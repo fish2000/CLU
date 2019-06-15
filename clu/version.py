@@ -1,4 +1,4 @@
-import re
+import re, os
 
 if not hasattr(__builtins__, 'cmp'):
     def cmp(a, b):
@@ -232,17 +232,14 @@ class VersionInfo(VersionAncestor):
     def __ge__(self, other):
         return compare_keys(self._asdict(), dictify(other)) >= 0
 
-# inline tests:
-def test():
-    # get the project version tag without importing:
-    try:
-        exec(compile(open('__version__.py')).read(),
-                          '__version__.py', 'exec')
-    except:
-        __version__ = '0.1.0'
-    
-    # the InstaKit project version:
-    version = VersionInfo(__version__)
+# Inline tests:
+def test(version):
+    # global __version__
+        
+    # The CLU project version:
+    print("__version__ in globals():", '__version__' in globals())
+    print("__version__ in locals():", '__version__' in locals())
+    print("__version__:", __version__)
     
     # print(VersionInfo.REG)
     print("VersionInfo Instance:", repr(version))
@@ -260,6 +257,23 @@ def test():
     
     assert bool(version)
     assert not bool(VersionInfo('‽.‽.‽'))
+    
+    print("All assertions passed")
+
+# get the project version tag without importing:
+__version__ = "<undefined>"
+BASEPATH = os.path.dirname(__file__)
+
+try:
+    exec(compile(open(os.path.join(BASEPATH, '__version__.py')).read(),
+                                             '__version__.py', 'exec'))
+except:
+    import traceback, sys
+    print("ERROR: failed to parse __version__.py")
+    traceback.print_exc(file=sys.stdout)
+    __version__ = '0.1.0'
+
+version = VersionInfo(__version__)
 
 if __name__ == '__main__':
-    test()
+    test(version)

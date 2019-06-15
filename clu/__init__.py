@@ -25,7 +25,6 @@
 #
 from __future__ import print_function
 from pkgutil import extend_path
-from version import VersionInfo, test
 
 # module exports:
 __all__ = ('__version__', 'version', 'VersionInfo',
@@ -38,6 +37,8 @@ if '__path__' in locals():
     __path__ = extend_path(__path__, __name__)
     __all__ += ('__path__',)
 
+from version import VersionInfo, test as test_version
+
 # Embedded project metadata:
 __version__ = "‽.‽.‽"
 __title__ = 'clu'
@@ -48,13 +49,13 @@ __copyright__ = '© 2012-2025 %s' % __author__
 
 # get the project version tag without importing:
 try:
-    exec(compile(open('__version__.py')).read(),
-                      '__version__.py', 'exec')
+    exec(compile(open('__version__.py').read(),
+                      '__version__.py', 'exec'))
 except:
     __version__ = '0.1.0'
 
-# the InstaKit project version:
+# the CLU project version:
 version = VersionInfo(__version__)
 
 if __name__ == '__main__':
-    test()
+    test_version(version)

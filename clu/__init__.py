@@ -26,7 +26,7 @@
 from __future__ import print_function
 from pkgutil import extend_path
 
-# module exports:
+# Module exports:
 __all__ = ('__version__', 'version', 'VersionInfo',
            '__title__', '__author__', '__maintainer__',
            '__license__', '__copyright__')
@@ -47,7 +47,7 @@ __maintainer__ = __author__
 __license__ = 'MIT'
 __copyright__ = '© 2012-2025 %s' % __author__
 
-# get the project version tag without importing:
+# Get the project version tag without importing:
 try:
     exec(compile(open('__version__.py').read(),
                       '__version__.py', 'exec'))

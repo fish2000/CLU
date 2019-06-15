@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import print_function, unicode_literals
+
 import re, os
 
 if not hasattr(__builtins__, 'cmp'):
@@ -258,7 +262,7 @@ def test(version):
     
     print("All assertions passed")
 
-# get the project version tag without importing:
+# Get the project version tag without importing:
 __version__ = "<undefined>"
 BASEPATH = os.path.dirname(__file__)
 

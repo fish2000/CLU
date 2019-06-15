@@ -234,8 +234,6 @@ class VersionInfo(VersionAncestor):
 
 # Inline tests:
 def test(version):
-    # global __version__
-        
     # The CLU project version:
     print("__version__ in globals():", '__version__' in globals())
     print("__version__ in locals():", '__version__' in locals())

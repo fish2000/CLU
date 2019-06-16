@@ -18,10 +18,12 @@ except ImportError:
 from functools import wraps
 from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
-from .misc import memoize, stringify, suffix_searcher, u8bytes, u8str
+from constants import ENCODING, PATH
+from predicates import attr, allattrs
+from sanitizer import utf8_encode
+from .misc import memoize, stringify, suffix_searcher, u8str
 
-__all__ = ('DEFAULT_PATH',
-           'DEFAULT_PREFIX',
+__all__ = ('DEFAULT_PREFIX',
            'DEFAULT_ENCODING',
            'DEFAULT_TIMEOUT',
            'ExecutionError', 'FilesystemError',
@@ -35,10 +37,6 @@ __all__ = ('DEFAULT_PATH',
            'NamedTemporaryFile')
 
 __dir__ = lambda: list(__all__)
-
-DEFAULT_PATH = ":".join(filter(os.path.exists, ("/usr/local/bin",
-                                                "/bin",  "/usr/bin",
-                                                "/sbin", "/usr/sbin")))
 
 DEFAULT_ENCODING = 'latin-1'
 DEFAULT_TIMEOUT = 60 # seconds
@@ -62,6 +60,19 @@ def ensure_path_is_valid(pth):
     if not os.path.isdir(parent_dir):
         raise FilesystemError("Directory doesn’t exist: %s" % parent_dir)
 
+def write_to_path(data, pth, relative_to=None, verbose=False):
+    """ Write data to a new file using a context-managed handle """
+    ensure_path_is_valid(pth)
+    bytestring = utf8_encode(data)
+    with open(pth, "wb") as handle:
+        handle.write(bytestring)
+        handle.flush()
+    if verbose:
+        start = relative_to or os.path.dirname(pth)
+        print("» Wrote %i bytes to %s" % (len(bytestring),
+                                          os.path.relpath(pth,
+                                                          start=start)))
+
 def script_path():
     """ Return the path to the embedded scripts directory. """
     return os.path.join(
@@ -75,9 +86,9 @@ def which(binary_name, pathvar=None):
         executables that cannot be found.
     """
     from distutils.spawn import find_executable
-    if not hasattr(which, 'pathvar'):
-        which.pathvar = os.getenv("PATH", DEFAULT_PATH)
     return find_executable(binary_name, pathvar or which.pathvar) or ""
+
+which.pathvar = PATH
 
 def back_tick(command,  as_str=True,
                        ret_err=False,
@@ -100,8 +111,8 @@ def back_tick(command,  as_str=True,
             In either case `stdout` and `stderr` are strings containing output
             from the commands’ execution. Default is False.
         raise_err : None or bool, optional
-            If True, raise instakit.utils.filesystem.errors.ExecutionError when
-            calling the function results in a non-zero return code.
+            If True, raise clu.fs.filesystem.ExecutionError when calling the
+                     function results in a non-zero return code.
             If None, it is set to True if `ret_err` is False,
                                   False if `ret_err` is True.
             Default is None (exception-raising behavior depends on the `ret_err`
@@ -129,7 +140,7 @@ def back_tick(command,  as_str=True,
         
         Raises
         ------
-        A `instakit.utils.filesystem.errors.ExecutionError` will raise if the
+        A `clu.fs.filesystem.ExecutionError` will raise if the
         executed command returns with any non-zero exit status, and `raise_err`
         is set to True.
         
@@ -243,7 +254,7 @@ def temporary(suffix=None, prefix=None, parent=None, **kwargs):
 
 class TypeLocker(abc.ABCMeta):
     
-    """ instakit.utils.filesystem.TypeLocker is a metaclass that does two
+    """ clu.fs.filesystem.TypeLocker is a metaclass that does two
         things with the types for whom it is designated as meta:
         
         1) It keeps an index of those types in a dictionary member of
@@ -256,7 +267,7 @@ class TypeLocker(abc.ABCMeta):
            was passed).
         
         … The point of this is to allow any of the classes throughout the
-        instakit.utils.filesystem module regardless of where they are defined
+        clu.fs.filesystem module regardless of where they are defined
         or from whom they inherit, to make use of cheaply-constructed Directory
         instances wherever convenient.
         
@@ -279,7 +290,7 @@ class TypeLocker(abc.ABCMeta):
     def __new__(metacls, name, bases, attributes, **kwargs):
         """ All classes are initialized with a “directory(…)”
             class method, lazily returning an instance of the
-            instakit.utils.filesystem.Directory(…) class, per
+            clu.fs.filesystem.Directory(…) class, per
             the arguments:
         """
         # Always replace the “directory” method anew:
@@ -341,14 +352,14 @@ def TemporaryNamedFile(tempth, mode='wb', buffer_size=-1, delete=True):
         
         Returns
         -------
-            A ``instakit.utils.filesystem.TemporaryFileWrapper`` object,
+            A ``clu.fs.filesystem.TemporaryFileWrapper`` object,
             initialized and ready to be used, as per its counterpart(s),
             ``tempfile.NamedTemporaryFile``, and
             `filesystem.NamedTemporaryFile`.
         
         Raises
         ------
-            A `instakit.utils.filesystem.FilesystemError`, corresponding to
+            A `clu.fs.filesystem.FilesystemError`, corresponding to
             any errors that may be raised during its own internal calls to
             ``os.open(…)`` and ``os.fdopen(…)``
         
@@ -537,7 +548,7 @@ class TemporaryName(collections.abc.Hashable,
         return self._name
     
     def __bytes__(self):
-        return u8bytes(str(self))
+        return bytes(str(self), encoding=ENCODING)
     
     def __fspath__(self):
         return self._name
@@ -612,8 +623,7 @@ class Directory(collections.abc.Hashable,
     @property
     def name(self):
         """ The instances’ target directory path. """
-        return getattr(self, 'target', None) or \
-               getattr(self, 'new')
+        return attr(self, 'target', 'new')
     
     @property
     def basename(self):
@@ -648,17 +658,17 @@ class Directory(collections.abc.Hashable,
             instance values, q.v. `ctx_set_targets(…)` help sub.) and is ready
             for context-managed use.
         """
-        return hasattr(self, 'old') and hasattr(self, 'new')
+        return allattrs(self, 'old', 'new')
     
     @property
     def prepared(self):
         """ Whether or not the instance has been internally prepared for use
             (q.v. `ctx_prepare()` help sub.) and is in a valid state.
         """
-        return hasattr(self, 'will_change') and \
-               hasattr(self, 'will_change_back') and \
-               hasattr(self, 'did_change') and \
-               hasattr(self, 'did_change_back')
+        return allattrs(self, 'will_change',
+                              'will_change_back',
+                              'did_change',
+                              'did_change_back')
     
     def split(self):
         """ Return a two-tuple containing `(dirname, basename)` – like e.g.
@@ -942,7 +952,7 @@ class Directory(collections.abc.Hashable,
         return self.name
     
     def __bytes__(self):
-        return u8bytes(str(self))
+        return bytes(str(self), encoding=ENCODING)
     
     def __fspath__(self):
         return self.name
@@ -993,14 +1003,12 @@ class cd(Directory):
         """
         super(cd, self).__init__(pth)
 
-
 class wd(Directory):
     
     def __init__(self):
         """ Initialize a Directory instance for the current working directory.
         """
         super(wd, self).__init__(pth=None)
-
 
 class TemporaryDirectory(Directory):
     
@@ -1105,7 +1113,7 @@ class TemporaryDirectory(Directory):
 
 class Intermediate(TemporaryDirectory, Directory):
     
-    """ instakit.utils.filesystem.Intermediate isn’t a class, per se – rather,
+    """ clu.fs.filesystem.Intermediate isn’t a class, per se – rather,
         it is a class factory proxy that normally constructs a new Directory
         instance in leu of itself, except for when it it is constructed without
         a `pth` argument, in which case, it falls back to the construction of
@@ -1157,7 +1165,7 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
     
     (descriptor, name) = _mkstemp_inner(parent.name, prefix,
                                                      suffix, flags,
-                                             u8bytes(suffix))
+                                               bytes(suffix), encoding=ENCODING)
     try:
         filehandle = os.fdopen(descriptor, mode, buffer_size)
         return TemporaryFileWrapper(filehandle, name, delete)
@@ -1171,7 +1179,7 @@ del TemporaryFileWrapperBase
 
 def test():
     
-    """ Run the inline tests for the instakit.utils.filesystem module. """
+    """ Run the inline tests for the clu.fs.filesystem module. """
     
     # Simple inline tests for “TemporaryName”, “cd” and “cwd”,
     # and “TemporaryDirectory”:

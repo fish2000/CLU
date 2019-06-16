@@ -52,14 +52,28 @@ class Namespace(SimpleNamespace, MutableMapping):
     winnower = re.compile(r"\{(?:\s+)(?P<stuff>.+)")
     
     def get(self, key, default=NoDefault):
-        """ Return the value for key if key is in the dictionary, else default. """
+        """ Return the value for key if key is in the namespace, else default. """
         if default is NoDefault:
             return self.__dict__.get(key)
         return self.__dict__.get(key, default)
     
+    def pop(self, key, default=NoDefault):
+        """ Return the value for key if key is in the namespace, else default,
+            removing the key/value pairing if the key was found.
+        """
+        if default is NoDefault:
+            return self.__dict__.pop(key)
+        return self.__dict__.pop(key, default)
+    
+    def update(self, dictish=None, **updates):
+        """ Update the namespace with key/value pairs and/or an iterator;
+            q.v. `dict.update(…)` docstring supra.
+        """
+        self.__dict__.update(dictish, **updates)
+    
     @property
     def __all__(self):
-        """ Get a tuple with all the stringified keys in the Namespace. """
+        """ Get a tuple with all the stringified keys in the namespace. """
         return tuple(str(key) for key in sorted(self))
     
     def __repr__(self):

@@ -2,6 +2,8 @@
 from __future__ import print_function
 from itertools import chain
 
+import os
+import site
 import sys
 import warnings
 
@@ -200,6 +202,21 @@ def determine_module(thing):
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
 # assess a thing’s qualified name, etc etc.
 
+def path_to_dotpath(path):
+    """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
+        to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
+        would call a “quick and dirty” fashion.
+    """ 
+    relpath = os.path.relpath(path, start=os.path.dirname('/usr/local/lib/python3.7/site-packages'))
+    dotpath = relpath.replace(os.path.sep, os.path.extsep)
+    
+    if dotpath.endswith('.py'):
+        dotpath = dotpath[:len(dotpath)-3]
+    while dotpath.startswith(os.path.extsep):
+        dotpath = dotpath[1:]
+    
+    return dotpath
+
 def dotpath_join(base, *addenda):
     """ Join dotpath elements together as one, á la os.path.join(…) """
     if base is None or base == '':
@@ -261,6 +278,44 @@ def qualified_name(thing):
         print("Qualified Name: %s" % qualname)
     return qualname
 
+def split_abbreviations(s):
+    """ Split a string into a tuple of its unique constituents,
+        based on its internal capitalization -- to wit:
+        
+        >>> split_abbreviations('RGB')
+        ('R', 'G', 'B')
+        >>> split_abbreviations('CMYK')
+        ('C', 'M', 'Y', 'K')
+        >>> split_abbreviations('YCbCr')
+        ('Y', 'Cb', 'Cr')
+        >>> split_abbreviations('sRGB')
+        ('R', 'G', 'B')
+        >>> split_abbreviations('XYZZ')
+        ('X', 'Y', 'Z')
+        >>> split_abbreviations('I;16B')
+        ('I',)
+        
+        If you still find this function inscrutable,
+        have a look here: https://gist.github.com/4027079
+    """
+    abbreviations = []
+    current_token = ''
+    for char in s.split(';')[0]:
+        if current_token == '':
+            current_token += char
+        elif char.islower():
+            current_token += char
+        else:
+            if not current_token.islower():
+                if current_token not in abbreviations:
+                    abbreviations.append(current_token)
+            current_token = ''
+            current_token += char
+    if current_token != '':
+        if current_token not in abbreviations:
+            abbreviations.append(current_token)
+    return tuple(abbreviations)
+
 __all__ = ('pytuple', 'doctrim',
            'sysmods', 'thingname', 'thingname_search', 'determine_name',
            'itermodule', 'moduleids',
@@ -270,6 +325,7 @@ __all__ = ('pytuple', 'doctrim',
            'dotpath_join', 'dotpath_split',
            'qualified_import',
            'qualified_name_tuple',
-           'qualified_name')
+           'qualified_name',
+           'split_abbreviations')
 
 __dir__ = lambda: list(__all__)

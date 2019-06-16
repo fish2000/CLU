@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import sys, os
+import os
+import socket
+import sys
 
 # Possible names for builtin modules:
 BUILTINS = ('__builtins__', '__builtin__', 'builtins', 'builtin')
@@ -9,8 +11,17 @@ BUILTINS = ('__builtins__', '__builtin__', 'builtins', 'builtin')
 # Are we debuggin out?
 DEBUG = bool(int(os.environ.get('DEBUG', '0'), base=10))
 
+# A prefix to use when creating new modules programmatically:
+DYNAMIC_MODULE_PREFIX = '__dynamic_modules__'
+
 # On non-macOS platforms this may be awry:
 ENCODING = sys.getfilesystemencoding().upper() # 'UTF-8'
+
+# Possible names for file arguments (used for introspection):
+FILE_ARGUMENT_NAMES = ('path', 'pth', 'file')
+
+# The hostname for this computer:
+HOSTNAME = socket.gethostname()
 
 # The __name__ of a lambda function:
 lam = lambda: None
@@ -20,6 +31,15 @@ LAMBDA = getattr(lam, '__qualname__',
 # N.B. this may or may not be a PY2/PY3 thing:
 MAXINT = getattr(sys, 'maxint',
          getattr(sys, 'maxsize', (2 ** 64) / 2))
+
+# The PATH environment variable, with a sensible default:
+DEFAULT_PATH = ":".join(filter(os.path.exists, ("/usr/local/bin",
+                                                "/bin",  "/usr/bin",
+                                                "/sbin", "/usr/sbin")))
+PATH = os.getenv("PATH", DEFAULT_PATH)
+
+# The name of this project
+PROJECT_NAME = 'clu'
 
 # Determine if our Python is three’d up:
 PY3 = sys.version_info.major > 2
@@ -47,6 +67,9 @@ else:
     from terminalsize import get_terminal_size
     SEPARATOR_WIDTH = get_terminal_size(default=(100, 25))[0]
 
+# WTF HAX:
+TOKEN = ' -'
+
 # Stuff we want to keep out of namespaces:
 pytuple = lambda *attrs: tuple('__%s__' % str(atx) for atx in attrs)
 VERBOTEN = pytuple('all', 'cached', 'loader', 'file', 'spec')
@@ -63,14 +86,20 @@ class NoDefault(object):
 
 __all__ = ('BUILTINS',
            'DEBUG',
+           'DYNAMIC_MODULE_PREFIX',
            'ENCODING',
+           'FILE_ARGUMENT_NAMES',
+           'HOSTNAME',
            'LAMBDA',
            'MAXINT',
+           'PATH',
+           'PROJECT_NAME',
            'PY3', 'PYPY',
            'QUALIFIER',
            'SEPARATOR_WIDTH',
            'SINGLETON_TYPES',
            'TEXTMATE',
+           'TOKEN',
            'VERBOTEN',
            'NoDefault')
 

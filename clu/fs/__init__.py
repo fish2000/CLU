@@ -1,10 +1,10 @@
 
-from .filesystem import (DEFAULT_PATH,
-                         DEFAULT_PREFIX,
+from .filesystem import (DEFAULT_PREFIX,
                          DEFAULT_ENCODING,
                          DEFAULT_TIMEOUT,
                          ExecutionError, FilesystemError,
                          ensure_path_is_valid,
+                         write_to_path,
                          script_path, which, back_tick,
                          rm_rf, temporary,
                          TemporaryName,
@@ -15,14 +15,16 @@ from .filesystem import (DEFAULT_PATH,
 
 from .appdirs import AppDirs
 
-from .misc import current_umask, masked_permissions, stringify, suffix_searcher
+from .misc import current_umask, masked_permissions, stringify, suffix_searcher, u8str
 
-__all__ = ('DEFAULT_PATH',
-           'DEFAULT_PREFIX',
+from .pypath import append_paths, remove_paths
+
+__all__ = ('DEFAULT_PREFIX',
            'DEFAULT_ENCODING',
            'DEFAULT_TIMEOUT',
            'ExecutionError', 'FilesystemError',
            'ensure_path_is_valid',
+           'write_to_path',
            'script_path', 'which', 'back_tick',
            'rm_rf', 'temporary',
            'TemporaryName',
@@ -32,6 +34,7 @@ __all__ = ('DEFAULT_PATH',
            'NamedTemporaryFile',
            'AppDirs',
            'current_umask', 'masked_permissions',
-           'stringify', 'suffix_searcher')
+           'stringify', 'suffix_searcher', 'u8str',
+           'append_paths', 'remove_paths')
 
 __dir__ = lambda: list(__all__)

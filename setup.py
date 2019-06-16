@@ -38,7 +38,7 @@ PYTHON_VERSION = float("%s%s%s" % (sys.version_info.major, os.extsep,
                                    sys.version_info.minor))
 
 # CONSTANTS
-PROJECT_NAME = 'instakit'
+PROJECT_NAME = 'clu'
 AUTHOR_NAME = 'Alexander Böhn'
 AUTHOR_USER = 'fish2000'
 

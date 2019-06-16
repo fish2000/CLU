@@ -3,9 +3,11 @@ from __future__ import print_function
 
 import os
 import re
+import sys
 
-from constants import VERBOTEN, cache_from_source
+from constants import DYNAMIC_MODULE_PREFIX, PROJECT_NAME, VERBOTEN, cache_from_source
 from .namespace import SimpleNamespace, Namespace
+from naming import doctrim, dotpath_join, path_to_dotpath
 
 import types as thetypes
 types = Namespace()
@@ -25,8 +27,8 @@ for typename in dir(thetypes):
         setattr(types, typename, getattr(thetypes, typename))
 
 # Substitute our own SimpleNamespace class, instead of the provided version:
-setattr(types, 'Namespace',       Namespace)
 setattr(types, 'SimpleNamespace', SimpleNamespace)
+setattr(types, 'Namespace',       Namespace)
 
 # Manually set `types.__file__` and related attributes:
 setattr(types, '__file__',        __file__)
@@ -34,5 +36,73 @@ setattr(types, '__cached__',      cache_from_source(__file__))
 setattr(types, '__package__',     os.path.splitext(
                                   os.path.basename(__file__))[0])
 
-__all__ = ('SimpleNamespace', 'Namespace', 'types')
+def modulize(namespace, name,
+                        docs=None,
+                        path=None):
+    """ Convert a dictionary mapping into a legit Python module """
+    
+    # Ensure a module with the given module name we received
+    # doesn’t already exist in `sys.modules`:
+    if name in sys.modules:
+        raise LookupError("Module “%s” already in sys.modules" % name)
+    
+    # Update the namespace with '__all__' and '__dir__' if necessary:
+    ns_all = None
+    
+    if '__all__' not in namespace and not hasattr(namespace, '__all__'):
+        ns_all = tuple(sorted(namespace.keys()))
+        namespace['__all__'] = ns_all
+    
+    if '__dir__' not in namespace:
+        if ns_all is None:
+            ns_all = namespace['__all__']
+        namespace['__dir__'] = lambda: list(ns_all)
+    
+    # Check for a __file__ entry in the namespace if we weren’t
+    # called with a name:
+    if '__file__' in namespace:
+        if not path:
+            path = namespace.get('__file__', path)
+    
+    # Construct a trivially namespaced name for the module,
+    # based on the given name, the given file path (if any), and
+    # some reasonable prefixes:
+    if path:
+        dotpath = path_to_dotpath(path)
+        qualified_name = dotpath_join(DYNAMIC_MODULE_PREFIX,
+                                      PROJECT_NAME,
+                                      dotpath, name)
+        
+        # Note that one can use a file path that does not
+        # have to necessarily exist on the filesystem in an
+        # accessible manner:
+        namespace.update({ '__file__' : path,
+                         '__cached__' : cache_from_source(path) })
+    else:
+        qualified_name = dotpath_join(DYNAMIC_MODULE_PREFIX,
+                                      PROJECT_NAME,
+                                      name)
+    
+    # Ensure we have a name and a package dotpath in our namespace:
+    namespace.update({ '__name__' : name,
+                    '__package__' : qualified_name })
+    
+    # Construct the module type from the qualified name, using
+    # any given docstring text:
+    module = types.Module(qualified_name, doctrim(docs))
+    
+    # Update the module’s `__dict__` with our namespaced mapping
+    module.__dict__.update(namespace)
+    
+    # Update the `sys.modules` mapping with the new module,
+    # as required by Python’s internal import machinery --
+    # Once `sys.modules` has been thusly updated, the new module
+    # can be imported with an “import «name»” statement, as with
+    # any other available module:
+    sys.modules[name] = module
+    
+    # Return our new module instance:
+    return module
+
+__all__ = ('SimpleNamespace', 'Namespace', 'types', 'path_to_dotpath', 'modulize')
 __dir__ = lambda: list(__all__)

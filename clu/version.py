@@ -18,7 +18,7 @@ FIELDS = ('major', 'minor', 'patch',
 
 # The `namedtuple` ancestor,
 # from which our VersionInfo struct inherits:
-VersionAncestor = NamedTuple('VersionAncestor', FIELDS)
+VersionAncestor = NamedTuple('VersionAncestor', FIELDS, module=__name__)
 
 # sets, for various comparisons and checks:
 fields = frozenset(FIELDS)

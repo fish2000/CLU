@@ -23,7 +23,7 @@
 #    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 #    SOFTWARE.
 #
-''' CLU - Common Lightweight Utilities, or Command-Line Utilities... your pick '''
+''' CLU - Common Lightweight Utilities, or Command-Line Utilities (your pick) '''
 
 from __future__ import print_function
 import os, sys

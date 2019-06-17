@@ -14,7 +14,7 @@ def append_paths(*putatives):
     if len(putatives) < 1:
         return out
     paths = frozenset(sys.path)
-    append_paths.oldsyspath = tuple(sys.path)
+    append_paths.oldsyspath.append(tuple(sys.path))
     for pth in (os.fspath(putative) for putative in putatives):
         if not os.path.exists(pth):
             out[pth] = False
@@ -31,7 +31,7 @@ def append_paths(*putatives):
         continue
     return out
 
-append_paths.oldsyspath = tuple(sys.path)
+append_paths.oldpaths = [tuple(sys.path)]
 
 def remove_paths(*putatives):
     """ Mutate `sys.path` by removing one or more existing paths --
@@ -53,8 +53,8 @@ def remove_paths(*putatives):
         out[pth] = False
         continue
     paths -= removals
-    remove_paths.oldsyspath = tuple(sys.path)
+    remove_paths.oldpaths.append(tuple(sys.path))
     sys.path = list(paths)
     return out
 
-remove_paths.oldsyspath = tuple(sys.path)
+remove_paths.oldpaths = [tuple(sys.path)]

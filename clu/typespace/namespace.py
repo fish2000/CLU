@@ -28,7 +28,7 @@ class SimpleNamespace(object):
     def __repr__(self):
         items = ("{}={!r}".format(key, self.__dict__[key]) for key in sorted(self))
         return "{}({}) @ {}".format(determine_name(type(self)),
-                          ",\n".join(items),         id(self))
+                         ",\n".join(items),          id(self))
     
     def __eq__(self, other):
         return self.__dict__ == asdict(other)
@@ -129,3 +129,6 @@ class Namespace(SimpleNamespace, MutableMapping):
     
     def __bool__(self):
         return bool(self.__dict__)
+
+__all__ = ('SimpleNamespace', 'Namespace')
+__dir__ = lambda: list(__all__)

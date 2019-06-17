@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-replenv.py
+banners.py
 
 • Default module imports and other configgy code,
 • For generic use in python repls – both the python2 and python3 interactive
@@ -20,11 +20,6 @@ import os
 import sys
 
 from constants import PY3, PYPY, TEXTMATE
-
-if __name__ == '__main__':
-    # take your executions elsewhere:
-    raise RuntimeError(
-        "%s is for module import or star-import only" % __file__)
 
 # Python version figlet banners:
 banners = {}

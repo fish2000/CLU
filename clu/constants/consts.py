@@ -4,6 +4,7 @@ from __future__ import print_function
 import os
 import socket
 import sys
+import sysconfig
 
 # Possible names for builtin modules:
 BUILTINS = ('__builtins__', '__builtin__', 'builtins', 'builtin')
@@ -33,9 +34,11 @@ MAXINT = getattr(sys, 'maxint',
          getattr(sys, 'maxsize', (2 ** 64) / 2))
 
 # The PATH environment variable, with a sensible default:
-DEFAULT_PATH = ":".join(filter(os.path.exists, ("/usr/local/bin",
-                                                "/bin",  "/usr/bin",
-                                                "/sbin", "/usr/sbin")))
+PYTHON_BIN = os.path.join(sysconfig.get_path('data'), 'bin')
+DEFAULT_PATH = ":".join(filter(os.path.exists, (PYTHON_BIN,
+                                               "/usr/local/bin",
+                                               "/bin",  "/usr/bin",
+                                               "/sbin", "/usr/sbin")))
 PATH = os.getenv("PATH", DEFAULT_PATH)
 
 # The name of this project

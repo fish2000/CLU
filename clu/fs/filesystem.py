@@ -8,19 +8,22 @@ import collections.abc
 import contextlib
 import os
 import re
+import shutil
 import sys
 
 try:
     from scandir import scandir, walk
 except ImportError:
     from os import scandir, walk
-
+    
+from distutils.spawn import find_executable
 from functools import wraps
 from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
 from constants import ENCODING, PATH
 from predicates import attr, allattrs
 from sanitizer import utf8_encode
+from typing import ispath, isvalidpath
 from .misc import memoize, stringify, suffix_searcher, u8str
 
 __all__ = ('DEFAULT_PREFIX',
@@ -52,6 +55,8 @@ class FilesystemError(Exception):
 
 def ensure_path_is_valid(pth):
     """ Raise an exception if we can’t write to the specified path """
+    if not ispath(pth):
+        raise FilesystemError("Operand can’t be a path: %s" % pth)
     if os.path.exists(pth):
         if os.path.isdir(pth):
             raise FilesystemError("Can’t save over directory: %s" % pth)
@@ -76,7 +81,8 @@ def write_to_path(data, pth, relative_to=None, verbose=False):
 def script_path():
     """ Return the path to the embedded scripts directory. """
     return os.path.join(
-           os.path.dirname(__file__), 'scripts')
+           os.path.dirname(
+           os.path.dirname(__file__)), 'scripts')
 
 def which(binary_name, pathvar=None):
     """ Deduces the path corresponding to an executable name,
@@ -85,7 +91,6 @@ def which(binary_name, pathvar=None):
         Always returns a string - an empty one for those
         executables that cannot be found.
     """
-    from distutils.spawn import find_executable
     return find_executable(binary_name, pathvar or which.pathvar) or ""
 
 which.pathvar = PATH
@@ -208,7 +213,7 @@ def rm_rf(pth):
     """ rm_rf() does what `rm -rf` does – so, for the love of fuck,
         BE FUCKING CAREFUL WITH IT.
     """
-    if not pth:
+    if not isvalidpath(pth):
         raise ExecutionError(
             "Can’t rm -rf without something to rm arr-effedly")
     pth = os.fspath(pth)
@@ -496,8 +501,9 @@ class TemporaryName(collections.abc.Hashable,
         """
         if not destination:
             raise FilesystemError("Copying requires a place to which to copy")
-        import shutil
         if self.exists:
+            if os.path.samefile(self._name, destination):
+                raise FilesystemError("Can’t copy across identical locations")
             return shutil.copy2(self._name, os.fspath(destination))
         return False
     
@@ -557,6 +563,8 @@ class TemporaryName(collections.abc.Hashable,
         return self.exists
     
     def __eq__(self, other):
+        if not ispath(other):
+            return NotImplemented
         try:
             return os.path.samefile(self._name,
                                     os.fspath(other))
@@ -564,6 +572,8 @@ class TemporaryName(collections.abc.Hashable,
             return False
     
     def __ne__(self, other):
+        if not ispath(other):
+            return NotImplemented
         try:
             return not os.path.samefile(self._name,
                                         os.fspath(other))
@@ -574,7 +584,7 @@ class TemporaryName(collections.abc.Hashable,
         return hash((self._name, self.exists))
 
 non_dotfile_match = re.compile(r"^[^\.]").match
-non_dotfile_matcher = lambda p: non_dotfile_match(p.name) # type: ignore
+non_dotfile_matcher = lambda p: non_dotfile_match(p.name)
 
 class Directory(collections.abc.Hashable,
                 collections.abc.Mapping,
@@ -891,14 +901,16 @@ class Directory(collections.abc.Hashable,
            `os.fspath(…)`. Internally, this method uses `shutil.copytree(…)`
             to tell the filesystem what to copy where.
         """
-        import shutil
         whereto = self.directory(pth=destination)
-        if whereto.exists or os.path.isfile(whereto.name) \
-                          or os.path.islink(whereto.name):
+        if any(whereto.exists, os.path.isfile(whereto.name),
+                               os.path.islink(whereto.name)):
             raise FilesystemError(
                 "copy_all() destination exists: %s" % whereto.name)
         if self.exists:
             return shutil.copytree(self.name, whereto.name)
+        else:
+            raise FilesystemError(
+                "copy_all() source doesn’t exist: %s" % self.name)
         return False
     
     def zip_archive(self, zpth=None, zmode=None):
@@ -977,6 +989,8 @@ class Directory(collections.abc.Hashable,
         return self.subpath(filename, requisite=True) is not None
     
     def __eq__(self, other):
+        if not ispath(other):
+            return NotImplemented
         try:
             return os.path.samefile(self.name,
                                     os.fspath(other))
@@ -984,6 +998,8 @@ class Directory(collections.abc.Hashable,
             return False
     
     def __ne__(self, other):
+        if not ispath(other):
+            return NotImplemented
         try:
             return not os.path.samefile(self.name,
                                         os.fspath(other))

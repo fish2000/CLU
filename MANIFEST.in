@@ -10,6 +10,7 @@ include CODE_OF_CONDUCT.md
 include conftest.py
 include COPYING.md
 include LICENSE.txt
+include Makefile
 include README.md
 include setup.cfg
 include setup.py

@@ -7,7 +7,7 @@ distclean: clean-pyc clean-cython clean-build-artifacts
 
 rebuild: distclean cython
 
-dist: rebuild sdist twine-upload
+dist: twine-upload
 
 upload: bump dist
 
@@ -28,7 +28,10 @@ cython:
 sdist:
 	python setup.py sdist
 
-twine-upload:
+wheel:
+	python setup.py bdist_wheel
+
+twine-upload: cython sdist wheel
 	twine upload -s dist/*
 
 bump:
@@ -37,12 +40,16 @@ bump:
 bigbump:
 	bumpversion --verbose minor
 
-check:
+check-all:
 	check-manifest -v
 	python setup.py check -m -s
 	travis lint .travis.yml
 
+check: check-all
+	rm -rf build dist $(PROJECT_NAME).egg-info
+
 .PHONY: clean-pyc clean-cython clean-build-artifacts
 .PHONY: clean distclean rebuild dist upload bigupload
-.PHONY: cython sdist twine-upload bump bigbump check
+.PHONY: cython sdist wheel twine-upload bump bigbump
+.PHONY: check-all check
 

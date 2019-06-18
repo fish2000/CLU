@@ -26,6 +26,10 @@
 from __future__ import print_function
 from pkgutil import extend_path
 
+import os
+
+from version import read_version_file
+
 # Module exports:
 __all__ = ('__version__', 'version', 'VersionInfo',
            '__title__', '__author__', '__maintainer__',
@@ -40,21 +44,14 @@ if '__path__' in locals():
 from version import VersionInfo, test as test_version
 
 # Embedded project metadata:
-__version__ = "‽.‽.‽"
+__version__ = read_version_file(os.path.dirname(__file__))
 __title__ = 'clu'
 __author__ = 'Alexander Böhn'
 __maintainer__ = __author__
 __license__ = 'MIT'
 __copyright__ = '© 2012-2025 %s' % __author__
 
-# Get the project version tag without importing:
-try:
-    exec(compile(open('__version__.py').read(),
-                      '__version__.py', 'exec'))
-except:
-    __version__ = '0.1.0'
-
-# the CLU project version:
+# The CLU project version:
 version = VersionInfo(__version__)
 
 if __name__ == '__main__':

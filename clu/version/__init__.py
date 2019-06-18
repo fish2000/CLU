@@ -13,6 +13,8 @@ from functools import wraps
 from pkg_resources import parse_version as pkg_resources_parse_version
 from pkg_resources.extern.packaging.version import Version as PkgResourcesVersion
 
+from .read_version import read_version_file
+
 FIELDS = ('major', 'minor', 'patch',
           'pre',   'build')
 
@@ -236,11 +238,17 @@ class VersionInfo(VersionAncestor):
     def __ge__(self, other):
         return compare_keys(self._asdict(), dictify(other)) >= 0
 
+# Get the project version tag without importing:
+BASEPATH = os.path.dirname(os.path.dirname(__file__))
+__version__ = read_version_file(BASEPATH)
+
+version = VersionInfo(__version__)
+
 # Inline tests:
 def test(version):
     # The CLU project version:
-    print("__version__ in globals():", '__version__' in globals())
-    print("__version__ in locals():", '__version__' in locals())
+    # print("__version__ in globals():", '__version__' in globals())
+    # print("__version__ in locals():", '__version__' in locals())
     print("__version__:", __version__)
     
     # print(VersionInfo.REG)
@@ -261,21 +269,6 @@ def test(version):
     assert not bool(VersionInfo('‽.‽.‽'))
     
     print("All assertions passed")
-
-# Get the project version tag without importing:
-__version__ = "<undefined>"
-BASEPATH = os.path.dirname(__file__)
-
-try:
-    exec(compile(open(os.path.join(BASEPATH, '__version__.py')).read(),
-                                             '__version__.py', 'exec'))
-except:
-    import traceback, sys
-    print("ERROR: failed to parse __version__.py")
-    traceback.print_exc(file=sys.stdout)
-    __version__ = '0.1.0'
-
-version = VersionInfo(__version__)
 
 if __name__ == '__main__':
     test(version)

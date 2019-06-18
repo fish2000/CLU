@@ -13,7 +13,7 @@ from .filesystem import (DEFAULT_PREFIX,
                          TemporaryDirectory, Intermediate,
                          NamedTemporaryFile)
 
-from .appdirs import AppDirs
+from .appdirectories import AppDirs
 
 from .misc import current_umask, masked_permissions, stringify, suffix_searcher, u8str
 

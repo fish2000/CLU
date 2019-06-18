@@ -4,8 +4,8 @@ from __future__ import print_function
 import plistlib
 import zict
 
-from constants import ENCODING
-from fs import appdirs
+from constants import ENCODING, NoDefault
+from fs import appdirectories as appdirs
 from fs import Directory
 from predicates import attr
 from typing import isstring, isbytes
@@ -27,21 +27,22 @@ class ReplEnvDirs(appdirs.AppDirs):
     
     def __init__(self):
         """ Initialize with a fixed “appname” parameter `replenv` """
-        super(ReplEnvDirs, self).__init__(appname='replenv')
-        self.mode = 'linux' # use Linux directory layout
+        # use Linux directory layout
+        super(ReplEnvDirs, self).__init__(appname='replenv',
+                                          system="linux")
     
     @property
     def mode(self):
         """ The “appdirs.system” global module variable controls the
             operation of the properties of all `appdirs.AppDirs` instances.
         """
-        return appdirs.system
+        return self.system
     
     @mode.setter
     def mode(self, value):
         if value not in ('darwin', 'linux'):
             raise ValueError("invalid mode: %s" % value)
-        appdirs.system = value
+        self.system = value
     
     @property
     def site_config(self):
@@ -96,14 +97,14 @@ def count():
     return len(zfunc)
 
 # @export
-def get(key, default_value=None):
+def get(key, default=NoDefault):
     """ Return a value from the ReplEnv user-config key-value store. """
-    if not key:
-        return default_value
+    if default is NoDefault:
+        return zfunc[key]
     try:
         return zfunc[key]
     except KeyError:
-        return default_value
+        return default
 
 # @export
 def set(key, value):

@@ -13,7 +13,7 @@ a bunch of subordinate packages:
         `TemporaryName`; a version of `tempfile.NamedTemporaryFile` that works with or without the leading dot
         in the provided suffix (a peeve of mine); functions for common filesystem operations like `which(…)`, 
         `back_ticks(…)`, `rm_rf(…)` (be careful with that one), and so forth.
-    * `fs.appdirs`: pretty much a wholesale duplication of the popular `appdirs` package.
+    * `fs.appdirectories`: pretty much a wholesale duplication of the popular `appdirs` package.
     * `fs.misc`: a bunch of miscellany – noteworthy standouts include a memoized `current_umask(…)`
         and a corresponding `masked_permissions(…)`
     * `fs.pypath`: functions for safe manipulation of `sys.path` – `append_paths(…)` and `remove_paths(…)`,

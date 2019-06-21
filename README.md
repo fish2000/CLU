@@ -39,7 +39,7 @@ a bunch of subordinate packages:
 
 * `sanitizer`: functions for cleaning up unicode. Right now there is just a list-based `sanitize(…)` function that tones down anything with high-value code points to the point where it can be safely `ascii`-ified. 
 
-* `typing`: This is like `predicates` but with more predicates, most of which are based on typelists. The module is full of typelists and it uses them extensively in its predicates, via `isinstance(…)`, `issubclass(…)` and a custom version of same called `graceful_issubclass(…)` which tries very hard to work with what you give it (instead of just crapping out with a `False` return value). 
+* `typology`: This is like `predicates` but with more predicates, most of which are based on typelists. The module is full of typelists and it uses them extensively in its predicates, via `isinstance(…)`, `issubclass(…)` and a custom version of same called `graceful_issubclass(…)` which tries very hard to work with what you give it (instead of just crapping out with a `False` return value). 
 
 * `version`: This is basically my take on the `semver` package. I originally developed it for internal use in some of my Python projects, but it stands on its own decently enough. 
 

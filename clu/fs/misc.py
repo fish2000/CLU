@@ -6,7 +6,7 @@ import re, os
 
 from constants import ENCODING, lru_cache
 from predicates import tuplize
-from typing import string_types
+from typology import string_types
 
 def wrap_value(value):
     return lambda *args, **kwargs: value

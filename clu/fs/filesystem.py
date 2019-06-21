@@ -23,7 +23,7 @@ from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 from constants import ENCODING, PATH
 from predicates import attr, allattrs
 from sanitizer import utf8_encode
-from typing import ispath, isvalidpath
+from typology import ispath, isvalidpath
 from .misc import memoize, stringify, suffix_searcher, u8str
 
 __all__ = ('DEFAULT_PREFIX',

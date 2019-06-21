@@ -8,7 +8,7 @@ from constants import ENCODING, NoDefault
 from fs import System, AppDirs, Directory
 from fs.appdirectories import test
 from predicates import attr
-from typing import isstring, isbytes
+from typology import isstring, isbytes
 # from replutilities import Exporter
 
 # exporter = Exporter()

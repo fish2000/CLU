@@ -20,7 +20,7 @@ import os
 import platform
 
 from constants import ENCODING, PY3, unicode, Enum
-from typing import isbytes
+from typology import isbytes
 from version import VersionInfo
 
 __version__ = "1.4.4"

@@ -3,7 +3,7 @@ from __future__ import print_function
 
 from constants import ENCODING
 from typespace import SimpleNamespace
-from typing import isstring
+from typology import isstring
 from fs import stringify, u8str
 
 class ConfigurationError(Exception):

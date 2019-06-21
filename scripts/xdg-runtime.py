@@ -9,7 +9,6 @@ BASEDIR = "/usr/local/var/run/xdg"
 SSID = os.getenv('SECURITYSESSIONID')
 
 from clu.constants import HOSTNAME
-# from clu.fs import ensure_path_is_valid
 from clu.fs import rm_rf, Directory
 
 basedir = Directory(BASEDIR)
@@ -19,11 +18,8 @@ def name_xdg_runtime_dir(namebase=SSID):
 
 def make_xdg_runtime_dir(directory=basedir, mode=MODE):
     runtime_dir = directory.subdirectory(name_xdg_runtime_dir())
-    # pth = os.path.join(directory, name_xdg_runtime_dir())
-    # ensure_path_is_valid(pth)
     if runtime_dir.exists:
         rm_rf(runtime_dir)
-    # os.mkdir(pth, mode=mode)
     runtime_dir.makedirs(mode=mode)
     return runtime_dir
 

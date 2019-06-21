@@ -2,7 +2,7 @@
 from __future__ import print_function
 
 from collections import Counter, OrderedDict
-from enum import Enum, unique, _is_dunder as ispyname
+from enum import Enum, EnumMeta, unique, _is_dunder as ispyname
 
 from .consts import PY3
 
@@ -60,7 +60,7 @@ except ImportError:
         Path = None
 
 __all__ = ('Counter', 'OrderedDict',
-           'Enum', 'unique', 'ispyname',
+           'Enum', 'EnumMeta', 'unique', 'ispyname',
            'AutoType', 'auto',
            'unicode', 'long',
            'Mapping', 'MutableMapping', 'HashableABC',

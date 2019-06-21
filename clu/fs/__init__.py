@@ -1,6 +1,5 @@
 
 from .filesystem import (DEFAULT_PREFIX,
-                         DEFAULT_ENCODING,
                          DEFAULT_TIMEOUT,
                          ExecutionError, FilesystemError,
                          ensure_path_is_valid,
@@ -13,14 +12,13 @@ from .filesystem import (DEFAULT_PREFIX,
                          TemporaryDirectory, Intermediate,
                          NamedTemporaryFile)
 
-from .appdirectories import AppDirs
+from .appdirectories import System, SYSTEM, AppDirs
 
 from .misc import current_umask, masked_permissions, stringify, suffix_searcher, u8str
 
 from .pypath import append_paths, remove_paths
 
 __all__ = ('DEFAULT_PREFIX',
-           'DEFAULT_ENCODING',
            'DEFAULT_TIMEOUT',
            'ExecutionError', 'FilesystemError',
            'ensure_path_is_valid',
@@ -32,7 +30,7 @@ __all__ = ('DEFAULT_PREFIX',
            'cd', 'wd',
            'TemporaryDirectory', 'Intermediate',
            'NamedTemporaryFile',
-           'AppDirs',
+           'System', 'SYSTEM', 'AppDirs',
            'current_umask', 'masked_permissions',
            'stringify', 'suffix_searcher', 'u8str',
            'append_paths', 'remove_paths')

@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+
 # Copyright (c) 2005-2010 ActiveState Software Inc.
 # Copyright (c) 2013 Eddy Petrișor
-
+# Copyright  ©  2019 Alexander Böhn
 """Utilities for determining application-specific dirs.
 
-See <https://github.com/ActiveState/appdirs> for details and usage.
+See <https://github.com/fish2000/CLU> for details and usage.
 """
 # Dev Notes:
 # - MSDN on where to store app data files:
@@ -13,38 +15,118 @@ See <https://github.com/ActiveState/appdirs> for details and usage.
 # - Mac OS X: http://developer.apple.com/documentation/MacOSX/Conceptual/BPFileSystem/index.html
 # - XDG spec for Un*x: https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
 
-__version__ = "1.4.4"
-__version_info__ = tuple(int(segment) for segment in __version__.split("."))
-
 import sys
 import os
+import platform
 
-PY3 = sys.version_info[0] == 3
+from constants import ENCODING, PY3, unicode, Enum
+from typing import isbytes
+from version import VersionInfo
 
-if PY3:
-    unicode = str
+__version__ = "1.4.4"
+__version_info__ = VersionInfo(__version__)
+
+class System(Enum):
+    
+    """ An enumeration class for dealing with system names """
+    
+    DARWIN = 'Mac'
+    WIN32 = 'Windows'
+    LINUX = 'Linux'
+    LINUX2 = ''
+    
+    @classmethod
+    def determine(cls):
+        """ Determine the System value for the current platform """
+        if sys.platform.startswith('java'):
+            os_name = platform.java_ver()[3][0]
+            for system in cls:
+                if os_name.startswith(system.os_name):
+                    return system
+        return cls.from_string(sys.platform)
+    
+    @classmethod
+    def from_string(cls, string):
+        """ Retrieve a System value by name (case-insensitively) """
+        for system in cls:
+            if system.sys_name == string.lower():
+                return system
+        raise ValueError("System not found: %s" % string)
+    
+    @classmethod
+    def match(cls, value):
+        if type(value) is cls:
+            return value
+        if isbytes(value):
+            return cls.from_string(str(value, encoding=ENCODING))
+        return cls.from_string(value) # Assume string as last resort
+    
+    def to_string(self):
+        """ A given System value’s name """
+        return str(self.name)
+    
+    def __str__(self):
+        return self.to_string()
+    
+    def __bytes__(self):
+        return bytes(self.name, encoding=ENCODING)
+    
+    @property
+    def os_name(self):
+        """ A given System value’s “os_name” (as reported when
+            running within a java-based environment e.g. Jython)
+        """
+        return str(self.value)
+    
+    @property
+    def sys_name(self):
+        """ A given System value’s name, lowercased """
+        return self.to_string().lower()
+
+SYSTEM = System.determine()
 
 class AppDirs(object):
     
     """ Convenience wrapper for getting application dirs. """
     
+    def __new__(cls, *args, **kwargs):
+        """ Overriden `__new__(…)` installs version variables –
+            the names of which would cause a shadow-name situation
+            if they were to be set normally within `__init__(…)`
+        """
+        instance = super(AppDirs, cls).__new__(cls)
+        setattr(instance, '__version__',      __version__)
+        setattr(instance, '__version_info__', __version_info__)
+        return instance
+    
     def __init__(self, appname=None,
                        appauthor=None,
                        version=None,
                        roaming=False,
-                       multipath=False):
-        self.appname = appname
+                       multipath=False,
+                       system=None):
+        """ Call `__init__(…)` to initialize an AppDirs instance with
+            whichever of the myriad naming options are important to you
+            and whatever it is you happen to be doing
+        """
         self.appauthor = appauthor
-        self.version = version
-        self.roaming = roaming
-        self.multipath = multipath
-        self.system = self.determine_system()
-        if self.system == "win32":
+        self.appname = appname
+        self.roaming = bool(roaming)
+        self.multipath = bool(multipath)
+        self.system = system and System.match(system) or SYSTEM
+        self.version = version and str(version) or None
+        self.version_info = version and VersionInfo(version) or None
+        
+        if self.system is System.WIN32:
             self._win_folder_function = self.determine_win_folder_function()
-
-    def determine_system(self):
+    
+    def determine_system_string(self):
+        """ Determine upon which system this AppDirs instance has been brought
+            into existence – DEPRECIATED, see the appdirectories.System enum
+            class (and the System.determine() class method in particular) for
+            the replcaement logic
+        """
         if sys.platform.startswith('java'):
-            import platform
             os_name = platform.java_ver()[3][0]
             if os_name.startswith('Windows'): # "Windows XP", "Windows 7", etc.
                 system = 'win32'
@@ -58,8 +140,16 @@ class AppDirs(object):
         else:
             system = sys.platform
         return system
-
+    
     def determine_win_folder_function(self):
+        """ Use successive imports to determine the best folder-finding method
+            to employ on Windows.
+            
+            These are all dummy imports – they differ from actual (albiet similar
+            and related) modules imported by each of the respective Windows-native
+            functions; that’s why we delete whatever we managed to import before
+            returning the function.
+        """
         try:
             import win32com.shell as win32api
             out =_get_win_folder_with_pywin32
@@ -76,47 +166,58 @@ class AppDirs(object):
                     out = _get_win_folder_from_registry
         del win32api
         return out
-
+    
     @property
     def user_data_dir(self):
+        """ The userland application-specific data directory """
         return self.get_user_data_dir(self.appname, self.appauthor,
                                                     version=self.version,
                                                     roaming=self.roaming)
-
+    
     @property
     def site_data_dir(self):
+        """ The system-wide application-specific data directory """
         return self.get_site_data_dir(self.appname, self.appauthor,
                                                     version=self.version,
                                                     multipath=self.multipath)
-
+    
     @property
     def user_config_dir(self):
+        """ The userland configuration directory """
         return self.get_user_config_dir(self.appname, self.appauthor,
                                                       version=self.version,
                                                       roaming=self.roaming)
-
+    
     @property
     def site_config_dir(self):
+        """ The system-wide configuration directory """
         return self.get_site_config_dir(self.appname, self.appauthor,
                                                       version=self.version,
                                                       multipath=self.multipath)
-
+    
     @property
     def user_cache_dir(self):
+        """ The userland cache directory """
         return self.get_user_cache_dir(self.appname, self.appauthor,
                                                      version=self.version)
-
+    
     @property
     def user_state_dir(self):
+        """ The userland state-stash directory """
         return self.get_user_state_dir(self.appname, self.appauthor,
                                                      version=self.version)
-
+    
     @property
     def user_log_dir(self):
+        """ The userland log directory """
         return self.get_user_log_dir(self.appname, self.appauthor,
                                                    version=self.version)
     
     def _get_win_folder(self, argument):
+        """ Retrieve the module-private Win32 API access function from
+            the AppDirs instance (so as not to invoke it as a bound method)
+            before calling it with the supplied argument
+        """
         return getattr(self, '_win_folder_function', lambda arg: None)(argument)
     
     def get_user_data_dir(self, appname=None,
@@ -124,7 +225,7 @@ class AppDirs(object):
                                 version=None,
                                 roaming=False):
         r"""Return full path to the user-specific data dir for this application.
-
+            
             "appname" is the name of application.
                 If None, just the system directory is returned.
             "appauthor" (only used on Windows) is the name of the
@@ -142,7 +243,7 @@ class AppDirs(object):
                 sync'd on login. See
                 <http://technet.microsoft.com/en-us/library/cc766489(WS.10).aspx>
                 for a discussion of issues.
-
+                
         Typical user data directories are:
             Mac OS X:               ~/Library/Application Support/<AppName>
             Unix:                   ~/.local/share/<AppName>    # or in $XDG_DATA_HOME, if defined
@@ -150,11 +251,11 @@ class AppDirs(object):
             Win XP (roaming):       C:\Documents and Settings\<username>\Local Settings\Application Data\<AppAuthor>\<AppName>
             Win 7  (not roaming):   C:\Users\<username>\AppData\Local\<AppAuthor>\<AppName>
             Win 7  (roaming):       C:\Users\<username>\AppData\Roaming\<AppAuthor>\<AppName>
-
+        
         For Unix, we follow the XDG spec and support $XDG_DATA_HOME.
         That means, by default "~/.local/share/<AppName>".
         """
-        if self.system == "win32":
+        if self.system is System.WIN32:
             if appauthor is None:
                 appauthor = appname
             const = roaming and "CSIDL_APPDATA" or "CSIDL_LOCAL_APPDATA"
@@ -164,7 +265,7 @@ class AppDirs(object):
                     path = os.path.join(path, appauthor, appname)
                 else:
                     path = os.path.join(path, appname)
-        elif self.system == 'darwin':
+        elif self.system is System.DARWIN:
             path = os.path.expanduser('~/Library/Application Support/')
             if appname:
                 path = os.path.join(path, appname)
@@ -175,13 +276,13 @@ class AppDirs(object):
         if appname and version:
             path = os.path.join(path, version)
         return path
-
+    
     def get_site_data_dir(self, appname=None,
                                 appauthor=None,
                                 version=None,
                                 multipath=False):
         r"""Return full path to the user-shared data dir for this application.
-
+            
             "appname" is the name of application.
                 If None, just the system directory is returned.
             "appauthor" (only used on Windows) is the name of the
@@ -198,19 +299,19 @@ class AppDirs(object):
                 returned. By default, the first item from XDG_DATA_DIRS is
                 returned, or '/usr/local/share/<AppName>',
                 if XDG_DATA_DIRS is not set
-
+                
         Typical site data directories are:
             Mac OS X:   /Library/Application Support/<AppName>
             Unix:       /usr/local/share/<AppName> or /usr/share/<AppName>
             Win XP:     C:\Documents and Settings\All Users\Application Data\<AppAuthor>\<AppName>
             Vista:      (Fail! "C:\ProgramData" is a hidden *system* directory on Vista.)
             Win 7:      C:\ProgramData\<AppAuthor>\<AppName>   # Hidden, but writeable on Win 7.
-
+        
         For Unix, this is using the $XDG_DATA_DIRS[0] default.
-
+        
         WARNING: Do not use this on Windows. See the Vista-Fail note above for why.
         """
-        if self.system == "win32":
+        if self.system is System.WIN32:
             if appauthor is None:
                 appauthor = appname
             path = os.path.normpath(self._get_win_folder("CSIDL_COMMON_APPDATA"))
@@ -219,7 +320,7 @@ class AppDirs(object):
                     path = os.path.join(path, appauthor, appname)
                 else:
                     path = os.path.join(path, appname)
-        elif self.system == 'darwin':
+        elif self.system is System.DARWIN:
             path = os.path.expanduser('/Library/Application Support')
             if appname:
                 path = os.path.join(path, appname)
@@ -233,24 +334,23 @@ class AppDirs(object):
                 if version:
                     appname = os.path.join(appname, version)
                 pathlist = [os.sep.join([x, appname]) for x in pathlist]
-
+                
             if multipath:
                 path = os.pathsep.join(pathlist)
             else:
                 path = pathlist[0]
             return path
-
+        
         if appname and version:
             path = os.path.join(path, version)
         return path
-
-
+    
     def get_user_config_dir(self, appname=None,
                                   appauthor=None,
                                   version=None,
                                   roaming=False):
         r"""Return full path to the user-specific config dir for this application.
-
+            
             "appname" is the name of application.
                 If None, just the system directory is returned.
             "appauthor" (only used on Windows) is the name of the
@@ -268,18 +368,18 @@ class AppDirs(object):
                 sync'd on login. See
                 <http://technet.microsoft.com/en-us/library/cc766489(WS.10).aspx>
                 for a discussion of issues.
-
+                
         Typical user config directories are:
             Mac OS X:               ~/Library/Preferences/<AppName>
             Unix:                   ~/.config/<AppName>     # or in $XDG_CONFIG_HOME, if defined
             Win *:                  same as user_data_dir
-
+        
         For Unix, we follow the XDG spec and support $XDG_CONFIG_HOME.
         That means, by default "~/.config/<AppName>".
         """
-        if self.system == "win32":
+        if self.system is System.WIN32:
             path = self.get_user_data_dir(appname, appauthor, None, roaming)
-        elif self.system == 'darwin':
+        elif self.system is System.DARWIN:
             path = os.path.expanduser('~/Library/Preferences/')
             if appname:
                 path = os.path.join(path, appname)
@@ -290,13 +390,13 @@ class AppDirs(object):
         if appname and version:
             path = os.path.join(path, version)
         return path
-
+    
     def get_site_config_dir(self, appname=None,
                                   appauthor=None,
                                   version=None,
                                   multipath=False):
         r"""Return full path to the user-shared data dir for this application.
-
+            
             "appname" is the name of application.
                 If None, just the system directory is returned.
             "appauthor" (only used on Windows) is the name of the
@@ -312,23 +412,23 @@ class AppDirs(object):
                 which indicates that the entire list of config dirs should be
                 returned. By default, the first item from XDG_CONFIG_DIRS is
                 returned, or '/etc/xdg/<AppName>', if XDG_CONFIG_DIRS is not set
-
+                
         Typical site config directories are:
             Mac OS X:   same as site_data_dir
             Unix:       /etc/xdg/<AppName> or $XDG_CONFIG_DIRS[i]/<AppName> for each value in
                         $XDG_CONFIG_DIRS
             Win *:      same as site_data_dir
             Vista:      (Fail! "C:\ProgramData" is a hidden *system* directory on Vista.)
-
+        
         For Unix, this is using the $XDG_CONFIG_DIRS[0] default, if multipath=False
-
+        
         WARNING: Do not use this on Windows. See the Vista-Fail note above for why.
         """
-        if self.system == 'win32':
+        if self.system is System.WIN32:
             path = self.get_site_data_dir(appname, appauthor)
             if appname and version:
                 path = os.path.join(path, version)
-        elif self.system == 'darwin':
+        elif self.system is System.DARWIN:
             path = os.path.expanduser('/Library/Preferences')
             if appname:
                 path = os.path.join(path, appname)
@@ -341,19 +441,19 @@ class AppDirs(object):
                 if version:
                     appname = os.path.join(appname, version)
                 pathlist = [os.sep.join([x, appname]) for x in pathlist]
-
+            
             if multipath:
                 path = os.pathsep.join(pathlist)
             else:
                 path = pathlist[0]
         return path
-
+    
     def get_user_cache_dir(self, appname=None,
                                  appauthor=None,
                                  version=None,
                                  opinion=True):
         r"""Return full path to the user-specific cache dir for this application.
-
+            
             "appname" is the name of application.
                 If None, just the system directory is returned.
             "appauthor" (only used on Windows) is the name of the
@@ -368,13 +468,13 @@ class AppDirs(object):
             "opinion" (boolean) can be False to disable the appending of
                 "Cache" to the base app data dir for Windows. See
                 discussion below.
-
+        
         Typical user cache directories are:
             Mac OS X:   ~/Library/Caches/<AppName>
             Unix:       ~/.cache/<AppName> (XDG default)
             Win XP:     C:\Documents and Settings\<username>\Local Settings\Application Data\<AppAuthor>\<AppName>\Cache
             Vista:      C:\Users\<username>\AppData\Local\<AppAuthor>\<AppName>\Cache
-
+        
         On Windows the only suggestion in the MSDN docs is that local settings go in
         the `CSIDL_LOCAL_APPDATA` directory. This is identical to the non-roaming
         app data dir (the default returned by `user_data_dir` above). Apps typically
@@ -384,7 +484,7 @@ class AppDirs(object):
         OPINION: This function appends "Cache" to the `CSIDL_LOCAL_APPDATA` value.
         This can be disabled with the `opinion=False` option.
         """
-        if self.system == "win32":
+        if self.system is System.WIN32:
             if appauthor is None:
                 appauthor = appname
             path = os.path.normpath(self._get_win_folder("CSIDL_LOCAL_APPDATA"))
@@ -395,7 +495,7 @@ class AppDirs(object):
                     path = os.path.join(path, appname)
                 if opinion:
                     path = os.path.join(path, "Cache")
-        elif self.system == 'darwin':
+        elif self.system is System.DARWIN:
             path = os.path.expanduser('~/Library/Caches')
             if appname:
                 path = os.path.join(path, appname)
@@ -406,13 +506,13 @@ class AppDirs(object):
         if appname and version:
             path = os.path.join(path, version)
         return path
-
+    
     def get_user_state_dir(self, appname=None,
                                  appauthor=None,
                                  version=None,
                                  roaming=False):
         r"""Return full path to the user-specific state dir for this application.
-
+            
             "appname" is the name of application.
                 If None, just the system directory is returned.
             "appauthor" (only used on Windows) is the name of the
@@ -430,18 +530,18 @@ class AppDirs(object):
                 sync'd on login. See
                 <http://technet.microsoft.com/en-us/library/cc766489(WS.10).aspx>
                 for a discussion of issues.
-
+        
         Typical user state directories are:
             Mac OS X:  same as user_data_dir
             Unix:      ~/.local/state/<AppName>   # or in $XDG_STATE_HOME, if defined
             Win *:     same as user_data_dir
-
+        
         For Unix, we follow this Debian proposal <https://wiki.debian.org/XDGBaseDirectorySpecification#state>
         to extend the XDG spec and support $XDG_STATE_HOME.
-
+        
         That means, by default "~/.local/state/<AppName>".
         """
-        if self.system in ["win32", "darwin"]:
+        if self.system in (System.WIN32, System.DARWIN):
             path = self.get_user_data_dir(appname, appauthor, None, roaming)
         else:
             path = os.getenv('XDG_STATE_HOME', os.path.expanduser("~/.local/state"))
@@ -450,13 +550,13 @@ class AppDirs(object):
         if appname and version:
             path = os.path.join(path, version)
         return path
-
+    
     def get_user_log_dir(self, appname=None,
                                appauthor=None,
                                version=None,
                                opinion=True):
         r"""Return full path to the user-specific log dir for this application.
-
+            
             "appname" is the name of application.
                 If None, just the system directory is returned.
             "appauthor" (only used on Windows) is the name of the
@@ -471,26 +571,26 @@ class AppDirs(object):
             "opinion" (boolean) can be False to disable the appending of
                 "Logs" to the base app data dir for Windows, and "log" to the
                 base cache dir for Unix. See discussion below.
-
+        
         Typical user log directories are:
             Mac OS X:   ~/Library/Logs/<AppName>
             Unix:       ~/.cache/<AppName>/log  # or under $XDG_CACHE_HOME if defined
             Win XP:     C:\Documents and Settings\<username>\Local Settings\Application Data\<AppAuthor>\<AppName>\Logs
             Vista:      C:\Users\<username>\AppData\Local\<AppAuthor>\<AppName>\Logs
-
+        
         On Windows the only suggestion in the MSDN docs is that local settings
         go in the `CSIDL_LOCAL_APPDATA` directory. (Note: I'm interested in
         examples of what some windows apps use for a logs dir.)
-
+        
         OPINION: This function appends "Logs" to the `CSIDL_LOCAL_APPDATA`
         value for Windows and appends "log" to the user cache dir for Unix.
         This can be disabled with the `opinion=False` option.
         """
-        if self.system == "darwin":
+        if self.system is System.DARWIN:
             path = os.path.join(
                 os.path.expanduser('~/Library/Logs'),
                 appname)
-        elif self.system == "win32":
+        elif self.system is System.WIN32:
             path = self.get_user_data_dir(appname, appauthor, version)
             version = False
             if opinion:
@@ -507,138 +607,175 @@ class AppDirs(object):
 #---- internal support stuff
 
 def _get_win_folder_from_registry(csidl_name):
-    """This is a fallback technique at best. I'm not sure if using the
-    registry for this guarantees us the correct answer for all CSIDL_*
-    names.
+    """ This is a fallback technique at best. I'm not sure if using the
+        sregistry for this guarantees us the correct answer for all CSIDL_*
+        names.
+            – Eddy Petrișor
     """
     if PY3:
-      import winreg as _winreg
+        import winreg as _winreg
     else:
-      import _winreg
-
+        import _winreg
+    
     shell_folder_name = {
         "CSIDL_APPDATA": "AppData",
         "CSIDL_COMMON_APPDATA": "Common AppData",
         "CSIDL_LOCAL_APPDATA": "Local AppData",
     }[csidl_name]
-
+    
     key = _winreg.OpenKey(
         _winreg.HKEY_CURRENT_USER,
         r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
     )
-    dir, type = _winreg.QueryValueEx(key, shell_folder_name)
-    return dir
+    directory, _ = _winreg.QueryValueEx(key, shell_folder_name)
+    return directory
 
 def _get_win_folder_with_pywin32(csidl_name):
+    """ Use the PyWin32 Python C-API wrappers to make a fairly direct
+        win32 filesystem API calls
+    """
     from win32com.shell import shellcon, shell
-    dir = shell.SHGetFolderPath(0, getattr(shellcon, csidl_name), 0, 0)
+    directory = shell.SHGetFolderPath(0, getattr(shellcon, csidl_name), 0, 0)
     # Try to make this a unicode path because SHGetFolderPath does
     # not return unicode strings when there is unicode data in the
     # path.
     try:
-        dir = unicode(dir)
-
+        directory = unicode(directory)
         # Downgrade to short path name if have highbit chars. See
         # <http://bugs.activestate.com/show_bug.cgi?id=85099>.
         has_high_char = False
-        for c in dir:
-            if ord(c) > 255:
+        for char in directory:
+            if ord(char) > 255:
                 has_high_char = True
                 break
         if has_high_char:
             try:
                 import win32api
-                dir = win32api.GetShortPathName(dir)
+                directory = win32api.GetShortPathName(directory)
             except ImportError:
                 pass
     except UnicodeError:
         pass
-    return dir
+    return directory
 
 def _get_win_folder_with_ctypes(csidl_name):
+    """ Use ctypes to call into the win32 filesystem API """
     import ctypes
-
+    
     csidl_const = {
         "CSIDL_APPDATA": 26,
         "CSIDL_COMMON_APPDATA": 35,
         "CSIDL_LOCAL_APPDATA": 28,
     }[csidl_name]
-
+    
     buf = ctypes.create_unicode_buffer(1024)
     ctypes.windll.shell32.SHGetFolderPathW(None, csidl_const, None, 0, buf)
-
+    
     # Downgrade to short path name if have highbit chars. See
     # <http://bugs.activestate.com/show_bug.cgi?id=85099>.
     has_high_char = False
-    for c in buf:
-        if ord(c) > 255:
+    for char in buf:
+        if ord(char) > 255:
             has_high_char = True
             break
     if has_high_char:
         buf2 = ctypes.create_unicode_buffer(1024)
         if ctypes.windll.kernel32.GetShortPathNameW(buf.value, buf2, 1024):
             buf = buf2
-
+    
     return buf.value
 
 def _get_win_folder_with_jna(csidl_name):
+    """ Use the Python Java wrappers to invoke – circuitously,
+        I might add – a win32 filesystem API call
+    """
     import array
     from com.sun import jna
     from com.sun.jna.platform import win32
-
+    
     buf_size = win32.WinDef.MAX_PATH * 2
     buf = array.zeros('c', buf_size)
     shell = win32.Shell32.INSTANCE
-    shell.SHGetFolderPath(None, getattr(win32.ShlObj, csidl_name), None, win32.ShlObj.SHGFP_TYPE_CURRENT, buf)
-    dir = jna.Native.toString(buf.tostring()).rstrip("\0")
-
+    shell.SHGetFolderPath(None, getattr(win32.ShlObj, csidl_name),
+                          None, win32.ShlObj.SHGFP_TYPE_CURRENT,
+                          buf)
+    directory = jna.Native.toString(buf.tostring()).rstrip("\0")
+    
     # Downgrade to short path name if have highbit chars. See
     # <http://bugs.activestate.com/show_bug.cgi?id=85099>.
     has_high_char = False
-    for c in dir:
-        if ord(c) > 255:
+    for char in directory:
+        if ord(char) > 255:
             has_high_char = True
             break
     if has_high_char:
         buf = array.zeros('c', buf_size)
         kernel = win32.Kernel32.INSTANCE
-        if kernel.GetShortPathName(dir, buf, buf_size):
-            dir = jna.Native.toString(buf.tostring()).rstrip("\0")
+        if kernel.GetShortPathName(directory, buf, buf_size):
+            directory = jna.Native.toString(buf.tostring()).rstrip("\0")
+    return directory
 
-    return dir
+__all__ = ('System', 'SYSTEM', 'AppDirs')
+__dir__ = lambda: list(__all__)
 
 #---- self test code
 
-if __name__ == "__main__":
+def test():
+    """ Inline tests for appdirectories """
+    from repl import print_separator
+    
     appname = "MyApp"
     appauthor = "MyCompany"
+    
+    props = ("system", "version", "version_info",
+             "site_config_dir", "site_data_dir",
+             "user_cache_dir", "user_config_dir",
+                               "user_data_dir",
+                               "user_log_dir",
+                               "user_state_dir")
+    
+    print("-- “appdirectories” __version__: %s --" % __version__)
+    print()
+    print()
+    
+    for system in System:
+        
+        print_separator()
+        print("-- System: %s %s" % (system.to_string(),
+                                   (system is SYSTEM) and "(DEFAULT)" or ""))
+        # print()
+        
+        if (system is not System.WIN32) or ((system is System.WIN32) \
+                                        and (SYSTEM is System.WIN32)):
+            
+            print("-- app dirs (with optional 'version')")
+            dirs = AppDirs(appname, appauthor, version="1.0", system=system)
+            for prop in props:
+                print("%20s : %s" % (prop, getattr(dirs, prop)))
+            print()
+            
+            print("-- app dirs (without optional 'version')")
+            dirs = AppDirs(appname, appauthor, system=system)
+            for prop in props:
+                print("%20s : %s" % (prop, getattr(dirs, prop)))
+            print()
+            
+            print("-- app dirs (without optional 'appauthor')")
+            dirs = AppDirs(appname, system=system)
+            for prop in props:
+                print("%20s : %s" % (prop, getattr(dirs, prop)))
+            print()
+            
+            print("-- app dirs (with disabled 'appauthor')")
+            dirs = AppDirs(appname, appauthor=False, system=system)
+            for prop in props:
+                print("%20s : %s" % (prop, getattr(dirs, prop)))
+            print()
+        
+        else:
+            
+            print("-- skipping Win32 tests (Win32 API access required)")
+            print()
 
-    props = ("user_data_dir",
-             "user_config_dir",
-             "user_cache_dir",
-             "user_state_dir",
-             "user_log_dir",
-             "site_data_dir",
-             "site_config_dir")
-
-    print("-- app dirs %s --" % __version__)
-
-    print("-- app dirs (with optional 'version')")
-    dirs = AppDirs(appname, appauthor, version="1.0")
-    for prop in props:
-        print("%s: %s" % (prop, getattr(dirs, prop)))
-
-    print("\n-- app dirs (without optional 'version')")
-    dirs = AppDirs(appname, appauthor)
-    for prop in props:
-        print("%s: %s" % (prop, getattr(dirs, prop)))
-
-    print("\n-- app dirs (without optional 'appauthor')")
-    dirs = AppDirs(appname)
-    for prop in props:
-        print("%s: %s" % (prop, getattr(dirs, prop)))
-
-    print("\n-- app dirs (with disabled 'appauthor')")
-    dirs = AppDirs(appname, appauthor=False)
-    for prop in props:
-        print("%s: %s" % (prop, getattr(dirs, prop)))
+if __name__ == "__main__":
+    test()

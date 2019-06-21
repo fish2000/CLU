@@ -27,7 +27,6 @@ from typing import ispath, isvalidpath
 from .misc import memoize, stringify, suffix_searcher, u8str
 
 __all__ = ('DEFAULT_PREFIX',
-           'DEFAULT_ENCODING',
            'DEFAULT_TIMEOUT',
            'ExecutionError', 'FilesystemError',
            'ensure_path_is_valid',
@@ -41,7 +40,6 @@ __all__ = ('DEFAULT_PREFIX',
 
 __dir__ = lambda: list(__all__)
 
-DEFAULT_ENCODING = 'latin-1'
 DEFAULT_TIMEOUT = 60 # seconds
 DEFAULT_PREFIX = "yo-dogg-"
 
@@ -124,7 +122,7 @@ def back_tick(command,  as_str=True,
             value).
         encoding : str, optional
             The name of the encoding to use when decoding the command output per
-            the `as_str` value. Default is “latin-1”.
+            the `as_str` value. Default is “%s”.
         directory : str / Directory / path-like, optional
             The directory in which to execute the command. Default is None (in
             which case the process working directory, unchanged, will be used).
@@ -149,12 +147,12 @@ def back_tick(command,  as_str=True,
         executed command returns with any non-zero exit status, and `raise_err`
         is set to True.
         
-    """
+    """ % ENCODING
     # Step 1: Prepare for battle:
     import subprocess, shlex
     verbose = bool(kwargs.pop('verbose',  False))
     timeout =  int(kwargs.pop('timeout',  DEFAULT_TIMEOUT))
-    encoding = str(kwargs.pop('encoding', DEFAULT_ENCODING))
+    encoding = str(kwargs.pop('encoding', ENCODING))
     raise_err = raise_err is not None and raise_err or bool(not ret_err)
     issequence = isinstance(command, (list, tuple))
     command_str = issequence and " ".join(command) or u8str(command).strip()
@@ -853,7 +851,7 @@ class Directory(collections.abc.Hashable,
             raise FilesystemError("mountpoint exists at subdirectory path: %s" % pth)
         return self.directory(pth)
     
-    def makedirs(self, pth=None):
+    def makedirs(self, pth=None, mode=0o755):
         """ Creates any parts of the target directory path that don’t
             already exist, á la the `mkdir -p` shell command.
         """
@@ -861,7 +859,8 @@ class Directory(collections.abc.Hashable,
             os.makedirs(os.path.abspath(
                         os.path.join(self.name,
                         os.fspath(pth or os.curdir))),
-                        exist_ok=False)
+                        exist_ok=False,
+                        mode=mode)
         except OSError as os_error:
             raise FilesystemError(str(os_error))
         return self

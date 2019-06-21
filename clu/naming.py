@@ -207,12 +207,13 @@ def path_to_dotpath(path):
         to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
         would call a “quick and dirty” fashion.
     """ 
-    relpath = os.path.relpath(path, start=os.path.dirname('/usr/local/lib/python3.7/site-packages'))
-    dotpath = relpath.replace(os.path.sep, os.path.extsep)
+    relpath = os.path.relpath(path,
+        start=os.path.dirname('/usr/local/lib/python3.7/site-packages'))
+    dotpath = relpath.replace(os.path.sep, QUALIFIER)
     
     if dotpath.endswith('.py'):
         dotpath = dotpath[:len(dotpath)-3]
-    while dotpath.startswith(os.path.extsep):
+    while dotpath.startswith(QUALIFIER):
         dotpath = dotpath[1:]
     
     return dotpath

@@ -5,8 +5,8 @@ import plistlib
 import zict
 
 from constants import ENCODING, NoDefault
-from fs import appdirectories as appdirs
-from fs import Directory
+from fs import System, AppDirs, Directory
+from fs.appdirectories import test
 from predicates import attr
 from typing import isstring, isbytes
 # from replutilities import Exporter
@@ -23,13 +23,13 @@ class KeyValueError(ValueError):
 # UTILITY STUFF: AppDirs wrapper
 
 # @export
-class ReplEnvDirs(appdirs.AppDirs):
+class ReplEnvDirs(AppDirs):
     
     def __init__(self):
         """ Initialize with a fixed “appname” parameter `replenv` """
         # use Linux directory layout
         super(ReplEnvDirs, self).__init__(appname='replenv',
-                                          system="linux")
+                                          system=System.LINUX)
     
     @property
     def mode(self):
@@ -157,5 +157,6 @@ def items():
 # def test():
 #     exporter.print_diagnostics(__all__, __dir__)
 #
-# if __name__ == '__main__':
-#     test()
+if __name__ == '__main__':
+    test()
+

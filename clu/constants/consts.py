@@ -79,6 +79,13 @@ VERBOTEN = pytuple('all', 'cached', 'loader', 'file', 'spec')
 VERBOTEN += BUILTINS
 VERBOTEN += ('Namespace', 'SimpleNamespace')
 
+# XDG_RUNTIME_DIR support:
+basedir = "/usr/local/var/run/xdg"
+symlink = os.path.join(basedir, 'CURRENT')
+
+XDG_RUNTIME_BASE = basedir
+XDG_RUNTIME_DIR = symlink
+XDG_RUNTIME_MODE = 0o700
 
 class NoDefault(object):
     """ A singleton object to signify a lack of an argument. """
@@ -104,6 +111,8 @@ __all__ = ('BUILTINS',
            'TEXTMATE',
            'TOKEN',
            'VERBOTEN',
+           'XDG_RUNTIME_BASE', 'XDG_RUNTIME_DIR',
+                               'XDG_RUNTIME_MODE',
            'NoDefault')
 
 __dir__ = lambda: list(__all__)

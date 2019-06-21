@@ -946,6 +946,11 @@ class Directory(collections.abc.Hashable,
             ztmp.copy(zpth)
         return self.realpath(zpth)
     
+    def symlink(self, destination, pth=None):
+        return os.symlink(
+               os.fspath(pth or self.name),
+               os.fspath(destination), target_is_directory=True)
+    
     def close(self):
         """ Stub method -- always returns True: """
         return True

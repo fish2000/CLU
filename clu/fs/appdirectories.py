@@ -122,7 +122,7 @@ class CSIDL(Enum):
         return bytes(self.to_string(), encoding=ENCODING)
     
     def __index__(self):
-        return int(self)
+        return self.to_int()
 
 SYSTEM = System.determine()
 

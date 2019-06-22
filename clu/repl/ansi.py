@@ -73,6 +73,7 @@ class ANSI(AliasingEnumMeta):
                                                    **kwargs)
     
     def for_name(cls, name):
+        """ Get an enum member or alias member by name """
         lowerstring = name.lower()
         for ansi in cls:
             if ansi.name.lower() == lowerstring:

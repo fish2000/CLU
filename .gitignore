@@ -19,6 +19,7 @@ sdist/
 .pytest_cache/
 
 .envrc
+.tm_properties
 
 tmtags
 tmtagsHistory

@@ -83,6 +83,47 @@ class System(Enum):
         """ A given System value’s name, lowercased """
         return self.to_string().lower()
 
+class CSIDL(Enum):
+    
+    """ An enumeration encapsulating Windows CSIDLs """
+    # … which I have no idea WTF those actually are
+    
+    APPDATA         = ('AppData',        26)
+    COMMON_APPDATA  = ('Common AppData', 35)
+    LOCAL_APPDATA   = ('Local AppData',  28)
+    
+    @classmethod
+    def for_name(cls, name):
+        string_name = str(name)
+        for csidl in cls:
+            if csidl.name == string_name:
+                return csidl
+            elif csidl.fullname == string_name:
+                return csidl
+        raise LookupError("No CSIDL found named %s" % string_name)
+    
+    def __init__(self, *args):
+        self.shell_folder_name, self.const = args
+    
+    @property
+    def fullname(self):
+        return "%s_%s" (type(self).__name__, self.name)
+    
+    def to_string(self):
+        return str(self.fullname)
+    
+    def to_int(self):
+        return int(self.const)
+    
+    def __str__(self):
+        return self.to_string()
+    
+    def __bytes__(self):
+        return bytes(self.to_string(), encoding=ENCODING)
+    
+    def __index__(self):
+        return int(self)
+
 SYSTEM = System.determine()
 
 class AppDirs(object):
@@ -218,7 +259,8 @@ class AppDirs(object):
             the AppDirs instance (so as not to invoke it as a bound method)
             before calling it with the supplied argument
         """
-        return getattr(self, '_win_folder_function', lambda arg: None)(argument)
+        return os.path.normpath(
+               getattr(self, '_win_folder_function', lambda arg: None)(argument))
     
     def get_user_data_dir(self, appname=None,
                                 appauthor=None,
@@ -258,9 +300,8 @@ class AppDirs(object):
         if self.system is System.WIN32:
             if appauthor is None:
                 appauthor = appname
-            path = os.path.normpath(
-                   self._get_win_folder(roaming and "APPDATA" \
-                                           or "LOCAL_APPDATA"))
+            path = self._get_win_folder(roaming and CSIDL.APPDATA \
+                                           or CSIDL.LOCAL_APPDATA)
             if appname:
                 if appauthor is not False:
                     path = os.path.join(path, appauthor, appname)
@@ -315,7 +356,7 @@ class AppDirs(object):
         if self.system is System.WIN32:
             if appauthor is None:
                 appauthor = appname
-            path = os.path.normpath(self._get_win_folder("COMMON_APPDATA"))
+            path = self._get_win_folder(CSIDL.COMMON_APPDATA)
             if appname:
                 if appauthor is not False:
                     path = os.path.join(path, appauthor, appname)
@@ -488,7 +529,7 @@ class AppDirs(object):
         if self.system is System.WIN32:
             if appauthor is None:
                 appauthor = appname
-            path = os.path.normpath(self._get_win_folder("LOCAL_APPDATA"))
+            path = self._get_win_folder(CSIDL.LOCAL_APPDATA)
             if appname:
                 if appauthor is not False:
                     path = os.path.join(path, appauthor, appname)
@@ -607,35 +648,7 @@ class AppDirs(object):
 
 #---- Internal Windows support stuff
 
-class CSIDL(Enum):
-    
-    APPDATA         = ('AppData',        26)
-    COMMON_APPDATA  = ('Common AppData', 35)
-    LOCAL_APPDATA   = ('Local AppData',  28)
-    
-    @classmethod
-    def for_name(cls, name):
-        for csidl in cls:
-            if csidl.name == name:
-                return csidl
-            elif csidl.fullname == name:
-                return csidl
-        raise LookupError("No CSIDL found named %s" % name)
-    
-    def __init__(self, *args):
-        self.shell_folder_name, self.const = args
-    
-    def __str__(self):
-        return str(self.shell_folder_name)
-    
-    def to_string(self):
-        return str(self)
-    
-    @property
-    def fullname(self):
-        return "%s_%s" (type(self).__name__, self.name)
-
-def _get_win_folder_from_registry(name):
+def _get_win_folder_from_registry(csidl):
     """ This is a fallback technique at best. I'm not sure if using the
         sregistry for this guarantees us the correct answer for all CSIDL_*
         names.
@@ -646,19 +659,18 @@ def _get_win_folder_from_registry(name):
     else:
         import _winreg as winreg
     
-    csidl = CSIDL.for_name(name)
     key = winreg.OpenKey(
           winreg.HKEY_CURRENT_USER,
         r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders")
     directory, _ = winreg.QueryValueEx(key, csidl.shell_folder_name)
     return directory
 
-def _get_win_folder_with_pywin32(name):
+def _get_win_folder_with_pywin32(csidl):
     """ Use the PyWin32 Python C-API wrappers to make a fairly direct
-        win32 filesystem API calls
+        win32 filesystem API call
     """
     from win32com.shell import shellcon, shell
-    directory = shell.SHGetFolderPath(0, getattr(shellcon, name), 0, 0)
+    directory = shell.SHGetFolderPath(0, getattr(shellcon, csidl.fullname), 0, 0)
     
     # Try to make this a unicode path because SHGetFolderPath does
     # not return unicode strings when there is unicode data in the
@@ -684,11 +696,10 @@ def _get_win_folder_with_pywin32(name):
     
     return directory
 
-def _get_win_folder_with_ctypes(name):
+def _get_win_folder_with_ctypes(csidl):
     """ Use ctypes to call into the win32 filesystem API """
     import ctypes
     
-    csidl = CSIDL.for_name(name)
     buf = ctypes.create_unicode_buffer(1024)
     ctypes.windll.shell32.SHGetFolderPathW(None, csidl.const, None, 0, buf)
     
@@ -706,7 +717,7 @@ def _get_win_folder_with_ctypes(name):
     
     return buf.value
 
-def _get_win_folder_with_jna(name):
+def _get_win_folder_with_jna(csidl):
     """ Use the Python Java wrappers to invoke – circuitously,
         I might add – a win32 filesystem API call
     """
@@ -717,7 +728,7 @@ def _get_win_folder_with_jna(name):
     buf_size = win32.WinDef.MAX_PATH * 2
     buf = array.zeros('c', buf_size)
     shell = win32.Shell32.INSTANCE
-    shell.SHGetFolderPath(None, getattr(win32.ShlObj, name),
+    shell.SHGetFolderPath(None, getattr(win32.ShlObj, csidl.fullname),
                           None, win32.ShlObj.SHGFP_TYPE_CURRENT, buf)
     
     directory = jna.Native.toString(buf.tostring()).rstrip("\0")
@@ -737,7 +748,7 @@ def _get_win_folder_with_jna(name):
     
     return directory
 
-__all__ = ('System', 'SYSTEM', 'AppDirs', 'CSIDL')
+__all__ = ('System', 'CSIDL', 'SYSTEM', 'AppDirs')
 __dir__ = lambda: list(__all__)
 
 #---- Self-Test Code:

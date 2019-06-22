@@ -5,26 +5,13 @@ from collections import namedtuple as NamedTuple
 import colorama
 colorama.init()
 
-from constants import SEPARATOR_WIDTH, Enum, EnumMeta, unique, auto
+from constants import SEPARATOR_WIDTH, AliasingEnumMeta, Enum, unique, alias, auto
 from naming import qualified_name
 from predicates import tuplize
 
 print_separator = lambda: print('-' * SEPARATOR_WIDTH)
 
-# class ANSISource(object):
-#
-#     """ Read-only descriptor for Colorama sources of ANSI codes """
-#
-#     def __init__(self, source):
-#         self.source = source
-#
-#     def __get__(self, *args):
-#         return self.source
-#
-#     def __repr__(self):
-#         return repr(self.source)
-
-class ANSIAncestor(Enum):
+class ANSIBase(Enum):
     
     """ Root ancestor class for all ANSI-code enums """
     
@@ -32,7 +19,7 @@ class ANSIAncestor(Enum):
     def is_ansi(cls, instance):
         return cls in type(instance).__mro__
 
-class ANSI(EnumMeta):
+class ANSI(AliasingEnumMeta):
     
     @classmethod
     def __prepare__(metacls, name, bases, **kwargs):
@@ -47,7 +34,7 @@ class ANSI(EnumMeta):
             requisite methods (q.v. Text, Background and Weight
             definitions sub.)
         """
-        source = kwargs.pop('source', None) or colorama.Fore
+        source = kwargs.pop('source')
         
         class Source(object):
             
@@ -97,8 +84,7 @@ class ANSI(EnumMeta):
         return super(ANSI, cls)._missing_(value)
 
 @unique
-class Text(ANSIAncestor, metaclass=ANSI,
-                         source=colorama.Fore):
+class Text(ANSIBase, metaclass=ANSI, source=colorama.Fore):
     
     BLACK               = auto()
     BLUE                = auto()
@@ -114,13 +100,22 @@ class Text(ANSIAncestor, metaclass=ANSI,
     LIGHTYELLOW_EX      = auto()
     MAGENTA             = auto()
     RED                 = auto()
-    RESET               = auto()
     WHITE               = auto()
     YELLOW              = auto()
+    GRAY                = alias(LIGHTBLACK_EX)
+    GREY                = alias(LIGHTBLACK_EX)
+    LIGHTBLUE           = alias(LIGHTBLUE_EX)
+    LIGHTCYAN           = alias(LIGHTCYAN_EX)
+    LIGHTGREEN          = alias(LIGHTGREEN_EX)
+    LIGHTMAGENTA        = alias(LIGHTMAGENTA_EX)
+    LIGHTRED            = alias(LIGHTRED_EX)
+    PINK                = alias(LIGHTRED_EX)
+    LIGHTWHITE          = alias(LIGHTWHITE_EX)
+    LIGHTYELLOW         = alias(LIGHTYELLOW_EX)
+    RESET               = auto()
 
 @unique
-class Background(ANSIAncestor, metaclass=ANSI,
-                               source=colorama.Back):
+class Background(ANSIBase, metaclass=ANSI, source=colorama.Back):
     
     BLACK               = auto()
     BLUE                = auto()
@@ -136,18 +131,28 @@ class Background(ANSIAncestor, metaclass=ANSI,
     LIGHTYELLOW_EX      = auto()
     MAGENTA             = auto()
     RED                 = auto()
-    RESET               = auto()
     WHITE               = auto()
     YELLOW              = auto()
+    GRAY                = alias(LIGHTBLACK_EX)
+    GREY                = alias(LIGHTBLACK_EX)
+    LIGHTBLUE           = alias(LIGHTBLUE_EX)
+    LIGHTCYAN           = alias(LIGHTCYAN_EX)
+    LIGHTGREEN          = alias(LIGHTGREEN_EX)
+    LIGHTMAGENTA        = alias(LIGHTMAGENTA_EX)
+    LIGHTRED            = alias(LIGHTRED_EX)
+    PINK                = alias(LIGHTRED_EX)
+    LIGHTWHITE          = alias(LIGHTWHITE_EX)
+    LIGHTYELLOW         = alias(LIGHTYELLOW_EX)
+    RESET               = auto()
 
 @unique
-class Weight(ANSIAncestor, metaclass=ANSI,
-                           source=colorama.Style):
+class Weight(ANSIBase, metaclass=ANSI, source=colorama.Style):
     
     BRIGHT              = auto()
     DIM                 = auto()
     NORMAL              = auto()
     RESET_ALL           = auto()
+    RESET               = alias(RESET_ALL)
 
 # class ForegroundAncestor(Enum):
 #
@@ -162,9 +167,13 @@ class Weight(ANSIAncestor, metaclass=ANSI,
 #         # Insert terminal256 lookup shit here
 #         pass
 
-ANSIFormat = NamedTuple('ANSIFormat', ('text', 'background', 'weight'),
-                      defaults=tuplize(Weight.NORMAL),
-                        module=__file__)
+ANSIFormatBase = NamedTuple('ANSIFormatBase', ('text', 'background', 'weight'),
+                                               defaults=tuplize(Weight.NORMAL),
+                                               module=__file__)
+
+class ANSIFormat(ANSIFormatBase):
+    
+    pass
 
 def print_ansi(text, color='', reset=None):
     """ Print text in ANSI color, using optional inline markup

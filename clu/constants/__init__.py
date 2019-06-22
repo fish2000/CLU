@@ -22,14 +22,16 @@ from .consts import (BUILTINS,
                                        XDG_RUNTIME_MODE,
                      NoDefault)
 
-from .polyfills import (Counter, OrderedDict,
-                       Enum, EnumMeta, unique, ispyname,
-                       AutoType, auto,
-                       unicode, long,
-                       Mapping, MutableMapping, HashableABC,
-                       cache_from_source,
-                       lru_cache,
-                       Path)
+from .enums import alias, AliasingEnumMeta
+
+from .polyfills import (Enum, EnumMeta, unique, ispyname,
+                        AutoType, auto,
+                        Counter, OrderedDict,
+                        unicode, long,
+                        Mapping, MutableMapping, HashableABC,
+                        cache_from_source,
+                        lru_cache,
+                        Path)
 
 from .terminalsize import get_terminal_size
 
@@ -53,9 +55,10 @@ __all__ = ('BUILTINS',
            'XDG_RUNTIME_BASE', 'XDG_RUNTIME_DIR',
                                'XDG_RUNTIME_MODE',
            'NoDefault',
-           'Counter', 'OrderedDict',
+           'alias', 'AliasingEnumMeta',
            'Enum', 'EnumMeta', 'unique', 'ispyname',
            'AutoType', 'auto',
+           'Counter', 'OrderedDict',
            'unicode', 'long',
            'Mapping', 'MutableMapping', 'HashableABC',
            'cache_from_source',

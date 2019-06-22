@@ -36,7 +36,7 @@ class ANSI(AliasingEnumMeta):
         """
         source = kwargs.pop('source')
         
-        class Source(object):
+        class SourceDescriptor(object):
             
             def __get__(self, *args):
                 return source
@@ -60,7 +60,7 @@ class ANSI(AliasingEnumMeta):
         def to_string(self):
             return str(self.code)
         
-        attributes['source']    = Source()
+        attributes['source']    = SourceDescriptor()
         attributes['__init__']  = init_method
         attributes['__str__']   = str_method
         attributes['__add__']   = add_method
@@ -72,12 +72,15 @@ class ANSI(AliasingEnumMeta):
                                                      attributes,
                                                    **kwargs)
     
-    def for_string(cls, string):
-        lowerstring = string.lower()
+    def for_name(cls, name):
+        lowerstring = name.lower()
         for ansi in cls:
             if ansi.name.lower() == lowerstring:
                 return ansi
-        raise LookupError("No ANSI code found for “%s”" % string)
+        for aka, ansi in cls.__aliases__.items():
+            if aka.lower() == lowerstring:
+                return ansi
+        raise LookupError("No ANSI code found for “%s”" % name)
     
     def _missing_(cls, value):
         # Insert terminal256 lookup here
@@ -154,25 +157,11 @@ class Weight(ANSIBase, metaclass=ANSI, source=colorama.Style):
     RESET_ALL           = auto()
     RESET               = alias(RESET_ALL)
 
-# class ForegroundAncestor(Enum):
-#
-#     def _generate_next_value(name,
-#                              start,
-#                              count,
-#                              last_values):
-#         return getattr(colorama.Fore, name)
-#
-#     @classmethod
-#     def _missing_(cls, value):
-#         # Insert terminal256 lookup shit here
-#         pass
-
 ANSIFormatBase = NamedTuple('ANSIFormatBase', ('text', 'background', 'weight'),
                                                defaults=tuplize(Weight.NORMAL),
                                                module=__file__)
 
 class ANSIFormat(ANSIFormatBase):
-    
     pass
 
 def print_ansi(text, color='', reset=None):

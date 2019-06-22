@@ -65,7 +65,6 @@ class AliasingEnumMeta(EnumMeta):
                                                                  bases,
                                                                  attributes,
                                                                **kwargs)
-        
 
 __all__ = ('alias', 'AliasingEnumMeta')
 __dir__ = lambda: list(__all__)

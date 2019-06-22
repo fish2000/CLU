@@ -58,3 +58,6 @@ def remove_paths(*putatives):
     return out
 
 remove_paths.oldpaths = [tuple(sys.path)]
+
+__all__ = ('append_paths', 'remove_paths')
+__dir__ = lambda: list(__all__)

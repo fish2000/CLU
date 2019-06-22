@@ -19,7 +19,8 @@ import colorama
 import os
 import sys
 
-from constants import PY3, PYPY, TEXTMATE
+from constants import DEBUG, PY3, PYPY, TEXTMATE
+from .ansi import Text, print_ansi_centered
 
 # Python version figlet banners:
 banners = {}
@@ -187,7 +188,7 @@ def print_warning(text, color=colorama.Fore.RED,
     print(color + text, sep='')
     print(reset, end='')
 
-def banner():
+def print_banner():
     # Print python banner before end-of-module --
     # if running in TextMate, we use `sys.stderr` instead of ANSI colors,
     # as that’s the only way to get any sort of colored output in TextMate’s
@@ -197,6 +198,12 @@ def banner():
     else:
         colorama.init()
         print_python_banner(banner, banner_color)
+    
+    if DEBUG:
+        print_ansi_centered("DEBUG MODE INITIATED",
+                             color=(TEXTMATE and Text.NOTHING \
+                                              or Text.LIGHTYELLOW_EX))
+        print()
     
     if not PY3:
         if is_python2_dead:
@@ -208,5 +215,5 @@ def banner():
         else:
             print_warning(warning)
 
-__all__ = ('banners', 'is_python2_dead', 'print_python_banner', 'print_warning', 'banner')
+__all__ = ('banners', 'is_python2_dead', 'print_python_banner', 'print_warning', 'print_banner')
 __dir__ = lambda: list(__all__)

@@ -44,3 +44,6 @@ def asdict(thing):
     if haspyattr(thing, 'dict'):
         return thing.__dict__
     return dict(thing)
+
+__all__ = ('merge_two', 'merge_as', 'merge', 'asdict')
+__dir__ = lambda: list(__all__)

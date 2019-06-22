@@ -209,18 +209,17 @@ def print_ansi(text, color=''):
     for line in text.splitlines():
         print(fmt.render(line), sep='')
 
-def print_ansi_centered(text, color='', reset=None,
-                              filler='*',
+def print_ansi_centered(text, color='',
+                              filler='•',
                               width=SEPARATOR_WIDTH):
     """ Print a string to the terminal, centered and bookended with asterisks """
     message = f" {text.strip()} "
-    asterisks = (width / 2) - (len(message) / 2)
+    asterisks = int((width / 2) - (len(message) / 2))
     
     aa = filler[0] * asterisks
     ab = filler[0] * (asterisks + 0 - (len(message) % 2))
     
-    print_ansi(f"{aa}{message}{ab}", color=color,
-                                     reset=reset)
+    print_ansi(f"{aa}{message}{ab}", color=color)
 
 def highlight(code_string, language='json',
                              markup='terminal256',
@@ -232,3 +231,9 @@ def highlight(code_string, language='json',
     LexerCls = pygments.lexers.find_lexer_class_by_name(language)
     formatter = pygments.formatters.get_formatter_by_name(markup, style=style)
     return pygments.highlight(code_string, lexer=LexerCls(), formatter=formatter)
+
+__all__ = ('print_separator',
+           'Text', 'Weight', 'Background', 'ANSIFormat',
+           'print_ansi', 'print_ansi_centered', 'highlight')
+
+__dir__ = lambda: list(__all__)

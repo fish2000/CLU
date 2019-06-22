@@ -22,6 +22,7 @@ import platform
 from constants import ENCODING, PY3, unicode, Enum
 from typology import isbytes
 from version import VersionInfo
+from .filesystem import Directory
 
 __version__ = "1.4.4"
 __version_info__ = VersionInfo(__version__)
@@ -253,6 +254,34 @@ class AppDirs(object):
         """ The userland log directory """
         return self.get_user_log_dir(self.appname, self.appauthor,
                                                    version=self.version)
+    
+    @property
+    def site_config(self):
+        return Directory(self.site_config_dir)
+    
+    @property
+    def site_data(self):
+        return Directory(self.site_data_dir)
+    
+    @property
+    def user_cache(self):
+        return Directory(self.user_cache_dir)
+    
+    @property
+    def user_config(self):
+        return Directory(self.user_config_dir)
+    
+    @property
+    def user_data(self):
+        return Directory(self.user_data_dir)
+    
+    @property
+    def user_log(self):
+        return Directory(self.user_log_dir)
+    
+    @property
+    def user_state(self):
+        return Directory(self.user_state_dir)
     
     def _get_win_folder(self, argument):
         """ Retrieve the module-private Win32 API access function from

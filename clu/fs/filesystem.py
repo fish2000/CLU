@@ -21,10 +21,12 @@ from functools import wraps
 from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
 from constants import ENCODING, PATH
+from constants import lru_cache
 from predicates import attr, allattrs
 from sanitizer import utf8_encode
 from typology import ispath, isvalidpath
-from .misc import memoize, stringify, suffix_searcher, u8str
+from .misc import masked_permissions
+from .misc import stringify, suffix_searcher, u8str
 
 __all__ = ('DEFAULT_PREFIX',
            'DEFAULT_TIMEOUT',
@@ -331,7 +333,9 @@ class TemporaryFileWrapper(TemporaryFileWrapperBase,
     def __fspath__(self):
         return self.name
 
-@memoize
+cache = lru_cache(maxsize=128, typed=True)
+
+@cache
 def TemporaryNamedFile(tempth, mode='wb', buffer_size=-1, delete=True):
     """ Variation on ``tempfile.NamedTemporaryFile(…)``, for use within
         `filesystem.TemporaryName()` – q.v. class definition sub.
@@ -406,7 +410,7 @@ class TemporaryName(collections.abc.Hashable,
         Unless you say not to. Really it's your call dogg I could give AF
     """
     
-    fields = ('name', 'exists',
+    fields = ('name', 'exists', 'mode',
               'destroy', 'prefix', 'suffix', 'parent')
     
     def __init__(self, prefix=None, suffix="tmp",
@@ -415,26 +419,51 @@ class TemporaryName(collections.abc.Hashable,
         """ Initialize a new TemporaryName object.
             
             All parameters are optional; you may specify “prefix”, “suffix”,
-            and “dir” (alternatively as “parent” which I think reads better)
-            as per `tempfile.mktemp(…)`. Suffixes may omit the leading period
-            without confusing things. 
+            “mode”, and “dir” (alternatively as “parent” which I think reads
+            better) as per keyword arguments accepted by `tempfile.mktemp(…)`
+            and `tempfile.NamedTemporaryFile`.
+            
+            Additionally, an optional keyword argument “randomized” specifies
+            a boolean – this value is passed straight on to the `temporary(…)`
+            function (q.v. definition supra.) with which we wrap all of our
+            calls to `tempfile.mktemp(…)`.
+            
+            Suffixes may omit a leading period without causing any problems;
+            in other words, “.jpg” and “jpg” are both valid suffix arguments,
+            and they both mean the same thing.
         """
+        # Get the “randomized” and “mode” keyword values:
         randomized = kwargs.pop('randomized', False)
+        mode = kwargs.pop('mode', 'wb')
+        
+        # Enable randomization if using the default prefix,
+        # to avoid otherwise highly likely name collisions:
         if not prefix:
             prefix = DEFAULT_PREFIX
             randomized = True
+        
+        # Normalize the suffix-value leading-period sitiuation,
+        # regardless of whether or not the default is in use:
         if suffix:
             if not suffix.startswith(os.extsep):
                 suffix = "%s%s" % (os.extsep, suffix)
         else:
             suffix = "%stmp" % os.extsep
+        
+        # Try the “parent” argument first, fall back to the “dir”
+        # keyword, and normalize with `os.fspath(¬)`:
         if parent is None:
             parent = kwargs.pop('dir', None)
         if parent:
             parent = os.fspath(parent)
+        
+        # Initialize the “name” value with a call to `temporary(…)`:
         self._name = temporary(prefix=prefix, suffix=suffix,
                                               parent=parent,
                                               randomized=randomized)
+        
+        # Initialize the rest of the TemporaryName instance values:
+        self._mode = mode.lower()
         self._destroy = True
         self._parent = parent
         self.prefix = prefix
@@ -475,17 +504,54 @@ class TemporaryName(collections.abc.Hashable,
         return self._destroy
     
     @property
+    def mode(self):
+        """ Get the mode string for this TemporaryName instance. This is used
+            if and when a filehandle is accessed (q.v. “filehandle” property
+            definition sub.) in the construction of the TemporaryNamedFile that
+            is handed back as the filehandle instance.
+        """
+        return self._mode
+    
+    @property
+    def binary_mode(self):
+        """ Whether or not the mode with which this TemporaryName instance was 
+            constructed is a “binary mode” – and as such, requires the operands
+            passed to its `write(…)` methods of its filehandle (q.v. the “mode”
+            property definition supra., and the “filehandle” property definition
+            sub.) to be of type `byte` or `bytearray`, or of a type either derived
+            or compatible with these. Errors will be raised if you try to call a
+            `write(…)` method with a `str`-ish operand.
+            
+            Filehandles constructed through “non-binary” TemporaryName instances
+            are the other way around – their `write(…)` methods can only be passed
+            instances of `str` (or, `unicode`, for the Python-2 diehards amongst us)
+            or similar; attempt to pass anything `byte`-y and you’ll get raised on.
+        """
+        return 'b' in self._mode
+    
+    @property
     def filehandle(self):
         """ Access a TemporaryNamedFile instance, opened and ready to read and write,
             for this TemporaryName instances’ temporary file path.
+            
+            While this is a normal property descriptor – each time it is accessed,
+            its function is called anew – the underlying `TemporaryNamedFile` call
+            is a cached function and not a class constructor (despite what you might
+            think because of that CamelCased identifier). That means you’ll almost
+            certainly be given the same instance whenever you access the “filehandle”
+            property (which is less fraught with potentially confusing weirdness,
+            I do believe).
             
             Accessing this property delegates the responsibility for destroying
             the TemporaryName file contents to the TemporaryNamedFile object --
             saving the TemporaryNamedFile in, like, a variable somewhere and then
             letting the original TemporaryName go out of scope will keep the file
-            alive and unclosed, for example.
+            alive and unclosed, for example. THE UPSHOT: be sure to call “close()”
+            on the filehandle instance you use. That’s fair, right? I think that’s
+            totally fair to do it like that, OK.
         """
-        return TemporaryNamedFile(self.do_not_destroy())
+        return TemporaryNamedFile(self.do_not_destroy(),
+                                  mode=self.mode)
     
     def split(self):
         """ Return (dirname, basename) e.g. for /yo/dogg/i/heard/youlike,
@@ -860,7 +926,7 @@ class Directory(collections.abc.Hashable,
                         os.path.join(self.name,
                         os.fspath(pth or os.curdir))),
                         exist_ok=False,
-                        mode=mode)
+                        mode=masked_permissions(mode))
         except OSError as os_error:
             raise FilesystemError(str(os_error))
         return self
@@ -947,9 +1013,18 @@ class Directory(collections.abc.Hashable,
         return self.realpath(zpth)
     
     def symlink(self, destination, pth=None):
-        return os.symlink(
-               os.fspath(pth or self.name),
-               os.fspath(destination), target_is_directory=True)
+        """ Create a symlink at `destination`, pointing to this instances’
+            directory path (or an alternative path, if specified).
+            
+            The `destination` argument can be anything path-like: instances of
+            `str`, `unicode`, `bytes`, `bytearray`, `pathlib.Path`, `os.PathLike`,
+            or anything with an `__fspath__(…)` method. 
+        """
+        if destination is None:
+            raise FilesystemError("symlink destination cannot be None")
+        os.symlink(os.fspath(pth or self.name),
+                   os.fspath(destination), target_is_directory=True)
+        return self
     
     def close(self):
         """ Stub method -- always returns True: """
@@ -1098,6 +1173,14 @@ class TemporaryDirectory(Directory):
         change = super(TemporaryDirectory, self).ctx_prepare().change
         self.will_change = self.will_change_back = bool(self.will_change and change)
         return self
+    
+    def symlink(self, *args, **kwargs):
+        """ Symlinking to TemporaryDirectory instances is disabled –
+            why do you want to symlink to something that is about
+            to delete itself?? That is just asking for a whole bunch of
+            dangling references dogg.
+        """
+        raise FilesystemError("can’t symlink to a TemporaryDirectory")
     
     def close(self):
         """ Delete the directory pointed to by the TemporaryDirectory

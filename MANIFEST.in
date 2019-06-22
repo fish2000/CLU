@@ -11,6 +11,7 @@ include conftest.py
 include COPYING.md
 include LICENSE.txt
 include Makefile
+include pyproject.toml
 include README.md
 include setup.cfg
 include setup.py

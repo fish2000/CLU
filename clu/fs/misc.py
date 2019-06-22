@@ -142,7 +142,9 @@ def u8str(source):
     """
     return type(source) is str and source \
                         or u8bytes(source).decode(ENCODING)
+
 # OS UTILITIES: get the current process’ umask value
+octalize = lambda integer: "0o%04o" % integer
 
 @lru_cache(maxsize=1)
 def current_umask():
@@ -156,3 +158,11 @@ def masked_permissions(perms=0o666):
         and a given permission octal number.
     """
     return perms & ~current_umask()
+
+def masked_chmod(pth, perms=0o666):
+    """ Perform the `os.chmod(…)` operation, respecting the current
+        umask value (q.v. `current_umask()` supra.)
+    """
+    masked_perms = masked_permissions(perms=perms)
+    os.chmod(pth, mode=masked_perms)
+    return octalize(masked_perms)

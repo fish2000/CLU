@@ -8,10 +8,11 @@ SSID = os.getenv('SECURITYSESSIONID')
 
 from clu.constants import (DEBUG, HOSTNAME, XDG_RUNTIME_BASE,
                                             XDG_RUNTIME_DIR,
-                                            XDG_RUNTIME_MODE)
+                                            XDG_RUNTIME_MODE, TEXTMATE)
 
-from clu.fs import rm_rf, AppDirs, Directory, FilesystemError
+from clu.fs import rm_rf, Directory, FilesystemError
 from clu.predicates import attr
+from clu.repl.ansi import Text, print_ansi
 from clu.sanitizer import utf8_decode
 
 BASEDIR = XDG_RUNTIME_BASE
@@ -53,18 +54,19 @@ def remove_existing_dirs(directory):
     return True
 
 def print_launchd_plist():
-    import plistlib, tempfile
+    import plistlib
     plist_dumps = attr(plistlib, 'dumps', 'writePlistToString')
     plist_dict = dict(Label="ost.xdg-runtime.script",
                       Program=sys.executable,
                       ProgramArguments=[__file__],
                       RunAtLoad=True,
-                      KeepAlive=False,
-                      WorkingDirectory=tempfile.gettempdir())
-    print(utf8_decode(plist_dumps(plist_dict, sort_keys=False)))
+                      KeepAlive=False)
+    print_ansi(utf8_decode(plist_dumps(plist_dict, sort_keys=False)),
+               color=(TEXTMATE and Text.NOTHING \
+                                or Text.LIGHTCYAN_EX))
 
-def main():
-    """ Main entry point for xdg-runtime.py script """
+def create_xdg_runtime_dir():
+    """ Create the XDG_RUNTIME_DIR directory """
     basedir = Directory(BASEDIR)
     
     # First, clear existing directories:
@@ -80,5 +82,12 @@ def main():
     if not create_symlink(basedir, runtime_dir):
         raise FilesystemError("Couldn’t symlink XDG_RUNTIME_DIR %s" % SYMLINK)
     
+    return SYMLINK
+
+def main():
+    """ Main entry point for xdg-runtime.py script """
+    
+    pass
+
 if __name__ == '__main__':
     print_launchd_plist()

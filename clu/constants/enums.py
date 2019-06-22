@@ -52,7 +52,7 @@ class alias(object):
         return self.aliased
     
     def __set_name__(self, cls, name):
-        """ Register the alias within the __alias__ dict in
+        """ Register the alias within the __aliases__ dict in
             the class (if it has one).
             
             N.B. This only gets called on Python 3.6+
@@ -74,6 +74,7 @@ class alias(object):
 class AliasingEnumMeta(EnumMeta):
     
     def __new__(metacls, name, bases, attributes, **kwargs):
+        """ Ensure __aliases__ is a dictionary attribute on the new class """
         
         if '__aliases__' not in attributes:
             attributes['__aliases__'] = {}

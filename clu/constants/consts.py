@@ -67,7 +67,7 @@ TEXTMATE = 'TM_PYTHON' in os.environ
 if TEXTMATE:
     SEPARATOR_WIDTH = 100
 else:
-    from terminalsize import get_terminal_size
+    from .terminalsize import get_terminal_size
     SEPARATOR_WIDTH = get_terminal_size(default=(100, 25))[0]
 
 # WTF HAX:

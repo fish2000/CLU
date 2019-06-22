@@ -34,12 +34,21 @@ class alias(object):
         ISN’T ALL OF THAT FUCKING AWESOME?!?!? I think so. Yes!
     """
     
-    def __init__(self, instance):
-        """ Set up the alias, passing an enum instance """
+    def __init__(self, instance, name=None, cls=None):
+        """ Set up the alias, passing an enum instance.
+            
+            N.B. Use the “name” and “cls” arguments under Python 2
+            or Python 3 < 3.6 – as they don’t yet support the
+            “__set_name__” method (q.v. definition sub.)
+            
+        """
         self.aliased = instance
+        if name is not None and cls is not None:
+            self.name = name
+            self.register(cls)
     
     def __get__(self, instance=None, cls=None):
-        """ Return the aliased enum instance """
+        """ Return the aliased enum instance. """
         return self.aliased
     
     def __set_name__(self, cls, name):
@@ -49,9 +58,17 @@ class alias(object):
             N.B. This only gets called on Python 3.6+
         """
         self.name = name
+        self.register(cls)
+    
+    def register(self, cls):
+        """ Register the alias member with the parent class,
+            if it supports such things (that is to say, if it
+            has a dictionary attribute “__aliases__”).
+        """
         if hasattr(cls, '__aliases__'):
             if self.name in cls.__aliases__:
-                raise AttributeError("Enum already contains an alias named %s" % name)
+                message = "Enum already contains an alias named %s" % self.name
+                raise AttributeError(message)
             cls.__aliases__[self.name] = self.aliased
 
 class AliasingEnumMeta(EnumMeta):

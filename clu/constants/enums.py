@@ -12,7 +12,7 @@ class alias(object):
                 TWO = 2
                 THREE = 3
                 UNO = alias(ONE)
-                DOS = alias(DOS)
+                DOS = alias(TWO)
                 TRÉS = alias(THREE)
         
         … unlike the enum documentation, which would have you
@@ -45,6 +45,8 @@ class alias(object):
     def __set_name__(self, cls, name):
         """ Register the alias within the __alias__ dict in
             the class (if it has one).
+            
+            N.B. This only gets called on Python 3.6+
         """
         self.name = name
         if hasattr(cls, '__aliases__'):

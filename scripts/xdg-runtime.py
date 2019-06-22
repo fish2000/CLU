@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import os
+import os, sys
 
 SSID = os.getenv('SECURITYSESSIONID')
 
 from clu.constants import (DEBUG, HOSTNAME, XDG_RUNTIME_BASE,
                                             XDG_RUNTIME_DIR,
                                             XDG_RUNTIME_MODE)
-from clu.fs import rm_rf, Directory, FilesystemError
+
+from clu.fs import rm_rf, AppDirs, Directory, FilesystemError
+from clu.predicates import attr
+from clu.sanitizer import utf8_decode
 
 BASEDIR = XDG_RUNTIME_BASE
 SYMLINK = XDG_RUNTIME_DIR
@@ -49,6 +52,17 @@ def remove_existing_dirs(directory):
                                          and remove_symlink(directory)
     return True
 
+def print_launchd_plist():
+    import plistlib, tempfile
+    plist_dumps = attr(plistlib, 'dumps', 'writePlistToString')
+    plist_dict = dict(Label="ost.xdg-runtime.script",
+                      Program=sys.executable,
+                      ProgramArguments=[__file__],
+                      RunAtLoad=True,
+                      KeepAlive=False,
+                      WorkingDirectory=tempfile.gettempdir())
+    print(utf8_decode(plist_dumps(plist_dict, sort_keys=False)))
+
 def main():
     """ Main entry point for xdg-runtime.py script """
     basedir = Directory(BASEDIR)
@@ -66,4 +80,5 @@ def main():
     if not create_symlink(basedir, runtime_dir):
         raise FilesystemError("Couldn’t symlink XDG_RUNTIME_DIR %s" % SYMLINK)
     
-    
+if __name__ == '__main__':
+    print_launchd_plist()

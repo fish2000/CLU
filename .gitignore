@@ -1,3 +1,4 @@
+__pycache__/
 *.pyc
 *.orig
 .DS_Store
@@ -9,6 +10,7 @@ Icon*
 *.o
 *.so
 *.dmg
+*.dylib
 *.jar
 a.out
 
@@ -16,10 +18,10 @@ clu.egg-info/
 build/
 dist/
 sdist/
-.pytest_cache/
 
+.hypothesis/
+.pytest_cache/
 .envrc
-.tm_properties
 
 tmtags
 tmtagsHistory

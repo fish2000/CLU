@@ -64,8 +64,8 @@ def read_version(*fpath, **kwargs):
     if not os.path.isabs(fpath):
         caller_file = inspect.stack()[1][0].f_globals["__file__"]
         fpath = os.path.join(os.path.dirname(caller_file), fpath)
-    with open(fpath, 'rb') as fp:
-        src = fp.read()
+    with open(fpath, 'rb') as handle:
+        src = handle.read()
     top_level = ast.parse(src)
     variable = kwargs.get("variable", "__version__")
     try:

@@ -36,15 +36,24 @@ class ANSI(EnumMeta):
     
     @classmethod
     def __prepare__(metacls, name, bases, **kwargs):
-        kwargs.pop('source', None)
-        return super(ANSI, metacls).__prepare__(name, bases, **kwargs)
+        """ Remove the “source” class keyword before calling up """
+        superkws = dict(kwargs)
+        del superkws['source']
+        return super(ANSI, metacls).__prepare__(name, bases, **superkws)
     
     def __new__(metacls, name, bases, attributes, **kwargs):
+        """ Override for `type.__new__(…)` setting up a derived
+            Enum class that pulls from a “source” with the
+            requisite methods (q.v. Text, Background and Weight
+            definitions sub.)
+        """
         source = kwargs.pop('source', None) or colorama.Fore
         
         class Source(object):
+            
             def __get__(self, *args):
                 return source
+            
             def __repr__(self):
                 return repr(source)
         
@@ -71,7 +80,10 @@ class ANSI(EnumMeta):
         attributes['__doc__']   = doc_string
         attributes['to_string'] = to_string
         
-        return super(ANSI, metacls).__new__(metacls, name, bases, attributes, **kwargs)
+        return super(ANSI, metacls).__new__(metacls, name,
+                                                     bases,
+                                                     attributes,
+                                                   **kwargs)
     
     def for_string(cls, string):
         lowerstring = string.lower()
@@ -150,8 +162,9 @@ class Weight(ANSIAncestor, metaclass=ANSI,
 #         # Insert terminal256 lookup shit here
 #         pass
 
-ANSIFormat = NamedTuple('ANSIFormat', ('text', 'background', 'weight'), defaults=tuplize(Weight.NORMAL), module=__file__)
-
+ANSIFormat = NamedTuple('ANSIFormat', ('text', 'background', 'weight'),
+                      defaults=tuplize(Weight.NORMAL),
+                        module=__file__)
 
 def print_ansi(text, color='', reset=None):
     """ Print text in ANSI color, using optional inline markup

@@ -68,10 +68,9 @@ def modulize(namespace, name,
     # based on the given name, the given file path (if any), and
     # some reasonable prefixes:
     if path:
-        dotpath = path_to_dotpath(path)
         qualified_name = dotpath_join(DYNAMIC_MODULE_PREFIX,
                                       PROJECT_NAME,
-                                      dotpath, name)
+                                      path_to_dotpath(path), name)
         
         # Note that one can use a file path that does not
         # have to necessarily exist on the filesystem in an
@@ -85,6 +84,7 @@ def modulize(namespace, name,
     
     # Ensure we have a name and a package dotpath in our namespace:
     namespace.update({ '__name__' : name,
+                   '__qualname__' : name,
                     '__package__' : qualified_name })
     
     # Construct the module type from the qualified name, using

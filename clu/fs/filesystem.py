@@ -1023,7 +1023,8 @@ class Directory(collections.abc.Hashable,
         if destination is None:
             raise FilesystemError("symlink destination cannot be None")
         os.symlink(os.fspath(pth or self.name),
-                   os.fspath(destination), target_is_directory=True)
+                   os.fspath(destination),
+                   target_is_directory=True)
         return self
     
     def close(self):

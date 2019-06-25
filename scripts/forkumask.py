@@ -3,18 +3,16 @@
 from __future__ import print_function
 
 import os
-# import sys
 
-# ENCODING = sys.intern(sys.getfilesystemencoding().upper()) # 'UTF-8'
 octalize = lambda integer: "0o%04o" % integer
 
-def forkoff():
+def current_umask():
     """ Use a forked child process to retrieve the umask without
         mutating the value held by the current (parent) process.
     """
     
-    def current_umask():
-        """ Get the current umask value (cached on Python 3 and up). """
+    def umask():
+        """ Get the current umask value. """
         mask = os.umask(0)
         os.umask(mask)
         return int(mask)
@@ -30,13 +28,13 @@ def forkoff():
             devnull = os.open("/dev/null", os.O_RDONLY)
             
             # Redirect std{in,out,err}:
+            os.dup2(devnull, 0) # stdin
             os.dup2(forkout, 1) # stdout
             os.dup2(forkout, 2) # stderr
-            os.dup2(devnull, 0) # stdin
             
             # Do what we came here to do:
-            umask = b"%i" % current_umask()
-            os.write(1, umask)
+            maskval = b"%i" % umask()
+            os.write(1, maskval)
             
         except OSError as exc:
             print("[ERROR] Child failed to umask: %s" % str(exc))
@@ -59,7 +57,7 @@ def forkoff():
         umask_value = int(handle.read())
     
     # Kill the kid:
-    pid, status = os.waitpid(-1, 0)
+    pid, status = os.waitpid(pid, 0)
     
     # What happened?
     print("Child [pid %s] exited, status: %s, umask: %s" % (pid,
@@ -70,7 +68,7 @@ def forkoff():
 
 def test():
     print("About to fork…")
-    mask, octmask = forkoff()
+    mask, octmask = current_umask()
     
     print("Fork is over, value returned is %i [%s]" % (mask, octmask))
 

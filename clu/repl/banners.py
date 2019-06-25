@@ -22,7 +22,7 @@ import sys
 from constants import DEBUG, PY3, PYPY, TEXTMATE
 from .ansi import Text, print_ansi_centered
 
-# Python version figlet banners:
+# Python version figlet banners – using the figlet “Colossal” typeface:
 banners = {}
 
 banners['python3.x'] = """
@@ -161,8 +161,6 @@ banners['pypy2.7'] = """
 """
 
 # Determine if we’re on PyPy and/or Python 3:
-# PY3 = sys.version_info.major > 2
-# PYPY = hasattr(sys, 'pypy_version_info')
 prefix = PYPY and 'pypy' or 'python'
 
 # Configure ANSI-color python banner, per python version:
@@ -189,8 +187,7 @@ def print_warning(text, color=colorama.Fore.RED,
     print(reset, end='')
 
 def print_banner():
-    # Print python banner before end-of-module --
-    # if running in TextMate, we use `sys.stderr` instead of ANSI colors,
+    # If we’re running in TextMate, use `sys.stderr` instead of ANSI colors,
     # as that’s the only way to get any sort of colored output in TextMate’s
     # console output window:
     if TEXTMATE:

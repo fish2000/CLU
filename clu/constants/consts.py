@@ -12,6 +12,9 @@ BUILTINS = ('__builtins__', '__builtin__', 'builtins', 'builtin')
 # Are we debuggin out?
 DEBUG = bool(int(os.environ.get('DEBUG', '0'), base=10))
 
+# Flag for deleting temporary files:
+DELETE_FLAG = getattr(os, 'O_TEMPORARY', 0)
+
 # A prefix to use when creating new modules programmatically:
 DYNAMIC_MODULE_PREFIX = sys.intern('__dynamic_modules__')
 
@@ -96,6 +99,7 @@ class NoDefault(object):
 
 __all__ = ('BUILTINS',
            'DEBUG',
+           'DELETE_FLAG',
            'DYNAMIC_MODULE_PREFIX',
            'ENCODING',
            'FILE_ARGUMENT_NAMES',

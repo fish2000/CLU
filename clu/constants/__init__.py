@@ -3,6 +3,7 @@ from __future__ import print_function
 
 from .consts import (BUILTINS,
                      DEBUG,
+                     DELETE_FLAG,
                      DYNAMIC_MODULE_PREFIX,
                      ENCODING,
                      FILE_ARGUMENT_NAMES,
@@ -37,6 +38,7 @@ from .terminalsize import get_terminal_size
 
 __all__ = ('BUILTINS',
            'DEBUG',
+           'DELETE_FLAG',
            'DYNAMIC_MODULE_PREFIX',
            'ENCODING',
            'FILE_ARGUMENT_NAMES',

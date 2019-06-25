@@ -20,7 +20,7 @@ from distutils.spawn import find_executable
 from functools import wraps
 from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
-from constants import ENCODING, PATH
+from constants import DELETE_FLAG, ENCODING, PATH
 from constants import lru_cache
 from predicates import attr, allattrs
 from sanitizer import utf8_encode
@@ -377,8 +377,8 @@ def TemporaryNamedFile(tempth, mode='wb', buffer_size=-1, delete=True):
         flags = _bin_openflags
     else:
         flags = _text_openflags
-    if os.name == 'nt' and delete:
-        flags |= os.O_TEMPORARY
+    if delete:
+        flags |= DELETE_FLAG
     
     descriptor = 0
     filehandle = None
@@ -1214,7 +1214,6 @@ class TemporaryDirectory(Directory):
             out &= self.close()
         return out
 
-
 class Intermediate(TemporaryDirectory, Directory):
     
     """ clu.fs.filesystem.Intermediate isn’t a class, per se – rather,
@@ -1264,8 +1263,8 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
         flags = _bin_openflags
     else:
         flags = _text_openflags
-    if os.name == 'nt' and delete:
-        flags |= os.O_TEMPORARY
+    if delete:
+        flags |= DELETE_FLAG
     
     (descriptor, name) = _mkstemp_inner(parent.name, prefix,
                                                      suffix, flags,

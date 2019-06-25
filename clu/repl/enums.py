@@ -84,8 +84,8 @@ class AliasingEnumMeta(EnumMeta):
             It is not strictly necessary to make this class an ancestor to
             your enums in order to use the `alias(…)` descriptor function,
             as defined above – if you do, the enums you define with it will
-            conveniently furnish the __aliases__ dictionary
-            
+            conveniently furnish the __aliases__ dictionary, which is like
+            the normal enum __members__ directory only with aliases. Yes.
         """
         
         if '__aliases__' not in attributes:

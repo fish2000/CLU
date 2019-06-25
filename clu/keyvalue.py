@@ -4,8 +4,8 @@ from __future__ import print_function
 import plistlib
 import zict
 
-from constants import ENCODING, NoDefault
-from fs import System, AppDirs, Directory
+from constants import ENCODING, NoDefault, System
+from fs import AppDirs
 from fs.appdirectories import test
 from predicates import attr
 from typology import isstring, isbytes
@@ -29,49 +29,7 @@ class ReplEnvDirs(AppDirs):
         """ Initialize with a fixed “appname” parameter `replenv` """
         # use Linux directory layout
         super(ReplEnvDirs, self).__init__(appname='replenv',
-                                          system=System.LINUX)
-    
-    @property
-    def mode(self):
-        """ The “appdirs.system” global module variable controls the
-            operation of the properties of all `appdirs.AppDirs` instances.
-        """
-        return self.system
-    
-    @mode.setter
-    def mode(self, value):
-        if value not in ('darwin', 'linux'):
-            raise ValueError("invalid mode: %s" % value)
-        self.system = value
-    
-    @property
-    def site_config(self):
-        return Directory(self.site_config_dir)
-    
-    @property
-    def site_data(self):
-        return Directory(self.site_data_dir)
-    
-    @property
-    def user_cache(self):
-        return Directory(self.user_cache_dir)
-    
-    @property
-    def user_config(self):
-        return Directory(self.user_config_dir)
-    
-    @property
-    def user_data(self):
-        return Directory(self.user_data_dir)
-    
-    @property
-    def user_log(self):
-        return Directory(self.user_log_dir)
-    
-    @property
-    def user_state(self):
-        return Directory(self.user_state_dir)
-
+                                          system=System.LINUX2)
 
 renvdirs = ReplEnvDirs()
 

@@ -3,7 +3,6 @@ from __future__ import print_function
 from itertools import chain
 
 import os
-import site
 import sys
 import warnings
 

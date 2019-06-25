@@ -23,6 +23,8 @@ from .consts import (BUILTINS,
                                        XDG_RUNTIME_MODE,
                      NoDefault)
 
+from .enums import System, CSIDL, SYSTEM
+
 from .polyfills import (Enum, EnumMeta, unique, ispyname,
                         AutoType, auto,
                         Counter, OrderedDict,
@@ -55,6 +57,7 @@ __all__ = ('BUILTINS',
            'XDG_RUNTIME_BASE', 'XDG_RUNTIME_DIR',
                                'XDG_RUNTIME_MODE',
            'NoDefault',
+           'System', 'CSIDL', 'SYSTEM',
            'Enum', 'EnumMeta', 'unique', 'ispyname',
            'AutoType', 'auto',
            'Counter', 'OrderedDict',

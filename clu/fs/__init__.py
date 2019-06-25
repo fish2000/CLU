@@ -10,7 +10,7 @@ from .filesystem import (DEFAULT_PREFIX,
                          TemporaryDirectory, Intermediate,
                          NamedTemporaryFile)
 
-from .appdirectories import System, CSIDL, SYSTEM, AppDirs
+from .appdirectories import AppDirs
 
 from .misc import stringify, suffix_searcher, u8str
 from .misc import octalize, current_umask, masked_permissions, masked_chmod
@@ -27,7 +27,7 @@ __all__ = ('DEFAULT_PREFIX',
            'TemporaryName', 'Directory', 'cd', 'wd',
            'TemporaryDirectory', 'Intermediate',
            'NamedTemporaryFile',
-           'System', 'CSIDL', 'SYSTEM', 'AppDirs',
+           'AppDirs',
            'stringify', 'suffix_searcher', 'u8str',
            'octalize', 'current_umask', 'masked_permissions',
                                         'masked_chmod',

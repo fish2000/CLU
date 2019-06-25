@@ -103,11 +103,11 @@ class VersionInfo(VersionAncestor):
     SEPARATORS = '..-+'
     UNKNOWN = '‽'
     NULL_VERSION = "%s.%s.%s" % ((UNKNOWN,) * 3)
-    REG = re.compile('(?P<major>[\d‽]+)\.'     \
-                     '(?P<minor>[\d‽]+)'       \
-                     '(?:\.(?P<patch>[\d‽]+)'  \
-                     '(?:\-(?P<pre>[\w‽]+)'    \
-                     '(?:\+(?P<build>[\d‽]+))?)?)?')
+    REG = re.compile(r'(?P<major>[\d‽]+)\.'     \
+                     r'(?P<minor>[\d‽]+)'       \
+                     r'(?:\.(?P<patch>[\d‽]+)'  \
+                     r'(?:\-(?P<pre>[\w‽]+)'    \
+                     r'(?:\+(?P<build>[\d‽]+))?)?)?')
     
     @classmethod
     def from_string(cls, version_string):
@@ -243,32 +243,3 @@ BASEPATH = os.path.dirname(os.path.dirname(__file__))
 __version__ = read_version_file(BASEPATH)
 
 version = VersionInfo(__version__)
-
-# Inline tests:
-def test(version):
-    # The CLU project version:
-    # print("__version__ in globals():", '__version__' in globals())
-    # print("__version__ in locals():", '__version__' in locals())
-    print("__version__:", __version__)
-    
-    # print(VersionInfo.REG)
-    print("VersionInfo Instance:", repr(version))
-    print("Semantic Version:", version)
-    
-    assert version  < VersionInfo("9.0.0")
-    assert version == VersionInfo(version)
-    assert version == VersionInfo(__version__)
-    assert version == VersionInfo(PkgResourcesVersion(__version__))
-    assert version == VersionInfo(str(PkgResourcesVersion(__version__)))
-    assert version <= VersionInfo(__version__)
-    assert version >= VersionInfo(__version__)
-    assert version  > VersionInfo(b'0.0.1')
-    assert version != VersionInfo(b'0.0.1')
-    
-    assert bool(version)
-    assert not bool(VersionInfo('‽.‽.‽'))
-    
-    print("All assertions passed")
-
-if __name__ == '__main__':
-    test(version)

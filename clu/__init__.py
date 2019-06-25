@@ -41,7 +41,7 @@ if '__path__' in locals():
     __path__ = extend_path(__path__, __name__)
     __all__ += ('__path__',)
 
-from version import VersionInfo, test as test_version
+from version import VersionInfo
 
 # Embedded project metadata:
 __version__ = read_version_file(os.path.dirname(__file__))
@@ -53,6 +53,3 @@ __copyright__ = '© 2012-2025 %s' % __author__
 
 # The CLU project version:
 version = VersionInfo(__version__)
-
-if __name__ == '__main__':
-    test_version(version)

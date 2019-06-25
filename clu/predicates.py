@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from functools import partial
 
 from constants import Enum
 
-# UTILITY FUNCTIONS: boolean predicates for class types
+# PREDICATE FUNCTIONS: boolean predicates for class types
 
 ismetaclass = lambda thing: hasattr(thing, '__mro__') and \
                                 len(thing.__mro__) > 1 and \
@@ -16,7 +17,7 @@ isclass = lambda thing: (thing is object) or (hasattr(thing, '__mro__') and \
 isclasstype = lambda thing: hasattr(thing, '__mro__') and \
                                     thing.__mro__[-1] is object
 
-# UTILITY FUNCTIONS: hasattr(…) shortcuts:
+# PREDICATE FUNCTIONS: hasattr(…) shortcuts:
 
 haspyattr = lambda thing, atx: hasattr(thing, '__%s__' % atx)
 anyattrs = lambda thing, *attrs: any(hasattr(thing, atx) for atx in attrs)
@@ -69,6 +70,45 @@ isslotdicty = lambda thing: allpyattrs('mro', 'slots', 'dict')
 # For sorting with ALL_CAPS stuff first or last:
 case_sort = lambda c: c.lower() if c.isupper() else c.upper()
 
+# PREDICATE LOGCIAL FUNCTIONS: all/any/and/or/xor shortcuts:
+
+def apply_to(predicate, function, *things):
+    """ apply_to(predicate, function, *things) → Apply a predicate to each
+        of the things, and finally a function to the entirety of the things,
+        returning as that function returns.
+    """
+    # Ensure both the predicate and function are callable:
+    if (not callable(predicate)) or \
+       (not callable(function)):
+        names = (pyattr(predicate, 'qualname', 'name'),
+                 pyattr(function, 'qualname', 'name'))
+        raise ValueError("Noncallable specified in invoking apply_to(%s, %s, …)" % names)
+    if len(things) < 1:
+        # Return a partial for this predicate and function:
+        return partial(apply_to, predicate, function)
+    elif len(things) == 1:
+        # Ensure the argument is iterable:
+        if isiterable(things[0]):
+            # Recursive call, tuple-expanding on the one argument:
+            return apply_to(predicate, function, *tuple(things[0]))
+        else:
+            # Raise for noniterables:
+            names = (pyattr(predicate, 'qualname', 'name'),
+                     pyattr(function, 'qualname', 'name'))
+            raise ValueError("Noniterable subject passed to apply_to(%s, %s, …)" % names)
+    # Actually do the thing:
+    return function(predicate(thing) for thing in things)
+
+# Variadics:
+predicate_all = lambda predicate, *things: apply_to(predicate, all, *things)
+predicate_any = lambda predicate, *things: apply_to(predicate, any, *things)
+
+# Booleans:
+predicate_and = lambda predicate, a, b: apply_to(predicate, all, a, b)
+predicate_or  = lambda predicate, a, b: apply_to(predicate, any, a, b)
+predicate_xor = lambda predicate, a, b: apply_to(predicate, any, a, b) and \
+                                    not apply_to(predicate, all, a, b)
+
 # UTILITY FUNCTIONS: helpers for builtin container types:
 
 def tuplize(*items):
@@ -83,7 +123,7 @@ def listify(*items):
     """ Return a new list containing all non-`None` arguments """
     return list(item for item in items if item is not None)
 
-# ENUM UTILITIES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
+# ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)
 
 def isenum(cls):
@@ -110,6 +150,9 @@ __all__ = ('ismetaclass', 'isclass', 'isclasstype',
            'thing_has', 'class_has',
            'isslotted', 'isdictish', 'isslotdicty',
            'case_sort',
+           'apply_to',
+           'predicate_all', 'predicate_any',
+           'predicate_and', 'predicate_or', 'predicate_xor',
            'tuplize', 'uniquify', 'listify',
            'isenum', 'enumchoices')
 

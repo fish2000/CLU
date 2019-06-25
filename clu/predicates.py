@@ -76,6 +76,12 @@ def apply_to(predicate, function, *things):
     """ apply_to(predicate, function, *things) → Apply a predicate to each
         of the things, and finally a function to the entirety of the things,
         returning as that function returns.
+        
+        apply_to(predicate, function) → Return a partial† function ƒ(*things)
+        that will behave as `apply_to(predicate, function, *things)` when it
+        is called as above.
+        
+        † q.v. `functools.partial(…)` standard-library module function supra.
     """
     # Ensure both the predicate and function are callable:
     if (not callable(predicate)) or \

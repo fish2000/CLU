@@ -9,8 +9,14 @@ import io
 import os
 
 from constants import unicode, HashableABC, Path, LAMBDA, PY3, PYPY
-from predicates import (allpyattrs, getpyattr, haspyattr, pyattr, or_none,
-                        isiterable, tuplize, uniquify)
+
+from predicates import (isclasstype,
+                        allpyattrs, getpyattr, haspyattr,
+                        pyattr, or_none,
+                        isiterable,
+                        tuplize, uniquify,
+                        apply_to)
+
 from typespace import types
 
 def graceful_issubclass(thing, *cls_or_tuple):
@@ -102,3 +108,28 @@ ismodule = lambda thing: graceful_issubclass(thing, types.Module)
 isfunction = lambda thing: isinstance(thing, (types.Function, types.Lambda)) or callable(thing)
 islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == LAMBDA
 ishashable = lambda thing: isinstance(thing, HashableABC)
+
+# TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)`
+
+isunique = lambda thing: isiterable(thing) and (len(frozenset(thing)) == len(tuple(thing)))
+istypelist = apply_to(isclasstype, all)
+
+# maketypelist = lambda *things: tuple(frozenset(isclasstype(thing) and thing or type(thing) \
+#                                                        for thing in things \
+#                                                         if thing is not None))
+
+maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
+                        lambda total: tuple(frozenset(total)))
+
+__all__ = ('graceful_issubclass',
+           'numeric_types', 'array_types', 'string_types', 'bytes_types',
+           'path_classes', 'path_types', 'file_types', 'callable_types',
+           'ispathtype', 'ispath', 'isvalidpath',
+           'predicatenop',
+           'isabstractmethod', 'isabstract', 'isabstractcontextmanager', 'iscontextmanager',
+           'isnumber', 'isnumeric', 'isarray', 'isstring', 'isbytes', 'ismodule',
+           'isfunction', 'islambda', 'ishashable',
+           'isunique',
+           'istypelist', 'maketypelist')
+
+__dir__ = lambda: list(__all__)

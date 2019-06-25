@@ -58,8 +58,6 @@ class TestFilesystem(object):
             # deleted on scope exit:
             tfp = tfn.name
             assert os.path.exists(tfp)
-            print("* TemporaryName file object tests completed OK")
-            print("")
             
         # Confirm that the TemporaryName has been deleted:
         assert not os.path.exists(tfp)
@@ -81,7 +79,6 @@ class TestFilesystem(object):
             assert os.path.samefile(cwd.old,               os.fspath(cwd))
             assert os.path.samefile(os.fspath(cwd),        initial)
             assert not cwd.subdirectory('yodogg').exists
-            # assert cwd.subdirectory('yodogg').makedirs().exists
             assert not cwd.will_change
             assert not cwd.did_change
             assert not cwd.will_change_back
@@ -97,9 +94,6 @@ class TestFilesystem(object):
             assert os.path.isdir(os.fspath(cwd))
             assert not 'yodogg' in cwd
             assert cwd.basename in cwd.dirname
-            # print(", ".join(list(cwd.ls())))
-            # print("* Working-directory object tests completed OK")
-            # print("")
     
     def test_cd(self):
         """ Tests for clu.fs.filesystem.cd """
@@ -117,8 +111,6 @@ class TestFilesystem(object):
             assert not os.path.samefile(tmp.new,          initial)
             assert not os.path.samefile(os.fspath(tmp),   initial)
             assert os.path.samefile(tmp.old,              initial)
-            # assert not tmp.subdirectory('yodogg').exists
-            # assert tmp.subdirectory('yodogg').makedirs().exists
             assert tmp.will_change
             assert tmp.did_change
             assert tmp.will_change_back
@@ -133,8 +125,6 @@ class TestFilesystem(object):
             assert isinstance(tmp,                        os.PathLike)
             assert os.path.isdir(os.fspath(tmp))
             assert tmp.basename in tmp.dirname
-            # print("* Directory-change object tests completed OK")
-            # print("")
     
     def test_TemporaryDirectory(self):
         """ Tests for clu.fs.filesystem.TemporaryDirectory """
@@ -144,8 +134,6 @@ class TestFilesystem(object):
         
         with TemporaryDirectory(prefix="test-temporarydirectory-") as ttd:
             print("* Testing TemporaryDirectory instance: %s" % ttd.name)
-            # assert os.path.commonpath((os.getcwd(), gettempdir())) == gettempdir()
-            # print(os.path.commonpath((os.getcwd(), gettempdir())))
             assert gettempdir() in ttd.name
             assert gettempdir() in ttd.new
             assert gettempdir() in os.fspath(ttd)
@@ -186,8 +174,6 @@ class TestFilesystem(object):
             # that it has been correctly deleted on scope exit:
             tdp = Directory(ttd)
             assert tdp.exists
-            # print("* TemporaryDirectory object tests completed OK")
-            # print("")
         
         # Confirm that the TemporaryDirectory has been deleted:
         assert not tdp.exists

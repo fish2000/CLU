@@ -49,6 +49,11 @@ class alias(object):
     
     def __get__(self, instance=None, cls=None):
         """ Return the aliased enum instance. """
+        if cls is None:
+            cls = type(instance)
+        for thing in cls:
+            if thing.value == self.aliased:
+                return thing
         return self.aliased
     
     def __set_name__(self, cls, name):
@@ -74,7 +79,14 @@ class alias(object):
 class AliasingEnumMeta(EnumMeta):
     
     def __new__(metacls, name, bases, attributes, **kwargs):
-        """ Ensure __aliases__ is a dictionary attribute on the new class """
+        """ Ensure __aliases__ is a dictionary attribute on the new class.
+            
+            It is not strictly necessary to make this class an ancestor to
+            your enums in order to use the `alias(…)` descriptor function,
+            as defined above – if you do, the enums you define with it will
+            conveniently furnish the __aliases__ dictionary
+            
+        """
         
         if '__aliases__' not in attributes:
             attributes['__aliases__'] = {}

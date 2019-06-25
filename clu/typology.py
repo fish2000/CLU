@@ -113,11 +113,6 @@ ishashable = lambda thing: isinstance(thing, HashableABC)
 
 isunique = lambda thing: isiterable(thing) and (len(frozenset(thing)) == len(tuple(thing)))
 istypelist = apply_to(isclasstype, all)
-
-# maketypelist = lambda *things: tuple(frozenset(isclasstype(thing) and thing or type(thing) \
-#                                                        for thing in things \
-#                                                         if thing is not None))
-
 maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
                         lambda total: tuple(frozenset(total)))
 

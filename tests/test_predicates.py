@@ -18,6 +18,28 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates and clu.typology modules. """
     
+    def test_class_predicates(self):
+        """ » Checking “ismetaclass/isclass/isclasstype” from clu.predicates … """
+        from clu.predicates import ismetaclass, isclass, isclasstype
+        
+        class Class(object):
+            pass
+        
+        class MetaClass(type):
+            pass
+        
+        assert isclass(Class)
+        assert isclasstype(Class)
+        assert not ismetaclass(Class)
+        
+        assert ismetaclass(MetaClass)
+        assert isclasstype(MetaClass)
+        assert not isclass(MetaClass)
+        
+        assert not isclass(Class())
+        assert not ismetaclass(Class())
+        assert not isclasstype(Class())
+    
     def test_attr_accessor(self):
         """ » Checking “attr(•) accessor from clu.predicates …” """
         # plistlib on Python 2.x uses those ungainly `writePlistToString`

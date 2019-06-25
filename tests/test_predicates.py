@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import array, decimal, numpy, os
+import pytest
+import array, decimal, os
 
 from clu.typology import (graceful_issubclass,
                           ispathtype, ispath, isvalidpath,
                           isnumber, isnumeric, isarray,
                           isstring, isbytes,
-                          # islambda,
+                          islambda,
                           isfunction)
 
 from clu.predicates import attr
@@ -19,9 +20,6 @@ class TestPredicates(object):
     
     def test_attr_accessor(self):
         """ » Checking “attr(•) accessor from clu.predicates …” """
-        # print(test_attr_accessor.__doc__)
-        # print()
-        
         # plistlib on Python 2.x uses those ungainly `writePlistToString`
         # methods; on Python 3.x you have the more reasonable and expected
         # `dumps` and `loads` calls… thus, attr(…) will bridge the gap:
@@ -38,9 +36,6 @@ class TestPredicates(object):
     
     def test_boolean_predicates(self):
         """ » Checking basic isXXX(•) functions from clu.typology … """
-        # print(test_boolean_predicates.__doc__)
-        # print()
-        
         assert graceful_issubclass(int, int)
         
         assert ispathtype(str)
@@ -67,20 +62,24 @@ class TestPredicates(object):
         assert not isnumeric("2001e50")
         
         assert isarray(array.array)
-        if numpy is not None:
-            assert isarray(numpy.ndarray)
-            assert isarray(numpy.array([0, 1, 2]))
         assert isstring(str)
         assert isstring("")
         assert isbytes(bytes)
         assert isbytes(bytearray)
         assert isbytes(b"")
         
-        # assert islambda(lambda: None)
-        # assert islambda(attr)
+        assert islambda(lambda: None)
+        assert islambda(attr)
         # assert not islambda(export)
+        assert not islambda(graceful_issubclass)
         assert isfunction(lambda: None)
         assert isfunction(attr)
         # assert isfunction(export)
+        assert isfunction(graceful_issubclass)
         assert not isfunction(SimpleNamespace())
         assert isfunction(SimpleNamespace) # classes are callable!
+    
+    def test_numpy_predicates(self):
+        numpy = pytest.importorskip('numpy')
+        assert isarray(numpy.ndarray)
+        assert isarray(numpy.array([0, 1, 2]))

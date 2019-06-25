@@ -8,7 +8,7 @@ import decimal
 import io
 import os
 
-from constants import unicode, HashableABC, Path, LAMBDA, PY3, PYPY
+from constants import long, unicode, HashableABC, Path, LAMBDA, PY3, PYPY
 
 from predicates import (isclasstype,
                         allpyattrs, getpyattr, haspyattr,
@@ -45,7 +45,7 @@ def graceful_issubclass(thing, *cls_or_tuple):
     return None
 
 
-numeric_types = (int, float, decimal.Decimal)
+numeric_types = uniquify(int, long, float, decimal.Decimal)
 
 try:
     import numpy

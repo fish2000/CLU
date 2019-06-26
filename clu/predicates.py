@@ -37,7 +37,7 @@ always = lambda thing: True
 never = lambda thing: False
 nuhuh = lambda thing: None
 
-no_op = lambda thing, atx, default=None: atx or default
+no_op = lambda thing, atx, default=None: thing
 or_none = lambda thing, atx: getattr(thing, atx, None)
 getpyattr = lambda thing, atx, default=None: getattr(thing, '__%s__' % atx, default)
 getitem = lambda thing, itx, default=None: getattr(thing, 'get', no_op)(itx, default)

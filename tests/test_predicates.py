@@ -18,6 +18,18 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates and clu.typology modules. """
     
+    def test_nops(self):
+        """ » Checking “always/never/nuhuh/no_op” lambdas from clu.predicates … """
+        from clu.predicates import always, never, nuhuh, no_op
+        
+        singles = (True, False, None)
+        
+        for single in singles:
+            assert always(single) is True
+            assert never(single) is False
+            assert nuhuh(single) is None
+            assert no_op(single, 'get') is single
+    
     def test_ismergeable(self):
         """ » Checking “ismergeable” lambda from clu.predicates … """
         from clu.predicates import ismergeable

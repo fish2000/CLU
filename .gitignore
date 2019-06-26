@@ -14,7 +14,7 @@ Icon*
 *.jar
 a.out
 
-clu.egg-info/
+*.egg-info/
 build/
 dist/
 sdist/

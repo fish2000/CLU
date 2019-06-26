@@ -82,6 +82,142 @@ class TestPredicates(object):
         assert not class_has(Dictish, 'wtf')
         assert not class_has(Dictish, 'hax')
     
+    def test_applyto_predicate_logicals(self):
+        """ » Checking “apply_to(…)” derived predicate logicals clu.predicates … """
+        from clu.predicates import (haslength, uncallable, isiterable, isslotted)
+        from clu.predicates import (predicate_all, predicate_any,
+                                    predicate_and, predicate_or,
+                                    predicate_xor)
+        
+        class Slotted(object):
+            __slots__ = ('yo', 'dogg', 'wtf')
+            
+            def __init__(self):
+                self.yo: str = "YO"
+                self.dogg: str = "DOGG"
+                self.wtf: str = "WTFFFF"
+        
+        slot = Slotted()
+        ttup = ('yo', 'dogg')
+        mseq = list(ttup)
+        rstr = "yo dogg"
+        byts = b"YO DOGG!"
+        call = lambda: rstr
+        
+        # Variadics:
+        assert predicate_all(isiterable, ttup, mseq, rstr, byts)
+        assert predicate_all(uncallable, slot, ttup, mseq, rstr, byts)
+        assert predicate_any(isslotted, slot, ttup, mseq, rstr, byts)
+        assert predicate_all(isiterable, rstr, byts, slot.yo, slot.dogg, slot.wtf)
+        assert predicate_all(lambda thing: not uncallable(thing), Slotted, call, type)
+        assert predicate_any(lambda thing: not uncallable(thing), Slotted, call, type, slot)
+        
+        # Booleans:
+        assert predicate_and(lambda thing: type(thing) is str, slot.yo, slot.dogg)
+        assert predicate_and(lambda thing: type(thing) is str, slot.yo, rstr)
+        assert predicate_and(lambda thing: type(thing) is str, call(), rstr)
+        assert predicate_and(lambda thing: type(thing) is str, call(), ttup[0])
+        
+        assert not predicate_and(lambda thing: type(thing) is str, call, ttup[0])
+        assert not predicate_and(lambda thing: type(thing) is str, slot, ttup[0])
+        assert not predicate_and(lambda thing: type(thing) is str, slot, Slotted)
+        assert not predicate_and(lambda thing: type(thing) is str, ttup, mseq)
+        
+        assert predicate_or(haslength, slot, ttup)
+        assert predicate_or(haslength, byts, call)
+        assert predicate_or(haslength, byts, rstr)
+        assert predicate_or(haslength, rstr, rstr)
+        assert predicate_or(haslength, rstr, Slotted.__slots__)
+        assert predicate_or(haslength, rstr, call())
+        
+        assert not predicate_or(haslength, slot, Slotted)
+        assert not predicate_or(haslength, call, call)
+        assert not predicate_or(haslength, call, (s for s in ttup))
+        assert not predicate_or(haslength, type, Slotted.__class__)
+        assert not predicate_or(haslength, type, type(str))
+        
+        assert predicate_xor(isiterable, slot, ttup)
+        assert predicate_xor(isiterable, ttup, call)
+        assert predicate_xor(isiterable, call, Slotted.__slots__)
+        assert predicate_xor(isiterable, type, Slotted.__slots__)
+        assert predicate_xor(isiterable, type, Slotted.__mro__)
+        
+        assert not predicate_xor(isiterable, mseq, ttup)
+        assert not predicate_xor(isiterable, ttup, call())
+        assert not predicate_xor(isiterable, call(), Slotted.__slots__)
+        assert not predicate_xor(isiterable, rstr, Slotted.__slots__)
+        assert not predicate_xor(isiterable, byts, Slotted.__mro__)
+    
+    def test_applyto_internal_lambdas(self):
+        """ » Checking lambda internals for “apply_to(…)” from clu.predicates … """
+        from clu.predicates import (uncallable, isexpandable,
+                                                isnormative,
+                                                iscontainer)
+        
+        # Test subjects: in descending order, from
+        # the most predicate-satisfying to the least:
+        ttup = ('yo', 'dogg')
+        mseq = list(ttup)
+        genx = (s for s in ttup)
+        lcmp = [s for s in ttup]
+        rstr = "yo dogg"
+        byts = b"YO DOGG!"
+        robj = object()
+        tobj = object
+        
+        # Tuples aren’t normative:
+        assert uncallable(ttup)
+        assert isexpandable(ttup)
+        assert not isnormative(ttup)
+        assert iscontainer(ttup)
+        
+        # Mutable sequences (aka lists) aren’t normative:
+        assert uncallable(mseq)
+        assert isexpandable(mseq)
+        assert not isnormative(mseq)
+        assert iscontainer(mseq)
+        
+        # Generator expressions are neither expandable not normative:
+        assert uncallable(genx)
+        assert not isexpandable(genx)
+        assert not isnormative(genx)
+        assert iscontainer(genx)
+        
+        # List comprehensions aren’t normative (they are basically lists):
+        assert uncallable(lcmp)
+        assert isexpandable(lcmp)
+        assert not isnormative(lcmp)
+        assert iscontainer(lcmp)
+        
+        # Strings aren’t expandable, and as they are normative,
+        # they’re not containers:
+        assert uncallable(rstr)
+        assert not isexpandable(rstr)
+        assert isnormative(rstr)
+        assert not iscontainer(rstr)
+        
+        # Like strings, bytes aren’t expandable, and since they’re
+        # normative, they’re not containers:
+        assert uncallable(byts)
+        assert not isexpandable(byts)
+        assert isnormative(byts)
+        assert not iscontainer(byts)
+        
+        # Instances of object (or derived classes) aren’t going
+        # to be expandable, normative, or containers by default:
+        assert uncallable(robj)
+        assert not isexpandable(robj)
+        assert not isnormative(robj)
+        assert not iscontainer(robj)
+        
+        # Classes aren’t uncallable – they are callable! – and
+        # like instances, by default they won’t wind up being
+        # expandable, normative or containers, without intervention:
+        assert not uncallable(tobj)
+        assert not isexpandable(tobj)
+        assert not isnormative(tobj)
+        assert not iscontainer(tobj)
+    
     def test_getattr_shortcuts(self):
         """ » Checking “getattr/getpyattr/getitem” shortcuts from clu.predicates … """
         from random import shuffle
@@ -124,7 +260,9 @@ class TestPredicates(object):
     
     def test_nops(self):
         """ » Checking “always/never/nuhuh/no_op” lambdas from clu.predicates … """
-        from clu.predicates import always, never, nuhuh, no_op, predicate_nop
+        from clu.predicates import (always, never, nuhuh,
+                                    no_op, predicate_nop,
+                                            function_nop)
         
         singles = (True, False, None)
         
@@ -134,6 +272,7 @@ class TestPredicates(object):
             assert nuhuh(single) is None
             assert no_op(single, 'get') is single
             assert predicate_nop(*singles) is None
+            assert function_nop(single) is None
     
     def test_ismergeable(self):
         """ » Checking “ismergeable” lambda from clu.predicates … """
@@ -189,7 +328,7 @@ class TestPredicates(object):
         assert isiterable(TechnicallyIterable())
     
     def test_haslength(self):
-        """ » Checking “haslengtyh” lambda from clu.predicates … """
+        """ » Checking “haslength” lambda from clu.predicates … """
         from clu.predicates import haslength
         
         ttup = ('yo', 'dogg')

@@ -2,7 +2,7 @@
 from __future__ import print_function
 from functools import partial
 
-from constants import Enum
+from constants import Enum, unicode
 
 # PREDICATE FUNCTIONS: boolean predicates for class types
 
@@ -68,8 +68,13 @@ function_nop = lambda iterable: None
 
 uncallable = lambda thing: not callable(thing)
 pyname = lambda thing: pyattr(thing, 'qualname', 'name')
+
 isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,
                                                 map, filter, reversed))
+
+isnormative = lambda thing: isinstance(thing, (str, unicode, bytes, bytearray))
+iscontainer = lambda thing: isiterable(thing) and not isnormative(thing)
+
 
 def apply_to(predicate, function, *things):
     """ apply_to(predicate, function, *things) → Apply a predicate to each
@@ -91,7 +96,7 @@ def apply_to(predicate, function, *things):
         return partial(apply_to, predicate, function)
     elif len(things) == 1:
         # Ensure the argument is iterable:
-        if isiterable(things[0]):
+        if iscontainer(things[0]):
             # Recursive call, expanding the one argument:
             if isexpandable(things[0]):
                 return apply_to(predicate, function, *things[0])
@@ -164,7 +169,8 @@ __all__ = ('ismetaclass', 'isclass', 'isclasstype',
            'accessor', 'searcher',
            'attr', 'pyattr', 'item',
            'attr_search', 'pyattr_search', 'item_search',
-           'function_nop', 'predicate_nop', 'uncallable', 'isexpandable',
+           'function_nop', 'predicate_nop', 'uncallable',
+           'isexpandable', 'isnormative', 'iscontainer',
            'apply_to',
            'predicate_all', 'predicate_any',
            'predicate_and', 'predicate_or', 'predicate_xor',

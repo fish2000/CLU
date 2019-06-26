@@ -40,7 +40,7 @@ from .polyfills import (Enum, EnumMeta, unique, ispyname,
                         Mapping, MutableMapping, HashableABC,
                         cache_from_source,
                         lru_cache,
-                        Path)
+                        Path, numpy)
 
 from .terminalsize import get_terminal_size
 
@@ -80,7 +80,7 @@ __all__ = ('BASEPATH',
            'Mapping', 'MutableMapping', 'HashableABC',
            'cache_from_source',
            'lru_cache',
-           'Path',
+           'Path', 'numpy',
            'get_terminal_size')
 
 __dir__ = lambda: list(__all__)

@@ -58,6 +58,10 @@ except ImportError:
         from pathlib2 import Path
     except ImportError:
         Path = None
+try:
+    import numpy
+except (ImportError, SyntaxError):
+    numpy = None
 
 __all__ = ('Counter', 'OrderedDict',
            'Enum', 'EnumMeta', 'unique', 'ispyname',
@@ -66,6 +70,6 @@ __all__ = ('Counter', 'OrderedDict',
            'Mapping', 'MutableMapping', 'HashableABC',
            'cache_from_source',
            'lru_cache',
-           'Path')
+           'Path', 'numpy')
 
 __dir__ = lambda: list(__all__)

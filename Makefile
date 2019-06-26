@@ -20,7 +20,7 @@ clean-cython:
 	find . -name \*.so -print -delete
 
 clean-build-artifacts:
-	rm -rf build dist $(PROJECT_NAME).egg-info
+	rm -rf build dist $(PROJECT_NAME).egg-info python-$(PROJECT_NAME).egg-info
 
 cython:
 	python setup.py build_ext --inplace

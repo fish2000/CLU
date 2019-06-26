@@ -1,9 +1,11 @@
 exclude *.pyc *~ *.so .DS_Store
+
 include .bumpversion.cfg
 include .editorconfig
 include .gitignore
 include .landscape.yml
 include .travis.yml
+
 include ABOUT.md
 include appveyor.yml
 include CODE_OF_CONDUCT.md
@@ -16,10 +18,12 @@ include README.md
 include setup.cfg
 include setup.py
 include tox.ini
+
 recursive-include clu *
 recursive-include requirements *.txt
 recursive-include scripts *
 recursive-include tests *
+
 recursive-exclude clu *.pyc *~ *.so .DS_Store
 recursive-exclude requirements *.pyc *~ *.so .DS_Store
 recursive-exclude scripts *.pyc *~ *.so .DS_Store

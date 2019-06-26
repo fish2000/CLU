@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from enum import EnumMeta
+from constants import Enum, EnumMeta
+    
+# Dunder and sunder name constants for the alias dict:
+DUNDER = '__alias__'
+SUNDER = '_alias_'
 
 class alias(object):
     
@@ -33,10 +37,6 @@ class alias(object):
         
         ISN’T ALL OF THAT FUCKING AWESOME?!?!? I think so. Yes!
     """
-    
-    # Dunder and sunder name constants for the alias dict:
-    DUNDER = '__alias__'
-    SUNDER = '_alias_'
     
     def __init__(self, instance, name=None, cls=None):
         """ Set up the alias, passing an enum instance.
@@ -100,5 +100,16 @@ class AliasingEnumMeta(EnumMeta):
                                                                  attributes,
                                                                **kwargs)
 
-__all__ = ('alias', 'AliasingEnumMeta')
+class AliasingEnum(Enum, metaclass=AliasingEnumMeta):
+    """ An Enum subclass intermediate, suitable for subclassing
+        itself, that uses `AliasingEnumMeta` as its metaclass.
+        
+        …Thus, any member aliases that one makes in concrete
+        classes derived from this class will find them registered
+        upon class creation in an `__aliases__` directory on the
+        derived class.
+    """
+    pass
+
+__all__ = ('alias', 'AliasingEnumMeta', 'AliasingEnum')
 __dir__ = lambda: list(__all__)

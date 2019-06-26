@@ -206,8 +206,7 @@ def path_to_dotpath(path):
         to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
         would call a “quick and dirty” fashion.
     """
-    relpath = os.path.relpath(path,
-        start=os.path.dirname(BASEPATH))
+    relpath = os.path.relpath(path, start=BASEPATH)
     dotpath = relpath.replace(os.path.sep, QUALIFIER)
     
     if dotpath.endswith('.py'):

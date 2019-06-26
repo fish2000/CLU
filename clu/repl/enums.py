@@ -50,17 +50,13 @@ class alias(object):
         """
         self.aliased = instance
         if name is not None and cls is not None:
-            self.name = name
-            self.register(cls)
+            self.register(cls, name)
     
     def __get__(self, instance=None, cls=None):
         """ Return the aliased enum instance. """
         if cls is None:
             cls = type(instance)
-        for thing in cls:
-            if thing.value == self.aliased:
-                return thing
-        return self.aliased
+        return self.member_for_value(cls, self.aliased)
     
     def __set_name__(self, cls, name):
         """ Register the alias within the __aliases__ dict in
@@ -68,19 +64,30 @@ class alias(object):
             
             N.B. This only gets called on Python 3.6+
         """
-        self.name = name
-        self.register(cls)
+        self.register(cls, name)
     
-    def register(self, cls):
-        """ Register the alias member with the parent class,
-            if it supports such things (that is to say, if it
-            has a dictionary attribute “__aliases__”).
+    def member_for_value(self, cls, value):
+        """ Retrieve the original enum member corresponding
+            to the stored aliases’ instance value.
         """
+        for thing in cls:
+            if thing.value == value:
+                return thing
+        return value
+    
+    def register(self, cls, name):
+        """ First, set the name of the alias.
+            
+            Second, register the alias member with the parent
+            class, if it supports such things (that is to say,
+            if it has a dictionary attribute “__aliases__”).
+        """
+        self.name = name
         if hasattr(cls, '__aliases__'):
             if self.name in cls.__aliases__:
                 message = "Enum already contains an alias named %s" % self.name
                 raise AttributeError(message)
-            cls.__aliases__[self.name] = self.aliased
+            cls.__aliases__[self.name] = self.member_for_value(cls, self.aliased)
 
 class AliasingEnumMeta(EnumMeta):
     

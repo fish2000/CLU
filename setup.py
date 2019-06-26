@@ -211,7 +211,7 @@ include_dirs = [numpy.get_include(),
 
 # THE CALL TO `setup(…)`
 setup(
-    name=PROJECT_NAME,
+    name="python-%s" % PROJECT_NAME,
     author=AUTHOR_NAME,
     author_email=AUTHOR_EMAIL,
     

@@ -34,6 +34,10 @@ class alias(object):
         ISN’T ALL OF THAT FUCKING AWESOME?!?!? I think so. Yes!
     """
     
+    # Dunder and sunder name constants for the alias dict:
+    DUNDER = '__alias__'
+    SUNDER = '_alias_'
+    
     def __init__(self, instance, name=None, cls=None):
         """ Set up the alias, passing an enum instance.
             

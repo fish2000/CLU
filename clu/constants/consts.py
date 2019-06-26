@@ -133,7 +133,7 @@ def print_all():
     WIDTH = 125
     
     print('*' * WIDTH)
-    print("≠≠≠ CONSTS:")
+    print("≠≠≠ CONSTS: (total %i)" % len(__all__))
     print('*' * WIDTH)
     
     G = globals()

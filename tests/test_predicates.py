@@ -552,7 +552,7 @@ class TestPredicates(object):
         assert islambda(lambda: None)
         assert islambda(attr)
         # assert not islambda(export)
-        assert not islambda(graceful_issubclass)
+        assert islambda(graceful_issubclass) # IT IS NOW DOGG
         assert isfunction(lambda: None)
         assert isfunction(attr)
         # assert isfunction(export)

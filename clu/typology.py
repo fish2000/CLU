@@ -17,35 +17,42 @@ from predicates import (isclasstype,
                         pyattr, or_none,
                         isiterable,
                         tuplize, uniquify,
-                        apply_to)
+                        apply_to, predicate_any)
 
 from typespace import types
 
-def graceful_issubclass(thing, *cls_or_tuple):
-    """ A wrapper for `issubclass()` that tries to work with you. """
-    length = 0
-    try:
-        length = len(cls_or_tuple)
-    except TypeError:
-        pass
-    else:
-        if length == 1:
-            cls_or_tuple = cls_or_tuple[0]
-        else:
-            cls_or_tuple = tuple(item for item in cls_or_tuple if item is not None)
-        if (not isinstance(cls_or_tuple, (type, tuple))) \
-            and isiterable(cls_or_tuple):
-            cls_or_tuple = tuple(cls_or_tuple)
-    try:
-        return issubclass(thing, cls_or_tuple)
-    except TypeError:
-        pass
-    try:
-        return issubclass(type(thing), cls_or_tuple)
-    except TypeError:
-        pass
-    return None
+# TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)` –
+# can be formulated and tested by these lambdas and functions
 
+isunique = lambda thing: isiterable(thing) and (len(frozenset(thing)) == len(tuple(thing)))
+istypelist = apply_to(isclasstype, all)
+maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
+                        lambda total: tuple(frozenset(total)))
+
+def isderivative(putative, thing):
+    """ Examine whether something is either a subclass
+        or an instance of a thing, depending on whether
+        the putative “something” is either a classtype
+        or an instance, basically.
+    """
+    try:
+        return issubclass(putative, thing)
+    except TypeError:
+        return isinstance(putative, thing)
+
+# PREDICATE FUNCTION “graceful_issubclass”: A wrapper for `issubclass(…)`
+# and `isinstance(…)` that tries to work with you, instead of barfing up
+# all sorts of TypeErrors willy-nilly at the slightest misconfiguration: 
+
+subclasscheck = lambda putative, *thinglist: predicate_any(
+                lambda thing: isderivative(putative, thing),
+                             *maketypelist(*thinglist))
+
+# LEGACY CODE SUPPORT:
+graceful_issubclass = subclasscheck
+
+# TYPELISTS: manual assemblages of types, used for predicate testing
+# and other similar stuff.
 
 numeric_types = uniquify(int, long, float, decimal.Decimal)
 
@@ -81,13 +88,12 @@ if PY3 and not PYPY:
                   types.MemberDescriptor,
                   types.MethodDescriptor)
 
+# PREDICATE FUNCTIONS: is<something>() unary-predicates, many of which make use
+# of the aforementioned typelists:
 
 ispathtype = lambda cls: issubclass(cls, path_types)
 ispath = lambda thing: graceful_issubclass(thing, path_types) or haspyattr(thing, 'fspath')
 isvalidpath = lambda thing: ispath(thing) and os.path.exists(os.path.expanduser(thing))
-
-# UTILITY FUNCTIONS: is<something>() unary-predicates, and utility
-# type-tuples with which said predicates use to make their decisions:
 
 isabstractmethod = lambda method: getpyattr(method, 'isabstractmethod', False)
 isabstract = lambda thing: bool(pyattr(thing, 'abstractmethods', 'isabstractmethod'))
@@ -104,21 +110,13 @@ isfunction = lambda thing: isinstance(thing, (types.Function, types.Lambda)) or 
 islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == LAMBDA
 ishashable = lambda thing: isinstance(thing, HashableABC)
 
-# TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)`
-
-isunique = lambda thing: isiterable(thing) and (len(frozenset(thing)) == len(tuple(thing)))
-istypelist = apply_to(isclasstype, all)
-maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
-                        lambda total: tuple(frozenset(total)))
-
-__all__ = ('graceful_issubclass',
+__all__ = ('isunique', 'istypelist', 'maketypelist',
+           'isderivative', 'graceful_issubclass',
            'numeric_types', 'array_types', 'string_types', 'bytes_types',
            'path_classes', 'path_types', 'file_types', 'callable_types',
            'ispathtype', 'ispath', 'isvalidpath',
            'isabstractmethod', 'isabstract', 'isabstractcontextmanager', 'iscontextmanager',
            'isnumber', 'isnumeric', 'isarray', 'isstring', 'isbytes', 'ismodule',
-           'isfunction', 'islambda', 'ishashable',
-           'isunique',
-           'istypelist', 'maketypelist')
+           'isfunction', 'islambda', 'ishashable')
 
 __dir__ = lambda: list(__all__)

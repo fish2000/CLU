@@ -35,8 +35,8 @@ HOSTNAME = sys.intern(socket.gethostname())
 
 # The __name__ of a lambda function:
 lam = lambda: None
-LAMBDA = sys.intern(getattr(lam, '__qualname__',
-                    getattr(lam, '__name__', None)))
+λ = LAMBDA = sys.intern(getattr(lam, '__qualname__',
+                        getattr(lam, '__name__', None)))
 
 # N.B. this may or may not be a PY2/PY3 thing:
 MAXINT = getattr(sys, 'maxint',
@@ -110,7 +110,7 @@ __all__ = ('BASEPATH',
            'ENCODING',
            'FILE_ARGUMENT_NAMES',
            'HOSTNAME',
-           'LAMBDA',
+           'LAMBDA', 'λ',
            'MAXINT',
            'PATH',
            'PROJECT_NAME',

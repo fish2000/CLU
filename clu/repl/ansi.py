@@ -12,7 +12,6 @@ from predicates import tuplize
 from typology import string_types, bytes_types
 from .enums import alias, AliasingEnumMeta
 
-
 print_separator = lambda: print('-' * SEPARATOR_WIDTH)
 
 class ANSIBase(Enum):

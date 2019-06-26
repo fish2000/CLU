@@ -8,6 +8,8 @@ SUNDER = '_alias_'
 
 class alias(object):
     
+    __slots__ = ('name', 'aliased')
+    
     """ Alias one Enum class instance to another. To wit:
         
             @unique

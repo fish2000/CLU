@@ -84,6 +84,7 @@ function_nop = lambda iterable: None
 
 uncallable = lambda thing: not callable(thing)
 pyname = lambda thing: pyattr(thing, 'qualname', 'name')
+pytuple = lambda *attrs: tuple('__%s__' % str(atx) for atx in attrs)
 
 isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,
                                                 map, filter, reversed) or isenum(thing))
@@ -180,7 +181,8 @@ __all__ = ('ismetaclass', 'isclass', 'isclasstype',
            'attr', 'pyattr', 'item',
            'attr_search', 'pyattr_search', 'item_search',
            'isenum', 'enumchoices',
-           'predicate_nop', 'function_nop', 'uncallable', 'pyname',
+           'predicate_nop', 'function_nop', 'uncallable',
+           'pyname', 'pytuple',
            'isexpandable', 'isnormative', 'iscontainer',
            'apply_to',
            'predicate_all', 'predicate_any',

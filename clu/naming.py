@@ -11,8 +11,6 @@ from constants import lru_cache
 from constants import BadDotpathWarning
 # from predicates import pyattr
 
-pytuple = lambda *attrs: tuple('__%s__' % str(atx) for atx in attrs)
-
 def doctrim(docstring):
     """ This function is straight outta PEP257 -- q.v. `trim(…)`,
        “Handling Docstring Indentation” subsection sub.:
@@ -322,7 +320,7 @@ def split_abbreviations(s):
             abbreviations.append(current_token)
     return tuple(abbreviations)
 
-__all__ = ('pytuple', 'doctrim',
+__all__ = ('doctrim',
            'sysmods', 'thingname', 'thingname_search', 'determine_name',
            'itermodule', 'moduleids',
            'nameof',

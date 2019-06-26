@@ -5,10 +5,10 @@ import re
 
 from constants import NoDefault, MutableMapping, SEPARATOR_WIDTH
 from dicts import merge_two, asdict
-from naming import pytuple, determine_name
-from predicates import ismergeable
+from naming import determine_name
+from predicates import pytuple, ismergeable
 
-# UTILITY STUFF: SimpleNamespace and Namespace
+# NAMESPACES: SimpleNamespace and Namespace
 
 class SimpleNamespace(object):
     

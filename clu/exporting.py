@@ -8,7 +8,8 @@ import warnings
 from constants import LAMBDA, PY3, SEPARATOR_WIDTH
 from constants import Counter, MutableMapping, NoDefault, OrderedDict
 from constants import ExportError, ExportWarning
-from naming import doctrim, determine_name, pytuple
+from predicates import pytuple, case_sort
+from naming import doctrim, determine_name
 from naming import thingname_search, thingname_search_by_id
 from repl import print_separator
 
@@ -18,8 +19,6 @@ def predicates_for_types(*types):
     for classtype in frozenset(types):
         predicates.append(lambda thing: isinstance(thing, classtype))
     return tuple(predicates)
-
-case_sort = lambda c: c.lower() if c.isupper() else c.upper()
 
 class Exporter(MutableMapping):
     

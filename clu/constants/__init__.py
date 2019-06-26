@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from .consts import (BUILTINS,
+from .consts import (BASEPATH,
+                     BUILTINS,
                      DEBUG,
                      DELETE_FLAG,
                      DYNAMIC_MODULE_PREFIX,
@@ -36,7 +37,8 @@ from .polyfills import (Enum, EnumMeta, unique, ispyname,
 
 from .terminalsize import get_terminal_size
 
-__all__ = ('BUILTINS',
+__all__ = ('BASEPATH',
+           'BUILTINS',
            'DEBUG',
            'DELETE_FLAG',
            'DYNAMIC_MODULE_PREFIX',

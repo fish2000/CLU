@@ -6,6 +6,12 @@ import socket
 import sys
 import sysconfig
 
+# Project base path:
+BASEPATH = sys.intern(
+           os.path.dirname(
+           os.path.dirname(
+           os.path.dirname(__file__))))
+
 # Possible names for builtin modules:
 BUILTINS = ('__builtins__', '__builtin__', 'builtins', 'builtin')
 
@@ -96,7 +102,8 @@ class NoDefault(object):
     def __new__(cls, *a, **k):
         return cls
 
-__all__ = ('BUILTINS',
+__all__ = ('BASEPATH',
+           'BUILTINS',
            'DEBUG',
            'DELETE_FLAG',
            'DYNAMIC_MODULE_PREFIX',
@@ -119,3 +126,28 @@ __all__ = ('BUILTINS',
            'NoDefault')
 
 __dir__ = lambda: list(__all__)
+
+def print_all():
+    """ Print out all of the constant variables defined in consts.py """
+    # It’s not pretty – but actually it’s almost pretty, sort-of.
+    WIDTH = 125
+    
+    print('*' * WIDTH)
+    print("≠≠≠ CONSTS:")
+    print('*' * WIDTH)
+    
+    G = globals()
+    SEP = ",\n" + (" " * 30)
+    
+    for const_name in __all__:
+        if const_name.endswith('PATH') and os.pathsep in G[const_name]:
+            print("» %25s : %s" % (const_name, G[const_name].replace(os.pathsep, SEP)))
+        elif type(G[const_name]) is tuple:
+            print("» %25s : %s" % (const_name, SEP.join(str(g) for g in G[const_name])))
+        else:
+            print("» %25s : %s" % (const_name, G[const_name]))
+    
+    print('*' * WIDTH)
+
+if __name__ == '__main__':
+    print_all()

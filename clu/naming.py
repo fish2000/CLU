@@ -6,7 +6,7 @@ import os
 import sys
 import warnings
 
-from constants import BUILTINS, DEBUG, MAXINT, QUALIFIER
+from constants import BASEPATH, BUILTINS, DEBUG, MAXINT, QUALIFIER
 from constants import lru_cache
 from predicates import haspyattr, getpyattr, pyattr, uniquify
 
@@ -207,7 +207,7 @@ def path_to_dotpath(path):
         would call a “quick and dirty” fashion.
     """
     relpath = os.path.relpath(path,
-        start=os.path.dirname('/usr/local/lib/python3.7/site-packages'))
+        start=os.path.dirname(BASEPATH))
     dotpath = relpath.replace(os.path.sep, QUALIFIER)
     
     if dotpath.endswith('.py'):

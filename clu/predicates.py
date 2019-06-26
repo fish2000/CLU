@@ -92,7 +92,6 @@ iscontainer = lambda thing: isiterable(thing) and \
                         not isnormative(thing) and \
                         not isclasstype(thing)
 
-
 def apply_to(predicate, function, *things):
     """ apply_to(predicate, function, *things) → Apply a predicate to each
         of the things, and finally a function to the entirety of the things,

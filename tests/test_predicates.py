@@ -2,17 +2,6 @@
 from __future__ import print_function
 
 import pytest
-import array, decimal, os
-
-from clu.typology import (graceful_issubclass,
-                          ispathtype, ispath, isvalidpath,
-                          isnumber, isnumeric, isarray,
-                          isstring, isbytes,
-                          islambda,
-                          isfunction)
-
-from clu.predicates import attr
-from clu.typespace import SimpleNamespace
 
 class TestPredicates(object):
     
@@ -48,7 +37,7 @@ class TestPredicates(object):
     
     def test_slot_aware_attribute_checkers(self):
         """ » Checking “thing/class/slotted/dictish” lambdas from clu.predicates … """
-        from clu.typespace import Namespace
+        from clu.typespace import Namespace, SimpleNamespace
         from clu.predicates import (thing_has, class_has,
                                     isslotted, isdictish, isslotdicty)
         
@@ -372,7 +361,7 @@ class TestPredicates(object):
     def test_ismergeable(self):
         """ » Checking “ismergeable” lambda from clu.predicates … """
         from clu.predicates import ismergeable
-        from clu.typespace import Namespace
+        from clu.typespace import Namespace, SimpleNamespace
         from collections import OrderedDict, defaultdict
         
         dic = { 'yo' : "dogg" }
@@ -500,6 +489,8 @@ class TestPredicates(object):
     
     def test_attr_accessor(self):
         """ » Checking “attr(•) accessor from clu.predicates …” """
+        from clu.predicates import attr
+        
         # plistlib on Python 2.x uses those ungainly `writePlistToString`
         # methods; on Python 3.x you have the more reasonable and expected
         # `dumps` and `loads` calls… thus, attr(…) will bridge the gap:
@@ -516,6 +507,16 @@ class TestPredicates(object):
     
     def test_boolean_predicates(self):
         """ » Checking basic isXXX(•) functions from clu.typology … """
+        import array, decimal, os
+        from clu.predicates import attr
+        from clu.typespace import SimpleNamespace
+        from clu.typology import (graceful_issubclass,
+                                  ispathtype, ispath, isvalidpath,
+                                  isnumber, isnumeric, isarray,
+                                  isstring, isbytes,
+                                  islambda,
+                                  isfunction)
+        
         assert graceful_issubclass(int, int)
         
         assert ispathtype(str)
@@ -560,6 +561,7 @@ class TestPredicates(object):
         assert isfunction(SimpleNamespace) # classes are callable!
     
     def test_numpy_predicates(self):
+        from clu.typology import isarray
         numpy = pytest.importorskip('numpy')
         assert isarray(numpy.ndarray)
         assert isarray(numpy.array([0, 1, 2]))

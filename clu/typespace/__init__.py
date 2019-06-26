@@ -103,5 +103,5 @@ def modulize(name, namespace, docs=None,
     # Return our new module instance:
     return module
 
-__all__ = ('SimpleNamespace', 'Namespace', 'types', 'path_to_dotpath', 'modulize')
+__all__ = ('SimpleNamespace', 'Namespace', 'types', 'modulize')
 __dir__ = lambda: list(__all__)

@@ -34,6 +34,11 @@ class TestPredicates(object):
         assert not isenum(NotAnEnum)
         assert isenum(TechnicallyAnEnum)
         
+        assert not isenum(System.DARWIN)
+        assert not isenum(System.LINUX)
+        assert not isenum(CSIDL.APPDATA)
+        assert not isenum(CSIDL.LOCAL_APPDATA)
+        
         assert enumchoices(System) == ('DARWIN', 'WIN32', 'LINUX', 'LINUX2')
         assert enumchoices(CSIDL) == ('APPDATA', 'COMMON_APPDATA', 'LOCAL_APPDATA')
         assert enumchoices(NotAnEnum) == tuple()

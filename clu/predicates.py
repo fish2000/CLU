@@ -61,6 +61,21 @@ attr_search = lambda atx, *things: searcher(or_none, atx, *things)
 pyattr_search = lambda atx, *things: searcher(getpyattr, atx, *things)
 item_search = lambda itx, *things: searcher(getitem, itx, *things)
 
+# ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
+# of strings naming an enum’s choices (like duh)
+
+def isenum(cls):
+    """ isenum(cls) → boolean predicate, True if cls descends from Enum. """
+    if not isclasstype(cls):
+        return False
+    return Enum in cls.__mro__
+
+def enumchoices(cls):
+    """ isenum(cls) → Return a tuple of strings naming the members of an Enum class. """
+    if not isenum(cls):
+        return tuple()
+    return tuple(choice.name for choice in cls)
+
 # PREDICATE LOGCIAL FUNCTIONS: all/any/and/or/xor shortcuts:
 
 predicate_nop = lambda *things: None
@@ -70,7 +85,7 @@ uncallable = lambda thing: not callable(thing)
 pyname = lambda thing: pyattr(thing, 'qualname', 'name')
 
 isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,
-                                                map, filter, reversed))
+                                                map, filter, reversed) or isenum(thing))
 
 isnormative = lambda thing: isinstance(thing, (str, unicode, bytes, bytearray))
 iscontainer = lambda thing: isiterable(thing) and \
@@ -97,11 +112,10 @@ def apply_to(predicate, function, *things):
         # Return a partial for this predicate and function:
         return partial(apply_to, predicate, function)
     elif len(things) == 1:
-        # Ensure the argument is iterable:
+        # Recursive call, expanding the one argument:
+        if isexpandable(things[0]):
+            return apply_to(predicate, function, *things[0])
         if iscontainer(things[0]):
-            # Recursive call, expanding the one argument:
-            if isexpandable(things[0]):
-                return apply_to(predicate, function, *things[0])
             return apply_to(predicate, function, *tuple(things[0]))
     # Actually do the thing:
     return function(predicate(thing) for thing in things)
@@ -145,21 +159,6 @@ def uniquify(*items):
 def listify(*items):
     """ Return a new list containing all non-`None` arguments """
     return list(item for item in items if item is not None)
-
-# ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
-# of strings naming an enum’s choices (like duh)
-
-def isenum(cls):
-    """ isenum(cls) → boolean predicate, True if cls descends from Enum. """
-    if not isclasstype(cls):
-        return False
-    return Enum in cls.__mro__
-
-def enumchoices(cls):
-    """ isenum(cls) → Return a tuple of strings naming the members of an Enum class. """
-    if not isenum(cls):
-        return tuple()
-    return tuple(choice.name for choice in cls)
 
 __all__ = ('ismetaclass', 'isclass', 'isclasstype',
            'haspyattr', 'anyattrs', 'allattrs', 'anypyattrs', 'allpyattrs',

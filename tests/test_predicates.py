@@ -18,32 +18,6 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates module. """
     
-    def test_enum_predicates(self):
-        """ » Checking “isenum” and “enumchoices” functions from clu.predicates … """
-        from clu.predicates import isenum, enumchoices
-        from clu.constants import Enum, System, CSIDL
-        
-        class NotAnEnum(object):
-            pass
-        
-        class TechnicallyAnEnum(Enum):
-            pass
-        
-        assert isenum(System)
-        assert isenum(CSIDL)
-        assert not isenum(NotAnEnum)
-        assert isenum(TechnicallyAnEnum)
-        
-        assert not isenum(System.DARWIN)
-        assert not isenum(System.LINUX)
-        assert not isenum(CSIDL.APPDATA)
-        assert not isenum(CSIDL.LOCAL_APPDATA)
-        
-        assert enumchoices(System) == ('DARWIN', 'WIN32', 'LINUX', 'LINUX2')
-        assert enumchoices(CSIDL) == ('APPDATA', 'COMMON_APPDATA', 'LOCAL_APPDATA')
-        assert enumchoices(NotAnEnum) == tuple()
-        assert enumchoices(TechnicallyAnEnum) == tuple()
-    
     def test_utility_helper_functions(self):
         """ » Checking “tuplize/uniquify/listify” functions from clu.predicates … """
         from clu.predicates import tuplize, uniquify, listify
@@ -312,6 +286,32 @@ class TestPredicates(object):
         assert not isexpandable(tobj)
         assert not isnormative(tobj)
         assert not iscontainer(tobj)
+    
+    def test_enum_predicates(self):
+        """ » Checking “isenum” and “enumchoices” functions from clu.predicates … """
+        from clu.predicates import isenum, enumchoices
+        from clu.constants import Enum, System, CSIDL
+        
+        class NotAnEnum(object):
+            pass
+        
+        class TechnicallyAnEnum(Enum):
+            pass
+        
+        assert isenum(System)
+        assert isenum(CSIDL)
+        assert not isenum(NotAnEnum)
+        assert isenum(TechnicallyAnEnum)
+        
+        assert not isenum(System.DARWIN)
+        assert not isenum(System.LINUX)
+        assert not isenum(CSIDL.APPDATA)
+        assert not isenum(CSIDL.LOCAL_APPDATA)
+        
+        assert enumchoices(System) == ('DARWIN', 'WIN32', 'LINUX', 'LINUX2')
+        assert enumchoices(CSIDL) == ('APPDATA', 'COMMON_APPDATA', 'LOCAL_APPDATA')
+        assert enumchoices(NotAnEnum) == tuple()
+        assert enumchoices(TechnicallyAnEnum) == tuple()
     
     def test_getattr_shortcuts(self):
         """ » Checking “getattr/getpyattr/getitem” shortcuts from clu.predicates … """

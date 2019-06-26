@@ -25,13 +25,16 @@ allattrs = lambda thing, *attrs: all(hasattr(thing, atx) for atx in attrs)
 anypyattrs = lambda thing, *attrs: any(haspyattr(thing, atx) for atx in attrs)
 allpyattrs = lambda thing, *attrs: all(haspyattr(thing, atx) for atx in attrs)
 
+# Things with a __len__(…) method “have length”:
+haslength = lambda thing: haspyattr(thing, 'len')
+
 # Things with either __iter__(…) OR __getitem__(…) are iterable:
 isiterable = lambda thing: anypyattrs(thing, 'iter', 'getitem')
 
 # q.v. `merge_two(…)` implementation sub.
 ismergeable = lambda thing: bool(hasattr(thing, 'get') and isiterable(thing))
 
-# UTILITY FUNCTIONS: getattr(…) shortcuts:
+# ACCESSORS: getattr(…) shortcuts:
 
 always = lambda thing: True
 never = lambda thing: False
@@ -58,19 +61,15 @@ attr_search = lambda atx, *things: searcher(or_none, atx, *things)
 pyattr_search = lambda atx, *things: searcher(getpyattr, atx, *things)
 item_search = lambda itx, *things: searcher(getitem, itx, *things)
 
-# Does a class contain an attribute -- whether it uses `__dict__` or `__slots__`?
-thing_has = lambda thing, atx: atx in (pyattr(thing, 'dict', 'slots') or tuple())
-class_has = lambda cls, atx: isclasstype(cls) and thing_has(cls, atx)
-
-# Is this a class based on a `__dict__`, or one using `__slots__`?
-isslotted = lambda thing: allpyattrs('mro', 'slots')
-isdictish = lambda thing: allpyattrs('mro', 'dict')
-isslotdicty = lambda thing: allpyattrs('mro', 'slots', 'dict')
-
-# For sorting with ALL_CAPS stuff first or last:
-case_sort = lambda c: c.lower() if c.isupper() else c.upper()
-
 # PREDICATE LOGCIAL FUNCTIONS: all/any/and/or/xor shortcuts:
+
+predicate_nop = lambda *things: None
+function_nop = lambda iterable: None
+
+uncallable = lambda thing: not callable(thing)
+pyname = lambda thing: pyattr(thing, 'qualname', 'name')
+isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,
+                                                map, filter, reversed))
 
 def apply_to(predicate, function, *things):
     """ apply_to(predicate, function, *things) → Apply a predicate to each
@@ -84,10 +83,8 @@ def apply_to(predicate, function, *things):
         † q.v. `functools.partial(…)` standard-library module function supra.
     """
     # Ensure both the predicate and function are callable:
-    if (not callable(predicate)) or \
-       (not callable(function)):
-        names = (pyattr(predicate, 'qualname', 'name'),
-                 pyattr(function, 'qualname', 'name'))
+    if any(uncallable(f) for f in (predicate, function)):
+        names = tuple(pyname(f) for f in (predicate, function))
         raise ValueError("Noncallable specified in invoking apply_to(%s, %s, …)" % names)
     if len(things) < 1:
         # Return a partial for this predicate and function:
@@ -95,13 +92,10 @@ def apply_to(predicate, function, *things):
     elif len(things) == 1:
         # Ensure the argument is iterable:
         if isiterable(things[0]):
-            # Recursive call, tuple-expanding on the one argument:
+            # Recursive call, expanding the one argument:
+            if isexpandable(things[0]):
+                return apply_to(predicate, function, *things[0])
             return apply_to(predicate, function, *tuple(things[0]))
-        else:
-            # Raise for noniterables:
-            names = (pyattr(predicate, 'qualname', 'name'),
-                     pyattr(function, 'qualname', 'name'))
-            raise ValueError("Noniterable subject passed to apply_to(%s, %s, …)" % names)
     # Actually do the thing:
     return function(predicate(thing) for thing in things)
 
@@ -114,6 +108,22 @@ predicate_and = lambda predicate, a, b: apply_to(predicate, all, a, b)
 predicate_or  = lambda predicate, a, b: apply_to(predicate, any, a, b)
 predicate_xor = lambda predicate, a, b: apply_to(predicate, any, a, b) and \
                                     not apply_to(predicate, all, a, b)
+
+# Does a thing or a class contain an attribute --
+# whether it uses `__dict__` or `__slots__` (or both)?
+thing_has = lambda thing, atx: predicate_any(
+            lambda thing: atx in (pyattr(thing, 'dict', 'slots')),
+                   thing, *getpyattr(type(thing), 'mro'))
+
+class_has = lambda cls, atx: isclasstype(cls) and thing_has(cls, atx)
+
+# Is this a thing based on a `__dict__`, or one using `__slots__`?
+isslotted = lambda thing: haspyattr(thing, 'slots') and not haspyattr(thing, 'mro')
+isdictish = lambda thing: haspyattr(thing, 'dict') and not haspyattr(thing, 'mro')
+isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and not haspyattr(thing, 'mro')
+
+# For sorting with ALL_CAPS stuff first or last:
+case_sort = lambda c: c.lower() if c.isupper() else c.upper()
 
 # UTILITY FUNCTIONS: helpers for builtin container types:
 
@@ -134,7 +144,7 @@ def listify(*items):
 
 def isenum(cls):
     """ isenum(cls) → boolean predicate, True if cls descends from Enum. """
-    if not hasattr(cls, '__mro__'):
+    if not haspyattr(cls, 'mro'):
         return False
     return Enum in cls.__mro__
 
@@ -146,6 +156,7 @@ def enumchoices(cls):
 
 __all__ = ('ismetaclass', 'isclass', 'isclasstype',
            'haspyattr', 'anyattrs', 'allattrs', 'anypyattrs', 'allpyattrs',
+           'haslength',
            'isiterable', 'ismergeable',
            'always', 'never', 'nuhuh',
            'no_op', 'or_none',
@@ -153,12 +164,13 @@ __all__ = ('ismetaclass', 'isclass', 'isclasstype',
            'accessor', 'searcher',
            'attr', 'pyattr', 'item',
            'attr_search', 'pyattr_search', 'item_search',
-           'thing_has', 'class_has',
-           'isslotted', 'isdictish', 'isslotdicty',
-           'case_sort',
+           'function_nop', 'predicate_nop', 'uncallable', 'isexpandable',
            'apply_to',
            'predicate_all', 'predicate_any',
            'predicate_and', 'predicate_or', 'predicate_xor',
+           'thing_has', 'class_has',
+           'isslotted', 'isdictish', 'isslotdicty',
+           'case_sort',
            'tuplize', 'uniquify', 'listify',
            'isenum', 'enumchoices')
 

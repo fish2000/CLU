@@ -18,6 +18,70 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates and clu.typology modules. """
     
+    def test_slot_aware_attribute_checkers(self):
+        """ » Checking “thing/class/slotted/dictish” lambdas from clu.predicates … """
+        from clu.typespace import Namespace
+        from clu.predicates import (thing_has, class_has,
+                                    isslotted, isdictish, isslotdicty)
+        
+        assert isslotted(Namespace())
+        assert isslotted(SimpleNamespace())
+        assert isdictish(Namespace())
+        assert isdictish(SimpleNamespace())
+        assert isslotdicty(Namespace())
+        assert isslotdicty(SimpleNamespace())
+        
+        class Slotted(object):
+            __slots__ = ('yo', 'dogg', 'wtf')
+            
+            def __init__(self):
+                self.yo: str = "YO"
+                self.dogg: str = "DOGG"
+                self.wtf: str = "WTFFFF"
+        
+        class Dictish(object):
+            yo: str = "YO"
+            dogg: str = "DOGG"
+            
+            def __init__(self):
+                self.hax: str = "HAXXX"
+        
+        assert isslotted(Slotted())
+        assert isdictish(Dictish())
+        assert not isslotted(Dictish())
+        assert not isdictish(Slotted())
+        assert not isslotdicty(Slotted())
+        assert not isslotdicty(Dictish())
+        
+        assert thing_has(Slotted, 'yo')
+        assert thing_has(Slotted(), 'yo')
+        assert thing_has(Slotted, 'dogg')
+        assert thing_has(Slotted(), 'dogg')
+        assert thing_has(Slotted, 'wtf')
+        assert thing_has(Slotted(), 'wtf')
+        assert not thing_has(Slotted, 'hax')
+        assert not thing_has(Slotted(), 'hax')
+        
+        assert thing_has(Dictish, 'yo')
+        assert thing_has(Dictish(), 'yo')
+        assert thing_has(Dictish, 'dogg')
+        assert thing_has(Dictish(), 'dogg')
+        assert not thing_has(Dictish, 'wtf')
+        assert not thing_has(Dictish(), 'wtf')
+        # Only installed via __init__ on instance:
+        assert not thing_has(Dictish, 'hax')
+        assert thing_has(Dictish(), 'hax')
+        
+        assert class_has(Slotted, 'yo')
+        assert class_has(Slotted, 'dogg')
+        assert class_has(Slotted, 'wtf')
+        assert not class_has(Slotted, 'hax')
+        
+        assert class_has(Dictish, 'yo')
+        assert class_has(Dictish, 'dogg')
+        assert not class_has(Dictish, 'wtf')
+        assert not class_has(Dictish, 'hax')
+    
     def test_getattr_shortcuts(self):
         """ » Checking “getattr/getpyattr/getitem” shortcuts from clu.predicates … """
         from random import shuffle
@@ -57,11 +121,10 @@ class TestPredicates(object):
             is getpyattr(dict1, 'class') \
             is getpyattr(dict2, 'class') \
             is pyattr_search('class', *dicts)
-        
     
     def test_nops(self):
         """ » Checking “always/never/nuhuh/no_op” lambdas from clu.predicates … """
-        from clu.predicates import always, never, nuhuh, no_op
+        from clu.predicates import always, never, nuhuh, no_op, predicate_nop
         
         singles = (True, False, None)
         
@@ -70,6 +133,7 @@ class TestPredicates(object):
             assert never(single) is False
             assert nuhuh(single) is None
             assert no_op(single, 'get') is single
+            assert predicate_nop(*singles) is None
     
     def test_ismergeable(self):
         """ » Checking “ismergeable” lambda from clu.predicates … """
@@ -123,6 +187,33 @@ class TestPredicates(object):
         
         assert isiterable(TechnicallyIterable)
         assert isiterable(TechnicallyIterable())
+    
+    def test_haslength(self):
+        """ » Checking “haslengtyh” lambda from clu.predicates … """
+        from clu.predicates import haslength
+        
+        ttup = ('yo', 'dogg')
+        mseq = list(ttup)
+        genx = (s for s in ttup)
+        lcmp = [s for s in ttup]
+        rstr = "yo dogg"
+        robj = object()
+        
+        assert haslength(ttup)
+        assert haslength(mseq)
+        assert not haslength(genx) # hahaaa
+        assert haslength(lcmp)
+        assert haslength(rstr)
+        assert not haslength(robj)
+        assert not haslength(haslength)
+        assert not haslength(self)
+        
+        class TechnicallyLengthy(object):
+            """ This is to show the limitations of the predicate """
+            __len__ = "YO DOGG"
+        
+        assert haslength(TechnicallyLengthy)
+        assert haslength(TechnicallyLengthy())
     
     def test_hasattr_shortcuts(self):
         """ » Checking “hasattr/haspyattr” shortcuts from clu.predicates … """

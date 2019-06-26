@@ -92,8 +92,6 @@ isvalidpath = lambda thing: ispath(thing) and os.path.exists(os.path.expanduser(
 # UTILITY FUNCTIONS: is<something>() unary-predicates, and utility
 # type-tuples with which said predicates use to make their decisions:
 
-predicatenop = lambda *things: None
-
 isabstractmethod = lambda method: getpyattr(method, 'isabstractmethod', False)
 isabstract = lambda thing: bool(pyattr(thing, 'abstractmethods', 'isabstractmethod'))
 isabstractcontextmanager = lambda cls: graceful_issubclass(cls, contextlib.AbstractContextManager)
@@ -120,7 +118,6 @@ __all__ = ('graceful_issubclass',
            'numeric_types', 'array_types', 'string_types', 'bytes_types',
            'path_classes', 'path_types', 'file_types', 'callable_types',
            'ispathtype', 'ispath', 'isvalidpath',
-           'predicatenop',
            'isabstractmethod', 'isabstract', 'isabstractcontextmanager', 'iscontextmanager',
            'isnumber', 'isnumeric', 'isarray', 'isstring', 'isbytes', 'ismodule',
            'isfunction', 'islambda', 'ishashable',

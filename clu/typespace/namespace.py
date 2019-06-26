@@ -79,7 +79,7 @@ class Namespace(SimpleNamespace, MutableMapping):
     def __repr__(self):
         from pprint import pformat
         return "{}({}) @ {}".format(determine_name(type(self)),
-                                    self.winnower.sub('{\g<stuff>',
+                                    self.winnower.sub(r'{\g<stuff>',
                                               pformat(self.__dict__,
                                                       width=SEPARATOR_WIDTH)),
                                                       id(self))

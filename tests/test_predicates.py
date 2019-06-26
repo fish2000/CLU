@@ -82,8 +82,49 @@ class TestPredicates(object):
         assert not class_has(Dictish, 'wtf')
         assert not class_has(Dictish, 'hax')
     
+    def test_applyto(self):
+        """ » Checking “apply_to(…)” core function from clu.predicates … """
+        from string import capwords
+        from clu.predicates import apply_to, isclasstype
+        from clu.constants import ENCODING, SINGLETON_TYPES
+        from clu.typology import (numeric_types, string_types, bytes_types,
+                                  callable_types, array_types, path_types)
+        
+        # Test apply_to(…) returning a partial --
+        # N.B. this is the exact implementation of actual functions
+        # in use in clu.typology:
+        istypelist = apply_to(isclasstype, all)
+        maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
+                                lambda total: tuple(frozenset(total)))
+        
+        assert istypelist(SINGLETON_TYPES)
+        assert istypelist(numeric_types)
+        assert istypelist(string_types)
+        assert istypelist(bytes_types)
+        assert istypelist(callable_types)
+        assert istypelist(array_types)
+        assert istypelist(path_types)
+        
+        one = maketypelist(str, bytes, type, object(), { 'yo' : "dogg" })
+        two = maketypelist("yo", "dogg", b"I heard", b"you like", 1337)
+        
+        assert istypelist(one)
+        assert istypelist(two)
+        
+        # Test apply_to evaluating the application of
+        # its function and predicate:
+        assert apply_to(lambda thing: type(thing) is str,
+                        lambda total: all(total),
+                        "yo", "dogg", "I", "heard", "you", "love", "apply_to")
+        
+        s = lambda by: str(by, encoding=ENCODING)
+        r = "Yo Dogg I Heard You Love Apply_to"
+        assert apply_to(lambda thing: isinstance(thing, string_types) and thing or s(thing),
+                        lambda total: capwords(" ".join(total)),
+                        "yo", "dogg", b"I", b"heard", "you", b"love", "apply_to") == r
+    
     def test_applyto_predicate_logicals(self):
-        """ » Checking “apply_to(…)” derived predicate logicals clu.predicates … """
+        """ » Checking “apply_to(…)” derived predicate logicals from clu.predicates … """
         from clu.predicates import (haslength, uncallable, isiterable, isslotted)
         from clu.predicates import (predicate_all, predicate_any,
                                     predicate_and, predicate_or,

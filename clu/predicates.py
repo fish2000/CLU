@@ -73,7 +73,9 @@ isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,
                                                 map, filter, reversed))
 
 isnormative = lambda thing: isinstance(thing, (str, unicode, bytes, bytearray))
-iscontainer = lambda thing: isiterable(thing) and not isnormative(thing)
+iscontainer = lambda thing: isiterable(thing) and \
+                        not isnormative(thing) and \
+                        not isclasstype(thing)
 
 
 def apply_to(predicate, function, *things):
@@ -123,9 +125,9 @@ thing_has = lambda thing, atx: predicate_any(
 class_has = lambda cls, atx: isclasstype(cls) and thing_has(cls, atx)
 
 # Is this a thing based on a `__dict__`, or one using `__slots__`?
-isslotted = lambda thing: haspyattr(thing, 'slots') and not haspyattr(thing, 'mro')
-isdictish = lambda thing: haspyattr(thing, 'dict') and not haspyattr(thing, 'mro')
-isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and not haspyattr(thing, 'mro')
+isslotted = lambda thing: haspyattr(thing, 'slots') and not isclasstype(thing)
+isdictish = lambda thing: haspyattr(thing, 'dict') and not isclasstype(thing)
+isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and not isclasstype(thing)
 
 # For sorting with ALL_CAPS stuff first or last:
 case_sort = lambda c: c.lower() if c.isupper() else c.upper()
@@ -149,7 +151,7 @@ def listify(*items):
 
 def isenum(cls):
     """ isenum(cls) → boolean predicate, True if cls descends from Enum. """
-    if not haspyattr(cls, 'mro'):
+    if not isclasstype(cls):
         return False
     return Enum in cls.__mro__
 

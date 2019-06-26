@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 #
-#
 #   get_terminal_size()
 # 
 #   from https://gist.github.com/jtriley/1108174

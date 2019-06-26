@@ -25,13 +25,12 @@
 #
 from __future__ import print_function
 from pkgutil import extend_path
+from os.path import dirname
 
-import os
-
-from version import read_version_file
+from version import read_version_file, VersionInfo
 
 # Module exports:
-__all__ = ('__version__', 'version', 'VersionInfo',
+__all__ = ('__version__', 'version',
            '__title__', '__author__', '__maintainer__',
            '__license__', '__copyright__')
 
@@ -41,10 +40,8 @@ if '__path__' in locals():
     __path__ = extend_path(__path__, __name__)
     __all__ += ('__path__',)
 
-from version import VersionInfo
-
 # Embedded project metadata:
-__version__ = read_version_file(os.path.dirname(__file__))
+__version__ = read_version_file(dirname(__file__))
 __title__ = 'clu'
 __author__ = 'Alexander Böhn'
 __maintainer__ = __author__

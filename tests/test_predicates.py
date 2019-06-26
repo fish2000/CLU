@@ -18,6 +18,86 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates and clu.typology modules. """
     
+    def test_ismergeable(self):
+        """ » Checking “ismergeable” lambda from clu.predicates … """
+        from clu.predicates import ismergeable
+        from clu.typespace import Namespace
+        from collections import OrderedDict, defaultdict
+        
+        dic = { 'yo' : "dogg" }
+        odc = OrderedDict({ 'i_heard' : "you liked" })
+        ddc = defaultdict(lambda: "wat", { "mergeable" : "instances" })
+        nsi = Namespace(dogg="yo")
+        sns = SimpleNamespace(dogg="yo")
+        
+        assert ismergeable(dic)
+        assert ismergeable(odc)
+        assert ismergeable(ddc)
+        assert ismergeable(nsi)
+        assert not ismergeable(sns)
+        
+        class TechnicallyMergeable(object):
+            """ This is to show the limitations of the predicate """
+            __iter__ = "wtf"
+            __getitem__ = "hax"
+            get = "IDK"
+        
+        assert ismergeable(TechnicallyMergeable)
+        assert ismergeable(TechnicallyMergeable())
+    
+    def test_isiterable(self):
+        """ » Checking “isiterable” lambda from clu.predicates … """
+        from clu.predicates import isiterable
+        
+        ttup = ('yo', 'dogg')
+        mseq = list(ttup)
+        genx = (s for s in ttup)
+        rstr = "yo dogg"
+        robj = object()
+        
+        assert isiterable(ttup)
+        assert isiterable(mseq)
+        assert isiterable(genx)
+        assert isiterable(rstr)
+        assert not isiterable(robj)
+        assert not isiterable(isiterable)
+        assert not isiterable(self)
+        
+        class TechnicallyIterable(object):
+            """ This is to show the limitations of the predicate """
+            __iter__ = "wtf"
+            __getitem__ = "hax"
+        
+        assert isiterable(TechnicallyIterable)
+        assert isiterable(TechnicallyIterable())
+    
+    def test_hasattr_shortcuts(self):
+        """ » Checking “hasattr/haspyattr” shortcuts from clu.predicates … """
+        from clu.predicates import (haspyattr, anyattrs, allattrs,
+                                               anypyattrs, allpyattrs)
+        assert not hasattr(object, 'base')
+        assert not hasattr(object, 'class')
+        assert hasattr(object, 'mro')
+        
+        assert haspyattr(object, 'base')
+        assert haspyattr(object, 'class')
+        assert haspyattr(object, 'mro')
+        assert not haspyattr(object, 'yo')
+        assert not haspyattr(object, 'dogg')
+        assert not haspyattr(object, 'wtf')
+        
+        assert anyattrs(object, 'base', 'class', 'mro')
+        assert not allattrs(object, 'base', 'class', 'mro')
+        assert not anyattrs(object, 'yo', 'dogg', 'i', 'have', 'not', 'heard')
+        assert allattrs(object, '__base__', '__class__', '__mro__')
+        
+        assert anypyattrs(object, 'yo', 'dogg', 'mro')
+        assert not allpyattrs(object, 'yo', 'dogg', 'mro')
+        assert not anypyattrs(object, 'yo', 'dogg', 'wtf')
+        assert allpyattrs(object, 'base', 'class', 'mro',
+                                  'call', 'dict', 'doc',
+                                  'name', 'hash', 'dir')
+    
     def test_class_predicates(self):
         """ » Checking “ismetaclass/isclass/isclasstype” from clu.predicates … """
         from clu.predicates import ismetaclass, isclass, isclasstype

@@ -25,7 +25,7 @@ ENCODING = sys.intern(sys.getfilesystemencoding().upper()) # 'UTF-8'
 FILE_ARGUMENT_NAMES = ('path', 'pth', 'file')
 
 # The hostname for this computer:
-HOSTNAME = socket.gethostname()
+HOSTNAME = sys.intern(socket.gethostname())
 
 # The __name__ of a lambda function:
 lam = lambda: None
@@ -38,10 +38,10 @@ MAXINT = getattr(sys, 'maxint',
 
 # The PATH environment variable, with a sensible default:
 PYTHON_BIN = os.path.join(sysconfig.get_path('data'), 'bin')
-DEFAULT_PATH = ":".join(filter(os.path.exists, (PYTHON_BIN,
-                                               "/usr/local/bin",
-                                               "/bin",  "/usr/bin",
-                                               "/sbin", "/usr/sbin")))
+DEFAULT_PATH = os.pathsep.join(filter(os.path.exists, (PYTHON_BIN,
+                                                       "/usr/local/bin",
+                                                       "/bin",  "/usr/bin",
+                                                       "/sbin", "/usr/sbin")))
 PATH = os.getenv("PATH", DEFAULT_PATH)
 
 # The name of this project
@@ -54,7 +54,7 @@ PY3 = sys.version_info.major > 2
 PYPY = hasattr(sys, 'pypy_version_info')
 
 # Qualifier for qualified-name operations:
-QUALIFIER = '.'
+QUALIFIER = sys.intern(os.extsep)
 
 # List of Python’s built-in singleton types:
 NoneType = type(None)
@@ -95,7 +95,6 @@ class NoDefault(object):
     __slots__ = tuple()
     def __new__(cls, *a, **k):
         return cls
-
 
 __all__ = ('BUILTINS',
            'DEBUG',

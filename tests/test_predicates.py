@@ -18,6 +18,47 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates and clu.typology modules. """
     
+    def test_getattr_shortcuts(self):
+        """ » Checking “getattr/getpyattr/getitem” shortcuts from clu.predicates … """
+        from random import shuffle
+        from clu.predicates import (or_none, getpyattr, getitem,
+                                    attr, pyattr, item,
+                                    attr_search, pyattr_search, item_search)
+        
+        dict0 = {  'yo' : "dogg"  }
+        dict1 = {   'i' : "heard" }
+        dict2 = { 'you' : "like"  }
+        
+        dicts = (dict0, dict1, dict2)
+        list_of_dicts = list(dicts)
+        
+        for d in dicts:
+            assert or_none(d, 'get') is not None
+            assert or_none(d, 'set') is None
+            assert attr(d, 'set', 'delete', 'get') == or_none(d, 'get')
+            assert pyattr(d, 'bool', 'enter', 'exit', 'class') is dict
+            assert type(item(d, 'yo', 'i', 'you')) is str
+            assert item(d, 'yo', 'i', 'you') in ("dogg", "heard", "like")
+        
+        assert getitem(dict0, 'yo') == "dogg"
+        assert getitem(dict1, 'i') == "heard"
+        assert getitem(dict2, 'you') == "like"
+        
+        shuffle(list_of_dicts)
+        assert attr_search('__doc__', *dicts) \
+            == attr_search('__doc__', *reversed(dicts)) \
+            == attr_search('__doc__', *list_of_dicts)
+        
+        assert item_search('yo', *dicts) == "dogg"
+        assert item_search('i', *dicts) == "heard"
+        assert item_search('you', *dicts) == "like"
+        
+        assert getpyattr(dict0, 'class') \
+            is getpyattr(dict1, 'class') \
+            is getpyattr(dict2, 'class') \
+            is pyattr_search('class', *dicts)
+        
+    
     def test_nops(self):
         """ » Checking “always/never/nuhuh/no_op” lambdas from clu.predicates … """
         from clu.predicates import always, never, nuhuh, no_op

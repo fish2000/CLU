@@ -16,7 +16,23 @@ from clu.typespace import SimpleNamespace
 
 class TestPredicates(object):
     
-    """ Run the tests for the clu.predicates and clu.typology modules. """
+    """ Run the tests for the clu.predicates module. """
+    
+    def test_enum_predicates(self):
+        """ » Checking “isenum” and “enumchoices” functions from clu.predicates … """
+        from clu.predicates import isenum, enumchoices
+        from clu.constants import System, CSIDL
+        
+        class NotAnEnum(object):
+            pass
+        
+        assert isenum(System)
+        assert isenum(CSIDL)
+        assert not isenum(NotAnEnum)
+        
+        assert enumchoices(System) == ('DARWIN', 'WIN32', 'LINUX', 'LINUX2')
+        assert enumchoices(CSIDL) == ('APPDATA', 'COMMON_APPDATA', 'LOCAL_APPDATA')
+        assert enumchoices(NotAnEnum) == tuple()
     
     def test_utility_helper_functions(self):
         """ » Checking “tuplize/uniquify/listify” functions from clu.predicates … """

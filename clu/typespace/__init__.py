@@ -36,9 +36,8 @@ setattr(types, '__cached__',      cache_from_source(__file__))
 setattr(types, '__package__',     os.path.splitext(
                                   os.path.basename(__file__))[0])
 
-def modulize(namespace, name,
-                        docs=None,
-                        path=None):
+def modulize(name, namespace, docs=None,
+                              path=None):
     """ Convert a dictionary mapping into a legit Python module """
     
     # Ensure a module with the given module name we received

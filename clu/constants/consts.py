@@ -139,13 +139,17 @@ def print_all():
     G = globals()
     SEP = ",\n" + (" " * 30)
     
+    printout = lambda name, value: print("» %25s : %s" % (name, value))
+    
     for const_name in __all__:
         if const_name.endswith('PATH') and os.pathsep in G[const_name]:
-            print("» %25s : %s" % (const_name, G[const_name].replace(os.pathsep, SEP)))
+            printout(const_name, G[const_name].replace(os.pathsep, SEP))
         elif type(G[const_name]) is tuple:
-            print("» %25s : %s" % (const_name, SEP.join(str(g) for g in G[const_name])))
+            printout(const_name, SEP.join("“%s”" % str(g) for g in G[const_name]))
+        elif type(G[const_name]) is str:
+            printout(const_name, "“%s”" % G[const_name])
         else:
-            print("» %25s : %s" % (const_name, G[const_name]))
+            printout(const_name, G[const_name])
     
     print('*' * WIDTH)
 

@@ -18,6 +18,34 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates and clu.typology modules. """
     
+    def test_utility_helper_functions(self):
+        """ » Checking “tuplize/uniquify/listify” functions from clu.predicates … """
+        from clu.predicates import tuplize, uniquify, listify
+        
+        t = tuplize("yo", "dogg", "I", "heard", "you", "like", "tuples")
+        assert type(t) is tuple
+        assert len(t) == 7
+        
+        u = uniquify("yo", "dogg", "I", "heard", "you", "like", "dogg", "yo")
+        assert type(u) is tuple
+        assert len(u) == 6
+        
+        l = listify("yo", "dogg", "I", "heard", "you", "like", "mutable", "lists")
+        assert type(l) is list
+        assert len(l) == 8
+        
+        et = tuplize()
+        assert type(et) is tuple
+        assert len(et) == 0
+        
+        eu = uniquify()
+        assert type(eu) is tuple
+        assert len(eu) == 0
+        
+        el = listify()
+        assert type(el) is list
+        assert len(el) == 0
+    
     def test_slot_aware_attribute_checkers(self):
         """ » Checking “thing/class/slotted/dictish” lambdas from clu.predicates … """
         from clu.typespace import Namespace

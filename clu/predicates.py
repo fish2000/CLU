@@ -107,7 +107,7 @@ def apply_to(predicate, function, *things):
     # Ensure both the predicate and function are callable:
     if any(uncallable(f) for f in (predicate, function)):
         names = tuple(pyname(f) for f in (predicate, function))
-        raise ValueError("Noncallable specified in invoking apply_to(%s, %s, …)" % names)
+        raise ValueError("Noncallable passed to apply_to(%s, %s, …)" % names)
     if len(things) < 1:
         # Return a partial for this predicate and function:
         return partial(apply_to, predicate, function)
@@ -170,7 +170,8 @@ __all__ = ('ismetaclass', 'isclass', 'isclasstype',
            'accessor', 'searcher',
            'attr', 'pyattr', 'item',
            'attr_search', 'pyattr_search', 'item_search',
-           'function_nop', 'predicate_nop', 'uncallable',
+           'isenum', 'enumchoices',
+           'predicate_nop', 'function_nop', 'uncallable',
            'isexpandable', 'isnormative', 'iscontainer',
            'apply_to',
            'predicate_all', 'predicate_any',
@@ -178,7 +179,6 @@ __all__ = ('ismetaclass', 'isclass', 'isclasstype',
            'thing_has', 'class_has',
            'isslotted', 'isdictish', 'isslotdicty',
            'case_sort',
-           'tuplize', 'uniquify', 'listify',
-           'isenum', 'enumchoices')
+           'tuplize', 'uniquify', 'listify')
 
 __dir__ = lambda: list(__all__)

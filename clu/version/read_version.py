@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 Extract your project's __version__ variable
 
 When creating a ``setup.py`` for a new project, do you find yourself always

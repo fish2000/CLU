@@ -73,6 +73,9 @@ class alias(object):
         for thing in cls:
             if thing.value == value:
                 return thing
+        for thing_name, thing_value in cls.__members__.items():
+            if thing_value == value:
+                return cls.__members__[thing_name]
         return value
     
     def register(self, cls, name):

@@ -21,18 +21,23 @@ class TestPredicates(object):
     def test_enum_predicates(self):
         """ » Checking “isenum” and “enumchoices” functions from clu.predicates … """
         from clu.predicates import isenum, enumchoices
-        from clu.constants import System, CSIDL
+        from clu.constants import Enum, System, CSIDL
         
         class NotAnEnum(object):
+            pass
+        
+        class TechnicallyAnEnum(Enum):
             pass
         
         assert isenum(System)
         assert isenum(CSIDL)
         assert not isenum(NotAnEnum)
+        assert isenum(TechnicallyAnEnum)
         
         assert enumchoices(System) == ('DARWIN', 'WIN32', 'LINUX', 'LINUX2')
         assert enumchoices(CSIDL) == ('APPDATA', 'COMMON_APPDATA', 'LOCAL_APPDATA')
         assert enumchoices(NotAnEnum) == tuple()
+        assert enumchoices(TechnicallyAnEnum) == tuple()
     
     def test_utility_helper_functions(self):
         """ » Checking “tuplize/uniquify/listify” functions from clu.predicates … """

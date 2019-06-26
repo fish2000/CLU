@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from itertools import chain
 from functools import partial
 
 from constants import Enum, unicode
@@ -142,6 +143,15 @@ isslotted = lambda thing: haspyattr(thing, 'slots') and not isclasstype(thing)
 isdictish = lambda thing: haspyattr(thing, 'dict') and not isclasstype(thing)
 isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and not isclasstype(thing)
 
+def slots_for(cls):
+    """ Get the summation of the `__slots__` tuples for a class and its ancestors """
+    # q.v. https://stackoverflow.com/a/6720815/298171
+    if not isclasstype(cls):
+        return tuple()
+    return tuple(chain.from_iterable(
+                 getpyattr(ancestor, 'slots', tuple()) \
+                       for ancestor in cls.__mro__))
+
 # For sorting with ALL_CAPS stuff first or last:
 case_sort = lambda c: c.lower() if c.isupper() else c.upper()
 
@@ -170,13 +180,13 @@ __all__ = ('ismetaclass', 'isclass', 'isclasstype',
            'attr', 'pyattr', 'item',
            'attr_search', 'pyattr_search', 'item_search',
            'isenum', 'enumchoices',
-           'predicate_nop', 'function_nop', 'uncallable',
+           'predicate_nop', 'function_nop', 'uncallable', 'pyname',
            'isexpandable', 'isnormative', 'iscontainer',
            'apply_to',
            'predicate_all', 'predicate_any',
            'predicate_and', 'predicate_or', 'predicate_xor',
            'thing_has', 'class_has',
-           'isslotted', 'isdictish', 'isslotdicty',
+           'isslotted', 'isdictish', 'isslotdicty', 'slots_for',
            'case_sort',
            'tuplize', 'uniquify', 'listify')
 

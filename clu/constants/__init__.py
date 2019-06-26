@@ -31,7 +31,8 @@ from .exceptions import (BadDotpathWarning,
                          ConfigurationError,
                          ExecutionError, FilesystemError,
                          ExportError, ExportWarning,
-                         KeyValueError)
+                         KeyValueError,
+                         Nondeterminism)
 
 from .polyfills import (Enum, EnumMeta, unique, ispyname,
                         AutoType, auto,
@@ -73,6 +74,7 @@ __all__ = ('BASEPATH',
            'ExecutionError', 'FilesystemError',
            'ExportError', 'ExportWarning',
            'KeyValueError',
+           'Nondeterminism',
            'Enum', 'EnumMeta', 'unique', 'ispyname',
            'AutoType', 'auto',
            'Counter', 'OrderedDict',

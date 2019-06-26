@@ -10,7 +10,6 @@ from constants import Counter, MutableMapping, NoDefault, OrderedDict
 from constants import ExportError, ExportWarning
 from naming import doctrim, determine_name, pytuple
 from naming import thingname_search, thingname_search_by_id
-from predicates import getitem
 from repl import print_separator
 
 def predicates_for_types(*types):
@@ -235,7 +234,7 @@ class Exporter(MutableMapping):
         from pprint import pformat
         exports = self.exports()
         keys = sorted(exports.keys(), key=case_sort, reverse=True)
-        vals = (getitem(exports, key) for key in keys)
+        vals = (exports[key] for key in keys)
         print_separator()
         print("≠≠≠ EXPORTS: (length = %i)" % len(keys))
         print()
@@ -356,3 +355,4 @@ exporter = Exporter()
 export = exporter.decorator()
 
 __all__ = ('Exporter', 'exporter', 'export')
+__dir__ = lambda: list(__all__)

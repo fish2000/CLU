@@ -37,11 +37,17 @@ class KeyValueError(ValueError):
     """ An error raised in the clu.keyvalue API """
     pass
 
+class Nondeterminism(Exception):
+    """ An error indicating a “heisenbug” –
+        a nondeterministic problem.
+    """
+
 __all__ = ('BadDotpathWarning',
            'CDBError',
            'ConfigurationError',
            'ExecutionError', 'FilesystemError',
            'ExportError', 'ExportWarning',
-           'KeyValueError')
+           'KeyValueError',
+           'Nondeterminism')
 
 __dir__ = lambda: list(__all__)

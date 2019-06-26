@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from itertools import chain
 
 import os
+import pickle
 import sys
 import warnings
 
 from constants import BASEPATH, BUILTINS, DEBUG, MAXINT, QUALIFIER
 from constants import lru_cache
 from constants import BadDotpathWarning
-from predicates import haspyattr, getpyattr, pyattr, uniquify
+# from predicates import pyattr
 
 pytuple = lambda *attrs: tuple('__%s__' % str(atx) for atx in attrs)
 
@@ -50,7 +50,7 @@ cache = lru_cache(maxsize=128, typed=False)
 # as members of the `__console__` or `__main__` modules –
 # a problem which, I should mention, is present in the operation
 # of the `pickle.whichmodule(…)` function (!)
-sysmods = lambda: reversed(uniquify(*sys.modules.values()))
+sysmods = lambda: reversed(tuple(frozenset(sys.modules.values())))
 
 @cache
 def thingname_search_by_id(thingID):
@@ -173,15 +173,6 @@ def itermoduleids(module):
     ids = (id(getattr(module, key)) for key in keys)
     return zip(keys, ids)
 
-def slots_for(cls):
-    """ Get the summation of the `__slots__` tuples for a class and its ancestors """
-    # q.v. https://stackoverflow.com/a/6720815/298171
-    if not haspyattr(cls, 'mro'):
-        return tuple()
-    return tuple(chain.from_iterable(
-                 getpyattr(ancestor, 'slots', tuple()) \
-                       for ancestor in cls.__mro__))
-
 def nameof(thing, fallback=''):
     """ Get the name of a thing, according to either:
         >>> thing.__qualname__
@@ -195,9 +186,10 @@ def determine_module(thing):
     """ Determine in which module a given thing is ensconced,
         and return that modules’ name as a string.
     """
-    return pyattr(thing, 'module', 'package') or \
-           determine_name(
-           thingname_search_by_id(id(thing))[0])
+    # return pyattr(thing, 'module', 'package') or \
+    #        determine_name(
+    #        thingname_search_by_id(id(thing))[0])
+    return pickle.whichmodule(thing, None)
 
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
 # assess a thing’s qualified name, etc etc.
@@ -333,7 +325,6 @@ def split_abbreviations(s):
 __all__ = ('pytuple', 'doctrim',
            'sysmods', 'thingname', 'thingname_search', 'determine_name',
            'itermodule', 'moduleids',
-           'slots_for',
            'nameof',
            'determine_module',
            'path_to_dotpath',

@@ -9,13 +9,9 @@ import os
 
 from abc import abstractmethod as abstract
 
-from constants import ENCODING
+from constants import ENCODING, CDBError
 from fs import TemporaryName, Directory, rm_rf, stringify, u8str
 from predicates import tuplize
-
-class CDBError(Exception):
-    """ A problem with a compilation database """
-    pass
 
 class CDBSubBase(abc.ABC, metaclass=abc.ABCMeta):
     

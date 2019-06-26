@@ -22,6 +22,7 @@ from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
 from constants import DELETE_FLAG, ENCODING, PATH
 from constants import lru_cache
+from constants import ExecutionError, FilesystemError
 from predicates import attr, allattrs
 from sanitizer import utf8_encode
 from typology import ispath, isvalidpath
@@ -44,14 +45,6 @@ __dir__ = lambda: list(__all__)
 
 DEFAULT_TIMEOUT = 60 # seconds
 DEFAULT_PREFIX = "yo-dogg-"
-
-class ExecutionError(Exception):
-    """ An error during the execution of a shell command """
-    pass
-
-class FilesystemError(Exception):
-    """ An error that occurred while mucking about with the filesystem """
-    pass
 
 def ensure_path_is_valid(pth):
     """ Raise an exception if we can’t write to the specified path """

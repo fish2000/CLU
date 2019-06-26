@@ -8,6 +8,7 @@ import warnings
 
 from constants import BASEPATH, BUILTINS, DEBUG, MAXINT, QUALIFIER
 from constants import lru_cache
+from constants import BadDotpathWarning
 from predicates import haspyattr, getpyattr, pyattr, uniquify
 
 pytuple = lambda *attrs: tuple('__%s__' % str(atx) for atx in attrs)
@@ -200,9 +201,6 @@ def determine_module(thing):
 
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
 # assess a thing’s qualified name, etc etc.
-
-class BadDotpathWarning(Warning):
-    pass
 
 def path_to_dotpath(path):
     """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)

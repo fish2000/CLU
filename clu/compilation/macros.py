@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from constants import ENCODING
+from constants import ENCODING, ConfigurationError
 from typespace import SimpleNamespace
 from typology import isstring
 from fs import stringify, u8str
-
-class ConfigurationError(Exception):
-    """ An error that occurred in the course of configuration """
-    pass
 
 class Macro(object):
     
@@ -140,5 +136,5 @@ class Macros(SimpleNamespace):
     def __bytes__(self):
         return bytes(self.to_string(), encoding=ENCODING)
 
-__all__ = ('ConfigurationError', 'Macro', 'Macros')
+__all__ = ('Macro', 'Macros')
 __dir__ = lambda: list(__all__)

@@ -48,7 +48,7 @@ sanitize.sanitizers = (
     (sanitize.re(r""),                 "Apple"),
     (sanitize.re(r"⌘"),                 "command"),
     (sanitize.re(r"∞"),                 "infinity"),
-    (sanitize.re(r'√(?P<arg>[\w\d]*)'), 'sqrt(\g<arg>)'),
+    (sanitize.re(r'√(?P<arg>[\w\d]*)'), r'sqrt(\g<arg>)'),
     (sanitize.re(r"¶"),                 "[P]"),
     (sanitize.re(r"[∂∆]"),              "d"),
     (sanitize.re(r"Ø"),                 "0"),

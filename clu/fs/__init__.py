@@ -1,7 +1,6 @@
 
 from .filesystem import (DEFAULT_PREFIX,
                          DEFAULT_TIMEOUT,
-                         ExecutionError, FilesystemError,
                          ensure_path_is_valid,
                          write_to_path,
                          script_path, which, back_tick,
@@ -19,7 +18,6 @@ from .pypath import append_paths, remove_paths
 
 __all__ = ('DEFAULT_PREFIX',
            'DEFAULT_TIMEOUT',
-           'ExecutionError', 'FilesystemError',
            'ensure_path_is_valid',
            'write_to_path',
            'script_path', 'which', 'back_tick',

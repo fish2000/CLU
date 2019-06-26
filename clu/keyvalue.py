@@ -5,6 +5,7 @@ import plistlib
 import zict
 
 from constants import ENCODING, NoDefault, System
+from constants import KeyValueError
 from fs import AppDirs
 from fs.appdirectories import test
 from predicates import attr
@@ -17,8 +18,6 @@ from typology import isstring, isbytes
 # UTILITY STUFF: Exceptions
 
 # @export
-class KeyValueError(ValueError):
-    pass
 
 # UTILITY STUFF: AppDirs wrapper
 

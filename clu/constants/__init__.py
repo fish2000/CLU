@@ -26,6 +26,13 @@ from .consts import (BASEPATH,
 
 from .enums import System, CSIDL, SYSTEM
 
+from .exceptions import (BadDotpathWarning,
+                         CDBError,
+                         ConfigurationError,
+                         ExecutionError, FilesystemError,
+                         ExportError, ExportWarning,
+                         KeyValueError)
+
 from .polyfills import (Enum, EnumMeta, unique, ispyname,
                         AutoType, auto,
                         Counter, OrderedDict,
@@ -60,6 +67,12 @@ __all__ = ('BASEPATH',
                                'XDG_RUNTIME_MODE',
            'NoDefault',
            'System', 'CSIDL', 'SYSTEM',
+           'BadDotpathWarning',
+           'CDBError',
+           'ConfigurationError',
+           'ExecutionError', 'FilesystemError',
+           'ExportError', 'ExportWarning',
+           'KeyValueError',
            'Enum', 'EnumMeta', 'unique', 'ispyname',
            'AutoType', 'auto',
            'Counter', 'OrderedDict',

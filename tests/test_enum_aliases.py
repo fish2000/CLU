@@ -31,6 +31,7 @@ class TestEnumAliases(object):
         # Aliases on basic Enum subclasses aren’t registered
         # in an “__aliases__” dict on the Enum subclass itself:
         assert not hasattr(Numbers, '__aliases__')
+        assert len(getattr(Numbers, '__aliases__', {})) == 0
         
         # len(Numbers) reflects only the non-alias members:
         assert len(Numbers) == 3
@@ -41,8 +42,8 @@ class TestEnumAliases(object):
         
         @unique
         class Numbers(Enum, metaclass=AliasingEnumMeta):
-            """ This is literally the example from the alias
-                object docstring.
+            """ This Enum subclass has AliasingEnumMeta
+                as its metaclass.
             """
             ONE = 1
             TWO = 2
@@ -60,7 +61,7 @@ class TestEnumAliases(object):
         # register their aliases in an “__aliases__” dict on
         # the Enum subclass itself:
         assert hasattr(Numbers, '__aliases__')
-        assert len(Numbers.__aliases__) == 3
+        assert len(getattr(Numbers, '__aliases__', {})) == 3
         
         # len(Numbers) reflects only the non-alias members:
         assert len(Numbers) == 3
@@ -71,8 +72,9 @@ class TestEnumAliases(object):
         
         @unique
         class Numbers(AliasingEnum):
-            """ This is literally the example from the alias
-                object docstring.
+            """ This is a subclass of AliasingEnum, itself
+                an intermediate Enum subclass that furnishes
+                the AliasingEnumMeta metaclass.
             """
             ONE = 1
             TWO = 2
@@ -90,7 +92,7 @@ class TestEnumAliases(object):
         # aliases in an “__aliases__” dict on the AliasingEnum
         # subclass itself:
         assert hasattr(Numbers, '__aliases__')
-        assert len(Numbers.__aliases__) == 3
+        assert len(getattr(Numbers, '__aliases__', {})) == 3
         
         # len(Numbers) reflects only the non-alias members:
         assert len(Numbers) == 3

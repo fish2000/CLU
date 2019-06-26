@@ -205,7 +205,7 @@ def path_to_dotpath(path):
     """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
         to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
         would call a “quick and dirty” fashion.
-    """ 
+    """
     relpath = os.path.relpath(path,
         start=os.path.dirname('/usr/local/lib/python3.7/site-packages'))
     dotpath = relpath.replace(os.path.sep, QUALIFIER)

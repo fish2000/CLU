@@ -237,26 +237,4 @@ export(isslotdicty,     name='isslotdicty',     doc="isslotdicty(thing) → bool
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
-# assert frozenset(__all__) == frozenset(('ismetaclass', 'isclass', 'isclasstype',
-#            'haspyattr', 'anyattrs', 'allattrs', 'anypyattrs', 'allpyattrs',
-#            'haslength',
-#            'isiterable', 'ismergeable',
-#            'always', 'never', 'nuhuh',
-#            'no_op', 'or_none',
-#            'getpyattr', 'getitem',
-#            'accessor', 'searcher',
-#            'attr', 'pyattr', 'item',
-#            'attr_search', 'pyattr_search', 'item_search',
-#            'isenum', 'enumchoices',
-#            'predicate_nop', 'function_nop', 'uncallable',
-#            'pyname',
-#            'isexpandable', 'isnormative', 'iscontainer',
-#            'apply_to',
-#            'predicate_all', 'predicate_any',
-#            'predicate_and', 'predicate_or', 'predicate_xor',
-#            'thing_has', 'class_has',
-#            'isslotted', 'isdictish', 'isslotdicty', 'slots_for',
-#            'case_sort',
-#            'tuplize', 'uniquify', 'listify'))
-
 # __dir__ = lambda: list(__all__)

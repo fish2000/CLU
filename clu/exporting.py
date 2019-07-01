@@ -153,9 +153,16 @@ class Exporter(MutableMapping):
     """ A class representing a list of things for a module to export. """
     __slots__ = pytuple('exports', 'clades')
     
-    def __init__(self):
+    def __init__(self, *args):
         self.__exports__ = {}
         self.__clades__ = Counter()
+        
+        for arg in args:
+            if isinstance(arg, type(self)):
+                self.__exports__.update(arg.__exports__)
+                self.__clades__.update(arg.__clades__)
+            else:
+                self.__exports__.update(dict(arg))
     
     def exports(self):
         """ Get a new dictionary instance filled with the exports. """
@@ -336,6 +343,40 @@ class Exporter(MutableMapping):
     
     def __delitem__(self, key):
         del self.__exports__[key]
+    
+    def __add__(self, operand):
+        # On add, old values are not overwritten
+        from predicates import ismergeable
+        from dicts import merge_two
+        if not ismergeable(operand):
+            return NotImplemented
+        return merge_two(self, operand, cls=type(self))
+    
+    def __radd__(self, operand):
+        # On reverse-add, old values are overwritten
+        from predicates import ismergeable
+        from dicts import merge_two
+        if not ismergeable(operand):
+            return NotImplemented
+        return merge_two(operand, self, cls=type(self))
+    
+    def __iadd__(self, operand):
+        # On in-place add, old values are updated and replaced
+        from predicates import ismergeable
+        from dicts import asdict
+        if not ismergeable(operand):
+            return NotImplemented
+        self.__dict__.update(asdict(operand))
+        return self
+    
+    def __or__(self, operand):
+        return self.__add__(operand)
+    
+    def __ror__(self, operand):
+        return self.__radd__(operand)
+    
+    def __ior__(self, operand):
+        return self.__iadd__(operand)
     
     def __bool__(self):
         return len(self.__exports__) > 0

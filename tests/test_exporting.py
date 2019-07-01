@@ -7,6 +7,13 @@ class TestExporting(object):
     
     """ Run the tests for the clu.exporting module. """
     
+    def test_combine_real_world_exporters(self):
+        from clu.predicates import exporter as exporter0
+        from clu.typology import exporter as exporter1
+        
+        exporter_sum = exporter0 + exporter1
+        assert len(exporter_sum) == len(exporter0) + len(exporter1)
+    
     def test_exporter_export_constants(self):
         # N.B. the warning checks will *FAIL* for some reason
         # if ExportWarning is imported from clu.constants,

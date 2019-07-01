@@ -159,12 +159,3 @@ export(ishashable,      name='ishashable',  doc="ishashable(thing) → boolean p
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
-
-# assert frozenset(__all__) == frozenset(('isunique', 'istypelist', 'maketypelist',
-#            'isderivative', 'subclasscheck', 'graceful_issubclass',
-#            'numeric_types', 'array_types', 'string_types', 'bytes_types',
-#            'path_classes', 'path_types', 'file_types', 'callable_types',
-#            'ispathtype', 'ispath', 'isvalidpath',
-#            'isabstractmethod', 'isabstract', 'isabstractcontextmanager', 'iscontextmanager',
-#            'isnumber', 'isnumeric', 'iscomplex', 'isarray', 'isstring', 'isbytes', 'ismodule',
-#            'isfunction', 'islambda', 'ishashable'))

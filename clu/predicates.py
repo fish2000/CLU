@@ -107,6 +107,11 @@ lambda_repr = lambda instance, default="<lambda>": "<function %s at 0x%0x>" % (p
 
 class Partial(partial):
     
+    """ A subclass of `functools.partial` designed to be renameable –
+        it offers the same `repr`-style as lambda-types, and can have
+        its `__doc__` value assigned as well.
+    """
+    
     def __init__(self, *args, **kwargs):
         """ Initialize a new Partial object """
         # N.B. The real action seems to happen in partial.__new__(…)
@@ -123,7 +128,9 @@ class Partial(partial):
 def apply_to(predicate, function, *things):
     """ apply_to(predicate, function, *things) → Apply a predicate to each
         of the things, and finally a function to the entirety of the things,
-        returning as that function returns.
+        returning as that function returns. Like e.g.:
+        
+            function(predicate(thing) for thing in things)
         
         apply_to(predicate, function) → Return a partial† function ƒ(*things)
         that will behave as `apply_to(predicate, function, *things)` when it

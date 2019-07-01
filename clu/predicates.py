@@ -145,7 +145,7 @@ isdictish = lambda thing: haspyattr(thing, 'dict') and not isclasstype(thing)
 isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and not isclasstype(thing)
 
 def slots_for(cls):
-    """ Get the summation of the `__slots__` tuples for a class and its ancestors """
+    """ slots_for(cls) → get the summation of the `__slots__` tuples for a class and its ancestors """
     # q.v. https://stackoverflow.com/a/6720815/298171
     if not isclasstype(cls):
         return tuple()
@@ -159,15 +159,15 @@ case_sort = lambda c: c.lower() if c.isupper() else c.upper()
 # UTILITY FUNCTIONS: helpers for builtin container types:
 
 def tuplize(*items):
-    """ Return a new tuple containing all non-`None` arguments """
+    """ tuplize(*items) → Return a new tuple containing all non-`None` arguments """
     return tuple(item for item in items if item is not None)
 
 def uniquify(*items):
-    """ Return a tuple with a unique set of all non-`None` arguments """
+    """ uniquify(*items) → Return a tuple with a unique set of all non-`None` arguments """
     return tuple(frozenset(item for item in items if item is not None))
 
 def listify(*items):
-    """ Return a new list containing all non-`None` arguments """
+    """ listify(*items) → Return a new list containing all non-`None` arguments """
     return list(item for item in items if item is not None)
 
 __all__ = ('ismetaclass', 'isclass', 'isclasstype',

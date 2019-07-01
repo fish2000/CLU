@@ -46,7 +46,7 @@ def isderivative(putative, thing):
 
 subclasscheck = lambda putative, *thinglist: predicate_any(
                 lambda thing: isderivative(putative, thing),
-                             *maketypelist(*thinglist))
+                                      *maketypelist(*thinglist))
 
 # LEGACY CODE SUPPORT:
 graceful_issubclass = subclasscheck

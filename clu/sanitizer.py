@@ -4,9 +4,14 @@ from __future__ import print_function
 import re
 
 from constants import unicode, PY3, ENCODING
+from exporting import Exporter
+
+exporter = Exporter()
+export = exporter.decorator()
 
 # TEXT UTILITIES: `sanitize(…)` to remove high-code-point glyphs
 
+@export
 def sanitize(text):
     """ Remove specific unicode strings, in favor of ASCII-friendly versions """
     sanitized = unicode(text)
@@ -63,6 +68,8 @@ sanitize.sanitizers = (
 sanitizers = lambda: tuple((sani.pattern, sub) for sani, sub in sanitize.sanitizers)
 
 if PY3:
+    
+    @export
     def utf8_encode(source):
         """ Encode a source as a UTF-8 bytes object using Python 3 semantics """
         if type(source) is bytes:
@@ -71,6 +78,7 @@ if PY3:
             return bytes(source)
         return bytes(source, encoding=utf8_encode.encoding)
     
+    @export
     def utf8_decode(source):
         """ Decode a source from UTF-8 bytes to a string using Python 3 semantics """
         if type(source) in (bytes, bytearray):
@@ -78,6 +86,8 @@ if PY3:
         return source
 
 else:
+    
+    @export
     def utf8_encode(source):
         """ Encode a source as a UTF-8 bytestring using Python 2 semantics """
         if type(source) is unicode:
@@ -86,6 +96,7 @@ else:
             return str(source)
         return source
     
+    @export
     def utf8_decode(source):
         """ Decode a source from a UTF-8 bytestring to Unicode using Python 2 semantics """
         if type(source) in (str, bytearray):
@@ -94,5 +105,9 @@ else:
 
 utf8_encode.encoding = utf8_decode.encoding = ENCODING
 
-__all__ = ('sanitize', 'sanitizers', 'utf8_encode', 'utf8_decode')
-__dir__ = lambda: list(__all__)
+export(sanitizers,          name='sanitizers',          doc="sanitizers() → shortcut to get a tuple of tuples listing the registered sanitizers")
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
+
+assert frozenset(__all__) == frozenset(('sanitize', 'sanitizers', 'utf8_encode', 'utf8_decode'))

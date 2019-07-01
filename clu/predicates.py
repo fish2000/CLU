@@ -238,6 +238,8 @@ export(isexpandable,    name='isexpandable',    doc="isexpandable(thing) → boo
 export(isnormative,     name='isnormative',     doc="isnormative(thing) → boolean predicate, True if thing is a string-like or bytes-like iterable")
 export(iscontainer,     name='iscontainer',     doc="iscontainer(thing) → boolean predicate, True if thing is iterable and not “normative” (q.v. `isnormative(…)` supra.)")
 
+export(lambda_repr,     name='lambda_repr',     doc="lambda_repr(instance) → Equivalent to the built-in __repr__ method of a lambda function")
+
 export(predicate_all,   name='predicate_all',   doc="predicate_all(predicate, *things) → boolean predicate, shortcut for apply_to(predicate, all, *things")
 export(predicate_any,   name='predicate_any',   doc="predicate_any(predicate, *things) → boolean predicate, shortcut for apply_to(predicate, any, *things")
 export(predicate_and,   name='predicate_and',   doc="predicate_and(predicate, a, b) → boolean predicate, shortcut for apply_to(predicate, all, a, b")

@@ -212,14 +212,3 @@ def split_abbreviations(s):
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
-
-# __all__ = ('thingname', 'itermodule', 'moduleids', 'nameof',
-#            'determine_module',
-#            'path_to_dotpath',
-#            'dotpath_join', 'dotpath_split',
-#            'qualified_import',
-#            'qualified_name_tuple',
-#            'qualified_name',
-#            'split_abbreviations')
-#
-# __dir__ = lambda: list(__all__)

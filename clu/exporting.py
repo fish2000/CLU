@@ -11,7 +11,7 @@ import warnings
 # from predicates import case_sort
 # from repl import print_separator
 
-from constants import BUILTINS, LAMBDA, MAXINT
+from constants import BUILTINS, λ, MAXINT
 from constants import Counter, MutableMapping, NoDefault
 from constants import ExportError, ExportWarning
 from constants import lru_cache, pytuple
@@ -120,10 +120,11 @@ def determine_name(thing, name=None, try_repr=False):
         code = thing.func_code
     # Use the function’s code object, if found…
     if code is not None:
-        if hasattr(code, 'co_name'):
+        if hasattr(code, 'co_name') and \
+       not hasattr(thing, '__lambda_name__'):
             name = code.co_name
     # … Otherwise, try the standard name attributes:
-    else:
+    if name is None:
         if hasattr(thing, '__qualname__'):
             name = thing.__qualname__
         elif hasattr(thing, '__name__'):
@@ -233,13 +234,13 @@ class Exporter(MutableMapping):
         # a lambda, try to rename it with either our valid name,
         # or the result of an ID-based search for that lambda:
         if callable(thing):
-            if getattr(thing, '__name__', '') == LAMBDA:
-                if named == LAMBDA:
+            if getattr(thing, '__name__', '') == λ:
+                if named == λ:
                     named = thingname_search(thing)
                 if named is None:
                     raise ExportError(type(self).messages['noname'] % id(thing))
                 thing.__name__ = thing.__qualname__ = named
-                thing.__lambda_name__ = LAMBDA # To recall the lambda’s genesis
+                thing.__lambda_name__ = λ # To recall the lambda’s genesis
         
         # If a “doc” argument was passed in, attempt to assign
         # the __doc__ attribute accordingly on the item -- note

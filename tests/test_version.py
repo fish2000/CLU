@@ -14,17 +14,17 @@ class TestVersionInfo(object):
     """ Run the tests for the clu.version module. """
     
     def test_VersionInfo(self):
-        version = VersionInfo(__version__)
+        version_info = VersionInfo(__version__)
         
-        assert version  < VersionInfo("9.0.0")
-        assert version == VersionInfo(version)
-        assert version == VersionInfo(__version__)
-        assert version == VersionInfo(PkgResourcesVersion(__version__))
-        assert version == VersionInfo(str(PkgResourcesVersion(__version__)))
-        assert version <= VersionInfo(__version__)
-        assert version >= VersionInfo(__version__)
-        assert version  > VersionInfo(b'0.0.1')
-        assert version != VersionInfo(b'0.0.1')
+        assert version_info  < VersionInfo("9.0.0")
+        assert version_info == VersionInfo(version_info)
+        assert version_info == VersionInfo(__version__)
+        assert version_info == VersionInfo(PkgResourcesVersion(__version__))
+        assert version_info == VersionInfo(str(PkgResourcesVersion(__version__)))
+        assert version_info <= VersionInfo(__version__)
+        assert version_info >= VersionInfo(__version__)
+        assert version_info  > VersionInfo(b'0.0.1')
+        assert version_info != VersionInfo(b'0.0.1')
         
-        assert bool(version)
+        assert bool(version_info)
         assert not bool(VersionInfo('‽.‽.‽'))

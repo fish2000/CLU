@@ -242,4 +242,4 @@ class VersionInfo(VersionAncestor):
 BASEPATH = os.path.dirname(os.path.dirname(__file__))
 __version__ = read_version_file(BASEPATH)
 
-version = VersionInfo(__version__)
+version_info = VersionInfo(__version__)

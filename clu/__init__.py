@@ -30,7 +30,7 @@ from os.path import dirname
 from version import read_version_file, VersionInfo
 
 # Module exports:
-__all__ = ('__version__', 'version',
+__all__ = ('__version__', 'version_info',
            '__title__', '__author__', '__maintainer__',
            '__license__', '__copyright__')
 
@@ -49,4 +49,4 @@ __license__ = 'MIT'
 __copyright__ = '© 2012-2025 %s' % __author__
 
 # The CLU project version:
-version = VersionInfo(__version__)
+version_info = VersionInfo(__version__)

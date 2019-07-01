@@ -3,12 +3,17 @@ from __future__ import print_function
 
 MOCK_NUMPY = False
 from constants import numpy
+from exporting import Exporter
+
+exporter = Exporter()
+export = exporter.decorator()
 
 if numpy is None:
     from mock import Mock
     numpy = Mock()
     MOCK_NUMPY = True
 
+@export
 def isdtype(thing):
     """ isdtype(thing) → boolean predicate, True if thing is a non-object NumPy dtype """
     try:
@@ -17,6 +22,7 @@ def isdtype(thing):
         return False
     return dt != numpy.object_
 
+@export
 class Clamper(object):
     __slots__ = ('type', 'info')
     
@@ -61,5 +67,5 @@ class Clamper(object):
 clamp = Clamper(dtype=numpy.uint8)
 
 if MOCK_NUMPY is not True:
-    __all__ = ('isdtype', 'Clamper', 'clamp')
-    __dir__ = lambda: list(__all__)
+    export(clamp, name='clamp')
+    __all__, __dir__ = exporter.all_and_dir()

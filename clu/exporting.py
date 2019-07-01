@@ -167,11 +167,6 @@ class Exporter(MutableMapping):
         """ Return the histogram of clade counts. """
         return Counter(self.__clades__)
     
-    messages = {
-        'docstr'    : "Can’t set the docstring for thing “%s” of type %s:",
-        'noname'    : "Can’t determine a name for lambda: 0x%0x"
-    }
-    
     def keys(self):
         """ Get a key view on the exported items dictionary. """
         return self.__exports__.keys()
@@ -181,14 +176,21 @@ class Exporter(MutableMapping):
         return self.__exports__.values()
     
     def get(self, key, default=NoDefault):
+        """ Get and return a value for a key, with an optional default """
         if default is NoDefault:
             return self.__exports__.get(key)
         return self.__exports__.get(key, default)
     
     def pop(self, key, default=NoDefault):
+        """ Remove and return a value for a key, with an optional default """
         if default is NoDefault:
             return self.__exports__.pop(key)
         return self.__exports__.pop(key, default)
+    
+    messages = {
+        'docstr'    : "Can’t set the docstring for thing “%s” of type %s:",
+        'noname'    : "Can’t determine a name for lambda: 0x%0x"
+    }
     
     def export(self, thing, name=None, doc=None):
         """ Add a function -- or any object, really -- to the export list.

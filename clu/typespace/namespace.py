@@ -3,10 +3,12 @@ from __future__ import print_function
 
 import re
 
-from constants import NoDefault, MutableMapping, SEPARATOR_WIDTH
+from constants import SEPARATOR_WIDTH
+from constants import NoDefault, MutableMapping
+from constants import pytuple
 from dicts import merge_two, asdict
 from naming import determine_name
-from predicates import pytuple, ismergeable
+from predicates import ismergeable
 
 # NAMESPACES: SimpleNamespace and Namespace
 

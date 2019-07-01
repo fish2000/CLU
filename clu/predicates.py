@@ -4,6 +4,11 @@ from itertools import chain
 from functools import partial
 
 from constants import Enum, unicode
+from exporting import Exporter
+
+exporter = Exporter()
+export = exporter.decorator()
+
 
 # PREDICATE FUNCTIONS: boolean predicates for class types
 
@@ -65,12 +70,14 @@ item_search   = lambda itx, *things, default=None: searcher(getitem,   itx, *thi
 # ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)
 
+@export
 def isenum(cls):
     """ isenum(cls) → boolean predicate, True if cls descends from Enum. """
     if not isclasstype(cls):
         return False
     return Enum in cls.__mro__
 
+@export
 def enumchoices(cls):
     """ enumchoices(cls) → Return a tuple of strings naming the members of an Enum class. """
     if not isenum(cls):
@@ -84,7 +91,6 @@ function_nop = lambda iterable: None
 
 uncallable = lambda thing: not callable(thing)
 pyname = lambda thing: pyattr(thing, 'qualname', 'name')
-pytuple = lambda *attrs: tuple('__%s__' % str(atx) for atx in attrs)
 
 isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,
                                                 map, filter, reversed) or isenum(thing))
@@ -94,6 +100,7 @@ iscontainer = lambda thing: isiterable(thing) and \
                         not isnormative(thing) and \
                         not isclasstype(thing)
 
+@export
 def apply_to(predicate, function, *things):
     """ apply_to(predicate, function, *things) → Apply a predicate to each
         of the things, and finally a function to the entirety of the things,
@@ -144,6 +151,7 @@ isslotted = lambda thing: haspyattr(thing, 'slots') and not isclasstype(thing)
 isdictish = lambda thing: haspyattr(thing, 'dict') and not isclasstype(thing)
 isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and not isclasstype(thing)
 
+@export
 def slots_for(cls):
     """ slots_for(cls) → get the summation of the `__slots__` tuples for a class and its ancestors """
     # q.v. https://stackoverflow.com/a/6720815/298171
@@ -158,38 +166,97 @@ case_sort = lambda c: c.lower() if c.isupper() else c.upper()
 
 # UTILITY FUNCTIONS: helpers for builtin container types:
 
+@export
 def tuplize(*items):
     """ tuplize(*items) → Return a new tuple containing all non-`None` arguments """
     return tuple(item for item in items if item is not None)
 
+@export
 def uniquify(*items):
     """ uniquify(*items) → Return a tuple with a unique set of all non-`None` arguments """
     return tuple(frozenset(item for item in items if item is not None))
 
+@export
 def listify(*items):
     """ listify(*items) → Return a new list containing all non-`None` arguments """
     return list(item for item in items if item is not None)
 
-__all__ = ('ismetaclass', 'isclass', 'isclasstype',
-           'haspyattr', 'anyattrs', 'allattrs', 'anypyattrs', 'allpyattrs',
-           'haslength',
-           'isiterable', 'ismergeable',
-           'always', 'never', 'nuhuh',
-           'no_op', 'or_none',
-           'getpyattr', 'getitem',
-           'accessor', 'searcher',
-           'attr', 'pyattr', 'item',
-           'attr_search', 'pyattr_search', 'item_search',
-           'isenum', 'enumchoices',
-           'predicate_nop', 'function_nop', 'uncallable',
-           'pyname', 'pytuple',
-           'isexpandable', 'isnormative', 'iscontainer',
-           'apply_to',
-           'predicate_all', 'predicate_any',
-           'predicate_and', 'predicate_or', 'predicate_xor',
-           'thing_has', 'class_has',
-           'isslotted', 'isdictish', 'isslotdicty', 'slots_for',
-           'case_sort',
-           'tuplize', 'uniquify', 'listify')
+export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → boolean predicate, True if thing is a class, descending from `type`")
+export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object`")
+export(isclasstype,     name='isclasstype',     doc="isclasstype(thing) → boolean predicate, True if thing is a class, descending from either `object` or `type`")
 
-__dir__ = lambda: list(__all__)
+export(haspyattr,       name='haspyattr',       doc="haspyattr(thing, attribute) → boolean predicate, shortcut for hasattr(thing, '__%s__' % attribute)")
+export(anyattrs,        name='anyattrs',        doc="anyattrs(thing, *attributes) → boolean predicate, shortcut for any(hasattr(thing, atx) for atx in attributes)")
+export(allattrs,        name='allattrs',        doc="allattrs(thing, *attributes) → boolean predicate, shortcut for all(hasattr(thing, atx) for atx in attributes)")
+export(anypyattrs,      name='anypyattrs',      doc="anypyattrs(thing, *attributes) → boolean predicate, shortcut for any(haspyattr(thing, atx) for atx in attributes)")
+export(allpyattrs,      name='allpyattrs',      doc="allpyattrs(thing, *attributes) → boolean predicate, shortcut for all(haspyattr(thing, atx) for atx in attributes)")
+export(haslength,       name='haslength',       doc="haslength(thing) → boolean predicate, True if thing has a “__len__” attribute")
+export(isiterable,      name='isiterable',      doc="isiterable(thing) → boolean predicate, True if thing can be iterated over")
+export(ismergeable,     name='ismergeable',     doc="ismergeable(thing) → boolean predicate, True if thing is a valid operand to merge(…) or merge_as(…)")
+
+export(always,          name='always',          doc="always(thing) → boolean predicate that always returns True")
+export(never,           name='never',           doc="never(thing) → boolean predicate that always returns False")
+export(nuhuh,           name='nuhuh',           doc="nuhuh(thing) → boolean predicate that always returns None")
+export(no_op,           name='no_op',           doc="no_op(thing, attribute[, default]) → shortcut for (attribute or default)")
+export(or_none,         name='or_none',         doc="or_none(thing, attribute) → shortcut for getattr(thing, attribute, None)")
+export(getpyattr,       name='getpyattr',       doc="getpyattr(thing, attribute[, default]) → shortcut for getattr(thing, '__%s__' % attribute[, default])")
+export(getitem,         name='getitem',         doc="getitem(thing, item[, default]) → shortcut for thing.get(item[, default])")
+export(accessor,        name='accessor',        doc="accessor(func, thing, *attributes) → return the first non-None value had by successively applying func(thing, attribute)")
+export(searcher,        name='searcher',        doc="searcher(func, attribute, *things) → return the first non-None value had by successively applying func(thing, attribute)")
+
+export(attr,            name='attr',            doc="Return the first existing attribute from a thing, given 1+ attribute names")
+export(pyattr,          name='pyattr',          doc="Return the first existing __special__ attribute from a thing, given 1+ attribute names")
+export(item,            name='item',            doc="Return the first existing item held by thing, given 1+ item names")
+export(attr_search,     name='attr_search',     doc="Return the first-found existing attribute from a thing, given 1+ things")
+export(pyattr_search,   name='pyattr_search',   doc="Return the first-found existing __special__ attribute from a thing, given 1+ things")
+export(item_search,     name='item_search',     doc="Return the first-found existing item from a thing, given 1+ things")
+
+export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns None")
+export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns None")
+export(uncallable,      name='uncallable',      doc="uncallable(thing) → boolean predicate, shortcut for `not callable(thing)`")
+export(pyname,          name='pyname',          doc="pyname(string) → Return the __special__ name for a given string")
+
+export(isexpandable,    name='isexpandable',    doc="isexpandable(thing) → boolean predicate, True if thing can be `*expanded`")
+export(isnormative,     name='isnormative',     doc="isnormative(thing) → boolean predicate, True if thing is a string-like or bytes-like iterable")
+export(iscontainer,     name='iscontainer',     doc="iscontainer(thing) → boolean predicate, True if thing is iterable and not “normative” (q.v. `isnormative(…)` supra.)")
+
+export(predicate_all,   name='predicate_all',   doc="predicate_all(predicate, *things) → boolean predicate, shortcut for apply_to(predicate, all, *things")
+export(predicate_any,   name='predicate_any',   doc="predicate_any(predicate, *things) → boolean predicate, shortcut for apply_to(predicate, any, *things")
+export(predicate_and,   name='predicate_and',   doc="predicate_and(predicate, a, b) → boolean predicate, shortcut for apply_to(predicate, all, a, b")
+export(predicate_or,    name='predicate_or',    doc="predicate_or(predicate, a, b) → boolean predicate, shortcut for apply_to(predicate, all, a, b")
+export(predicate_xor,   name='predicate_xor',   doc="predicate_xor(predicate, a, b) → boolean predicate, shortcut for apply_to(predicate, all, a, b")
+
+export(case_sort,       name='case_sort',       doc="case_sort(string) → Sorting predicate to sort UPPERCASE names first")
+
+export(thing_has,       name='thing_has',       doc="thing_has(thing, attribute) → boolean predicate, True if thing has the attribute (in either __dict__ or __slots__)")
+export(class_has,       name='class_has',       doc="class_has(cls, attribute) → boolean predicate, True if cls is a class type and has the attribute (in either __dict__ or __slots__)")
+export(isslotted,       name='isslotted',       doc="isslotted(thing) → boolean predicate, True if thing has both an __mro__ and a __slots__ attribute")
+export(isdictish,       name='isdictish',       doc="isdictish(thing) → boolean predicate, True if thing has both an __mro__ and a __dict__ attribute")
+export(isslotdicty,     name='isslotdicty',     doc="isslotdicty(thing) → boolean predicate, True if thing has __mro__, __slots__, and __dict__ attributes")
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
+
+# assert frozenset(__all__) == frozenset(('ismetaclass', 'isclass', 'isclasstype',
+#            'haspyattr', 'anyattrs', 'allattrs', 'anypyattrs', 'allpyattrs',
+#            'haslength',
+#            'isiterable', 'ismergeable',
+#            'always', 'never', 'nuhuh',
+#            'no_op', 'or_none',
+#            'getpyattr', 'getitem',
+#            'accessor', 'searcher',
+#            'attr', 'pyattr', 'item',
+#            'attr_search', 'pyattr_search', 'item_search',
+#            'isenum', 'enumchoices',
+#            'predicate_nop', 'function_nop', 'uncallable',
+#            'pyname',
+#            'isexpandable', 'isnormative', 'iscontainer',
+#            'apply_to',
+#            'predicate_all', 'predicate_any',
+#            'predicate_and', 'predicate_or', 'predicate_xor',
+#            'thing_has', 'class_has',
+#            'isslotted', 'isdictish', 'isslotdicty', 'slots_for',
+#            'case_sort',
+#            'tuplize', 'uniquify', 'listify'))
+
+# __dir__ = lambda: list(__all__)

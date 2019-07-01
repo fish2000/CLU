@@ -109,5 +109,3 @@ export(sanitizers,          name='sanitizers',          doc="sanitizers() → sh
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
-
-assert frozenset(__all__) == frozenset(('sanitize', 'sanitizers', 'utf8_encode', 'utf8_decode'))

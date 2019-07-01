@@ -17,7 +17,8 @@ from predicates import (isclasstype,
                         pyattr, or_none,
                         isiterable,
                         tuplize, uniquify,
-                        apply_to, predicate_any)
+                        apply_to, predicate_any,
+                                  predicate_all)
 
 from typespace import types
 
@@ -25,14 +26,13 @@ from typespace import types
 # can be formulated and tested by these lambdas and functions
 
 isunique = lambda thing: isiterable(thing) and (len(frozenset(thing)) == len(tuple(thing)))
-istypelist = apply_to(isclasstype, all)
+istypelist = predicate_all(isclasstype)
 maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
                         lambda total: tuple(frozenset(total)))
 
 def isderivative(putative, thing):
-    """ Examine whether something is either a subclass
-        or an instance of a thing, depending on whether
-        the putative “something” is either a classtype
+    """ isderivative(thing) → Boolean predicate, True if putative is either a subclass
+        or an instance of thing – depending on whether putative is either a classtype
         or an instance, basically.
     """
     try:
@@ -54,16 +54,13 @@ graceful_issubclass = subclasscheck
 # TYPELISTS: manual assemblages of types, used for predicate testing
 # and other similar stuff.
 
-numeric_types = uniquify(int, long, float, decimal.Decimal)
+numeric_types = uniquify(int, long, float, complex, decimal.Decimal)
+array_types = (array.ArrayType, bytearray, memoryview)
 
-if numpy is None:
-    array_types = (array.ArrayType,
-                   bytearray, memoryview)
-else:
-    array_types = (numpy.ndarray,
-                   numpy.matrix,
-                   numpy.ma.MaskedArray, array.ArrayType,
-                                         bytearray, memoryview)
+if numpy is not None:
+    array_types += (numpy.ndarray,
+                    numpy.matrix,
+                    numpy.ma.MaskedArray)
 
 try:
     from six import string_types
@@ -102,6 +99,7 @@ iscontextmanager = lambda cls: allpyattrs(cls, 'enter', 'exit') or isabstractcon
 
 isnumber = lambda thing: graceful_issubclass(thing, numeric_types)
 isnumeric = lambda thing: graceful_issubclass(thing, numeric_types)
+iscomplex = lambda thing: graceful_issubclass(thing, complex)
 isarray = lambda thing: graceful_issubclass(thing, array_types)
 isstring = lambda thing: graceful_issubclass(thing, string_types)
 isbytes = lambda thing: graceful_issubclass(thing, bytes_types)
@@ -111,12 +109,12 @@ islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == LAM
 ishashable = lambda thing: isinstance(thing, HashableABC)
 
 __all__ = ('isunique', 'istypelist', 'maketypelist',
-           'isderivative', 'graceful_issubclass',
+           'isderivative', 'subclasscheck', 'graceful_issubclass',
            'numeric_types', 'array_types', 'string_types', 'bytes_types',
            'path_classes', 'path_types', 'file_types', 'callable_types',
            'ispathtype', 'ispath', 'isvalidpath',
            'isabstractmethod', 'isabstract', 'isabstractcontextmanager', 'iscontextmanager',
-           'isnumber', 'isnumeric', 'isarray', 'isstring', 'isbytes', 'ismodule',
+           'isnumber', 'isnumeric', 'iscomplex', 'isarray', 'isstring', 'isbytes', 'ismodule',
            'isfunction', 'islambda', 'ishashable')
 
 __dir__ = lambda: list(__all__)

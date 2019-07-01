@@ -39,7 +39,6 @@ class TestNaming(object):
         except AssertionError:
             raise Nondeterminism("Nondeterminism in qualified_name(BASEPATH) → %s" % qname)
     
-    @pytest.mark.xfail
     def test_qualified_name_instances(self):
         """ » Checking “qualified_name(¬) on instances of objects …” """
         
@@ -55,8 +54,7 @@ class TestNaming(object):
         from clu.predicates import predicate_all, predicate_xor, thing_has
         from clu.predicates import slots_for
         
-        things = (qualified_name,
-                  isclass, ismetaclass, isclasstype,
+        things = (isclass, ismetaclass, isclasstype,
                   allattrs, allpyattrs, isiterable,
                   attr, pyattr, isenum, enumchoices,
                   isnormative, iscontainer, apply_to,
@@ -70,6 +68,10 @@ class TestNaming(object):
                 assert qname == 'clu.predicates.%s' % name
             except AssertionError:
                 raise Nondeterminism("Nondeterminism in qualified_name(%s) → %s" % (name, qname))
+        
+        # TO INFINITY AND BEYOND:
+        assert 'clu.naming.%s' % determine_name(qualified_name) == qualified_name(qualified_name)
+        assert 'clu.naming.%s' % determine_name(determine_name) == qualified_name(determine_name)
     
     def test_qualified_name_typespace(self):
         """ For some fucking reason *this* one consistently passes …? """

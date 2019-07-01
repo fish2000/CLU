@@ -72,7 +72,7 @@ def isenum(cls):
     return Enum in cls.__mro__
 
 def enumchoices(cls):
-    """ isenum(cls) → Return a tuple of strings naming the members of an Enum class. """
+    """ enumchoices(cls) → Return a tuple of strings naming the members of an Enum class. """
     if not isenum(cls):
         return tuple()
     return tuple(choice.name for choice in cls)

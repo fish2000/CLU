@@ -363,10 +363,9 @@ class Exporter(MutableMapping):
     def __iadd__(self, operand):
         # On in-place add, old values are updated and replaced
         from predicates import ismergeable
-        from dicts import asdict
         if not ismergeable(operand):
             return NotImplemented
-        self.__dict__.update(asdict(operand))
+        self.__exports__.update(operand.__exports__)
         return self
     
     def __or__(self, operand):

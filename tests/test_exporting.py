@@ -7,7 +7,17 @@ class TestExporting(object):
     
     """ Run the tests for the clu.exporting module. """
     
-    def test_combine_real_world_exporters(self):
+    def test_combine_real_world_exporters_1(self):
+        from clu.predicates import exporter as exporter0
+        from clu.typology import exporter as exporter1
+        from clu.exporting import Exporter
+        
+        exporter_sum = Exporter()
+        exporter_sum += exporter0
+        exporter_sum += exporter1
+        assert len(exporter_sum) == len(exporter0) + len(exporter1)
+    
+    def test_combine_real_world_exporters_0(self):
         from clu.predicates import exporter as exporter0
         from clu.typology import exporter as exporter1
         

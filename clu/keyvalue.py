@@ -7,21 +7,15 @@ import zict
 from constants import ENCODING, NoDefault, System
 from constants import KeyValueError
 from fs import AppDirs
-from fs.appdirectories import test
+from fs.appdirectories import test as appdirectories_test
 from predicates import attr
 from typology import isstring, isbytes
-# from replutilities import Exporter
+from exporting import Exporter
 
-# exporter = Exporter()
-# export = exporter.decorator()
+exporter = Exporter()
+export = exporter.decorator()
 
-# UTILITY STUFF: Exceptions
-
-# @export
-
-# UTILITY STUFF: AppDirs wrapper
-
-# @export
+@export
 class ReplEnvDirs(AppDirs):
     
     def __init__(self):
@@ -43,17 +37,17 @@ zfunc = zict.Func(dump=lambda value: isstring(value) and value.encode(ENCODING) 
                   load=lambda value: isbytes(value) and value.decode(ENCODING) or value,
                   d=zutf8)
 
-# @export
+@export
 def has(key):
     """ Test if a key is contained in the key-value store. """
     return key in zfunc
 
-# @export
+@export
 def count():
     """ Return the number of items in the key-value store. """
     return len(zfunc)
 
-# @export
+@export
 def get(key, default=NoDefault):
     """ Return a value from the ReplEnv user-config key-value store. """
     if default is NoDefault:
@@ -63,7 +57,7 @@ def get(key, default=NoDefault):
     except KeyError:
         return default
 
-# @export
+@export
 def set(key, value):
     """ Set and return a value in the ReplEnv user-config key-value store. """
     if not key:
@@ -73,47 +67,41 @@ def set(key, value):
     zfunc[key] = value
     return get(key)
 
-# @export
+@export
 def delete(key):
     """ Delete a value from the ReplEnv user-config key-value store. """
     if not key:
         raise KeyValueError("Non-Falsey key required for deletion (k: %s)" % key)
     del zfunc[key]
 
-# @export
+@export
 def iterate():
     """ Return an iterator for the key-value store. """
     return iter(zfunc)
 
-# @export
+@export
 def keys():
     """ Return an iterable with all of the keys in the key-value store. """
     return zfunc.keys()
 
-# @export
+@export
 def values():
     """ Return an iterable with all of the values in the key-value store. """
     return zfunc.values()
 
-# @export
+@export
 def items():
     """ Return an iterable yielding (key, value) for all items in the key-value store. """
     return zfunc.items()
 
 
-# export(pytuple,         name='pytuple',         doc="")
-
 # NO DOCS ALLOWED:
-# export(Directory)
-# export(ENCODING,        name='ENCODING')
+export(zfile,           name='zfile')
+export(zutf8,           name='zutf8')
+export(zfunc,           name='zfunc')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
-# __all__, __dir__ = exporter.all_and_dir()
+__all__, __dir__ = exporter.all_and_dir()
 
-# Private (un-exported) inline test function:
-# def test():
-#     exporter.print_diagnostics(__all__, __dir__)
-#
 if __name__ == '__main__':
-    test()
-
+    appdirectories_test()

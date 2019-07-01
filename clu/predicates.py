@@ -3,6 +3,7 @@ from __future__ import print_function
 from itertools import chain
 from functools import partial
 
+from constants import LAMBDA
 from constants import Enum, unicode
 from exporting import Exporter
 
@@ -105,6 +106,18 @@ lambda_repr = lambda instance: "<function %s at 0x%0x>" % (pyattr(instance, 'qua
                                                                   default="<lambda>"),
                                                            id(instance))
 
+class partial_ex(partial):
+    
+    def __init__(self, *args, **kwargs):
+        """ Initialize the Partial object: """
+        # Name it as if it’s a lambda-type:
+        self.__name__ = self.__qualname__ = LAMBDA
+        super(partial_ex, self).__init__()
+    
+    def __repr__(self):
+        # Use the lambda_repr equivalent:
+        return lambda_repr(self)
+
 @export
 def apply_to(predicate, function, *things):
     """ apply_to(predicate, function, *things) → Apply a predicate to each
@@ -123,7 +136,7 @@ def apply_to(predicate, function, *things):
         raise ValueError("Noncallable passed to apply_to(%s, %s, …)" % names)
     if len(things) < 1:
         # Return a partial for this predicate and function:
-        return partial(apply_to, predicate, function)
+        return partial_ex(apply_to, predicate, function)
     elif len(things) == 1:
         # Recursive call, expanding the one argument:
         if isexpandable(things[0]):

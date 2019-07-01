@@ -114,7 +114,7 @@ isfunction = lambda thing: isinstance(thing, (types.Function, types.Lambda)) or 
 islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == LAMBDA
 ishashable = lambda thing: isinstance(thing, HashableABC)
 
-
+# MODULE EXPORTS:
 export(isunique,        name='isunique',    doc="isunique(thing) → boolean predicate, True if thing is an iterable with unique contents")
 export(istypelist,      name='istypelist',  doc="istypelist(thing) → boolean predicate, True if thing is a typelist (a list consisting only of class types)")
 export(maketypelist,    name='maketypelist',

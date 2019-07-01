@@ -200,6 +200,7 @@ def listify(*items):
     """ listify(*items) → Return a new list containing all non-`None` arguments """
     return list(item for item in items if item is not None)
 
+# MODULE EXPORTS:
 export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → boolean predicate, True if thing is a class, descending from `type`")
 export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object`")
 export(isclasstype,     name='isclasstype',     doc="isclasstype(thing) → boolean predicate, True if thing is a class, descending from either `object` or `type`")

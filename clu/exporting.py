@@ -162,7 +162,12 @@ class Exporter(MutableMapping):
                 self.__exports__.update(arg.__exports__)
                 self.__clades__.update(arg.__clades__)
             else:
-                self.__exports__.update(dict(arg))
+                try:
+                    d = dict(arg)
+                except (TypeError, ValueError):
+                    pass
+                else:
+                    self.__exports__.update(d)
     
     def exports(self):
         """ Get a new dictionary instance filled with the exports. """

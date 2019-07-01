@@ -41,26 +41,26 @@ always = lambda thing: True
 never = lambda thing: False
 nuhuh = lambda thing: None
 
-no_op = lambda thing, atx, default=None: thing
-or_none = lambda thing, atx: getattr(thing, atx, None)
+no_op     = lambda thing, atx, default=None: thing
+or_none   = lambda thing, atx: getattr(thing, atx, None)
 getpyattr = lambda thing, atx, default=None: getattr(thing, '__%s__' % atx, default)
-getitem = lambda thing, itx, default=None: getattr(thing, 'get', no_op)(itx, default)
+getitem   = lambda thing, itx, default=None: getattr(thing, 'get', no_op)(itx, default)
 
-accessor = lambda function, thing, *attrs: ([atx for atx in (function(thing, atx) \
-                                                 for atx in attrs) \
-                                                 if atx is not None] or [None]).pop(0)
+accessor = lambda function, thing, *attrs, default=None: ([atx for atx in (function(thing, atx) \
+                                                               for atx in attrs) \
+                                                                if atx is not None] or [default]).pop(0)
 
-searcher = lambda function, xatx, *things: ([atx for atx in (function(thing, xatx) \
-                                                 for thing in things) \
-                                                 if atx is not None] or [None]).pop(0)
+searcher = lambda function, xatx, *things, default=None: ([atx for atx in (function(thing, xatx) \
+                                                               for thing in things) \
+                                                                if atx is not None] or [default]).pop(0)
 
-attr = lambda thing, *attrs: accessor(or_none, thing, *attrs)
-pyattr = lambda thing, *attrs: accessor(getpyattr, thing, *attrs)
-item = lambda thing, *items: accessor(getitem, thing, *items)
+attr   = lambda thing, *attrs, default=None: accessor(or_none,   thing, *attrs, default=default)
+pyattr = lambda thing, *attrs, default=None: accessor(getpyattr, thing, *attrs, default=default)
+item   = lambda thing, *items, default=None: accessor(getitem,   thing, *items, default=default)
 
-attr_search = lambda atx, *things: searcher(or_none, atx, *things)
-pyattr_search = lambda atx, *things: searcher(getpyattr, atx, *things)
-item_search = lambda itx, *things: searcher(getitem, itx, *things)
+attr_search   = lambda atx, *things, default=None: searcher(or_none,   atx, *things, default=default)
+pyattr_search = lambda atx, *things, default=None: searcher(getpyattr, atx, *things, default=default)
+item_search   = lambda itx, *things, default=None: searcher(getitem,   itx, *things, default=default)
 
 # ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)
@@ -134,7 +134,7 @@ predicate_xor = lambda predicate, a, b: apply_to(predicate, any, a, b) and \
 # Does a thing or a class contain an attribute --
 # whether it uses `__dict__` or `__slots__` (or both)?
 thing_has = lambda thing, atx: predicate_any(
-            lambda thing: atx in (pyattr(thing, 'dict', 'slots')),
+            lambda thing: atx in (pyattr(thing, 'dict', 'slots', default=tuple())),
                    thing, *getpyattr(type(thing), 'mro'))
 
 class_has = lambda cls, atx: isclasstype(cls) and thing_has(cls, atx)

@@ -305,6 +305,7 @@ class TestPredicates(object):
     def test_getattr_shortcuts(self):
         """ » Checking “getattr/getpyattr/getitem” shortcuts from clu.predicates … """
         from random import shuffle
+        from clu.constants import NoDefault
         from clu.predicates import (or_none, getpyattr, getitem,
                                     attr, pyattr, item,
                                     attr_search, pyattr_search, item_search)
@@ -320,9 +321,12 @@ class TestPredicates(object):
             assert or_none(d, 'get') is not None
             assert or_none(d, 'set') is None
             assert attr(d, 'set', 'delete', 'get') == or_none(d, 'get')
+            assert attr(d, 'set', 'delete', default=NoDefault) is NoDefault
             assert pyattr(d, 'bool', 'enter', 'exit', 'class') is dict
+            assert pyattr(d, 'bool', 'enter', 'exit', default=NoDefault) is NoDefault
             assert type(item(d, 'yo', 'i', 'you')) is str
             assert item(d, 'yo', 'i', 'you') in ("dogg", "heard", "like")
+            assert item(d, 'foo', 'bar', 'baz', default="DOGG") == "DOGG"
         
         assert getitem(dict0, 'yo') == "dogg"
         assert getitem(dict1, 'i') == "heard"

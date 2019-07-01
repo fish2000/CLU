@@ -3,7 +3,7 @@ from __future__ import print_function
 
 from predicates import haspyattr
 
-# UTILITY FUNCTIONS: dictionary-merging
+# DICT FUNCTIONS: dictionary-merging
 
 def merge_two(one, two, cls=dict):
     """ Merge two dictionaries into an instance of the specified class
@@ -35,7 +35,7 @@ def merge(*dicts, **overrides):
         raise NameError('Cannot override the `cls` value')
     return merge_as(*dicts, cls=dict, **overrides)
 
-# UTILITY STUFF: asdict(…)
+# DICT STUFF: asdict(…)
 
 def asdict(thing):
     """ asdict(thing) → returns either thing, thing.__dict__, or dict(thing) as necessary """

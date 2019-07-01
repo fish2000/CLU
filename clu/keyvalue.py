@@ -7,7 +7,6 @@ import zict
 from constants import ENCODING, NoDefault, System
 from constants import KeyValueError
 from fs import AppDirs
-from fs.appdirectories import test as appdirectories_test
 from predicates import attr
 from typology import isstring, isbytes
 from exporting import Exporter
@@ -104,4 +103,5 @@ export(zfunc,           name='zfunc')
 __all__, __dir__ = exporter.all_and_dir()
 
 if __name__ == '__main__':
+    from fs.appdirectories import test as appdirectories_test
     appdirectories_test()

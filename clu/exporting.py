@@ -1,19 +1,144 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-# import re
+import sys
 import warnings
 
+# Unused clade-related stuff:
+# import re
 # from constants import DEBUG, SINGLETON_TYPES, Enum, unique
 # from constants import PY3, SEPARATOR_WIDTH, OrderedDict
-from constants import LAMBDA
+# from predicates import case_sort
+# from repl import print_separator
+
+from constants import BUILTINS, LAMBDA, MAXINT
 from constants import Counter, MutableMapping, NoDefault
 from constants import ExportError, ExportWarning
-from predicates import pytuple
-# from predicates import case_sort
-from naming import doctrim, determine_name
-from naming import thingname_search, thingname_search_by_id
-# from repl import print_separator
+from constants import lru_cache, pytuple
+
+def doctrim(docstring):
+    """ This function is straight outta PEP257 -- q.v. `trim(…)`,
+       “Handling Docstring Indentation” subsection sub.:
+            https://www.python.org/dev/peps/pep-0257/#id18
+    """
+    if not docstring:
+        return ''
+    # Convert tabs to spaces (following the normal Python rules)
+    # and split into a list of lines:
+    lines = docstring.expandtabs().splitlines()
+    # Determine minimum indentation (first line doesn't count):
+    indent = MAXINT
+    for line in lines[1:]:
+        stripped = line.lstrip()
+        if stripped:
+            indent = min(indent, len(line) - len(stripped))
+    # Remove indentation (first line is special):
+    trimmed = [lines[0].strip()]
+    if indent < MAXINT:
+        for line in lines[1:]:
+            trimmed.append(line[indent:].rstrip())
+    # Strip off trailing and leading blank lines:
+    while trimmed and not trimmed[-1]:
+        trimmed.pop()
+    while trimmed and not trimmed[0]:
+        trimmed.pop(0)
+    # Return a single string:
+    return '\n'.join(trimmed)
+
+def itermoduleids(module):
+    """ Internal function to get an iterable of `(name, id(thing))`
+        tuples for all things comntained in a given module – q.v.
+        `itermodule(…)` implementation supra.
+    """
+    keys = tuple(key for key in dir(module) \
+                      if key not in BUILTINS)
+    ids = (id(getattr(module, key)) for key in keys)
+    return zip(keys, ids)
+
+# Q.v. `thingname_search_by_id(…)` function sub.
+cache = lru_cache(maxsize=128, typed=False)
+
+# This goes against all logic and reason, but it fucking seems
+# to fix the problem of constants, etc showing up erroneously
+# as members of the `__console__` or `__main__` modules –
+# a problem which, I should mention, is present in the operation
+# of the `pickle.whichmodule(…)` function (!)
+sysmods = lambda: reversed(tuple(frozenset(sys.modules.values())))
+
+@cache
+def thingname_search_by_id(thingID):
+    """ Cached function to find the name of a thing, according
+        to what it is called in the context of a module in which
+        it resides – searching across all currently imported
+        modules in entirely, as indicated from the inspection of
+        `sys.modules.values()` (which is potentially completely
+        fucking enormous).
+        
+        This function implements `thingname_search(…)` – q.v.
+        the calling function code sub., and is also used in the
+        implementdation of `determine_module(…)`, - also q.v.
+        the calling function code sub.
+        
+        Caching courtesy the `functools.lru_cache(…)` decorator.
+    """
+    # Would you believe that the uniquify(…) call is absolutely
+    # fucking necessary to use on `sys.modules`?! I checked and
+    # on my system, like on all my REPLs, uniquifying the modules
+    # winnowed the module list (and therefore, this functions’
+    # search space) by around 100 fucking modules (!) every time!!
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        for module in sysmods():
+            for key, valueID in itermoduleids(module):
+                if valueID == thingID:
+                    return module, key
+    return None, None
+
+def thingname_search(thing):
+    """ Attempt to find the name for thing, using the logic from
+        the `thingname(…)` function, applied to all currently
+        imported modules, as indicated from the inspection of
+        `sys.modules.values()` (which that, as a search space,
+        is potentially fucking enormous).
+        
+        This function may be called by `determine_name(…)`. Its
+        subordinate internal function, `thingname_search_by_id(…)`,
+        uses the LRU cache from `functools`.
+    """
+    return thingname_search_by_id(id(thing))[1]
+
+def determine_name(thing, name=None, try_repr=False):
+    """ Private module function to find a name for a thing. """
+    # Shortcut everything if a name was explictly specified:
+    if name is not None:
+        return name
+    # Check for telltale function-object attributes:
+    code = None
+    if hasattr(thing, '__code__'): # Python 3.x
+        code = thing.__code__
+    elif hasattr(thing, 'func_code'): # Python 2.x
+        code = thing.func_code
+    # Use the function’s code object, if found…
+    if code is not None:
+        if hasattr(code, 'co_name'):
+            name = code.co_name
+    # … Otherwise, try the standard name attributes:
+    else:
+        if hasattr(thing, '__qualname__'):
+            name = thing.__qualname__
+        elif hasattr(thing, '__name__'):
+            name = thing.__name__
+    # We likely have something by now:
+    if name is not None:
+        return name
+    # If asked to try the thing’s repr, return that:
+    if try_repr:
+        return repr(thing)
+    # LAST RESORT: Search the entire id-space
+    # of objects within imported modules -- it is
+    # possible (however unlikely) that this’ll ending
+    # up returning None:
+    return thingname_search(thing)
 
 def predicates_for_types(*types):
     """ For a list of types, return a list of “isinstance” predicates """
@@ -43,21 +168,8 @@ class Exporter(MutableMapping):
     
     messages = {
         'docstr'    : "Can’t set the docstring for thing “%s” of type %s:",
-        'xclade'    : "Can’t determine a clade for thing “%s” of type %s",
         'noname'    : "Can’t determine a name for lambda: 0x%0x"
     }
-    
-    def increment_for_clade(self, thing, named, increment=1):
-        # clade = self.classify(thing, named=named)
-        # self.__clades__[clade] += int(increment)
-        # return clade
-        pass
-    
-    def decrement_for_clade(self, thing, named, decrement=-1):
-        # clade = self.classify(thing, named=named)
-        # self.__clades__[clade] += int(decrement)
-        # return clade
-        pass
     
     def keys(self):
         """ Get a key view on the exported items dictionary. """
@@ -73,8 +185,6 @@ class Exporter(MutableMapping):
         return self.__exports__.get(key, default)
     
     def pop(self, key, default=NoDefault):
-        if key in self.__exports__:
-            self.decrement_for_clade(self[key], named=key)
         if default is NoDefault:
             return self.__exports__.pop(key)
         return self.__exports__.pop(key, default)
@@ -118,15 +228,6 @@ class Exporter(MutableMapping):
             raise ExportError("can’t export the __exports__ dict directly")
         if thing is self:
             raise ExportError("can’t export an exporter instance directly")
-        
-        # Attempt to classify the item to a clade:
-        try:
-            self.increment_for_clade(thing, named=named)
-        except ValueError:
-            # no clade found
-            typename = determine_name(type(thing))
-            warnings.warn(type(self).messages['xclade'] % (named, typename),
-                          ExportWarning, stacklevel=2)
         
         # At this point, “named” is valid -- if we were passed
         # a lambda, try to rename it with either our valid name,
@@ -212,6 +313,7 @@ class Exporter(MutableMapping):
             which is used in last-resort name lookups made by
             `determine_name(…)` during `export(…)` calls.
         """
+        from naming import thingname_search_by_id
         return thingname_search_by_id.cache_info()
     
     def __iter__(self):
@@ -227,13 +329,9 @@ class Exporter(MutableMapping):
         return self.__exports__[key]
     
     def __setitem__(self, key, value):
-        if key in self.__exports__:
-            self.decrement_for_clade(self[key], named=key)
-        self.increment_for_clade(value, named=key)
         self.__exports__[key] = value
     
     def __delitem__(self, key):
-        self.decrement_for_clade(self[key], named=key)
         del self.__exports__[key]
     
     def __bool__(self):
@@ -242,5 +340,13 @@ class Exporter(MutableMapping):
 exporter = Exporter()
 export = exporter.decorator()
 
-__all__ = ('Exporter', 'exporter', 'export')
-__dir__ = lambda: list(__all__)
+export(doctrim)
+export(thingname_search)
+export(determine_name)
+export(sysmods,         name='sysmods',         doc="sysmods() → shortcut for reversed(tuple(frozenset(sys.modules.values()))) …OK? I know. It’s not my finest work, but it works.")
+
+# NO DOCS ALLOWED:
+export(Exporter)        # hahaaaaa
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()

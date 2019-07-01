@@ -4,7 +4,7 @@ from __future__ import print_function
 from collections import Counter, OrderedDict
 from enum import Enum, EnumMeta, unique, _is_dunder as ispyname
 
-from .consts import PY3
+from .consts import PY3, pytuple
 
 class AutoType(object):
     
@@ -64,7 +64,8 @@ except (ImportError, SyntaxError):
     numpy = None
 
 __all__ = ('Counter', 'OrderedDict',
-           'Enum', 'EnumMeta', 'unique', 'ispyname',
+           'Enum', 'EnumMeta', 'unique',
+           'ispyname', 'pytuple',
            'AutoType', 'auto',
            'unicode', 'long',
            'Mapping', 'MutableMapping', 'HashableABC',

@@ -3,132 +3,21 @@ from __future__ import print_function
 
 import os
 import pickle
-import sys
 import warnings
 
-from constants import BASEPATH, BUILTINS, DEBUG, MAXINT, QUALIFIER
-from constants import lru_cache
+from constants import BASEPATH, BUILTINS, DEBUG, QUALIFIER
 from constants import BadDotpathWarning
+from exporting import determine_name, Exporter
 # from predicates import pyattr
 
-def doctrim(docstring):
-    """ This function is straight outta PEP257 -- q.v. `trim(…)`,
-       “Handling Docstring Indentation” subsection sub.:
-            https://www.python.org/dev/peps/pep-0257/#id18
-    """
-    if not docstring:
-        return ''
-    # Convert tabs to spaces (following the normal Python rules)
-    # and split into a list of lines:
-    lines = docstring.expandtabs().splitlines()
-    # Determine minimum indentation (first line doesn't count):
-    indent = MAXINT
-    for line in lines[1:]:
-        stripped = line.lstrip()
-        if stripped:
-            indent = min(indent, len(line) - len(stripped))
-    # Remove indentation (first line is special):
-    trimmed = [lines[0].strip()]
-    if indent < MAXINT:
-        for line in lines[1:]:
-            trimmed.append(line[indent:].rstrip())
-    # Strip off trailing and leading blank lines:
-    while trimmed and not trimmed[-1]:
-        trimmed.pop()
-    while trimmed and not trimmed[0]:
-        trimmed.pop(0)
-    # Return a single string:
-    return '\n'.join(trimmed)
-
-# Q.v. `thingname_search_by_id(…)` function sub.
-cache = lru_cache(maxsize=128, typed=False)
-
-# This goes against all logic and reason, but it fucking seems
-# to fix the problem of constants, etc showing up erroneously
-# as members of the `__console__` or `__main__` modules –
-# a problem which, I should mention, is present in the operation
-# of the `pickle.whichmodule(…)` function (!)
-sysmods = lambda: reversed(tuple(frozenset(sys.modules.values())))
-
-@cache
-def thingname_search_by_id(thingID):
-    """ Cached function to find the name of a thing, according
-        to what it is called in the context of a module in which
-        it resides – searching across all currently imported
-        modules in entirely, as indicated from the inspection of
-        `sys.modules.values()` (which is potentially completely
-        fucking enormous).
-        
-        This function implements `thingname_search(…)` – q.v.
-        the calling function code sub., and is also used in the
-        implementdation of `determine_module(…)`, - also q.v.
-        the calling function code sub.
-        
-        Caching courtesy the `functools.lru_cache(…)` decorator.
-    """
-    # Would you believe that the uniquify(…) call is absolutely
-    # fucking necessary to use on `sys.modules`?! I checked and
-    # on my system, like on all my REPLs, uniquifying the modules
-    # winnowed the module list (and therefore, this functions’
-    # search space) by around 100 fucking modules (!) every time!!
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        for module in sysmods():
-            for key, valueID in itermoduleids(module):
-                if valueID == thingID:
-                    return module, key
-    return None, None
-
-def thingname_search(thing):
-    """ Attempt to find the name for thing, using the logic from
-        the `thingname(…)` function, applied to all currently
-        imported modules, as indicated from the inspection of
-        `sys.modules.values()` (which that, as a search space,
-        is potentially fucking enormous).
-        
-        This function may be called by `determine_name(…)`. Its
-        subordinate internal function, `thingname_search_by_id(…)`,
-        uses the LRU cache from `functools`.
-    """
-    return thingname_search_by_id(id(thing))[1]
-
-def determine_name(thing, name=None, try_repr=False):
-    """ Private module function to find a name for a thing. """
-    # Shortcut everything if a name was explictly specified:
-    if name is not None:
-        return name
-    # Check for telltale function-object attributes:
-    code = None
-    if hasattr(thing, '__code__'): # Python 3.x
-        code = thing.__code__
-    elif hasattr(thing, 'func_code'): # Python 2.x
-        code = thing.func_code
-    # Use the function’s code object, if found…
-    if code is not None:
-        if hasattr(code, 'co_name'):
-            name = code.co_name
-    # … Otherwise, try the standard name attributes:
-    else:
-        if hasattr(thing, '__qualname__'):
-            name = thing.__qualname__
-        elif hasattr(thing, '__name__'):
-            name = thing.__name__
-    # We likely have something by now:
-    if name is not None:
-        return name
-    # If asked to try the thing’s repr, return that:
-    if try_repr:
-        return repr(thing)
-    # LAST RESORT: Search the entire id-space
-    # of objects within imported modules -- it is
-    # possible (however unlikely) that this’ll ending
-    # up returning None:
-    return thingname_search(thing)
+exporter = Exporter()
+export = exporter.decorator()
 
 # MODULE SEARCH FUNCTIONS: iterate and search modules, yielding
 # names, thing values, and/or id(thing) values, matching by given
 # by thing names or id(thing) values
 
+@export
 def itermodule(module):
     """ Get an iterable of `(name, thing)` tuples for all things
         contained in a given module (although it’ll probably work
@@ -139,6 +28,7 @@ def itermodule(module):
     values = (getattr(module, key) for key in keys)
     return zip(keys, values)
 
+@export
 def moduleids(module):
     """ Get a dictionary of `(name, thing)` tuples from a module,
         indexed by the `id()` value of `thing`
@@ -148,6 +38,7 @@ def moduleids(module):
         out[id(thing)] = (key, thing)
     return out
 
+@export
 def thingname(original, *modules):
     """ Find the name of a thing, according to what it is called
         in the context of a module in which it resides
@@ -161,16 +52,7 @@ def thingname(original, *modules):
                     return key
     return None
 
-def itermoduleids(module):
-    """ Internal function to get an iterable of `(name, id(thing))`
-        tuples for all things comntained in a given module – q.v.
-        `itermodule(…)` implementation supra.
-    """
-    keys = tuple(key for key in dir(module) \
-                      if key not in BUILTINS)
-    ids = (id(getattr(module, key)) for key in keys)
-    return zip(keys, ids)
-
+@export
 def nameof(thing, fallback=''):
     """ Get the name of a thing, according to either:
         >>> thing.__qualname__
@@ -180,6 +62,7 @@ def nameof(thing, fallback=''):
     """
     return determine_name(thing) or fallback
 
+@export
 def determine_module(thing):
     """ Determine in which module a given thing is ensconced,
         and return that modules’ name as a string.
@@ -192,6 +75,7 @@ def determine_module(thing):
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
 # assess a thing’s qualified name, etc etc.
 
+@export
 def path_to_dotpath(path):
     """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
         to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
@@ -221,6 +105,7 @@ def path_to_dotpath(path):
     
     return dotpath
 
+@export
 def dotpath_join(base, *addenda):
     """ Join dotpath elements together as one, á la os.path.join(…) """
     if base is None or base == '':
@@ -240,6 +125,7 @@ def dotpath_join(base, *addenda):
         return base[:-1]
     return base
 
+@export
 def dotpath_split(dotpath):
     """ For a dotted path e.g. `yo.dogg.DoggListener`,
         return a tuple `('DoggListener', 'yo.dogg')`.
@@ -250,6 +136,7 @@ def dotpath_split(dotpath):
     tail = dotpath.replace("%s%s" % (QUALIFIER, head), '')
     return head, tail != head and tail or None
 
+@export
 def qualified_import(qualified):
     """ Import a qualified thing-name.
         e.g. 'instakit.processors.halftone.FloydSteinberg'
@@ -264,6 +151,7 @@ def qualified_import(qualified):
         print("Qualified Import: %s" % qualified)
     return imported
 
+@export
 def qualified_name_tuple(thing):
     """ Get the module/package and thing-name for a class or module.
         e.g. ('instakit.processors.halftone', 'FloydSteinberg')
@@ -272,6 +160,7 @@ def qualified_name_tuple(thing):
            dotpath_split(
            determine_name(thing))[0]
 
+@export
 def qualified_name(thing):
     """ Get a qualified thing-name for a thing.
         e.g. 'instakit.processors.halftone.FloydSteinberg'
@@ -282,6 +171,7 @@ def qualified_name(thing):
         print("Qualified Name: %s" % qualname)
     return qualname
 
+@export
 def split_abbreviations(s):
     """ Split a string into a tuple of its unique constituents,
         based on its internal capitalization -- to wit:
@@ -320,16 +210,16 @@ def split_abbreviations(s):
             abbreviations.append(current_token)
     return tuple(abbreviations)
 
-__all__ = ('doctrim',
-           'sysmods', 'thingname', 'thingname_search', 'determine_name',
-           'itermodule', 'moduleids',
-           'nameof',
-           'determine_module',
-           'path_to_dotpath',
-           'dotpath_join', 'dotpath_split',
-           'qualified_import',
-           'qualified_name_tuple',
-           'qualified_name',
-           'split_abbreviations')
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
 
-__dir__ = lambda: list(__all__)
+# __all__ = ('thingname', 'itermodule', 'moduleids', 'nameof',
+#            'determine_module',
+#            'path_to_dotpath',
+#            'dotpath_join', 'dotpath_split',
+#            'qualified_import',
+#            'qualified_name_tuple',
+#            'qualified_name',
+#            'split_abbreviations')
+#
+# __dir__ = lambda: list(__all__)

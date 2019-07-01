@@ -7,7 +7,8 @@ import sys
 
 from constants import DYNAMIC_MODULE_PREFIX, PROJECT_NAME, VERBOTEN, cache_from_source
 from .namespace import SimpleNamespace, Namespace
-from naming import doctrim, dotpath_join, path_to_dotpath
+from exporting import doctrim
+from naming import dotpath_join, path_to_dotpath
 
 import types as thetypes
 types = Namespace()

@@ -6,6 +6,9 @@ import socket
 import sys
 import sysconfig
 
+# pytuple shortcut lambda:
+pytuple = lambda *attrs: tuple('__%s__' % str(atx) for atx in attrs)
+
 # Project base path:
 BASEPATH = sys.intern(
            os.path.dirname(
@@ -83,7 +86,6 @@ else:
 TOKEN = sys.intern(' -')
 
 # Stuff we want to keep out of namespaces:
-pytuple = lambda *attrs: tuple('__%s__' % str(atx) for atx in attrs)
 VERBOTEN = pytuple('all', 'cached', 'loader', 'file', 'spec')
 VERBOTEN += BUILTINS
 VERBOTEN += ('Namespace', 'SimpleNamespace')
@@ -101,6 +103,11 @@ class NoDefault(object):
     __slots__ = tuple()
     def __new__(cls, *a, **k):
         return cls
+
+# Manually rename `pytuple(…)` per mechanism of “clu.exporting.Exporter”:
+pytuple.__lambda_name__ = λ
+pytuple.__qualname__ = pytuple.__name__ = 'pytuple'
+pytuple.__doc__ = "pytuple(*attrs) → turns ('do', 're', 'mi') into ('__do__', '__re__', '__mi__')"
 
 __all__ = ('BASEPATH',
            'BUILTINS',
@@ -123,7 +130,7 @@ __all__ = ('BASEPATH',
            'VERBOTEN',
            'XDG_RUNTIME_BASE', 'XDG_RUNTIME_DIR',
                                'XDG_RUNTIME_MODE',
-           'NoDefault')
+           'pytuple', 'NoDefault')
 
 __dir__ = lambda: list(__all__)
 

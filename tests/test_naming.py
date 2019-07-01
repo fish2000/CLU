@@ -46,7 +46,8 @@ class TestNaming(object):
         # the Exporter up and running – so we can assign real __name__,
         # __doc__ (…et al.) values to lambda functions as warranted.
         
-        from clu.naming import qualified_name, determine_name
+        from clu.exporting import determine_name
+        from clu.naming import qualified_name
         from clu.predicates import isclass, ismetaclass, isclasstype
         from clu.predicates import allattrs, allpyattrs, isiterable
         from clu.predicates import attr, pyattr, isenum, enumchoices
@@ -70,8 +71,8 @@ class TestNaming(object):
                 raise Nondeterminism("Nondeterminism in qualified_name(%s) → %s" % (name, qname))
         
         # TO INFINITY AND BEYOND:
+        assert 'clu.exporting.%s' % determine_name(determine_name) == qualified_name(determine_name)
         assert 'clu.naming.%s' % determine_name(qualified_name) == qualified_name(qualified_name)
-        assert 'clu.naming.%s' % determine_name(determine_name) == qualified_name(determine_name)
     
     def test_qualified_name_typespace(self):
         """ For some fucking reason *this* one consistently passes …? """

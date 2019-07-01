@@ -7,7 +7,8 @@ colorama.init()
 
 from constants import ENCODING, SEPARATOR_WIDTH
 from constants import Enum, unique, auto
-from naming import doctrim, qualified_name
+from exporting import doctrim
+from naming import qualified_name
 from predicates import tuplize
 from typology import string_types, bytes_types
 from .enums import alias, AliasingEnumMeta

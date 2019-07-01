@@ -12,6 +12,8 @@ from constants import LAMBDA, PY3, PYPY
 from constants import long, unicode, HashableABC, Path
 from constants import numpy
 
+from exporting import Exporter
+
 from predicates import (isclasstype,
                         allpyattrs, getpyattr, haspyattr,
                         pyattr, or_none,
@@ -22,6 +24,9 @@ from predicates import (isclasstype,
 
 from typespace import types
 
+exporter = Exporter()
+export = exporter.decorator()
+
 # TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)` –
 # can be formulated and tested by these lambdas and functions
 
@@ -30,6 +35,7 @@ istypelist = predicate_all(isclasstype)
 maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
                         lambda total: tuple(frozenset(total)))
 
+@export
 def isderivative(putative, thing):
     """ isderivative(thing) → Boolean predicate, True if putative is either a subclass
         or an instance of thing – depending on whether putative is either a classtype
@@ -108,13 +114,57 @@ isfunction = lambda thing: isinstance(thing, (types.Function, types.Lambda)) or 
 islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == LAMBDA
 ishashable = lambda thing: isinstance(thing, HashableABC)
 
-__all__ = ('isunique', 'istypelist', 'maketypelist',
-           'isderivative', 'subclasscheck', 'graceful_issubclass',
-           'numeric_types', 'array_types', 'string_types', 'bytes_types',
-           'path_classes', 'path_types', 'file_types', 'callable_types',
-           'ispathtype', 'ispath', 'isvalidpath',
-           'isabstractmethod', 'isabstract', 'isabstractcontextmanager', 'iscontextmanager',
-           'isnumber', 'isnumeric', 'iscomplex', 'isarray', 'isstring', 'isbytes', 'ismodule',
-           'isfunction', 'islambda', 'ishashable')
 
-__dir__ = lambda: list(__all__)
+export(isunique,        name='isunique',    doc="isunique(thing) → boolean predicate, True if thing is an iterable with unique contents")
+export(istypelist,      name='istypelist',  doc="istypelist(thing) → boolean predicate, True if thing is a typelist (a list consisting only of class types)")
+export(maketypelist,    name='maketypelist',
+                         doc="maketypelist(iterable) → convert an iterable of unknown things into a uniquified typelist")
+
+
+export(subclasscheck,   name='subclasscheck',
+                         doc="subclasscheck(putative, *cls_or_tuple) → A wrapper for `issubclass(…) and `isinstance(…)` that tries to work with you`")
+
+export(graceful_issubclass,
+                        name='graceful_issubclass')
+
+# NO DOCS ALLOWED:
+export(numeric_types)
+export(array_types)
+export(bytes_types)
+export(string_types)
+export(path_classes)
+export(path_types)
+export(file_types)
+export(callable_types)
+
+export(ispathtype,      name='ispathtype',  doc="ispathtype(thing) → boolean predicate, True if thing is a path type")
+export(ispath,          name='ispath',      doc="ispath(thing) → boolean predicate, True if thing seems to be path-ish instance")
+export(isvalidpath,     name='isvalidpath', doc="isvalidpath(thing) → boolean predicate, True if thing is a valid path on the filesystem")
+
+export(isabstractmethod,                    doc="isabstractmethod(thing) → boolean predicate, True if thing is a method declared abstract with @abc.abstractmethod")
+export(isabstract,                          doc="isabstract(thing) → boolean predicate, True if thing is an abstract method OR an abstract base class (née ABC)")
+export(isabstractcontextmanager,            doc="isabstractcontextmanager(thing) → boolean predicate, True if thing decends from contextlib.AbstractContextManager")
+export(iscontextmanager,                    doc="iscontextmanager(thing) → boolean predicate, True if thing is a context manager (either abstract or concrete)")
+
+export(isnumber,        name='isnumber',    doc="isnumber(thing) → boolean predicate, True if thing is a numeric type or an instance of same")
+export(isnumeric,       name='isnumeric',   doc="isnumeric(thing) → boolean predicate, True if thing is a numeric type or an instance of same")
+export(iscomplex,       name='iscomplex',   doc="iscomplex(thing) → boolean predicate, True if thing is a complex numeric type or an instance of same")
+export(isarray,         name='isarray',     doc="isarray(thing) → boolean predicate, True if thing is an array type or an instance of same")
+export(isstring,        name='isstring',    doc="isstring(thing) → boolean predicate, True if thing is a string type or an instance of same")
+export(isbytes,         name='isbytes',     doc="isbytes(thing) → boolean predicate, True if thing is a bytes-like type or an instance of same")
+export(ismodule,        name='ismodule',    doc="ismodule(thing) → boolean predicate, True if thing is a module type or an instance of same")
+export(isfunction,      name='isfunction',  doc="isfunction(thing) → boolean predicate, True if thing is of a callable function type")
+export(islambda,        name='islambda',    doc="islambda(thing) → boolean predicate, True if thing is a function created with the «lambda» keyword")
+export(ishashable,      name='ishashable',  doc="ishashable(thing) → boolean predicate, True if thing can be hashed, via the builtin `hash(thing)`")
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
+
+# assert frozenset(__all__) == frozenset(('isunique', 'istypelist', 'maketypelist',
+#            'isderivative', 'subclasscheck', 'graceful_issubclass',
+#            'numeric_types', 'array_types', 'string_types', 'bytes_types',
+#            'path_classes', 'path_types', 'file_types', 'callable_types',
+#            'ispathtype', 'ispath', 'isvalidpath',
+#            'isabstractmethod', 'isabstract', 'isabstractcontextmanager', 'iscontextmanager',
+#            'isnumber', 'isnumeric', 'iscomplex', 'isarray', 'isstring', 'isbytes', 'ismodule',
+#            'isfunction', 'islambda', 'ishashable'))

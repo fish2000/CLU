@@ -10,7 +10,6 @@ from exporting import Exporter
 exporter = Exporter()
 export = exporter.decorator()
 
-
 # PREDICATE FUNCTIONS: boolean predicates for class types
 
 ismetaclass = lambda thing: hasattr(thing, '__mro__') and \

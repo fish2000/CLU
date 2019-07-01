@@ -2,9 +2,14 @@
 from __future__ import print_function
 
 from predicates import haspyattr
+from exporting import Exporter
+
+exporter = Exporter()
+export = exporter.decorator()
 
 # DICT FUNCTIONS: dictionary-merging
 
+@export
 def merge_two(one, two, cls=dict):
     """ Merge two dictionaries into an instance of the specified class
         Based on this docopt example source: https://git.io/fjCZ6
@@ -15,6 +20,7 @@ def merge_two(one, two, cls=dict):
     merged = ((key, one.get(key, None) or two.get(key, None)) for key in keys)
     return cls(merged)
 
+@export
 def merge_as(*dicts, **overrides):
     """ Merge all dictionary arguments into a new instance of the specified class,
         passing all additional keyword arguments to the class constructor as overrides
@@ -27,6 +33,7 @@ def merge_as(*dicts, **overrides):
         merged = merge_two(merged, d, cls=cls)
     return merged
 
+@export
 def merge(*dicts, **overrides):
     """ Merge all dictionary arguments into a new `dict` instance, using any
         keyword arguments as item overrides in the final `dict` instance returned
@@ -37,6 +44,7 @@ def merge(*dicts, **overrides):
 
 # DICT STUFF: asdict(…)
 
+@export
 def asdict(thing):
     """ asdict(thing) → returns either thing, thing.__dict__, or dict(thing) as necessary """
     if isinstance(thing, dict):
@@ -45,5 +53,7 @@ def asdict(thing):
         return thing.__dict__
     return dict(thing)
 
-__all__ = ('merge_two', 'merge_as', 'merge', 'asdict')
-__dir__ = lambda: list(__all__)
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
+
+# assert frozenset(__all__) == frozenset(('merge_two', 'merge_as', 'merge', 'asdict'))

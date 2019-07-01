@@ -9,9 +9,8 @@ import io
 import os
 
 from constants import LAMBDA, PY3, PYPY
-from constants import long, unicode, HashableABC, Path
-from constants import numpy
-
+from constants import long, unicode, numpy
+from constants import HashableABC, SequenceABC, Path
 from exporting import Exporter
 
 from predicates import (isclasstype,
@@ -113,6 +112,19 @@ ismodule = lambda thing: graceful_issubclass(thing, types.Module)
 isfunction = lambda thing: isinstance(thing, (types.Function, types.Lambda)) or callable(thing)
 islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == LAMBDA
 ishashable = lambda thing: isinstance(thing, HashableABC)
+issequence = lambda thing: isinstance(thing, SequenceABC)
+
+isnumberlist = lambda thinglist: issequence(thinglist) and predicate_all(isnumber, *thinglist)
+isnumericlist = lambda thinglist: issequence(thinglist) and predicate_all(isnumeric, *thinglist)
+iscomplexlist = lambda thinglist: issequence(thinglist) and predicate_all(iscomplex, *thinglist)
+isarraylist = lambda thinglist: issequence(thinglist) and predicate_all(isarray, *thinglist)
+isstringlist = lambda thinglist: issequence(thinglist) and predicate_all(isstring, *thinglist)
+isbyteslist = lambda thinglist: issequence(thinglist) and predicate_all(isbytes, *thinglist)
+ismodulelist = lambda thinglist: issequence(thinglist) and predicate_all(ismodule, *thinglist)
+isfunctionlist = lambda thinglist: issequence(thinglist) and predicate_all(isfunction, *thinglist)
+islambdalist = lambda thinglist: issequence(thinglist) and predicate_all(islambda, *thinglist)
+ishashablelist = lambda thinglist: issequence(thinglist) and predicate_all(ishashable, *thinglist)
+issequencelist = lambda thinglist: issequence(thinglist) and predicate_all(issequence, *thinglist)
 
 # MODULE EXPORTS:
 export(isunique,        name='isunique',    doc="isunique(thing) → boolean predicate, True if thing is an iterable with unique contents")
@@ -156,6 +168,19 @@ export(ismodule,        name='ismodule',    doc="ismodule(thing) → boolean pre
 export(isfunction,      name='isfunction',  doc="isfunction(thing) → boolean predicate, True if thing is of a callable function type")
 export(islambda,        name='islambda',    doc="islambda(thing) → boolean predicate, True if thing is a function created with the «lambda» keyword")
 export(ishashable,      name='ishashable',  doc="ishashable(thing) → boolean predicate, True if thing can be hashed, via the builtin `hash(thing)`")
+export(issequence,      name='issequence',  doc="issequence(thing) → boolean predicate, True if thing is a sequence type (e.g. a tuple or list type)")
+
+export(isnumberlist,    name='isnumberlist',    doc="isnumberlist(thinglist) → boolean predicate, True if thinglist is a sequence of numeric types")
+export(isnumericlist,   name='isnumericlist',   doc="isnumericlist(thinglist) → boolean predicate, True if thinglist is a sequence of numeric types")
+export(iscomplexlist,   name='iscomplexlist',   doc="iscomplexlist(thinglist) → boolean predicate, True if thinglist is a sequence of complex numeric types")
+export(isarraylist,     name='isarraylist',     doc="isarraylist(thinglist) → boolean predicate, True if thinglist is a sequence of array types")
+export(isstringlist,    name='isstringlist',    doc="isstringlist(thinglist) → boolean predicate, True if thinglist is a sequence of string types")
+export(isbyteslist,     name='isbyteslist',     doc="isbyteslist(thinglist) → boolean predicate, True if thinglist is a sequence of bytes-like types")
+export(ismodulelist,    name='ismodulelist',    doc="ismodulelist(thinglist) → boolean predicate, True if thinglist is a sequence of module types")
+export(isfunctionlist,  name='isfunctionlist',  doc="isfunctionlist(thinglist) → boolean predicate, True if thinglist is a sequence of callable function types")
+export(islambdalist,    name='islambdalist',    doc="islambdalist(thinglist) → boolean predicate, True if thinglist is a sequence of functions created with the «lambda» keyword")
+export(ishashablelist,  name='ishashablelist',  doc="ishashablelist(thinglist) → boolean predicate, True if thinglist is a sequence of things that can be hashed, via the builtin `hash(thing)`")
+export(issequencelist,  name='issequencelist',  doc="issequencelist(thinglist) → boolean predicate, True if thinglist is a sequence of sequence types")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

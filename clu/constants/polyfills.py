@@ -32,9 +32,15 @@ if PY3:
     long = int
 
 try:
-    from collections.abc import Mapping, MutableMapping, Hashable as HashableABC
+    from collections.abc import (Mapping, MutableMapping,
+                                 Hashable as HashableABC,
+                                 Sequence as SequenceABC,
+                                 Sized as SizedABC)
 except ImportError:
-    from collections import Mapping, MutableMapping, Hashable as HashableABC
+    from collections import (Mapping, MutableMapping,
+                             Hashable as HashableABC,
+                             Sequence as SequenceABC,
+                             Sized as SizedABC)
 
 try:
     from importlib.util import cache_from_source
@@ -68,7 +74,8 @@ __all__ = ('Counter', 'OrderedDict',
            'ispyname', 'pytuple',
            'AutoType', 'auto',
            'unicode', 'long',
-           'Mapping', 'MutableMapping', 'HashableABC',
+           'Mapping', 'MutableMapping',
+           'HashableABC', 'SequenceABC', 'SizedABC',
            'cache_from_source',
            'lru_cache',
            'Path', 'numpy')

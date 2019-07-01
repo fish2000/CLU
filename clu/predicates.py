@@ -121,7 +121,6 @@ class Partial(partial):
     
     def __repr__(self):
         # Use the lambda_repr equivalent:
-        # , default="<partial>"
         return lambda_repr(self)
 
 @export

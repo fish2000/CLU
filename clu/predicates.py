@@ -100,6 +100,11 @@ iscontainer = lambda thing: isiterable(thing) and \
                         not isnormative(thing) and \
                         not isclasstype(thing)
 
+# This is the equivalent of a lambda types’ built-in __repr__ function:
+lambda_repr = lambda instance: "<function %s at 0x%0x>" % (pyattr(instance, 'qualname', 'name',
+                                                                  default="<lambda>"),
+                                                           id(instance))
+
 @export
 def apply_to(predicate, function, *things):
     """ apply_to(predicate, function, *things) → Apply a predicate to each

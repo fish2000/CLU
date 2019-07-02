@@ -4,7 +4,6 @@ from __future__ import print_function
 import pytest
 
 from clu.constants import System
-# from clu.constants import SYSTEM
 from clu.fs import AppDirs, Directory
 from clu.version import VersionInfo
 

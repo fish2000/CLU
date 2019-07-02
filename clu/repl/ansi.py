@@ -12,9 +12,14 @@ from naming import qualified_name
 from predicates import tuplize
 from typology import string_types, bytes_types
 from .enums import alias, AliasingEnumMeta
+from exporting import Exporter
 
-print_separator = lambda: print('-' * SEPARATOR_WIDTH)
+exporter = Exporter()
+export = exporter.decorator()
 
+print_separator = lambda filler='-': print(filler * SEPARATOR_WIDTH)
+
+@export
 class ANSIBase(Enum):
     
     """ Root ancestor class for all ANSI-code enums """
@@ -23,6 +28,7 @@ class ANSIBase(Enum):
     def is_ansi(cls, instance):
         return cls in type(instance).__mro__
 
+@export
 class ANSI(AliasingEnumMeta):
     
     @classmethod
@@ -185,6 +191,7 @@ ANSIFormatBase = NamedTuple('ANSIFormatBase', ('text', 'background', 'weight'),
                                                                     Weight.NORMAL),
                                                module=__file__)
 
+@export
 class ANSIFormat(ANSIFormatBase):
     
     def __new__(cls, text=Text.NOTHING,
@@ -203,6 +210,7 @@ class ANSIFormat(ANSIFormatBase):
                            str(string),
                            str(Weight.RESET_ALL.to_string()))
 
+@export
 def print_ansi(text, color=''):
     """ Print text in ANSI color, using optional inline markup
         from `colorama` for terminal color-escape delimiters
@@ -211,6 +219,7 @@ def print_ansi(text, color=''):
     for line in text.splitlines():
         print(fmt.render(line), sep='')
 
+@export
 def print_ansi_centered(text, color='',
                               filler='•',
                               width=SEPARATOR_WIDTH):
@@ -223,6 +232,7 @@ def print_ansi_centered(text, color='',
     
     print_ansi(f"{aa}{message}{ab}", color=color)
 
+@export
 def highlight(code_string, language='json',
                              markup='terminal256',
                               style='paraiso-dark'):
@@ -234,8 +244,16 @@ def highlight(code_string, language='json',
     formatter = pygments.formatters.get_formatter_by_name(markup, style=style)
     return pygments.highlight(code_string, lexer=LexerCls(), formatter=formatter)
 
-__all__ = ('print_separator',
-           'Text', 'Weight', 'Background', 'ANSIFormat',
-           'print_ansi', 'print_ansi_centered', 'highlight')
+export(print_separator,     name='print_separator', doc="print_separator(filler_char) → print filler_char TERMINAL_WIDTH times")
 
-__dir__ = lambda: list(__all__)
+# NO DOCS ALLOWED:
+export(Text)
+export(Background)
+export(Weight)
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
+
+# assert frozenset(__all__) == frozenset(('print_separator',
+#            'Text', 'Weight', 'Background', 'ANSI', 'ANSIBase', 'ANSIFormat',
+#            'print_ansi', 'print_ansi_centered', 'highlight'))

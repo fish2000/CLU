@@ -22,7 +22,7 @@ clean-cython:
 clean-build-artifacts:
 	rm -rf build dist python_$(PROJECT_NAME).egg-info
 
-cython:
+cython: clean-cython
 	python setup.py build_ext --inplace
 
 sdist:
@@ -46,7 +46,7 @@ check:
 	travis lint .travis.yml
 
 check-all: check clean-build-artifacts
-	pytest -v
+	pytest
 
 .PHONY: clean-pyc clean-cython clean-build-artifacts
 .PHONY: clean distclean rebuild dist upload bigupload

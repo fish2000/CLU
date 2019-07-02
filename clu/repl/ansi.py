@@ -9,7 +9,6 @@ from constants import ENCODING, SEPARATOR_WIDTH
 from constants import Enum, unique, auto
 from exporting import doctrim
 from naming import qualified_name
-from predicates import tuplize
 from typology import string_types, bytes_types
 from .enums import alias, AliasingEnumMeta
 from exporting import Exporter
@@ -186,10 +185,7 @@ class Weight(ANSIBase, metaclass=ANSI, source=colorama.Style):
     RESET_ALL           = auto()
     RESET               = alias(RESET_ALL)
 
-ANSIFormatBase = NamedTuple('ANSIFormatBase', ('text', 'background', 'weight'),
-                                               defaults=tuplize(Background.NOTHING,
-                                                                    Weight.NORMAL),
-                                               module=__file__)
+ANSIFormatBase = NamedTuple('ANSIFormatBase', ('text', 'background', 'weight'), module=__file__)
 
 @export
 class ANSIFormat(ANSIFormatBase):

@@ -21,7 +21,7 @@ def stringify(instance, fields):
             TypeName(fieldname="val", otherfieldname="otherval") @ 0x0FE
         
         The `stringify(…)` function is of use in `__str__()` and `__repr__()`
-        definitions, E.G. something like:
+        definitions, e.g. something like:
         
             def __repr__(self):
                 return stringify(self, type(self).__slots__)

@@ -240,7 +240,7 @@ export(item_search,     name='item_search',     doc="Return the first-found exis
 export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns None")
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns None")
 export(uncallable,      name='uncallable',      doc="uncallable(thing) → boolean predicate, shortcut for `not callable(thing)`")
-export(pyname,          name='pyname',          doc="pyname(string) → Return the __special__ name for a given string")
+export(pyname,          name='pyname',          doc="pyname(thing) → Return either the __qualname__ or __name__ for a given thing")
 
 export(isexpandable,    name='isexpandable',    doc="isexpandable(thing) → boolean predicate, True if thing can be `*expanded`")
 export(isnormative,     name='isnormative',     doc="isnormative(thing) → boolean predicate, True if thing is a string-like or bytes-like iterable")

@@ -39,6 +39,8 @@ class System(Enum):
     def match(cls, value):
         if type(value) is cls:
             return value
+        if Enum in type(value).__mro__:
+            return value
         if type(value) in (bytes, bytearray):
             return cls.from_string(str(value, encoding=ENCODING))
         return cls.from_string(value) # Assume string as last resort
@@ -52,6 +54,9 @@ class System(Enum):
     
     def __bytes__(self):
         return bytes(self.name, encoding=ENCODING)
+    
+    def __eq__(self, other):
+        return str(self) == str(other)
     
     @property
     def os_name(self):

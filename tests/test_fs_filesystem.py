@@ -8,7 +8,7 @@ import os
 
 from clu.fs import Directory
 
-class TestFilesystem(object):
+class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     

@@ -225,7 +225,7 @@ class AppDirs(object):
         For Unix, we follow the XDG spec and support $XDG_DATA_HOME.
         That means, by default "~/.local/share/<AppName>".
         """
-        if self.system is System.WIN32:
+        if self.system == System.WIN32:
             if appauthor is None:
                 appauthor = appname
             path = self._get_win_folder(roaming and CSIDL.APPDATA \
@@ -235,7 +235,7 @@ class AppDirs(object):
                     path = os.path.join(path, appauthor, appname)
                 else:
                     path = os.path.join(path, appname)
-        elif self.system is System.DARWIN:
+        elif self.system == System.DARWIN:
             path = os.path.expanduser('~/Library/Application Support/')
             if appname:
                 path = os.path.join(path, appname)
@@ -281,7 +281,7 @@ class AppDirs(object):
         
         WARNING: Do not use this on Windows. See the Vista-Fail note above for why.
         """
-        if self.system is System.WIN32:
+        if self.system == System.WIN32:
             if appauthor is None:
                 appauthor = appname
             path = self._get_win_folder(CSIDL.COMMON_APPDATA)
@@ -290,8 +290,8 @@ class AppDirs(object):
                     path = os.path.join(path, appauthor, appname)
                 else:
                     path = os.path.join(path, appname)
-        elif self.system is System.DARWIN:
-            path = os.path.expanduser('/Library/Application Support')
+        elif self.system == System.DARWIN:
+            path = '/Library/Application Support'
             if appname:
                 path = os.path.join(path, appname)
         else:
@@ -347,9 +347,9 @@ class AppDirs(object):
         For Unix, we follow the XDG spec and support $XDG_CONFIG_HOME.
         That means, by default "~/.config/<AppName>".
         """
-        if self.system is System.WIN32:
+        if self.system == System.WIN32:
             path = self.get_user_data_dir(appname, appauthor, None, roaming)
-        elif self.system is System.DARWIN:
+        elif self.system == System.DARWIN:
             path = os.path.expanduser('~/Library/Preferences/')
             if appname:
                 path = os.path.join(path, appname)
@@ -394,12 +394,12 @@ class AppDirs(object):
         
         WARNING: Do not use this on Windows. See the Vista-Fail note above for why.
         """
-        if self.system is System.WIN32:
+        if self.system == System.WIN32:
             path = self.get_site_data_dir(appname, appauthor)
             if appname and version:
                 path = os.path.join(path, version)
-        elif self.system is System.DARWIN:
-            path = os.path.expanduser('/Library/Preferences')
+        elif self.system == System.DARWIN:
+            path = '/Library/Preferences'
             if appname:
                 path = os.path.join(path, appname)
         else:
@@ -455,7 +455,7 @@ class AppDirs(object):
         OPINION: This function appends "Cache" to the `CSIDL_LOCAL_APPDATA` value.
         This can be disabled with the `opinion=False` option.
         """
-        if self.system is System.WIN32:
+        if self.system == System.WIN32:
             if appauthor is None:
                 appauthor = appname
             path = self._get_win_folder(CSIDL.LOCAL_APPDATA)
@@ -466,7 +466,7 @@ class AppDirs(object):
                     path = os.path.join(path, appname)
                 if opinion:
                     path = os.path.join(path, "Cache")
-        elif self.system is System.DARWIN:
+        elif self.system == System.DARWIN:
             path = os.path.expanduser('~/Library/Caches')
             if appname:
                 path = os.path.join(path, appname)
@@ -557,11 +557,11 @@ class AppDirs(object):
         value for Windows and appends "log" to the user cache dir for Unix.
         This can be disabled with the `opinion=False` option.
         """
-        if self.system is System.DARWIN:
+        if self.system == System.DARWIN:
             path = os.path.join(
                 os.path.expanduser('~/Library/Logs'),
                 appname)
-        elif self.system is System.WIN32:
+        elif self.system == System.WIN32:
             path = self.get_user_data_dir(appname, appauthor, version)
             version = False
             if opinion:

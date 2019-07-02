@@ -49,7 +49,7 @@ DEFAULT_PREFIX = "yo-dogg-"
 def ensure_path_is_valid(pth):
     """ Raise an exception if we can’t write to the specified path """
     if not ispath(pth):
-        raise FilesystemError("Operand can’t be a path: %s" % pth)
+        raise FilesystemError("Operand must be a path type: %s" % pth)
     if os.path.exists(pth):
         if os.path.isdir(pth):
             raise FilesystemError("Can’t save over directory: %s" % pth)

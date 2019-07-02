@@ -5,7 +5,7 @@ import pytest
 
 from clu.constants import System
 # from clu.constants import SYSTEM
-from clu.fs import AppDirs
+from clu.fs import AppDirs, Directory
 from clu.version import VersionInfo
 
 XDGS = ('XDG_CONFIG_DIRS', 'XDG_DATA_HOME',
@@ -58,6 +58,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_log_dir     == "%s/.cache/%s/%s/log" % (home, appname, appversion)
         assert appdirs.user_state_dir   == "%s/.local/state/%s/%s" % (home, appname, appversion)
         
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
+        
         assert appdirs.system           == System.LINUX
         assert appdirs.version          == appversion
         
@@ -82,6 +91,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_log_dir     == "%s/.cache/%s/%s/log" % (home, appname, appversion)
         assert appdirs.user_state_dir   == "%s/.local/state/%s/%s" % (home, appname, appversion)
         
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
+        
         assert appdirs.system           == System.LINUX
         assert appdirs.version          == appversion
         
@@ -103,6 +121,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_data_dir    == "%s/.local/share/%s" % (home, appname)
         assert appdirs.user_log_dir     == "%s/.cache/%s/log" % (home, appname)
         assert appdirs.user_state_dir   == "%s/.local/state/%s" % (home, appname)
+        
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
         
         assert appdirs.system           == System.LINUX
         assert appdirs.version          == None
@@ -126,6 +153,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_log_dir     == "%s/.cache/%s/log" % (home, appname)
         assert appdirs.user_state_dir   == "%s/.local/state/%s" % (home, appname)
         
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
+        
         assert appdirs.system           == System.LINUX
         assert appdirs.version          == None
         assert appdirs.version_info     == None
@@ -147,6 +183,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_data_dir    == "%s/.local/share/%s/%s" % (home, appname, appversion)
         assert appdirs.user_log_dir     == "%s/.cache/%s/%s/log" % (home, appname, appversion)
         assert appdirs.user_state_dir   == "%s/.local/state/%s/%s" % (home, appname, appversion)
+        
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
         
         assert appdirs.system           == System.LINUX2
         assert appdirs.version          == appversion
@@ -172,6 +217,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_log_dir     == "%s/.cache/%s/%s/log" % (home, appname, appversion)
         assert appdirs.user_state_dir   == "%s/.local/state/%s/%s" % (home, appname, appversion)
         
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
+        
         assert appdirs.system           == System.LINUX2
         assert appdirs.version          == appversion
         
@@ -193,6 +247,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_data_dir    == "%s/.local/share/%s" % (home, appname)
         assert appdirs.user_log_dir     == "%s/.cache/%s/log" % (home, appname)
         assert appdirs.user_state_dir   == "%s/.local/state/%s" % (home, appname)
+        
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
         
         assert appdirs.system           == System.LINUX2
         assert appdirs.version          == None
@@ -216,6 +279,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_log_dir     == "%s/.cache/%s/log" % (home, appname)
         assert appdirs.user_state_dir   == "%s/.local/state/%s" % (home, appname)
         
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
+        
         assert appdirs.system           == System.LINUX2
         assert appdirs.version          == None
         assert appdirs.version_info     == None
@@ -237,6 +309,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_data_dir    == "/Users/%s/Library/Application Support/%s/%s" % (user, appname, appversion)
         assert appdirs.user_log_dir     == "/Users/%s/Library/Logs/%s/%s" % (user, appname, appversion)
         assert appdirs.user_state_dir   == "/Users/%s/Library/Application Support/%s/%s" % (user, appname, appversion)
+        
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
         
         assert appdirs.system           == System.DARWIN
         assert appdirs.version          == appversion
@@ -262,6 +343,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_log_dir     == "/Users/%s/Library/Logs/%s/%s" % (user, appname, appversion)
         assert appdirs.user_state_dir   == "/Users/%s/Library/Application Support/%s/%s" % (user, appname, appversion)
         
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
+        
         assert appdirs.system           == System.DARWIN
         assert appdirs.version          == appversion
         
@@ -284,6 +374,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_log_dir     == "/Users/%s/Library/Logs/%s" % (user, appname)
         assert appdirs.user_state_dir   == "/Users/%s/Library/Application Support/%s" % (user, appname)
         
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
+        
         assert appdirs.system           == System.DARWIN
         assert appdirs.version          == None
         assert appdirs.version_info     == None
@@ -305,6 +404,15 @@ class TestFsAppdirectories(object):
         assert appdirs.user_data_dir    == "/Users/%s/Library/Application Support/%s" % (user, appname)
         assert appdirs.user_log_dir     == "/Users/%s/Library/Logs/%s" % (user, appname)
         assert appdirs.user_state_dir   == "/Users/%s/Library/Application Support/%s" % (user, appname)
+        
+        assert type(appdirs.site_config)    is Directory
+        assert type(appdirs.site_data)      is Directory
+        
+        assert type(appdirs.user_cache)     is Directory
+        assert type(appdirs.user_config)    is Directory
+        assert type(appdirs.user_data)      is Directory
+        assert type(appdirs.user_log)       is Directory
+        assert type(appdirs.user_state)     is Directory
         
         assert appdirs.system           == System.DARWIN
         assert appdirs.version          == None

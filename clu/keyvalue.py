@@ -101,7 +101,3 @@ export(zfunc,           name='zfunc')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
-
-if __name__ == '__main__':
-    from fs.appdirectories import test as appdirectories_test
-    appdirectories_test()

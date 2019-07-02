@@ -40,16 +40,16 @@ bump:
 bigbump:
 	bumpversion --verbose minor
 
-check-all:
+check:
 	check-manifest -v
 	python setup.py check -m -s
 	travis lint .travis.yml
 
-check: check-all
-	rm -rf build dist $(PROJECT_NAME).egg-info
+check-all: check clean-build-artifacts
+	pytest -v
 
 .PHONY: clean-pyc clean-cython clean-build-artifacts
 .PHONY: clean distclean rebuild dist upload bigupload
 .PHONY: cython sdist wheel twine-upload bump bigbump
-.PHONY: check-all check
+.PHONY: check check-all
 

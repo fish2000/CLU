@@ -26,12 +26,11 @@
 ''' CLU - Common Lightweight Utilities, or Command-Line Utilities (your pick) '''
 
 from __future__ import print_function
-import os, sys
-import sysconfig
-
-# from multiprocessing import cpu_count
-# from Cython.Build import cythonize
 from setuptools import setup, find_packages
+
+import os
+import sys
+import sysconfig
 
 # HOST PYTHON VERSION
 PYTHON_VERSION = float("%s%s%s" % (sys.version_info.major, os.extsep,
@@ -59,9 +58,6 @@ KEYWORDS = ('command',
             'predicates',
             'REPR', 'tools')
 
-CPPLANGS = ('c++', 'cxx', 'cpp', 'cc', 'mm')
-CPPVERSION = PYTHON_VERSION < 3 and 'c++14' or 'c++17'
-
 # PROJECT DIRECTORY
 CWD = os.path.dirname(__file__)
 BASE_PATH = os.path.join(
@@ -78,46 +74,6 @@ def project_content(*filenames):
     if not out:
         raise ValueError("""File %s couldn't be read""" % os.path.sep.join(filenames))
     return out.strip()
-
-# CYTHON & C-API EXTENSION MODULES
-def cython_module(*args, **kwargs):
-    from Cython.Distutils import Extension
-    sources = []
-    sources.extend(kwargs.pop('sources', []))
-    include_dirs = []
-    include_dirs.extend(kwargs.pop('include_dirs', []))
-    ext_package = os.path.extsep.join(args)
-    ext_pth = os.path.sep.join(args) + os.extsep + "pyx"
-    sources.insert(0, ext_pth)
-    language = kwargs.pop('language', 'c').lower()
-    extra_compile_args = ['-Wno-unused-function',
-                          '-Wno-unneeded-internal-declaration',
-                          '-O3',
-                          '-fstrict-aliasing',
-                          '-funroll-loops',
-                          '-mtune=native']
-    if language in CPPLANGS:
-        extra_compile_args.extend(['-std=%s' % CPPVERSION,
-                                   '-stdlib=libc++',
-                                   '-Wno-sign-compare',
-                                   '-Wno-unused-private-field'])
-    return Extension(ext_package, sources,
-        language=language,
-        include_dirs=include_dirs,
-        extra_compile_args=extra_compile_args)
-
-def cython_comparator(name, **kwargs):
-    return cython_module(PROJECT_NAME, 'comparators', 'ext', name, **kwargs)
-
-def cython_processor(name, **kwargs):
-    return cython_module(PROJECT_NAME, 'processors', 'ext', name, **kwargs)
-
-def cython_utility(name, **kwargs):
-    return cython_module(PROJECT_NAME, 'utils', 'ext', name, **kwargs)
-
-def additional_source(*args):
-    return os.path.join(
-           os.path.relpath(BASE_PATH, start=CWD), *args)
 
 # PROJECT VERSION & METADATA
 __version__ = "<undefined>"
@@ -149,8 +105,6 @@ CLASSIFIERS = [
     'Operating System :: POSIX',
     'Operating System :: Unix',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
@@ -166,8 +120,6 @@ except ImportError:
     numpy = FakeNumpy()
 
 # SOURCES & INCLUDE DIRECTORIES
-# hsluv_source = additional_source('utils', 'ext', 'hsluv.c')
-# augli_source = additional_source('comparators', 'ext', 'butteraugli.cc')
 include_dirs = [numpy.get_include(),
                 sysconfig.get_path('include')]
 
@@ -189,23 +141,12 @@ setup(
     
     packages=[package for package in find_packages() \
                        if package.startswith(PROJECT_NAME)],
+    
     package_dir={ 'clu' : 'clu' },
     package_data={ '' : ['*.*'] },
     include_package_data=False,
     zip_safe=True,
     
     install_requires=INSTALL_REQUIRES,
-    include_dirs=include_dirs,
-    
-    # ext_modules=cythonize([
-    #     cython_comparator("buttereye",  sources=[augli_source],
-    #                                     language="c++"),
-    #     cython_processor("halftone",    include_dirs=include_dirs,
-    #                                     language="c"),
-    #     cython_utility("api",           sources=[hsluv_source],
-    #                                     language="c")
-    #     ], nthreads=cpu_count(),
-    #        compiler_directives=dict(language_level=3,
-    #                                 infer_types=True,
-    #                                 embedsignature=True)),
+    include_dirs=include_dirs
 )

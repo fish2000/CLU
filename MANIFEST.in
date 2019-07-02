@@ -22,7 +22,7 @@ include tox.ini
 recursive-include clu *
 recursive-include requirements *.txt
 recursive-include scripts *
-recursive-include tests *
+recursive-include tests *.py
 
 recursive-exclude clu *.pyc *~ *.so .DS_Store
 recursive-exclude requirements *.pyc *~ *.so .DS_Store

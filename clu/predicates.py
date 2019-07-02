@@ -230,12 +230,12 @@ export(getitem,         name='getitem',         doc="getitem(thing, item[, defau
 export(accessor,        name='accessor',        doc="accessor(func, thing, *attributes) → return the first non-None value had by successively applying func(thing, attribute)")
 export(searcher,        name='searcher',        doc="searcher(func, attribute, *things) → return the first non-None value had by successively applying func(thing, attribute)")
 
-export(attr,            name='attr',            doc="Return the first existing attribute from a thing, given 1+ attribute names")
-export(pyattr,          name='pyattr',          doc="Return the first existing __special__ attribute from a thing, given 1+ attribute names")
-export(item,            name='item',            doc="Return the first existing item held by thing, given 1+ item names")
-export(attr_search,     name='attr_search',     doc="Return the first-found existing attribute from a thing, given 1+ things")
-export(pyattr_search,   name='pyattr_search',   doc="Return the first-found existing __special__ attribute from a thing, given 1+ things")
-export(item_search,     name='item_search',     doc="Return the first-found existing item from a thing, given 1+ things")
+export(attr,            name='attr',            doc="attr(thing, *attributes) → Return the first existing attribute from a thing, given 1+ attribute names")
+export(pyattr,          name='pyattr',          doc="pyattr(thing, *attributes) → Return the first existing __special__ attribute from a thing, given 1+ attribute names")
+export(item,            name='item',            doc="item(thing, *itemnames) → Return the first existing item held by thing, given 1+ item names")
+export(attr_search,     name='attr_search',     doc="attr_search(attribute, *things) → Return the first-found existing attribute from a thing, given 1+ things")
+export(pyattr_search,   name='pyattr_search',   doc="pyattr_search(attribute, *things) → Return the first-found existing __special__ attribute from a thing, given 1+ things")
+export(item_search,     name='item_search',     doc="item_search(itemname, *things) → Return the first-found existing item from a thing, given 1+ things")
 
 export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns None")
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns None")

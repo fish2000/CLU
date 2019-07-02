@@ -1,68 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from functools import wraps
 
-import re, os
+import re
+import os
 
 from constants import ENCODING, lru_cache
-from predicates import tuplize
 from typology import string_types
 
 def wrap_value(value):
     return lambda *args, **kwargs: value
 
 none_function = wrap_value(None)
-
-class Memoizer(dict):
-    
-    """ Very simple memoizer (only works with positional args) """
-    
-    def __init__(self, function):
-        super(Memoizer, self).__init__()
-        self.original = function
-    
-    def __missing__(self, key):
-        function = self.original
-        self[key] = out = function(*key)
-        return out
-    
-    @property
-    def original(self):
-        return self.original_function
-    
-    @original.setter
-    def original(self, value):
-        if not value:
-            self.original_function = none_function
-        elif not callable(value):
-            self.original_function = wrap_value(value)
-        else:
-            self.original_function = value
-    
-    @property
-    def __wrapped__(self):
-        return self.original_function
-    
-    def __call__(self, function=None):
-        if function is None:
-            function = self.original
-        else:
-            self.original = function
-        @wraps(function)
-        def memoized(*args):
-            return self[tuplize(*args)]
-        memoized.__wrapped__ = function
-        memoized.__instance__ = self
-        return memoized
-
-def memoize(function):
-    memoinstance = Memoizer(function)
-    @wraps(function)
-    def memoized(*args):
-        return memoinstance[tuplize(*args)]
-    memoized.__wrapped__ = function
-    memoized.__instance__ = memoinstance
-    return memoized
 
 def stringify(instance, fields):
     """ Stringify an object instance, using an iterable field list to
@@ -143,7 +91,8 @@ def u8str(source):
     return type(source) is str and source \
                         or u8bytes(source).decode(ENCODING)
 
-# OS UTILITIES: get the current process’ umask value
+# OS UTILITIES: deal with the umask value
+
 octalize = lambda integer: "0o%04o" % integer
 
 @lru_cache(maxsize=1)

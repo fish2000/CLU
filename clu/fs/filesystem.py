@@ -338,8 +338,8 @@ def TemporaryNamedFile(tempth, mode='wb', buffer_size=-1, delete=True):
         
         Parameters
         ----------
-        tempth : str / bytes / descriptor / filename-ish
-            File name, path, or descriptor to open.
+        tempth : str / bytes  / filename-ish
+            File name, path, or filename-ish instance to open.
         mode : str / bytes, optional
             String-like symbolic explication of mode with which to open
             the file -- q.v. ``io.open(…)`` or ``__builtins__.open(…)``

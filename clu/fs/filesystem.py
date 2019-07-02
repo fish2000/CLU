@@ -227,7 +227,7 @@ def rm_rf(pth):
         pass
     return False
 
-def temporary(suffix=None, prefix=None, parent=None, **kwargs):
+def temporary(suffix='', prefix='', parent=None, **kwargs):
     """ Wrapper around `tempfile.mktemp()` that allows full overriding of the
         prefix and suffix by the caller -- that is to say, no random elements
         are used in the returned filename if both a prefix and a suffix are
@@ -239,6 +239,9 @@ def temporary(suffix=None, prefix=None, parent=None, **kwargs):
     """
     from tempfile import mktemp, gettempdir
     directory = os.fspath(kwargs.pop('dir', parent) or gettempdir())
+    if suffix:
+        if not suffix.startswith(os.extsep):
+            suffix = "%s%s" % (os.extsep, suffix)
     tempmade = mktemp(prefix=prefix, suffix=suffix, dir=directory)
     tempsplit = os.path.splitext(os.path.basename(tempmade))
     if not suffix:

@@ -13,6 +13,87 @@ class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     
+    def test_temporary(self):
+        from clu.fs.filesystem import temporary, write_to_path
+        from clu.fs.filesystem import FilesystemError
+        
+        # Prepare the temporary directory:
+        d = Directory(gettempdir())
+        assert d.exists
+        
+        # These automatically randomize:
+        assert temporary(dir=d).startswith(gettempdir())
+        assert temporary(parent=d).startswith(gettempdir())
+        
+        # These are deterministic:
+        assert temporary(prefix='yo-dogg', dir=d) == os.path.join(gettempdir(), 'yo-dogg')
+        assert temporary(prefix='yo-dogg', parent=d) == os.path.join(gettempdir(), 'yo-dogg')
+        
+        # These are deterministic (see below):
+        assert temporary(prefix='yo-dogg', suffix='tmp', dir=d) == os.path.join(gettempdir(), 'yo-dogg.tmp')
+        assert temporary(prefix='yo-dogg', suffix='tmp', parent=d) == os.path.join(gettempdir(), 'yo-dogg.tmp')
+        assert temporary(prefix='yo-dogg', suffix='.tmp', dir=d) == os.path.join(gettempdir(), 'yo-dogg.tmp')
+        assert temporary(prefix='yo-dogg', suffix='.tmp', parent=d) == os.path.join(gettempdir(), 'yo-dogg.tmp')
+        
+        # These are manually randomized:
+        assert temporary(prefix='yo-dogg-',
+                         suffix='tmp',
+                         randomized=True,
+                         dir=d).startswith(os.path.join(gettempdir(), 'yo-dogg-'))
+        assert temporary(prefix='yo-dogg-',
+                         suffix='tmp',
+                         randomized=True,
+                         parent=d).startswith(os.path.join(gettempdir(), 'yo-dogg-'))
+        
+        assert temporary(prefix='yo-dogg-',
+                         suffix='tmp',
+                         randomized=True,
+                         dir=d).endswith('.tmp')
+        assert temporary(prefix='yo-dogg-',
+                         suffix='tmp',
+                         randomized=True,
+                         parent=d).endswith('.tmp')
+        
+        # Prepare the subpath
+        p = d.subpath('yo-dogg.tmp')
+        assert not os.path.exists(p)
+        
+        # Prepare data:
+        data = "yo dogg, " * 1000
+        data += "yo dogg."
+        
+        try:
+            write_to_path(data, p)
+            
+            with open(p, 'rb') as handle:
+                roundtrip = handle.read()
+                assert len(data) == len(roundtrip)
+            
+            # Ensure we wrote data to the subpath:
+            assert os.path.exists(p)
+            
+            # Ensure that temporary() raises when a deterministic call results
+            # in the computation of a file path that already exists –
+            # see also the original forms of the deterministic calls, above:
+            with pytest.raises(FilesystemError) as exc:
+                temporary(prefix='yo-dogg', suffix='tmp', dir=d)
+            assert "file exists" in str(exc.value)
+            
+            with pytest.raises(FilesystemError) as exc:
+                temporary(prefix='yo-dogg', suffix='tmp', parent=d)
+            assert "file exists" in str(exc.value)
+            
+            with pytest.raises(FilesystemError) as exc:
+                temporary(prefix='yo-dogg', suffix='.tmp', dir=d)
+            assert "file exists" in str(exc.value)
+            
+            with pytest.raises(FilesystemError) as exc:
+                temporary(prefix='yo-dogg', suffix='.tmp', parent=d)
+            assert "file exists" in str(exc.value)
+        
+        finally:
+            os.unlink(p)
+    
     def test_rm_rf(self):
         # Also involves `write_to_path(…)` and `Directory.walk()`
         from clu.fs.filesystem import write_to_path, rm_rf

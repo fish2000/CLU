@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from tempfile import gettempdir
 
 import pytest
 
@@ -41,7 +42,7 @@ class TestFsAppdirectories(object):
     appversion = "1.2.4"
     
     def test_LINUX_yes_version_no_author(self, environment):
-        home = environment.get('HOME', '/tmp')
+        home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appversion = type(self).appversion
         appdirs = AppDirs(appname, version=appversion, system=System.LINUX)
@@ -73,7 +74,7 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
     
     def test_LINUX_yes_version_yes_author(self, environment):
-        home = environment.get('HOME', '/tmp')
+        home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appauthor = type(self).appauthor
         appversion = type(self).appversion
@@ -106,7 +107,7 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
     
     def test_LINUX_no_version_no_author(self, environment):
-        home = environment.get('HOME', '/tmp')
+        home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appdirs = AppDirs(appname, system=System.LINUX)
         
@@ -136,7 +137,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
     
     def test_LINUX_no_version_yes_author(self, environment):
-        home = environment.get('HOME', '/tmp')
+        home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appauthor = type(self).appauthor
         appdirs = AppDirs(appname, appauthor, system=System.LINUX)
@@ -167,7 +168,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
     
     def test_LINUX2_yes_version_no_author(self, environment):
-        home = environment.get('HOME', '/tmp')
+        home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appversion = type(self).appversion
         appdirs = AppDirs(appname, version=appversion, system=System.LINUX2)
@@ -199,7 +200,7 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
     
     def test_LINUX2_yes_version_yes_author(self, environment):
-        home = environment.get('HOME', '/tmp')
+        home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appauthor = type(self).appauthor
         appversion = type(self).appversion
@@ -232,7 +233,7 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
     
     def test_LINUX2_no_version_no_author(self, environment):
-        home = environment.get('HOME', '/tmp')
+        home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appdirs = AppDirs(appname, system=System.LINUX2)
         
@@ -262,7 +263,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
     
     def test_LINUX2_no_version_yes_author(self, environment):
-        home = environment.get('HOME', '/tmp')
+        home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appauthor = type(self).appauthor
         appdirs = AppDirs(appname, appauthor, system=System.LINUX2)

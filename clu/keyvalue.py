@@ -15,44 +15,46 @@ exporter = Exporter()
 export = exporter.decorator()
 
 @export
-class ReplEnvDirs(AppDirs):
+class CLUInterface(AppDirs):
     
-    def __init__(self):
+    def __init__(self, appname='clu'):
         """ Initialize with a fixed “appname” parameter `replenv` """
         # use Linux directory layout
-        super(ReplEnvDirs, self).__init__(appname='replenv',
-                                          system=System.LINUX2)
+        super(CLUInterface, self).__init__(appname=appname,
+                                            system=System.LINUX2)
+        
+        # Create directory if necessary:
+        if not self.user_config.exists:
+            self.user_config.makedirs()
+        
+        # Configure zicts:
+        self.zfile = zict.File(str(self.user_config), mode='a')
+        self.zutf8 = zict.Func(dump=attr(plistlib, 'dumps', 'writePlistToString'),
+                               load=attr(plistlib, 'loads', 'readPlistFromString'),
+                               d=self.zfile)
+        self.zfunc = zict.Func(dump=lambda value: isstring(value) and value.encode(ENCODING) or value,
+                               load=lambda value: isbytes(value) and value.decode(ENCODING) or value,
+                               d=self.zutf8)
 
-renvdirs = ReplEnvDirs()
-
-if not renvdirs.user_config.exists:
-    renvdirs.user_config.makedirs()
-
-zfile = zict.File(str(renvdirs.user_config), mode='a')
-zutf8 = zict.Func(dump=attr(plistlib, 'dumps', 'writePlistToString'),
-                  load=attr(plistlib, 'loads', 'readPlistFromString'),
-                  d=zfile)
-zfunc = zict.Func(dump=lambda value: isstring(value) and value.encode(ENCODING) or value,
-                  load=lambda value: isbytes(value) and value.decode(ENCODING) or value,
-                  d=zutf8)
+interface = CLUInterface()
 
 @export
 def has(key):
     """ Test if a key is contained in the key-value store. """
-    return key in zfunc
+    return key in interface.zfunc
 
 @export
 def count():
     """ Return the number of items in the key-value store. """
-    return len(zfunc)
+    return len(interface.zfunc)
 
 @export
 def get(key, default=NoDefault):
     """ Return a value from the ReplEnv user-config key-value store. """
     if default is NoDefault:
-        return zfunc[key]
+        return interface.zfunc[key]
     try:
-        return zfunc[key]
+        return interface.zfunc[key]
     except KeyError:
         return default
 
@@ -63,7 +65,7 @@ def set(key, value):
         raise KeyValueError("Non-Falsey key required (k: %s, v: %s)" % (key, value))
     if not value:
         raise KeyValueError("Non-Falsey value required (k: %s, v: %s)" % (key, value))
-    zfunc[key] = value
+    interface.zfunc[key] = value
     return get(key)
 
 @export
@@ -71,33 +73,31 @@ def delete(key):
     """ Delete a value from the ReplEnv user-config key-value store. """
     if not key:
         raise KeyValueError("Non-Falsey key required for deletion (k: %s)" % key)
-    del zfunc[key]
+    del interface.zfunc[key]
 
 @export
 def iterate():
     """ Return an iterator for the key-value store. """
-    return iter(zfunc)
+    return iter(interface.zfunc)
 
 @export
 def keys():
     """ Return an iterable with all of the keys in the key-value store. """
-    return zfunc.keys()
+    return interface.zfunc.keys()
 
 @export
 def values():
     """ Return an iterable with all of the values in the key-value store. """
-    return zfunc.values()
+    return interface.zfunc.values()
 
 @export
 def items():
     """ Return an iterable yielding (key, value) for all items in the key-value store. """
-    return zfunc.items()
+    return interface.zfunc.items()
 
 
 # NO DOCS ALLOWED:
-export(zfile,           name='zfile')
-export(zutf8,           name='zutf8')
-export(zfunc,           name='zfunc')
+export(interface,           name='interface')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

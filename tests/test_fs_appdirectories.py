@@ -417,3 +417,23 @@ class TestFsAppdirectories(object):
         assert appdirs.system           == System.DARWIN
         assert appdirs.version          == None
         assert appdirs.version_info     == None
+    
+    def test_WIN32_yes_version_no_author(self, environment):
+        """ Win32 tests TODO """
+        win32com_shell = pytest.importorskip('win32com.shell')
+        assert bool(win32com_shell)
+    
+    def test_WIN32_yes_version_yes_author(self, environment):
+        """ Win32 tests TODO """
+        win32com_shell = pytest.importorskip('win32com.shell')
+        assert bool(win32com_shell)
+    
+    def test_WIN32_no_version_no_author(self, environment):
+        """ Win32 tests TODO """
+        win32com_shell = pytest.importorskip('win32com.shell')
+        assert bool(win32com_shell)
+    
+    def test_WIN32_no_version_yes_author(self, environment):
+        """ Win32 tests TODO """
+        win32com_shell = pytest.importorskip('win32com.shell')
+        assert bool(win32com_shell)

@@ -29,7 +29,7 @@ from __future__ import print_function
 import os, sys
 import sysconfig
 
-# from psutil import cpu_count
+# from multiprocessing import cpu_count
 # from Cython.Build import cythonize
 from setuptools import setup, find_packages
 

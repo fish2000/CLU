@@ -21,6 +21,10 @@ import sys
 
 from constants import DEBUG, PY3, PYPY, TEXTMATE
 from .ansi import Text, print_ansi_centered
+from exporting import Exporter
+
+exporter = Exporter()
+export = exporter.decorator()
 
 # Python version figlet banners – using the figlet “Colossal” typeface:
 banners = {}
@@ -175,17 +179,20 @@ now = datetime.datetime.now
 python2_expires = 'January 1st, 2020'
 is_python2_dead = now() >= now().strptime(python2_expires, '%B %dst, %Y') and ['YES'] or []
 
+@export
 def print_python_banner(text, color,
                               reset=colorama.Style.RESET_ALL):
     for line in text.splitlines():
         print(color + line, sep='')
     print(reset, end='')
 
+@export
 def print_warning(text, color=colorama.Fore.RED,
                         reset=colorama.Style.RESET_ALL):
     print(color + text, sep='')
     print(reset, end='')
 
+@export
 def print_banner():
     # If we’re running in TextMate, use `sys.stderr` instead of ANSI colors,
     # as that’s the only way to get any sort of colored output in TextMate’s
@@ -212,5 +219,11 @@ def print_banner():
         else:
             print_warning(warning)
 
-__all__ = ('banners', 'is_python2_dead', 'print_python_banner', 'print_warning', 'print_banner')
-__dir__ = lambda: list(__all__)
+# NO DOCS ALLOWED:
+export(banners,         name='banners')
+export(is_python2_dead, name='is_python2_dead')
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
+
+# assert frozenset(__all__) == frozenset(('banners', 'is_python2_dead', 'print_python_banner', 'print_warning', 'print_banner'))

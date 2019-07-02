@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from constants import Enum, EnumMeta
+from exporting import Exporter
+
+exporter = Exporter()
+export = exporter.decorator()
     
 # Dunder and sunder name constants for the alias dict:
 DUNDER = '__alias__'
 SUNDER = '_alias_'
 
+@export
 class alias(object):
     
     __slots__ = ('name', 'aliased')
@@ -92,6 +97,7 @@ class alias(object):
                 raise AttributeError(message)
             cls.__aliases__[self.name] = self.member_for_value(cls, self.aliased)
 
+@export
 class AliasingEnumMeta(EnumMeta):
     
     def __new__(metacls, name, bases, attributes, **kwargs):
@@ -112,6 +118,7 @@ class AliasingEnumMeta(EnumMeta):
                                                                  attributes,
                                                                **kwargs)
 
+@export
 class AliasingEnum(Enum, metaclass=AliasingEnumMeta):
     """ An Enum subclass intermediate, suitable for subclassing
         itself, that uses `AliasingEnumMeta` as its metaclass.
@@ -123,5 +130,12 @@ class AliasingEnum(Enum, metaclass=AliasingEnumMeta):
     """
     pass
 
-__all__ = ('alias', 'AliasingEnumMeta', 'AliasingEnum')
-__dir__ = lambda: list(__all__)
+# NO DOCS ALLOWED:
+export(DUNDER,          name='DUNDER')
+export(SUNDER,          name='SUNDER')
+
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
+
+# assert frozenset(__all__) == frozenset(('DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum'))

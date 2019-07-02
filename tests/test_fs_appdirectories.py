@@ -10,7 +10,8 @@ from clu.version import VersionInfo
 XDGS = ('XDG_CONFIG_DIRS', 'XDG_DATA_HOME',
         'XDG_CONFIG_HOME', 'XDG_DATA_DIRS',
                           'XDG_CACHE_HOME',
-                          'XDG_STATE_HOME')
+                          'XDG_STATE_HOME',
+                         'XDG_RUNTIME_DIR')
 
 @pytest.fixture
 def environment(keys=XDGS):
@@ -22,7 +23,7 @@ def environment(keys=XDGS):
     for key in keys:
         if key in os.environ:
             stash[key] = os.environ.get(key)
-        del os.environ[key]
+            del os.environ[key]
     
     yield os.environ
     

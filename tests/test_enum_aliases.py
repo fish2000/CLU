@@ -5,11 +5,11 @@ from __future__ import print_function
 
 class TestEnumAliases(object):
     
-    """ Run the tests for the clu.repl.enums module. """
+    """ Run the tests for the clu.enums module. """
     
     def test_alias_basic_enum(self):
         from enum import Enum, unique
-        from clu.repl.enums import alias
+        from clu.enums import alias
         
         @unique
         class Numbers(Enum):
@@ -38,7 +38,7 @@ class TestEnumAliases(object):
     
     def test_aliasing_enum_metaclass(self):
         from enum import Enum, unique
-        from clu.repl.enums import alias, AliasingEnumMeta
+        from clu.enums import alias, AliasingEnumMeta
         
         @unique
         class Numbers(Enum, metaclass=AliasingEnumMeta):
@@ -68,7 +68,7 @@ class TestEnumAliases(object):
     
     def test_aliasing_enum_subclass(self):
         from enum import unique
-        from clu.repl.enums import alias, AliasingEnum
+        from clu.enums import alias, AliasingEnum
         
         @unique
         class Numbers(AliasingEnum):

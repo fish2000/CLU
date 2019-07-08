@@ -3,18 +3,19 @@ from __future__ import print_function
 from itertools import chain
 from functools import partial
 
-from clu.constants import PYPY, LAMBDA
+from clu.constants import PYPY, λ
 from clu.constants import Enum, unicode
+from clu.enums import alias
 from clu.exporting import Exporter
 
 exporter = Exporter()
 export = exporter.decorator()
 
-# PREDICATE LOGIC: negate(function)
+# PREDICATE LOGIC: negate(function) will “negate” a boolean predicate function –
 
 negate = lambda function: (lambda *args, **kwargs: not function(*args, **kwargs))
 
-# Negate is used thusly:
+# … You use `negate(function)` thusly:
 # 
 # >>> iscat = lambda thing: thing == 😺
 # >>> isnotcat = lambda thing: negate(iscat)(thing) # <-- SEE??
@@ -24,7 +25,13 @@ negate = lambda function: (lambda *args, **kwargs: not function(*args, **kwargs)
 # True
 # >>> isnotcat(😺)
 # False
-
+#
+# … You’ll find that `negate(function)` works great with builtin and stdlib functions:
+#
+# >>> uncallable = lambda thing: negate(callable)(thing) # see below!
+# >>> os.path.differentfile = negate(os.path.samefile) # I’ll admit to having done this
+# >>> misfnmatch = negate(shutil.fnmatch.fnmatch) # There are times when this makes sense
+#
 
 # PREDICATE FUNCTIONS: boolean predicates for class types
 
@@ -100,6 +107,10 @@ def enumchoices(cls):
         return tuple()
     return tuple(choice.name for choice in cls)
 
+isaliasdescriptor = lambda thing: isinstance(thing, alias)
+hasmembers = lambda thing: haspyattr('members')
+hasaliases = lambda thing: haspyattr('aliases')
+
 # PREDICATE LOGCIAL FUNCTIONS: all/any/and/or/xor shortcuts:
 
 predicate_nop = lambda *things: None
@@ -117,9 +128,9 @@ iscontainer = lambda thing: isiterable(thing) and \
                         not isclasstype(thing)
 
 # This is the equivalent of a lambda types’ built-in __repr__ function:
-lambda_repr = lambda instance, default="<lambda>": "<function %s at 0x%0x>" % (pyattr(instance, 'qualname', 'name',
-                                                                                      default=default),
-                                                                               id(instance))
+lambda_repr = lambda instance, default=λ: "<function %s at 0x%0x>" % (pyattr(instance, 'qualname', 'name',
+                                                                             default=default),
+                                                                          id(instance))
 
 class Partial(partial):
     
@@ -132,7 +143,7 @@ class Partial(partial):
         """ Initialize a new Partial object """
         # N.B. The real action seems to happen in partial.__new__(…)
         # Name the Partial instance, as if it’s a lambda-type:
-        self.__name__ = self.__qualname__ = LAMBDA
+        self.__name__ = self.__qualname__ = λ
         if PYPY:
             super(Partial, self).__init__(*args, **kwargs)
             return
@@ -257,6 +268,11 @@ export(item,            name='item',            doc="item(thing, *itemnames) →
 export(attr_search,     name='attr_search',     doc="attr_search(attribute, *things) → Return the first-found existing attribute from a thing, given 1+ things")
 export(pyattr_search,   name='pyattr_search',   doc="pyattr_search(attribute, *things) → Return the first-found existing __special__ attribute from a thing, given 1+ things")
 export(item_search,     name='item_search',     doc="item_search(itemname, *things) → Return the first-found existing item from a thing, given 1+ things")
+
+export(isaliasdescriptor,
+name='isaliasdescriptor',                       doc="isaliasdescriptor(thing) → boolean predicate, returns True if thing is an alias descriptor instance for an enum member")
+export(hasmembers,      name='hasmembers',      doc="hasmembers(cls) → boolean predicate, True if cls descends from Enum and has 1+ items in its __members__ dict")
+export(hasaliases,      name='hasaliases',      doc="hasaliases(cls) → boolean predicate, True if cls descends from Enum and has 1+ items in its __aliases__ dict")
 
 export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns None")
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns None")

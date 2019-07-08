@@ -8,7 +8,7 @@ import decimal
 import io
 import os
 
-from clu.constants import LAMBDA, PY3, PYPY
+from clu.constants import λ, PY3, PYPY
 from clu.constants import long, unicode, numpy
 from clu.constants import HashableABC, SequenceABC, Path
 from clu.exporting import Exporter
@@ -110,7 +110,7 @@ isstring = lambda thing: graceful_issubclass(thing, string_types)
 isbytes = lambda thing: graceful_issubclass(thing, bytes_types)
 ismodule = lambda thing: graceful_issubclass(thing, types.Module)
 isfunction = lambda thing: isinstance(thing, (types.Function, types.Lambda)) or callable(thing)
-islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == LAMBDA
+islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == λ
 ishashable = lambda thing: isinstance(thing, HashableABC)
 issequence = lambda thing: isinstance(thing, SequenceABC)
 

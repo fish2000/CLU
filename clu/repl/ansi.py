@@ -10,7 +10,7 @@ from clu.constants import Enum, unique, auto
 from clu.exporting import doctrim
 from clu.naming import qualified_name
 from clu.typology import string_types, bytes_types
-from .enums import alias, AliasingEnumMeta
+from clu.enums import alias, AliasingEnumMeta
 from clu.exporting import Exporter
 
 exporter = Exporter()

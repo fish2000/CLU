@@ -1,22 +1,25 @@
-# this file is *not* meant to cover or endorse the use of travis, but rather to
-# help confirm pull requests to this project.
+# Album: Bird, Artist: Cherubino, Composer: Travis
 
+dist: xenial
 language: python
 
-matrix:
-  include:
-    - python: 3.5
-      env: TOXENV=py35
-    - python: 3.6
-      env: TOXENV=py36
-    - python: 3.7
-      env: TOXENV=py37
-    - python: pypy3.6
-      env: TOXENV=pypy36
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "3.7-dev"
+  - "3.8-dev"
+  - "pypy3.5"
+  - "pypy3.6"
 
-install: pip install -U tox
+install:
+  - pip install -r requirements/dev.txt
 
-script: tox
+# - pip install -U .
+
+script:
+  - check-manifest -v
+  - pytest
 
 notifications:
   email: false

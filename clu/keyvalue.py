@@ -46,6 +46,9 @@ class CLUInterface(AppDirs):
         self.zfunc = zict.Func(dump=lambda value: isstring(value) and value.encode(ENCODING) or value,
                                load=lambda value: isbytes(value) and value.decode(ENCODING) or value,
                                d=self.zutf8)
+        
+        # WE ARE *NOT* CLOSED
+        self._closed = False
     
     def get_datadir(self):
         return getattr(self, 'datadir', None)
@@ -103,6 +106,34 @@ class CLUInterface(AppDirs):
     def items(self):
         """ Return an iterable yielding (key, value) for all items in this key-value store. """
         return self.zfunc.items()
+    
+    def as_dict(self):
+        """ Return a plain dict with the key-value stores’ contents. """
+        out = {}
+        for key in self.keys():
+            out[key] = self[key]
+        return out
+    
+    def close(self):
+        """ Attept to close zicts """
+        from zict.common import close as closer
+        closer(self.zfunc)
+        closer(self.zutf8)
+        closer(self.zfile)
+        self._closed = True
+    
+    @property
+    def closed(self):
+        return getattr(self, '_closed', False)
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type=None, exc_val=None, exc_tb=None):
+        # N.B. return False to throw, True to supress:
+        if not self.closed:
+            self.close()
+        return exc_type is None
     
     def __len__(self):
         return len(self.zfunc)

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pytest_plugins = ['pytest_osxnotify']
 
 import pytest
 
@@ -29,3 +28,17 @@ def environment(keys=XDGS):
     for key, value in stash.items():
         os.environ[key] = value
 
+@pytest.fixture
+def temporarydir():
+    """ clu.fs.filesystem.TemporaryDirectory fixture factory: yields
+        a new instance of `TemporaryDirectory`, without making any
+        calls to “os.chdir()”.
+    """
+    from clu.fs.filesystem import TemporaryDirectory
+    
+    prefix = "clu-fs-filesystem-temporarydirectory-"
+    with TemporaryDirectory(prefix=prefix,
+                            change=False) as temporarydir:
+        yield temporarydir
+    
+    assert not temporarydir.exists

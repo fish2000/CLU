@@ -108,8 +108,8 @@ def enumchoices(cls):
     return tuple(choice.name for choice in cls)
 
 isaliasdescriptor = lambda thing: isinstance(thing, alias)
-hasmembers = lambda thing: haspyattr(thing, 'members')
-hasaliases = lambda thing: haspyattr(thing, 'aliases')
+hasmembers = lambda thing: isenum(thing) and haspyattr(thing, 'members')
+hasaliases = lambda thing: isenum(thing) and haspyattr(thing, 'aliases')
 
 # PREDICATE LOGCIAL FUNCTIONS: all/any/and/or/xor shortcuts:
 

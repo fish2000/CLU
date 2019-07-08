@@ -18,8 +18,10 @@ See <https://github.com/fish2000/CLU> for details and usage.
 import sys
 import os
 import platform
+import warnings
 
 from constants import CSIDL, PY3, SYSTEM, System, unicode
+from constants import UnusedValueWarning
 from version import VersionInfo
 from .filesystem import Directory
 
@@ -42,24 +44,45 @@ class AppDirs(object):
     
     def __init__(self, appname=None,
                        appauthor=None,
-                       version=None,
                        roaming=False,
                        multipath=False,
-                       system=None):
+                       system=None,
+                       version=None):
         """ Call `__init__(…)` to initialize an AppDirs instance with
             whichever of the myriad naming options are important to you
             and whatever it is you happen to be doing
         """
-        self.appauthor = appauthor
+        # The name of the application:
         self.appname = appname
+        
+        # These next three data only matter on Windows:
+        self.appauthor = appauthor
         self.roaming = bool(roaming)
         self.multipath = bool(multipath)
+        
+        # System and Version can be specified as instances of the System enum
+        # or of clu.version.VersuionInfo, respectively:
         self.system = system and System.match(system) or SYSTEM
         self.version = version and str(version) or None
         self.version_info = version and VersionInfo(version) or None
         
-        if self.system is System.WIN32:
+        if self.system == System.WIN32:
+            # On Windows, choose the most expedient Win32 interface for
+            # getting user- and system-related folder paths:
             self._win_folder_function = self.determine_win_folder_function()
+            
+        else:
+            # On non-Windows platforms, warn when options relevant only to
+            # Windows-y OSes have been specified:
+            if appauthor is not None:
+                warnings.warn("The “appauthor” value is currently only used under Windows",
+                              UnusedValueWarning, stacklevel=2)
+            if roaming:
+                warnings.warn("The “roaming” option is currently only used under Windows",
+                              UnusedValueWarning, stacklevel=2)
+            if multipath:
+                warnings.warn("The “multipath” option is currently only used under Windows",
+                              UnusedValueWarning, stacklevel=2)
     
     def determine_system_string(self):
         """ Determine upon which system this AppDirs instance has been brought

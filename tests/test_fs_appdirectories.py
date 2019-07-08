@@ -6,6 +6,7 @@ import pytest
 
 from clu.constants.enums import System
 from clu.fs import AppDirs, Directory
+from clu.fs.appdirectories import UnusedValueWarning # ?!
 from clu.version import VersionInfo
 
 XDGS = ('XDG_CONFIG_DIRS', 'XDG_DATA_HOME',
@@ -78,7 +79,11 @@ class TestFsAppdirectories(object):
         appname = type(self).appname
         appauthor = type(self).appauthor
         appversion = type(self).appversion
-        appdirs = AppDirs(appname, appauthor, version=appversion, system=System.LINUX)
+        
+        with pytest.warns(UnusedValueWarning):
+            appdirs = AppDirs(appname, appauthor,
+                               version=appversion,
+                                system=System.LINUX)
         
         for xdg in XDGS:
             assert xdg not in environment
@@ -140,7 +145,10 @@ class TestFsAppdirectories(object):
         home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appauthor = type(self).appauthor
-        appdirs = AppDirs(appname, appauthor, system=System.LINUX)
+        
+        with pytest.warns(UnusedValueWarning):
+            appdirs = AppDirs(appname, appauthor,
+                                system=System.LINUX)
         
         for xdg in XDGS:
             assert xdg not in environment
@@ -171,7 +179,8 @@ class TestFsAppdirectories(object):
         home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appversion = type(self).appversion
-        appdirs = AppDirs(appname, version=appversion, system=System.LINUX2)
+        appdirs = AppDirs(appname, version=appversion,
+                                    system=System.LINUX2)
         
         for xdg in XDGS:
             assert xdg not in environment
@@ -204,7 +213,11 @@ class TestFsAppdirectories(object):
         appname = type(self).appname
         appauthor = type(self).appauthor
         appversion = type(self).appversion
-        appdirs = AppDirs(appname, appauthor, version=appversion, system=System.LINUX2)
+        
+        with pytest.warns(UnusedValueWarning):
+            appdirs = AppDirs(appname, appauthor,
+                               version=appversion,
+                                system=System.LINUX2)
         
         for xdg in XDGS:
             assert xdg not in environment
@@ -266,7 +279,10 @@ class TestFsAppdirectories(object):
         home = environment.get('HOME', gettempdir())
         appname = type(self).appname
         appauthor = type(self).appauthor
-        appdirs = AppDirs(appname, appauthor, system=System.LINUX2)
+        
+        with pytest.warns(UnusedValueWarning):
+            appdirs = AppDirs(appname, appauthor,
+                                system=System.LINUX2)
         
         for xdg in XDGS:
             assert xdg not in environment
@@ -297,7 +313,8 @@ class TestFsAppdirectories(object):
         user = environment.get('USER', 'nobody')
         appname = type(self).appname
         appversion = type(self).appversion
-        appdirs = AppDirs(appname, version=appversion, system=System.DARWIN)
+        appdirs = AppDirs(appname, version=appversion,
+                                    system=System.DARWIN)
         
         for xdg in XDGS:
             assert xdg not in environment
@@ -330,7 +347,11 @@ class TestFsAppdirectories(object):
         appname = type(self).appname
         appauthor = type(self).appauthor
         appversion = type(self).appversion
-        appdirs = AppDirs(appname, appauthor, version=appversion, system=System.DARWIN)
+        
+        with pytest.warns(UnusedValueWarning):
+            appdirs = AppDirs(appname, appauthor,
+                               version=appversion,
+                                system=System.DARWIN)
         
         for xdg in XDGS:
             assert xdg not in environment
@@ -392,7 +413,10 @@ class TestFsAppdirectories(object):
         user = environment.get('USER', 'nobody')
         appname = type(self).appname
         appauthor = type(self).appauthor
-        appdirs = AppDirs(appname, appauthor, system=System.DARWIN)
+        
+        with pytest.warns(UnusedValueWarning):
+            appdirs = AppDirs(appname, appauthor,
+                                system=System.DARWIN)
         
         for xdg in XDGS:
             assert xdg not in environment

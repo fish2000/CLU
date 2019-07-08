@@ -42,12 +42,20 @@ class Nondeterminism(Exception):
         a nondeterministic problem.
     """
 
+class UnusedValueWarning(Warning):
+    """ A warning issued when an AppDirs instance is initialized using
+        a value or values that aren’t currently utilized on the platform
+        upon which we are currently running
+    """
+    pass
+
 __all__ = ('BadDotpathWarning',
            'CDBError',
            'ConfigurationError',
            'ExecutionError', 'FilesystemError',
            'ExportError', 'ExportWarning',
            'KeyValueError',
-           'Nondeterminism')
+           'Nondeterminism',
+           'UnusedValueWarning')
 
 __dir__ = lambda: list(__all__)

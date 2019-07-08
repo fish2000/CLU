@@ -3,9 +3,9 @@ from __future__ import print_function
 from itertools import chain
 from functools import partial
 
-from constants import PYPY, LAMBDA
-from constants import Enum, unicode
-from exporting import Exporter
+from clu.constants import PYPY, LAMBDA
+from clu.constants import Enum, unicode
+from clu.exporting import Exporter
 
 exporter = Exporter()
 export = exporter.decorator()

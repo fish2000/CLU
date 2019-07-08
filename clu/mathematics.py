@@ -2,8 +2,8 @@
 from __future__ import print_function
 
 MOCK_NUMPY = False
-from constants import numpy
-from exporting import Exporter
+from clu.constants import numpy
+from clu.exporting import Exporter
 
 exporter = Exporter()
 export = exporter.decorator()

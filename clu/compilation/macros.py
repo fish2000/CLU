@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from constants import ENCODING, ConfigurationError
-from typespace import SimpleNamespace
-from typology import isstring
-from fs import stringify, u8str
+from clu.constants import ENCODING, ConfigurationError
+from clu.typespace import SimpleNamespace
+from clu.typology import isstring
+from clu.fs import stringify, u8str
 
 class Macro(object):
     

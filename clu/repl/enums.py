@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from constants import Enum, EnumMeta
-from exporting import Exporter
+from clu.constants import Enum, EnumMeta
+from clu.exporting import Exporter
 
 exporter = Exporter()
 export = exporter.decorator()

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from predicates import haspyattr
-from exporting import Exporter
+from clu.predicates import haspyattr
+from clu.exporting import Exporter
 
 exporter = Exporter()
 export = exporter.decorator()

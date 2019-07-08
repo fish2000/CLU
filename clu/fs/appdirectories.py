@@ -20,9 +20,9 @@ import os
 import platform
 import warnings
 
-from constants import CSIDL, PY3, SYSTEM, System, unicode
-from constants import UnusedValueWarning
-from version import VersionInfo
+from clu.constants import CSIDL, PY3, SYSTEM, System, unicode
+from clu.constants import UnusedValueWarning
+from clu.version import VersionInfo
 from .filesystem import Directory
 
 __version__ = "1.4.4"

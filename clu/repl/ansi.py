@@ -5,13 +5,13 @@ from collections import namedtuple as NamedTuple
 import colorama
 colorama.init()
 
-from constants import ENCODING, SEPARATOR_WIDTH
-from constants import Enum, unique, auto
-from exporting import doctrim
-from naming import qualified_name
-from typology import string_types, bytes_types
+from clu.constants import ENCODING, SEPARATOR_WIDTH
+from clu.constants import Enum, unique, auto
+from clu.exporting import doctrim
+from clu.naming import qualified_name
+from clu.typology import string_types, bytes_types
 from .enums import alias, AliasingEnumMeta
-from exporting import Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter()
 export = exporter.decorator()

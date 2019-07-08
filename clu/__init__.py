@@ -27,7 +27,7 @@ from __future__ import print_function
 from pkgutil import extend_path
 from os.path import dirname
 
-from version import read_version_file, VersionInfo
+from clu.version import read_version_file, VersionInfo
 
 # Module exports:
 __all__ = ('__version__', 'version_info',

@@ -3,8 +3,8 @@ from __future__ import print_function
 
 import re
 
-from constants import unicode, PY3, ENCODING
-from exporting import Exporter
+from clu.constants import unicode, PY3, ENCODING
+from clu.exporting import Exporter
 
 exporter = Exporter()
 export = exporter.decorator()

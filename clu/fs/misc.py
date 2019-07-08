@@ -4,8 +4,8 @@ from __future__ import print_function
 import re
 import os
 
-from constants import ENCODING, lru_cache
-from typology import string_types
+from clu.constants import ENCODING, lru_cache
+from clu.typology import string_types
 
 def wrap_value(value):
     return lambda *args, **kwargs: value

@@ -5,10 +5,10 @@ import os
 import re
 import sys
 
-from constants import DYNAMIC_MODULE_PREFIX, PROJECT_NAME, VERBOTEN, cache_from_source
+from clu.constants import DYNAMIC_MODULE_PREFIX, PROJECT_NAME, VERBOTEN, cache_from_source
 from .namespace import SimpleNamespace, Namespace
-from exporting import doctrim
-from naming import dotpath_join, path_to_dotpath
+from clu.exporting import doctrim
+from clu.naming import dotpath_join, path_to_dotpath
 
 import types as thetypes
 types = Namespace()

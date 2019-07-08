@@ -20,12 +20,12 @@ from distutils.spawn import find_executable
 from functools import wraps
 from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
-from constants import DELETE_FLAG, ENCODING, PATH
-from constants import lru_cache
-from constants import ExecutionError, FilesystemError
-from predicates import attr, allattrs
-from sanitizer import utf8_encode
-from typology import ispath, isvalidpath
+from clu.constants import DELETE_FLAG, ENCODING, PATH
+from clu.constants import lru_cache
+from clu.constants import ExecutionError, FilesystemError
+from clu.predicates import attr, allattrs
+from clu.sanitizer import utf8_encode
+from clu.typology import ispath, isvalidpath
 from .misc import masked_permissions
 from .misc import stringify, suffix_searcher, u8str
 

@@ -8,20 +8,20 @@ import decimal
 import io
 import os
 
-from constants import LAMBDA, PY3, PYPY
-from constants import long, unicode, numpy
-from constants import HashableABC, SequenceABC, Path
-from exporting import Exporter
+from clu.constants import LAMBDA, PY3, PYPY
+from clu.constants import long, unicode, numpy
+from clu.constants import HashableABC, SequenceABC, Path
+from clu.exporting import Exporter
 
-from predicates import (isclasstype,
-                        allpyattrs, getpyattr, haspyattr,
-                        pyattr, or_none,
-                        isiterable,
-                        tuplize, uniquify,
-                        apply_to, predicate_any,
-                                  predicate_all)
+from clu.predicates import (isclasstype,
+                            allpyattrs, getpyattr, haspyattr,
+                            pyattr, or_none,
+                            isiterable,
+                            tuplize, uniquify,
+                            apply_to, predicate_any,
+                                      predicate_all)
 
-from typespace import types
+from clu.typespace import types
 
 exporter = Exporter()
 export = exporter.decorator()

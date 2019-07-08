@@ -11,10 +11,10 @@ import warnings
 # from predicates import case_sort
 # from repl import print_separator
 
-from constants import BUILTINS, λ, MAXINT
-from constants import Counter, MutableMapping, NoDefault
-from constants import ExportError, ExportWarning
-from constants import lru_cache, pytuple
+from clu.constants import BUILTINS, λ, MAXINT
+from clu.constants import Counter, MutableMapping, NoDefault
+from clu.constants import ExportError, ExportWarning
+from clu.constants import lru_cache, pytuple
 
 def doctrim(docstring):
     """ This function is straight outta PEP257 -- q.v. `trim(…)`,
@@ -328,7 +328,7 @@ class Exporter(MutableMapping):
             which is used in last-resort name lookups made by
             `determine_name(…)` during `export(…)` calls.
         """
-        from naming import thingname_search_by_id
+        from clu.naming import thingname_search_by_id
         return thingname_search_by_id.cache_info()
     
     def __iter__(self):
@@ -351,23 +351,23 @@ class Exporter(MutableMapping):
     
     def __add__(self, operand):
         # On add, old values are not overwritten
-        from predicates import ismergeable
-        from dicts import merge_two
+        from clu.predicates import ismergeable
+        from clu.dicts import merge_two
         if not ismergeable(operand):
             return NotImplemented
         return merge_two(self, operand, cls=type(self))
     
     def __radd__(self, operand):
         # On reverse-add, old values are overwritten
-        from predicates import ismergeable
-        from dicts import merge_two
+        from clu.predicates import ismergeable
+        from clu.dicts import merge_two
         if not ismergeable(operand):
             return NotImplemented
         return merge_two(operand, self, cls=type(self))
     
     def __iadd__(self, operand):
         # On in-place add, old values are updated and replaced
-        from predicates import ismergeable
+        from clu.predicates import ismergeable
         if not ismergeable(operand):
             return NotImplemented
         self.__exports__.update(operand.__exports__)

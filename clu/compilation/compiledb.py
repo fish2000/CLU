@@ -9,9 +9,9 @@ import os
 
 from abc import abstractmethod as abstract
 
-from constants import ENCODING, CDBError
-from fs import TemporaryName, Directory, rm_rf, stringify, u8str
-from predicates import tuplize
+from clu.constants import ENCODING, CDBError
+from clu.fs import TemporaryName, Directory, rm_rf, stringify, u8str
+from clu.predicates import tuplize
 
 class CDBSubBase(abc.ABC, metaclass=abc.ABCMeta):
     

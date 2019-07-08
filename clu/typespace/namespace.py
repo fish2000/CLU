@@ -3,12 +3,12 @@ from __future__ import print_function
 
 import re
 
-from constants import SEPARATOR_WIDTH
-from constants import NoDefault, MutableMapping
-from constants import pytuple
-from dicts import merge_two, asdict
-from naming import determine_name
-from predicates import ismergeable
+from clu.constants import SEPARATOR_WIDTH
+from clu.constants import NoDefault, MutableMapping
+from clu.constants import pytuple
+from clu.dicts import merge_two, asdict
+from clu.naming import determine_name
+from clu.predicates import ismergeable
 
 # NAMESPACES: SimpleNamespace and Namespace
 

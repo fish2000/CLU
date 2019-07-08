@@ -19,9 +19,9 @@ import colorama
 import os
 import sys
 
-from constants import DEBUG, PY3, PYPY, TEXTMATE
+from clu.constants import DEBUG, PY3, PYPY, TEXTMATE
 from .ansi import Text, print_ansi_centered
-from exporting import Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter()
 export = exporter.decorator()

@@ -4,13 +4,13 @@ from __future__ import print_function
 import plistlib
 import zict
 
-from constants import ENCODING, PROJECT_NAME
-from constants import NoDefault, System
-from constants import KeyValueError
-from fs import AppDirs, Directory
-from predicates import attr
-from typology import isstring, isbytes
-from exporting import Exporter
+from clu.constants import ENCODING, PROJECT_NAME
+from clu.constants import NoDefault, System
+from clu.constants import KeyValueError
+from clu.fs import AppDirs, Directory
+from clu.predicates import attr
+from clu.typology import isstring, isbytes
+from clu.exporting import Exporter
 
 exporter = Exporter()
 export = exporter.decorator()

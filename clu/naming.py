@@ -5,10 +5,10 @@ import os
 import pickle
 import warnings
 
-from constants import BASEPATH, BUILTINS, DEBUG, QUALIFIER
-from constants import BadDotpathWarning
-from exporting import determine_name, Exporter
-# from predicates import pyattr
+from clu.constants import BASEPATH, BUILTINS, DEBUG, QUALIFIER
+from clu.constants import BadDotpathWarning
+from clu.exporting import determine_name, Exporter
+# from clu.predicates import pyattr
 
 exporter = Exporter()
 export = exporter.decorator()

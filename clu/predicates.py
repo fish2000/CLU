@@ -51,8 +51,10 @@ isclasstype = lambda thing: hasattr(thing, '__mro__') and \
 haspyattr = lambda thing, atx: hasattr(thing, '__%s__' % atx)
 anyattrs = lambda thing, *attrs: any(hasattr(thing, atx) for atx in attrs)
 allattrs = lambda thing, *attrs: all(hasattr(thing, atx) for atx in attrs)
+noattrs = lambda thing, *attrs: negate(anyattrs)(thing, *attrs)
 anypyattrs = lambda thing, *attrs: any(haspyattr(thing, atx) for atx in attrs)
 allpyattrs = lambda thing, *attrs: all(haspyattr(thing, atx) for atx in attrs)
+nopyattrs = lambda thing, *attrs: negate(anypyattrs)(thing, *attrs)
 
 # Things with a __len__(…) method “have length”:
 haslength = lambda thing: haspyattr(thing, 'len')
@@ -246,8 +248,10 @@ export(isclasstype,     name='isclasstype',     doc="isclasstype(thing) → bool
 export(haspyattr,       name='haspyattr',       doc="haspyattr(thing, attribute) → boolean predicate, shortcut for hasattr(thing, '__%s__' % attribute)")
 export(anyattrs,        name='anyattrs',        doc="anyattrs(thing, *attributes) → boolean predicate, shortcut for any(hasattr(thing, atx) for atx in attributes)")
 export(allattrs,        name='allattrs',        doc="allattrs(thing, *attributes) → boolean predicate, shortcut for all(hasattr(thing, atx) for atx in attributes)")
+export(noattrs,         name='noattrs',         doc="noattrs(thing, *attributes) → boolean predicate, shortcut for (not anypyattrs(hasattr(thing, atx) for atx in attributes))")
 export(anypyattrs,      name='anypyattrs',      doc="anypyattrs(thing, *attributes) → boolean predicate, shortcut for any(haspyattr(thing, atx) for atx in attributes)")
 export(allpyattrs,      name='allpyattrs',      doc="allpyattrs(thing, *attributes) → boolean predicate, shortcut for all(haspyattr(thing, atx) for atx in attributes)")
+export(nopyattrs,       name='nopyattrs',       doc="nopyattrs(thing, *attributes) → boolean predicate, shortcut for (not any(haspyattr(thing, atx) for atx in attributes))")
 export(haslength,       name='haslength',       doc="haslength(thing) → boolean predicate, True if thing has a “__len__” attribute")
 export(isiterable,      name='isiterable',      doc="isiterable(thing) → boolean predicate, True if thing can be iterated over")
 export(ismergeable,     name='ismergeable',     doc="ismergeable(thing) → boolean predicate, True if thing is a valid operand to merge(…) or merge_as(…)")
@@ -269,8 +273,8 @@ export(attr_search,     name='attr_search',     doc="attr_search(attribute, *thi
 export(pyattr_search,   name='pyattr_search',   doc="pyattr_search(attribute, *things) → Return the first-found existing __special__ attribute from a thing, given 1+ things")
 export(item_search,     name='item_search',     doc="item_search(itemname, *things) → Return the first-found existing item from a thing, given 1+ things")
 
-export(isaliasdescriptor,
-name='isaliasdescriptor',                       doc="isaliasdescriptor(thing) → boolean predicate, returns True if thing is an alias descriptor instance for an enum member")
+export(isaliasdescriptor,                       name='isaliasdescriptor',
+                                                doc="isaliasdescriptor(thing) → boolean predicate, returns True if thing is an alias descriptor instance for an enum member")
 export(hasmembers,      name='hasmembers',      doc="hasmembers(cls) → boolean predicate, True if cls descends from Enum and has 1+ items in its __members__ dict")
 export(hasaliases,      name='hasaliases',      doc="hasaliases(cls) → boolean predicate, True if cls descends from Enum and has 1+ items in its __aliases__ dict")
 

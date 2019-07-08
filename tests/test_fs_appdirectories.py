@@ -15,24 +15,6 @@ XDGS = ('XDG_CONFIG_DIRS', 'XDG_DATA_HOME',
                           'XDG_STATE_HOME',
                          'XDG_RUNTIME_DIR')
 
-@pytest.fixture
-def environment(keys=XDGS):
-    """ Yield an instance of `os.environ` free of XDG variables """
-    import os
-    stash = {}
-    
-    # Setup: remove XDG variables from environment:
-    for key in keys:
-        if key in os.environ:
-            stash[key] = os.environ.get(key)
-            del os.environ[key]
-    
-    yield os.environ
-    
-    # Teardown: restore environment:
-    for key, value in stash.items():
-        os.environ[key] = value
-
 class TestFsAppdirectories(object):
     
     """ Run the tests for the clu.fs.appdirectories module. """

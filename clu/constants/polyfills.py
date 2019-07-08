@@ -20,6 +20,13 @@ class AutoType(object):
         self.count += increment
         return out
 
+class FakeNumpy(object):
+    
+    FAKE = True
+    
+    def get_include(self):
+        return '.'
+
 # Try to get `auto` from `enum`, falling back to the polyfill:
 try:
     from enum import auto

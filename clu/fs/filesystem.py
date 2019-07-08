@@ -75,7 +75,8 @@ def script_path():
     """ Return the path to the embedded scripts directory. """
     return os.path.join(
            os.path.dirname(
-           os.path.dirname(__file__)), 'scripts')
+           os.path.dirname(
+           os.path.dirname(__file__))), 'scripts')
 
 def which(binary_name, pathvar=None):
     """ Deduces the path corresponding to an executable name,
@@ -388,10 +389,9 @@ def TemporaryNamedFile(tempth, mode='wb', buffer_size=-1, delete=True):
     except BaseException as base_exception:
         try:
             rm_rf(path)
-        except ExecutionError:
-            pass
-        if descriptor > 0:
-            os.close(descriptor)
+        finally:
+            if descriptor > 0:
+                os.close(descriptor)
         raise FilesystemError(str(base_exception))
 
 class TemporaryName(collections.abc.Hashable,
@@ -764,7 +764,7 @@ class Directory(collections.abc.Hashable,
             needed by the internal workings of a Directory instance.
         """
         if self.targets_set:
-            self.target = u8str(self.new or self.old)
+            self.target = attr(self, 'new', 'old')
             del self.old
             del self.new
         if self.prepared:

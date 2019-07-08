@@ -13,6 +13,14 @@ class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     
+    def test_script_path(self):
+        from clu.fs.filesystem import script_path
+        
+        scripts = Directory(script_path())
+        assert scripts.exists
+        assert '.gitignore' in scripts
+        assert '__init__.py' in scripts # it’s a Python module directory
+    
     def test_temporary(self):
         from clu.fs.filesystem import temporary, write_to_path
         from clu.fs.filesystem import FilesystemError
@@ -26,33 +34,38 @@ class TestFsFilesystem(object):
         assert temporary(parent=d).startswith(gettempdir())
         
         # These are deterministic:
-        assert temporary(prefix='yo-dogg', dir=d) == os.path.join(gettempdir(), 'yo-dogg')
-        assert temporary(prefix='yo-dogg', parent=d) == os.path.join(gettempdir(), 'yo-dogg')
+        prefix = os.path.join(gettempdir(), 'yo-dogg')
+        assert temporary(prefix='yo-dogg', dir=d) == prefix
+        assert temporary(prefix='yo-dogg', parent=d) == prefix
         
         # These are deterministic (see below):
-        assert temporary(prefix='yo-dogg', suffix='tmp', dir=d) == os.path.join(gettempdir(), 'yo-dogg.tmp')
-        assert temporary(prefix='yo-dogg', suffix='tmp', parent=d) == os.path.join(gettempdir(), 'yo-dogg.tmp')
-        assert temporary(prefix='yo-dogg', suffix='.tmp', dir=d) == os.path.join(gettempdir(), 'yo-dogg.tmp')
-        assert temporary(prefix='yo-dogg', suffix='.tmp', parent=d) == os.path.join(gettempdir(), 'yo-dogg.tmp')
+        prefix_suffix = os.path.join(gettempdir(), 'yo-dogg.tmp')
+        assert temporary(prefix='yo-dogg', suffix='tmp', dir=d) == prefix_suffix
+        assert temporary(prefix='yo-dogg', suffix='tmp', parent=d) == prefix_suffix
+        assert temporary(prefix='yo-dogg', suffix='.tmp', dir=d) == prefix_suffix
+        assert temporary(prefix='yo-dogg', suffix='.tmp', parent=d) == prefix_suffix
         
         # These are manually randomized:
-        assert temporary(prefix='yo-dogg-',
-                         suffix='tmp',
-                         randomized=True,
-                         dir=d).startswith(os.path.join(gettempdir(), 'yo-dogg-'))
-        assert temporary(prefix='yo-dogg-',
-                         suffix='tmp',
-                         randomized=True,
-                         parent=d).startswith(os.path.join(gettempdir(), 'yo-dogg-'))
+        starts = os.path.join(gettempdir(), 'yo-dogg-')
+        ends = '.tmp'
         
         assert temporary(prefix='yo-dogg-',
                          suffix='tmp',
                          randomized=True,
-                         dir=d).endswith('.tmp')
+                         dir=d).startswith(starts)
         assert temporary(prefix='yo-dogg-',
                          suffix='tmp',
                          randomized=True,
-                         parent=d).endswith('.tmp')
+                         parent=d).startswith(starts)
+        
+        assert temporary(prefix='yo-dogg-',
+                         suffix='tmp',
+                         randomized=True,
+                         dir=d).endswith(ends)
+        assert temporary(prefix='yo-dogg-',
+                         suffix='tmp',
+                         randomized=True,
+                         parent=d).endswith(ends)
         
         # Prepare the subpath
         p = d.subpath('yo-dogg.tmp')
@@ -93,6 +106,8 @@ class TestFsFilesystem(object):
         
         finally:
             os.unlink(p)
+        
+        assert not os.path.exists(p)
     
     def test_rm_rf(self):
         # Also involves `write_to_path(…)` and `Directory.walk()`
@@ -142,6 +157,15 @@ class TestFsFilesystem(object):
         assert yo_dogg_count == 3
         assert rm_rf(dd)
         
+        yo_dogg_count = 0
+        
+        for root, dirs, files in dd.walk():
+            for filename in files:
+                if filename == 'yo-dogg.txt':
+                    yo_dogg_count += 1
+        
+        assert yo_dogg_count == 0
+        
         # Re-check subdirectories:
         assert not dd.exists
         assert not ddd.exists
@@ -182,6 +206,9 @@ class TestFsFilesystem(object):
             # Call write_to_path(…):
             write_to_path(data, p)
             
+            # Check for the file:
+            assert os.path.exists(p)
+            
             # Read the data back in and compare:
             with open(p, 'rb') as handle:
                 roundtrip = handle.read()
@@ -190,6 +217,8 @@ class TestFsFilesystem(object):
         finally:
             # Ensure we unlink the temporary file subpath:
             os.unlink(p)
+        
+        assert not os.path.exists(p)
     
     def test_ensure_path_is_valid(self):
         from clu.fs.filesystem import ensure_path_is_valid
@@ -225,6 +254,7 @@ class TestFsFilesystem(object):
         
         # This one should be sucessful (as in it will not raise):
         ensure_path_is_valid(d.subpath('yodogg.txt'))
+        assert not os.path.exists(d.subpath('yodogg.txt'))
     
     def test_TemporaryName(self):
         """ Tests for clu.fs.filesystem.TemporaryName """
@@ -234,7 +264,7 @@ class TestFsFilesystem(object):
         
         with TemporaryName(prefix="test-temporaryname-",
                            randomized=True) as tfn:
-            print("* Testing TemporaryName file instance: %s" % tfn.name)
+            # print("* Testing TemporaryName file instance: %s" % tfn.name)
             assert os.path.samefile(os.getcwd(),            initial)
             assert gettempdir() in tfn.name
             assert tfn.prefix == "test-temporaryname-"
@@ -282,7 +312,7 @@ class TestFsFilesystem(object):
         initial = os.getcwd()
         
         with wd() as cwd:
-            print("* Testing working-directory instance: %s" % cwd.name)
+            # print("* Testing working-directory instance: %s" % cwd.name)
             assert os.path.samefile(os.getcwd(),           cwd.new)
             assert os.path.samefile(os.getcwd(),           cwd.old)
             assert os.path.samefile(os.getcwd(),           os.fspath(cwd))
@@ -315,7 +345,7 @@ class TestFsFilesystem(object):
         initial = os.getcwd()
         
         with cd(gettempdir()) as tmp:
-            print("* Testing directory-change instance: %s" % tmp.name)
+            # print("* Testing directory-change instance: %s" % tmp.name)
             assert os.path.samefile(os.getcwd(),          gettempdir())
             assert os.path.samefile(os.getcwd(),          tmp.new)
             assert os.path.samefile(gettempdir(),         tmp.new)
@@ -347,7 +377,7 @@ class TestFsFilesystem(object):
         tdp = None
         
         with TemporaryDirectory(prefix="test-temporarydirectory-") as ttd:
-            print("* Testing TemporaryDirectory instance: %s" % ttd.name)
+            # print("* Testing TemporaryDirectory instance: %s" % ttd.name)
             assert gettempdir() in ttd.name
             assert gettempdir() in ttd.new
             assert gettempdir() in os.fspath(ttd)

@@ -19,6 +19,7 @@ export = exporter.decorator()
 class CLUInterface(AppDirs):
     
     def __init__(self, appname=PROJECT_NAME,
+                       version=None,
                        datadir=None):
         """ Initialize a key-value store with a default “appname” parameter `clu` –
             q.v. ``clu.constants.consts``, the “PROJECT_NAME” constant supra. –
@@ -26,6 +27,7 @@ class CLUInterface(AppDirs):
         """
         # …also, use the Linux directory layout:
         super(CLUInterface, self).__init__(appname=appname,
+                                           version=version,
                                             system=System.LINUX2)
         
         # Use passed-in “datadir” or “user_config”
@@ -84,6 +86,12 @@ class CLUInterface(AppDirs):
         """ Return an iterator for this key-value store. """
         return iter(self.zfunc)
     
+    def update(self, dictish=None, **updates):
+        """ Update the key-value store with key/value pairs and/or an iterator;
+            q.v. `dict.update(…)` docstring supra.
+        """
+        return self.zfunc.update(dictish, **updates)
+    
     def keys(self):
         """ Return an iterable with all of the keys in this key-value store. """
         return self.zfunc.keys()
@@ -113,6 +121,12 @@ class CLUInterface(AppDirs):
     
     def __getitem__(self, key):
         return self.zfunc[key]
+    
+    def __setitem__(self, key, value):
+        self.zfunc[key] = value
+    
+    def __delitem__(self, key):
+        del self.zfunc[key]
 
 # Module-local singleton key-value instance:
 interface = CLUInterface()
@@ -150,6 +164,11 @@ def iterate():
     return interface.iterate()
 
 @export
+def update(dictish=None, **updates):
+    """ Update the CLU key-value store with key/value pairs, and/or an iterator """
+    return interface.update(dictish, **updates)
+
+@export
 def keys():
     """ Return an iterable with all of the keys in the key-value store. """
     return interface.keys()
@@ -163,7 +182,6 @@ def values():
 def items():
     """ Return an iterable yielding (key, value) for all items in the key-value store. """
     return interface.items()
-
 
 # NO DOCS ALLOWED:
 export(interface,           name='interface')

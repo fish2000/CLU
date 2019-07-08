@@ -48,7 +48,10 @@ isclasstype = lambda thing: hasattr(thing, '__mro__') and \
 
 # PREDICATE FUNCTIONS: hasattr(…) shortcuts:
 
+noattr = lambda thing, atx: negate(hasattr)(thing, atx)
 haspyattr = lambda thing, atx: hasattr(thing, '__%s__' % atx)
+nopyattr = lambda thing, atx: negate(haspyattr)(thing, atx)
+
 anyattrs = lambda thing, *attrs: any(hasattr(thing, atx) for atx in attrs)
 allattrs = lambda thing, *attrs: all(hasattr(thing, atx) for atx in attrs)
 noattrs = lambda thing, *attrs: negate(anyattrs)(thing, *attrs)
@@ -245,7 +248,10 @@ export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → bool
 export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object`")
 export(isclasstype,     name='isclasstype',     doc="isclasstype(thing) → boolean predicate, True if thing is a class, descending from either `object` or `type`")
 
+export(noattr,          name='noattr',          doc="noattr(thing, attribute) → boolean predicate, shortcut for (not hasattr(thing, attribute))")
 export(haspyattr,       name='haspyattr',       doc="haspyattr(thing, attribute) → boolean predicate, shortcut for hasattr(thing, '__%s__' % attribute)")
+export(nopyattr,        name='nopyattr',        doc="nopyattr(thing, attribute) → boolean predicate, shortcut for (not hasattr(thing, '__%s__' % attribute))")
+
 export(anyattrs,        name='anyattrs',        doc="anyattrs(thing, *attributes) → boolean predicate, shortcut for any(hasattr(thing, atx) for atx in attributes)")
 export(allattrs,        name='allattrs',        doc="allattrs(thing, *attributes) → boolean predicate, shortcut for all(hasattr(thing, atx) for atx in attributes)")
 export(noattrs,         name='noattrs',         doc="noattrs(thing, *attributes) → boolean predicate, shortcut for (not anypyattrs(hasattr(thing, atx) for atx in attributes))")

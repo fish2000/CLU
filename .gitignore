@@ -21,6 +21,7 @@ sdist/
 
 .hypothesis/
 .pytest_cache/
+.tox/
 .envrc
 
 tmtags

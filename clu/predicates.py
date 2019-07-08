@@ -10,6 +10,22 @@ from clu.exporting import Exporter
 exporter = Exporter()
 export = exporter.decorator()
 
+# PREDICATE LOGIC: negate(function)
+
+negate = lambda function: (lambda *args, **kwargs: not function(*args, **kwargs))
+
+# Negate is used thusly:
+# 
+# >>> iscat = lambda thing: thing == 😺
+# >>> isnotcat = lambda thing: negate(iscat)(thing) # <-- SEE??
+# >>> iscat(😺)
+# True
+# >>> isnotcat(🐇)
+# True
+# >>> isnotcat(😺)
+# False
+
+
 # PREDICATE FUNCTIONS: boolean predicates for class types
 
 ismetaclass = lambda thing: hasattr(thing, '__mro__') and \
@@ -89,7 +105,7 @@ def enumchoices(cls):
 predicate_nop = lambda *things: None
 function_nop = lambda iterable: None
 
-uncallable = lambda thing: not callable(thing)
+uncallable = lambda thing: negate(callable)(thing)
 pyname = lambda thing: pyattr(thing, 'qualname', 'name')
 
 isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,
@@ -175,9 +191,9 @@ thing_has = lambda thing, atx: predicate_any(
 class_has = lambda cls, atx: isclasstype(cls) and thing_has(cls, atx)
 
 # Is this a thing based on a `__dict__`, or one using `__slots__`?
-isslotted = lambda thing: haspyattr(thing, 'slots') and not isclasstype(thing)
-isdictish = lambda thing: haspyattr(thing, 'dict') and not isclasstype(thing)
-isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and not isclasstype(thing)
+isslotted = lambda thing: haspyattr(thing, 'slots') and negate(isclasstype)(thing)
+isdictish = lambda thing: haspyattr(thing, 'dict') and negate(isclasstype)(thing)
+isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and negate(isclasstype)(thing)
 
 @export
 def slots_for(cls):
@@ -210,6 +226,8 @@ def listify(*items):
     return list(item for item in items if item is not None)
 
 # MODULE EXPORTS:
+export(negate,          name='negate',          doc="negate(function) → Negate a boolean function. Used like: `isnotxxx = lambda thing: negate(isxxx)(thing)`")
+
 export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → boolean predicate, True if thing is a class, descending from `type`")
 export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object`")
 export(isclasstype,     name='isclasstype',     doc="isclasstype(thing) → boolean predicate, True if thing is a class, descending from either `object` or `type`")

@@ -444,8 +444,14 @@ class TestPredicates(object):
     
     def test_hasattr_shortcuts(self):
         """ » Checking “hasattr/haspyattr” shortcuts from clu.predicates … """
-        from clu.predicates import (haspyattr, anyattrs, allattrs,
-                                               anypyattrs, allpyattrs)
+        from clu.predicates import (noattr, haspyattr, nopyattr,
+                                    anyattrs, allattrs, noattrs,
+                                    anypyattrs, allpyattrs, nopyattrs)
+        
+        assert noattr(object, 'base')
+        assert noattr(object, 'class')
+        assert not noattr(object, 'mro')
+        
         assert not hasattr(object, 'base')
         assert not hasattr(object, 'class')
         assert hasattr(object, 'mro')
@@ -457,14 +463,26 @@ class TestPredicates(object):
         assert not haspyattr(object, 'dogg')
         assert not haspyattr(object, 'wtf')
         
+        assert not nopyattr(object, 'base')
+        assert not nopyattr(object, 'class')
+        assert not nopyattr(object, 'mro')
+        assert nopyattr(object, 'yo')
+        assert nopyattr(object, 'dogg')
+        assert nopyattr(object, 'wtf')
+        
         assert anyattrs(object, 'base', 'class', 'mro')
         assert not allattrs(object, 'base', 'class', 'mro')
         assert not anyattrs(object, 'yo', 'dogg', 'i', 'have', 'not', 'heard')
         assert allattrs(object, '__base__', '__class__', '__mro__')
+        assert noattrs(object, 'yo', 'dogg', 'i', 'have', 'not', 'heard')
+        assert not noattrs(object, 'base', 'class', 'mro')
         
         assert anypyattrs(object, 'yo', 'dogg', 'mro')
         assert not allpyattrs(object, 'yo', 'dogg', 'mro')
         assert not anypyattrs(object, 'yo', 'dogg', 'wtf')
+        assert nopyattrs(object, 'yo', 'dogg', 'wtf')
+        assert not nopyattrs(object, 'yo', 'dogg', 'mro')
+        
         assert allpyattrs(object, 'base', 'class', 'mro',
                                   'call', 'dict', 'doc',
                                   'name', 'hash', 'dir')

@@ -511,7 +511,7 @@ class TestPredicates(object):
     
     def test_attr_accessor(self):
         """ » Checking “attr(•) accessor from clu.predicates …” """
-        from clu.predicates import attr
+        from clu.predicates import attr, uncallable
         
         # plistlib on Python 2.x uses those ungainly `writePlistToString`
         # methods; on Python 3.x you have the more reasonable and expected
@@ -521,11 +521,14 @@ class TestPredicates(object):
         load = attr(plistlib, 'loads', 'readPlistFromString')
         assert dump is not None
         assert load is not None
+        assert callable(dump)
+        assert callable(load)
         
         # When attr(…) can't find an attribute matching any of the names
         # provided, you get None back:
         wat = attr(plistlib, 'yo_dogg', 'wtf_hax')
         assert wat is None
+        assert uncallable(wat)
     
     def test_boolean_predicates(self):
         """ » Checking basic isXXX(•) functions from clu.typology … """

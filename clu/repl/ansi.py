@@ -208,9 +208,8 @@ class ANSIFormat(ANSIFormatBase):
 
 @export
 def print_ansi(text, color=''):
-    """ Print text in ANSI color, using optional inline markup
-        from `colorama` for terminal color-escape delimiters
-    """
+    """ print_ansi(…) → Print text in ANSI color, using optional inline markup
+                        from `colorama` for terminal color-escape delimiters """
     fmt = ANSIFormat(color)
     for line in text.splitlines():
         print(fmt.render(line), sep='')
@@ -219,7 +218,8 @@ def print_ansi(text, color=''):
 def print_ansi_centered(text, color='',
                               filler='•',
                               width=SEPARATOR_WIDTH):
-    """ Print a string to the terminal, centered and bookended with asterisks """
+    """ print_ansi_centered(…) → Print a string to the terminal, centered
+                                 and bookended with asterisks """
     message = f" {text.strip()} "
     asterisks = int((width / 2) - (len(message) / 2))
     
@@ -240,7 +240,7 @@ def highlight(code_string, language='json',
     formatter = pygments.formatters.get_formatter_by_name(markup, style=style)
     return pygments.highlight(code_string, lexer=LexerCls(), formatter=formatter)
 
-export(print_separator,     name='print_separator', doc="print_separator(filler_char) → print filler_char TERMINAL_WIDTH times")
+export(print_separator,     name='print_separator', doc="print_separator(filler_char='-') → print filler_char TERMINAL_WIDTH times")
 
 # NO DOCS ALLOWED:
 export(Text)

@@ -1,7 +1,7 @@
 
 PROJECT_NAME = clu
 
-clean: clean-pyc
+clean: clean-cython clean-build-artifacts clean-pyc
 
 distclean: clean-test-artifacts clean-build-artifacts
 

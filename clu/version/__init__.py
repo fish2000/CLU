@@ -197,7 +197,7 @@ class VersionInfo(VersionAncestor):
     
     def __bytes__(self):
         """ Bytes-ify the VersionInfo (q.v. “to_string(…)” supra.) """
-        return bytes(self.to_string())
+        return bytes(self.to_string(), encoding='UTF-8')
     
     def __hash__(self):
         """ Hash the VersionInfo, using its tuplized value """

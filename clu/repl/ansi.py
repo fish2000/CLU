@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from collections import namedtuple as NamedTuple
+from collections import OrderedDict, namedtuple as NamedTuple
 
 import colorama
 colorama.init()
+
+import sys
 
 from clu.constants import ENCODING, SEPARATOR_WIDTH
 from clu.constants import Enum, unique, auto
@@ -45,6 +47,20 @@ class ANSI(AliasingEnumMeta):
         """
         source = kwargs.pop('source')
         
+        class CacheDescriptor(object):
+            
+            def __init__(self):
+                self.cache = {}
+            
+            def __get__(self, *args):
+                return self.cache
+            
+            def __set__(self, instance, value):
+                self.cache = value
+            
+            def __repr__(self):
+                return repr(self.cache)
+        
         class SourceDescriptor(object):
             
             def __get__(self, *args):
@@ -73,6 +89,7 @@ class ANSI(AliasingEnumMeta):
         def to_string(self):
             return str(self.code)
         
+        attributes['cache']     = CacheDescriptor()
         attributes['source']    = SourceDescriptor()
         attributes['__init__']  = init_method
         attributes['__str__']   = str_method
@@ -87,22 +104,37 @@ class ANSI(AliasingEnumMeta):
     
     def for_name(cls, name):
         """ Get an enum member or alias member by name """
+        # Lower-ize the name:
         lowerstring = name.lower()
+        # Check cache and return if found:
+        if lowerstring in cls.cache:
+            return cls.cache[lowerstring]
+        # Walk through standard ANSI names first:
         for ansi in cls:
             if ansi.name.lower() == lowerstring:
+                # If a match is found on an unaliased name,
+                # simply cache and return:
+                cls.cache[lowerstring] = ansi
                 return ansi
-        for aka, ansi in cls.__aliases__.items():
+        # Try aliased ANSI names second:
+        for aka, ansialias in cls.__aliases__.items():
             if aka.lower() == lowerstring:
-                return ansi
+                # Once a match is found, trace it back
+                # to the original value before caching
+                # and returning:
+                for ansi in cls:
+                    if ansi.value == ansialias:
+                        cls.cache[lowerstring] = ansi
+                        return ansi
         raise LookupError("No ANSI code found for “%s”" % name)
     
     def convert(cls, specifier):
         """ Convert a specifier of unknown type to an enum or alias member """
         if cls.is_ansi(specifier):
-            return specifier
-        if type(specifier) in string_types:
-            return cls.for_name(specifier)
-        elif type(specifier) in bytes_types:
+            return specifier                        # Already an ANSI type, return it
+        if isinstance(specifier, string_types):
+            return cls.for_name(specifier)          # Match by name, decoding if necessary
+        elif isinstance(specifier, bytes_types):
             return cls.for_name(str(specifier), encoding=ENCODING)
         raise LookupError("Couldn’t convert specifier to %s: %s" % (cls.__name__,
                                                                     str(specifier)))
@@ -185,34 +217,108 @@ class Weight(ANSIBase, metaclass=ANSI, source=colorama.Style):
     RESET_ALL           = auto()
     RESET               = alias(RESET_ALL)
 
-ANSIFormatBase = NamedTuple('ANSIFormatBase', ('text', 'background', 'weight'), module=__file__)
+FIELDS = ('text', 'background', 'weight')
+fields = frozenset(FIELDS)
+
+ANSIFormatBase = NamedTuple('ANSIFormatBase', FIELDS, module=__file__)
+dict_types = { dict, OrderedDict }
 
 @export
 class ANSIFormat(ANSIFormatBase):
     
-    def __new__(cls, text=Text.NOTHING,
-                     background=Background.NOTHING,
-                     weight=Weight.NORMAL):
+    RESET_ALL = Weight.RESET_ALL.to_string()
+    
+    @classmethod
+    def from_dict(cls, format_dict):
+        """ Instantiate an ANSIFormat with a dict of related ANSI values –
+            q.v. FIELD string names supra.
+        """
+        assert any((field in format_dict) for field in FIELDS)
+        assert frozenset(format_dict.keys()).issubset(fields)
+        return cls(**format_dict)
+    
+    def to_dict(self):
+        """ Return the ANSI format primitives as a dict """
+        out = {}
+        for field in FIELDS:
+            if getattr(self, field, None) is not None:
+                out[field] = getattr(self, field)
+        return out
+    
+    def to_tuple(self):
+        """ Return the ANSI format primitives as a tuple """
+        return (self.text,
+                self.background,
+                self.weight)
+    
+    def to_string(self):
+        """ Build up an initial ANSI format string based on values present """
+        out = ""
+        if self.text is not None:
+            out += str(self.text)
+        if self.background is not None:
+            out += str(self.background)
+        if self.weight is not None:
+            out += str(self.weight)
+        return out
+    
+    def __new__(cls, from_value=None, text=Text.NOTHING,
+                                      background=Background.NOTHING,
+                                      weight=Weight.NORMAL):
         """ Instantiate an ANSIFormat, populating its fields per args """
+        if from_value is not None:
+            if type(from_value) is cls:
+                return cls.from_dict(from_value.to_dict())
+            elif hasattr(from_value, 'to_dict'):
+                return cls.from_dict(from_value.to_dict())
+            elif type(from_value) in dict_types:
+                return cls.from_dict(from_value)
+            elif type(from_value) in string_types + bytes_types:
+                text = from_value
+            elif ANSIBase.is_ansi(from_value):
+                text = from_value
         instance = super(ANSIFormat, cls).__new__(cls, Text.convert(text),
                                                        Background.convert(background),
                                                        Weight.convert(weight))
         return instance
     
+    def __str__(self):
+        """ Stringify the ANSIFormat (q.v. “to_string(…)” supra.) """
+        return self.to_string()
+    
+    def __bytes__(self):
+        """ Bytes-ify the ANSIFormat (q.v. “to_string(…)” supra.) """
+        return bytes(self.to_string(), encoding=ENCODING)
+    
+    def __hash__(self):
+        """ Hash the ANSIFormat, using its tuplized value """
+        return hash(self.to_tuple())
+    
+    def __bool__(self):
+        """ An instance of ANSIFormat is considered Falsey if its “text”,
+           “background”, and “weight” fields are all set to None; otherwise it’s
+            a Truthy value in boolean contexts
+        """
+        return not (self.text is None and \
+                    self.background is None and \
+                    self.weight is None)
+    
     def render(self, string):
-        return "%s%s%s" % (str(self.text) + \
-                           str(self.background) + \
-                           str(self.weight),
-                           str(string),
-                           str(Weight.RESET_ALL.to_string()))
+        """ Render a string appropriately marked up with the ANSI formatting
+            called for by this ANSIFormat instance, ending with the necessary
+            ANSI reset sequence(s).
+        """
+        return "%s%s%s" % (self.to_string(), str(string),
+                                             str(self.RESET_ALL))
 
 @export
 def print_ansi(text, color=''):
     """ print_ansi(…) → Print text in ANSI color, using optional inline markup
                         from `colorama` for terminal color-escape delimiters """
-    fmt = ANSIFormat(color)
+    fmt = ANSIFormat(text=color)
     for line in text.splitlines():
-        print(fmt.render(line), sep='')
+        print(file=sys.__stdout__)
+        print(fmt.render(line), sep='', file=sys.__stdout__)
 
 @export
 def print_ansi_centered(text, color='',

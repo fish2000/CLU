@@ -39,7 +39,8 @@ HOSTNAME = sys.intern(socket.gethostname())
 # The __name__ of a lambda function:
 lam = lambda: None
 λ = LAMBDA = sys.intern(getattr(lam, '__qualname__',
-                        getattr(lam, '__name__', None)))
+                        getattr(lam, '__name__',
+                                     "<lambda>")))
 
 # N.B. this may or may not be a PY2/PY3 thing:
 MAXINT = getattr(sys, 'maxint',
@@ -137,10 +138,10 @@ __dir__ = lambda: list(__all__)
 def print_all():
     """ Print out all of the constant variables defined in consts.py """
     # It’s not pretty – but actually it’s almost pretty, sort-of.
-    WIDTH = 125
+    WIDTH = max(SEPARATOR_WIDTH, 125)
     
     print('*' * WIDTH)
-    print("≠≠≠ CONSTS: (total %i)" % len(__all__))
+    print("≠≠≠ CONSTS: (total %i defined)" % len(__all__))
     print('*' * WIDTH)
     
     G = globals()

@@ -13,7 +13,8 @@ export = exporter.decorator()
 
 @export
 def sanitize(text):
-    """ Remove specific unicode strings, in favor of ASCII-friendly versions """
+    """ sanitize(text) → Remove specific unicode strings, in favor of ASCII-friendly versions,
+                         from the text passed in to the function """
     sanitized = unicode(text)
     for sanitizer, substitution in sanitize.sanitizers:
         sanitized, _ = sanitizer.subn(substitution, sanitized)
@@ -71,7 +72,7 @@ if PY3:
     
     @export
     def utf8_encode(source):
-        """ Encode a source as a UTF-8 bytes object using Python 3 semantics """
+        """ utf8_encode(source) → Encode a source as a UTF-8 bytes object using Python 3 semantics """
         if type(source) is bytes:
             return source
         elif type(source) is bytearray:
@@ -80,7 +81,7 @@ if PY3:
     
     @export
     def utf8_decode(source):
-        """ Decode a source from UTF-8 bytes to a string using Python 3 semantics """
+        """ utf8_decode(source) → Decode a source from UTF-8 bytes to a string using Python 3 semantics """
         if type(source) in (bytes, bytearray):
             return str(source, encoding=utf8_decode.encoding)
         return source
@@ -89,7 +90,7 @@ else:
     
     @export
     def utf8_encode(source):
-        """ Encode a source as a UTF-8 bytestring using Python 2 semantics """
+        """ utf8_encode(source) → Encode a source as a UTF-8 bytestring using Python 2 semantics """
         if type(source) is unicode:
             return source.encode(utf8_encode.encoding)
         elif type(source) is bytearray:
@@ -98,7 +99,7 @@ else:
     
     @export
     def utf8_decode(source):
-        """ Decode a source from a UTF-8 bytestring to Unicode using Python 2 semantics """
+        """ utf8_decode(source) → Decode a source from a UTF-8 bytestring to Unicode using Python 2 semantics """
         if type(source) in (str, bytearray):
             return source.decode(utf8_decode.encoding)
         return source

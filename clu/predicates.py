@@ -15,23 +15,24 @@ export = exporter.decorator()
 
 negate = lambda function: (lambda *args, **kwargs: not function(*args, **kwargs))
 
-# … You use `negate(function)` thusly:
-# 
-# >>> iscat = lambda thing: thing == 😺
-# >>> isnotcat = lambda thing: negate(iscat)(thing) # <-- SEE??
-# >>> iscat(😺)
-# True
-# >>> isnotcat(🐇)
-# True
-# >>> isnotcat(😺)
-# False
-#
-# … You’ll find that `negate(function)` works great with builtin and stdlib functions:
-#
-# >>> uncallable = lambda thing: negate(callable)(thing) # see below!
-# >>> os.path.differentfile = negate(os.path.samefile) # I’ll admit to having done this
-# >>> misfnmatch = negate(shutil.fnmatch.fnmatch) # There are times when this makes sense
-#
+negate_doc = """
+### … You use `negate(function)` thusly:
+
+>>> iscat = lambda thing: thing == 😺
+>>> isnotcat = lambda thing: negate(iscat)(thing) # <-- SEE??
+>>> iscat(😺)
+True
+>>> isnotcat(🐇)
+True
+>>> isnotcat(😺)
+False
+
+### … You’ll find that `negate(function)` works great with builtin and stdlib functions:
+
+>>> uncallable = lambda thing: negate(callable)(thing) # see below!
+>>> os.path.differentfile = negate(os.path.samefile) # I’ll admit to having done this
+>>> misfnmatch = negate(shutil.fnmatch.fnmatch) # There are times when this makes sense
+"""
 
 # PREDICATE FUNCTIONS: boolean predicates for class types
 
@@ -259,9 +260,7 @@ def noneof(*items):
     return negate(any)(item for item in items if item is not None)
 
 # MODULE EXPORTS:
-export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n"
-                                                                     "… Used like e.g.: `isnotxxx = lambda thing: negate(isxxx)(thing)` \n"
-                                                                     "… Like if “(thing)” is representative of the call signature of `isxxx(…)`")
+export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n" + negate_doc)
 
 export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → boolean predicate, True if thing is a metaclass, descending directly from `type`")
 export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object` but not `type`")

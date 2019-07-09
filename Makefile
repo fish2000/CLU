@@ -1,9 +1,9 @@
 
 PROJECT_NAME = clu
 
-clean: clean-pyc clean-cython
+clean: clean-pyc
 
-distclean: clean-pyc clean-cython clean-build-artifacts
+distclean: clean-pyc clean-build-artifacts
 
 rebuild: distclean cython
 
@@ -17,12 +17,12 @@ clean-pyc:
 	find . -name \*.pyc -print -delete
 
 clean-cython:
-	find . -name \*.so -print -delete
+	find clu/ -name \*.so -print -delete
 
 clean-build-artifacts:
 	rm -rf build dist python_$(PROJECT_NAME).egg-info
 
-cython: clean-cython
+cython:
 	python setup.py build_ext --inplace
 
 sdist:

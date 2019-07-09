@@ -40,10 +40,15 @@ class TestPredicates(object):
         assert anyof([], {}, tuple(), '', b'b')
         assert anyof(0, 1, 2, 3, 4, 5)
         
+        class Falsified(object):
+            
+            def __bool__(self):
+                return False
+        
         assert not noneof(0, 1, 2, 3, 4, 5)
         assert not noneof(1, 2, 3, 4, 5)
         assert noneof([], {}, tuple(), '', b'')
-        assert noneof(0, None, False)
+        assert noneof(0, None, False, Falsified())
     
     def test_utility_helpers_for_builtin_containers(self):
         """ » Checking “tuplize/uniquify/listify” functions from clu.predicates … """

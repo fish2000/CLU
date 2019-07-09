@@ -51,6 +51,8 @@ class ANSI(AliasingEnumMeta):
             
             def __init__(self):
                 self.cache = {}
+                self.cache['HITS'] = 0
+                self.cache['MISSES'] = 0
             
             def __get__(self, *args):
                 return self.cache
@@ -108,12 +110,14 @@ class ANSI(AliasingEnumMeta):
         lowerstring = name.lower()
         # Check cache and return if found:
         if lowerstring in cls.cache:
+            cls.cache['HITS'] += 1
             return cls.cache[lowerstring]
         # Walk through standard ANSI names first:
         for ansi in cls:
             if ansi.name.lower() == lowerstring:
                 # If a match is found on an unaliased name,
                 # simply cache and return:
+                cls.cache['MISSES'] += 1
                 cls.cache[lowerstring] = ansi
                 return ansi
         # Try aliased ANSI names second:
@@ -124,6 +128,7 @@ class ANSI(AliasingEnumMeta):
                 # and returning:
                 for ansi in cls:
                     if ansi.value == ansialias:
+                        cls.cache['MISSES'] += 1
                         cls.cache[lowerstring] = ansi
                         return ansi
         raise LookupError("No ANSI code found for “%s”" % name)

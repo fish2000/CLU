@@ -34,6 +34,16 @@ class TestPredicates(object):
         assert anyof(True, True, True, True, True)
         assert anyof(False, False, True, False, True)
         assert noneof(False, False, False, False, False)
+        
+        assert allof(1, 2, 3, 4, 5)
+        assert allof([1], [2], [3], [4], [5])
+        assert anyof([], {}, tuple(), '', b'b')
+        assert anyof(0, 1, 2, 3, 4, 5)
+        
+        assert not noneof(0, 1, 2, 3, 4, 5)
+        assert not noneof(1, 2, 3, 4, 5)
+        assert noneof([], {}, tuple(), '', b'')
+        assert noneof(0, None, False)
     
     def test_utility_helpers_for_builtin_containers(self):
         """ » Checking “tuplize/uniquify/listify” functions from clu.predicates … """

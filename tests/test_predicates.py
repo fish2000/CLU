@@ -7,7 +7,35 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates module. """
     
-    def test_utility_helper_functions(self):
+    def test_utility_helpers_for_builtin_predicates(self):
+        from clu.predicates import allof, anyof, noneof
+        
+        all_OK = (True, True, True, True, True)
+        any_OK = (False, False, True, False, True)
+        non_OK = (False, False, False, False, False)
+        
+        # What we expect:
+        assert all(all_OK)
+        assert any(all_OK)
+        assert any(any_OK)
+        assert not any(non_OK)
+        assert not all(any_OK) # … but WHO CARES really;
+                               # notice, we don’t have a
+                               # “someof(…)” function or
+                               # anything like that dogg
+        
+        # The “real” tests:
+        assert allof(*all_OK)
+        assert anyof(*all_OK)
+        assert anyof(*any_OK)
+        assert noneof(*non_OK)
+        
+        assert allof(True, True, True, True, True)
+        assert anyof(True, True, True, True, True)
+        assert anyof(False, False, True, False, True)
+        assert noneof(False, False, False, False, False)
+    
+    def test_utility_helpers_for_builtin_containers(self):
         """ » Checking “tuplize/uniquify/listify” functions from clu.predicates … """
         from clu.predicates import tuplize, uniquify, listify
         
@@ -348,7 +376,8 @@ class TestPredicates(object):
     
     def test_nops(self):
         """ » Checking “always/never/nuhuh/no_op” lambdas from clu.predicates … """
-        from clu.predicates import (always, never, nuhuh,
+        from clu.predicates import (negate, 
+                                    always, never, nuhuh,
                                     no_op, predicate_nop,
                                             function_nop)
         
@@ -358,6 +387,9 @@ class TestPredicates(object):
             assert always(single) is True
             assert never(single) is False
             assert nuhuh(single) is None
+            assert negate(always)(single) is False
+            assert negate(never)(single) is True
+            assert negate(nuhuh)(single) is True # not not None is True
             assert no_op(single, 'get') is single
             assert predicate_nop(*singles) is None
             assert function_nop(single) is None
@@ -529,6 +561,12 @@ class TestPredicates(object):
         wat = attr(plistlib, 'yo_dogg', 'wtf_hax')
         assert wat is None
         assert uncallable(wat)
+        
+        # … Unless of course a “default” value was specified:
+        jon_snow = object() # it’s a sentinel GET IT?!?
+        hax = attr(plistlib, 'yo_dogg', 'wtf_hax', default=jon_snow)
+        assert hax is jon_snow
+        assert uncallable(hax)
     
     def test_boolean_predicates(self):
         """ » Checking basic isXXX(•) functions from clu.typology … """
@@ -544,10 +582,11 @@ class TestPredicates(object):
         
         assert graceful_issubclass(int, int)
         
-        assert ispathtype(str)
-        assert ispathtype(bytes)
         if hasattr(os, 'PathLike'):
             assert ispathtype(os.PathLike)
+        
+        assert ispathtype(str)
+        assert ispathtype(bytes)
         assert not ispathtype(SimpleNamespace)
         assert ispath('/yo/dogg')
         assert not ispath(SimpleNamespace())
@@ -576,11 +615,10 @@ class TestPredicates(object):
         
         assert islambda(lambda: None)
         assert islambda(attr)
-        # assert not islambda(export)
         assert islambda(graceful_issubclass) # IT IS NOW DOGG
+        
         assert isfunction(lambda: None)
         assert isfunction(attr)
-        # assert isfunction(export)
         assert isfunction(graceful_issubclass)
         assert not isfunction(SimpleNamespace())
         assert isfunction(SimpleNamespace) # classes are callable!

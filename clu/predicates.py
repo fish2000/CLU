@@ -241,6 +241,23 @@ def listify(*items):
     """ listify(*items) → Return a new list containing all non-`None` arguments """
     return list(item for item in items if item is not None)
 
+# UTILITY FUNCTIONS: helpers for builtin predicate functions over iterables:
+
+@export
+def allof(*items):
+    """ allof(*items) → Return the result of “all(…)” on all non-`None` arguments """
+    return all(item for item in items if item is not None)
+
+@export
+def anyof(*items):
+    """ anyof(*items) → Return the result of “any(…)” on all non-`None` arguments """
+    return any(item for item in items if item is not None)
+
+@export
+def noneof(*items):
+    """ noneof(*items) → Return the result of “not any(…)” on all non-`None` arguments """
+    return negate(any)(item for item in items if item is not None)
+
 # MODULE EXPORTS:
 export(negate,          name='negate',          doc="negate(function) → Negate a boolean function. Used like: `isnotxxx = lambda thing: negate(isxxx)(thing)`")
 

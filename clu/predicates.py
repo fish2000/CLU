@@ -100,14 +100,14 @@ item_search   = lambda itx, *things, default=None: searcher(getitem,   itx, *thi
 
 @export
 def isenum(cls):
-    """ isenum(cls) → boolean predicate, True if cls descends from Enum. """
+    """ isenum(cls) → boolean predicate, True if cls descends from `Enum`. """
     if not isclasstype(cls):
         return False
     return Enum in cls.__mro__
 
 @export
 def enumchoices(cls):
-    """ enumchoices(cls) → Return a tuple of strings naming the members of an Enum class. """
+    """ enumchoices(cls) → Return a tuple of strings naming the members of an `Enum` class. """
     if not isenum(cls):
         return tuple()
     return tuple(choice.name for choice in cls)
@@ -140,8 +140,8 @@ lambda_repr = lambda instance, default=λ: "<function %s at 0x%0x>" % (pyattr(in
 class Partial(partial):
     
     """ A subclass of `functools.partial` designed to be renameable –
-        it offers the same `repr`-style as lambda-types, and can have
-        its `__doc__` value assigned as well.
+        it offers the same `__repr__(…)`-style as lambda-types, and to whose
+        `__doc__` value may be mutably written as well.
     """
     
     def __init__(self, *args, **kwargs):
@@ -259,72 +259,73 @@ def noneof(*items):
     return negate(any)(item for item in items if item is not None)
 
 # MODULE EXPORTS:
-export(negate,          name='negate',          doc="negate(function) → Negate a boolean function. Used like: `isnotxxx = lambda thing: negate(isxxx)(thing)`")
+export(negate,          name='negate',          doc="negate(function) → Negate a boolean function. Used like e.g.: `isnotxxx = lambda thing: negate(isxxx)(thing)`")
 
-export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → boolean predicate, True if thing is a class, descending from `type`")
-export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object`")
-export(isclasstype,     name='isclasstype',     doc="isclasstype(thing) → boolean predicate, True if thing is a class, descending from either `object` or `type`")
+export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → boolean predicate, True if thing is a metaclass, descending directly from `type`")
+export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object` but not `type`")
+export(isclasstype,     name='isclasstype',     doc="isclasstype(thing) → boolean predicate, True if thing is a class type, descending from either `object` or `type`")
 
-export(noattr,          name='noattr',          doc="noattr(thing, attribute) → boolean predicate, shortcut for (not hasattr(thing, attribute))")
-export(haspyattr,       name='haspyattr',       doc="haspyattr(thing, attribute) → boolean predicate, shortcut for hasattr(thing, '__%s__' % attribute)")
-export(nopyattr,        name='nopyattr',        doc="nopyattr(thing, attribute) → boolean predicate, shortcut for (not hasattr(thing, '__%s__' % attribute))")
+export(noattr,          name='noattr',          doc="noattr(thing, attribute) → boolean predicate, shortcut for `(not hasattr(thing, attribute))`")
+export(haspyattr,       name='haspyattr',       doc="haspyattr(thing, attribute) → boolean predicate, shortcut for `hasattr(thing, '__%s__' % attribute)`")
+export(nopyattr,        name='nopyattr',        doc="nopyattr(thing, attribute) → boolean predicate, shortcut for `(not hasattr(thing, '__%s__' % attribute))`")
 
-export(anyattrs,        name='anyattrs',        doc="anyattrs(thing, *attributes) → boolean predicate, shortcut for any(hasattr(thing, atx) for atx in attributes)")
-export(allattrs,        name='allattrs',        doc="allattrs(thing, *attributes) → boolean predicate, shortcut for all(hasattr(thing, atx) for atx in attributes)")
-export(noattrs,         name='noattrs',         doc="noattrs(thing, *attributes) → boolean predicate, shortcut for (not anypyattrs(hasattr(thing, atx) for atx in attributes))")
-export(anypyattrs,      name='anypyattrs',      doc="anypyattrs(thing, *attributes) → boolean predicate, shortcut for any(haspyattr(thing, atx) for atx in attributes)")
-export(allpyattrs,      name='allpyattrs',      doc="allpyattrs(thing, *attributes) → boolean predicate, shortcut for all(haspyattr(thing, atx) for atx in attributes)")
-export(nopyattrs,       name='nopyattrs',       doc="nopyattrs(thing, *attributes) → boolean predicate, shortcut for (not any(haspyattr(thing, atx) for atx in attributes))")
-export(haslength,       name='haslength',       doc="haslength(thing) → boolean predicate, True if thing has a “__len__” attribute")
-export(isiterable,      name='isiterable',      doc="isiterable(thing) → boolean predicate, True if thing can be iterated over")
-export(ismergeable,     name='ismergeable',     doc="ismergeable(thing) → boolean predicate, True if thing is a valid operand to merge(…) or merge_as(…)")
+export(anyattrs,        name='anyattrs',        doc="anyattrs(thing, *attributes) → boolean predicate, shortcut for `any(hasattr(thing, atx) for atx in attributes)`")
+export(allattrs,        name='allattrs',        doc="allattrs(thing, *attributes) → boolean predicate, shortcut for `all(hasattr(thing, atx) for atx in attributes)`")
+export(noattrs,         name='noattrs',         doc="noattrs(thing, *attributes) → boolean predicate, shortcut for `(not anypyattrs(hasattr(thing, atx) for atx in attributes))`")
+export(anypyattrs,      name='anypyattrs',      doc="anypyattrs(thing, *attributes) → boolean predicate, shortcut for `any(haspyattr(thing, atx) for atx in attributes)`")
+export(allpyattrs,      name='allpyattrs',      doc="allpyattrs(thing, *attributes) → boolean predicate, shortcut for `all(haspyattr(thing, atx) for atx in attributes)`")
+export(nopyattrs,       name='nopyattrs',       doc="nopyattrs(thing, *attributes) → boolean predicate, shortcut for `(not any(haspyattr(thing, atx) for atx in attributes))`")
 
-export(always,          name='always',          doc="always(thing) → boolean predicate that always returns True")
-export(never,           name='never',           doc="never(thing) → boolean predicate that always returns False")
-export(nuhuh,           name='nuhuh',           doc="nuhuh(thing) → boolean predicate that always returns None")
-export(no_op,           name='no_op',           doc="no_op(thing, attribute[, default]) → shortcut for (attribute or default)")
-export(or_none,         name='or_none',         doc="or_none(thing, attribute) → shortcut for getattr(thing, attribute, None)")
-export(getpyattr,       name='getpyattr',       doc="getpyattr(thing, attribute[, default]) → shortcut for getattr(thing, '__%s__' % attribute[, default])")
-export(getitem,         name='getitem',         doc="getitem(thing, item[, default]) → shortcut for thing.get(item[, default])")
-export(accessor,        name='accessor',        doc="accessor(func, thing, *attributes) → return the first non-None value had by successively applying func(thing, attribute)")
-export(searcher,        name='searcher',        doc="searcher(func, attribute, *things) → return the first non-None value had by successively applying func(thing, attribute)")
+export(haslength,       name='haslength',       doc="haslength(thing) → boolean predicate, True if `thing` has a “__len__” attribute")
+export(isiterable,      name='isiterable',      doc="isiterable(thing) → boolean predicate, True if `thing` can be iterated over")
+export(ismergeable,     name='ismergeable',     doc="ismergeable(thing) → boolean predicate, True if `thing` is a valid operand to `merge(…)` or `merge_as(…)`")
 
-export(attr,            name='attr',            doc="attr(thing, *attributes) → Return the first existing attribute from a thing, given 1+ attribute names")
-export(pyattr,          name='pyattr',          doc="pyattr(thing, *attributes) → Return the first existing __special__ attribute from a thing, given 1+ attribute names")
-export(item,            name='item',            doc="item(thing, *itemnames) → Return the first existing item held by thing, given 1+ item names")
+export(always,          name='always',          doc="always(thing) → boolean predicate that always returns `True`")
+export(never,           name='never',           doc="never(thing) → boolean predicate that always returns `False`")
+export(nuhuh,           name='nuhuh',           doc="nuhuh(thing) → boolean predicate that always returns `None`")
+export(no_op,           name='no_op',           doc="no_op(thing, attribute[, default]) → shortcut for `(attribute or default)`")
+export(or_none,         name='or_none',         doc="or_none(thing, attribute) → shortcut for `getattr(thing, attribute, None)`")
+export(getpyattr,       name='getpyattr',       doc="getpyattr(thing, attribute[, default]) → shortcut for `getattr(thing, '__%s__' % attribute[, default])`")
+export(getitem,         name='getitem',         doc="getitem(thing, item[, default]) → shortcut for `thing.get(item[, default])`")
+export(accessor,        name='accessor',        doc="accessor(func, thing, *attributes) → return the first non-None value had by successively applying func(thing, attribute) to all attributes")
+export(searcher,        name='searcher',        doc="searcher(func, attribute, *things) → return the first non-None value had by successively applying func(thing, attribute) to all things")
+
+export(attr,            name='attr',            doc="attr(thing, *attributes) → Return the first existing attribute from `thing`, given 1+ attribute names")
+export(pyattr,          name='pyattr',          doc="pyattr(thing, *attributes) → Return the first existing __special__ attribute from `thing`, given 1+ attribute names")
+export(item,            name='item',            doc="item(thing, *itemnames) → Return the first existing item held by `thing`, given 1+ item names")
 export(attr_search,     name='attr_search',     doc="attr_search(attribute, *things) → Return the first-found existing attribute from a thing, given 1+ things")
 export(pyattr_search,   name='pyattr_search',   doc="pyattr_search(attribute, *things) → Return the first-found existing __special__ attribute from a thing, given 1+ things")
 export(item_search,     name='item_search',     doc="item_search(itemname, *things) → Return the first-found existing item from a thing, given 1+ things")
 
 export(isaliasdescriptor,                       name='isaliasdescriptor',
-                                                doc="isaliasdescriptor(thing) → boolean predicate, returns True if thing is an alias descriptor instance for an enum member")
-export(hasmembers,      name='hasmembers',      doc="hasmembers(cls) → boolean predicate, True if cls descends from Enum and has 1+ items in its __members__ dict")
-export(hasaliases,      name='hasaliases',      doc="hasaliases(cls) → boolean predicate, True if cls descends from Enum and has 1+ items in its __aliases__ dict")
+                                                doc="isaliasdescriptor(thing) → boolean predicate, returns True if `thing` is an aliasing descriptor bound to an existing Enum member")
+export(hasmembers,      name='hasmembers',      doc="hasmembers(cls) → boolean predicate, True if `cls` descends from Enum and has 1+ items in its `__members__` dict")
+export(hasaliases,      name='hasaliases',      doc="hasaliases(cls) → boolean predicate, True if `cls` descends from Enum and has 1+ items in its `__aliases__` dict")
 
-export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns None")
-export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns None")
+export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns `None`")
+export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns `None`")
 export(uncallable,      name='uncallable',      doc="uncallable(thing) → boolean predicate, shortcut for `not callable(thing)`")
-export(pyname,          name='pyname',          doc="pyname(thing) → Return either the __qualname__ or __name__ for a given thing")
+export(pyname,          name='pyname',          doc="pyname(thing) → Return either `__qualname__` or `__name__` from a given `thing`")
 
-export(isexpandable,    name='isexpandable',    doc="isexpandable(thing) → boolean predicate, True if thing can be `*expanded`")
-export(isnormative,     name='isnormative',     doc="isnormative(thing) → boolean predicate, True if thing is a string-like or bytes-like iterable")
-export(iscontainer,     name='iscontainer',     doc="iscontainer(thing) → boolean predicate, True if thing is iterable and not “normative” (q.v. `isnormative(…)` supra.)")
+export(isexpandable,    name='isexpandable',    doc="isexpandable(thing) → boolean predicate, True if `thing` can be `*expanded`")
+export(isnormative,     name='isnormative',     doc="isnormative(thing) → boolean predicate, True if `thing` is a string-like or bytes-like iterable")
+export(iscontainer,     name='iscontainer',     doc="iscontainer(thing) → boolean predicate, True if `thing` is iterable and not “normative” (q.v. `isnormative(…)` supra.)")
 
-export(lambda_repr,     name='lambda_repr',     doc="lambda_repr(instance) → Equivalent to the built-in __repr__ method of a lambda function")
+export(lambda_repr,     name='lambda_repr',     doc="lambda_repr(instance) → Equivalent to the built-in `__repr__(…)` method of a lambda function")
 
-export(predicate_all,   name='predicate_all',   doc="predicate_all(predicate, *things) → boolean predicate, shortcut for apply_to(predicate, all, *things")
-export(predicate_any,   name='predicate_any',   doc="predicate_any(predicate, *things) → boolean predicate, shortcut for apply_to(predicate, any, *things")
-export(predicate_and,   name='predicate_and',   doc="predicate_and(predicate, a, b) → boolean predicate, shortcut for apply_to(predicate, all, a, b")
-export(predicate_or,    name='predicate_or',    doc="predicate_or(predicate, a, b) → boolean predicate, shortcut for apply_to(predicate, all, a, b")
-export(predicate_xor,   name='predicate_xor',   doc="predicate_xor(predicate, a, b) → boolean predicate, shortcut for apply_to(predicate, all, a, b")
+export(predicate_all,   name='predicate_all',   doc="predicate_all(predicate, *things) → boolean predicate, shortcut for `apply_to(predicate, all, *things)`")
+export(predicate_any,   name='predicate_any',   doc="predicate_any(predicate, *things) → boolean predicate, shortcut for `apply_to(predicate, any, *things)`")
+export(predicate_and,   name='predicate_and',   doc="predicate_and(predicate, a, b) → boolean predicate, shortcut for `apply_to(predicate, all, a, b)`")
+export(predicate_or,    name='predicate_or',    doc="predicate_or(predicate, a, b) → boolean predicate, shortcut for `apply_to(predicate, any, a, b)`")
+export(predicate_xor,   name='predicate_xor',   doc="predicate_xor(predicate, a, b) → boolean predicate, shortcut for `apply_to(predicate, any, a, b) and not apply_to(predicate, all, a, b)`")
 
 export(case_sort,       name='case_sort',       doc="case_sort(string) → Sorting predicate to sort UPPERCASE names first")
 
-export(thing_has,       name='thing_has',       doc="thing_has(thing, attribute) → boolean predicate, True if thing has the attribute (in either __dict__ or __slots__)")
-export(class_has,       name='class_has',       doc="class_has(cls, attribute) → boolean predicate, True if cls is a class type and has the attribute (in either __dict__ or __slots__)")
-export(isslotted,       name='isslotted',       doc="isslotted(thing) → boolean predicate, True if thing has both an __mro__ and a __slots__ attribute")
-export(isdictish,       name='isdictish',       doc="isdictish(thing) → boolean predicate, True if thing has both an __mro__ and a __dict__ attribute")
-export(isslotdicty,     name='isslotdicty',     doc="isslotdicty(thing) → boolean predicate, True if thing has __mro__, __slots__, and __dict__ attributes")
+export(thing_has,       name='thing_has',       doc="thing_has(thing, attribute) → boolean predicate, True if `thing` has “attribute” (in either `__dict__` or `__slots__`)")
+export(class_has,       name='class_has',       doc="class_has(cls, attribute) → boolean predicate, True if `cls` is a class type and has “attribute” (in either `__dict__` or `__slots__`)")
+export(isslotted,       name='isslotted',       doc="isslotted(thing) → boolean predicate, True if `thing` has both an `__mro__` and a `__slots__` attribute")
+export(isdictish,       name='isdictish',       doc="isdictish(thing) → boolean predicate, True if `thing` has both an `__mro__` and a `__dict__` attribute")
+export(isslotdicty,     name='isslotdicty',     doc="isslotdicty(thing) → boolean predicate, True if `thing` has `__mro__`, `__slots__`, and `__dict__` attributes")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

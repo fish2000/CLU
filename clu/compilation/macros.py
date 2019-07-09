@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from clu.constants import ENCODING, ConfigurationError
-from clu.typespace import SimpleNamespace
+from clu.constants import ENCODING, TOKEN
+from clu.constants.exceptions import ConfigurationError
+from clu.typespace.namespace import SimpleNamespace
 from clu.typology import isstring
 from clu.fs import stringify, u8str
 
@@ -88,14 +89,27 @@ class Macros(SimpleNamespace):
     def define(self, name, definition=None,
                            *,
                            undefine=False):
+        """ Define a Macro within the Macrospace – specifiying a name, a definition (optionally),
+            and a boolean flag (optionally) indicating that the macro is “undefined” --
+            that is to say, that it is a so-called “undef macro”.
+        """
         return self.add(Macro(name,
                               definition,
                               undefine=undefine))
     
     def undefine(self, name, **kwargs):
+        """ Create a new “undefined” Macro within the Macrospace. Only a name needs to be specified;
+            the fact of the Macro’s undefinedness is its definition and payload.
+        """
         return self.add(Macro(name, undefine=True))
     
     def add(self, macro):
+        """ The `add(…)` method is called by both `define(…)` and `undefine(…)` to create any sort
+            of new Macro within the Macrospace. Passing a fresh Macro instance to `add(¬)` will add
+            this instance to the Macrospace; do not invoke this directly unless you’re certain of
+            yourself, as using a macro with an already-existing name will overwrite the contents
+            of whatever was previously occupying that named entry. 
+        """
         name = macro.name
         if bool(macro):
             # macro is defined:
@@ -106,27 +120,46 @@ class Macros(SimpleNamespace):
         return macro
     
     def delete(self, name, **kwargs):
+        """ The `delete(…)` method will delete a Macro from the Macrospace by name; currently,
+            this method accepts arbitrary kwargs but does not consider them. 
+        """
         if name in self:
             del self[name]
             return True
         return False
     
     def definition_for(self, name):
+        """ Use the `definition_for(…)` method to query the Macrospace – it will return a new
+            Macro instance with definitions filled in from that which it matches by name; if no
+            macro is found for a given name, an “undefined” macro is returned instead. As such,
+            this method will always return an initialized Macro instance in a valid state.
+        """
         if name not in self:
             return Macro(name, undefine=True)
         return Macro(name, self[name])
     
     def to_list(self):
+        """ The `to_list()` method returns a new list, containing a tuplized version of each
+            macro instance in the Macrospace – q.v. `Macro.to_tuple()` notes and implementation
+            supra. for a description of this process.
+        """
         out = []
         for k, v in self.items():
             out.append(Macro(k, v).to_tuple())
         return out
     
     def to_tuple(self):
+        """ This is exactly like `to_list()`, above; except that the container of tuplized
+            Macro instances return is a tuple instead.
+        """
         return tuple(self.to_list())
     
     def to_string(self):
-        global TOKEN
+        """ A method to return the command-line value-equivalent of the Macrospace and its
+            contents – q.v. `Macro.to_string()` notes and implementation supra. The value
+            of `to_string()` should – for certain values of “should” – work out-of-the-box
+            if passed to recent versions of the GCC or Clang C/C++/ObjC preprocessors.
+        """
         stringified = TOKEN.join(Macro(k, v).to_string() for k, v in self.items()).strip()
         return f"{TOKEN.lstrip()}{stringified}"
     

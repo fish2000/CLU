@@ -259,7 +259,9 @@ def noneof(*items):
     return negate(any)(item for item in items if item is not None)
 
 # MODULE EXPORTS:
-export(negate,          name='negate',          doc="negate(function) → Negate a boolean function. Used like e.g.: `isnotxxx = lambda thing: negate(isxxx)(thing)`")
+export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n"
+                                                                     "… Used like e.g.: `isnotxxx = lambda thing: negate(isxxx)(thing)` \n"
+                                                                     "… Like if “(thing)” is representative of the call signature of `isxxx(…)`")
 
 export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → boolean predicate, True if thing is a metaclass, descending directly from `type`")
 export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object` but not `type`")

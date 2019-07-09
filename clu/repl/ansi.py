@@ -49,6 +49,8 @@ class ANSI(AliasingEnumMeta):
         
         class CacheDescriptor(object):
             
+            __slots__ = ('cache',)
+            
             def __init__(self):
                 self.cache = {}
                 self.cache['HITS'] = 0
@@ -64,6 +66,8 @@ class ANSI(AliasingEnumMeta):
                 return repr(self.cache)
         
         class SourceDescriptor(object):
+            
+            __slots__ = tuple()
             
             def __get__(self, *args):
                 return source

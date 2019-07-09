@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from collections import OrderedDict, namedtuple as NamedTuple
+from collections import namedtuple as NamedTuple
 
 import colorama
 colorama.init()
@@ -11,7 +11,7 @@ from clu.constants import ENCODING, SEPARATOR_WIDTH
 from clu.constants import Enum, unique, auto
 from clu.exporting import doctrim
 from clu.naming import qualified_name
-from clu.typology import string_types, bytes_types
+from clu.typology import string_types, bytes_types, dict_types
 from clu.enums import alias, AliasingEnumMeta
 from clu.exporting import Exporter
 
@@ -230,7 +230,6 @@ FIELDS = ('text', 'background', 'weight')
 fields = frozenset(FIELDS)
 
 ANSIFormatBase = NamedTuple('ANSIFormatBase', FIELDS, module=__file__)
-dict_types = { dict, OrderedDict }
 
 @export
 class ANSIFormat(ANSIFormatBase):

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from collections import OrderedDict, defaultdict as DefaultDict, Counter
 
 import array
 import argparse
@@ -8,9 +9,10 @@ import decimal
 import io
 import os
 
-from clu.constants import λ, PY3, PYPY
-from clu.constants import long, unicode, numpy
-from clu.constants import HashableABC, SequenceABC, Path
+from clu.constants.consts import λ, PY3, PYPY
+from clu.constants.polyfills import long, unicode, numpy
+from clu.constants.polyfills import HashableABC, SequenceABC, Path
+from clu.constants.polyfills import Mapping, MutableMapping
 from clu.exporting import Exporter
 
 from clu.predicates import (isclasstype,
@@ -78,6 +80,10 @@ bytes_types = (bytes, bytearray)
 path_classes = tuplize(argparse.FileType, or_none(os, 'PathLike'), Path) # Path may be “None” in disguise
 path_types = string_types + bytes_types + path_classes
 file_types = (io.TextIOBase, io.BufferedIOBase, io.RawIOBase, io.IOBase)
+
+dict_types = { dict, OrderedDict, DefaultDict, Counter }
+mapping_types = { Mapping, MutableMapping }
+mapping_classes = dict_types | mapping_types
 
 callable_types = (types.Function,
                   types.Method,

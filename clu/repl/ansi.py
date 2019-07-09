@@ -29,6 +29,24 @@ class ANSIBase(Enum):
     def is_ansi(cls, instance):
         return cls in type(instance).__mro__
 
+class CacheDescriptor(object):
+    
+    __slots__ = ('cache',)
+    
+    def __init__(self):
+        self.cache = {}
+        self.cache['HITS'] = 0
+        self.cache['MISSES'] = 0
+    
+    def __get__(self, *args):
+        return self.cache
+    
+    def __set__(self, instance, value):
+        self.cache = value
+    
+    def __repr__(self):
+        return repr(self.cache)
+
 @export
 class ANSI(AliasingEnumMeta):
     
@@ -46,24 +64,6 @@ class ANSI(AliasingEnumMeta):
             definitions sub.)
         """
         source = kwargs.pop('source')
-        
-        class CacheDescriptor(object):
-            
-            __slots__ = ('cache',)
-            
-            def __init__(self):
-                self.cache = {}
-                self.cache['HITS'] = 0
-                self.cache['MISSES'] = 0
-            
-            def __get__(self, *args):
-                return self.cache
-            
-            def __set__(self, instance, value):
-                self.cache = value
-            
-            def __repr__(self):
-                return repr(self.cache)
         
         class SourceDescriptor(object):
             

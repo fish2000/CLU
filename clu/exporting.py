@@ -4,13 +4,6 @@ from __future__ import print_function
 import sys
 import warnings
 
-# Unused clade-related stuff:
-# import re
-# from constants import DEBUG, SINGLETON_TYPES, Enum, unique
-# from constants import PY3, SEPARATOR_WIDTH, OrderedDict
-# from predicates import case_sort
-# from repl import print_separator
-
 from clu.constants import BUILTINS, λ, MAXINT
 from clu.constants import Counter, MutableMapping, NoDefault
 from clu.constants import ExportError, ExportWarning

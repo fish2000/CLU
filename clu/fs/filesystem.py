@@ -557,8 +557,9 @@ class TemporaryName(collections.abc.Hashable,
         if not destination:
             raise FilesystemError("Copying requires a place to which to copy")
         if self.exists:
-            if os.path.samefile(self._name, destination):
-                raise FilesystemError("Can’t copy across identical locations")
+            if os.path.exists(destination):
+                if os.path.samefile(self._name, destination):
+                    raise FilesystemError("Can’t copy to identical locations")
             return shutil.copy2(self._name, os.fspath(destination))
         return False
     
@@ -988,7 +989,9 @@ class Directory(collections.abc.Hashable,
         if not zmode:
             zmode = zipfile.ZIP_DEFLATED
         ensure_path_is_valid(zpth)
-        with TemporaryName(prefix="ziparchive-", suffix=zsuf[1:]) as ztmp:
+        with TemporaryName(prefix="ziparchive-",
+                           suffix=zsuf[1:],
+                           randomized=True) as ztmp:
             with zipfile.ZipFile(ztmp.name, "w", zmode) as ziphandle:
                 relparent = lambda p: os.path.relpath(p, os.fspath(self.parent()))
                 for root, dirs, files in self.walk(followlinks=True):
@@ -998,7 +1001,7 @@ class Directory(collections.abc.Hashable,
                         if os.path.isfile(filepath): # regular files only
                             arcname = os.path.join(relparent(root), filename)
                             ziphandle.write(filepath, arcname) # add regular file
-            ztmp.copy(zpth)
+            assert ztmp.copy(zpth)
         return self.realpath(zpth)
     
     def symlink(self, destination, pth=None):

@@ -33,10 +33,13 @@ class TestFsFilesystem(object):
         
         try:
             # Create the zip archive:
-            datadir.zip_archive(tzip)
+            fzip = datadir.zip_archive(tzip)
             
             assert os.path.exists(tzip)
             assert os.lstat(tzip).st_size > 10000
+            
+            assert os.path.exists(fzip)
+            assert os.path.samefile(tzip, fzip)
         
         finally:
             os.unlink(tzip)

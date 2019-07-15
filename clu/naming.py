@@ -2,13 +2,13 @@
 from __future__ import print_function
 
 import os
-import pickle
 import warnings
 
 from clu.constants import BASEPATH, BUILTINS, DEBUG, QUALIFIER
 from clu.constants import BadDotpathWarning
 from clu.exporting import determine_name, Exporter
-# from clu.predicates import pyattr
+from clu.exporting import thingname_search_by_id
+from clu.predicates import pyattr
 
 exporter = Exporter()
 export = exporter.decorator()
@@ -67,10 +67,11 @@ def determine_module(thing):
     """ Determine in which module a given thing is ensconced,
         and return that modules’ name as a string.
     """
-    # return pyattr(thing, 'module', 'package') or \
-    #        determine_name(
-    #        thingname_search_by_id(id(thing))[0])
-    return pickle.whichmodule(thing, None)
+    # import pickle
+    # return pickle.whichmodule(thing, None)
+    return pyattr(thing, 'module', 'package') or \
+           determine_name(
+           thingname_search_by_id(id(thing))[0])
 
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
 # assess a thing’s qualified name, etc etc.

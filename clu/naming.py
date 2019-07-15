@@ -4,11 +4,9 @@ from __future__ import print_function
 import os
 import warnings
 
-from clu.constants import BASEPATH, BUILTINS, DEBUG, QUALIFIER
-from clu.constants import BadDotpathWarning
+from clu.constants.consts import BASEPATH, BUILTINS, DEBUG, QUALIFIER
+from clu.constants.exceptions import BadDotpathWarning
 from clu.exporting import determine_name, Exporter
-from clu.exporting import thingname_search_by_id
-from clu.predicates import pyattr
 
 exporter = Exporter()
 export = exporter.decorator()
@@ -69,6 +67,8 @@ def determine_module(thing):
     """
     # import pickle
     # return pickle.whichmodule(thing, None)
+    from clu.exporting import thingname_search_by_id
+    from clu.predicates import pyattr
     return pyattr(thing, 'module', 'package') or \
            determine_name(
            thingname_search_by_id(id(thing))[0])

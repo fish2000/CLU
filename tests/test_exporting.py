@@ -19,17 +19,41 @@ class TestExporting(object):
         from clu.typology import exporter as exporter1
         from clu.exporting import Exporter
         
+        # Sum the exporters:
         exporter_sum = Exporter()
         exporter_sum += exporter0
         exporter_sum += exporter1
+        
+        # Check length:
         assert len(exporter_sum) == len(exporter0) + len(exporter1)
+        
+        # Check key membership:
+        for key in exporter_sum.keys():
+            assert (key in exporter0) or \
+                   (key in exporter1)
+        
+        # Check key set heirarchy:
+        assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter0.all_tuple()))
+        assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter1.all_tuple()))
     
     def test_combine_real_world_exporters_0(self):
         from clu.predicates import exporter as exporter0
         from clu.typology import exporter as exporter1
         
+        # Sum the exporters:
         exporter_sum = exporter0 + exporter1
+        
+        # Check length:
         assert len(exporter_sum) == len(exporter0) + len(exporter1)
+        
+        # Check key membership:
+        for key in exporter_sum.keys():
+            assert (key in exporter0) or \
+                   (key in exporter1)
+        
+        # Check key set heirarchy:
+        assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter0.all_tuple()))
+        assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter1.all_tuple()))
     
     def test_exporter_export_constants(self):
         # N.B. the warning checks will *FAIL* for some reason
@@ -60,6 +84,7 @@ class TestExporting(object):
         assert 'I_HEARD' in exporter
         assert 'YO_DOGG_W' in exporter
         assert 'I_HEARD_W' in exporter
+        
         # These don’t work right at non-module-level:
         # assert nameof(YO_DOGG) == 'yo_dogg'
         # assert nameof(I_HEARD) == 'i_heard'

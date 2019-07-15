@@ -14,6 +14,32 @@ class TestExporting(object):
     
     """ Run the tests for the clu.exporting module. """
     
+    def test_combine_real_world_exporters_2(self):
+        from clu.predicates import exporter as exporter0
+        from clu.typology import exporter as exporter1
+        from clu.fs.filesystem import exporter as exporter2
+        from clu.exporting import Exporter
+        
+        # Sum the exporters:
+        exporter_sum = Exporter()
+        exporter_sum += exporter0
+        exporter_sum += exporter1
+        exporter_sum += exporter2
+        
+        # Check length:
+        assert len(exporter_sum) == len(exporter0) + len(exporter1) + len(exporter2)
+        
+        # Check key membership:
+        for key in exporter_sum.keys():
+            assert (key in exporter0) or \
+                   (key in exporter1) or \
+                   (key in exporter2)
+        
+        # Check key set heirarchy:
+        assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter0.all_tuple()))
+        assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter1.all_tuple()))
+        assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter2.all_tuple()))
+    
     def test_combine_real_world_exporters_1(self):
         from clu.predicates import exporter as exporter0
         from clu.typology import exporter as exporter1

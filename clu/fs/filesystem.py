@@ -1272,8 +1272,6 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
             os.close(descriptor)
         raise FilesystemError(str(base_exception))
 
-del TemporaryFileWrapperBase
-
 # NO DOCS ALLOWED:
 export(DEFAULT_PREFIX,          name='DEFAULT_PREFIX')
 export(DEFAULT_TIMEOUT,         name='DEFAULT_TIMEOUT')

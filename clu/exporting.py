@@ -188,6 +188,8 @@ class Exporter(MutableMapping):
             self.path = kwargs.pop('path', None)
             if self.path is not None:
                 self.dotpath = path_to_dotpath(self.path)
+            else:
+                self.dotpath = None
         
         for arg in args:
             if isinstance(arg, type(self)):

@@ -7,8 +7,8 @@ import pytest
 # in order for “thingname_search(…)” to find them properly –
 # q.v. “test_exporter_export_lambdas_no_name_provided(…)”
 # definition sub.:
-yo_dogg = lambda: print("Yo dogg.")
-i_heard = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
+yo_dogg_lambda = lambda: print("Yo dogg.")
+i_heard_lambda = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
 
 class TestExporting(object):
     
@@ -86,29 +86,29 @@ class TestExporting(object):
         exporter = Exporter()
         export = exporter.decorator()
         
-        export(yo_dogg,     doc='yo_dogg() → Prints “Yo dogg.”')
-        export(i_heard,     doc='i_heard() → Prints “I heard you like …” with argument reprs')
+        export(yo_dogg_lambda,     doc='yo_dogg_lambda() → Prints “Yo dogg.”')
+        export(i_heard_lambda,     doc='i_heard_lambda() → Prints “I heard you like …” with argument reprs')
         
-        assert 'yo_dogg' in exporter
-        assert 'i_heard' in exporter
-        assert yo_dogg.__name__ == 'yo_dogg'
-        assert i_heard.__name__ == 'i_heard'
-        assert yo_dogg.__qualname__ == 'yo_dogg'
-        assert i_heard.__qualname__ == 'i_heard'
-        assert nameof(yo_dogg) == 'yo_dogg'
-        assert nameof(i_heard) == 'i_heard'
+        assert 'yo_dogg_lambda' in exporter
+        assert 'i_heard_lambda' in exporter
+        assert yo_dogg_lambda.__name__ == 'yo_dogg_lambda'
+        assert i_heard_lambda.__name__ == 'i_heard_lambda'
+        assert yo_dogg_lambda.__qualname__ == 'yo_dogg_lambda'
+        assert i_heard_lambda.__qualname__ == 'i_heard_lambda'
+        assert nameof(yo_dogg_lambda) == 'yo_dogg_lambda'
+        assert nameof(i_heard_lambda) == 'i_heard_lambda'
         
-        assert 'yo_dogg() → Prints “Yo dogg.”' in yo_dogg.__doc__
-        assert 'i_heard() → Prints “I heard you like …” with argument reprs' in i_heard.__doc__
+        assert 'yo_dogg_lambda() → Prints “Yo dogg.”' in yo_dogg_lambda.__doc__
+        assert 'i_heard_lambda() → Prints “I heard you like …” with argument reprs' in i_heard_lambda.__doc__
         
         test_all, test_dir = exporter.all_and_dir()
         
         assert len(test_all) == 2
         assert len(test_dir()) == 2
-        assert 'yo_dogg' in test_all
-        assert 'i_heard' in test_all
-        assert 'yo_dogg' in test_dir()
-        assert 'i_heard' in test_dir()
+        assert 'yo_dogg_lambda' in test_all
+        assert 'i_heard_lambda' in test_all
+        assert 'yo_dogg_lambda' in test_dir()
+        assert 'i_heard_lambda' in test_dir()
     
     def test_exporter_export_lambdas(self):
         from clu.exporting import Exporter

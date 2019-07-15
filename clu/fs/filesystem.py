@@ -399,8 +399,10 @@ class TemporaryName(collections.abc.Hashable,
         Unless you say not to. Really it's your call dogg I could give AF
     """
     
-    fields = ('name', 'exists', 'mode',
-              'destroy', 'prefix', 'suffix', 'parent')
+    fields = ('name', 'exists', 'destroy',
+              'mode', 'binary_mode',
+              'prefix', 'suffix',
+              'parent')
     
     def __init__(self, prefix=None, suffix="tmp",
                        parent=None,
@@ -980,16 +982,13 @@ class Directory(collections.abc.Hashable,
         if zpth is None:
             raise FilesystemError("Need to specify a zip-archive file path")
         zpth = os.fspath(zpth)
-        if not zpth.lower().endswith(self.zip_suffix):
-            zpth += self.zip_suffix
-        if os.path.exists(zpth):
-            if os.path.isdir(zpth):
-                raise FilesystemError("Can't overwrite a directory: %s" % zpth)
-            raise FilesystemError("File path for zip-archive already exists")
+        zsuf = type(self).zip_suffix
+        if not zpth.lower().endswith(zsuf):
+            zpth += zsuf
         if not zmode:
             zmode = zipfile.ZIP_DEFLATED
-        with TemporaryName(prefix="ziparchive-",
-                           suffix=self.zip_suffix[1:]) as ztmp:
+        ensure_path_is_valid(zpth)
+        with TemporaryName(prefix="ziparchive-", suffix=zsuf[1:]) as ztmp:
             with zipfile.ZipFile(ztmp.name, "w", zmode) as ziphandle:
                 relparent = lambda p: os.path.relpath(p, os.fspath(self.parent()))
                 for root, dirs, files in self.walk(followlinks=True):
@@ -1263,7 +1262,7 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
     
     (descriptor, name) = _mkstemp_inner(parent.name, prefix,
                                                      suffix, flags,
-                                               bytes(suffix), encoding=ENCODING)
+                                               bytes(suffix, encoding=ENCODING))
     try:
         filehandle = os.fdopen(descriptor, mode, buffer_size)
         return TemporaryFileWrapper(filehandle, name, delete)

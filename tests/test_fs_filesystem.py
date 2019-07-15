@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from tempfile import gettempdir, NamedTemporaryFile
+from tempfile import gettempdir
 
 import collections.abc
 import contextlib
@@ -23,7 +23,7 @@ class TestFsFilesystem(object):
     
     def test_temporary(self):
         from clu.fs.filesystem import temporary, write_to_path
-        from clu.fs.filesystem import FilesystemError
+        from clu.constants.exceptions import FilesystemError
         
         # Prepare the temporary directory:
         d = Directory(gettempdir())
@@ -221,8 +221,9 @@ class TestFsFilesystem(object):
         assert not os.path.exists(p)
     
     def test_ensure_path_is_valid(self):
+        from clu.constants.exceptions import FilesystemError
         from clu.fs.filesystem import ensure_path_is_valid
-        from clu.fs.filesystem import FilesystemError
+        from clu.fs.filesystem import NamedTemporaryFile
         
         with pytest.raises(FilesystemError) as exc:
             ensure_path_is_valid(object())

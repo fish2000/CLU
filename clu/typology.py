@@ -102,21 +102,21 @@ if PY3 and not PYPY:
 # of the aforementioned typelists:
 
 ispathtype = lambda cls: issubclass(cls, path_types)
-ispath = lambda thing: graceful_issubclass(thing, path_types) or haspyattr(thing, 'fspath')
+ispath = lambda thing: subclasscheck(thing, path_types) or haspyattr(thing, 'fspath')
 isvalidpath = lambda thing: ispath(thing) and os.path.exists(os.path.expanduser(thing))
 
 isabstractmethod = lambda method: getpyattr(method, 'isabstractmethod', False)
 isabstract = lambda thing: bool(pyattr(thing, 'abstractmethods', 'isabstractmethod'))
-isabstractcontextmanager = lambda cls: graceful_issubclass(cls, contextlib.AbstractContextManager)
+isabstractcontextmanager = lambda cls: subclasscheck(cls, contextlib.AbstractContextManager)
 iscontextmanager = lambda cls: allpyattrs(cls, 'enter', 'exit') or isabstractcontextmanager(cls)
 
-isnumber = lambda thing: graceful_issubclass(thing, numeric_types)
-isnumeric = lambda thing: graceful_issubclass(thing, numeric_types)
-iscomplex = lambda thing: graceful_issubclass(thing, complex)
-isarray = lambda thing: graceful_issubclass(thing, array_types)
-isstring = lambda thing: graceful_issubclass(thing, string_types)
-isbytes = lambda thing: graceful_issubclass(thing, bytes_types)
-ismodule = lambda thing: graceful_issubclass(thing, types.Module)
+isnumber = lambda thing: subclasscheck(thing, numeric_types)
+isnumeric = lambda thing: subclasscheck(thing, numeric_types)
+iscomplex = lambda thing: subclasscheck(thing, complex)
+isarray = lambda thing: subclasscheck(thing, array_types)
+isstring = lambda thing: subclasscheck(thing, string_types)
+isbytes = lambda thing: subclasscheck(thing, bytes_types)
+ismodule = lambda thing: subclasscheck(thing, types.Module)
 isfunction = lambda thing: isinstance(thing, (types.Function, types.Lambda)) or callable(thing)
 islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == λ
 ishashable = lambda thing: isinstance(thing, HashableABC)

@@ -588,14 +588,14 @@ class TestPredicates(object):
         import array, decimal, os
         from clu.predicates import attr
         from clu.typespace import SimpleNamespace
-        from clu.typology import (graceful_issubclass,
+        from clu.typology import (subclasscheck,
                                   ispathtype, ispath, isvalidpath,
                                   isnumber, isnumeric, isarray,
                                   isstring, isbytes,
                                   islambda,
                                   isfunction)
         
-        assert graceful_issubclass(int, int)
+        assert subclasscheck(int, int)
         
         if hasattr(os, 'PathLike'):
             assert ispathtype(os.PathLike)
@@ -630,11 +630,11 @@ class TestPredicates(object):
         
         assert islambda(lambda: None)
         assert islambda(attr)
-        assert islambda(graceful_issubclass) # IT IS NOW DOGG
+        assert islambda(subclasscheck) # IT IS NOW DOGG
         
         assert isfunction(lambda: None)
         assert isfunction(attr)
-        assert isfunction(graceful_issubclass)
+        assert isfunction(subclasscheck)
         assert not isfunction(SimpleNamespace())
         assert isfunction(SimpleNamespace) # classes are callable!
     

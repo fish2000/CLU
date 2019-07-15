@@ -28,24 +28,15 @@ from clu.sanitizer import utf8_encode
 from clu.typology import ispath, isvalidpath
 from .misc import masked_permissions
 from .misc import stringify, suffix_searcher, u8str
+from clu.exporting import Exporter
 
-__all__ = ('DEFAULT_PREFIX',
-           'DEFAULT_TIMEOUT',
-           'ExecutionError', 'FilesystemError',
-           'ensure_path_is_valid',
-           'script_path', 'which', 'back_tick',
-           'rm_rf', 'temporary',
-           'TemporaryName',
-           'Directory',
-           'cd', 'wd',
-           'TemporaryDirectory', 'Intermediate',
-           'NamedTemporaryFile')
-
-__dir__ = lambda: list(__all__)
+exporter = Exporter()
+export = exporter.decorator()
 
 DEFAULT_TIMEOUT = 60 # seconds
 DEFAULT_PREFIX = "yo-dogg-"
 
+@export
 def ensure_path_is_valid(pth):
     """ Raise an exception if we can’t write to the specified path """
     if not ispath(pth):
@@ -58,6 +49,7 @@ def ensure_path_is_valid(pth):
     if not os.path.isdir(parent_dir):
         raise FilesystemError("Directory doesn’t exist: %s" % parent_dir)
 
+@export
 def write_to_path(data, pth, relative_to=None, verbose=False):
     """ Write data to a new file using a context-managed handle """
     ensure_path_is_valid(pth)
@@ -71,6 +63,7 @@ def write_to_path(data, pth, relative_to=None, verbose=False):
                                           os.path.relpath(pth,
                                                           start=start)))
 
+@export
 def script_path():
     """ Return the path to the embedded scripts directory. """
     return os.path.join(
@@ -78,6 +71,7 @@ def script_path():
            os.path.dirname(
            os.path.dirname(__file__))), 'scripts')
 
+@export
 def which(binary_name, pathvar=None):
     """ Deduces the path corresponding to an executable name,
         as per the UNIX command `which`. Optionally takes an
@@ -89,6 +83,7 @@ def which(binary_name, pathvar=None):
 
 which.pathvar = PATH
 
+@export
 def back_tick(command,  as_str=True,
                        ret_err=False,
                      raise_err=None, **kwargs):
@@ -203,6 +198,7 @@ def back_tick(command,  as_str=True,
                (as_str and errors.decode(encoding) or errors)
     return (as_str and output.decode(encoding) or output)
 
+@export
 def rm_rf(pth):
     """ rm_rf() does what `rm -rf` does – so, for the love of fuck,
         BE FUCKING CAREFUL WITH IT.
@@ -228,6 +224,7 @@ def rm_rf(pth):
         pass
     return False
 
+@export
 def temporary(suffix='', prefix='', parent=None, **kwargs):
     """ Wrapper around `tempfile.mktemp()` that allows full overriding of the
         prefix and suffix by the caller -- that is to say, no random elements
@@ -394,6 +391,7 @@ def TemporaryNamedFile(tempth, mode='wb', buffer_size=-1, delete=True):
                 os.close(descriptor)
         raise FilesystemError(str(base_exception))
 
+@export
 class TemporaryName(collections.abc.Hashable,
                     contextlib.AbstractContextManager,
                     os.PathLike,
@@ -646,6 +644,7 @@ class TemporaryName(collections.abc.Hashable,
 non_dotfile_match = re.compile(r"^[^\.]").match
 non_dotfile_matcher = lambda p: non_dotfile_match(p.name)
 
+@export
 class Directory(collections.abc.Hashable,
                 collections.abc.Mapping,
                 collections.abc.Sized,
@@ -1088,6 +1087,7 @@ class Directory(collections.abc.Hashable,
     def __call__(self, *args, **kwargs):
         return self
 
+@export
 class cd(Directory):
     
     def __init__(self, pth):
@@ -1095,6 +1095,7 @@ class cd(Directory):
         """
         super(cd, self).__init__(pth)
 
+@export
 class wd(Directory):
     
     def __init__(self):
@@ -1102,6 +1103,7 @@ class wd(Directory):
         """
         super(wd, self).__init__(pth=None)
 
+@export
 class TemporaryDirectory(Directory):
     
     """ It's funny how this code looks, like, 99 percent exactly like the above
@@ -1210,6 +1212,7 @@ class TemporaryDirectory(Directory):
             out &= self.close()
         return out
 
+@export
 class Intermediate(TemporaryDirectory, Directory):
     
     """ clu.fs.filesystem.Intermediate isn’t a class, per se – rather,
@@ -1234,6 +1237,7 @@ class Intermediate(TemporaryDirectory, Directory):
         """
         pass
 
+@export
 def NamedTemporaryFile(mode='w+b', buffer_size=-1,
                        suffix="tmp", prefix=DEFAULT_PREFIX,
                        directory=None,
@@ -1275,3 +1279,10 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
         raise FilesystemError(str(base_exception))
 
 del TemporaryFileWrapperBase
+
+# NO DOCS ALLOWED:
+export(DEFAULT_PREFIX,          name='DEFAULT_PREFIX')
+export(DEFAULT_TIMEOUT,         name='DEFAULT_TIMEOUT')
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()

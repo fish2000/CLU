@@ -6,12 +6,19 @@ import os
 
 from clu.constants import ENCODING, lru_cache
 from clu.typology import string_types
+from clu.exporting import Exporter
 
+exporter = Exporter()
+export = exporter.decorator()
+
+@export
 def wrap_value(value):
+    """ Get a “lazified” copy of a value, wrapped in a lamba """
     return lambda *args, **kwargs: value
 
 none_function = wrap_value(None)
 
+@export
 def stringify(instance, fields):
     """ Stringify an object instance, using an iterable field list to
         extract and render its values, and printing them along with the 
@@ -41,6 +48,7 @@ def stringify(instance, fields):
     hex_id = hex(id(instance))
     return "%s(%s) @ %s" % (typename, field_dict_string, hex_id)
 
+@export
 def suffix_searcher(suffix):
     """ Return a boolean function that will search for the given
         file suffix in strings with which it is called, returning
@@ -62,10 +70,12 @@ def suffix_searcher(suffix):
     searcher = re.compile(regex_str, re.IGNORECASE).search
     return lambda searching_for: bool(searcher(searching_for))
 
+@export
 def u8encode(source):
     """ Encode a source as bytes using the UTF-8 codec """
     return bytes(source, encoding=ENCODING)
 
+@export
 def u8bytes(source):
     """ Encode a source as bytes using the UTF-8 codec, guaranteeing
         a proper return value without raising an error
@@ -84,6 +94,7 @@ def u8bytes(source):
         return b'None'
     return bytes(source)
 
+@export
 def u8str(source):
     """ Encode a source as a Python string, guaranteeing a proper return
         value without raising an error
@@ -102,12 +113,14 @@ def current_umask():
     os.umask(mask)
     return mask
 
+@export
 def masked_permissions(perms=0o666):
     """ Compute the permission bitfield, using the current umask value
         and a given permission octal number.
     """
     return perms & ~current_umask()
 
+@export
 def masked_chmod(pth, perms=0o666):
     """ Perform the `os.chmod(…)` operation, respecting the current
         umask value (q.v. `current_umask()` supra.)
@@ -115,3 +128,11 @@ def masked_chmod(pth, perms=0o666):
     masked_perms = masked_permissions(perms=perms)
     os.chmod(pth, mode=masked_perms)
     return octalize(masked_perms)
+
+# MODULE EXPORTS:
+export(current_umask,           name='current_umask')
+export(none_function,           name='none_function',       doc="none_function() → A function that always returns None")
+export(octalize,                name='octalize',            doc="octalize(integer) → Format an integer value as an octal number")
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()

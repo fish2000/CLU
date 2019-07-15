@@ -12,7 +12,7 @@ from clu.predicates import attr
 from clu.typology import isstring, isbytes
 from clu.exporting import Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 @export

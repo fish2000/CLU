@@ -7,7 +7,7 @@ from clu.constants import λ, Enum, unicode
 from clu.enums import alias
 from clu.exporting import Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 # PREDICATE LOGIC: negate(function) will “negate” a boolean predicate function –

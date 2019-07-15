@@ -15,7 +15,7 @@ from clu.typology import string_types, bytes_types, dict_types
 from clu.enums import alias, AliasingEnumMeta
 from clu.exporting import Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 print_separator = lambda filler='-': print(filler * SEPARATOR_WIDTH)

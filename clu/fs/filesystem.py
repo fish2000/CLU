@@ -25,7 +25,7 @@ from .misc import masked_permissions
 from .misc import stringify, suffix_searcher, u8str
 from clu.exporting import Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 DEFAULT_TIMEOUT = 60 # seconds

@@ -7,8 +7,8 @@ import sys
 
 from clu.constants import DYNAMIC_MODULE_PREFIX, PROJECT_NAME, VERBOTEN, cache_from_source
 from .namespace import SimpleNamespace, Namespace
-from clu.exporting import doctrim
-from clu.naming import dotpath_join, path_to_dotpath
+from clu.exporting import doctrim, path_to_dotpath
+from clu.naming import dotpath_join
 
 import types as thetypes
 types = Namespace()

@@ -25,7 +25,7 @@ from clu.predicates import (isclasstype,
 
 from clu.typespace import types
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 # TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)` –

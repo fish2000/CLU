@@ -8,7 +8,7 @@ from clu.constants import ENCODING, lru_cache
 from clu.typology import string_types
 from clu.exporting import Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 @export

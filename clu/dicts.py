@@ -4,7 +4,7 @@ from __future__ import print_function
 from clu.predicates import haspyattr
 from clu.exporting import Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 # DICT FUNCTIONS: dictionary-merging

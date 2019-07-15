@@ -5,7 +5,7 @@ MOCK_NUMPY = False
 from clu.constants import numpy
 from clu.exporting import Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 if numpy is None:

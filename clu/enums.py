@@ -3,7 +3,7 @@ from __future__ import print_function
 from clu.constants import Enum, EnumMeta
 from clu.exporting import Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
     
 # Dunder and sunder name constants for the alias dict:

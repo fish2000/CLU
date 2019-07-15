@@ -23,7 +23,7 @@ from clu.constants import DEBUG, PY3, PYPY, TEXTMATE
 from .ansi import Text, print_ansi_centered
 from clu.exporting import Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 # Python version figlet banners – using the figlet “Colossal” typeface:

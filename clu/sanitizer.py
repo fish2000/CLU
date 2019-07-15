@@ -6,7 +6,7 @@ import re
 from clu.constants import unicode, PY3, ENCODING
 from clu.exporting import Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 # TEXT UTILITIES: `sanitize(…)` to remove high-code-point glyphs

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import sys
+import sys, os
 import warnings
 
 from clu.constants.consts import λ, NoDefault, pytuple
@@ -137,6 +137,38 @@ def determine_name(thing, name=None, try_repr=False):
     # up returning None:
     return thingname_search(thing)
 
+def path_to_dotpath(path):
+    """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
+        to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
+        would call a “quick and dirty” fashion.
+        
+        Issues a BadDotpathWarning if the converted path contains
+        dashes – I don’t quite know what to do about something
+        like that besides warn, so erm. There you go.
+    """
+    from clu.constants.consts import BASEPATH, QUALIFIER
+    from clu.constants.exceptions import BadDotpathWarning
+    
+    # Relativize the path to the BASEPATH,
+    # and replace slashes with dots:
+    relpath = os.path.relpath(path, start=BASEPATH)
+    dotpath = relpath.replace(os.path.sep, QUALIFIER)
+    
+    # Trim off any remaining “.py” suffixes,
+    # and extraneous dot-prefixes:
+    if dotpath.endswith('.py'):
+        dotpath = dotpath[:len(dotpath)-3]
+    while dotpath.startswith(QUALIFIER):
+        dotpath = dotpath[1:]
+    
+    # Warn before returning, if the converted path
+    # should contain dashes:
+    if '-' in dotpath:
+        warnings.warn("Dotpath contains dashes: “%s”" % dotpath,
+                      BadDotpathWarning, stacklevel=2)
+    
+    return dotpath
+
 def predicates_for_types(*types):
     """ For a list of types, return a list of “isinstance” predicates """
     predicates = []
@@ -147,10 +179,15 @@ def predicates_for_types(*types):
 class Exporter(MutableMapping):
     
     """ A class representing a list of things for a module to export. """
-    __slots__ = pytuple('exports', 'clades')
+    __slots__ = pytuple('exports') + ('path', 'dotpath')
     
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self.__exports__ = {}
+        
+        if 'path' in kwargs:
+            self.path = kwargs.pop('path', None)
+            if self.path is not None:
+                self.dotpath = path_to_dotpath(self.path)
         
         for arg in args:
             if isinstance(arg, type(self)):
@@ -388,6 +425,8 @@ export = exporter.decorator()
 export(doctrim)
 export(thingname_search)
 export(determine_name)
+export(path_to_dotpath)
+export(predicates_for_types)
 export(sysmods,         name='sysmods',         doc="sysmods() → shortcut for reversed(tuple(frozenset(sys.modules.values()))) …OK? I know. It’s not my finest work, but it works.")
 
 # NO DOCS ALLOWED:
@@ -395,3 +434,17 @@ export(Exporter)        # hahaaaaa
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
+
+def test():
+    from pprint import pprint
+    print("» LOCALS:")
+    pprint(locals())
+    print()
+    
+    print("» GLOBALS:")
+    pprint(globals())
+    print()
+
+if __name__ == '__main__':
+    test()
+

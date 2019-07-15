@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import os
 import warnings
 
-from clu.constants.consts import BASEPATH, BUILTINS, DEBUG, QUALIFIER
-from clu.constants.exceptions import BadDotpathWarning
+from clu.constants.consts import BUILTINS, DEBUG, QUALIFIER
 from clu.exporting import determine_name, Exporter
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 # MODULE SEARCH FUNCTIONS: iterate and search modules, yielding
@@ -75,36 +73,6 @@ def determine_module(thing):
 
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
 # assess a thing’s qualified name, etc etc.
-
-@export
-def path_to_dotpath(path):
-    """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
-        to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
-        would call a “quick and dirty” fashion.
-        
-        Issues a BadDotpathWarning if the converted path contains
-        dashes – I don’t quite know what to do about something
-        like that besides warn, so erm. There you go.
-    """
-    # Relativize the path to the BASEPATH,
-    # and replace slashes with dots:
-    relpath = os.path.relpath(path, start=BASEPATH)
-    dotpath = relpath.replace(os.path.sep, QUALIFIER)
-    
-    # Trim off any remaining “.py” suffixes,
-    # and extraneous dot-prefixes:
-    if dotpath.endswith('.py'):
-        dotpath = dotpath[:len(dotpath)-3]
-    while dotpath.startswith(QUALIFIER):
-        dotpath = dotpath[1:]
-    
-    # Warn before returning, if the converted path
-    # should contain dashes:
-    if '-' in dotpath:
-        warnings.warn("Dotpath contains dashes: “%s”" % dotpath,
-                      BadDotpathWarning, stacklevel=2)
-    
-    return dotpath
 
 @export
 def dotpath_join(base, *addenda):

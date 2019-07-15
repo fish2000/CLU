@@ -3,8 +3,7 @@ from __future__ import print_function
 from itertools import chain
 from functools import partial
 
-from clu.constants import PYPY, λ
-from clu.constants import Enum, unicode
+from clu.constants import λ, Enum, unicode
 from clu.enums import alias
 from clu.exporting import Exporter
 
@@ -150,10 +149,10 @@ class Partial(partial):
         # N.B. The real action seems to happen in partial.__new__(…)
         # Name the Partial instance, as if it’s a lambda-type:
         self.__name__ = self.__qualname__ = λ
-        if PYPY:
+        try:
             super(Partial, self).__init__(*args, **kwargs)
-            return
-        super(Partial, self).__init__()
+        except:
+            super(Partial, self).__init__()
     
     def __repr__(self):
         # Use the lambda_repr equivalent:

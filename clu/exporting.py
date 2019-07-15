@@ -292,13 +292,13 @@ class Exporter(MutableMapping):
         """
         return self.export
     
-    def __call__(self):
-        """ Exporter instances are callable, for use in `__all__` definitions """
+    def all_tuple(self):
+        """ For use in module `__all__` tuple definitions """
         return tuple(self.keys())
     
     def dir_function(self):
         """ Return a list containing the exported module names. """
-        return list(self.keys())
+        return lambda: list(self.keys())
     
     def all_and_dir(self):
         """ Assign a modules’ __all__ and __dir__ values, e.g.:
@@ -309,7 +309,7 @@ class Exporter(MutableMapping):
             all calls to `exporter.export(…)` (aka @export) have
             been made – q.v. the “decorator()” method supra.
         """
-        return self(), self.dir_function
+        return self.all_tuple(), self.dir_function()
     
     def dir_and_all(self):
         """ Assign a modules’ __dir__ and __all__ values, e.g.:
@@ -320,7 +320,7 @@ class Exporter(MutableMapping):
             all calls to `exporter.export(…)` (aka @export) have
             been made – q.v. the “decorator()” method supra.
         """
-        return self.dir_function, self() # OPPOSITE!
+        return self.dir_function(), self.all_tuple() # OPPOSITE!
     
     def cache_info(self):
         """ Shortcut to get the CacheInfo namedtuple from the

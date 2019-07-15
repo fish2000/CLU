@@ -191,6 +191,14 @@ class Exporter(MutableMapping):
             return self.__exports__.pop(key)
         return self.__exports__.pop(key, default)
     
+    def update(self, dictish=NoDefault, **updates):
+        """ Update the exporter with key/value pairs and/or an iterator;
+            q.v. `dict.update(…)` docstring supra.
+        """
+        if dictish is NoDefault:
+            return self.__exports__.update(**updates)
+        return self.__exports__.update(dictish, **updates)
+    
     messages = {
         'docstr'    : "Can’t set the docstring for thing “%s” of type %s:",
         'noname'    : "Can’t determine a name for lambda: 0x%0x"
@@ -361,7 +369,7 @@ class Exporter(MutableMapping):
         from clu.predicates import ismergeable
         if not ismergeable(operand):
             return NotImplemented
-        self.__exports__.update(operand.__exports__)
+        self.update(**getattr(operand, '__exports__', operand))
         return self
     
     def __or__(self, operand):

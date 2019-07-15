@@ -5,3 +5,4 @@ flake8
 flake8-bugbear
 twine
 pytest
+pytest-datadir

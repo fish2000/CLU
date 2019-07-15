@@ -122,6 +122,10 @@ islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == λ
 ishashable = lambda thing: isinstance(thing, HashableABC)
 issequence = lambda thing: isinstance(thing, SequenceABC)
 
+ispathtypelist = lambda thinglist: istypelist(thinglist) and predicate_all(ispathtype, *thinglist)
+ispathlist = lambda thinglist: issequence(thinglist) and predicate_all(ispath, *thinglist)
+isvalidpathlist = lambda thinglist: issequence(thinglist) and predicate_all(isvalidpath, *thinglist)
+
 isnumberlist = lambda thinglist: issequence(thinglist) and predicate_all(isnumber, *thinglist)
 isnumericlist = lambda thinglist: issequence(thinglist) and predicate_all(isnumeric, *thinglist)
 iscomplexlist = lambda thinglist: issequence(thinglist) and predicate_all(iscomplex, *thinglist)
@@ -177,6 +181,10 @@ export(isfunction,      name='isfunction',  doc="isfunction(thing) → boolean p
 export(islambda,        name='islambda',    doc="islambda(thing) → boolean predicate, True if `thing` is a function created with the «lambda» keyword")
 export(ishashable,      name='ishashable',  doc="ishashable(thing) → boolean predicate, True if `thing` can be hashed, via the builtin `hash(…)` function")
 export(issequence,      name='issequence',  doc="issequence(thing) → boolean predicate, True if `thing` is a sequence type (e.g. a `tuple` or `list` type)")
+
+export(ispathtypelist,  name='ispathtypelist',  doc="ispathtypelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of path-related class types")
+export(ispathlist,      name='ispathlist',      doc="ispathlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of path-like instances")
+export(isvalidpathlist, name='isvalidpathlist', doc="isvalidpathlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of valid filesystem path instances")
 
 export(isnumberlist,    name='isnumberlist',    doc="isnumberlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of numeric types")
 export(isnumericlist,   name='isnumericlist',   doc="isnumericlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of numeric types")

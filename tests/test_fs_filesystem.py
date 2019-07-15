@@ -13,6 +13,40 @@ class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     
+    def test_zip_archive(self, shared_datadir):
+        from clu.fs.filesystem import temporary
+        from clu.typology import isvalidpathlist
+        
+        # Ensure “shared_datadir” has something in it
+        # that we can use:
+        datafiles = tuple(shared_datadir.rglob("*.*"))
+        assert len(datafiles) > 0
+        assert isvalidpathlist(datafiles)
+        
+        # Create a Directory from the fixture-injected pathlib.Path:
+        datadir = Directory(shared_datadir)
+        
+        # Use a temporary file path for the zip archive:
+        tzip = temporary(prefix='test-zip-archive-',
+                         suffix='zip',
+                         randomized=True)
+        
+        try:
+            # Create the zip archive:
+            datadir.zip_archive(tzip)
+            
+            # Inspect it before it goes out-of-scope:
+            # assert tzip.exists
+            # assert tzip.destroy
+            # assert tzip.binary_mode
+            # assert tzip.basename.startswith('test-zip-archive-')
+            
+            assert os.path.exists(tzip)
+            assert os.lstat(tzip).st_size > 10000
+        
+        finally:
+            os.unlink(tzip)
+    
     def test_script_path(self):
         from clu.fs.filesystem import script_path
         
@@ -259,7 +293,7 @@ class TestFsFilesystem(object):
     
     def test_TemporaryName(self):
         """ Tests for clu.fs.filesystem.TemporaryName """
-        from clu.fs import TemporaryName
+        from clu.fs.filesystem import TemporaryName
         initial = os.getcwd()
         tfp = None
         
@@ -309,7 +343,7 @@ class TestFsFilesystem(object):
     
     def test_wd(self):
         """ Tests for clu.fs.filesystem.wd """
-        from clu.fs import wd
+        from clu.fs.filesystem import wd
         initial = os.getcwd()
         
         with wd() as cwd:
@@ -342,7 +376,7 @@ class TestFsFilesystem(object):
     
     def test_cd(self):
         """ Tests for clu.fs.filesystem.cd """
-        from clu.fs import cd
+        from clu.fs.filesystem import cd
         initial = os.getcwd()
         
         with cd(gettempdir()) as tmp:
@@ -373,7 +407,7 @@ class TestFsFilesystem(object):
     
     def test_TemporaryDirectory(self):
         """ Tests for clu.fs.filesystem.TemporaryDirectory """
-        from clu.fs import TemporaryDirectory
+        from clu.fs.filesystem import TemporaryDirectory
         initial = os.getcwd()
         tdp = None
         

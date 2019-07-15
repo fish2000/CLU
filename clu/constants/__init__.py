@@ -44,7 +44,8 @@ from .polyfills import (Enum, EnumMeta, unique,
                         HashableABC, SequenceABC, SizedABC,
                         cache_from_source,
                         lru_cache,
-                        Path, numpy)
+                        Path, scandir, walk,
+                        numpy)
 
 from .terminalsize import get_terminal_size
 
@@ -88,7 +89,8 @@ __all__ = ('BASEPATH',
            'HashableABC', 'SequenceABC', 'SizedABC',
            'cache_from_source',
            'lru_cache',
-           'Path', 'numpy',
+           'Path', 'scandir', 'walk',
+           'numpy',
            'get_terminal_size')
 
 __dir__ = lambda: list(__all__)

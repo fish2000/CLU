@@ -10,19 +10,14 @@ import os
 import re
 import shutil
 import sys
-
-try:
-    from scandir import scandir, walk
-except ImportError:
-    from os import scandir, walk
     
 from distutils.spawn import find_executable
 from functools import wraps
 from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
-from clu.constants import DELETE_FLAG, ENCODING, PATH
-from clu.constants import lru_cache
-from clu.constants import ExecutionError, FilesystemError
+from clu.constants.consts import DELETE_FLAG, ENCODING, PATH
+from clu.constants.exceptions import ExecutionError, FilesystemError
+from clu.constants.polyfills import lru_cache, scandir, walk
 from clu.predicates import attr, allattrs
 from clu.sanitizer import utf8_encode
 from clu.typology import ispath, isvalidpath

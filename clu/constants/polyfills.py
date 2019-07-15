@@ -71,6 +71,12 @@ except ImportError:
         from pathlib2 import Path
     except ImportError:
         Path = None
+
+try:
+    from scandir import scandir, walk
+except ImportError:
+    from os import scandir, walk
+
 try:
     import numpy
 except (ImportError, SyntaxError):
@@ -85,6 +91,7 @@ __all__ = ('Counter', 'OrderedDict',
            'HashableABC', 'SequenceABC', 'SizedABC',
            'cache_from_source',
            'lru_cache',
-           'Path', 'numpy')
+           'Path', 'scandir', 'walk',
+           'numpy')
 
 __dir__ = lambda: list(__all__)

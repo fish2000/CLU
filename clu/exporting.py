@@ -4,10 +4,9 @@ from __future__ import print_function
 import sys
 import warnings
 
-from clu.constants import BUILTINS, λ, MAXINT
-from clu.constants import Counter, MutableMapping, NoDefault
-from clu.constants import ExportError, ExportWarning
-from clu.constants import lru_cache, pytuple
+from clu.constants.consts import BUILTINS, λ, MAXINT, NoDefault, pytuple
+from clu.constants.exceptions import ExportError, ExportWarning
+from clu.constants.polyfills import Counter, MutableMapping, lru_cache
 
 def doctrim(docstring):
     """ This function is straight outta PEP257 -- q.v. `trim(…)`,
@@ -321,7 +320,6 @@ class Exporter(MutableMapping):
             which is used in last-resort name lookups made by
             `determine_name(…)` during `export(…)` calls.
         """
-        from clu.naming import thingname_search_by_id
         return thingname_search_by_id.cache_info()
     
     def __iter__(self):

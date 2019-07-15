@@ -20,10 +20,13 @@ import os
 import platform
 import warnings
 
-from clu.constants import CSIDL, PY3, SYSTEM, System, unicode
-from clu.constants import UnusedValueWarning
+from clu.constants.consts import ENCODING, PY3
+from clu.constants.enums import CSIDL, System, SYSTEM
+from clu.constants.exceptions import UnusedValueWarning
+from clu.constants.polyfills import unicode
 from clu.version import VersionInfo
 from .filesystem import Directory
+from .misc import stringify
 
 __version__ = "1.4.4"
 __version_info__ = VersionInfo(__version__)
@@ -31,6 +34,16 @@ __version_info__ = VersionInfo(__version__)
 class AppDirs(object):
     
     """ Convenience wrapper for getting application dirs. """
+    
+    fields = ('appname', 'appauthor',
+              'roaming', 'multipath',
+              'system',  'version',
+                         'version_info',
+              
+              'site_config', 'site_data',
+              'user_cache',  'user_config',
+              'user_data',   'user_log',
+              'user_state')
     
     def __new__(cls, *args, **kwargs):
         """ Overriden `__new__(…)` installs version variables –
@@ -130,6 +143,20 @@ class AppDirs(object):
                     out = _get_win_folder_from_registry
         del win32api
         return out
+    
+    def to_string(self):
+        """ Stringify the Directory instance. """
+        return stringify(self, type(self).fields)
+    
+    def __repr__(self):
+        return self.to_string()
+    
+    def __str__(self):
+        return self.to_string()
+    
+    def __bytes__(self):
+        return bytes(str(self), encoding=ENCODING)
+    
     
     @property
     def user_data_dir(self):

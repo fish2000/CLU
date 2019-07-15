@@ -55,6 +55,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version          == appversion
         
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
+        assert str(appdirs) == repr(appdirs)
     
     def test_LINUX_yes_version_yes_author(self, environment):
         home = environment.get('HOME', gettempdir())
@@ -92,6 +93,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version          == appversion
         
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
+        assert str(appdirs) == repr(appdirs)
     
     def test_LINUX_no_version_no_author(self, environment):
         home = environment.get('HOME', gettempdir())
@@ -122,6 +124,7 @@ class TestFsAppdirectories(object):
         assert appdirs.system           == System.LINUX
         assert appdirs.version          == None
         assert appdirs.version_info     == None
+        assert str(appdirs) == repr(appdirs)
     
     def test_LINUX_no_version_yes_author(self, environment):
         home = environment.get('HOME', gettempdir())
@@ -156,6 +159,7 @@ class TestFsAppdirectories(object):
         assert appdirs.system           == System.LINUX
         assert appdirs.version          == None
         assert appdirs.version_info     == None
+        assert str(appdirs) == repr(appdirs)
     
     def test_LINUX2_yes_version_no_author(self, environment):
         home = environment.get('HOME', gettempdir())
@@ -189,6 +193,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version          == appversion
         
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
+        assert str(appdirs) == repr(appdirs)
     
     def test_LINUX2_yes_version_yes_author(self, environment):
         home = environment.get('HOME', gettempdir())
@@ -226,6 +231,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version          == appversion
         
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
+        assert str(appdirs) == repr(appdirs)
     
     def test_LINUX2_no_version_no_author(self, environment):
         home = environment.get('HOME', gettempdir())
@@ -256,6 +262,7 @@ class TestFsAppdirectories(object):
         assert appdirs.system           == System.LINUX2
         assert appdirs.version          == None
         assert appdirs.version_info     == None
+        assert str(appdirs) == repr(appdirs)
     
     def test_LINUX2_no_version_yes_author(self, environment):
         home = environment.get('HOME', gettempdir())
@@ -290,6 +297,7 @@ class TestFsAppdirectories(object):
         assert appdirs.system           == System.LINUX2
         assert appdirs.version          == None
         assert appdirs.version_info     == None
+        assert str(appdirs) == repr(appdirs)
     
     def test_DARWIN_yes_version_no_author(self, environment):
         user = environment.get('USER', 'nobody')
@@ -323,6 +331,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version          == appversion
         
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
+        assert str(appdirs) == repr(appdirs)
     
     def test_DARWIN_yes_version_yes_author(self, environment):
         user = environment.get('USER', 'nobody')
@@ -360,6 +369,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version          == appversion
         
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
+        assert str(appdirs) == repr(appdirs)
     
     def test_DARWIN_no_version_no_author(self, environment):
         user = environment.get('USER', 'nobody')
@@ -390,6 +400,7 @@ class TestFsAppdirectories(object):
         assert appdirs.system           == System.DARWIN
         assert appdirs.version          == None
         assert appdirs.version_info     == None
+        assert str(appdirs) == repr(appdirs)
     
     def test_DARWIN_no_version_yes_author(self, environment):
         user = environment.get('USER', 'nobody')
@@ -424,6 +435,7 @@ class TestFsAppdirectories(object):
         assert appdirs.system           == System.DARWIN
         assert appdirs.version          == None
         assert appdirs.version_info     == None
+        assert str(appdirs) == repr(appdirs)
     
     def test_WIN32_yes_version_no_author(self, environment):
         """ Win32 tests TODO """

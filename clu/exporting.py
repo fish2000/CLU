@@ -4,15 +4,17 @@ from __future__ import print_function
 import sys
 import warnings
 
-from clu.constants.consts import BUILTINS, λ, MAXINT, NoDefault, pytuple
+from clu.constants.consts import λ, NoDefault, pytuple
 from clu.constants.exceptions import ExportError, ExportWarning
-from clu.constants.polyfills import Counter, MutableMapping, lru_cache
+from clu.constants.polyfills import MutableMapping, lru_cache
 
 def doctrim(docstring):
     """ This function is straight outta PEP257 -- q.v. `trim(…)`,
        “Handling Docstring Indentation” subsection sub.:
             https://www.python.org/dev/peps/pep-0257/#id18
     """
+    from clu.constants.consts import MAXINT
+    
     if not docstring:
         return ''
     # Convert tabs to spaces (following the normal Python rules)
@@ -42,6 +44,8 @@ def itermoduleids(module):
         tuples for all things comntained in a given module – q.v.
         `itermodule(…)` implementation supra.
     """
+    from clu.constants.consts import BUILTINS
+    
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
     ids = (id(getattr(module, key)) for key in keys)
@@ -147,12 +151,10 @@ class Exporter(MutableMapping):
     
     def __init__(self, *args):
         self.__exports__ = {}
-        self.__clades__ = Counter()
         
         for arg in args:
             if isinstance(arg, type(self)):
                 self.__exports__.update(arg.__exports__)
-                self.__clades__.update(arg.__clades__)
             else:
                 try:
                     d = dict(arg)
@@ -166,10 +168,6 @@ class Exporter(MutableMapping):
         out = {}
         out.update(self.__exports__)
         return out
-    
-    def clade_histogram(self):
-        """ Return the histogram of clade counts. """
-        return Counter(self.__clades__)
     
     def keys(self):
         """ Get a key view on the exported items dictionary. """

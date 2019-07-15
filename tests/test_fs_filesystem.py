@@ -35,12 +35,6 @@ class TestFsFilesystem(object):
             # Create the zip archive:
             datadir.zip_archive(tzip)
             
-            # Inspect it before it goes out-of-scope:
-            # assert tzip.exists
-            # assert tzip.destroy
-            # assert tzip.binary_mode
-            # assert tzip.basename.startswith('test-zip-archive-')
-            
             assert os.path.exists(tzip)
             assert os.lstat(tzip).st_size > 10000
         

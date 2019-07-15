@@ -155,8 +155,7 @@ class AppDirs(object):
         return self.to_string()
     
     def __bytes__(self):
-        return bytes(str(self), encoding=ENCODING)
-    
+        return bytes(self.to_string(), encoding=ENCODING)
     
     @property
     def user_data_dir(self):

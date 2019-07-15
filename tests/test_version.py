@@ -6,7 +6,10 @@ import os
 
 from clu.version import VersionInfo, read_version_file
 
-BASEPATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'clu')
+BASEPATH = os.path.join(
+           os.path.dirname(
+           os.path.dirname(__file__)), 'clu')
+
 __version__ = read_version_file(BASEPATH)
 
 class TestVersionInfo(object):

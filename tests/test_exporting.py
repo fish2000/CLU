@@ -3,6 +3,13 @@ from __future__ import print_function
 
 import pytest
 
+# Currently these need to be defined at the module level,
+# in order for “thingname_search(…)” to find them properly –
+# q.v. “test_exporter_export_lambdas_no_name_provided(…)”
+# definition sub.:
+yo_dogg = lambda: print("Yo dogg.")
+i_heard = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
+
 class TestExporting(object):
     
     """ Run the tests for the clu.exporting module. """
@@ -70,7 +77,7 @@ class TestExporting(object):
         assert 'YO_DOGG_W' in test_dir()
         assert 'I_HEARD_W' in test_dir()
     
-    def _test_exporter_export_lambdas_no_name_provided(self):
+    def test_exporter_export_lambdas_no_name_provided(self):
         # N.B. “thingname_search()” should inspect locals (?!)
         # in order to make this work at non-module-level:
         from clu.exporting import Exporter
@@ -78,9 +85,6 @@ class TestExporting(object):
         
         exporter = Exporter()
         export = exporter.decorator()
-        
-        yo_dogg = lambda: print("Yo dogg.")
-        i_heard = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
         
         export(yo_dogg,     doc='yo_dogg() → Prints “Yo dogg.”')
         export(i_heard,     doc='i_heard() → Prints “I heard you like …” with argument reprs')

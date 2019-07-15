@@ -12,7 +12,7 @@ class TestNaming(object):
     def test_qualified_name_constants(self):
         """ » Checking “qualified_name(¬) on items from clu.constants …” """
         
-        from clu.constants import BASEPATH, HOSTNAME, PROJECT_NAME, VERBOTEN
+        from clu.constants.consts import BASEPATH, HOSTNAME, PROJECT_NAME, VERBOTEN
         from clu.naming import qualified_name
         
         qname = qualified_name(VERBOTEN)

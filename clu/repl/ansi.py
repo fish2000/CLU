@@ -54,7 +54,8 @@ class ANSI(AliasingEnumMeta):
     def __prepare__(metacls, name, bases, **kwargs):
         """ Remove the “source” class keyword before calling up """
         superkws = dict(kwargs)
-        del superkws['source']
+        if 'source' in superkws:
+            del superkws['source']
         return super(ANSI, metacls).__prepare__(name, bases, **superkws)
     
     def __new__(metacls, name, bases, attributes, **kwargs):

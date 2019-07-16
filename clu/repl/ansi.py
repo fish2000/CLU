@@ -324,7 +324,7 @@ class ANSIFormat(ANSIFormatBase):
 def print_ansi(text, color=''):
     """ print_ansi(…) → Print text in ANSI color, using optional inline markup
                         from `colorama` for terminal color-escape delimiters """
-    fmt = ANSIFormat(text=color)
+    fmt = ANSIFormat(color)
     for line in text.splitlines():
         print(fmt.render(line), sep='', end='\n', file=sys.__stdout__)
 
@@ -346,10 +346,13 @@ def print_ansi_centered(text, color='',
 def ansidoc(thing):
     """ ansidoc(thing) → Print the docstring value for a thing in ANSI color """
     print(file=sys.__stdout__)
-    print_ansi_centered("__doc__ for “%s”" % nameof(thing), color=Text.LIGHTMAGENTA)
+    print_ansi_centered("__doc__ for “%s”" % nameof(thing), color=Text.CYAN)
+    print(file=sys.__stdout__)
     print_ansi(getpyattr(thing, 'doc', "«unknown»"), color=Text.GRAY)
     print(file=sys.__stdout__)
-    print_ansi_centered("¡FUCK YEAH!", color=Text.LIGHTMAGENTA)
+    print_ansi_centered("¡FUCK YEAH!", color=ANSIFormat(text=Text.BLACK,
+                                                        background=Background.CYAN,
+                                                        weight=Weight.DIM))
     print(file=sys.__stdout__)
 
 @export

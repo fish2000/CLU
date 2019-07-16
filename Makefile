@@ -61,7 +61,8 @@ test-all: check
 
 .PHONY: clean distclean rebuild
 .PHONY: dist upload bigupload
-.PHONY: clean-pyc clean-cython clean-build-artifacts clean-test-artifacts
+.PHONY: clean-pyc clean-cython
+.PHONY: clean-build-artifacts clean-test-artifacts clean-pytest-artifacts
 
 .PHONY: cython sdist wheel twine-upload bump bigbump
 

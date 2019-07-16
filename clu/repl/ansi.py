@@ -144,7 +144,7 @@ class ANSI(AliasingEnumMeta):
         if isinstance(specifier, string_types):
             return cls.for_name(specifier)          # Match by name, decoding if necessary
         elif isinstance(specifier, bytes_types):
-            return cls.for_name(str(specifier), encoding=ENCODING)
+            return cls.for_name(str(specifier, encoding=ENCODING))
         raise LookupError("Couldn’t convert specifier to %s: %s" % (cls.__name__,
                                                                     str(specifier)))
     

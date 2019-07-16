@@ -66,10 +66,11 @@ graceful_issubclass = subclasscheck
 numeric_types = uniquify(int, long, float, complex, decimal.Decimal)
 array_types = (array.ArrayType, bytearray, memoryview)
 
-if numpy is not None:
-    array_types += (numpy.ndarray,
-                    numpy.matrix,
-                    numpy.ma.MaskedArray)
+array_types += tuplize(or_none(numpy, 'ndarray'),
+                       or_none(numpy, 'matrix'),
+                       hasattr(numpy, 'ma') and or_none(
+                       getattr(numpy, 'ma'),
+                                      'MaskedArray')) or None
 
 try:
     from six import string_types

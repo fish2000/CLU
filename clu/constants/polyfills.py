@@ -82,6 +82,11 @@ try:
 except (ImportError, SyntaxError):
     numpy = None
 
+try:
+    from functools import reduce
+except (ImportError, SyntaxError):
+    pass
+
 __all__ = ('Counter', 'OrderedDict',
            'Enum', 'EnumMeta', 'unique',
            'ispyname', 'pytuple',
@@ -92,6 +97,7 @@ __all__ = ('Counter', 'OrderedDict',
            'cache_from_source',
            'lru_cache',
            'Path', 'scandir', 'walk',
-           'numpy')
+           'numpy',
+           'reduce')
 
 __dir__ = lambda: list(__all__)

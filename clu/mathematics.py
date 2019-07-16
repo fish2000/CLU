@@ -2,7 +2,8 @@
 from __future__ import print_function
 
 MOCK_NUMPY = False
-from clu.constants import numpy
+
+from clu.constants.polyfills import numpy, reduce
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -12,6 +13,10 @@ if numpy is None:
     from mock import Mock
     numpy = Mock()
     MOCK_NUMPY = True
+
+# JUST LIKE THE GREEKS
+σ = sum
+Σ = reduce
 
 @export
 def isdtype(thing):
@@ -67,5 +72,7 @@ class Clamper(object):
 clamp = Clamper(dtype=numpy.uint8)
 
 if MOCK_NUMPY is not True:
-    export(clamp, name='clamp')
+    export(σ,       name='σ')
+    export(Σ,       name='Σ')
+    export(clamp,   name='clamp')
     __all__, __dir__ = exporter.all_and_dir()

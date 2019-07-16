@@ -42,7 +42,8 @@ from clu.constants.polyfills import (Enum, EnumMeta, unique,
                                      HashableABC, SequenceABC, SizedABC,
                                      cache_from_source,
                                      lru_cache,
-                                     Path, scandir, walk)
+                                     Path, scandir, walk,
+                                     reduce)
 
 from clu.constants.terminalsize import get_terminal_size
 from clu.compilation import (Macro, Macros,
@@ -130,7 +131,7 @@ import sysconfig
 import termcolor
 import xerox
 
-from clu.mathematics import isdtype, Clamper, clamp
+from clu.mathematics import σ, Σ, isdtype, Clamper, clamp
 from clu import keyvalue
 
 from clu.enums import (DUNDER, SUNDER,
@@ -141,6 +142,20 @@ from clu.repl.ansi import (print_separator,
                            print_ansi, print_ansi_centered, highlight)
 
 from clu.repl.banners import print_banner
+
+# Compile all Greekly definitions and their names:
+GREEK_STRINGS = ('σ', 'Σ', 'λ', 'λλ', 'Λ', 'ΛΛ')
+GREEK_DEFS = (σ, Σ, λ, λλ, Λ, ΛΛ)
+
+GREEK_PHONETICS = ('sigma-lower',
+                   'sigma-upper',
+                   'lambda-lower',
+                   'double-lambda-lower',
+                   'lambda-upper',
+                   'double-lambda-upper')
+
+GREEK_STRINGDICT = dict(zip(GREEK_STRINGS, GREEK_DEFS))
+GREEK_NAMEDICT = dict(zip(GREEK_PHONETICS, GREEK_DEFS))
 
 # Practice safe star-importing:
 __all__ = ('Image',
@@ -167,7 +182,10 @@ __all__ = ('Image',
            'types',
            'xerox',
            'print_banner',
-           'isdtype', 'Clamper', 'clamp',
+           'GREEK_STRINGS', 'GREEK_DEFS', 'GREEK_PHONETICS',
+                                          'GREEK_STRINGDICT',
+                                          'GREEK_NAMEDICT',
+           'σ', 'Σ', 'isdtype', 'Clamper', 'clamp',
            'predicates_for_types',
            'version_info',
            'BASEPATH',
@@ -271,20 +289,6 @@ __all__ = ('Image',
            'keyvalue')
 
 try:
-    from functools import reduce
-except (ImportError, SyntaxError):
-    pass
-
-try:
-    if PY3:
-        from replpy3 import Σ
-except (AttributeError, SyntaxError):
-    pass
-else:
-    if PY3:
-        __all__ += (u'Σ',)
-
-try:
     import numpy
     import scipy
 except (ImportError, SyntaxError):
@@ -303,12 +307,13 @@ else:
     __all__ += ('colorio', 'colormath')
 
 try:
+    import pytz
     import dateutil
 except (ImportError, SyntaxError):
     pass
 else:
     # Extend `__all__`:
-    __all__ += ('dateutil',)
+    __all__ += ('pytz', 'dateutil')
 
 try:
     import abc

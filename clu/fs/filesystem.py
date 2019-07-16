@@ -602,7 +602,7 @@ class TemporaryName(collections.abc.Hashable,
         return stringify(self, type(self).fields)
     
     def __repr__(self):
-        return stringify(self, type(self).fields)
+        return self.to_string()
     
     def __str__(self):
         if self.exists:
@@ -610,7 +610,7 @@ class TemporaryName(collections.abc.Hashable,
         return self._name
     
     def __bytes__(self):
-        return bytes(str(self), encoding=ENCODING)
+        return bytes(self.to_string(), encoding=ENCODING)
     
     def __fspath__(self):
         return self._name
@@ -1028,7 +1028,7 @@ class Directory(collections.abc.Hashable,
         return stringify(self, type(self).fields)
     
     def __repr__(self):
-        return stringify(self, type(self).fields)
+        return self.to_string()
     
     def __str__(self):
         if self.exists:
@@ -1036,7 +1036,7 @@ class Directory(collections.abc.Hashable,
         return self.name
     
     def __bytes__(self):
-        return bytes(str(self), encoding=ENCODING)
+        return bytes(self.to_string(), encoding=ENCODING)
     
     def __fspath__(self):
         return self.name

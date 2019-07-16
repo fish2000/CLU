@@ -72,7 +72,9 @@ class Clamper(object):
 clamp = Clamper(dtype=numpy.uint8)
 
 if MOCK_NUMPY is not True:
+    
     export(σ,       name='σ')
     export(Σ,       name='Σ')
     export(clamp,   name='clamp')
     __all__, __dir__ = exporter.all_and_dir()
+    

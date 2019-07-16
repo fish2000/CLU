@@ -9,7 +9,8 @@ import sys
 
 from clu.constants.consts import ENCODING, SEPARATOR_WIDTH
 from clu.constants.polyfills import Enum, unique, auto
-from clu.naming import qualified_name
+from clu.naming import nameof, qualified_name
+from clu.predicates import getpyattr
 from clu.typology import string_types, bytes_types, dict_types
 from clu.enums import alias, AliasingEnumMeta
 from clu.exporting import doctrim, Exporter
@@ -325,8 +326,7 @@ def print_ansi(text, color=''):
                         from `colorama` for terminal color-escape delimiters """
     fmt = ANSIFormat(text=color)
     for line in text.splitlines():
-        print(file=sys.__stdout__)
-        print(fmt.render(line), sep='', file=sys.__stdout__)
+        print(fmt.render(line), sep='', end='\n', file=sys.__stdout__)
 
 @export
 def print_ansi_centered(text, color='',
@@ -341,6 +341,16 @@ def print_ansi_centered(text, color='',
     ab = filler[0] * (asterisks + 0 - (len(message) % 2))
     
     print_ansi(f"{aa}{message}{ab}", color=color)
+
+@export
+def ansidoc(thing):
+    """ ansidoc(thing) → Print the docstring value for a thing in ANSI color """
+    print(file=sys.__stdout__)
+    print_ansi_centered("__doc__ for “%s”" % nameof(thing), color=Text.LIGHTMAGENTA)
+    print_ansi(getpyattr(thing, 'doc', "«unknown»"), color=Text.GRAY)
+    print(file=sys.__stdout__)
+    print_ansi_centered("¡FUCK YEAH!", color=Text.LIGHTMAGENTA)
+    print(file=sys.__stdout__)
 
 @export
 def highlight(code_string, language='json',

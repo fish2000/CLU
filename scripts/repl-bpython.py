@@ -137,9 +137,10 @@ from clu import keyvalue
 from clu.enums import (DUNDER, SUNDER,
                        alias, AliasingEnumMeta, AliasingEnum)
 
-from clu.repl.ansi import (print_separator,
-                           Text, Weight, Background, ANSIFormat,
-                           print_ansi, print_ansi_centered, highlight)
+from clu.repl.ansi import (print_separator, print_ansi, print_ansi_centered,
+                           ansidoc, highlight,
+                           ANSIBase, ANSI,
+                           Text, Weight, Background, ANSIFormat)
 
 from clu.repl.banners import print_banner
 
@@ -284,8 +285,10 @@ __all__ = ('Image',
            'qualified_import', 'qualified_name_tuple', 'qualified_name', 'split_abbreviations',
            'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',
-           'print_separator', 'Text', 'Weight', 'Background', 'ANSIFormat',
-           'print_ansi', 'print_ansi_centered', 'highlight',
+           'print_separator', 'print_ansi', 'print_ansi_centered',
+           'ansidoc', 'highlight',
+           'ANSIBase', 'ANSI',
+           'Text', 'Weight', 'Background', 'ANSIFormat',
            'keyvalue')
 
 try:

@@ -3,7 +3,8 @@ from __future__ import print_function
 from itertools import chain
 from functools import partial
 
-from clu.constants import λ, Enum, unicode
+from clu.constants.consts import λ
+from clu.constants.polyfills import unicode
 from clu.enums import alias
 from clu.exporting import Exporter
 
@@ -101,6 +102,7 @@ item_search   = lambda itx, *things, default=None: searcher(getitem,   itx, *thi
 @export
 def isenum(cls):
     """ isenum(cls) → boolean predicate, True if cls descends from `Enum`. """
+    from clu.constants.polyfills import Enum
     if not isclasstype(cls):
         return False
     return Enum in cls.__mro__

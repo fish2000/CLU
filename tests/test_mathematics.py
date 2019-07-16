@@ -15,6 +15,7 @@ class TestMathematics(object):
         assert σ(range(10), 666) == 711
     
     def test_sigma_uppercase_reduce_alias(self):
+        numpy = pytest.importorskip('numpy')
         from clu.mathematics import Σ           # same as “reduce”
         from clu.predicates import apply_to     # functional helper
         from clu.naming import nameof           # predicate function

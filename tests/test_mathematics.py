@@ -24,7 +24,7 @@ class TestMathematics(object):
         
         # Double-check numpy:
         assert hasattr(numpy, 'ndarray')
-        assert numpy.ndarray in array_types
+        assert getattr(numpy, 'ndarray') in array_types
         
         # Compose a function to select the longest typename,
         # given an arbitrary typelist:

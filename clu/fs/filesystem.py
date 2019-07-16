@@ -610,7 +610,7 @@ class TemporaryName(collections.abc.Hashable,
         return self._name
     
     def __bytes__(self):
-        return bytes(self.to_string(), encoding=ENCODING)
+        return bytes(str(self), encoding=ENCODING)
     
     def __fspath__(self):
         return self._name
@@ -1036,7 +1036,7 @@ class Directory(collections.abc.Hashable,
         return self.name
     
     def __bytes__(self):
-        return bytes(self.to_string(), encoding=ENCODING)
+        return bytes(str(self), encoding=ENCODING)
     
     def __fspath__(self):
         return self.name

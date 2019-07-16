@@ -9,7 +9,7 @@ import decimal
 import io
 import os
 
-from clu.constants.consts import λ, PY3, PYPY
+from clu.constants.consts import λ
 from clu.constants.polyfills import long, unicode, numpy
 from clu.constants.polyfills import HashableABC, SequenceABC, Path
 from clu.constants.polyfills import Mapping, MutableMapping
@@ -85,18 +85,28 @@ dict_types = { dict, OrderedDict, DefaultDict, Counter }
 mapping_types = { Mapping, MutableMapping }
 mapping_classes = dict_types | mapping_types
 
-callable_types = (types.Function,
-                  types.Method,
-                  types.Lambda,
-                  types.BuiltinFunction,
-                  types.BuiltinMethod)
+function_types = Λ = (types.Function,
+                      types.Method,
+                      types.Lambda)
 
-if PY3 and not PYPY:
-    callable_types += (
-                  types.Coroutine,
-                  types.ClassMethodDescriptor,
-                  types.MemberDescriptor,
-                  types.MethodDescriptor)
+callable_types = Λ + (types.BuiltinFunction,
+                      types.BuiltinMethod)
+
+# These next types are generally only present in CPython’s “types” module,
+# circa version 3.7-ish… PyPy seems to omit them as of v7.1.1, under its
+# Python 3.6-compatible interpreter build:
+
+if hasattr(types, 'Coroutine'):
+    callable_types += tuplize(types.Coroutine)
+
+if hasattr(types, 'ClassMethodDescriptor'):
+    callable_types += tuplize(types.ClassMethodDescriptor)
+
+if hasattr(types, 'MemberDescriptor'):
+    callable_types += tuplize(types.MemberDescriptor)
+
+if hasattr(types, 'MethodDescriptor'):
+    callable_types += tuplize(types.MethodDescriptor)
 
 # PREDICATE FUNCTIONS: is<something>() unary-predicates, many of which make use
 # of the aforementioned typelists:
@@ -117,8 +127,8 @@ isarray = lambda thing: subclasscheck(thing, array_types)
 isstring = lambda thing: subclasscheck(thing, string_types)
 isbytes = lambda thing: subclasscheck(thing, bytes_types)
 ismodule = lambda thing: subclasscheck(thing, types.Module)
-isfunction = lambda thing: isinstance(thing, (types.Function, types.Lambda)) or callable(thing)
-islambda = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == λ
+isfunction = ΛΛ = lambda thing: isinstance(thing, Λ) or callable(thing)
+islambda = λλ = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == λ
 ishashable = lambda thing: isinstance(thing, HashableABC)
 issequence = lambda thing: isinstance(thing, SequenceABC)
 
@@ -152,14 +162,16 @@ export(graceful_issubclass,
                         name='graceful_issubclass')
 
 # NO DOCS ALLOWED:
-export(numeric_types)
-export(array_types)
-export(bytes_types)
-export(string_types)
-export(path_classes)
-export(path_types)
-export(file_types)
-export(callable_types)
+export(numeric_types,   name='numeric_types')
+export(array_types,     name='array_types')
+export(bytes_types,     name='bytes_types')
+export(string_types,    name='string_types')
+export(path_classes,    name='path_classes')
+export(path_types,      name='path_types')
+export(file_types,      name='file_types')
+export(function_types,  name='function_types')
+export(Λ,               name='Λ')
+export(callable_types,  name='callable_types')
 
 export(ispathtype,      name='ispathtype',  doc="ispathtype(thing) → boolean predicate, True if `thing` is a path type")
 export(ispath,          name='ispath',      doc="ispath(thing) → boolean predicate, True if `thing` seems to be path-ish instance")
@@ -178,7 +190,9 @@ export(isstring,        name='isstring',    doc="isstring(thing) → boolean pre
 export(isbytes,         name='isbytes',     doc="isbytes(thing) → boolean predicate, True if `thing` is a bytes-like type or an instance of same")
 export(ismodule,        name='ismodule',    doc="ismodule(thing) → boolean predicate, True if `thing` is a module type or an instance of same")
 export(isfunction,      name='isfunction',  doc="isfunction(thing) → boolean predicate, True if `thing` is of a callable function type")
+export(ΛΛ,              name='ΛΛ',          doc="ΛΛ(thing) → boolean predicate, True if `thing` is of a callable function type")
 export(islambda,        name='islambda',    doc="islambda(thing) → boolean predicate, True if `thing` is a function created with the «lambda» keyword")
+export(λλ,              name='λλ',          doc="λλ(thing) → boolean predicate, True if `thing` is a function created with the «lambda» keyword")
 export(ishashable,      name='ishashable',  doc="ishashable(thing) → boolean predicate, True if `thing` can be hashed, via the builtin `hash(…)` function")
 export(issequence,      name='issequence',  doc="issequence(thing) → boolean predicate, True if `thing` is a sequence type (e.g. a `tuple` or `list` type)")
 

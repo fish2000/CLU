@@ -96,17 +96,10 @@ callable_types = Λ + (types.BuiltinFunction,
 # circa version 3.7-ish… PyPy seems to omit them as of v7.1.1, under its
 # Python 3.6-compatible interpreter build:
 
-if hasattr(types, 'Coroutine'):
-    callable_types += tuplize(types.Coroutine)
-
-if hasattr(types, 'ClassMethodDescriptor'):
-    callable_types += tuplize(types.ClassMethodDescriptor)
-
-if hasattr(types, 'MemberDescriptor'):
-    callable_types += tuplize(types.MemberDescriptor)
-
-if hasattr(types, 'MethodDescriptor'):
-    callable_types += tuplize(types.MethodDescriptor)
+callable_types += tuplize(or_none(types, 'Coroutine'),
+                          or_none(types, 'ClassMethodDescriptor'),
+                          or_none(types, 'MemberDescriptor'),
+                          or_none(types, 'MethodDescriptor'))
 
 # PREDICATE FUNCTIONS: is<something>() unary-predicates, many of which make use
 # of the aforementioned typelists:

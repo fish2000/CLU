@@ -3,7 +3,7 @@ from __future__ import print_function
 from itertools import chain
 from functools import partial
 
-from clu.constants.consts import λ
+from clu.constants.consts import λ, QUALIFIER
 from clu.constants.polyfills import unicode
 from clu.enums import alias
 from clu.exporting import Exporter
@@ -80,6 +80,18 @@ or_none   = lambda thing, atx: getattr(thing, atx, None)
 getpyattr = lambda thing, atx, default=None: getattr(thing, '__%s__' % atx, default)
 getitem   = lambda thing, itx, default=None: getattr(thing, 'get', no_op)(itx, default)
 
+@export
+def resolve(thing, atx):
+    """ resolve(thing, atx) → retrieve and resolve an attribute, following
+        each dotted segment, back from its host thing.
+        
+        Q.v. the standard library “operator” module notes supra.:
+            https://docs.python.org/3/library/operator.html#operator.attrgetter
+    """
+    for atn in atx.split(QUALIFIER):
+        thing = or_none(thing, atn)
+    return thing
+
 accessor = lambda function, thing, *attrs, default=None: ([atx for atx in (function(thing, atx) \
                                                                for atx in attrs) \
                                                                 if atx is not None] or [default]).pop(0)
@@ -88,11 +100,11 @@ searcher = lambda function, xatx, *things, default=None: ([atx for atx in (funct
                                                                for thing in things) \
                                                                 if atx is not None] or [default]).pop(0)
 
-attr   = lambda thing, *attrs, default=None: accessor(or_none,   thing, *attrs, default=default)
+attr   = lambda thing, *attrs, default=None: accessor(resolve,   thing, *attrs, default=default)
 pyattr = lambda thing, *attrs, default=None: accessor(getpyattr, thing, *attrs, default=default)
 item   = lambda thing, *items, default=None: accessor(getitem,   thing, *items, default=default)
 
-attr_search   = lambda atx, *things, default=None: searcher(or_none,   atx, *things, default=default)
+attr_search   = lambda atx, *things, default=None: searcher(resolve,   atx, *things, default=default)
 pyattr_search = lambda atx, *things, default=None: searcher(getpyattr, atx, *things, default=default)
 item_search   = lambda itx, *things, default=None: searcher(getitem,   itx, *things, default=default)
 

@@ -17,7 +17,7 @@ from clu.exporting import Exporter
 
 from clu.predicates import (isclasstype,
                             allpyattrs, getpyattr, haspyattr,
-                            pyattr, or_none,
+                            pyattr, or_none, resolve,
                             isiterable,
                             tuplize, uniquify,
                             apply_to, predicate_any,
@@ -68,9 +68,7 @@ array_types = (array.ArrayType, bytearray, memoryview)
 
 array_types += tuplize(or_none(numpy, 'ndarray'),
                        or_none(numpy, 'matrix'),
-                       hasattr(numpy, 'ma') and or_none(
-                       getattr(numpy, 'ma'),
-                                      'MaskedArray') or None)
+                       resolve(numpy, 'ma.core.MaskedArray'))
 
 # N.B. this numpy typelist does *not* include `decimal.Decimal` –
 # and it *does* include `memoryview`:

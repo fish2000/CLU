@@ -22,6 +22,10 @@ class TestMathematics(object):
         from clu.typology import (array_types,  # data on which to operate
                                 numeric_types)
         
+        # Double-check numpy:
+        assert hasattr(numpy, 'ndarray')
+        assert numpy.ndarray in array_types
+        
         # Compose a function to select the longest typename,
         # given an arbitrary typelist:
         reduce_function = lambda a, b: (len(a) > len(b)) and a or b

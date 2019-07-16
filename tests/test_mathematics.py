@@ -7,6 +7,23 @@ class TestMathematics(object):
     
     """ Run the tests for the clu.mathematics module. """
     
+    def test_numpy_type_member_predicate(self):
+        numpy = pytest.importorskip('numpy')
+        from clu.mathematics import isnumpytype
+        from clu.predicates import negate
+        from clu.typology import array_types
+        from itertools import dropwhile
+        
+        # Chop off the numpy end of “array_types”:
+        numpies = tuple(dropwhile(negate(isnumpytype),
+                                         array_types))
+        
+        # Confirm it’s got our types:
+        assert len(numpies) == 3
+        assert numpy.ndarray in numpies
+        assert numpy.matrix in numpies
+        assert numpy.ma.core.MaskedArray in numpies
+    
     def test_sigma_lowercase_sum_alias(self):
         from clu.mathematics import σ           # same as “sum”
         
@@ -33,7 +50,7 @@ class TestMathematics(object):
         longest_typename = apply_to(nameof, sigma_function)
         
         # Affirm that we know what we’re doing:
-        assert longest_typename(*numeric_types) == 'complex'
+        assert longest_typename(*numeric_types) == 'Decimal'
         assert longest_typename(*array_types) == 'MaskedArray'
     
     def test_isdtype_predicate(self):

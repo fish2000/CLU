@@ -63,14 +63,19 @@ graceful_issubclass = subclasscheck
 # TYPELISTS: manual assemblages of types, used for predicate testing
 # and other similar stuff.
 
-numeric_types = uniquify(int, long, float, complex, decimal.Decimal)
+numeric_types = uniquify(bool, int, long, float, complex, decimal.Decimal)
 array_types = (array.ArrayType, bytearray, memoryview)
 
 array_types += tuplize(or_none(numpy, 'ndarray'),
                        or_none(numpy, 'matrix'),
                        hasattr(numpy, 'ma') and or_none(
                        getattr(numpy, 'ma'),
-                                      'MaskedArray')) or None
+                                      'MaskedArray') or None)
+
+# N.B. this numpy typelist does *not* include `decimal.Decimal` –
+# and it *does* include `memoryview`:
+scalar_types = frozenset(getattr(numpy, 'ScalarType',
+                     set(numeric_types) - { decimal.Decimal }))
 
 try:
     from six import string_types
@@ -118,6 +123,7 @@ isnumber = lambda thing: subclasscheck(thing, numeric_types)
 isnumeric = lambda thing: subclasscheck(thing, numeric_types)
 iscomplex = lambda thing: subclasscheck(thing, complex)
 isarray = lambda thing: subclasscheck(thing, array_types)
+isscalar = lambda thing: subclasscheck(thing, scalar_types)
 isstring = lambda thing: subclasscheck(thing, string_types)
 isbytes = lambda thing: subclasscheck(thing, bytes_types)
 ismodule = lambda thing: subclasscheck(thing, types.Module)
@@ -134,6 +140,7 @@ isnumberlist = lambda thinglist: issequence(thinglist) and predicate_all(isnumbe
 isnumericlist = lambda thinglist: issequence(thinglist) and predicate_all(isnumeric, *thinglist)
 iscomplexlist = lambda thinglist: issequence(thinglist) and predicate_all(iscomplex, *thinglist)
 isarraylist = lambda thinglist: issequence(thinglist) and predicate_all(isarray, *thinglist)
+isscalarlist = lambda thinglist: issequence(thinglist) and predicate_all(isscalar, *thinglist)
 isstringlist = lambda thinglist: issequence(thinglist) and predicate_all(isstring, *thinglist)
 isbyteslist = lambda thinglist: issequence(thinglist) and predicate_all(isbytes, *thinglist)
 ismodulelist = lambda thinglist: issequence(thinglist) and predicate_all(ismodule, *thinglist)
@@ -158,6 +165,7 @@ export(graceful_issubclass,
 # NO DOCS ALLOWED:
 export(numeric_types,   name='numeric_types')
 export(array_types,     name='array_types')
+export(scalar_types,    name='scalar_types')
 export(bytes_types,     name='bytes_types')
 export(string_types,    name='string_types')
 export(path_classes,    name='path_classes')
@@ -180,6 +188,7 @@ export(isnumber,        name='isnumber',    doc="isnumber(thing) → boolean pre
 export(isnumeric,       name='isnumeric',   doc="isnumeric(thing) → boolean predicate, True if `thing` is a numeric type or an instance of same")
 export(iscomplex,       name='iscomplex',   doc="iscomplex(thing) → boolean predicate, True if `thing` is a complex numeric type or an instance of same")
 export(isarray,         name='isarray',     doc="isarray(thing) → boolean predicate, True if `thing` is an array type or an instance of same")
+export(isscalar,        name='isscalar',    doc="isscalar(thing) → boolean predicate, True if `thing` is a numpy scalar numeric type or an instance of same")
 export(isstring,        name='isstring',    doc="isstring(thing) → boolean predicate, True if `thing` is a string type or an instance of same")
 export(isbytes,         name='isbytes',     doc="isbytes(thing) → boolean predicate, True if `thing` is a bytes-like type or an instance of same")
 export(ismodule,        name='ismodule',    doc="ismodule(thing) → boolean predicate, True if `thing` is a module type or an instance of same")
@@ -198,6 +207,7 @@ export(isnumberlist,    name='isnumberlist',    doc="isnumberlist(thinglist) →
 export(isnumericlist,   name='isnumericlist',   doc="isnumericlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of numeric types")
 export(iscomplexlist,   name='iscomplexlist',   doc="iscomplexlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of complex numeric types")
 export(isarraylist,     name='isarraylist',     doc="isarraylist(thinglist) → boolean predicate, True if `thinglist` is a sequence of array types")
+export(isscalarlist,    name='isscalarlist',    doc="isscalarlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of numpy scalar numeric types")
 export(isstringlist,    name='isstringlist',    doc="isstringlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of string types")
 export(isbyteslist,     name='isbyteslist',     doc="isbyteslist(thinglist) → boolean predicate, True if `thinglist` is a sequence of bytes-like types")
 export(ismodulelist,    name='ismodulelist',    doc="ismodulelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of module types")

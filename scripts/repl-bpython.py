@@ -89,15 +89,15 @@ from clu.typespace import SimpleNamespace, Namespace, types, modulize
 
 from clu.typology import (isunique, istypelist, maketypelist,
                           isderivative, subclasscheck, graceful_issubclass,
-                          numeric_types, array_types, string_types, bytes_types,
+                          numeric_types, array_types, scalar_types, string_types, bytes_types,
                           path_classes, path_types, file_types, function_types, Λ, callable_types,
                           ispathtype, ispath, isvalidpath,
                           isabstractmethod, isabstract, isabstractcontextmanager, iscontextmanager,
-                          isnumber, isnumeric, iscomplex, isarray, isstring, isbytes, ismodule,
+                          isnumber, isnumeric, iscomplex, isarray, isscalar, isstring, isbytes, ismodule,
                           isfunction, ΛΛ, islambda, λλ, ishashable, issequence,
                           ispathtypelist, ispathlist, isvalidpathlist,
                           isnumberlist, isnumericlist, iscomplexlist,
-                          isarraylist, isstringlist, isbyteslist,
+                          isarraylist, isscalarlist, isstringlist, isbyteslist,
                           ismodulelist, isfunctionlist, islambdalist,
                           ishashablelist, issequencelist)
 
@@ -131,9 +131,11 @@ import sysconfig
 import termcolor
 import xerox
 
-from clu.mathematics import σ, Σ, isdtype, Clamper, clamp
-from clu import keyvalue
+from clu.mathematics import (σ, Σ,
+                             isdtype, isnumpything, isnumpytype,
+                             Clamper, clamp)
 
+from clu import keyvalue
 from clu.enums import (DUNDER, SUNDER,
                        alias, AliasingEnumMeta, AliasingEnum)
 
@@ -186,7 +188,9 @@ __all__ = ('Image',
            'GREEK_STRINGS', 'GREEK_DEFS', 'GREEK_PHONETICS',
                                           'GREEK_STRINGDICT',
                                           'GREEK_NAMEDICT',
-           'σ', 'Σ', 'isdtype', 'Clamper', 'clamp',
+           'σ', 'Σ',
+           'isdtype', 'isnumpything', 'isnumpytype',
+           'Clamper', 'clamp',
            'predicates_for_types',
            'version_info',
            'BASEPATH',
@@ -266,17 +270,17 @@ __all__ = ('Image',
            'SimpleNamespace', 'Namespace', 'types', 'modulize',
            'isunique', 'istypelist', 'maketypelist',
            'isderivative', 'subclasscheck', 'graceful_issubclass',
-           'numeric_types', 'array_types', 'string_types', 'bytes_types',
+           'numeric_types', 'array_types', 'scalar_types', 'string_types', 'bytes_types',
            'path_classes', 'path_types', 'file_types', 'function_types', 'Λ', 'callable_types',
            'ispathtype', 'ispath', 'isvalidpath',
            'isabstractmethod', 'isabstract', 'isabstractcontextmanager', 'iscontextmanager',
            'isnumber', 'isnumeric', 'iscomplex',
-           'isarray', 'isstring', 'isbytes',
+           'isarray', 'isscalar', 'isstring', 'isbytes',
            'ismodule', 'isfunction', 'ΛΛ', 'islambda', 'λλ',
            'ishashable', 'issequence',
            'ispathtypelist', 'ispathlist', 'isvalidpathlist',
            'isnumberlist', 'isnumericlist', 'iscomplexlist',
-           'isarraylist', 'isstringlist', 'isbyteslist',
+           'isarraylist', 'isscalarlist', 'isstringlist', 'isbyteslist',
            'ismodulelist', 'isfunctionlist', 'islambdalist',
            'ishashablelist', 'issequencelist',
            'thingname', 'itermodule', 'moduleids', 'slots_for', 'nameof',

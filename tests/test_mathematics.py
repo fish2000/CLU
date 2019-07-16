@@ -7,6 +7,30 @@ class TestMathematics(object):
     
     """ Run the tests for the clu.mathematics module. """
     
+    def test_sigma_lowercase_sum_alias(self):
+        from clu.mathematics import σ           # same as “sum”
+        
+        # As simple as these things get:
+        assert sum(range(10), 666) == 711
+        assert σ(range(10), 666) == 711
+    
+    def test_sigma_uppercase_reduce_alias(self):
+        from clu.mathematics import Σ           # same as “reduce”
+        from clu.predicates import apply_to     # functional helper
+        from clu.naming import nameof           # predicate function
+        from clu.typology import (array_types,  # data on which to operate
+                                numeric_types)
+        
+        # Compose a function to select the longest typename,
+        # given an arbitrary typelist:
+        reduce_function = lambda a, b: (len(a) > len(b)) and a or b
+        sigma_function = lambda total: Σ(reduce_function, total, '')
+        longest_typename = apply_to(nameof, sigma_function)
+        
+        # Affirm that we know what we’re doing:
+        assert longest_typename(*numeric_types) == 'complex'
+        assert longest_typename(*array_types) == 'MaskedArray'
+    
     def test_isdtype_predicate(self):
         numpy = pytest.importorskip('numpy')
         from clu.mathematics import isdtype

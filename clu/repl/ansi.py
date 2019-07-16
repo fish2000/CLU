@@ -7,13 +7,12 @@ colorama.init()
 
 import sys
 
-from clu.constants import ENCODING, SEPARATOR_WIDTH
-from clu.constants import Enum, unique, auto
-from clu.exporting import doctrim
+from clu.constants.consts import ENCODING, SEPARATOR_WIDTH
+from clu.constants.polyfills import Enum, unique, auto
 from clu.naming import qualified_name
 from clu.typology import string_types, bytes_types, dict_types
 from clu.enums import alias, AliasingEnumMeta
-from clu.exporting import Exporter
+from clu.exporting import doctrim, Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

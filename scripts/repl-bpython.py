@@ -1,59 +1,57 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 
-# from replutilities import test, thingname_search_by_id
-# from replutilities import *
-# from replenv import *
-# import keyvalue
+from clu.constants.consts import (BASEPATH,
+                                  BUILTINS,
+                                  DEBUG,
+                                  DELETE_FLAG,
+                                  DYNAMIC_MODULE_PREFIX,
+                                  ENCODING,
+                                  FILE_ARGUMENT_NAMES,
+                                  HOSTNAME,
+                                  LAMBDA, λ,
+                                  MAXINT,
+                                  PATH,
+                                  PROJECT_NAME,
+                                  PY3, PYPY,
+                                  QUALIFIER,
+                                  SEPARATOR_WIDTH,
+                                  SINGLETON_TYPES,
+                                  TEXTMATE,
+                                  TOKEN,
+                                  VERBOTEN,
+                                  XDG_RUNTIME_BASE, XDG_RUNTIME_DIR,
+                                                    XDG_RUNTIME_MODE,
+                                  NoDefault, pytuple)
 
-from clu.constants import (BASEPATH,
-                           BUILTINS,
-                           DEBUG,
-                           DELETE_FLAG,
-                           DYNAMIC_MODULE_PREFIX,
-                           ENCODING,
-                           FILE_ARGUMENT_NAMES,
-                           HOSTNAME,
-                           LAMBDA, λ,
-                           MAXINT,
-                           PATH,
-                           PROJECT_NAME,
-                           PY3, PYPY,
-                           QUALIFIER,
-                           SEPARATOR_WIDTH,
-                           SINGLETON_TYPES,
-                           TEXTMATE,
-                           TOKEN,
-                           VERBOTEN,
-                           XDG_RUNTIME_BASE, XDG_RUNTIME_DIR,
-                                             XDG_RUNTIME_MODE,
-                           NoDefault,
-                           System, CSIDL, SYSTEM,
-                           BadDotpathWarning,
-                           CDBError,
-                           ConfigurationError,
-                           ExecutionError, FilesystemError,
-                           ExportError, ExportWarning,
-                           KeyValueError,
-                           Enum, EnumMeta, unique,
-                           ispyname, pytuple,
-                           AutoType, auto,
-                           Counter, OrderedDict,
-                           unicode, long,
-                           Mapping, MutableMapping,
-                           HashableABC, SequenceABC, SizedABC,
-                           cache_from_source,
-                           lru_cache,
-                           Path, scandir, walk,
-                           get_terminal_size)
+from clu.constants.enums import (System, CSIDL, SYSTEM)
 
+from clu.constants.exceptions import (BadDotpathWarning,
+                                      CDBError,
+                                      ConfigurationError,
+                                      ExecutionError, FilesystemError,
+                                      ExportError, ExportWarning,
+                                      KeyValueError)
+
+from clu.constants.polyfills import (Enum, EnumMeta, unique,
+                                     ispyname,
+                                     AutoType, auto,
+                                     Counter, OrderedDict,
+                                     unicode, long,
+                                     Mapping, MutableMapping,
+                                     HashableABC, SequenceABC, SizedABC,
+                                     cache_from_source,
+                                     lru_cache,
+                                     Path, scandir, walk)
+
+from clu.constants.terminalsize import get_terminal_size
 from clu.compilation import (Macro, Macros,
                              CDBSubBase, CDBBase, CDBJsonFile)
 
 from clu.exporting import (doctrim,
                            thingname_search, determine_name, sysmods,
-                           Exporter, exporter, export,
-                           predicates_for_types)
+                           Exporter, path_to_dotpath,
+                                     predicates_for_types)
 
 from clu.sanitizer import sanitize, sanitizers, utf8_encode, utf8_decode
 from clu.version import version_info
@@ -104,7 +102,6 @@ from clu.typology import (isunique, istypelist, maketypelist,
 
 from clu.naming import (thingname, itermodule, moduleids, nameof,
                         determine_module,
-                        path_to_dotpath,
                         dotpath_join, dotpath_split, qualified_import,
                                                      qualified_name_tuple,
                                                      qualified_name, split_abbreviations)
@@ -217,8 +214,9 @@ __all__ = ('Image',
            'Macro', 'Macros',
            'CDBSubBase', 'CDBBase', 'CDBJsonFile',
            'doctrim', 'sysmods', 'thingname_search', 'determine_name',
-           'Exporter', 'exporter', 'export',
+           'Exporter',
            'predicates_for_types',
+           'path_to_dotpath',
            'negate',
            'ismetaclass', 'isclass', 'isclasstype',
            'noattr', 'haspyattr', 'nopyattr',
@@ -264,7 +262,7 @@ __all__ = ('Image',
            'ishashablelist', 'issequencelist',
            'thingname', 'itermodule', 'moduleids', 'slots_for', 'nameof',
            'determine_module',
-           'path_to_dotpath', 'dotpath_join', 'dotpath_split',
+           'dotpath_join', 'dotpath_split',
            'qualified_import', 'qualified_name_tuple', 'qualified_name', 'split_abbreviations',
            'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',

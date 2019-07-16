@@ -4,10 +4,12 @@ from __future__ import print_function
 import plistlib
 import zict
 
-from clu.constants import ENCODING, PROJECT_NAME
-from clu.constants import NoDefault, System
-from clu.constants import KeyValueError
-from clu.fs import AppDirs, Directory
+from clu.constants.consts import ENCODING, PROJECT_NAME, NoDefault
+from clu.constants.enums import System
+from clu.constants.exceptions import KeyValueError
+from clu.fs.appdirectories import AppDirs
+from clu.fs.filesystem import Directory
+from clu.fs.misc import stringify
 from clu.predicates import attr
 from clu.typology import isstring, isbytes
 from clu.exporting import Exporter
@@ -17,6 +19,18 @@ export = exporter.decorator()
 
 @export
 class CLUInterface(AppDirs):
+    
+    fields = ('appname', 'system', 
+                         'version',
+                         'version_info',
+                         'datadir',
+                         'count',
+                         'closed',
+              
+              'site_config', 'site_data',
+              'user_cache',  'user_config',
+              'user_data',   'user_log',
+              'user_state')
     
     def __init__(self, appname=PROJECT_NAME,
                        version=None,
@@ -125,6 +139,19 @@ class CLUInterface(AppDirs):
     @property
     def closed(self):
         return getattr(self, '_closed', False)
+    
+    def to_string(self):
+        """ Stringify the Directory instance. """
+        return stringify(self, type(self).fields)
+    
+    def __repr__(self):
+        return self.to_string()
+    
+    def __str__(self):
+        return self.to_string()
+    
+    def __bytes__(self):
+        return bytes(self.to_string(), encoding=ENCODING)
     
     def __enter__(self):
         return self

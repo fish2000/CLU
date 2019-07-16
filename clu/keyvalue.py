@@ -141,7 +141,7 @@ class CLUInterface(AppDirs):
         return getattr(self, '_closed', False)
     
     def to_string(self):
-        """ Stringify the Directory instance. """
+        """ Stringify the CLUInterface instance. """
         return stringify(self, type(self).fields)
     
     def __repr__(self):

@@ -145,7 +145,7 @@ class AppDirs(object):
         return out
     
     def to_string(self):
-        """ Stringify the Directory instance. """
+        """ Stringify the AppDirs instance. """
         return stringify(self, type(self).fields)
     
     def __repr__(self):

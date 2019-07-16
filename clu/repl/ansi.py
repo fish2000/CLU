@@ -343,17 +343,19 @@ def print_ansi_centered(text, color='',
     print_ansi(f"{aa}{message}{ab}", color=color)
 
 @export
-def ansidoc(thing):
-    """ ansidoc(thing) → Print the docstring value for a thing in ANSI color """
-    print(file=sys.__stdout__)
-    print_ansi_centered("__doc__ for “%s”" % nameof(thing), color=Text.CYAN)
-    print(file=sys.__stdout__)
-    print_ansi(getpyattr(thing, 'doc', "«unknown»"), color=Text.GRAY)
-    print(file=sys.__stdout__)
-    print_ansi_centered("¡FUCK YEAH!", color=ANSIFormat(text=Text.BLACK,
-                                                        background=Background.CYAN,
-                                                        weight=Weight.DIM))
-    print(file=sys.__stdout__)
+def ansidoc(*things):
+    """ ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
+    for thing in things:
+        print(file=sys.__stdout__)
+        print_ansi_centered("__doc__ for “%s”" % nameof(thing), color=Text.CYAN)
+        print(file=sys.__stdout__)
+        print_ansi(getpyattr(thing, 'doc', "«unknown»"), color=Text.GRAY)
+        print(file=sys.__stdout__)
+        print_ansi_centered("¡FUCK YEAH!", filler='Ø',
+                                           color=ANSIFormat(text=Text.BLACK,
+                                                            background=Background.CYAN,
+                                                            weight=Weight.DIM))
+        print(file=sys.__stdout__)
 
 @export
 def highlight(code_string, language='json',

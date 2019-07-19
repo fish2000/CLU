@@ -102,7 +102,9 @@ callable_types = Λ + (types.BuiltinFunction,
 callable_types += attrs(types, 'Coroutine',
                                'ClassMethodDescriptor',
                                'MemberDescriptor',
-                               'MethodDescriptor')
+                               'MethodDescriptor',
+                               'MethodWrapper',
+                               'WrapperDescriptor')
 
 # PREDICATE FUNCTIONS: is<something>() unary-predicates, many of which make use
 # of the aforementioned typelists:

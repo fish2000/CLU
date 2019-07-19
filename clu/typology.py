@@ -39,9 +39,9 @@ maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing
 
 @export
 def isderivative(putative, thing):
-    """ isderivative(thing) → Boolean predicate, True if putative is either a subclass
-        or an instance of thing – depending on whether putative is either a classtype
-        or an instance, basically.
+    """ isderivative(putative, thing) → Boolean predicate, True if putative is either
+        a subclass or an instance of thing – depending on whether putative is either
+        a classtype or an instance, basically.
         
         Used internally to implement `subclasscheck(…)` (née “graceful_issubclass(…)”).
     """

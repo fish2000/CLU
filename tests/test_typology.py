@@ -7,6 +7,59 @@ class TestTypology(object):
     
     """ Run the tests for the clu.typology module. """
     
+    def test_lambda_double_uppercase_lambda_double_lowercase_and_isfunction(self):
+        from clu.typology import ΛΛ, λλ, iscallable
+        
+        def function_def(*args, **kwargs):
+            return "Yo dogg"
+        
+        function_lambda = lambda *args, **kwargs: "Yo dogg"
+        
+        class function_class(object):
+            
+            def __call__(self, *args, **kwargs):
+                return "Yo dogg"
+        
+        function_object = function_class()
+        
+        assert ΛΛ(function_def)
+        assert ΛΛ(function_lambda)
+        assert not ΛΛ(function_class)
+        assert not ΛΛ(function_object)
+        
+        assert not λλ(function_def)
+        assert λλ(function_lambda)
+        assert not λλ(function_class)
+        assert not λλ(function_object)
+        
+        assert not iscallable(function_def)
+        assert not iscallable(function_lambda)
+        assert iscallable(function_class)
+        assert iscallable(function_object)
+    
+    def test_subclasscheck(self):
+        from clu.typology import subclasscheck
+        from abc import ABC
+        
+        assert subclasscheck(int, int)
+        assert subclasscheck(666, int)
+        
+        class Int(int):
+            pass
+        
+        assert subclasscheck(Int, int)
+        assert not subclasscheck(int, Int)
+        assert not subclasscheck(666, Int)
+        
+        class FunnyYouDontLookIntish(ABC):
+            pass
+        
+        FunnyYouDontLookIntish.register(int)
+        
+        assert subclasscheck(int, FunnyYouDontLookIntish)
+        assert subclasscheck(666, FunnyYouDontLookIntish)
+        assert not subclasscheck(FunnyYouDontLookIntish, int)
+    
     def test_boolean_predicates(self):
         """ » Checking basic isXXX(•) functions from clu.typology … """
         import array, decimal, os
@@ -18,8 +71,6 @@ class TestTypology(object):
                                   isstring, isbytes,
                                   islambda,
                                   isfunction)
-        
-        assert subclasscheck(int, int)
         
         if hasattr(os, 'PathLike'):
             assert ispathtype(os.PathLike)

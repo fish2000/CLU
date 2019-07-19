@@ -617,6 +617,9 @@ class TestPredicates(object):
         assert metaclass(Class) is type
         assert metaclass(MetaClass) is MetaClass
         assert metaclass(ClassWithMeta) is MetaClass
+        
+        assert metaclass(Class()) is type
+        assert metaclass(ClassWithMeta()) is MetaClass
     
     def test_attr_accessor(self):
         """ » Checking “attr(•) accessor from clu.predicates …” """

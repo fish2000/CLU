@@ -7,6 +7,53 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates module. """
     
+    def test_collator_based_accessors(self):
+        from clu.predicates import attrs, pyattrs, items
+        from clu.typespace.namespace import Namespace
+        
+        ns = Namespace(yo="Yo Dogg,",
+                       dogg="I heard you like",
+                       iheard="irritating recursion",
+                       youlike=None)
+        
+        # Check “attrs(…)”:
+        assert attrs(ns, 'yo', 'dogg', 'iheard') == ("Yo Dogg,",
+                                                     "I heard you like",
+                                                     "irritating recursion")
+        
+        assert attrs(ns, 'iheard', 'dogg', 'yo') == ("irritating recursion",
+                                                     "I heard you like",
+                                                     "Yo Dogg,")
+        
+        # “youlike” will be None, which won’t get collated:
+        assert attrs(ns, 'yo', 'dogg', 'iheard', 'youlike') == ("Yo Dogg,",
+                                                     "I heard you like",
+                                                     "irritating recursion")
+        
+        # Check “items(…)”:
+        assert items(ns, 'yo', 'dogg', 'iheard') == ("Yo Dogg,",
+                                                     "I heard you like",
+                                                     "irritating recursion")
+        
+        assert items(ns, 'iheard', 'dogg', 'yo') == ("irritating recursion",
+                                                     "I heard you like",
+                                                     "Yo Dogg,")
+        
+        # “youlike” will be None, which won’t get collated:
+        assert items(ns, 'yo', 'dogg', 'iheard', 'youlike') == ("Yo Dogg,",
+                                                     "I heard you like",
+                                                     "irritating recursion")
+        
+        # Check “pyattrs(…)”:
+        assert pyattrs(ns, 'abstractmethods', 'class', 'module', 'slots') == (frozenset(), Namespace,
+                                                                             'clu.typespace.namespace',
+                                                                              tuple())
+        
+        # “__weakref__” will be None, which won’t get collated:
+        assert pyattrs(ns, 'abstractmethods', 'class', 'module', 'slots', 'weakref') == (frozenset(), Namespace,
+                                                                             'clu.typespace.namespace',
+                                                                              tuple())
+    
     def test_utility_helpers_for_builtin_predicates(self):
         from clu.predicates import allof, anyof, noneof
         

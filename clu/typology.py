@@ -16,8 +16,9 @@ from clu.constants.polyfills import Mapping, MutableMapping
 from clu.exporting import Exporter
 
 from clu.predicates import (isclasstype,
-                            allpyattrs, getpyattr, haspyattr,
-                            pyattr, or_none, attrs,
+                            allpyattrs, haspyattr, nopyattr,
+                            getpyattr, or_none,
+                            pyattr, attrs,
                             isiterable,
                             tuplize, uniquify,
                             apply_to, predicate_any,
@@ -128,6 +129,7 @@ isbytes = lambda thing: subclasscheck(thing, bytes_types)
 ismodule = lambda thing: subclasscheck(thing, types.Module)
 isfunction = ΛΛ = lambda thing: isinstance(thing, Λ) and not isclasstype(thing)
 islambda = λλ = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == λ
+iscallable = lambda thing: haspyattr(thing, 'call') and nopyattr(thing, 'code')
 ishashable = lambda thing: isinstance(thing, HashableABC)
 issequence = lambda thing: isinstance(thing, SequenceABC)
 
@@ -145,6 +147,7 @@ isbyteslist = lambda thinglist: issequence(thinglist) and predicate_all(isbytes,
 ismodulelist = lambda thinglist: issequence(thinglist) and predicate_all(ismodule, *thinglist)
 isfunctionlist = lambda thinglist: issequence(thinglist) and predicate_all(isfunction, *thinglist)
 islambdalist = lambda thinglist: issequence(thinglist) and predicate_all(islambda, *thinglist)
+iscallablelist = lambda thinglist: issequence(thinglist) and predicate_all(iscallable, *thinglist)
 ishashablelist = lambda thinglist: issequence(thinglist) and predicate_all(ishashable, *thinglist)
 issequencelist = lambda thinglist: issequence(thinglist) and predicate_all(issequence, *thinglist)
 
@@ -195,6 +198,8 @@ export(isfunction,      name='isfunction',  doc="isfunction(thing) → boolean p
 export(ΛΛ,              name='ΛΛ',          doc="ΛΛ(thing) → boolean predicate, True if `thing` is of a callable function type")
 export(islambda,        name='islambda',    doc="islambda(thing) → boolean predicate, True if `thing` is a function created with the «lambda» keyword")
 export(λλ,              name='λλ',          doc="λλ(thing) → boolean predicate, True if `thing` is a function created with the «lambda» keyword")
+export(iscallable,      name='iscallable',  doc="iscallable(thing) → boolean predicate, True if `thing` is a callable type (a class with a “__call__” method) or an instance of same\n\n"
+                                                "N.B. this predicate is *NOT* the same as the built-in “callable(…)” predicate")
 export(ishashable,      name='ishashable',  doc="ishashable(thing) → boolean predicate, True if `thing` can be hashed, via the builtin `hash(…)` function")
 export(issequence,      name='issequence',  doc="issequence(thing) → boolean predicate, True if `thing` is a sequence type (e.g. a `tuple` or `list` type)")
 
@@ -212,6 +217,7 @@ export(isbyteslist,     name='isbyteslist',     doc="isbyteslist(thinglist) → 
 export(ismodulelist,    name='ismodulelist',    doc="ismodulelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of module types")
 export(isfunctionlist,  name='isfunctionlist',  doc="isfunctionlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of callable function types")
 export(islambdalist,    name='islambdalist',    doc="islambdalist(thinglist) → boolean predicate, True if `thinglist` is a sequence of functions created with the «lambda» keyword")
+export(iscallablelist,  name='iscallablelist',  doc="iscallablelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of callable types (class types with “__call__” methods or instances of same)")
 export(ishashablelist,  name='ishashablelist',  doc="ishashablelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of things that can be hashed, via the builtin `hash(…)` function")
 export(issequencelist,  name='issequencelist',  doc="issequencelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of sequence types")
 

@@ -67,8 +67,7 @@ numeric_types = uniquify(bool, int, long, float, complex, decimal.Decimal)
 array_types = (array.ArrayType, bytearray, memoryview)
 array_types += attrs(numpy, 'ndarray',
                             'matrix',
-                            'ma.core.MaskedArray',
-                             default=tuple())
+                            'ma.core.MaskedArray')
 
 # N.B. this numpy typelist does *not* include `decimal.Decimal` –
 # and it *does* include `memoryview`:
@@ -103,8 +102,7 @@ callable_types = Λ + (types.BuiltinFunction,
 callable_types += attrs(types, 'Coroutine',
                                'ClassMethodDescriptor',
                                'MemberDescriptor',
-                               'MethodDescriptor',
-                                default=tuple())
+                               'MethodDescriptor')
 
 # PREDICATE FUNCTIONS: is<something>() unary-predicates, many of which make use
 # of the aforementioned typelists:

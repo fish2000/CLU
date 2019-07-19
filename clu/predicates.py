@@ -100,9 +100,9 @@ accessor = lambda function, thing, *attrs, default=None: ([atx for atx in (funct
                                                                for atx in attrs) \
                                                                 if atx is not None] or [default]).pop(0)
 
-collator = lambda function, thing, *attrs, default=None: tuple(atx for atx in (function(thing, atx) \
-                                                                   for atx in attrs) \
-                                                                    if atx is not None) or default
+collator = lambda function, thing, *attrs, default=tuple(): tuple(atx for atx in (function(thing, atx) \
+                                                                      for atx in attrs) \
+                                                                       if atx is not None) or default
 
 searcher = lambda function, xatx, *things, default=None: ([atx for atx in (function(thing, xatx) \
                                                                for thing in things) \

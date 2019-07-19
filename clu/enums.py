@@ -7,8 +7,8 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
     
 # Dunder and sunder name constants for the alias dict:
-DUNDER = '__alias__'
-SUNDER = '_alias_'
+DUNDER = '__aliases__'
+SUNDER = '_aliases_'
 
 @export
 class alias(object):

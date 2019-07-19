@@ -7,7 +7,7 @@ class TestTypology(object):
     
     """ Run the tests for the clu.typology module. """
     
-    def test_lambda_double_uppercase_lambda_double_lowercase_and_isfunction(self):
+    def test_lambda_double_uppercase_lambda_double_lowercase_lambda_and_isfunction(self):
         from clu.typology import ΛΛ, λλ, iscallable
         
         def function_def(*args, **kwargs):

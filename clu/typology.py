@@ -49,9 +49,9 @@ def isderivative(putative, thing):
     except TypeError:
         return isinstance(putative, thing)
 
-# PREDICATE FUNCTION “graceful_issubclass”: A wrapper for `issubclass(…)`
-# and `isinstance(…)` that tries to work with you, instead of barfing up
-# all sorts of TypeErrors willy-nilly at the slightest misconfiguration: 
+# PREDICATE FUNCTION “subclasscheck”: A wrapper for `issubclass(…)` and
+# `isinstance(…)` that tries to work with you – instead of barfing up
+# all sorts of TypeErrors willy-nilly at the slightest misconfiguration:
 
 subclasscheck = lambda putative, *thinglist: predicate_any(
                 lambda thing: isderivative(putative, thing),

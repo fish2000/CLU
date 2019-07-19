@@ -17,9 +17,9 @@ from clu.exporting import Exporter
 
 from clu.predicates import (isclasstype,
                             allpyattrs, haspyattr, nopyattr,
+                            isiterable,
                             getpyattr, or_none,
                             pyattr, attrs,
-                            isiterable,
                             tuplize, uniquify,
                             apply_to, predicate_any,
                                       predicate_all)

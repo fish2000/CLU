@@ -47,6 +47,10 @@ isclass = lambda thing: (thing is object) or (hasattr(thing, '__mro__') and \
 isclasstype = lambda thing: hasattr(thing, '__mro__') and \
                                     thing.__mro__[-1] is object
 
+metaclass = lambda thing: ismetaclass(thing) and thing \
+                          or (isclass(thing) and type(thing) \
+                          or (type(type(thing))))
+
 # PREDICATE FUNCTIONS: hasattr(…) shortcuts:
 
 noattr = lambda thing, atx: negate(hasattr)(thing, atx)
@@ -96,17 +100,26 @@ accessor = lambda function, thing, *attrs, default=None: ([atx for atx in (funct
                                                                for atx in attrs) \
                                                                 if atx is not None] or [default]).pop(0)
 
+collator = lambda function, thing, *attrs, default=None: tuple(atx for atx in (function(thing, atx) \
+                                                                   for atx in attrs) \
+                                                                    if atx is not None) or default
+
 searcher = lambda function, xatx, *things, default=None: ([atx for atx in (function(thing, xatx) \
                                                                for thing in things) \
                                                                 if atx is not None] or [default]).pop(0)
 
-attr   = lambda thing, *attrs, default=None: accessor(resolve,   thing, *attrs, default=default)
-pyattr = lambda thing, *attrs, default=None: accessor(getpyattr, thing, *attrs, default=default)
-item   = lambda thing, *items, default=None: accessor(getitem,   thing, *items, default=default)
+attr    = lambda thing, *attrs, default=None: accessor(resolve,   thing, *attrs, default=default)
+pyattr  = lambda thing, *attrs, default=None: accessor(getpyattr, thing, *attrs, default=default)
+item    = lambda thing, *items, default=None: accessor(getitem,   thing, *items, default=default)
+
+attrs   = lambda thing, *attrs, default=None: collator(resolve,   thing, *attrs, default=default)
+pyattrs = lambda thing, *attrs, default=None: collator(getpyattr, thing, *attrs, default=default)
+items   = lambda thing, *items, default=None: collator(getitem,   thing, *items, default=default)
 
 attr_search   = lambda atx, *things, default=None: searcher(resolve,   atx, *things, default=default)
 pyattr_search = lambda atx, *things, default=None: searcher(getpyattr, atx, *things, default=default)
 item_search   = lambda itx, *things, default=None: searcher(getitem,   itx, *things, default=default)
+
 
 # ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)
@@ -278,6 +291,7 @@ export(negate,          name='negate',          doc="negate(function) → Negate
 export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → boolean predicate, True if thing is a metaclass, descending directly from `type`")
 export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object` but not `type`")
 export(isclasstype,     name='isclasstype',     doc="isclasstype(thing) → boolean predicate, True if thing is a class type, descending from either `object` or `type`")
+export(metaclass,       name='metaclass',       doc="metaclass(thing) → Returns: a) thing, if thing is a metaclass; b) type(thing), if thing is a class; or c) type(type(thing)), for all other instances")
 
 export(noattr,          name='noattr',          doc="noattr(thing, attribute) → boolean predicate, shortcut for `(not hasattr(thing, attribute))`")
 export(haspyattr,       name='haspyattr',       doc="haspyattr(thing, attribute) → boolean predicate, shortcut for `hasattr(thing, '__%s__' % attribute)`")
@@ -307,6 +321,9 @@ export(searcher,        name='searcher',        doc="searcher(func, attribute, *
 export(attr,            name='attr',            doc="attr(thing, *attributes) → Return the first existing attribute from `thing`, given 1+ attribute names")
 export(pyattr,          name='pyattr',          doc="pyattr(thing, *attributes) → Return the first existing __special__ attribute from `thing`, given 1+ attribute names")
 export(item,            name='item',            doc="item(thing, *itemnames) → Return the first existing item held by `thing`, given 1+ item names")
+export(attrs,           name='attrs',           doc="attrs(thing, *attributes) → Return all of the existing attributes from `thing`, given 1+ attribute names")
+export(pyattrs,         name='pyattrs',         doc="pyattrs(thing, *attributes) → Return all of the existing __special__ attributes from `thing`, given 1+ attribute names")
+export(items,           name='items',           doc="items(thing, *itemnames) → Return all of the existing items held by `thing`, given 1+ item names")
 export(attr_search,     name='attr_search',     doc="attr_search(attribute, *things) → Return the first-found existing attribute from a thing, given 1+ things")
 export(pyattr_search,   name='pyattr_search',   doc="pyattr_search(attribute, *things) → Return the first-found existing __special__ attribute from a thing, given 1+ things")
 export(item_search,     name='item_search',     doc="item_search(itemname, *things) → Return the first-found existing item from a thing, given 1+ things")

@@ -111,7 +111,7 @@ class TestMathematics(object):
         assert not isdictish(clamp)
         assert not isslotdicty(clamp)
         
-        assert isfunction(clamp)
+        assert not isfunction(clamp)
         assert not islambda(clamp)
     
     def test_uint8_clamp_functionality(self):

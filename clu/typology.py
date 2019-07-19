@@ -126,7 +126,7 @@ isscalar = lambda thing: subclasscheck(thing, scalar_types)
 isstring = lambda thing: subclasscheck(thing, string_types)
 isbytes = lambda thing: subclasscheck(thing, bytes_types)
 ismodule = lambda thing: subclasscheck(thing, types.Module)
-isfunction = ΛΛ = lambda thing: isinstance(thing, Λ) or callable(thing)
+isfunction = ΛΛ = lambda thing: isinstance(thing, Λ) and not isclasstype(thing)
 islambda = λλ = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == λ
 ishashable = lambda thing: isinstance(thing, HashableABC)
 issequence = lambda thing: isinstance(thing, SequenceABC)

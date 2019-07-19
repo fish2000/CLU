@@ -683,7 +683,7 @@ class TestPredicates(object):
         assert isfunction(attr)
         assert isfunction(subclasscheck)
         assert not isfunction(SimpleNamespace())
-        assert isfunction(SimpleNamespace) # classes are callable!
+        assert not isfunction(SimpleNamespace)
     
     def test_numpy_predicates(self):
         from clu.typology import isarray

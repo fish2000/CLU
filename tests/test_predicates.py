@@ -582,8 +582,11 @@ class TestPredicates(object):
                                   'name', 'hash', 'dir')
     
     def test_class_predicates(self):
-        """ » Checking “ismetaclass/isclass/isclasstype” from clu.predicates … """
-        from clu.predicates import ismetaclass, isclass, isclasstype
+        """ » Checking “ismetaclass/isclass/isclasstype/metaclass” from clu.predicates … """
+        from clu.predicates import (ismetaclass,
+                                    isclass,
+                                    isclasstype,
+                                    metaclass)
         
         class Class(object):
             pass
@@ -591,9 +594,16 @@ class TestPredicates(object):
         class MetaClass(type):
             pass
         
+        class ClassWithMeta(Class, metaclass=MetaClass):
+            pass
+        
         assert isclass(Class)
         assert isclasstype(Class)
         assert not ismetaclass(Class)
+        
+        assert isclass(ClassWithMeta)
+        assert isclasstype(ClassWithMeta)
+        assert not ismetaclass(ClassWithMeta)
         
         assert ismetaclass(MetaClass)
         assert isclasstype(MetaClass)
@@ -602,6 +612,11 @@ class TestPredicates(object):
         assert not isclass(Class())
         assert not ismetaclass(Class())
         assert not isclasstype(Class())
+        
+        # Check the results of “metaclass(…)”:
+        assert metaclass(Class) is type
+        assert metaclass(MetaClass) is MetaClass
+        assert metaclass(ClassWithMeta) is MetaClass
     
     def test_attr_accessor(self):
         """ » Checking “attr(•) accessor from clu.predicates …” """

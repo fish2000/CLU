@@ -7,6 +7,29 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates module. """
     
+    def test_resolve_accessor(self):
+        from clu.predicates import resolve
+        from clu.typespace.namespace import SimpleNamespace
+        
+        ns = SimpleNamespace(yo=SimpleNamespace(
+                           dogg=SimpleNamespace(
+                         iheard=SimpleNamespace(
+                        youlike="namespaces"))))
+        
+        assert type(ns) is SimpleNamespace
+        assert type(ns.yo) is SimpleNamespace
+        assert type(ns.yo.dogg) is SimpleNamespace
+        assert type(ns.yo.dogg.iheard) is SimpleNamespace
+        assert type(ns.yo.dogg.iheard.youlike) is str
+        
+        assert type(resolve(ns, 'yo')) is SimpleNamespace
+        assert type(resolve(ns, 'yo.dogg')) is SimpleNamespace
+        assert type(resolve(ns, 'yo.dogg.iheard')) is SimpleNamespace
+        assert type(resolve(ns, 'yo.dogg.iheard.youlike')) is str
+        
+        assert resolve(ns, 'yo.dogg.iheard.youlike') == "namespaces"
+        assert resolve(ns, 'yo.dogg.iheard.youlike') == ns.yo.dogg.iheard.youlike
+    
     def test_collator_based_accessors(self):
         from clu.predicates import attrs, pyattrs, items
         from clu.typespace.namespace import Namespace

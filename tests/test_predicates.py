@@ -220,6 +220,19 @@ class TestPredicates(object):
         from clu.typology import (numeric_types, string_types, bytes_types,
                                   callable_types, array_types, path_types)
         
+        # First, test apply_to(…) with invalid arguments (to raise a ValueError):
+        with pytest.raises(ValueError) as exc:
+            apply_to(isclasstype, "all")
+        assert "Noncallable passed to apply_to" in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            apply_to("isclasstype", all)
+        assert "Noncallable passed to apply_to" in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            apply_to("isclasstype", "all")
+        assert "Noncallable passed to apply_to" in str(exc.value)
+        
         # Test apply_to(…) returning a partial --
         # N.B. this is the exact implementation of actual functions
         # in use in clu.typology:

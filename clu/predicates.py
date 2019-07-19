@@ -315,6 +315,7 @@ export(or_none,         name='or_none',         doc="or_none(thing, attribute) �
 export(getpyattr,       name='getpyattr',       doc="getpyattr(thing, attribute[, default]) → shortcut for `getattr(thing, '__%s__' % attribute[, default])`")
 export(getitem,         name='getitem',         doc="getitem(thing, item[, default]) → shortcut for `thing.get(item[, default])`")
 export(accessor,        name='accessor',        doc="accessor(func, thing, *attributes) → return the first non-None value had by successively applying func(thing, attribute) to all attributes")
+export(collator,        name='collator',        doc="collator(func, thing, *attributes) → return all of the non-None values had by successively applying func(thing, attribute) to all attributes")
 export(searcher,        name='searcher',        doc="searcher(func, attribute, *things) → return the first non-None value had by successively applying func(thing, attribute) to all things")
 
 export(attr,            name='attr',            doc="attr(thing, *attributes) → Return the first existing attribute from `thing`, given 1+ attribute names")

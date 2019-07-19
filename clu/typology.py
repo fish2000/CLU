@@ -7,6 +7,7 @@ import argparse
 import contextlib
 import decimal
 import io
+import operator
 import os
 
 from clu.constants.consts import λ
@@ -17,12 +18,12 @@ from clu.exporting import Exporter
 
 from clu.predicates import (isclasstype,
                             allpyattrs, haspyattr, nopyattr,
-                            isiterable,
+                            isiterable, haslength,
                             getpyattr, or_none,
                             pyattr, attrs,
                             tuplize, uniquify,
                             apply_to, predicate_any,
-                                      predicate_all)
+                                      predicate_all, allof)
 
 from clu.typespace import types
 
@@ -32,7 +33,8 @@ export = exporter.decorator()
 # TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)` –
 # can be formulated and tested by these lambdas and functions
 
-isunique = lambda thing: isiterable(thing) and (len(frozenset(thing)) == len(tuple(thing)))
+samelength = lambda a, b: allof(haslength(a), haslength(b), operator.eq(len(a), len(b)))
+isunique = lambda thing: isiterable(thing) and samelength(frozenset(thing), tuple(thing))
 istypelist = predicate_all(isclasstype)
 maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
                         lambda total: tuple(frozenset(total)))
@@ -152,6 +154,7 @@ ishashablelist = lambda thinglist: issequence(thinglist) and predicate_all(ishas
 issequencelist = lambda thinglist: issequence(thinglist) and predicate_all(issequence, *thinglist)
 
 # MODULE EXPORTS:
+export(samelength,      name='samelength',  doc="samelength(a, b) → boolean predicate, True if both `len(a)` and `len(b)` are defined and equal to each other")
 export(isunique,        name='isunique',    doc="isunique(thing) → boolean predicate, True if `thing` is an iterable with unique contents")
 export(istypelist,      name='istypelist',  doc="istypelist(thing) → boolean predicate, True if `thing` is a “typelist” – a list consisting only of class types")
 export(maketypelist,    name='maketypelist',

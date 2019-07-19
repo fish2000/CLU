@@ -88,7 +88,7 @@ from clu.predicates import (negate,
 
 from clu.typespace import SimpleNamespace, Namespace, types, modulize
 
-from clu.typology import (isunique, istypelist, maketypelist,
+from clu.typology import (samelength, isunique, istypelist, maketypelist,
                           isderivative, subclasscheck, graceful_issubclass,
                           numeric_types, array_types, scalar_types, string_types, bytes_types,
                           path_classes, path_types, file_types, function_types, Λ, callable_types,
@@ -271,7 +271,7 @@ __all__ = ('Image',
            'tuplize', 'uniquify', 'listify',
            'allof', 'anyof', 'noneof',
            'SimpleNamespace', 'Namespace', 'types', 'modulize',
-           'isunique', 'istypelist', 'maketypelist',
+           'samelength', 'isunique', 'istypelist', 'maketypelist',
            'isderivative', 'subclasscheck', 'graceful_issubclass',
            'numeric_types', 'array_types', 'scalar_types', 'string_types', 'bytes_types',
            'path_classes', 'path_types', 'file_types', 'function_types', 'Λ', 'callable_types',

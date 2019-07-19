@@ -17,7 +17,7 @@ from clu.exporting import Exporter
 
 from clu.predicates import (isclasstype,
                             allpyattrs, getpyattr, haspyattr,
-                            pyattr, or_none, resolve,
+                            pyattr, or_none, attrs,
                             isiterable,
                             tuplize, uniquify,
                             apply_to, predicate_any,
@@ -65,10 +65,10 @@ graceful_issubclass = subclasscheck
 
 numeric_types = uniquify(bool, int, long, float, complex, decimal.Decimal)
 array_types = (array.ArrayType, bytearray, memoryview)
-
-array_types += tuplize(or_none(numpy, 'ndarray'),
-                       or_none(numpy, 'matrix'),
-                       resolve(numpy, 'ma.core.MaskedArray'))
+array_types += attrs(numpy, 'ndarray',
+                            'matrix',
+                            'ma.core.MaskedArray',
+                             default=tuple())
 
 # N.B. this numpy typelist does *not* include `decimal.Decimal` –
 # and it *does* include `memoryview`:
@@ -100,10 +100,11 @@ callable_types = Λ + (types.BuiltinFunction,
 # circa version 3.7-ish… PyPy seems to omit them as of v7.1.1, under its
 # Python 3.6-compatible interpreter build:
 
-callable_types += tuplize(or_none(types, 'Coroutine'),
-                          or_none(types, 'ClassMethodDescriptor'),
-                          or_none(types, 'MemberDescriptor'),
-                          or_none(types, 'MethodDescriptor'))
+callable_types += attrs(types, 'Coroutine',
+                               'ClassMethodDescriptor',
+                               'MemberDescriptor',
+                               'MethodDescriptor',
+                                default=tuple())
 
 # PREDICATE FUNCTIONS: is<something>() unary-predicates, many of which make use
 # of the aforementioned typelists:

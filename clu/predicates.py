@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from itertools import chain
-from functools import partial
+from functools import partial, wraps
 
-from clu.constants.consts import λ, QUALIFIER
+from clu.constants.consts import λ, pytuple, QUALIFIER
 from clu.constants.polyfills import unicode
 from clu.enums import alias
 from clu.exporting import Exporter
@@ -12,8 +12,10 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 # PREDICATE LOGIC: negate(function) will “negate” a boolean predicate function –
+assigned = pytuple('doc', 'annotations')
+wrap = lambda function: wraps(function, assigned=assigned)
 
-negate = lambda function: (lambda *args, **kwargs: not function(*args, **kwargs))
+negate = lambda function: wrap(function)(lambda *args, **kwargs: not function(*args, **kwargs))
 
 negate_doc = """
 ### … You use `negate(function)` thusly:
@@ -147,7 +149,7 @@ hasaliases = lambda thing: isenum(thing) and haspyattr(thing, 'aliases')
 predicate_nop = lambda *things: None
 function_nop = lambda iterable: None
 
-uncallable = lambda thing: negate(callable)(thing)
+uncallable = negate(callable)
 pyname = lambda thing: pyattr(thing, 'qualname', 'name')
 
 isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,

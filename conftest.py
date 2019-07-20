@@ -294,7 +294,7 @@ def copied_datadir(original_datadir, tmpdir):
     # Return the temporary path:
     return temp_path
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="package")
 def dirname(request):
     """ Fixture for wrapping up the “request.fspath.dirname” value in a
         clu.fs.filesystem.Directory instance – this is intended to be a

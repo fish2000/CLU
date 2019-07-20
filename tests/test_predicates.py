@@ -55,9 +55,8 @@ class TestPredicates(object):
                         youlike=None)
         
         # Check “attr_across(…)”:
-        assert attr_across('yo', ns0, ns1, ns2, ns3) == ("Yo Dogg,", "Yo Dogg,", "Yo Dogg,", "Yo Dogg,")
-        assert attr_across('dogg', ns0, ns1, ns2, ns3) == ("I heard you like", "I heard you like",
-                                                           "I heard you like", "I heard you like")
+        assert attr_across('yo', ns0, ns1, ns2, ns3) == ("Yo Dogg,",) * 4
+        assert attr_across('dogg', ns0, ns1, ns2, ns3) == ("I heard you like",) * 4
         assert attr_across('iheard', ns0, ns1, ns2, ns3) == ("multidimentional accessors",
                                                              "polymorpic descriptors",
                                                              "attribute hypergetters",
@@ -66,9 +65,8 @@ class TestPredicates(object):
         assert attr_across('youlike', ns0, ns1, ns2, ns3) == tuple()
         
         # Check “item_across(…)”:
-        assert item_across('yo', ns0, ns1, ns2, ns3) == ("Yo Dogg,", "Yo Dogg,", "Yo Dogg,", "Yo Dogg,")
-        assert item_across('dogg', ns0, ns1, ns2, ns3) == ("I heard you like", "I heard you like",
-                                                           "I heard you like", "I heard you like")
+        assert item_across('yo', ns0, ns1, ns2, ns3) == ("Yo Dogg,",) * 4
+        assert item_across('dogg', ns0, ns1, ns2, ns3) == ("I heard you like",) * 4
         assert item_across('iheard', ns0, ns1, ns2, ns3) == ("multidimentional accessors",
                                                              "polymorpic descriptors",
                                                              "attribute hypergetters",
@@ -77,9 +75,9 @@ class TestPredicates(object):
         assert item_across('youlike', ns0, ns1, ns2, ns3) == tuple()
         
         # Check “pyattr_across(…)”:
-        assert pyattr_across('abstractmethods', ns0, ns1, ns2, ns3) == (frozenset(), frozenset(), frozenset(), frozenset())
-        assert pyattr_across('class', ns0, ns1, ns2, ns3) == (Namespace, Namespace, Namespace, Namespace)
-        assert pyattr_across('slots', ns0, ns1, ns2, ns3) == (tuple(), tuple(), tuple(), tuple())
+        assert pyattr_across('abstractmethods', ns0, ns1, ns2, ns3) == (frozenset(),) * 4
+        assert pyattr_across('class', ns0, ns1, ns2, ns3) == (Namespace,) * 4
+        assert pyattr_across('slots', ns0, ns1, ns2, ns3) == (tuple(),) * 4
         # “__weakref__” will be None, which won’t get collated:
         assert pyattr_across('weakref', ns0, ns1, ns2, ns3) == tuple()
     

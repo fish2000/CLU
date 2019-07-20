@@ -338,7 +338,7 @@ def print_ansi_centered(text, color='',
     asterisks = int((width / 2) - (len(message) / 2))
     
     aa = filler[0] * asterisks
-    ab = filler[0] * (asterisks + 0 - (len(message) % 2))
+    ab = filler[0] * (asterisks + 1 - (len(message) % 2))
     
     print_ansi(f"{aa}{message}{ab}", color=color)
 

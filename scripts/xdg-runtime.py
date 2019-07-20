@@ -6,11 +6,13 @@ import os, sys
 
 SSID = os.getenv('SECURITYSESSIONID')
 
-from clu.constants import (DEBUG, HOSTNAME, XDG_RUNTIME_BASE,
-                                            XDG_RUNTIME_DIR,
-                                            XDG_RUNTIME_MODE, TEXTMATE)
+from clu.constants.consts import (DEBUG, HOSTNAME, XDG_RUNTIME_BASE,
+                                                   XDG_RUNTIME_DIR,
+                                                   XDG_RUNTIME_MODE,
+                                                   TEXTMATE)
 
-from clu.fs import rm_rf, Directory, FilesystemError
+from clu.constants.exceptions import FilesystemError
+from clu.fs.filesystem import rm_rf, Directory
 from clu.predicates import attr
 from clu.repl.ansi import Text, print_ansi
 from clu.sanitizer import utf8_decode

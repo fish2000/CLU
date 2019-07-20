@@ -13,18 +13,15 @@ class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     
-    def test_zip_archive(self, shared_datadir):
+    def test_zip_archive(self, datadir):
         from clu.fs.filesystem import temporary
         from clu.typology import isvalidpathlist
         
-        # Ensure “shared_datadir” has something in it
-        # that we can use:
-        datafiles = tuple(shared_datadir.rglob("*.*"))
+        # Ensure the “datadir” fixture has something
+        # in it, of which we can make use:
+        datafiles = tuple(datadir.subpath(p) for p in datadir.ls_la())
         assert len(datafiles) > 0
         assert isvalidpathlist(datafiles)
-        
-        # Create a Directory from the fixture-injected pathlib.Path:
-        datadir = Directory(shared_datadir)
         
         # Use a temporary file path for the zip archive:
         tzip = temporary(prefix='test-zip-archive-',

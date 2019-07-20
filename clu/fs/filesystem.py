@@ -18,7 +18,7 @@ from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 from clu.constants.consts import DELETE_FLAG, ENCODING, PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.constants.polyfills import lru_cache, scandir, walk
-from clu.predicates import attr, allattrs
+from clu.predicates import attr, allattrs, anyof
 from clu.sanitizer import utf8_encode
 from clu.typology import ispath, isvalidpath
 from .misc import masked_permissions
@@ -960,8 +960,8 @@ class Directory(collections.abc.Hashable,
             to tell the filesystem what to copy where.
         """
         whereto = self.directory(pth=destination)
-        if any(whereto.exists, os.path.isfile(whereto.name),
-                               os.path.islink(whereto.name)):
+        if anyof(whereto.exists, os.path.isfile(whereto.name),
+                                 os.path.islink(whereto.name)):
             raise FilesystemError(
                 "copy_all() destination exists: %s" % whereto.name)
         if self.exists:

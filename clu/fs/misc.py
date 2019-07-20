@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import re
 import os
+import re
+import sys
 
 from clu.constants import ENCODING, lru_cache
 from clu.typology import string_types
@@ -101,6 +102,25 @@ def u8str(source):
     """
     return type(source) is str and source \
                         or u8bytes(source).decode(ENCODING)
+
+# OS UTILITIES: make a path on windows into a “long path”: (…?)
+
+@export
+def win32_longpath(path):
+    """ Helper function to add the long path prefix for Windows, so that shutil.copytree
+        won't fail while working with paths with 255+ chars.
+        
+        Vendored in from pytest-datadir – q.v. https://git.io/fjMWl supra.
+    """
+    if sys.platform == 'win32':
+        # The use of os.path.normpath here is necessary since "the "\\?\" prefix to a path string
+        # tells the Windows APIs to disable all string parsing and to send the string that follows
+        # it straight to the file system".
+        # (See https://docs.microsoft.com/pt-br/windows/desktop/FileIO/naming-a-file)
+        return '\\\\?\\' + os.path.normpath(path)
+    else:
+        return path
+
 
 # OS UTILITIES: deal with the umask value
 

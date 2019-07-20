@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+import shutil
 
 import pytest
 
@@ -13,7 +15,6 @@ def environment(keys=XDGS):
     """ Environment testing fixture: yields an instance of `os.environ`,
         free of XDG variables
     """
-    import os
     stash = {}
     
     # Setup: remove XDG variables from environment:
@@ -244,3 +245,83 @@ def greektext():
             https://github.com/per9000/lorem
     """
     yield dict(GREEKOUT)
+
+@pytest.fixture
+def shared_datadir(request, tmpdir):
+    """ Vendored version of “shared_datadir(…)” from the pytest-datadir package """
+    from clu.constants.polyfills import Path
+    from clu.fs.misc import win32_longpath
+    
+    # Get the shared data path:
+    original_shared_path = os.path.join(request.fspath.dirname, 'data')
+    
+    # Prepare a temp_path pointing to a temporary data folder:
+    temp_path = Path(str(tmpdir.join('data')))
+    
+    # Copy everything to the temp_path:
+    shutil.copytree(win32_longpath(original_shared_path),
+                    win32_longpath(str(temp_path)))
+    
+    # Return the temp_path:
+    return temp_path
+
+@pytest.fixture
+def original_datadir(request):
+    """ Vendored version of “original_datadir(…)” from the pytest-datadir package """
+    from clu.constants.polyfills import Path
+    
+    # Split the “.py” from the requesting modules’ file path,
+    # and return a path instance based on that filesystem path prefix:
+    return Path(os.path.splitext(request.module.__file__)[0])
+
+@pytest.fixture
+def copied_datadir(original_datadir, tmpdir):
+    """ Vendored version of “datadir(…)” from the pytest-datadir package """
+    from clu.constants.polyfills import Path
+    from clu.fs.misc import win32_longpath
+    
+    # Prepare a temporary path for return:
+    temp_path = Path(str(tmpdir.join(original_datadir.stem)))
+    
+    # Copy data to the temporary path from the original datadir, if it exists;
+    # If it doesn’t exist, just ensure that the new path has been created:
+    if original_datadir.is_dir():
+        shutil.copytree(win32_longpath(str(original_datadir)),
+                        win32_longpath(str(temp_path)))
+    else:
+        temp_path.mkdir()
+    
+    # Return the temporary path:
+    return temp_path
+
+@pytest.fixture
+def datadir(request):
+    """ Local version of pytest-datadir’s “datadir” fixture, reimplemented
+        using clu.fs.filesystem classes – ensuring that the temporary directory
+        will be deleted immediately after use – and performing the directory-copy
+        operations through instance methods (vs. raw calls to “shutil.copytree(…)”).
+    """
+    from clu.fs.filesystem import Directory, TemporaryDirectory
+    
+    # Get the test-local (née “shared”) data path:
+    orig = Directory(os.path.join(request.fspath.dirname, 'data'))
+    
+    # Ensure source data directory exists:
+    assert orig.exists
+    
+    prefix = "clu-fs-filesystem-ttd-datadir-"
+    with TemporaryDirectory(prefix=prefix,
+                            change=False) as temporarydir:
+        # Assert that we exist:
+        assert temporarydir.exists
+        
+        # Copy files to the 'data' temporary subdirectory:
+        destination = temporarydir.subdirectory('data')
+        assert orig.copy_all(destination)
+        
+        # Yield the 'data' temporary subdirectory,
+        # prior to scope exit:
+        yield destination
+    
+    # Assert that we no longer exist after scope exit:
+    assert not temporarydir.exists

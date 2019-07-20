@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from clu.constants import Enum, EnumMeta
+
+from clu.constants.polyfills import Enum, EnumMeta
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

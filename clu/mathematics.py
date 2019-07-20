@@ -5,7 +5,7 @@ MOCK_NUMPY = False
 
 from clu.constants.polyfills import numpy, reduce
 from clu.naming import determine_module
-from clu.predicates import allof, isclasstype
+from clu.predicates import isclasstype
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -24,8 +24,7 @@ if numpy is None:
 # … this predicate function cuts through that nonsense by only looking at the 
 # start of the deduced module string:
 isnumpything = lambda thing: determine_module(thing).lower().startswith('numpy')
-isnumpytype = lambda cls: allof(isclasstype(cls),
-                                isnumpything(cls))
+isnumpytype = lambda cls: isclasstype(cls) and isnumpything(cls)
 
 @export
 def isdtype(thing):

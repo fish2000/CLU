@@ -23,7 +23,7 @@ from clu.predicates import (isclasstype,
                             pyattr, attrs,
                             tuplize, uniquify,
                             apply_to, predicate_any,
-                                      predicate_all, allof)
+                                      predicate_all)
 
 from clu.typespace import types
 
@@ -33,7 +33,7 @@ export = exporter.decorator()
 # TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)` –
 # can be formulated and tested by these lambdas and functions
 
-samelength = lambda a, b: allof(haslength(a), haslength(b), operator.eq(len(a), len(b)))
+samelength = lambda a, b: haslength(a) and haslength(b) and operator.eq(len(a), len(b))
 isunique = lambda thing: isiterable(thing) and samelength(tuple(thing), frozenset(thing))
 istypelist = predicate_all(isclasstype)
 maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),

@@ -3,12 +3,10 @@ from __future__ import print_function
 
 import os
 import re
-import sys
 
-from clu.constants import DYNAMIC_MODULE_PREFIX, PROJECT_NAME, VERBOTEN, cache_from_source
+from clu.constants.consts import DYNAMIC_MODULE_PREFIX, PROJECT_NAME, VERBOTEN
+from clu.constants.polyfills import cache_from_source
 from .namespace import SimpleNamespace, Namespace
-from clu.exporting import doctrim, path_to_dotpath
-from clu.naming import dotpath_join
 
 import types as thetypes
 types = Namespace()
@@ -40,6 +38,9 @@ setattr(types, '__package__',     os.path.splitext(
 def modulize(name, namespace, docs=None,
                               path=None):
     """ Convert a dictionary mapping into a legit Python module """
+    from clu.exporting import doctrim, path_to_dotpath
+    from clu.naming import dotpath_join
+    import sys
     
     # Ensure a module with the given module name we received
     # doesn’t already exist in `sys.modules`:

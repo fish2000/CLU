@@ -7,7 +7,7 @@ import contextlib
 import os
 import pytest
 
-from clu.fs import Directory
+from clu.fs.filesystem import Directory
 
 class TestFsFilesystem(object):
     

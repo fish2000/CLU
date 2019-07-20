@@ -299,7 +299,8 @@ def dirname(request):
     """ Fixture for wrapping up the “request.fspath.dirname” value in a
         clu.fs.filesystem.Directory instance – this is intended to be a
         read-only value (no way to enforce that just now) so we only run
-        it once per test module.
+        it once per test package (which really there is one test package,
+        total, so you see what we’re going for here doggie).
     """
     from clu.fs.filesystem import Directory
     from clu.predicates import resolve

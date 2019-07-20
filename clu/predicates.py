@@ -113,13 +113,13 @@ collator = lambda function, xatx, *things, default=tuple(): tuple(atx for atx in
                                                                       for thing in things) \
                                                                        if atx is not None) or default
 
-attr    = lambda thing, *attrs, default=None: accessor(resolve,   thing, *attrs, default=default)
-pyattr  = lambda thing, *attrs, default=None: accessor(getpyattr, thing, *attrs, default=default)
-item    = lambda thing, *items, default=None: accessor(getitem,   thing, *items, default=default)
+attr     = lambda thing, *attrs, default=None: accessor(resolve,   thing, *attrs, default=default)
+pyattr   = lambda thing, *attrs, default=None: accessor(getpyattr, thing, *attrs, default=default)
+item     = lambda thing, *items, default=None: accessor(getitem,   thing, *items, default=default)
 
-attrs   = lambda thing, *attrs, default=tuple(): acquirer(resolve,   thing, *attrs, default=default)
-pyattrs = lambda thing, *attrs, default=tuple(): acquirer(getpyattr, thing, *attrs, default=default)
-items   = lambda thing, *items, default=tuple(): acquirer(getitem,   thing, *items, default=default)
+attrs    = lambda thing, *attrs, default=tuple(): acquirer(resolve,   thing, *attrs, default=default)
+pyattrs  = lambda thing, *attrs, default=tuple(): acquirer(getpyattr, thing, *attrs, default=default)
+items    = lambda thing, *items, default=tuple(): acquirer(getitem,   thing, *items, default=default)
 
 attr_search   = lambda atx, *things, default=None: searcher(resolve,   atx, *things, default=default)
 pyattr_search = lambda atx, *things, default=None: searcher(getpyattr, atx, *things, default=default)

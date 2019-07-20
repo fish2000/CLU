@@ -101,7 +101,7 @@ accessor = lambda function, thing, *attrs, default=None: ([atx for atx in (funct
                                                                for atx in attrs) \
                                                                 if atx is not None] or [default]).pop(0)
 
-collator = lambda function, thing, *attrs, default=tuple(): tuple(atx for atx in (function(thing, atx) \
+acquirer = lambda function, thing, *attrs, default=tuple(): tuple(atx for atx in (function(thing, atx) \
                                                                       for atx in attrs) \
                                                                        if atx is not None) or default
 
@@ -109,17 +109,25 @@ searcher = lambda function, xatx, *things, default=None: ([atx for atx in (funct
                                                                for thing in things) \
                                                                 if atx is not None] or [default]).pop(0)
 
+collator = lambda function, xatx, *things, default=tuple(): tuple(atx for atx in (function(thing, xatx) \
+                                                                      for thing in things) \
+                                                                       if atx is not None) or default
+
 attr    = lambda thing, *attrs, default=None: accessor(resolve,   thing, *attrs, default=default)
 pyattr  = lambda thing, *attrs, default=None: accessor(getpyattr, thing, *attrs, default=default)
 item    = lambda thing, *items, default=None: accessor(getitem,   thing, *items, default=default)
 
-attrs   = lambda thing, *attrs, default=None: collator(resolve,   thing, *attrs, default=default)
-pyattrs = lambda thing, *attrs, default=None: collator(getpyattr, thing, *attrs, default=default)
-items   = lambda thing, *items, default=None: collator(getitem,   thing, *items, default=default)
+attrs   = lambda thing, *attrs, default=tuple(): acquirer(resolve,   thing, *attrs, default=default)
+pyattrs = lambda thing, *attrs, default=tuple(): acquirer(getpyattr, thing, *attrs, default=default)
+items   = lambda thing, *items, default=tuple(): acquirer(getitem,   thing, *items, default=default)
 
 attr_search   = lambda atx, *things, default=None: searcher(resolve,   atx, *things, default=default)
 pyattr_search = lambda atx, *things, default=None: searcher(getpyattr, atx, *things, default=default)
 item_search   = lambda itx, *things, default=None: searcher(getitem,   itx, *things, default=default)
+
+attr_across   = lambda atx, *things, default=tuple(): collator(resolve,   atx, *things, default=default)
+pyattr_across = lambda atx, *things, default=tuple(): collator(getpyattr, atx, *things, default=default)
+item_across   = lambda itx, *things, default=tuple(): collator(getitem,   itx, *things, default=default)
 
 # ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)
@@ -316,18 +324,22 @@ export(or_none,         name='or_none',         doc="or_none(thing, attribute) �
 export(getpyattr,       name='getpyattr',       doc="getpyattr(thing, attribute[, default]) → shortcut for `getattr(thing, '__%s__' % attribute[, default])`")
 export(getitem,         name='getitem',         doc="getitem(thing, item[, default]) → shortcut for `thing.get(item[, default])`")
 export(accessor,        name='accessor',        doc="accessor(func, thing, *attributes) → return the first non-None value had by successively applying func(thing, attribute) to all attributes")
-export(collator,        name='collator',        doc="collator(func, thing, *attributes) → return all of the non-None values had by successively applying func(thing, attribute) to all attributes")
-export(searcher,        name='searcher',        doc="searcher(func, attribute, *things) → return the first non-None value had by successively applying func(thing, attribute) to all things")
+export(acquirer,        name='acquirer',        doc="acquirer(func, thing, *attributes) → return all of the non-None values had by successively applying func(thing, attribute) to all attributes")
+export(searcher,        name='searcher',        doc="searcher(func, attribute, *things) → return the first non-None value had by successively applying func(thing, attribute) sequentially to all things")
+export(collator,        name='collator',        doc="collator(func, attribute, *things) → return all of the non-None values had by successively applying func(thing, attribute) across all things")
 
 export(attr,            name='attr',            doc="attr(thing, *attributes) → Return the first existing attribute from `thing`, given 1+ attribute names")
 export(pyattr,          name='pyattr',          doc="pyattr(thing, *attributes) → Return the first existing __special__ attribute from `thing`, given 1+ attribute names")
 export(item,            name='item',            doc="item(thing, *itemnames) → Return the first existing item held by `thing`, given 1+ item names")
-export(attrs,           name='attrs',           doc="attrs(thing, *attributes) → Return all of the existing attributes from `thing`, given 1+ attribute names")
-export(pyattrs,         name='pyattrs',         doc="pyattrs(thing, *attributes) → Return all of the existing __special__ attributes from `thing`, given 1+ attribute names")
-export(items,           name='items',           doc="items(thing, *itemnames) → Return all of the existing items held by `thing`, given 1+ item names")
+export(attrs,           name='attrs',           doc="attrs(thing, *attributes) → Return all of the existing named attributes from `thing`, given 1+ attribute names")
+export(pyattrs,         name='pyattrs',         doc="pyattrs(thing, *attributes) → Return all of the existing named __special__ attributes from `thing`, given 1+ attribute names")
+export(items,           name='items',           doc="items(thing, *itemnames) → Return all of the existing named items held by `thing`, given 1+ item names")
 export(attr_search,     name='attr_search',     doc="attr_search(attribute, *things) → Return the first-found existing attribute from a thing, given 1+ things")
 export(pyattr_search,   name='pyattr_search',   doc="pyattr_search(attribute, *things) → Return the first-found existing __special__ attribute from a thing, given 1+ things")
 export(item_search,     name='item_search',     doc="item_search(itemname, *things) → Return the first-found existing item from a thing, given 1+ things")
+export(attr_across,     name='attr_across',     doc="attr_across(attribute, *things) → Return all of the existing named attributes across all things (given 1+ things)")
+export(pyattr_across,   name='pyattr_across',   doc="pyattr_across(attribute, *things) → Return all of the existing named __special__ attributes across all things (given 1+ things)")
+export(item_across,     name='item_across',     doc="item_across(attribute, *things) → Return all of the existing named items held across all things (given 1+ things)")
 
 export(isaliasdescriptor,                       name='isaliasdescriptor',
                                                 doc="isaliasdescriptor(thing) → boolean predicate, returns True if `thing` is an aliasing descriptor bound to an existing Enum member")

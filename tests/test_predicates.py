@@ -31,6 +31,59 @@ class TestPredicates(object):
         assert resolve(ns, 'yo.dogg.iheard.youlike') == ns.yo.dogg.iheard.youlike
     
     def test_collator_based_accessors(self):
+        from clu.predicates import attr_across, pyattr_across, item_across
+        from clu.typespace.namespace import Namespace
+        
+        ns0 = Namespace(yo="Yo Dogg,",
+                        dogg="I heard you like",
+                        iheard="multidimentional accessors",
+                        youlike=None)
+        
+        ns1 = Namespace(yo="Yo Dogg,",
+                        dogg="I heard you like",
+                        iheard="polymorpic descriptors",
+                        youlike=None)
+        
+        ns2 = Namespace(yo="Yo Dogg,",
+                        dogg="I heard you like",
+                        iheard="attribute hypergetters",
+                        youlike=None)
+        
+        ns3 = Namespace(yo="Yo Dogg,",
+                        dogg="I heard you like",
+                        iheard="object-instance query functors",
+                        youlike=None)
+        
+        # Check “attr_across(…)”:
+        assert attr_across('yo', ns0, ns1, ns2, ns3) == ("Yo Dogg,", "Yo Dogg,", "Yo Dogg,", "Yo Dogg,")
+        assert attr_across('dogg', ns0, ns1, ns2, ns3) == ("I heard you like", "I heard you like",
+                                                           "I heard you like", "I heard you like")
+        assert attr_across('iheard', ns0, ns1, ns2, ns3) == ("multidimentional accessors",
+                                                             "polymorpic descriptors",
+                                                             "attribute hypergetters",
+                                                             "object-instance query functors")
+        # “youlike” will be None, which won’t get collated:
+        assert attr_across('youlike', ns0, ns1, ns2, ns3) == tuple()
+        
+        # Check “item_across(…)”:
+        assert item_across('yo', ns0, ns1, ns2, ns3) == ("Yo Dogg,", "Yo Dogg,", "Yo Dogg,", "Yo Dogg,")
+        assert item_across('dogg', ns0, ns1, ns2, ns3) == ("I heard you like", "I heard you like",
+                                                           "I heard you like", "I heard you like")
+        assert item_across('iheard', ns0, ns1, ns2, ns3) == ("multidimentional accessors",
+                                                             "polymorpic descriptors",
+                                                             "attribute hypergetters",
+                                                             "object-instance query functors")
+        # “youlike” will be None, which won’t get collated:
+        assert item_across('youlike', ns0, ns1, ns2, ns3) == tuple()
+        
+        # Check “pyattr_across(…)”:
+        assert pyattr_across('abstractmethods', ns0, ns1, ns2, ns3) == (frozenset(), frozenset(), frozenset(), frozenset())
+        assert pyattr_across('class', ns0, ns1, ns2, ns3) == (Namespace, Namespace, Namespace, Namespace)
+        assert pyattr_across('slots', ns0, ns1, ns2, ns3) == (tuple(), tuple(), tuple(), tuple())
+        # “__weakref__” will be None, which won’t get collated:
+        assert pyattr_across('weakref', ns0, ns1, ns2, ns3) == tuple()
+    
+    def test_acquirer_based_accessors(self):
         from clu.predicates import attrs, pyattrs, items
         from clu.typespace.namespace import Namespace
         
@@ -48,7 +101,7 @@ class TestPredicates(object):
                                                      "I heard you like",
                                                      "Yo Dogg,")
         
-        # “youlike” will be None, which won’t get collated:
+        # “youlike” will be None, which won’t get acquired:
         assert attrs(ns, 'yo', 'dogg', 'iheard', 'youlike') == ("Yo Dogg,",
                                                      "I heard you like",
                                                      "irritating recursion")
@@ -62,7 +115,7 @@ class TestPredicates(object):
                                                      "I heard you like",
                                                      "Yo Dogg,")
         
-        # “youlike” will be None, which won’t get collated:
+        # “youlike” will be None, which won’t get acquired:
         assert items(ns, 'yo', 'dogg', 'iheard', 'youlike') == ("Yo Dogg,",
                                                      "I heard you like",
                                                      "irritating recursion")
@@ -72,7 +125,7 @@ class TestPredicates(object):
                                                                              'clu.typespace.namespace',
                                                                               tuple())
         
-        # “__weakref__” will be None, which won’t get collated:
+        # “__weakref__” will be None, which won’t get acquired:
         assert pyattrs(ns, 'abstractmethods', 'class', 'module', 'slots', 'weakref') == (frozenset(), Namespace,
                                                                              'clu.typespace.namespace',
                                                                               tuple())

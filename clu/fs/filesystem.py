@@ -15,7 +15,7 @@ from distutils.spawn import find_executable
 from functools import wraps
 from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
-from clu.constants.consts import DELETE_FLAG, ENCODING, PATH
+from clu.constants.consts import DELETE_FLAG, ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.constants.polyfills import lru_cache, scandir, walk
 from clu.predicates import attr, allattrs, anyof
@@ -61,10 +61,11 @@ def write_to_path(data, pth, relative_to=None, verbose=False):
 @export
 def script_path():
     """ Return the path to the embedded scripts directory. """
-    return os.path.join(
-           os.path.dirname(
-           os.path.dirname(
-           os.path.dirname(__file__))), 'scripts')
+    # return os.path.join(
+    #        os.path.dirname(
+    #        os.path.dirname(
+    #        os.path.dirname(__file__))), 'scripts')
+    return SCRIPT_PATH
 
 @export
 def which(binary_name, pathvar=None):

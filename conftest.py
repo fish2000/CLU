@@ -294,20 +294,46 @@ def copied_datadir(original_datadir, tmpdir):
     # Return the temporary path:
     return temp_path
 
+@pytest.fixture(scope="module")
+def dirname(request):
+    """ Fixture for wrapping up the “request.fspath.dirname” value in a
+        clu.fs.filesystem.Directory instance – this is intended to be a
+        read-only value (no way to enforce that just now) so we only run
+        it once per test module.
+    """
+    from clu.fs.filesystem import Directory
+    from clu.predicates import resolve
+    
+    # Get the test-local (née “shared”) data path:
+    dirname = Directory(pth=resolve(request, 'fspath.dirname'))
+    
+    # Ensure it exists:
+    assert dirname.exists
+    
+    # Yield the Directory instance – N.B. do *NOT* manage this
+    # objects’ context, unless you hold the specific desire of
+    # changing the process working directory to what is specified
+    # in the the context-managed instance… That’s what they do,
+    # doggie, by default:
+    yield dirname
+    
+    # Ensure it continues to exist:
+    assert dirname.exists
+
 @pytest.fixture
-def datadir(request):
+def datadir(dirname):
     """ Local version of pytest-datadir’s “datadir” fixture, reimplemented
         using clu.fs.filesystem classes – ensuring that the temporary directory
         will be deleted immediately after use – and performing the directory-copy
         operations through instance methods (vs. raw calls to “shutil.copytree(…)”).
     """
-    from clu.fs.filesystem import Directory, TemporaryDirectory
+    from clu.fs.filesystem import TemporaryDirectory
     
     # Get the test-local (née “shared”) data path:
-    orig = Directory(os.path.join(request.fspath.dirname, 'data'))
+    datadir = dirname.subdirectory('data')
     
     # Ensure source data directory exists:
-    assert orig.exists
+    assert datadir.exists
     
     prefix = "clu-fs-filesystem-ttd-datadir-"
     with TemporaryDirectory(prefix=prefix,
@@ -317,7 +343,7 @@ def datadir(request):
         
         # Copy files to the 'data' temporary subdirectory:
         destination = temporarydir.subdirectory('data')
-        assert orig.copy_all(destination)
+        assert datadir.copy_all(destination=destination)
         
         # Yield the 'data' temporary subdirectory,
         # prior to scope exit:

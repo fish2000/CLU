@@ -16,7 +16,8 @@ BASEPATH = sys.intern(
            os.path.dirname(__file__))))
 
 # Possible names for builtin modules:
-BUILTINS = ('__builtins__', '__builtin__', 'builtins', 'builtin')
+builtins = ('builtins', 'builtin')
+BUILTINS = pytuple(*builtins) + builtins
 
 # Are we debuggin out?
 DEBUG = bool(int(os.environ.get('DEBUG', '0'), base=10))
@@ -57,6 +58,9 @@ PATH = os.getenv("PATH", DEFAULT_PATH)
 # The name of this project
 PROJECT_NAME = sys.intern('clu')
 
+# Path to the projects’ root package directory:
+PROJECT_PATH = sys.intern(os.path.join(BASEPATH, PROJECT_NAME))
+
 # Determine if our Python is three’d up:
 PY3 = sys.version_info.major > 2
 
@@ -72,6 +76,12 @@ EllipsisType = type(Ellipsis)
 NotImplementedType = type(NotImplemented)
 
 SINGLETON_TYPES = (bool, NoneType, EllipsisType, NotImplementedType)
+
+# Path to the script directory:
+SCRIPT_PATH = sys.intern(os.path.join(BASEPATH, 'scripts'))
+
+# Path to the project tests:
+TEST_PATH = sys.intern(os.path.join(BASEPATH, 'tests'))
 
 # Determine if we’re in TextMate:
 TEXTMATE = 'TM_PYTHON' in os.environ
@@ -121,11 +131,12 @@ __all__ = ('BASEPATH',
            'LAMBDA', 'λ',
            'MAXINT',
            'PATH',
-           'PROJECT_NAME',
+           'PROJECT_NAME', 'PROJECT_PATH',
            'PY3', 'PYPY',
            'QUALIFIER',
            'SEPARATOR_WIDTH',
            'SINGLETON_TYPES',
+           'SCRIPT_PATH', 'TEST_PATH',
            'TEXTMATE',
            'TOKEN',
            'VERBOTEN',

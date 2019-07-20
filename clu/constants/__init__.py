@@ -25,6 +25,8 @@ from .consts import (BASEPATH,
                                        XDG_RUNTIME_MODE,
                      NoDefault)
 
+from .data import GREEKOUT
+
 from .enums import System, CSIDL, SYSTEM
 
 from .exceptions import (BadDotpathWarning,
@@ -73,6 +75,7 @@ __all__ = ('BASEPATH',
            'XDG_RUNTIME_BASE', 'XDG_RUNTIME_DIR',
                                'XDG_RUNTIME_MODE',
            'NoDefault',
+           'GREEKOUT',
            'System', 'CSIDL', 'SYSTEM',
            'BadDotpathWarning',
            'CDBError',

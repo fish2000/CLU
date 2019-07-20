@@ -25,6 +25,7 @@ from clu.constants.consts import (BASEPATH,
                                                     XDG_RUNTIME_MODE,
                                   NoDefault, pytuple)
 
+from clu.constants.data import GREEKOUT
 from clu.constants.enums import (System, CSIDL, SYSTEM)
 
 from clu.constants.exceptions import (BadDotpathWarning,
@@ -221,6 +222,7 @@ __all__ = ('Image',
            'XDG_RUNTIME_BASE', 'XDG_RUNTIME_DIR',
                                'XDG_RUNTIME_MODE',
            'NoDefault',
+           'GREEKOUT',
            'System', 'CSIDL', 'SYSTEM',
            'BadDotpathWarning',
            'CDBError',

@@ -184,12 +184,11 @@ class Exporter(MutableMapping):
     def __init__(self, *args, **kwargs):
         self.__exports__ = {}
         
-        if 'path' in kwargs:
-            self.path = kwargs.pop('path', None)
-            if self.path is not None:
-                self.dotpath = path_to_dotpath(self.path)
-            else:
-                self.dotpath = None
+        self.path = kwargs.pop('path', None)
+        if self.path is not None:
+            self.dotpath = path_to_dotpath(self.path)
+        else:
+            self.dotpath = None
         
         for arg in args:
             if isinstance(arg, type(self)):

@@ -4,7 +4,6 @@ from itertools import chain
 from functools import partial, wraps
 
 from clu.constants.consts import λ, pytuple, QUALIFIER
-from clu.constants.polyfills import unicode
 from clu.enums import alias
 from clu.exporting import Exporter
 
@@ -155,7 +154,7 @@ pyname = lambda thing: pyattr(thing, 'qualname', 'name')
 isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,
                                                 map, filter, reversed) or isenum(thing))
 
-isnormative = lambda thing: isinstance(thing, (str, unicode, bytes, bytearray))
+isnormative = lambda thing: isinstance(thing, (str, bytes, bytearray))
 iscontainer = lambda thing: isiterable(thing) and \
                         not isnormative(thing) and \
                         not isclasstype(thing)

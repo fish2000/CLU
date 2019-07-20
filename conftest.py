@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import shutil
-
 import pytest
 
 XDGS = ('XDG_CONFIG_DIRS', 'XDG_DATA_HOME',

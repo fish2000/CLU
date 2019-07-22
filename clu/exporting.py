@@ -149,6 +149,10 @@ def path_to_dotpath(path):
     from clu.constants.consts import BASEPATH, QUALIFIER
     from clu.constants.exceptions import BadDotpathWarning
     
+    # Garbage in, garbage out:
+    if path is None:
+        return None
+    
     # Relativize the path to the BASEPATH,
     # and replace slashes with dots:
     relpath = os.path.relpath(path, start=BASEPATH)
@@ -185,14 +189,15 @@ class Exporter(MutableMapping):
         self.__exports__ = {}
         
         self.path = kwargs.pop('path', None)
-        if self.path is not None:
-            self.dotpath = path_to_dotpath(self.path)
-        else:
-            self.dotpath = None
+        self.dotpath = path_to_dotpath(self.path)
         
         for arg in args:
-            if isinstance(arg, type(self)):
+            if hasattr(arg, '__exports__'):
                 self.__exports__.update(arg.__exports__)
+            elif hasattr(arg, '_asdict'):
+                self.__exports__.update(arg._asdict())
+            elif hasattr(arg, 'to_dict'):
+                self.__exports__.update(arg.to_dict())
             else:
                 try:
                     d = dict(arg)

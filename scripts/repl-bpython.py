@@ -130,6 +130,7 @@ import functools
 import inspect
 import itertools
 import math
+import operator
 import requests
 import shutil
 import six
@@ -182,6 +183,7 @@ __all__ = ('Image',
            'inspect',
            'itertools',
            'math',
+           'operator',
            'reduce',
            'requests',
            'shutil',

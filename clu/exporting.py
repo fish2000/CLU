@@ -288,8 +288,8 @@ class Exporter(MutableMapping):
         # At this point, “named” is valid -- if we were passed
         # a lambda, try to rename it with either our valid name,
         # or the result of an ID-based search for that lambda:
-        if callable(thing):
-            if getattr(thing, '__name__', '') in (λ, φ):
+        if callable(thing) and hasattr(thing, '__name__'):
+            if getattr(thing, '__name__') in (λ, φ):
                 dname = getattr(thing, '__name__')
                 if named in (λ, φ):
                     named = thingname_search(thing)

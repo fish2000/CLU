@@ -49,54 +49,50 @@ class TestFsFilesystem(object):
         assert '.gitignore' in scripts
         assert '__init__.py' in scripts # it’s a Python module directory
     
-    def test_temporary(self):
+    def test_temporary(self, temporarydir):
         from clu.fs.filesystem import temporary, write_to_path
         from clu.constants.exceptions import FilesystemError
         
-        # Prepare the temporary directory:
-        d = Directory(gettempdir())
-        assert d.exists
-        
         # These automatically randomize:
-        assert temporary(dir=d).startswith(gettempdir())
-        assert temporary(parent=d).startswith(gettempdir())
+        assert temporary(dir=temporarydir).startswith(temporarydir.name)
+        assert temporary(parent=temporarydir).startswith(temporarydir.name)
         
         # These are deterministic:
-        prefix = os.path.join(gettempdir(), 'yo-dogg')
-        assert temporary(prefix='yo-dogg', dir=d) == prefix
-        assert temporary(prefix='yo-dogg', parent=d) == prefix
+        prefix = os.path.join(temporarydir.name, 'yo-dogg')
+        assert temporary(prefix='yo-dogg', dir=temporarydir) == prefix
+        assert temporary(prefix='yo-dogg', parent=temporarydir) == prefix
         
         # These are deterministic (see below):
-        prefix_suffix = os.path.join(gettempdir(), 'yo-dogg.tmp')
-        assert temporary(prefix='yo-dogg', suffix='tmp', dir=d) == prefix_suffix
-        assert temporary(prefix='yo-dogg', suffix='tmp', parent=d) == prefix_suffix
-        assert temporary(prefix='yo-dogg', suffix='.tmp', dir=d) == prefix_suffix
-        assert temporary(prefix='yo-dogg', suffix='.tmp', parent=d) == prefix_suffix
+        prefix_suffix = os.path.join(temporarydir.name, 'yo-dogg.tmp')
+        assert temporary(prefix='yo-dogg', suffix='tmp', dir=temporarydir) == prefix_suffix
+        assert temporary(prefix='yo-dogg', suffix='tmp', parent=temporarydir) == prefix_suffix
+        assert temporary(prefix='yo-dogg', suffix='.tmp', dir=temporarydir) == prefix_suffix
+        assert temporary(prefix='yo-dogg', suffix='.tmp', parent=temporarydir) == prefix_suffix
         
         # These are manually randomized:
-        starts = os.path.join(gettempdir(), 'yo-dogg-')
+        starts = os.path.join(temporarydir.name, 'yo-dogg-')
         ends = '.tmp'
         
         assert temporary(prefix='yo-dogg-',
                          suffix='tmp',
                          randomized=True,
-                         dir=d).startswith(starts)
+                         dir=temporarydir).startswith(starts)
         assert temporary(prefix='yo-dogg-',
                          suffix='tmp',
                          randomized=True,
-                         parent=d).startswith(starts)
+                         parent=temporarydir).startswith(starts)
         
         assert temporary(prefix='yo-dogg-',
                          suffix='tmp',
                          randomized=True,
-                         dir=d).endswith(ends)
+                         dir=temporarydir).endswith(ends)
         assert temporary(prefix='yo-dogg-',
                          suffix='tmp',
                          randomized=True,
-                         parent=d).endswith(ends)
+                         parent=temporarydir).endswith(ends)
         
         # Prepare the subpath
-        p = d.subpath('yo-dogg.tmp')
+        p = temporarydir.subpath('yo-dogg.tmp')
         assert not os.path.exists(p)
         
         # Prepare data:
@@ -117,19 +113,19 @@ class TestFsFilesystem(object):
             # in the computation of a file path that already exists –
             # see also the original forms of the deterministic calls, above:
             with pytest.raises(FilesystemError) as exc:
-                temporary(prefix='yo-dogg', suffix='tmp', dir=d)
+                temporary(prefix='yo-dogg', suffix='tmp', dir=temporarydir)
             assert "file exists" in str(exc.value)
             
             with pytest.raises(FilesystemError) as exc:
-                temporary(prefix='yo-dogg', suffix='tmp', parent=d)
+                temporary(prefix='yo-dogg', suffix='tmp', parent=temporarydir)
             assert "file exists" in str(exc.value)
             
             with pytest.raises(FilesystemError) as exc:
-                temporary(prefix='yo-dogg', suffix='.tmp', dir=d)
+                temporary(prefix='yo-dogg', suffix='.tmp', dir=temporarydir)
             assert "file exists" in str(exc.value)
             
             with pytest.raises(FilesystemError) as exc:
-                temporary(prefix='yo-dogg', suffix='.tmp', parent=d)
+                temporary(prefix='yo-dogg', suffix='.tmp', parent=temporarydir)
             assert "file exists" in str(exc.value)
         
         finally:
@@ -137,16 +133,12 @@ class TestFsFilesystem(object):
         
         assert not os.path.exists(p)
     
-    def test_rm_rf(self):
+    def test_rm_rf(self, temporarydir):
         # Also involves `write_to_path(…)` and `Directory.walk()`
         from clu.fs.filesystem import write_to_path, rm_rf
         
-        # Prepare the temporary directory:
-        d = Directory(gettempdir())
-        assert d.exists
-        
         # Make subdirectories:
-        dd = d.subdirectory('yo')
+        dd = temporarydir.subdirectory('yo')
         dd.makedirs()
         ddd = dd.subdirectory('dogg')
         ddd.makedirs()
@@ -215,15 +207,11 @@ class TestFsFilesystem(object):
         for binary in BINARIES:
             assert which(binary) == back_tick("which %s" % binary)
     
-    def test_write_to_path(self):
+    def test_write_to_path(self, temporarydir):
         from clu.fs.filesystem import write_to_path
         
-        # Prepare the temporary directory:
-        d = Directory(gettempdir())
-        assert d.exists
-        
         # Prepare a new file subpath:
-        p = d.subpath('yodogg.txt')
+        p = temporarydir.subpath('yodogg.txt')
         assert not os.path.exists(p)
         
         # Prepare some data:
@@ -248,7 +236,7 @@ class TestFsFilesystem(object):
         
         assert not os.path.exists(p)
     
-    def test_ensure_path_is_valid(self):
+    def test_ensure_path_is_valid(self, temporarydir):
         from clu.constants.exceptions import FilesystemError
         from clu.fs.filesystem import ensure_path_is_valid
         from clu.fs.filesystem import NamedTemporaryFile
@@ -272,9 +260,8 @@ class TestFsFilesystem(object):
                 ensure_path_is_valid(tf.name)
             assert "file exists" in str(exc.value)
         
-        d = Directory(gettempdir())
-        p = d.subdirectory('a/b')
-        assert d.exists
+        p = temporarydir.subdirectory('a/b')
+        assert temporarydir.exists
         assert not p.exists
         
         with pytest.raises(FilesystemError) as exc:
@@ -282,8 +269,8 @@ class TestFsFilesystem(object):
         assert "Directory" in str(exc.value)
         
         # This one should be sucessful (as in it will not raise):
-        ensure_path_is_valid(d.subpath('yodogg.txt'))
-        assert not os.path.exists(d.subpath('yodogg.txt'))
+        ensure_path_is_valid(temporarydir.subpath('yodogg.txt'))
+        assert not os.path.exists(temporarydir.subpath('yodogg.txt'))
     
     def test_TemporaryName(self):
         """ Tests for clu.fs.filesystem.TemporaryName """

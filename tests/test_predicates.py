@@ -347,7 +347,7 @@ class TestPredicates(object):
         assert predicate_all(isiterable, rstr, byts, slot.yo, slot.dogg, slot.wtf)
         assert predicate_all(lambda thing: not uncallable(thing), Slotted, call, type)
         assert predicate_any(lambda thing: not uncallable(thing), Slotted, call, type, slot)
-        assert predicate_none(lambda thing: uncallable(thing), Slotted, call, type)
+        assert predicate_none(uncallable, Slotted, call, type)
         
         # Booleans:
         assert predicate_and(lambda thing: type(thing) is str, slot.yo, slot.dogg)

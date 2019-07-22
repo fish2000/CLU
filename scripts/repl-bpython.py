@@ -100,7 +100,7 @@ from clu.typology import (samelength, differentlength, isunique, istypelist, mak
                           isabstractmethod, isabstract, isabstractcontextmanager, iscontextmanager,
                           isnumber, isnumeric, iscomplex, isarray, isscalar, isstring, isbytes, ismodule,
                           isfunction, ΛΛ, islambda, λλ,
-                          iscallable, ishashable, issequence,
+                          iscallable, ishashable, issequence, isxlist,
                           ispathtypelist, ispathlist, isvalidpathlist,
                           isnumberlist, isnumericlist, iscomplexlist,
                           isarraylist, isscalarlist, isstringlist, isbyteslist,
@@ -139,7 +139,10 @@ import termcolor
 import xerox
 
 from clu.mathematics import (σ, Σ,
-                             isdtype, isnumpything, isnumpytype,
+                             isdtype, isnumpything,
+                                      isnumpytype,
+                                      isnumpythinglist,
+                                      isnumpytypelist,
                              Clamper, clamp)
 
 from clu import keyvalue
@@ -197,7 +200,7 @@ __all__ = ('Image',
                                           'GREEK_STRINGDICT',
                                           'GREEK_NAMEDICT',
            'σ', 'Σ',
-           'isdtype', 'isnumpything', 'isnumpytype',
+           'isdtype', 'isnumpything', 'isnumpytype', 'isnumpythinglist', 'isnumpytypelist',
            'Clamper', 'clamp',
            'predicates_for_types',
            'version_info',
@@ -290,7 +293,7 @@ __all__ = ('Image',
            'isnumber', 'isnumeric', 'iscomplex',
            'isarray', 'isscalar', 'isstring', 'isbytes',
            'ismodule', 'isfunction', 'ΛΛ', 'islambda', 'λλ',
-           'iscallable', 'ishashable', 'issequence',
+           'iscallable', 'ishashable', 'issequence', 'isxlist',
            'ispathtypelist', 'ispathlist', 'isvalidpathlist',
            'isnumberlist', 'isnumericlist', 'iscomplexlist',
            'isarraylist', 'isscalarlist', 'isstringlist', 'isbyteslist',

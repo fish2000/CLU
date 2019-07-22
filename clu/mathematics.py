@@ -6,6 +6,7 @@ MOCK_NUMPY = False
 from clu.constants.polyfills import numpy, reduce
 from clu.naming import determine_module
 from clu.predicates import isclasstype
+from clu.typology import isxlist
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -25,6 +26,9 @@ if numpy is None:
 # start of the deduced module string:
 isnumpything = lambda thing: determine_module(thing).lower().startswith('numpy')
 isnumpytype = lambda cls: isclasstype(cls) and isnumpything(cls)
+
+isnumpythinglist = lambda thinglist: isxlist(isnumpything, thinglist)
+isnumpytypelist = lambda thinglist: isxlist(isnumpytype, thinglist)
 
 @export
 def isdtype(thing):
@@ -81,13 +85,16 @@ clamp = Clamper(dtype=numpy.uint8)
 
 if MOCK_NUMPY is not True:
     
-    export(σ,               name='σ')
-    export(Σ,               name='Σ')
+    export(σ,                   name='σ')
+    export(Σ,                   name='Σ')
     
-    export(isnumpything,    name='isnumpything',    doc="isnumpything(thing) → boolean predicate, True if thing’s qualified module name starts with “numpy”")
-    export(isnumpytype,     name='isnumpytype',     doc="isnumpytype(cls) → boolean predicate, True if thing is from the “numpy” module and is a classtype")
+    export(isnumpything,        name='isnumpything',        doc="isnumpything(thing) → boolean predicate, True if thing’s qualified module name starts with “numpy”")
+    export(isnumpytype,         name='isnumpytype',         doc="isnumpytype(cls) → boolean predicate, True if thing is from the “numpy” module and is a classtype")
     
-    export(clamp,           name='clamp')
+    export(isnumpythinglist,    name='isnumpythinglist',    doc="isnumpythinglist(thinglist) → boolean predicate, True if `thinglist` is a sequence of things from the “numpy” module")
+    export(isnumpytypelist,     name='isnumpytypelist',     doc="isnumpytypelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of types from the “numpy” module")
+    
+    export(clamp,               name='clamp')
     
     __all__, __dir__ = exporter.all_and_dir()
     

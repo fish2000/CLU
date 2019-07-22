@@ -8,7 +8,7 @@ class TestTypology(object):
     """ Run the tests for the clu.typology module. """
     
     def test_samelength_and_isunique(self):
-        from clu.typology import samelength, isunique
+        from clu.typology import samelength, differentlength, isunique
         from clu.typology import (numeric_types,
                                     array_types,
                                  function_types,
@@ -25,6 +25,11 @@ class TestTypology(object):
         assert samelength(array_types,        set(array_types))
         assert not samelength(function_types, set(function_types))
         assert not samelength(callable_types, set(callable_types))
+        
+        assert not differentlength(numeric_types,   set(numeric_types))
+        assert not differentlength(array_types,     set(array_types))
+        assert differentlength(function_types,      set(function_types))
+        assert differentlength(callable_types,      set(callable_types))
     
     def test_lambda_double_uppercase_lambda_double_lowercase_lambda_and_iscallable(self):
         from clu.typology import ΛΛ, λλ, iscallable

@@ -156,6 +156,7 @@ issequencelist = lambda thinglist: issequence(thinglist) and predicate_all(isseq
 
 # MODULE EXPORTS:
 export(samelength,      name='samelength',  doc="samelength(a, b) → boolean predicate, True if both `len(a)` and `len(b)` are defined and equal to each other")
+export(differentlength, name='differentlength', doc="differentlength(a, b) → boolean predicate, True if both `len(a)` and `len(b)` are defined, but are unequal")
 export(isunique,        name='isunique',    doc="isunique(thing) → boolean predicate, True if `thing` is an iterable with unique contents")
 export(istypelist,      name='istypelist',  doc="istypelist(thing) → boolean predicate, True if `thing` is a “typelist” – a list consisting only of class types")
 export(maketypelist,    name='maketypelist',

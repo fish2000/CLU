@@ -224,14 +224,15 @@ def apply_to(predicate, function, *things):
     return function(predicate(thing) for thing in things)
 
 # Variadics:
-predicate_all = lambda predicate, *things: apply_to(predicate, all, *things)
-predicate_any = lambda predicate, *things: apply_to(predicate, any, *things)
+predicate_all  = lambda predicate, *things: apply_to(predicate, all,         *things)
+predicate_any  = lambda predicate, *things: apply_to(predicate, any,         *things)
+predicate_none = lambda predicate, *things: apply_to(predicate, negate(any), *things)
 
 # Booleans:
-predicate_and = lambda predicate, a, b: apply_to(predicate, all, a, b)
-predicate_or  = lambda predicate, a, b: apply_to(predicate, any, a, b)
-predicate_xor = lambda predicate, a, b: apply_to(predicate, any, a, b) and \
-                                    not apply_to(predicate, all, a, b)
+predicate_and  = lambda predicate, a, b: apply_to(predicate, all, a, b)
+predicate_or   = lambda predicate, a, b: apply_to(predicate, any, a, b)
+predicate_xor  = lambda predicate, a, b: apply_to(predicate, any, a, b) and \
+                                     not apply_to(predicate, all, a, b)
 
 # Does a thing or a class contain an attribute --
 # whether it uses `__dict__` or `__slots__` (or both)?
@@ -359,6 +360,7 @@ export(lambda_repr,     name='lambda_repr',     doc="lambda_repr(instance) → E
 
 export(predicate_all,   name='predicate_all',   doc="predicate_all(predicate, *things) → boolean predicate, shortcut for `apply_to(predicate, all, *things)`")
 export(predicate_any,   name='predicate_any',   doc="predicate_any(predicate, *things) → boolean predicate, shortcut for `apply_to(predicate, any, *things)`")
+export(predicate_none,  name='predicate_none',  doc="predicate_none(predicate, *things) → boolean predicate, shortcut for `apply_to(predicate, negate(any), *things)`")
 export(predicate_and,   name='predicate_and',   doc="predicate_and(predicate, a, b) → boolean predicate, shortcut for `apply_to(predicate, all, a, b)`")
 export(predicate_or,    name='predicate_or',    doc="predicate_or(predicate, a, b) → boolean predicate, shortcut for `apply_to(predicate, any, a, b)`")
 export(predicate_xor,   name='predicate_xor',   doc="predicate_xor(predicate, a, b) → boolean predicate, shortcut for `apply_to(predicate, any, a, b) and not apply_to(predicate, all, a, b)`")

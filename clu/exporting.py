@@ -288,8 +288,8 @@ class Exporter(MutableMapping):
                 dname = getattr(thing, '__name__')
                 if named in (λ, φ):
                     named = thingname_search(thing)
-                    if named is None:
-                        raise ExportError(type(self).messages['noname'] % id(thing))
+                if named is None:
+                    raise ExportError(type(self).messages['noname'] % id(thing))
                 thing.__name__ = thing.__qualname__ = named
                 thing.__lambda_name__ = dname # To recall the lambda’s genesis
                 if dname == φ and self.dotpath is not None:

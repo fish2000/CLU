@@ -35,14 +35,14 @@ DEFAULT_PREFIX = "yo-dogg-"
 def ensure_path_is_valid(pth):
     """ Raise an exception if we can’t write to the specified path """
     if not ispath(pth):
-        raise FilesystemError("Operand must be a path type: %s" % pth)
+        raise FilesystemError(f"Operand must be a path type: {pth}")
     if os.path.exists(pth):
         if os.path.isdir(pth):
-            raise FilesystemError("Can’t save over directory: %s" % pth)
-        raise FilesystemError("Output file exists: %s" % pth)
+            raise FilesystemError(f"Can’t save over directory: {pth}")
+        raise FilesystemError(f"Output file exists: {pth}")
     parent_dir = os.path.dirname(pth)
     if not os.path.isdir(parent_dir):
-        raise FilesystemError("Directory doesn’t exist: %s" % parent_dir)
+        raise FilesystemError(f"Directory doesn’t exist: {parent_dir}")
 
 @export
 def write_to_path(data, pth, relative_to=None, verbose=False):
@@ -235,16 +235,16 @@ def temporary(suffix='', prefix='', parent=None, **kwargs):
     directory = os.fspath(kwargs.pop('dir', parent) or gettempdir())
     if suffix:
         if not suffix.startswith(os.extsep):
-            suffix = "%s%s" % (os.extsep, suffix)
+            suffix = f"{os.extsep}{suffix}"
     tempmade = mktemp(prefix=prefix, suffix=suffix, dir=directory)
     tempsplit = os.path.splitext(os.path.basename(tempmade))
     if not suffix:
         suffix = tempsplit[1][1:]
     if not prefix or kwargs.pop('randomized', False):
         prefix, _ = os.path.splitext(tempsplit[0]) # WTF, HAX!
-    fullpth = os.path.join(directory, "%s%s" % (prefix, suffix))
+    fullpth = os.path.join(directory, f"{prefix}{suffix}")
     if os.path.exists(fullpth):
-        raise FilesystemError("temporary(): file exists: %s" % fullpth)
+        raise FilesystemError(f"temporary(): file exists: {fullpth}")
     return fullpth
 
 class TypeLocker(abc.ABCMeta):
@@ -438,9 +438,9 @@ class TemporaryName(collections.abc.Hashable,
         # regardless of whether or not the default is in use:
         if suffix:
             if not suffix.startswith(os.extsep):
-                suffix = "%s%s" % (os.extsep, suffix)
+                suffix = f"{os.extsep}{suffix}"
         else:
-            suffix = "%stmp" % os.extsep
+            suffix = f"{os.extsep}tmp"
         
         # Try the “parent” argument first, fall back to the “dir”
         # keyword, and normalize with `os.fspath(¬)`:
@@ -664,7 +664,7 @@ class Directory(collections.abc.Hashable,
               'will_change',        'did_change',
               'will_change_back',   'did_change_back')
     
-    zip_suffix = "%szip" % os.extsep
+    zip_suffix = f"{os.extsep}zip"
     
     def __init__(self, pth=None):
         """ Initialize a new Directory object.
@@ -909,11 +909,11 @@ class Directory(collections.abc.Hashable,
         """
         pth = self.subpath(subdir, whence, requisite=False)
         if os.path.isfile(pth):
-            raise FilesystemError("file exists at subdirectory path: %s" % pth)
+            raise FilesystemError(f"file exists at subdirectory path: {pth}")
         if os.path.islink(pth):
-            raise FilesystemError("symlink exists at subdirectory path: %s" % pth)
+            raise FilesystemError(f"symlink exists at subdirectory path: {pth}")
         if os.path.ismount(pth):
-            raise FilesystemError("mountpoint exists at subdirectory path: %s" % pth)
+            raise FilesystemError(f"mountpoint exists at subdirectory path: {pth}")
         return self.directory(pth)
     
     def makedirs(self, pth=None, mode=0o755):
@@ -969,14 +969,14 @@ class Directory(collections.abc.Hashable,
         if anyof(whereto.exists, os.path.isfile(whereto.name),
                                  os.path.islink(whereto.name)):
             raise FilesystemError(
-                "copy_all() destination exists: %s" % whereto.name)
+                f"copy_all() destination exists: {whereto.name}")
         if self.exists:
             return os.path.isdir(
                    shutil.copytree(self.name, whereto.name,
                                    symlinks=False))
         else:
             raise FilesystemError(
-                "copy_all() source doesn’t exist: %s" % self.name)
+                f"copy_all() source doesn’t exist: {self.name}")
         return False
     
     def zip_archive(self, zpth=None, zmode=None):
@@ -1062,7 +1062,7 @@ class Directory(collections.abc.Hashable,
         pth = self.subpath(filename, requisite=True)
         if not pth:
             raise KeyError(
-                "file not found: %s" % os.fspath(filename))
+                f"file not found: {os.fspath(filename)}")
         return pth
     
     def __contains__(self, filename):
@@ -1158,7 +1158,7 @@ class TemporaryDirectory(Directory):
         from tempfile import mkdtemp
         if suffix:
             if not suffix.startswith(os.extsep):
-                suffix = "%s%s" % (os.extsep, suffix)
+                suffix = f"{os.extsep}{suffix}"
         if parent is None:
             parent = kwargs.pop('dir', None)
         if parent:
@@ -1250,7 +1250,7 @@ class Intermediate(TemporaryDirectory, Directory):
         """
         if pth is not None:
             return Directory(pth=pth)
-        return TemporaryDirectory(prefix="%s-" % cls.__name__,
+        return TemporaryDirectory(prefix=f"{cls.__name__}-",
                                   change=False)
     
     def __init__(self, pth=None):
@@ -1277,9 +1277,9 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
     
     if suffix:
         if not suffix.startswith(os.extsep):
-            suffix = "%s%s" % (os.extsep, suffix)
+            suffix = f"{os.extsep}{suffix}"
     else:
-        suffix = "%stmp" % os.extsep
+        suffix = f"{os.extsep}tmp"
     
     if 'b' in mode:
         flags = _bin_openflags

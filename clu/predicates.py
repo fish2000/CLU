@@ -55,7 +55,7 @@ metaclass = lambda thing: ismetaclass(thing) and thing \
 # PREDICATE FUNCTIONS: hasattr(…) shortcuts:
 
 noattr = lambda thing, atx: negate(hasattr)(thing, atx)
-haspyattr = lambda thing, atx: hasattr(thing, '__%s__' % atx)
+haspyattr = lambda thing, atx: hasattr(thing, f'__{atx}__')
 nopyattr = lambda thing, atx: negate(haspyattr)(thing, atx)
 
 anyattrs = lambda thing, *attrs: any(hasattr(thing, atx) for atx in attrs)
@@ -82,8 +82,11 @@ nuhuh = lambda thing: None
 
 no_op     = lambda thing, atx, default=None: thing
 or_none   = lambda thing, atx: getattr(thing, atx, None)
-getpyattr = lambda thing, atx, default=None: getattr(thing, '__%s__' % atx, default)
-getitem   = lambda thing, itx, default=None: getattr(thing, 'get', no_op)(itx, default)
+getpyattr = lambda thing, atx, default=None: getattr(thing, f'__{atx}__', default)
+
+getitem   = lambda thing, itx, default=None: thing.__contains__(itx) \
+                                         and thing.__getitem__(itx) \
+                                          or default
 
 @export
 def resolve(thing, atx):
@@ -210,7 +213,7 @@ def apply_to(predicate, function, *things):
         
             function(predicate(thing) for thing in things)
         
-        apply_to(predicate, function) → Return a partial† function ƒ(*things)
+        apply_to(predicate, function) → Return a Partial† function ƒ(*things)
         that will behave as `apply_to(predicate, function, *things)` when it
         is called as above.
         

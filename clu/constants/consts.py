@@ -7,7 +7,7 @@ import sys
 import sysconfig
 
 # pytuple shortcut lambda:
-pytuple = lambda *attrs: tuple('__%s__' % str(atx) for atx in attrs)
+pytuple = lambda *attrs: tuple(f'__{atx}__' for atx in attrs)
 
 # Project base path:
 BASEPATH = sys.intern(

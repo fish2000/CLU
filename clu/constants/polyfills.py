@@ -53,7 +53,7 @@ try:
     from importlib.util import cache_from_source
 except ImportError:
     # As far as I can tell, this is what Python 2.x does:
-    cache_from_source = lambda pth: pth + 'c'
+    cache_from_source = lambda pth: f'{pth}c'
 
 try:
     from functools import lru_cache

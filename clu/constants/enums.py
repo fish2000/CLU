@@ -33,7 +33,7 @@ class System(Enum):
         for system in cls:
             if system.sys_name == string.lower():
                 return system
-        raise ValueError("System not found: %s" % string)
+        raise ValueError(f"System not found: {string}")
     
     @classmethod
     def match(cls, value):
@@ -88,7 +88,7 @@ class CSIDL(Enum):
                 return csidl
             elif csidl.fullname == string_name:
                 return csidl
-        raise LookupError("No CSIDL found named %s" % string_name)
+        raise LookupError(f"No CSIDL found named {string_name}")
     
     def __init__(self, *args):
         self.shell_folder_name, self.const = args

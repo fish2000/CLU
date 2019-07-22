@@ -166,7 +166,6 @@ export(istypelist,      name='istypelist',  doc="istypelist(thing) → boolean p
 export(maketypelist,    name='maketypelist',
                          doc="maketypelist(iterable) → convert an iterable of unknown things into a uniquified typelist – a list consisting only of class types")
 
-
 export(subclasscheck,   name='subclasscheck',
                          doc="subclasscheck(putative, *cls_or_tuple) → A wrapper for `issubclass(…)` and `isinstance(…)` that tries to work with you`")
 

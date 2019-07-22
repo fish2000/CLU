@@ -12,6 +12,7 @@ from clu.constants.consts import (BASEPATH,
                                   LAMBDA, λ,
                                   MAXINT,
                                   PATH,
+                                  PARTIAL, φ,
                                   PROJECT_NAME, PROJECT_PATH,
                                   PY3, PYPY,
                                   QUALIFIER,
@@ -158,15 +159,16 @@ from clu.repl.ansi import (print_separator, print_ansi, print_ansi_centered,
 from clu.repl.banners import print_banner
 
 # Compile all Greekly definitions and their names:
-GREEK_STRINGS = ('σ', 'Σ', 'λ', 'λλ', 'Λ', 'ΛΛ')
-GREEK_DEFS = (σ, Σ, λ, λλ, Λ, ΛΛ)
+GREEK_STRINGS = ('σ', 'Σ', 'λ', 'λλ', 'Λ', 'ΛΛ', 'φ')
+GREEK_DEFS = (σ, Σ, λ, λλ, Λ, ΛΛ, φ)
 
 GREEK_PHONETICS = ('sigma-lower',
                    'sigma-upper',
                    'lambda-lower',
                    'double-lambda-lower',
                    'lambda-upper',
-                   'double-lambda-upper')
+                   'double-lambda-upper',
+                   'phi-lower')
 
 GREEK_STRINGDICT = dict(zip(GREEK_STRINGS, GREEK_DEFS))
 GREEK_NAMEDICT = dict(zip(GREEK_PHONETICS, GREEK_DEFS))
@@ -216,6 +218,7 @@ __all__ = ('Image',
            'LAMBDA', 'λ',
            'MAXINT',
            'PATH',
+           'PARTIAL', 'φ',
            'PROJECT_NAME', 'PROJECT_PATH',
            'PY3', 'PYPY',
            'QUALIFIER',

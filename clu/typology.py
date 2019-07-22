@@ -10,7 +10,7 @@ import io
 import operator
 import os
 
-from clu.constants.consts import λ
+from clu.constants.consts import λ, φ
 from clu.constants.polyfills import long, unicode, numpy
 from clu.constants.polyfills import HashableABC, SequenceABC, Path
 from clu.constants.polyfills import Mapping, MutableMapping
@@ -131,7 +131,7 @@ isstring = lambda thing: subclasscheck(thing, string_types)
 isbytes = lambda thing: subclasscheck(thing, bytes_types)
 ismodule = lambda thing: subclasscheck(thing, types.Module)
 isfunction = ΛΛ = lambda thing: isinstance(thing, Λ) and not isclasstype(thing)
-islambda = λλ = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') == λ
+islambda = λλ = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') in (λ, φ)
 iscallable = lambda thing: haspyattr(thing, 'call') and nopyattr(thing, 'code')
 ishashable = lambda thing: isinstance(thing, HashableABC)
 issequence = lambda thing: isinstance(thing, SequenceABC)

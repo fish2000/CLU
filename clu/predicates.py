@@ -3,7 +3,7 @@ from __future__ import print_function
 from itertools import chain
 from functools import partial, wraps
 
-from clu.constants.consts import λ, pytuple, QUALIFIER
+from clu.constants.consts import λ, φ, pytuple, QUALIFIER
 from clu.enums import alias
 from clu.exporting import Exporter
 
@@ -181,8 +181,8 @@ class Partial(partial):
     def __init__(self, *args, **kwargs):
         """ Initialize a new Partial object, with a predicate and a function """
         # N.B. The real action seems to happen in partial.__new__(…)
-        # Name the Partial instance, as if it’s a lambda-type:
-        self.__name__ = self.__qualname__ = λ
+        # Name the Partial instance, as if it’s a phi-type:
+        self.__name__ = self.__qualname__ = φ
         try:
             super(Partial, self).__init__(*args, **kwargs)
         except:
@@ -199,8 +199,8 @@ class Partial(partial):
         return (len(self.args) > 1) and self.args[1] or None
     
     def __repr__(self):
-        # Use the lambda_repr equivalent:
-        return lambda_repr(self)
+        # Use the lambda_repr equivalent, with a phi-type default name:
+        return lambda_repr(self, default=φ)
 
 @export
 def apply_to(predicate, function, *things):

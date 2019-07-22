@@ -4,7 +4,7 @@ from __future__ import print_function
 import sys, os
 import warnings
 
-from clu.constants.consts import λ, NoDefault, pytuple
+from clu.constants.consts import λ, φ, NoDefault, pytuple
 from clu.constants.exceptions import ExportError, ExportWarning
 from clu.constants.polyfills import MutableMapping, lru_cache
 
@@ -284,13 +284,16 @@ class Exporter(MutableMapping):
         # a lambda, try to rename it with either our valid name,
         # or the result of an ID-based search for that lambda:
         if callable(thing):
-            if getattr(thing, '__name__', '') == λ:
-                if named == λ:
+            if getattr(thing, '__name__', '') in (λ, φ):
+                dname = getattr(thing, '__name__')
+                if named in (λ, φ):
                     named = thingname_search(thing)
-                if named is None:
-                    raise ExportError(type(self).messages['noname'] % id(thing))
+                    if named is None:
+                        raise ExportError(type(self).messages['noname'] % id(thing))
                 thing.__name__ = thing.__qualname__ = named
-                thing.__lambda_name__ = λ # To recall the lambda’s genesis
+                thing.__lambda_name__ = dname # To recall the lambda’s genesis
+                if dname == φ and self.dotpath is not None:
+                    thing.__module__ = str(self.dotpath) # Reset __module__ for phi-types
         
         # If a “doc” argument was passed in, attempt to assign
         # the __doc__ attribute accordingly on the item -- note

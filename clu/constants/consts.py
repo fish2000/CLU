@@ -55,6 +55,8 @@ DEFAULT_PATH = os.pathsep.join(filter(os.path.exists, (PYTHON_BIN,
                                                        "/sbin", "/usr/sbin")))
 PATH = os.getenv("PATH", DEFAULT_PATH)
 
+φ = PARTIAL = sys.intern("<Partial>")
+
 # The name of this project
 PROJECT_NAME = sys.intern('clu')
 
@@ -131,6 +133,7 @@ __all__ = ('BASEPATH',
            'LAMBDA', 'λ',
            'MAXINT',
            'PATH',
+           'PARTIAL', 'φ',
            'PROJECT_NAME', 'PROJECT_PATH',
            'PY3', 'PYPY',
            'QUALIFIER',

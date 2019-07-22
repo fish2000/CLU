@@ -357,7 +357,8 @@ try:
                                    ensure_path_is_valid,
                                    script_path, which, back_tick,
                                    rm_rf, temporary,
-                                   TemporaryName, Directory, cd, wd,
+                                   TemporaryName, Directory,
+                                                  cd, wd, td, hd,
                                    TemporaryDirectory, Intermediate,
                                    NamedTemporaryFile)
 except (ImportError, SyntaxError):
@@ -369,7 +370,8 @@ else:
                 'ensure_path_is_valid',
                 'script_path', 'which', 'back_tick',
                 'rm_rf', 'temporary',
-                'TemporaryName', 'Directory', 'cd', 'wd',
+                'TemporaryName', 'Directory',
+                                 'cd', 'wd', 'td', 'hd',
                 'TemporaryDirectory', 'Intermediate',
                 'NamedTemporaryFile')
 

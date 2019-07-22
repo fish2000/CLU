@@ -34,6 +34,7 @@ export = exporter.decorator()
 # can be formulated and tested by these lambdas and functions
 
 samelength = lambda a, b: haslength(a) and haslength(b) and operator.eq(len(a), len(b))
+differentlength = lambda a, b: haslength(a) and haslength(b) and operator.ne(len(a), len(b))
 isunique = lambda thing: isiterable(thing) and samelength(tuple(thing), frozenset(thing))
 istypelist = predicate_all(isclasstype)
 maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),

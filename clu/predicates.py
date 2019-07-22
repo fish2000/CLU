@@ -168,8 +168,7 @@ iscontainer = lambda thing: isiterable(thing) and \
                         not isclasstype(thing)
 
 # This is the equivalent of a lambda types’ built-in __repr__ function:
-lambda_repr = lambda instance, default=λ: "<function %s at 0x%0x>" % (pyattr(instance, 'qualname', 'name',
-                                                                             default=default),
+lambda_repr = lambda instance, default=λ: "<function %s at 0x%0x>" % (pyname(instance) or default,
                                                                           id(instance))
 
 class Partial(partial):

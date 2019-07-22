@@ -386,6 +386,70 @@ class TestFsFilesystem(object):
             assert os.path.isdir(os.fspath(tmp))
             assert tmp.basename in tmp.dirname
     
+    def test_td(self):
+        """ Tests for clu.fs.filesystem.td """
+        from clu.fs.filesystem import td
+        initial = os.getcwd()
+        
+        with td() as tmp:
+            # print("* Testing directory-change instance: %s" % tmp.name)
+            assert os.path.samefile(os.getcwd(),          gettempdir())
+            assert os.path.samefile(os.getcwd(),          tmp.new)
+            assert os.path.samefile(gettempdir(),         tmp.new)
+            assert os.path.samefile(os.getcwd(),          os.fspath(tmp))
+            assert os.path.samefile(gettempdir(),         os.fspath(tmp))
+            assert not os.path.samefile(os.getcwd(),      initial)
+            assert not os.path.samefile(tmp.new,          initial)
+            assert not os.path.samefile(os.fspath(tmp),   initial)
+            assert os.path.samefile(tmp.old,              initial)
+            assert tmp.will_change
+            assert tmp.did_change
+            assert tmp.will_change_back
+            assert not tmp.did_change_back
+            assert type(tmp.directory(tmp.new)) == Directory
+            assert isinstance(tmp,                        td)
+            assert isinstance(tmp,                        Directory)
+            assert isinstance(tmp,                        collections.abc.Hashable)
+            assert isinstance(tmp,                        collections.abc.Mapping)
+            assert isinstance(tmp,                        collections.abc.Sized)
+            assert isinstance(tmp,                        contextlib.AbstractContextManager)
+            assert isinstance(tmp,                        os.PathLike)
+            assert os.path.isdir(os.fspath(tmp))
+            assert tmp.basename in tmp.dirname
+    
+    def test_hd(self):
+        """ Tests for clu.fs.filesystem.hd """
+        from clu.fs.filesystem import hd
+        initial = os.getcwd()
+        
+        gethomedir = lambda: os.path.expanduser("~")
+        
+        with hd() as home:
+            # print("* Testing directory-change instance: %s" % tmp.name)
+            assert os.path.samefile(os.getcwd(),          gethomedir())
+            assert os.path.samefile(os.getcwd(),          home.new)
+            assert os.path.samefile(gethomedir(),         home.new)
+            assert os.path.samefile(os.getcwd(),          os.fspath(home))
+            assert os.path.samefile(gethomedir(),         os.fspath(home))
+            assert not os.path.samefile(os.getcwd(),      initial)
+            assert not os.path.samefile(home.new,         initial)
+            assert not os.path.samefile(os.fspath(home),  initial)
+            assert os.path.samefile(home.old,             initial)
+            assert home.will_change
+            assert home.did_change
+            assert home.will_change_back
+            assert not home.did_change_back
+            assert type(home.directory(home.new)) == Directory
+            assert isinstance(home,                        hd)
+            assert isinstance(home,                        Directory)
+            assert isinstance(home,                        collections.abc.Hashable)
+            assert isinstance(home,                        collections.abc.Mapping)
+            assert isinstance(home,                        collections.abc.Sized)
+            assert isinstance(home,                        contextlib.AbstractContextManager)
+            assert isinstance(home,                        os.PathLike)
+            assert os.path.isdir(os.fspath(home))
+            assert home.basename in home.dirname
+    
     def test_TemporaryDirectory(self):
         """ Tests for clu.fs.filesystem.TemporaryDirectory """
         from clu.fs.filesystem import TemporaryDirectory

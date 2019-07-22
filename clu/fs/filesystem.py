@@ -1109,6 +1109,23 @@ class wd(Directory):
         super(wd, self).__init__(pth=None)
 
 @export
+class td(Directory):
+    
+    def __init__(self):
+        """ Initialize a Directory instance for the current temporary directory.
+        """
+        from tempfile import gettempdir
+        super(td, self).__init__(pth=gettempdir())
+
+@export
+class hd(Directory):
+    
+    def __init__(self):
+        """ Initialize a Directory instance for the current user’s home directory.
+        """
+        super(hd, self).__init__(pth=os.path.expanduser("~"))
+
+@export
 class TemporaryDirectory(Directory):
     
     """ It's funny how this code looks, like, 99 percent exactly like the above

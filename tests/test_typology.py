@@ -7,7 +7,7 @@ class TestTypology(object):
     
     """ Run the tests for the clu.typology module. """
     
-    def test_samelength_and_isunique(self):
+    def test_samelength_differentlength_and_isunique(self):
         from clu.typology import samelength, differentlength, isunique
         from clu.typology import (numeric_types,
                                     array_types,

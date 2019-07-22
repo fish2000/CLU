@@ -179,7 +179,7 @@ class Partial(partial):
     """
     
     def __init__(self, *args, **kwargs):
-        """ Initialize a new Partial object """
+        """ Initialize a new Partial object, with a predicate and a function """
         # N.B. The real action seems to happen in partial.__new__(…)
         # Name the Partial instance, as if it’s a lambda-type:
         self.__name__ = self.__qualname__ = λ
@@ -187,6 +187,16 @@ class Partial(partial):
             super(Partial, self).__init__(*args, **kwargs)
         except:
             super(Partial, self).__init__()
+    
+    @property
+    def predicate(self):
+        """ Return the “predicate” argument with which this Partial was initialized """
+        return (len(self.args) > 0) and self.args[0] or None
+    
+    @property
+    def function(self):
+        """ Return the “function” argument with which this Partial was initialized """
+        return (len(self.args) > 1) and self.args[1] or None
     
     def __repr__(self):
         # Use the lambda_repr equivalent:

@@ -136,26 +136,27 @@ iscallable = lambda thing: haspyattr(thing, 'call') and nopyattr(thing, 'code')
 ishashable = lambda thing: isinstance(thing, HashableABC)
 issequence = lambda thing: isinstance(thing, SequenceABC)
 
-# Helper predicate for composing sequence-based predicates:
+# Helper predicates for composing sequence-based predicates:
 isxlist = lambda predicate, thinglist: issequence(thinglist) and predicate_all(predicate, thinglist)
+isxtypelist = lambda predicate, thinglist: istypelist(thinglist) and predicate_all(predicate, thinglist)
 
-ispathtypelist = lambda thinglist: istypelist(thinglist) and predicate_all(ispathtype, thinglist)
-ispathlist = lambda thinglist: isxlist(ispath, thinglist)
-isvalidpathlist = lambda thinglist: isxlist(isvalidpath, thinglist)
+ispathtypelist = predicate_all(lambda thing: isclasstype(thing) and ispathtype(thing))
+ispathlist = predicate_all(ispath)
+isvalidpathlist = predicate_all(isvalidpath)
 
-isnumberlist = lambda thinglist: isxlist(isnumber, thinglist)
-isnumericlist = lambda thinglist: isxlist(isnumeric, thinglist)
-iscomplexlist = lambda thinglist: isxlist(iscomplex, thinglist)
-isarraylist = lambda thinglist: isxlist(isarray, thinglist)
-isscalarlist = lambda thinglist: isxlist(isscalar, thinglist)
-isstringlist = lambda thinglist: isxlist(isstring, thinglist)
-isbyteslist = lambda thinglist: isxlist(isbytes, thinglist)
-ismodulelist = lambda thinglist: isxlist(ismodule, thinglist)
-isfunctionlist = lambda thinglist: isxlist(isfunction, thinglist)
-islambdalist = lambda thinglist: isxlist(islambda, thinglist)
-iscallablelist = lambda thinglist: isxlist(iscallable, thinglist)
-ishashablelist = lambda thinglist: isxlist(ishashable, thinglist)
-issequencelist = lambda thinglist: isxlist(issequence, thinglist)
+isnumberlist = predicate_all(isnumber)
+isnumericlist = predicate_all(isnumeric)
+iscomplexlist = predicate_all(iscomplex)
+isarraylist = predicate_all(isarray)
+isscalarlist = predicate_all(isscalar)
+isstringlist = predicate_all(isstring)
+isbyteslist = predicate_all(isbytes)
+ismodulelist = predicate_all(ismodule)
+isfunctionlist = predicate_all(ΛΛ)
+islambdalist = predicate_all(λλ)
+iscallablelist = predicate_all(iscallable)
+ishashablelist = predicate_all(ishashable)
+issequencelist = predicate_all(issequence)
 
 # MODULE EXPORTS:
 export(samelength,      name='samelength',  doc="samelength(a, b) → boolean predicate, True if both `len(a)` and `len(b)` are defined and equal to each other")
@@ -215,6 +216,7 @@ export(ishashable,      name='ishashable',  doc="ishashable(thing) → boolean p
 export(issequence,      name='issequence',  doc="issequence(thing) → boolean predicate, True if `thing` is a sequence type (e.g. a `tuple` or `list` type)")
 
 export(isxlist,         name='isxlist',     doc="isxlist(predicate, thinglist) → boolean predicate, True if `thinglist` is a sequence of items, all of which match the predicate function")
+export(isxtypelist,     name='isxtypelist', doc="isxtypelist(predicate, thinglist) → boolean predicate, True if `thinglist` is a typelist, all types in which match the predicate function")
 
 export(ispathtypelist,  name='ispathtypelist',  doc="ispathtypelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of path-related class types")
 export(ispathlist,      name='ispathlist',      doc="ispathlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of path-like instances")

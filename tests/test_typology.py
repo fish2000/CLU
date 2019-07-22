@@ -26,7 +26,7 @@ class TestTypology(object):
         assert not samelength(function_types, set(function_types))
         assert not samelength(callable_types, set(callable_types))
     
-    def test_lambda_double_uppercase_lambda_double_lowercase_lambda_and_isfunction(self):
+    def test_lambda_double_uppercase_lambda_double_lowercase_lambda_and_iscallable(self):
         from clu.typology import ΛΛ, λλ, iscallable
         
         def function_def(*args, **kwargs):

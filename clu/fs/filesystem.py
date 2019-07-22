@@ -561,7 +561,12 @@ class TemporaryName(collections.abc.Hashable,
             if os.path.exists(destination):
                 if os.path.samefile(self._name, destination):
                     raise FilesystemError("Can’t copy to identical locations")
-            return shutil.copy2(self._name, os.fspath(destination))
+                if os.path.isdir(self._name, destination):
+                    raise FilesystemError("Can’t copy files over a directory")
+                rm_rf(destination)
+            return os.path.exists(
+                   shutil.copy2(self._name, os.fspath(destination),
+                                follow_symlinks=True))
         return False
     
     def do_not_destroy(self):
@@ -966,7 +971,9 @@ class Directory(collections.abc.Hashable,
             raise FilesystemError(
                 "copy_all() destination exists: %s" % whereto.name)
         if self.exists:
-            return shutil.copytree(self.name, whereto.name)
+            return os.path.isdir(
+                   shutil.copytree(self.name, whereto.name,
+                                   symlinks=False))
         else:
             raise FilesystemError(
                 "copy_all() source doesn’t exist: %s" % self.name)

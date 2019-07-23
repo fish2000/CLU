@@ -2,45 +2,6 @@
 
 import pytest
 
-@pytest.fixture
-def environment():
-    """ Environment testing fixture: yields an instance of `os.environ`,
-        free of XDG variables
-    """
-    from clu.constants.data import XDGS
-    import os
-    stash = {}
-    
-    # Setup: remove XDG variables from environment:
-    for key in XDGS:
-        if key in os.environ:
-            stash[key] = os.environ.get(key)
-            del os.environ[key]
-    
-    yield os.environ
-    
-    # Teardown: restore environment:
-    for key, value in stash.items():
-        os.environ[key] = value
-
-@pytest.fixture
-def temporarydir():
-    """ clu.fs.filesystem.TemporaryDirectory fixture factory: yields
-        a new instance of `TemporaryDirectory`, without making any
-        calls to “os.chdir()”.
-    """
-    from clu.fs.filesystem import TemporaryDirectory
-    from clu.naming import qualified_name, dotpath_to_prefix
-    
-    prefix = dotpath_to_prefix(
-             qualified_name(TemporaryDirectory))
-    
-    with TemporaryDirectory(prefix=prefix,
-                            change=False) as temporarydir:
-        yield temporarydir
-    
-    assert not temporarydir.exists
-
 @pytest.fixture(scope="module")
 def clumods():
     """ Import all CLU modules that use the “clu.exporting.Exporter”
@@ -137,3 +98,42 @@ def datadir(dirname):
     
     # Assert that we no longer exist after scope exit:
     assert not temporarydir.exists
+
+@pytest.fixture
+def temporarydir():
+    """ clu.fs.filesystem.TemporaryDirectory fixture factory: yields
+        a new instance of `TemporaryDirectory`, without making any
+        calls to “os.chdir()”.
+    """
+    from clu.fs.filesystem import TemporaryDirectory
+    from clu.naming import qualified_name, dotpath_to_prefix
+    
+    prefix = dotpath_to_prefix(
+             qualified_name(TemporaryDirectory))
+    
+    with TemporaryDirectory(prefix=prefix,
+                            change=False) as temporarydir:
+        yield temporarydir
+    
+    assert not temporarydir.exists
+
+@pytest.fixture
+def environment():
+    """ Environment testing fixture: yields an instance of `os.environ`,
+        free of XDG variables
+    """
+    from clu.constants.data import XDGS
+    import os
+    stash = {}
+    
+    # Setup: remove XDG variables from environment:
+    for key in XDGS:
+        if key in os.environ:
+            stash[key] = os.environ.get(key)
+            del os.environ[key]
+    
+    yield os.environ
+    
+    # Teardown: restore environment:
+    for key, value in stash.items():
+        os.environ[key] = value

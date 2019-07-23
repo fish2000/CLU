@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os
+
 import pytest
 
 XDGS = ('XDG_CONFIG_DIRS', 'XDG_DATA_HOME',
@@ -13,6 +13,7 @@ def environment(keys=XDGS):
     """ Environment testing fixture: yields an instance of `os.environ`,
         free of XDG variables
     """
+    import os
     stash = {}
     
     # Setup: remove XDG variables from environment:
@@ -44,6 +45,22 @@ def temporarydir():
         yield temporarydir
     
     assert not temporarydir.exists
+
+@pytest.fixture(scope="module")
+def clumods():
+    """ Import all CLU modules that use the “clu.exporting.Exporter”
+        mechanism for listing and exporting their module contents
+    """
+    from clu.constants.data import MODNAMES
+    import importlib
+    mods = []
+    
+    for modname in MODNAMES:
+        mods.append(importlib.import_module(modname))
+    
+    modules = dict(zip(MODNAMES, mods))
+    
+    yield modules
 
 @pytest.fixture(scope="package")
 def greektext():

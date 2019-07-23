@@ -184,3 +184,24 @@ Hesitating then no longer? Sir, said I, or Madam, truly your forgiveness I
 implore; But the fact is I was napping, and so gently you came rapping, And so
 faintly you came tapping, tapping at my chamber door?
 """
+
+MODNAMES = ('clu.compilation.compiledb',
+            'clu.compilation.macros',
+            'clu.dicts',
+            'clu.enums',
+            'clu.exporting',
+            'clu.fs.appdirectories',
+            'clu.fs.filesystem',
+            'clu.fs.misc',
+            'clu.fs.pypath',
+            'clu.keyvalue',
+            'clu.mathematics',
+            'clu.naming',
+            'clu.predicates',
+            'clu.repl.ansi',
+            'clu.repl.banners',
+            'clu.sanitizer',
+            'clu.typespace',
+            'clu.typespace.namespace',
+            'clu.typology')
+

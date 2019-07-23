@@ -218,6 +218,9 @@ class Exporter(MutableMapping):
         # already spent more than enough time fucking around with
         # “typing” shit and I am not interested at this time, and
         # b) it’s too useful a method to give it all up. So deal.
+        from clu.typology import isstring
+        if not isstring(key):
+            raise TypeError("instance access by string keys only")
         return cls.instances[key]
     
     def __init__(self, *args, **kwargs):

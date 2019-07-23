@@ -14,6 +14,23 @@ class TestExporting(object):
     
     """ Run the tests for the clu.exporting module. """
     
+    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
+    def test_exporter_instance_registry(self, clumods):
+        from clu.constants.data import MODNAMES
+        from clu.exporting import path_to_dotpath, Exporter
+        
+        # Check the number of modules:
+        assert len(clumods) == 19
+        assert len(MODNAMES) == 19
+        
+        # Check the Exporter instance against the module instance:
+        for modname in MODNAMES:
+            module = clumods[modname]
+            assert Exporter[modname]
+            assert Exporter[modname].path == module.__file__
+            assert Exporter[modname].dotpath == path_to_dotpath(module.__file__)
+            assert Exporter[modname].all_tuple() == module.__all__
+    
     def test_combine_real_world_exporters_2(self):
         from clu.predicates import exporter as exporter0
         from clu.typology import exporter as exporter1

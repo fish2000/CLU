@@ -169,8 +169,8 @@ class TestNaming(object):
     @pytest.mark.nondeterministic
     def test_determine_module_failure_rate(self, clumods):
         """ » Checking `determine_module(…)` against `pickle.whichmodule(…)` …"""
-        from clu.naming import determine_module
         from clu.exporting import Exporter
+        from clu.naming import determine_module
         import pickle
         
         total = 0

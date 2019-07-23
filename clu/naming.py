@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import warnings
 
-from clu.constants.consts import BUILTINS, DEBUG, QUALIFIER
+from clu.constants.consts import BUILTINS, DEBUG, QUALIFIER, NoDefault
 from clu.exporting import determine_name, path_to_dotpath, Exporter
 
 exporter = Exporter(path=__file__)
@@ -49,27 +49,29 @@ def thingname(original, *modules):
     return None
 
 @export
-def nameof(thing, fallback=''):
+def nameof(thing, default=NoDefault):
     """ Get the name of a thing, according to either:
         >>> thing.__qualname__
         … or:
         >>> thing.__name__
-        … optionally specifying a fallback string.
+        … optionally specifying a “default” fallback.
     """
-    return determine_name(thing) or fallback
+    if default is NoDefault:
+        return determine_name(thing)
+    return determine_name(thing) or default
 
 @export
 def determine_module(thing):
     """ Determine in which module a given thing is ensconced,
         and return that modules’ name as a string.
     """
-    # import pickle
-    # return pickle.whichmodule(thing, None)
+    import pickle
     from clu.exporting import thingname_search_by_id
     from clu.predicates import pyattr
     return pyattr(thing, 'module', 'package') or \
            determine_name(
-           thingname_search_by_id(id(thing))[0])
+           thingname_search_by_id(id(thing))[0]) or \
+           pickle.whichmodule(thing, None)
 
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
 # assess a thing’s qualified name, etc etc.

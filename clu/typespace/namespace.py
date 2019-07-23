@@ -9,9 +9,14 @@ from clu.constants import pytuple
 from clu.dicts import merge_two, asdict
 from clu.naming import determine_name
 from clu.predicates import ismergeable
+from clu.exporting import Exporter
+
+exporter = Exporter(path=__file__)
+export = exporter.decorator()
 
 # NAMESPACES: SimpleNamespace and Namespace
 
+@export
 class SimpleNamespace(object):
     
     """ Implementation courtesy this SO answer:
@@ -38,6 +43,7 @@ class SimpleNamespace(object):
     def __ne__(self, other):
         return self.__dict__ != asdict(other)
 
+@export
 class Namespace(SimpleNamespace, MutableMapping):
     
     """ Namespace adds the `get(…)`, `__len__()`, `__contains__(…)`, `__getitem__(…)`,
@@ -132,5 +138,5 @@ class Namespace(SimpleNamespace, MutableMapping):
     def __bool__(self):
         return bool(self.__dict__)
 
-__all__ = ('SimpleNamespace', 'Namespace')
-__dir__ = lambda: list(__all__)
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()

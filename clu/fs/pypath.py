@@ -4,6 +4,12 @@ from __future__ import print_function
 import os
 import sys
 
+from clu.exporting import Exporter
+
+exporter = Exporter(path=__file__)
+export = exporter.decorator()
+
+@export
 def append_paths(*putatives):
     """ Mutate `sys.path` by appending one or more new paths -- all of which
         are checked for both nonexistence and presence within the existing
@@ -33,6 +39,7 @@ def append_paths(*putatives):
 
 append_paths.oldpaths = [tuple(sys.path)]
 
+@export
 def remove_paths(*putatives):
     """ Mutate `sys.path` by removing one or more existing paths --
         all of which are checked for presence within the existing `sys.path`
@@ -59,5 +66,5 @@ def remove_paths(*putatives):
 
 remove_paths.oldpaths = [tuple(sys.path)]
 
-__all__ = ('append_paths', 'remove_paths')
-__dir__ = lambda: list(__all__)
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()

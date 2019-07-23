@@ -12,7 +12,12 @@ from abc import abstractmethod as abstract
 from clu.constants import ENCODING, CDBError
 from clu.fs import TemporaryName, Directory, rm_rf, stringify, u8str
 from clu.predicates import tuplize
+from clu.exporting import Exporter
 
+exporter = Exporter(path=__file__)
+export = exporter.decorator()
+
+@export
 class CDBSubBase(abc.ABC, metaclass=abc.ABCMeta):
     
     @abstract
@@ -40,7 +45,7 @@ class CDBSubBase(abc.ABC, metaclass=abc.ABCMeta):
     @abstract
     def __bool__(self): ...
 
-
+@export
 class CDBBase(CDBSubBase, collections.abc.Sequence,
                           collections.abc.Sized):
     
@@ -111,6 +116,7 @@ class CDBBase(CDBSubBase, collections.abc.Sequence,
 
 CDBSubBase.register(CDBBase)
 
+@export
 class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
     
     fields = ('filename', 'length', 'exists')
@@ -190,5 +196,7 @@ class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
 
 CDBSubBase.register(CDBJsonFile)
 
-__all__ = ('CDBError', 'CDBSubBase', 'CDBBase', 'CDBJsonFile')
-__dir__ = lambda: list(__all__)
+export(CDBError)
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()

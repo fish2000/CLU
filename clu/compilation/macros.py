@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from clu.constants import ENCODING, TOKEN
+from clu.constants.consts import ENCODING, TOKEN
 from clu.constants.exceptions import ConfigurationError
 from clu.typespace.namespace import SimpleNamespace
 from clu.typology import isstring
-from clu.fs import stringify, u8str
+from clu.fs.misc import stringify, u8str
+from clu.exporting import Exporter
 
+exporter = Exporter(path=__file__)
+export = exporter.decorator()
+
+@export
 class Macro(object):
     
     __slots__ = ('name', 'definition', 'undefine')
@@ -82,6 +87,7 @@ class Macro(object):
         """ An instance of Macro is considered Falsey if undefined, Truthy if not. """
         return not self.undefine
 
+@export
 class Macros(SimpleNamespace):
     
     __slots__ = tuple()
@@ -169,5 +175,5 @@ class Macros(SimpleNamespace):
     def __bytes__(self):
         return bytes(self.to_string(), encoding=ENCODING)
 
-__all__ = ('Macro', 'Macros')
-__dir__ = lambda: list(__all__)
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()

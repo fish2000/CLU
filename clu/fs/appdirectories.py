@@ -27,10 +27,15 @@ from clu.constants.polyfills import unicode
 from clu.version import VersionInfo
 from .filesystem import Directory
 from .misc import stringify
+from clu.exporting import Exporter
+
+exporter = Exporter(path=__file__)
+export = exporter.decorator()
 
 __version__ = "1.4.4"
 __version_info__ = VersionInfo(__version__)
 
+@export
 class AppDirs(object):
     
     """ Convenience wrapper for getting application dirs. """
@@ -726,8 +731,12 @@ def _get_win_folder_with_jna(csidl):
     
     return directory
 
-__all__ = ('System', 'CSIDL', 'SYSTEM', 'AppDirs')
-__dir__ = lambda: list(__all__)
+export(System)
+export(CSIDL)
+export(SYSTEM,  name='SYSTEM')
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
 
 #---- Self-Test Code:
 

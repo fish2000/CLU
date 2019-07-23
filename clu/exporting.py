@@ -161,7 +161,9 @@ def path_to_dotpath(path):
     
     # Trim off any remaining “.py” suffixes,
     # and extraneous dot-prefixes:
-    if dotpath.endswith('.py'):
+    if dotpath.endswith('.__init__.py'):
+        dotpath = dotpath[:len(dotpath)-12]
+    elif dotpath.endswith('.py'):
         dotpath = dotpath[:len(dotpath)-3]
     while dotpath.startswith(QUALIFIER):
         dotpath = dotpath[1:]
@@ -200,6 +202,23 @@ class Exporter(MutableMapping):
             cls.instances[instance.dotpath] = instance
         
         return instance
+    
+    @classmethod
+    def __class_getitem__(cls, key):
+        """ Return a specific Exporter instance from the registry,
+            given a dotted module path, like e.g:
+            
+                from clu import naming
+                assert Exporter['clu.naming'] == naming.exporter
+        """
+        # N.B. you are theoretically “not supposed” to use the
+        # “__class_getitem__” method for anything whatsoever, and
+        # just leave it alone unless you are fucking around with
+        # “typing” module internals. I say fuck that – a) I have
+        # already spent more than enough time fucking around with
+        # “typing” shit and I am not interested at this time, and
+        # b) it’s too useful a method to give it all up. So deal.
+        return cls.instances[key]
     
     def __init__(self, *args, **kwargs):
         self.__exports__ = {}
@@ -441,7 +460,7 @@ class Exporter(MutableMapping):
     def __bool__(self):
         return len(self.__exports__) > 0
 
-exporter = Exporter()
+exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 export(doctrim)

@@ -7,6 +7,10 @@ import re
 from clu.constants.consts import DYNAMIC_MODULE_PREFIX, PROJECT_NAME, VERBOTEN
 from clu.constants.polyfills import cache_from_source
 from .namespace import SimpleNamespace, Namespace
+from clu.exporting import Exporter
+
+exporter = Exporter(path=__file__)
+export = exporter.decorator()
 
 import types as thetypes
 types = Namespace()
@@ -35,6 +39,7 @@ setattr(types, '__cached__',      cache_from_source(__file__))
 setattr(types, '__package__',     os.path.splitext(
                                   os.path.basename(__file__))[0])
 
+@export
 def modulize(name, namespace, docs=None,
                               path=None):
     """ Convert a dictionary mapping into a legit Python module """
@@ -105,5 +110,15 @@ def modulize(name, namespace, docs=None,
     # Return our new module instance:
     return module
 
-__all__ = ('SimpleNamespace', 'Namespace', 'types', 'modulize')
-__dir__ = lambda: list(__all__)
+export(types,           name='types',       doc=""" A Namespace instance containing aliases into the `types` module,
+                                                    sans the irritating and lexically unnecessary “Type” suffix --
+                                                    e.g. `types.ModuleType` can be accessed as just `types.Module`
+                                                    from this Namespace, which is less pointlessly redundant and far
+                                                    more typographically pleasing, like definitively.
+                                                """)
+
+export(SimpleNamespace)
+export(Namespace)
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()

@@ -50,6 +50,7 @@ function CLU_python_module_run () {
 
 function CLU_bpy3 () {
     # set -x
+    configdir="${PROJECT_ROOT}/.config"
     pyversion="3"
     pyname="python${pyversion}"
     modname="bpython"

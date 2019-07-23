@@ -1,7 +1,10 @@
 -r install.txt
+bpython
 bumpversion
 check-manifest
 flake8
 flake8-bugbear
 twine
 pytest
+pytest-print
+pythonpy

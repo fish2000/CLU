@@ -196,8 +196,10 @@ class TestFsFilesystem(object):
         assert not os.path.exists(ppp)
         assert not os.path.exists(pppp)
     
+    @pytest.mark.TODO
     def test_which_and_back_tick(self):
         """ Test clu.fs.which(…) and clu.fs.back_tick(…) against one another """
+        # TODO: un-hardcode this binary list, somehow
         from clu.fs.filesystem import which, back_tick
         
         BINARIES = ('ls', 'clang', 'gawk',

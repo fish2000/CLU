@@ -49,6 +49,7 @@ class TestNaming(object):
         assert px1 == path_to_prefix(pp, end="≠")
         assert px2 == path_to_prefix(pp, sep="•", end="≠")
     
+    @pytest.mark.nondeterministic
     def test_qualified_name_constants(self):
         """ » Checking “qualified_name(¬) on items from clu.constants …” """
         from clu.constants.consts import (BASEPATH, HOSTNAME, VERBOTEN, SCRIPT_PATH, TEST_PATH)
@@ -115,6 +116,8 @@ class TestNaming(object):
         except AssertionError:
             raise Nondeterminism(f"Nondeterminism in qualified_name(types) → {qname}")
     
+    @pytest.mark.nondeterministic
+    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_qualified_import(self):
         """ » Checking “qualified_import(¬) …” """
         from clu.naming import qualified_import, qualified_name
@@ -163,6 +166,7 @@ class TestNaming(object):
         except AssertionError:
             raise Nondeterminism(f"Nondeterminism in qualified_name(Weight) → {qname}")
     
+    @pytest.mark.nondeterministic
     def test_determine_module_failure_rate(self, clumods):
         """ » Checking `determine_module(…)` against `pickle.whichmodule(…)` …"""
         from clu.naming import determine_module

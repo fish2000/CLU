@@ -98,6 +98,7 @@ class TestExporting(object):
         assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter0.all_tuple()))
         assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter1.all_tuple()))
     
+    @pytest.mark.TODO
     def test_exporter_export_constants(self):
         # N.B. the warning checks will *FAIL* for some reason
         # if ExportWarning is imported from clu.constants,
@@ -145,6 +146,7 @@ class TestExporting(object):
         assert 'YO_DOGG_W' in test_dir()
         assert 'I_HEARD_W' in test_dir()
     
+    @pytest.mark.TODO
     def test_exporter_export_lambdas_no_name_provided(self):
         # N.B. “thingname_search()” should inspect locals (?!)
         # in order to make this work at non-module-level:

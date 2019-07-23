@@ -525,8 +525,10 @@ class TestPredicates(object):
             is getpyattr(dict2, 'class') \
             is pyattr_search('class', *dicts)
     
+    @pytest.mark.TODO
     def test_nops(self):
         """ » Checking “always/never/nuhuh/no_op” lambdas from clu.predicates … """
+        # TODO: get rid of most of these “nop” functions – many are unused
         from clu.predicates import (negate, 
                                     always, never, nuhuh,
                                     no_op, predicate_nop,

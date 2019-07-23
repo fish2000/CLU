@@ -223,6 +223,28 @@ class Exporter(MutableMapping):
             raise TypeError("instance access by string keys only")
         return cls.instances[key]
     
+    @classmethod
+    def modulenames(cls):
+        """ Get a sorted list of module names – the keys to the Exporter
+            instance registry – that are currently available
+        """
+        return tuple(sorted(cls.instances.keys()))
+    
+    @classmethod
+    def modules(cls):
+        """ Get a dict of actual modules corresponding to the
+            currently registered Exporter instances
+        """
+        import importlib
+        modulenames = cls.modulenames()
+        mods = []
+        
+        for modulename in modulenames:
+            mods.append(importlib.import_module(modulename))
+        
+        modules = dict(zip(modulenames, mods))
+        return modules
+    
     def __init__(self, *args, **kwargs):
         self.__exports__ = {}
         

@@ -37,7 +37,7 @@ def current_umask():
             os.write(1, maskval)
             
         except OSError as exc:
-            print("[ERROR] Child failed to umask: %s" % str(exc))
+            print(f"[ERROR] Child failed to umask: {exc!s}")
             os._exit(os.EX_OSERR)
         
         finally:
@@ -53,16 +53,13 @@ def current_umask():
     # Reading from forkin yields strings:
     with os.fdopen(forkin) as handle:
         # nonlocal umask_value
-        # umask_value = int(str(handle.read(), encoding=ENCODING))
         umask_value = int(handle.read())
     
     # Kill the kid:
     pid, status = os.waitpid(pid, 0)
     
     # What happened?
-    print("Child [pid %s] exited, status: %s, umask: %s" % (pid,
-                                                            status,
-                                                            umask_value))
+    print(f"Child [pid {pid}] exited, status: {status}, umask: {umask_value}")
     
     return umask_value, octalize(umask_value)
 
@@ -70,7 +67,7 @@ def test():
     print("About to fork…")
     mask, octmask = current_umask()
     
-    print("Fork is over, value returned is %i [%s]" % (mask, octmask))
+    print(f"Fork is over, value returned is {mask!s} [{octmask}]")
 
 if __name__ == '__main__':
     test()

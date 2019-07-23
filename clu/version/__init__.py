@@ -102,7 +102,7 @@ class VersionInfo(VersionAncestor):
     
     SEPARATORS = '..-+'
     UNKNOWN = '‽'
-    NULL_VERSION = "%s.%s.%s" % ((UNKNOWN,) * 3)
+    NULL_VERSION = f"{UNKNOWN}.{UNKNOWN}.{UNKNOWN}"
     REG = re.compile(r'(?P<major>[\d‽]+)\.'     \
                      r'(?P<minor>[\d‽]+)'       \
                      r'(?:\.(?P<patch>[\d‽]+)'  \
@@ -132,14 +132,18 @@ class VersionInfo(VersionAncestor):
         if not bool(self):
             return type(self).NULL_VERSION
         SEPARATORS = type(self).SEPARATORS
-        out = "%i%s%i" % (self.major or 0, SEPARATORS[0],
-                          self.minor or 0)
+        out = f"{self.major or 0}{SEPARATORS[0]}{self.minor or 0}"
+        # out = "%i%s%i" % (self.major or 0, SEPARATORS[0],
+        #                   self.minor or 0)
         if self.patch is not None:
-            out += "%s%i" % (SEPARATORS[1], self.patch)
+            # out += "%s%i" % (SEPARATORS[1], self.patch)
+            out += f"{SEPARATORS[1]}{self.patch}"
             if self.pre:
-                out += "%s%s" % (SEPARATORS[2], self.pre)
+                # out += "%s%s" % (SEPARATORS[2], self.pre)
+                out += f"{SEPARATORS[2]}{self.pre}"
                 if self.build:
-                    out += "%s%i" % (SEPARATORS[3], self.build)
+                    # out += "%s%i" % (SEPARATORS[3], self.build)
+                    out += f"{SEPARATORS[3]}{self.build}"
         return out
     
     def to_dict(self):

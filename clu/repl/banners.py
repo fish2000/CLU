@@ -169,10 +169,10 @@ prefix = PYPY and 'pypy' or 'python'
 
 # Configure ANSI-color python banner, per python version:
 if PY3:
-    banner = banners.get('%s3.%s' % (prefix, sys.version_info.minor), banners['%s3.x' % prefix])
+    banner = banners.get(f'{prefix}3.{sys.version_info.minor}', banners[f'{prefix}3.x'])
     banner_color = colorama.Fore.CYAN
 else:
-    banner = banners['%s2.7' % prefix]
+    banner = banners[f'{prefix}2.7']
     banner_color = colorama.Fore.LIGHTGREEN_EX
 
 now = datetime.datetime.now

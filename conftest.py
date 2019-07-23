@@ -34,8 +34,11 @@ def temporarydir():
         calls to “os.chdir()”.
     """
     from clu.fs.filesystem import TemporaryDirectory
+    from clu.naming import qualified_name, dotpath_to_prefix
     
-    prefix = "clu-fs-filesystem-temporarydirectory-"
+    prefix = dotpath_to_prefix(
+             qualified_name(TemporaryDirectory))
+    
     with TemporaryDirectory(prefix=prefix,
                             change=False) as temporarydir:
         yield temporarydir
@@ -95,6 +98,7 @@ def datadir(dirname):
         operations through instance methods (vs. raw calls to “shutil.copytree(…)”).
     """
     from clu.fs.filesystem import TemporaryDirectory
+    from clu.naming import determine_module, dotpath_join, dotpath_to_prefix
     
     # Get the test-local (née “shared”) data path:
     datadir = dirname.subdirectory('data')
@@ -102,7 +106,10 @@ def datadir(dirname):
     # Ensure source data directory exists:
     assert datadir.exists
     
-    prefix = "clu-fs-filesystem-ttd-datadir-"
+    prefix = dotpath_to_prefix(
+             dotpath_join(
+             determine_module(TemporaryDirectory), 'ttd', 'datadir'))
+    
     with TemporaryDirectory(prefix=prefix,
                             change=False) as temporarydir:
         # Assert that we exist:

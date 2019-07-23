@@ -33,14 +33,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/usr/local/etc/xdg/%s/%s" % (appname, appversion)
-        assert appdirs.site_data_dir    == "/usr/local/share/%s/%s" % (appname, appversion)
+        assert appdirs.site_config_dir  == f"/usr/local/etc/xdg/{appname}/{appversion}"
+        assert appdirs.site_data_dir    == f"/usr/local/share/{appname}/{appversion}"
         
-        assert appdirs.user_cache_dir   == "%s/.cache/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_config_dir  == "%s/.config/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_data_dir    == "%s/.local/share/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_log_dir     == "%s/.cache/%s/%s/log" % (home, appname, appversion)
-        assert appdirs.user_state_dir   == "%s/.local/state/%s/%s" % (home, appname, appversion)
+        assert appdirs.user_cache_dir   == f"{home}/.cache/{appname}/{appversion}"
+        assert appdirs.user_config_dir  == f"{home}/.config/{appname}/{appversion}"
+        assert appdirs.user_data_dir    == f"{home}/.local/share/{appname}/{appversion}"
+        assert appdirs.user_log_dir     == f"{home}/.cache/{appname}/{appversion}/log"
+        assert appdirs.user_state_dir   == f"{home}/.local/state/{appname}/{appversion}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -71,14 +71,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/usr/local/etc/xdg/%s/%s" % (appname, appversion)
-        assert appdirs.site_data_dir    == "/usr/local/share/%s/%s" % (appname, appversion)
+        assert appdirs.site_config_dir  == f"/usr/local/etc/xdg/{appname}/{appversion}"
+        assert appdirs.site_data_dir    == f"/usr/local/share/{appname}/{appversion}"
         
-        assert appdirs.user_cache_dir   == "%s/.cache/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_config_dir  == "%s/.config/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_data_dir    == "%s/.local/share/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_log_dir     == "%s/.cache/%s/%s/log" % (home, appname, appversion)
-        assert appdirs.user_state_dir   == "%s/.local/state/%s/%s" % (home, appname, appversion)
+        assert appdirs.user_cache_dir   == f"{home}/.cache/{appname}/{appversion}"
+        assert appdirs.user_config_dir  == f"{home}/.config/{appname}/{appversion}"
+        assert appdirs.user_data_dir    == f"{home}/.local/share/{appname}/{appversion}"
+        assert appdirs.user_log_dir     == f"{home}/.cache/{appname}/{appversion}/log"
+        assert appdirs.user_state_dir   == f"{home}/.local/state/{appname}/{appversion}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -103,14 +103,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/usr/local/etc/xdg/%s" % appname
-        assert appdirs.site_data_dir    == "/usr/local/share/%s" % appname
+        assert appdirs.site_config_dir  == f"/usr/local/etc/xdg/{appname}"
+        assert appdirs.site_data_dir    == f"/usr/local/share/{appname}"
         
-        assert appdirs.user_cache_dir   == "%s/.cache/%s" % (home, appname)
-        assert appdirs.user_config_dir  == "%s/.config/%s" % (home, appname)
-        assert appdirs.user_data_dir    == "%s/.local/share/%s" % (home, appname)
-        assert appdirs.user_log_dir     == "%s/.cache/%s/log" % (home, appname)
-        assert appdirs.user_state_dir   == "%s/.local/state/%s" % (home, appname)
+        assert appdirs.user_cache_dir   == f"{home}/.cache/{appname}"
+        assert appdirs.user_config_dir  == f"{home}/.config/{appname}"
+        assert appdirs.user_data_dir    == f"{home}/.local/share/{appname}"
+        assert appdirs.user_log_dir     == f"{home}/.cache/{appname}/log"
+        assert appdirs.user_state_dir   == f"{home}/.local/state/{appname}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -138,14 +138,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/usr/local/etc/xdg/%s" % appname
-        assert appdirs.site_data_dir    == "/usr/local/share/%s" % appname
+        assert appdirs.site_config_dir  == f"/usr/local/etc/xdg/{appname}"
+        assert appdirs.site_data_dir    == f"/usr/local/share/{appname}"
         
-        assert appdirs.user_cache_dir   == "%s/.cache/%s" % (home, appname)
-        assert appdirs.user_config_dir  == "%s/.config/%s" % (home, appname)
-        assert appdirs.user_data_dir    == "%s/.local/share/%s" % (home, appname)
-        assert appdirs.user_log_dir     == "%s/.cache/%s/log" % (home, appname)
-        assert appdirs.user_state_dir   == "%s/.local/state/%s" % (home, appname)
+        assert appdirs.user_cache_dir   == f"{home}/.cache/{appname}"
+        assert appdirs.user_config_dir  == f"{home}/.config/{appname}"
+        assert appdirs.user_data_dir    == f"{home}/.local/share/{appname}"
+        assert appdirs.user_log_dir     == f"{home}/.cache/{appname}/log"
+        assert appdirs.user_state_dir   == f"{home}/.local/state/{appname}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -171,14 +171,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/usr/local/etc/xdg/%s/%s" % (appname, appversion)
-        assert appdirs.site_data_dir    == "/usr/local/share/%s/%s" % (appname, appversion)
+        assert appdirs.site_config_dir  == f"/usr/local/etc/xdg/{appname}/{appversion}"
+        assert appdirs.site_data_dir    == f"/usr/local/share/{appname}/{appversion}"
         
-        assert appdirs.user_cache_dir   == "%s/.cache/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_config_dir  == "%s/.config/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_data_dir    == "%s/.local/share/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_log_dir     == "%s/.cache/%s/%s/log" % (home, appname, appversion)
-        assert appdirs.user_state_dir   == "%s/.local/state/%s/%s" % (home, appname, appversion)
+        assert appdirs.user_cache_dir   == f"{home}/.cache/{appname}/{appversion}"
+        assert appdirs.user_config_dir  == f"{home}/.config/{appname}/{appversion}"
+        assert appdirs.user_data_dir    == f"{home}/.local/share/{appname}/{appversion}"
+        assert appdirs.user_log_dir     == f"{home}/.cache/{appname}/{appversion}/log"
+        assert appdirs.user_state_dir   == f"{home}/.local/state/{appname}/{appversion}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -209,14 +209,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/usr/local/etc/xdg/%s/%s" % (appname, appversion)
-        assert appdirs.site_data_dir    == "/usr/local/share/%s/%s" % (appname, appversion)
+        assert appdirs.site_config_dir  == f"/usr/local/etc/xdg/{appname}/{appversion}"
+        assert appdirs.site_data_dir    == f"/usr/local/share/{appname}/{appversion}"
         
-        assert appdirs.user_cache_dir   == "%s/.cache/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_config_dir  == "%s/.config/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_data_dir    == "%s/.local/share/%s/%s" % (home, appname, appversion)
-        assert appdirs.user_log_dir     == "%s/.cache/%s/%s/log" % (home, appname, appversion)
-        assert appdirs.user_state_dir   == "%s/.local/state/%s/%s" % (home, appname, appversion)
+        assert appdirs.user_cache_dir   == f"{home}/.cache/{appname}/{appversion}"
+        assert appdirs.user_config_dir  == f"{home}/.config/{appname}/{appversion}"
+        assert appdirs.user_data_dir    == f"{home}/.local/share/{appname}/{appversion}"
+        assert appdirs.user_log_dir     == f"{home}/.cache/{appname}/{appversion}/log"
+        assert appdirs.user_state_dir   == f"{home}/.local/state/{appname}/{appversion}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -241,14 +241,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/usr/local/etc/xdg/%s" % appname
-        assert appdirs.site_data_dir    == "/usr/local/share/%s" % appname
+        assert appdirs.site_config_dir  == f"/usr/local/etc/xdg/{appname}"
+        assert appdirs.site_data_dir    == f"/usr/local/share/{appname}"
         
-        assert appdirs.user_cache_dir   == "%s/.cache/%s" % (home, appname)
-        assert appdirs.user_config_dir  == "%s/.config/%s" % (home, appname)
-        assert appdirs.user_data_dir    == "%s/.local/share/%s" % (home, appname)
-        assert appdirs.user_log_dir     == "%s/.cache/%s/log" % (home, appname)
-        assert appdirs.user_state_dir   == "%s/.local/state/%s" % (home, appname)
+        assert appdirs.user_cache_dir   == f"{home}/.cache/{appname}"
+        assert appdirs.user_config_dir  == f"{home}/.config/{appname}"
+        assert appdirs.user_data_dir    == f"{home}/.local/share/{appname}"
+        assert appdirs.user_log_dir     == f"{home}/.cache/{appname}/log"
+        assert appdirs.user_state_dir   == f"{home}/.local/state/{appname}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -276,14 +276,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/usr/local/etc/xdg/%s" % appname
-        assert appdirs.site_data_dir    == "/usr/local/share/%s" % appname
+        assert appdirs.site_config_dir  == f"/usr/local/etc/xdg/{appname}"
+        assert appdirs.site_data_dir    == f"/usr/local/share/{appname}"
         
-        assert appdirs.user_cache_dir   == "%s/.cache/%s" % (home, appname)
-        assert appdirs.user_config_dir  == "%s/.config/%s" % (home, appname)
-        assert appdirs.user_data_dir    == "%s/.local/share/%s" % (home, appname)
-        assert appdirs.user_log_dir     == "%s/.cache/%s/log" % (home, appname)
-        assert appdirs.user_state_dir   == "%s/.local/state/%s" % (home, appname)
+        assert appdirs.user_cache_dir   == f"{home}/.cache/{appname}"
+        assert appdirs.user_config_dir  == f"{home}/.config/{appname}"
+        assert appdirs.user_data_dir    == f"{home}/.local/share/{appname}"
+        assert appdirs.user_log_dir     == f"{home}/.cache/{appname}/log"
+        assert appdirs.user_state_dir   == f"{home}/.local/state/{appname}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -309,14 +309,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/Library/Preferences/%s" % appname
-        assert appdirs.site_data_dir    == "/Library/Application Support/%s/%s" % (appname, appversion)
+        assert appdirs.site_config_dir  == f"/Library/Preferences/{appname}"
+        assert appdirs.site_data_dir    == f"/Library/Application Support/{appname}/{appversion}"
         
-        assert appdirs.user_cache_dir   == "/Users/%s/Library/Caches/%s/%s" % (user, appname, appversion)
-        assert appdirs.user_config_dir  == "/Users/%s/Library/Preferences/%s/%s" % (user, appname, appversion)
-        assert appdirs.user_data_dir    == "/Users/%s/Library/Application Support/%s/%s" % (user, appname, appversion)
-        assert appdirs.user_log_dir     == "/Users/%s/Library/Logs/%s/%s" % (user, appname, appversion)
-        assert appdirs.user_state_dir   == "/Users/%s/Library/Application Support/%s/%s" % (user, appname, appversion)
+        assert appdirs.user_cache_dir   == f"/Users/{user}/Library/Caches/{appname}/{appversion}"
+        assert appdirs.user_config_dir  == f"/Users/{user}/Library/Preferences/{appname}/{appversion}"
+        assert appdirs.user_data_dir    == f"/Users/{user}/Library/Application Support/{appname}/{appversion}"
+        assert appdirs.user_log_dir     == f"/Users/{user}/Library/Logs/{appname}/{appversion}"
+        assert appdirs.user_state_dir   == f"/Users/{user}/Library/Application Support/{appname}/{appversion}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -347,14 +347,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/Library/Preferences/%s" % appname
-        assert appdirs.site_data_dir    == "/Library/Application Support/%s/%s" % (appname, appversion)
+        assert appdirs.site_config_dir  == f"/Library/Preferences/{appname}"
+        assert appdirs.site_data_dir    == f"/Library/Application Support/{appname}/{appversion}"
         
-        assert appdirs.user_cache_dir   == "/Users/%s/Library/Caches/%s/%s" % (user, appname, appversion)
-        assert appdirs.user_config_dir  == "/Users/%s/Library/Preferences/%s/%s" % (user, appname, appversion)
-        assert appdirs.user_data_dir    == "/Users/%s/Library/Application Support/%s/%s" % (user, appname, appversion)
-        assert appdirs.user_log_dir     == "/Users/%s/Library/Logs/%s/%s" % (user, appname, appversion)
-        assert appdirs.user_state_dir   == "/Users/%s/Library/Application Support/%s/%s" % (user, appname, appversion)
+        assert appdirs.user_cache_dir   == f"/Users/{user}/Library/Caches/{appname}/{appversion}"
+        assert appdirs.user_config_dir  == f"/Users/{user}/Library/Preferences/{appname}/{appversion}"
+        assert appdirs.user_data_dir    == f"/Users/{user}/Library/Application Support/{appname}/{appversion}"
+        assert appdirs.user_log_dir     == f"/Users/{user}/Library/Logs/{appname}/{appversion}"
+        assert appdirs.user_state_dir   == f"/Users/{user}/Library/Application Support/{appname}/{appversion}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -379,14 +379,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/Library/Preferences/%s" % appname
-        assert appdirs.site_data_dir    == "/Library/Application Support/%s" % appname
+        assert appdirs.site_config_dir  == f"/Library/Preferences/{appname}"
+        assert appdirs.site_data_dir    == f"/Library/Application Support/{appname}"
         
-        assert appdirs.user_cache_dir   == "/Users/%s/Library/Caches/%s" % (user, appname)
-        assert appdirs.user_config_dir  == "/Users/%s/Library/Preferences/%s" % (user, appname)
-        assert appdirs.user_data_dir    == "/Users/%s/Library/Application Support/%s" % (user, appname)
-        assert appdirs.user_log_dir     == "/Users/%s/Library/Logs/%s" % (user, appname)
-        assert appdirs.user_state_dir   == "/Users/%s/Library/Application Support/%s" % (user, appname)
+        assert appdirs.user_cache_dir   == f"/Users/{user}/Library/Caches/{appname}"
+        assert appdirs.user_config_dir  == f"/Users/{user}/Library/Preferences/{appname}"
+        assert appdirs.user_data_dir    == f"/Users/{user}/Library/Application Support/{appname}"
+        assert appdirs.user_log_dir     == f"/Users/{user}/Library/Logs/{appname}"
+        assert appdirs.user_state_dir   == f"/Users/{user}/Library/Application Support/{appname}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory
@@ -414,14 +414,14 @@ class TestFsAppdirectories(object):
         for xdg in XDGS:
             assert xdg not in environment
         
-        assert appdirs.site_config_dir  == "/Library/Preferences/%s" % appname
-        assert appdirs.site_data_dir    == "/Library/Application Support/%s" % appname
+        assert appdirs.site_config_dir  == f"/Library/Preferences/{appname}"
+        assert appdirs.site_data_dir    == f"/Library/Application Support/{appname}"
         
-        assert appdirs.user_cache_dir   == "/Users/%s/Library/Caches/%s" % (user, appname)
-        assert appdirs.user_config_dir  == "/Users/%s/Library/Preferences/%s" % (user, appname)
-        assert appdirs.user_data_dir    == "/Users/%s/Library/Application Support/%s" % (user, appname)
-        assert appdirs.user_log_dir     == "/Users/%s/Library/Logs/%s" % (user, appname)
-        assert appdirs.user_state_dir   == "/Users/%s/Library/Application Support/%s" % (user, appname)
+        assert appdirs.user_cache_dir   == f"/Users/{user}/Library/Caches/{appname}"
+        assert appdirs.user_config_dir  == f"/Users/{user}/Library/Preferences/{appname}"
+        assert appdirs.user_data_dir    == f"/Users/{user}/Library/Application Support/{appname}"
+        assert appdirs.user_log_dir     == f"/Users/{user}/Library/Logs/{appname}"
+        assert appdirs.user_state_dir   == f"/Users/{user}/Library/Application Support/{appname}"
         
         assert type(appdirs.site_config)    is Directory
         assert type(appdirs.site_data)      is Directory

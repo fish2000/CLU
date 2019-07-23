@@ -168,7 +168,7 @@ def path_to_dotpath(path):
     # Warn before returning, if the converted path
     # should contain dashes:
     if '-' in dotpath:
-        warnings.warn("Dotpath contains dashes: “%s”" % dotpath,
+        warnings.warn(f"Dotpath contains dashes: “{dotpath}”",
                       BadDotpathWarning, stacklevel=2)
     
     return dotpath
@@ -279,7 +279,7 @@ class Exporter(MutableMapping):
         if named is None:
             raise ExportError("can’t export an unnamed thing")
         if named in self.__exports__:
-            raise ExportError("can’t re-export name “%s”" % named)
+            raise ExportError(f"can’t re-export name “{named}”")
         if thing is self.__exports__:
             raise ExportError("can’t export the __exports__ dict directly")
         if thing is self:

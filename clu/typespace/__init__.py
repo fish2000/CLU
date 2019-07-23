@@ -45,7 +45,7 @@ def modulize(name, namespace, docs=None,
     # Ensure a module with the given module name we received
     # doesn’t already exist in `sys.modules`:
     if name in sys.modules:
-        raise LookupError("Module “%s” already in sys.modules" % name)
+        raise LookupError(f"Module “{name}” already in sys.modules")
     
     # Update the namespace with '__all__' and '__dir__' if necessary:
     ns_all = None

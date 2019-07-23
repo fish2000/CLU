@@ -155,7 +155,7 @@ def print_all():
     WIDTH = TEXTMATE and max(SEPARATOR_WIDTH, 125) or SEPARATOR_WIDTH
     
     print('*' * WIDTH)
-    print("≠≠≠ CONSTS: (total %i defined)" % len(__all__))
+    print(f"≠≠≠ CONSTS: (total {len(__all__)} defined)")
     print('*' * WIDTH)
     
     G = globals()
@@ -167,9 +167,9 @@ def print_all():
         if const_name.endswith('PATH') and os.pathsep in G[const_name]:
             printout(const_name, G[const_name].replace(os.pathsep, SEP))
         elif type(G[const_name]) is tuple:
-            printout(const_name, SEP.join("“%s”" % str(g) for g in G[const_name]))
+            printout(const_name, SEP.join(f"“{g!s}”" for g in G[const_name]))
         elif type(G[const_name]) is str:
-            printout(const_name, "“%s”" % G[const_name])
+            printout(const_name, f"“{G[const_name]}”")
         else:
             printout(const_name, G[const_name])
     

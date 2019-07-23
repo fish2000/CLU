@@ -19,25 +19,25 @@ class TestNaming(object):
         try:
             assert qname == 'clu.constants.consts.VERBOTEN'
         except AssertionError:
-            raise Nondeterminism("Nondeterminism in qualified_name(VERBOTEN) → %s" % qname)
+            raise Nondeterminism(f"Nondeterminism in qualified_name(VERBOTEN) → {qname}")
         
         qname = qualified_name(PROJECT_NAME)
         try:
             assert qname == 'clu.constants.consts.PROJECT_NAME'
         except AssertionError:
-            raise Nondeterminism("Nondeterminism in qualified_name(PROJECT_NAME) → %s" % qname)
+            raise Nondeterminism(f"Nondeterminism in qualified_name(PROJECT_NAME) → {qname}")
         
         qname = qualified_name(HOSTNAME)
         try:
             assert qname == 'clu.constants.consts.HOSTNAME'
         except AssertionError:
-            raise Nondeterminism("Nondeterminism in qualified_name(HOSTNAME) → %s" % qname)
+            raise Nondeterminism(f"Nondeterminism in qualified_name(HOSTNAME) → {qname}")
         
         qname = qualified_name(BASEPATH)
         try:
             assert qname == 'clu.constants.consts.BASEPATH'
         except AssertionError:
-            raise Nondeterminism("Nondeterminism in qualified_name(BASEPATH) → %s" % qname)
+            raise Nondeterminism(f"Nondeterminism in qualified_name(BASEPATH) → {qname}")
     
     def test_qualified_name_instances(self):
         """ » Checking “qualified_name(¬) on instances of objects …” """
@@ -66,9 +66,9 @@ class TestNaming(object):
             qname = qualified_name(thing)
             name = determine_name(thing)
             try:
-                assert qname == 'clu.predicates.%s' % name
+                assert qname == f'clu.predicates.{name}'
             except AssertionError:
-                raise Nondeterminism("Nondeterminism in qualified_name(%s) → %s" % (name, qname))
+                raise Nondeterminism(f"Nondeterminism in qualified_name({name}) → {qname}")
         
         # TO INFINITY AND BEYOND:
         assert 'clu.exporting.%s' % determine_name(determine_name) == qualified_name(determine_name)
@@ -83,7 +83,7 @@ class TestNaming(object):
         try:
             assert qname == 'clu.typespace.namespace.types'
         except AssertionError:
-            raise Nondeterminism("Nondeterminism in qualified_name(types) → %s" % qname)
+            raise Nondeterminism(f"Nondeterminism in qualified_name(types) → {qname}")
     
     def test_qualified_import(self):
         """ » Checking “qualified_import(¬) …” """
@@ -100,38 +100,38 @@ class TestNaming(object):
         try:
             assert qname == 'clu.repl.banners.print_python_banner'
         except AssertionError:
-            raise Nondeterminism("Nondeterminism in qualified_name(print_python_banner) → %s" % qname)
+            raise Nondeterminism(f"Nondeterminism in qualified_name(print_python_banner) → {qname}")
         
         qname = qualified_name(print_warning)
         try:
             assert qname == 'clu.repl.banners.print_warning'
         except AssertionError:
-            raise Nondeterminism("Nondeterminism in qualified_name(print_warning) → %s" % qname)
+            raise Nondeterminism(f"Nondeterminism in qualified_name(print_warning) → {qname}")
         
         """ N.B. this “is_python2_dead” business seems to be the point of failure: """
         # qname = qualified_name(is_python2_dead)
         # try:
         #     assert qname == 'clu.repl.is_python2_dead'
         # except AssertionError:
-        #     raise Nondeterminism("Nondeterminism in qualified_name(is_python2_dead) → %s" % qname)
+        #     raise Nondeterminism(f"Nondeterminism in qualified_name(is_python2_dead) → {qname}")
         
         qname = qualified_name(Text)
         try:
             assert qname == 'clu.repl.ansi.Text'
         except AssertionError:
-            raise Nondeterminism("Nondeterminism in qualified_name(Text) → %s" % qname)
+            raise Nondeterminism(f"Nondeterminism in qualified_name(Text) → {qname}")
         
         qname = qualified_name(Background)
         try:
             assert qname == 'clu.repl.ansi.Background'
         except AssertionError:
-            raise Nondeterminism("Nondeterminism in qualified_name(Background) → %s" % qname)
+            raise Nondeterminism(f"Nondeterminism in qualified_name(Background) → {qname}")
         
         qname = qualified_name(Weight)
         try:
             assert qname == 'clu.repl.ansi.Weight'
         except AssertionError:
-            raise Nondeterminism("Nondeterminism in qualified_name(Weight) → %s" % qname)
+            raise Nondeterminism(f"Nondeterminism in qualified_name(Weight) → {qname}")
     
     def _test_determine_module(self):
         """ » Checking `determine_module(…)` against `pickle.whichmodule(…)` …"""
@@ -151,13 +151,13 @@ class TestNaming(object):
                 assert determination == whichmodule
             except AssertionError:
                 mismatches += 1
-                # print("»»» Module-lookup mismatch for %s “%s”" % (clade.to_string(), name))
-                # print("»»»   determine_module(…) → %s" % determination)
-                # print("»»» pickle.whichmodule(…) → %s" % whichmodule)
+                # print(f"»»» Module-lookup mismatch for {clade.to_string()} “{name}”")
+                # print(f"»»»   determine_module(…) → {determination}")
+                # print(f"»»» pickle.whichmodule(…) → {whichmodule}")
                 # print()
         
-        # print("≠≠≠ TOTAL EXPORTED THING COUNT: %i" % len(exporter))
-        # print("≠≠≠ TOTAL MISMATCHES FOUND: %i" % mismatches)
+        # print(f"≠≠≠ TOTAL EXPORTED THING COUNT: {len(exporter)}")
+        # print(f"≠≠≠ TOTAL MISMATCHES FOUND: {mismatches!s}")
         # print_separator()
         # print()
     

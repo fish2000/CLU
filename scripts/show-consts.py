@@ -50,7 +50,7 @@ colon = gray.render(":")
 def printout(name, value):
     """ Format and colorize each segment of the name/value output """
     itemname = lightblue.render(" %25s " % name)
-    itemvalue = gray.render(" %s" % value)
+    itemvalue = gray.render(f" {value}")
     ansi.print_ansi(chevron + itemname + colon + itemvalue, color=nothing)
 
 def show():
@@ -64,9 +64,9 @@ def show():
                                  or consts.SEPARATOR_WIDTH
     
     # Header:
-    # count = '%i defined' % len(consts.__all__)
-    header = 'CONSTS (%i defined)' % len(consts.__all__)
-    footer = 'Module: %s' % nameof(consts)
+    # count = f'{len(consts.__all__)} defined'
+    header = f'CONSTS ({len(consts.__all__)} defined)'
+    footer = f'Module: {nameof(consts)}'
     
     # ansi.print_ansi('≠' * WIDTH,        color=yellow_bg)
     # ansi.print_ansi_centered('CONSTS:', color=gray)
@@ -86,9 +86,9 @@ def show():
         if const_name.endswith('PATH') and os.pathsep in G[const_name]:
             printout(const_name, G[const_name].replace(os.pathsep, SEP))
         elif type(G[const_name]) is tuple:
-            printout(const_name, SEP.join("“%s”" % str(g) for g in G[const_name]))
+            printout(const_name, SEP.join(f"“{g!s}”" for g in G[const_name]))
         elif type(G[const_name]) is str:
-            printout(const_name, "“%s”" % G[const_name])
+            printout(const_name, f"“{G[const_name]}”")
         else:
             printout(const_name, G[const_name])
     

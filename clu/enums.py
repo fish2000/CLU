@@ -94,7 +94,7 @@ class alias(object):
         self.name = name
         if hasattr(cls, '__aliases__'):
             if self.name in cls.__aliases__:
-                message = "Enum already contains an alias named %s" % self.name
+                message = f"Enum already contains an alias named {self.name}"
                 raise AttributeError(message)
             cls.__aliases__[self.name] = self.member_for_value(cls, self.aliased)
 

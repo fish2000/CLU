@@ -61,10 +61,6 @@ def write_to_path(data, pth, relative_to=None, verbose=False):
 @export
 def script_path():
     """ Return the path to the embedded scripts directory. """
-    # return os.path.join(
-    #        os.path.dirname(
-    #        os.path.dirname(
-    #        os.path.dirname(__file__))), 'scripts')
     return SCRIPT_PATH
 
 @export
@@ -83,7 +79,7 @@ which.pathvar = PATH
 def back_tick(command,  as_str=True,
                        ret_err=False,
                      raise_err=None, **kwargs):
-    """ Run command `command`, return stdout -- or (stdout, stderr) if `ret_err`.
+    f""" Run command `command`, return stdout -- or (stdout, stderr) if `ret_err`.
         Roughly equivalent to ``check_output`` in Python 2.7.
         
         Parameters
@@ -109,7 +105,7 @@ def back_tick(command,  as_str=True,
             value).
         encoding : str, optional
             The name of the encoding to use when decoding the command output per
-            the `as_str` value. Default is “%s”.
+            the `as_str` value. Default is “{ENCODING}”.
         directory : str / Directory / path-like, optional
             The directory in which to execute the command. Default is None (in
             which case the process working directory, unchanged, will be used).
@@ -134,7 +130,7 @@ def back_tick(command,  as_str=True,
         executed command returns with any non-zero exit status, and `raise_err`
         is set to True.
         
-    """ % ENCODING
+    """
     # Step 1: Prepare for battle:
     import subprocess, shlex
     verbose = bool(kwargs.pop('verbose',  False))
@@ -149,7 +145,7 @@ def back_tick(command,  as_str=True,
         command = shlex.split(command)
     if verbose:
         print("EXECUTING:", file=sys.stdout)
-        print("`{}`".format(command_str),
+        print(f"`{command_str}`",
                             file=sys.stdout)
         print("",           file=sys.stdout)
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
@@ -165,27 +161,28 @@ def back_tick(command,  as_str=True,
     # Step 3: Analyze the return code:
     if returncode is None:
         process.terminate()
-        raise ExecutionError('`{}` terminated without exiting cleanly'.format(command_str))
+        raise ExecutionError(f'`{command_str}` terminated without exiting cleanly')
     if raise_err and returncode != 0:
-        raise ExecutionError('`{}` exited with status {}, error: “{}”'.format(command_str,
-                                   returncode,
-                                   u8str(errors).strip()))
+        error_str = u8str(errors).strip()
+        raise ExecutionError(f'`{command_str}` exited with status {returncode}, error: “{error_str}”')
     # Step 4: Tidy the output and return it:
     if verbose:
         if returncode != 0:
             print("",                           file=sys.stderr)
-            print("NONZERO RETURN STATUS: {}".format(returncode),
+            print(f"NONZERO RETURN STATUS: {returncode}",
                                                 file=sys.stderr)
             print("",                           file=sys.stderr)
         if len(u8str(output.strip())) > 0:
+            output_str = u8str(output).strip()
             print("")
             print("OUTPUT:",                            file=sys.stdout)
-            print("`{}`".format(u8str(output).strip()), file=sys.stdout)
+            print(f"`{output_str}`",                    file=sys.stdout)
             print("",                                   file=sys.stdout)
         if len(u8str(errors.strip())) > 0:
+            error_str = u8str(errors).strip()
             print("",                                   file=sys.stderr)
             print("ERRORS:",                            file=sys.stderr)
-            print("`{}`".format(u8str(errors).strip()), file=sys.stderr)
+            print(f"`{error_str}`",                     file=sys.stderr)
             print("",                                   file=sys.stderr)
     output = output.strip()
     if ret_err:

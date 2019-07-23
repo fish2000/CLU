@@ -113,7 +113,8 @@ from clu.naming import (thingname, itermodule, moduleids, nameof,
                         determine_module,
                         dotpath_join, dotpath_split, qualified_import,
                                                      qualified_name_tuple,
-                                                     qualified_name, split_abbreviations)
+                                                     qualified_name, dotpath_to_prefix,
+                        split_abbreviations)
 
 from clu.dicts import merge_two, merge_as, merge, asdict
 
@@ -307,7 +308,8 @@ __all__ = ('Image',
            'thingname', 'itermodule', 'moduleids', 'slots_for', 'nameof',
            'determine_module',
            'dotpath_join', 'dotpath_split',
-           'qualified_import', 'qualified_name_tuple', 'qualified_name', 'split_abbreviations',
+           'qualified_import', 'qualified_name_tuple', 'qualified_name', 'dotpath_to_prefix',
+           'split_abbreviations',
            'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',
            'print_separator', 'print_ansi', 'print_ansi_centered',

@@ -91,7 +91,7 @@ class ANSI(AliasingEnumMeta):
                 return self.to_string() + other.to_string()
             return NotImplemented
         
-        doc_string = """ Enumeration mapping ANSI codes to names found in “%s” """
+        doc_string = f""" Enumeration mapping ANSI codes to names found in “{qualified_name(source)}” """
         
         def to_string(self):
             return str(self.code)
@@ -101,7 +101,7 @@ class ANSI(AliasingEnumMeta):
         attributes['__init__']  = init_method
         attributes['__str__']   = str_method
         attributes['__add__']   = add_method
-        attributes['__doc__']   = doctrim(doc_string % qualified_name(source))
+        attributes['__doc__']   = doctrim(doc_string)
         attributes['to_string'] = to_string
         
         return super(ANSI, metacls).__new__(metacls, name,
@@ -136,7 +136,7 @@ class ANSI(AliasingEnumMeta):
                         cls.cache['MISSES'] += 1
                         cls.cache[lowerstring] = ansi
                         return ansi
-        raise LookupError("No ANSI code found for “%s”" % name)
+        raise LookupError(f"No ANSI code found for “{name}”")
     
     def convert(cls, specifier):
         """ Convert a specifier of unknown type to an enum or alias member """
@@ -146,8 +146,7 @@ class ANSI(AliasingEnumMeta):
             return cls.for_name(specifier)          # Match by name, decoding if necessary
         elif isinstance(specifier, bytes_types):
             return cls.for_name(str(specifier, encoding=ENCODING))
-        raise LookupError("Couldn’t convert specifier to %s: %s" % (cls.__name__,
-                                                                    str(specifier)))
+        raise LookupError(f"Couldn’t convert specifier to {cls.__name__}: {specifier!s}")
     
     def _missing_(cls, value):
         # Insert terminal256 lookup here
@@ -317,8 +316,7 @@ class ANSIFormat(ANSIFormatBase):
             called for by this ANSIFormat instance, ending with the necessary
             ANSI reset sequence(s).
         """
-        return "%s%s%s" % (self.to_string(), str(string),
-                                             str(self.RESET_ALL))
+        return f"{self.to_string()}{string!s}{self.RESET_ALL}"
 
 @export
 def print_ansi(text, color=''):
@@ -347,7 +345,7 @@ def ansidoc(*things):
     """ ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
     for thing in things:
         print(file=sys.__stdout__)
-        print_ansi_centered("__doc__ for “%s”" % nameof(thing), color=Text.CYAN)
+        print_ansi_centered(f"__doc__ for “{nameof(thing)}”", color=Text.CYAN)
         print(file=sys.__stdout__)
         print_ansi(getpyattr(thing, 'doc', "«unknown»"), color=Text.GRAY)
         print(file=sys.__stdout__)

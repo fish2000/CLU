@@ -745,15 +745,15 @@ def test():
                                "user_log_dir",
                                "user_state_dir")
     
-    print("-- “appdirectories” __version__: %s --" % __version__)
+    print(f"-- “appdirectories” __version__: {__version__} --")
     print()
     print()
     
     for system in System:
         
         print_separator()
-        print("-- System: %s %s" % (system.to_string(),
-                                   (system is SYSTEM) and "(DEFAULT)" or ""))
+        default = (system is SYSTEM) and "(DEFAULT)" or ""
+        print(f"-- System: {system.to_string()} {default}")
         # print()
         
         if (system is not System.WIN32) or ((system is System.WIN32) \

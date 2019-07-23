@@ -43,11 +43,11 @@ def stringify(instance, fields):
             field_dict.update({ u8str(field) : field_value })
     field_dict_items = []
     for k, v in field_dict.items():
-        field_dict_items.append('''%s="%s"''' % (k, v))
+        field_dict_items.append(f'''{k}="{v}"''')
     typename = type(instance).__name__
     field_dict_string = ", ".join(field_dict_items)
     hex_id = hex(id(instance))
-    return "%s(%s) @ %s" % (typename, field_dict_string, hex_id)
+    return f"{typename}({field_dict_string}) @ {hex_id}"
 
 @export
 def suffix_searcher(suffix):

@@ -55,7 +55,7 @@ class Clamper(object):
     @property
     def bits(self):
         """ A human-readable string showing the bitlength of the dtype """
-        return "%i-bit" % self.info.bits
+        return f"{self.info.bits!s}-bit"
     
     @property
     def kind(self):
@@ -72,7 +72,7 @@ class Clamper(object):
     
     @property
     def description(self):
-        return "Clamp a value within the bounds of an %s %s" % (self.bits, self.kind)
+        return f"Clamp a value within the bounds of an {self.bits} {self.kind}"
     
     def __call__(self, value, a_min=None, a_max=None):
         """ Clamp a value within the bounds of the initializing dtype """

@@ -22,7 +22,7 @@ SYMLINK = XDG_RUNTIME_DIR
 CURRENT = os.path.split(SYMLINK)[1]
 
 def name_xdg_runtime_dir(namebase=SSID):
-    return HOSTNAME.lower() + '-' + namebase.lower()
+    return f'{HOSTNAME.lower()}-{namebase.lower()}'
 
 def make_xdg_runtime_dir(directory, mode=XDG_RUNTIME_MODE):
     runtime_dir = directory.subdirectory(name_xdg_runtime_dir())
@@ -33,11 +33,11 @@ def make_xdg_runtime_dir(directory, mode=XDG_RUNTIME_MODE):
 
 def enumerate_dirs(directory):
     return (pth for pth in iter(directory) \
-                 if pth.startswith("%s%s" % (HOSTNAME.lower(), '-')))
+                 if pth.startswith(f"{HOSTNAME.lower()}-"))
 
 def create_symlink(directory, runtime_dir):
     if CURRENT in directory:
-        raise FilesystemError("Symlink “%s” already exists" % SYMLINK)
+        raise FilesystemError(f"Symlink “{SYMLINK}” already exists")
     runtime_dir.symlink(directory.subpath(CURRENT))
     return CURRENT in directory
 
@@ -73,16 +73,16 @@ def create_xdg_runtime_dir():
     
     # First, clear existing directories:
     if not remove_existing_dirs(basedir):
-        raise FilesystemError("Couldn’t clear subdirs from %s" % str(basedir))
+        raise FilesystemError(f"Couldn’t clear subdirs from {basedir!s}")
     
     # Next, make a new runtime directory:
     runtime_dir = make_xdg_runtime_dir(basedir)
     if not runtime_dir.exists:
-        raise FilesystemError("Couldn’t create XDG_RUNTIME_DIR %s" % str(runtime_dir))
+        raise FilesystemError(f"Couldn’t create XDG_RUNTIME_DIR {runtime_dir!s}")
     
     # Next, symlink the new directory:
     if not create_symlink(basedir, runtime_dir):
-        raise FilesystemError("Couldn’t symlink XDG_RUNTIME_DIR %s" % SYMLINK)
+        raise FilesystemError(f"Couldn’t symlink XDG_RUNTIME_DIR {SYMLINK}" % SYMLINK)
     
     return SYMLINK
 

@@ -205,7 +205,7 @@ class TestFsFilesystem(object):
                     'bumpversion')
         
         for binary in BINARIES:
-            assert which(binary) == back_tick("which %s" % binary)
+            assert which(binary) == back_tick(f"which {binary}")
     
     def test_write_to_path(self, temporarydir):
         from clu.fs.filesystem import write_to_path

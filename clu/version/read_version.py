@@ -87,7 +87,7 @@ def read_version(*fpath, **kwargs):
     try:
         return result
     except NameError:
-        raise ValueError('No assignment to {!r} found in file'.format(variable))
+        raise ValueError(f'No assignment to {variable!r} found in file')
 
 # The “read_version_file” lambda is a simple sugary shortcut,
 # which makes the assumption that your version variable is

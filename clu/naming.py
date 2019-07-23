@@ -84,7 +84,7 @@ def dotpath_join(base, *addenda):
             base += QUALIFIER
         if addendum.startswith(QUALIFIER):
             if len(addendum) == 1:
-                raise ValueError('operand too short: %s' % addendum)
+                raise ValueError(f'operand too short: {addendum}')
             addendum = addendum[1:]
         base += addendum
     # N.B. this might be overthinking it -- 
@@ -102,7 +102,7 @@ def dotpath_split(dotpath):
         `dotpath_split(…)` returns `(string, None)`.
     """
     head = dotpath.split(QUALIFIER)[-1]
-    tail = dotpath.replace("%s%s" % (QUALIFIER, head), '')
+    tail = dotpath.replace(f"{QUALIFIER}{head}", '')
     return head, tail != head and tail or None
 
 @export
@@ -112,12 +112,12 @@ def qualified_import(qualified):
     """
     import importlib
     if QUALIFIER not in qualified:
-        raise ValueError("qualified name required (got %s)" % qualified)
+        raise ValueError(f"qualified name required (got {qualified})")
     head, tail = dotpath_split(qualified)
     module = importlib.import_module(tail)
     imported = getattr(module, head)
     if DEBUG:
-        print("Qualified Import: %s" % qualified)
+        print(f"Qualified Import: {qualified}")
     return imported
 
 @export
@@ -137,8 +137,17 @@ def qualified_name(thing):
     mod_name, cls_name = qualified_name_tuple(thing)
     qualname = dotpath_join(mod_name, cls_name)
     if DEBUG:
-        print("Qualified Name: %s" % qualname)
+        print(f"Qualified Name: {qualname}")
     return qualname
+
+@export
+def dotpath_to_prefix(dotpath, sep='-', end='-'):
+    """ Convert a dotted path into a “prefix” string, suitable for
+        use with e.g. clu.fs.filesystem.TemporaryDirectory –
+        e.g. 'clu.typespace.namespace.Namespace' becomes:
+             'clu-typespace-namespace-namespace-'
+    """
+    return dotpath.lower().replace(QUALIFIER, sep) + end
 
 @export
 def split_abbreviations(s):

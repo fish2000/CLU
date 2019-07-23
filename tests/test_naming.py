@@ -8,6 +8,40 @@ class TestNaming(object):
     
     """ Run the tests for the clu.naming module. """
     
+    def test_dotpath_to_prefix(self):
+        from clu.naming import dotpath_to_prefix
+        
+        dp = "yo.dogg.iheard.youlike"
+        px0 = "yo-dogg-iheard-youlike-"
+        px1 = "yo-dogg-iheard-youlike≠"
+        px2 = "yo•dogg•iheard•youlike≠"
+        
+        # Ensure ValueError gets raised when arguments are bad:
+        with pytest.raises(ValueError) as exc:
+            dotpath_to_prefix(dp, end=None)
+        assert "must be non-None" in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            dotpath_to_prefix(dp, sep=None)
+        assert "must be non-None" in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            dotpath_to_prefix(dp, sep=None, end=None)
+        assert "must be non-None" in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            dotpath_to_prefix('')
+        assert "cannot be None or zero-length" in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            dotpath_to_prefix(None)
+        assert "cannot be None or zero-length" in str(exc.value)
+        
+        # Check conversion:
+        assert px0 == dotpath_to_prefix(dp)
+        assert px1 == dotpath_to_prefix(dp, end="≠")
+        assert px2 == dotpath_to_prefix(dp, sep="•", end="≠")
+    
     @pytest.mark.xfail
     def test_qualified_name_constants(self):
         """ » Checking “qualified_name(¬) on items from clu.constants …” """

@@ -167,7 +167,7 @@ class TestNaming(object):
             raise Nondeterminism(f"Nondeterminism in qualified_name(Weight) → {qname}")
     
     @pytest.mark.nondeterministic
-    def test_determine_module_failure_rate(self, clumods):
+    def test_determine_module_failure_rate(self, printer, clumods):
         """ » Checking `determine_module(…)` against `pickle.whichmodule(…)` …"""
         from clu.exporting import Exporter
         from clu.naming import determine_module
@@ -179,6 +179,10 @@ class TestNaming(object):
         
         assert len(clumods) == len(modulenames)
         
+        count = len(modulenames)
+        printer(f"» Examining {count} module names")
+        printer("")
+        
         for modulename in modulenames:
             exports = Exporter[modulename].exports()
             total += len(exports)
@@ -189,7 +193,15 @@ class TestNaming(object):
                     assert determination == whichmodule
                 except AssertionError:
                     mismatches += 1
+                    printer(f"» MISMATCH → {thing!r}")
+                    printer(f"» pickle.whichmodule(…)           == “{whichmodule}”")
+                    printer(f"» clu.naming.determine_module(…)) == “{determination}”")
+                    printer("")
         
         # In practice the failure rate seemed to be around 7.65 %
         failure_rate = 100 * (float(mismatches) / float(total))
         assert failure_rate < 8.0 # percent
+        
+        printer(f"» TOTAL# COMPARISONS: {total}")
+        printer(f"» TOTAL# MISMATCHES:  {mismatches}")
+        printer(f"» FAILURE PERCENTAGE: {failure_rate}%")

@@ -2,22 +2,17 @@
 
 import pytest
 
-XDGS = ('XDG_CONFIG_DIRS', 'XDG_DATA_HOME',
-        'XDG_CONFIG_HOME', 'XDG_DATA_DIRS',
-                          'XDG_CACHE_HOME',
-                          'XDG_STATE_HOME',
-                         'XDG_RUNTIME_DIR')
-
 @pytest.fixture
-def environment(keys=XDGS):
+def environment():
     """ Environment testing fixture: yields an instance of `os.environ`,
         free of XDG variables
     """
+    from clu.constants.data import XDGS
     import os
     stash = {}
     
     # Setup: remove XDG variables from environment:
-    for key in keys:
+    for key in XDGS:
         if key in os.environ:
             stash[key] = os.environ.get(key)
             del os.environ[key]

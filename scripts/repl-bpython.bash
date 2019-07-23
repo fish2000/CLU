@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-configdir="${PROJECT_ROOT}/.config"
-cachedir="${PROJECT_ROOT}/.cache"
-scriptbin="${PROJECT_ROOT}/.script-bin"
-
-localbin="/usr/local/bin"
-locallib="/usr/local/lib"
-localopt="/usr/local/opt"
-
 function CLU_python_module_run () {
     # Usage:
     # $ python_module_run python3 bpython  --config=path/to/config ...

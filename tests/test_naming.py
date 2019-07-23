@@ -167,7 +167,8 @@ class TestNaming(object):
             raise Nondeterminism(f"Nondeterminism in qualified_name(Weight) → {qname}")
     
     @pytest.mark.nondeterministic
-    def test_determine_module_failure_rate(self, clumods):
+    def test_determine_module_failure_rate(self, clumods,
+                                                 capsys):
         """ » Checking `determine_module(…)` against `pickle.whichmodule(…)` …"""
         from clu.exporting import Exporter
         from clu.naming import determine_module
@@ -178,6 +179,12 @@ class TestNaming(object):
         modulenames = Exporter.modulenames()
         
         assert len(clumods) == len(modulenames)
+        
+        count = len(modulenames)
+        with capsys.disabled():
+            print()
+            print(f"    » About to inspect {count} modules…")
+            print()
         
         for modulename in modulenames:
             exports = Exporter[modulename].exports()

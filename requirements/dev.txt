@@ -1,10 +1,21 @@
--r install.txt
-bpython
+-r tox.txt
+Pillow
+PyYAML
+asciiplotlib
+abpython
 bumpversion
-check-manifest
+colorio
+colormath
+cython
 flake8
 flake8-bugbear
-twine
-pytest
-pytest-print
+instakit
+ipython
 pythonpy
+pytz
+readme-renderer
+requests
+scipy
+twine
+yajl
+xerox

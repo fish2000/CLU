@@ -3,7 +3,8 @@ from __future__ import print_function
 
 import re
 
-from clu.constants import unicode, PY3, ENCODING
+from clu.constants.consts import PY3, ENCODING
+from clu.constants.polyfills import unicode
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

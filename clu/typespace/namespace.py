@@ -3,9 +3,8 @@ from __future__ import print_function
 
 import re
 
-from clu.constants import SEPARATOR_WIDTH
-from clu.constants import NoDefault, MutableMapping
-from clu.constants import pytuple
+from clu.constants.consts import SEPARATOR_WIDTH, pytuple, NoDefault
+from clu.constants.polyfills import MutableMapping
 from clu.dicts import merge_two, asdict
 from clu.naming import determine_name
 from clu.predicates import ismergeable

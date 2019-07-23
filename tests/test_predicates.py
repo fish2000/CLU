@@ -266,8 +266,8 @@ class TestPredicates(object):
     def test_applyto(self):
         """ » Checking “apply_to(…)” core function from clu.predicates … """
         from string import capwords
+        from clu.constants.consts import ENCODING, SINGLETON_TYPES
         from clu.predicates import apply_to, isclasstype
-        from clu.constants import ENCODING, SINGLETON_TYPES
         from clu.typology import (numeric_types, string_types, bytes_types,
                                   callable_types, array_types, path_types)
         
@@ -458,7 +458,7 @@ class TestPredicates(object):
     def test_enum_predicates(self):
         """ » Checking “isenum” and “enumchoices” functions from clu.predicates … """
         from clu.predicates import isenum, enumchoices
-        from clu.constants import Enum, System, CSIDL
+        from clu.constants.enums import Enum, System, CSIDL
         
         class NotAnEnum(object):
             pass
@@ -484,7 +484,7 @@ class TestPredicates(object):
     def test_getattr_shortcuts(self):
         """ » Checking “getattr/getpyattr/getitem” shortcuts from clu.predicates … """
         from random import shuffle
-        from clu.constants import NoDefault
+        from clu.constants.consts import NoDefault
         from clu.predicates import (or_none, getpyattr, getitem,
                                     attr, pyattr, item,
                                     attr_search, pyattr_search, item_search)

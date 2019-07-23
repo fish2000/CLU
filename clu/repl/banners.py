@@ -19,7 +19,7 @@ import colorama
 import os
 import sys
 
-from clu.constants import DEBUG, PY3, PYPY, TEXTMATE
+from clu.constants.consts import DEBUG, PY3, PYPY, TEXTMATE
 from .ansi import Text, print_ansi_centered
 from clu.exporting import Exporter
 

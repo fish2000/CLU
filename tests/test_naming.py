@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from clu.constants import Nondeterminism
+from clu.constants.exceptions import Nondeterminism
 
 import pytest
 

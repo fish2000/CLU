@@ -175,31 +175,29 @@ class TestNaming(object):
         except AssertionError:
             raise Nondeterminism(f"Nondeterminism in qualified_name(Weight) → {qname}")
     
-    def _test_determine_module(self):
+    def test_determine_module_failure_rate(self, clumods):
         """ » Checking `determine_module(…)` against `pickle.whichmodule(…)` …"""
-        
         from clu.naming import determine_module
-        from clu.exporting import exporter
-        
+        from clu.exporting import Exporter
         import pickle
+        
+        total = 0
         mismatches = 0
-        # print_separator()
+        modulenames = Exporter.modulenames()
         
-        for name, thing in exporter.exports().items():
-            # clade = Clade.of(thing, name_hint=name)
-            determination = determine_module(thing)
-            whichmodule = pickle.whichmodule(thing, None)
-            try:
-                assert determination == whichmodule
-            except AssertionError:
-                mismatches += 1
-                # print(f"»»» Module-lookup mismatch for {clade.to_string()} “{name}”")
-                # print(f"»»»   determine_module(…) → {determination}")
-                # print(f"»»» pickle.whichmodule(…) → {whichmodule}")
-                # print()
+        assert len(clumods) == len(modulenames)
         
-        # print(f"≠≠≠ TOTAL EXPORTED THING COUNT: {len(exporter)}")
-        # print(f"≠≠≠ TOTAL MISMATCHES FOUND: {mismatches!s}")
-        # print_separator()
-        # print()
-    
+        for modulename in modulenames:
+            exports = Exporter[modulename].exports()
+            total += len(exports)
+            for name, thing in exports.items():
+                whichmodule = pickle.whichmodule(thing, None)
+                determination = determine_module(thing)
+                try:
+                    assert determination == whichmodule
+                except AssertionError:
+                    mismatches += 1
+        
+        # In practice the failure rate seemed to be around 7.65 %
+        failure_rate = 100 * (float(mismatches) / float(total))
+        assert failure_rate < 8.0 # percent

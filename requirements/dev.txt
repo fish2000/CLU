@@ -1,4 +1,5 @@
 -r tox.txt
+Click
 Pillow
 PyYAML
 asciiplotlib
@@ -9,13 +10,17 @@ colormath
 cython
 flake8
 flake8-bugbear
+gfm
 instakit
+imageio
 ipython
+multidict
 pythonpy
 pytz
 readme-renderer
 requests
 scipy
+tifffile
 twine
 yajl
 xerox

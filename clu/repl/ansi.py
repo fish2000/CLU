@@ -6,8 +6,9 @@ import colorama
 colorama.init()
 
 import sys
+import zict
 
-from clu.constants.consts import ENCODING, SEPARATOR_WIDTH
+from clu.constants.consts import DEBUG, ENCODING, SEPARATOR_WIDTH
 from clu.constants.polyfills import Enum, unique, auto
 from clu.naming import nameof, qualified_name
 from clu.predicates import getpyattr
@@ -19,6 +20,7 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 print_separator = lambda filler='-': print(filler * SEPARATOR_WIDTH)
+evict_announcer = lambda key, value: print(f"Cache dropped: {key}")
 
 @export
 class ANSIBase(Enum):
@@ -31,21 +33,23 @@ class ANSIBase(Enum):
 
 class CacheDescriptor(object):
     
-    __slots__ = ('cache',)
+    __slots__ = ('cache', 'lru')
     
     def __init__(self):
         self.cache = {}
-        self.cache['HITS'] = 0
-        self.cache['MISSES'] = 0
+        self.lru = zict.LRU(18, self.cache,
+                                on_evict=(DEBUG \
+                                and evict_announcer \
+                                or None))
     
     def __get__(self, *args):
-        return self.cache
+        return self.lru
     
     def __set__(self, instance, value):
-        self.cache = value
+        self.lru = value
     
     def __repr__(self):
-        return repr(self.cache)
+        return repr(self.lru)
 
 @export
 class ANSI(AliasingEnumMeta):
@@ -115,14 +119,12 @@ class ANSI(AliasingEnumMeta):
         lowerstring = name.lower()
         # Check cache and return if found:
         if lowerstring in cls.cache:
-            cls.cache['HITS'] += 1
             return cls.cache[lowerstring]
         # Walk through standard ANSI names first:
         for ansi in cls:
             if ansi.name.lower() == lowerstring:
                 # If a match is found on an unaliased name,
                 # simply cache and return:
-                cls.cache['MISSES'] += 1
                 cls.cache[lowerstring] = ansi
                 return ansi
         # Try aliased ANSI names second:
@@ -133,7 +135,6 @@ class ANSI(AliasingEnumMeta):
                 # and returning:
                 for ansi in cls:
                     if ansi.value == ansialias:
-                        cls.cache['MISSES'] += 1
                         cls.cache[lowerstring] = ansi
                         return ansi
         raise LookupError(f"No ANSI code found for “{name}”")

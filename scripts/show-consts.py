@@ -104,6 +104,9 @@ def main():
     else:
         # Show ’em and weep:
         show()
+        if consts.DEBUG:
+            print()
+            print(f"")
 
 if __name__ == '__main__':
     main()

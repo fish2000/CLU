@@ -59,10 +59,7 @@ class TestNaming(object):
         
         for name, const in zip(names, consts):
             qname = qualified_name(const)
-            try:
-                assert qname == f'clu.constants.consts.{name}'
-            except AssertionError:
-                raise Nondeterminism(f"Nondeterminism in qualified_name({name}) → {qname}")
+            assert qname == f'clu.constants.consts.{name}'
         
         """ This commented-out bit fails because “clu.__title__” (defined in clu/__init__.py)
             is the same string – and interning makes them into the same object. """

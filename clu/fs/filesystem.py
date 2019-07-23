@@ -53,10 +53,10 @@ def write_to_path(data, pth, relative_to=None, verbose=False):
         handle.write(bytestring)
         handle.flush()
     if verbose:
+        size = len(bytestring)
         start = relative_to or os.path.dirname(pth)
-        print("» Wrote %i bytes to %s" % (len(bytestring),
-                                          os.path.relpath(pth,
-                                                          start=start)))
+        relpth = os.path.relpath(pth, start=start)
+        print(f"» Wrote {size!s} bytes to {relpth}")
 
 @export
 def script_path():

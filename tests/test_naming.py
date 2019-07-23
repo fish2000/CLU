@@ -49,11 +49,12 @@ class TestNaming(object):
         assert px1 == path_to_prefix(pp, end="≠")
         assert px2 == path_to_prefix(pp, sep="•", end="≠")
     
-    @pytest.mark.xfail
+    # @pytest.mark.xfail
     def test_qualified_name_constants(self):
         """ » Checking “qualified_name(¬) on items from clu.constants …” """
         
-        from clu.constants.consts import BASEPATH, HOSTNAME, PROJECT_NAME, VERBOTEN
+        # from clu.constants.consts import BASEPATH, HOSTNAME, PROJECT_NAME, VERBOTEN
+        from clu.constants.consts import BASEPATH, HOSTNAME, VERBOTEN
         from clu.naming import qualified_name
         
         qname = qualified_name(VERBOTEN)
@@ -62,11 +63,11 @@ class TestNaming(object):
         except AssertionError:
             raise Nondeterminism(f"Nondeterminism in qualified_name(VERBOTEN) → {qname}")
         
-        qname = qualified_name(PROJECT_NAME)
-        try:
-            assert qname == 'clu.constants.consts.PROJECT_NAME'
-        except AssertionError:
-            raise Nondeterminism(f"Nondeterminism in qualified_name(PROJECT_NAME) → {qname}")
+        # qname = qualified_name(PROJECT_NAME)
+        # try:
+        #     assert qname == 'clu.constants.consts.PROJECT_NAME'
+        # except AssertionError:
+        #     raise Nondeterminism(f"Nondeterminism in qualified_name(PROJECT_NAME) → {qname}")
         
         qname = qualified_name(HOSTNAME)
         try:

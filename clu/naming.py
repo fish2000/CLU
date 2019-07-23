@@ -4,7 +4,7 @@ from __future__ import print_function
 import warnings
 
 from clu.constants.consts import BUILTINS, DEBUG, QUALIFIER
-from clu.exporting import determine_name, Exporter
+from clu.exporting import determine_name, path_to_dotpath, Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -152,6 +152,13 @@ def dotpath_to_prefix(dotpath, sep='-', end='-'):
     if not dotpath:
         raise ValueError(f"“dotpath” cannot be None or zero-length (dotpath={dotpath})")
     return dotpath.lower().replace(QUALIFIER, sep) + end
+
+@export
+def path_to_prefix(path, sep='-', end='-'):
+    """ Shortcut for dotpath_to_prefix(path_to_dotpath(…)) """
+    return dotpath_to_prefix(path_to_dotpath(path),
+                             sep=sep,
+                             end=end)
 
 @export
 def split_abbreviations(s):

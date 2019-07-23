@@ -8,13 +8,15 @@ class TestNaming(object):
     
     """ Run the tests for the clu.naming module. """
     
-    def test_dotpath_to_prefix(self):
-        from clu.naming import dotpath_to_prefix
+    def test_dotpath_to_prefix_and_path_to_prefix(self):
+        from clu.naming import dotpath_to_prefix, path_to_prefix
         
         dp = "yo.dogg.iheard.youlike"
         px0 = "yo-dogg-iheard-youlike-"
         px1 = "yo-dogg-iheard-youlike≠"
         px2 = "yo•dogg•iheard•youlike≠"
+        
+        pp = "/yo/dogg/iheard/youlike.py"
         
         # Ensure ValueError gets raised when arguments are bad:
         with pytest.raises(ValueError) as exc:
@@ -37,10 +39,15 @@ class TestNaming(object):
             dotpath_to_prefix(None)
         assert "cannot be None or zero-length" in str(exc.value)
         
-        # Check conversion:
+        # Check dotpath conversion:
         assert px0 == dotpath_to_prefix(dp)
         assert px1 == dotpath_to_prefix(dp, end="≠")
         assert px2 == dotpath_to_prefix(dp, sep="•", end="≠")
+        
+        # Check path conversion:
+        assert px0 == path_to_prefix(pp)
+        assert px1 == path_to_prefix(pp, end="≠")
+        assert px2 == path_to_prefix(pp, sep="•", end="≠")
     
     @pytest.mark.xfail
     def test_qualified_name_constants(self):

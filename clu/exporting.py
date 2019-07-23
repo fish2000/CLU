@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import sys, os
 import warnings
+import weakref
 
 from clu.constants.consts import λ, φ, NoDefault, pytuple
 from clu.constants.exceptions import ExportError, ExportWarning
@@ -183,13 +184,25 @@ def predicates_for_types(*types):
 class Exporter(MutableMapping):
     
     """ A class representing a list of things for a module to export. """
-    __slots__ = pytuple('exports') + ('path', 'dotpath')
+    __slots__ = pytuple('exports', 'weakref') + ('path', 'dotpath')
+    instances = weakref.WeakValueDictionary()
+    
+    def __new__(cls, *args, **kwargs):
+        try:
+            instance = super(Exporter, cls).__new__(cls, *args, **kwargs)
+        except TypeError:
+            instance = super(Exporter, cls).__new__(cls)
+        
+        instance.path = kwargs.pop('path', None)
+        instance.dotpath = path_to_dotpath(instance.path)
+        
+        if instance.dotpath is not None:
+            cls.instances[instance.dotpath] = instance
+        
+        return instance
     
     def __init__(self, *args, **kwargs):
         self.__exports__ = {}
-        
-        self.path = kwargs.pop('path', None)
-        self.dotpath = path_to_dotpath(self.path)
         
         for arg in args:
             if hasattr(arg, '__exports__'):

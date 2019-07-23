@@ -144,9 +144,13 @@ def qualified_name(thing):
 def dotpath_to_prefix(dotpath, sep='-', end='-'):
     """ Convert a dotted path into a “prefix” string, suitable for
         use with e.g. clu.fs.filesystem.TemporaryDirectory –
-        e.g. 'clu.typespace.namespace.Namespace' becomes:
-             'clu-typespace-namespace-namespace-'
+        e.g. 'clu.typespace.namespace.SimpleNamespace' becomes:
+             'clu-typespace-namespace-simplenamespace-'
     """
+    if any(c is None for c in (sep, end)):
+        raise ValueError(f"“sep” and “end” must be non-None (sep={sep}, end={end})")
+    if not dotpath:
+        raise ValueError(f"“dotpath” cannot be None or zero-length (dotpath={dotpath})")
     return dotpath.lower().replace(QUALIFIER, sep) + end
 
 @export

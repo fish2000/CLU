@@ -153,7 +153,8 @@ from clu import keyvalue
 from clu.enums import (DUNDER, SUNDER,
                        alias, AliasingEnumMeta, AliasingEnum)
 
-from clu.repl.ansi import (print_separator, print_ansi, print_ansi_centered,
+from clu.repl.ansi import (print_separator, evict_announcer,
+                           print_ansi, print_ansi_centered,
                            ansidoc, highlight,
                            ANSIBase, ANSI,
                            Text, Weight, Background, ANSIFormat)
@@ -314,7 +315,8 @@ __all__ = ('Image',
            'split_abbreviations',
            'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',
-           'print_separator', 'print_ansi', 'print_ansi_centered',
+           'print_separator', 'evict_announcer',
+           'print_ansi', 'print_ansi_centered',
            'ansidoc', 'highlight',
            'ANSIBase', 'ANSI',
            'Text', 'Weight', 'Background', 'ANSIFormat',

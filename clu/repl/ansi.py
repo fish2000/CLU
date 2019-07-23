@@ -369,6 +369,7 @@ def highlight(code_string, language='json',
     return pygments.highlight(code_string, lexer=LexerCls(), formatter=formatter)
 
 export(print_separator,     name='print_separator', doc="print_separator(filler_char='-') → print filler_char TERMINAL_WIDTH times")
+export(evict_announcer,     name='evict_announcer', doc="evict_announcer(key, value) → print a debug trace message about the key and value")
 
 # NO DOCS ALLOWED:
 export(Text)

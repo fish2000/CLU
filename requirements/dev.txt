@@ -3,7 +3,7 @@ Click
 Pillow
 PyYAML
 asciiplotlib
-abpython
+bpython
 bumpversion
 colorio
 colormath

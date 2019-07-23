@@ -49,37 +49,28 @@ class TestNaming(object):
         assert px1 == path_to_prefix(pp, end="≠")
         assert px2 == path_to_prefix(pp, sep="•", end="≠")
     
-    # @pytest.mark.xfail
     def test_qualified_name_constants(self):
         """ » Checking “qualified_name(¬) on items from clu.constants …” """
-        
-        # from clu.constants.consts import BASEPATH, HOSTNAME, PROJECT_NAME, VERBOTEN
-        from clu.constants.consts import BASEPATH, HOSTNAME, VERBOTEN
+        from clu.constants.consts import (BASEPATH, HOSTNAME, VERBOTEN, SCRIPT_PATH, TEST_PATH)
         from clu.naming import qualified_name
         
-        qname = qualified_name(VERBOTEN)
-        try:
-            assert qname == 'clu.constants.consts.VERBOTEN'
-        except AssertionError:
-            raise Nondeterminism(f"Nondeterminism in qualified_name(VERBOTEN) → {qname}")
+        names = ('BASEPATH', 'HOSTNAME', 'VERBOTEN', 'SCRIPT_PATH', 'TEST_PATH')
+        consts = (BASEPATH, HOSTNAME, VERBOTEN, SCRIPT_PATH, TEST_PATH)
         
+        for name, const in zip(names, consts):
+            qname = qualified_name(const)
+            try:
+                assert qname == f'clu.constants.consts.{name}'
+            except AssertionError:
+                raise Nondeterminism(f"Nondeterminism in qualified_name({name}) → {qname}")
+        
+        """ This commented-out bit fails because “clu.__title__” (defined in clu/__init__.py)
+            is the same string – and interning makes them into the same object. """
         # qname = qualified_name(PROJECT_NAME)
         # try:
         #     assert qname == 'clu.constants.consts.PROJECT_NAME'
         # except AssertionError:
         #     raise Nondeterminism(f"Nondeterminism in qualified_name(PROJECT_NAME) → {qname}")
-        
-        qname = qualified_name(HOSTNAME)
-        try:
-            assert qname == 'clu.constants.consts.HOSTNAME'
-        except AssertionError:
-            raise Nondeterminism(f"Nondeterminism in qualified_name(HOSTNAME) → {qname}")
-        
-        qname = qualified_name(BASEPATH)
-        try:
-            assert qname == 'clu.constants.consts.BASEPATH'
-        except AssertionError:
-            raise Nondeterminism(f"Nondeterminism in qualified_name(BASEPATH) → {qname}")
     
     def test_qualified_name_instances(self):
         """ » Checking “qualified_name(¬) on instances of objects …” """

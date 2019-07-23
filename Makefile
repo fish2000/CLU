@@ -24,10 +24,7 @@ clean-cython:
 clean-build-artifacts: clean-cython
 	rm -rf build dist python_$(PROJECT_NAME).egg-info
 
-clean-pytest-artifacts:
-	pushd $(TMPDIR) && rm -rf pytest-of-$(USER) && popd
-
-clean-test-artifacts: clean-pyc clean-pytest-artifacts
+clean-test-artifacts: clean-pyc
 	rm -rf ../.pytest_cache ../.hypothesis .pytest_cache .hypothesis .tox
 
 cython:

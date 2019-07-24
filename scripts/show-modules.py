@@ -43,7 +43,7 @@ def import_clu_modules(modnames=MODNAMES):
 Mismatch = NamedTuple('Mismatch', ('which',
                                    'determine',
                                    'modulename',
-                                   'search_modules',
+                                   'thingname',
                                    'idx'), module=__file__)
 
 Results = NamedTuple('Results', ('total',
@@ -111,7 +111,7 @@ def show():
     for mismatch in results.mismatches:
         idx = f"{mismatch.idx}"
         
-        printout(f"{mismatch.search_modules} [{idx.zfill(2)}]",
+        printout(f"{mismatch.thingname} [{idx.zfill(2)}]",
                  f"{mismatch.which} ≠ {mismatch.determine}")
     
     print()

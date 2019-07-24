@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import warnings
-
-from clu.constants.consts import BASEPATH, BUILTINS, DEBUG, QUALIFIER, NoDefault
+from clu.constants.consts import BASEPATH, DEBUG, QUALIFIER, NoDefault
 from clu.exporting import determine_name, path_to_dotpath, Exporter
 
 exporter = Exporter(path=__file__)
@@ -14,41 +12,6 @@ export = exporter.decorator()
 # by thing names or id(thing) values
 
 @export
-def itermodule(module):
-    """ Get an iterable of `(name, thing)` tuples for all things
-        contained in a given module (although it’ll probably work
-        for classes and instances too – anything `dir()`-able.)
-    """
-    keys = tuple(key for key in sorted(dir(module)) \
-                      if key not in BUILTINS)
-    values = (getattr(module, key) for key in keys)
-    return zip(keys, values)
-
-@export
-def moduleids(module):
-    """ Get a dictionary of `(name, thing)` tuples from a module,
-        indexed by the `id()` value of `thing`
-    """
-    out = {}
-    for key, thing in itermodule(module):
-        out[id(thing)] = (key, thing)
-    return out
-
-@export
-def thingname(original, *modules):
-    """ Find the name of a thing, according to what it is called
-        in the context of a module in which it resides
-    """
-    inquestion = id(original)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        for module in frozenset(modules):
-            for key, thing in itermodule(module):
-                if id(thing) == inquestion:
-                    return key
-    return None
-
-@export
 def nameof(thing, default=NoDefault):
     """ Get the name of a thing, according to either:
         >>> thing.__qualname__
@@ -56,9 +19,15 @@ def nameof(thing, default=NoDefault):
         >>> thing.__name__
         … optionally specifying a “default” fallback.
     """
+    from clu.predicates import pyname
+    
+    result = pyname(thing) or \
+             Exporter.nameof(thing) or \
+             determine_name(thing)
+    
     if default is NoDefault:
-        return determine_name(thing)
-    return determine_name(thing) or default
+        return dotpath_split(result)[0]
+    return dotpath_split(result)[0] or default
 
 @export
 def determine_module(thing):
@@ -67,10 +36,11 @@ def determine_module(thing):
     """
     import pickle
     from clu.exporting import thingname_search_by_id
-    from clu.predicates import pyattr
-    return pyattr(thing, 'module', 'package') or \
+    from clu.predicates import pymodule
+    return pymodule(thing) or \
            determine_name(
-           thingname_search_by_id(id(thing))[0]) or \
+               Exporter.moduleof(thing) or \
+               thingname_search_by_id(id(thing))[0]) or \
            pickle.whichmodule(thing, None)
 
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
@@ -103,6 +73,8 @@ def dotpath_split(dotpath):
         When called with a string containing no dots,
         `dotpath_split(…)` returns `(string, None)`.
     """
+    if dotpath is None:
+        return None
     head = dotpath.split(QUALIFIER)[-1]
     tail = dotpath.replace(f"{QUALIFIER}{head}", '')
     return head, tail != head and tail or None

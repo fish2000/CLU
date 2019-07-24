@@ -40,6 +40,27 @@ def doctrim(docstring):
     # Return a single string:
     return '\n'.join(trimmed)
 
+def itermodule(module):
+    """ Get an iterable of `(name, thing)` tuples for all things
+        contained in a given module (although it’ll probably work
+        for classes and instances too – anything `dir()`-able.)
+    """
+    from clu.constants.consts import BUILTINS
+    
+    keys = tuple(key for key in sorted(dir(module)) \
+                      if key not in BUILTINS)
+    values = (getattr(module, key) for key in keys)
+    return zip(keys, values)
+
+def moduleids(module):
+    """ Get a dictionary of `(name, thing)` tuples from a module,
+        indexed by the `id()` value of `thing`
+    """
+    out = {}
+    for key, thing in itermodule(module):
+        out[id(thing)] = (key, thing)
+    return out
+
 def itermoduleids(module):
     """ Internal function to get an iterable of `(name, id(thing))`
         tuples for all things comntained in a given module – q.v.
@@ -103,6 +124,19 @@ def thingname_search(thing):
         uses the LRU cache from `functools`.
     """
     return thingname_search_by_id(id(thing))[1]
+
+def thingname(thing, *modules):
+    """ Find the name of a thing, according to what it is called
+        in the context of a module in which it resides
+    """
+    inquestion = id(thing)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        for module in frozenset(modules):
+            for key, value in itermodule(module):
+                if id(value) == inquestion:
+                    return module, key
+    return None, None
 
 def determine_name(thing, name=None, try_repr=False):
     """ Private module function to find a name for a thing. """
@@ -195,6 +229,8 @@ class Exporter(MutableMapping):
     __slots__ = pytuple('exports', 'weakref') + ('path', 'dotpath')
     instances = weakref.WeakValueDictionary()
     
+    basepath = BASEPATH
+    
     def __new__(cls, *args, **kwargs):
         try:
             instance = super(Exporter, cls).__new__(cls, *args, **kwargs)
@@ -203,7 +239,7 @@ class Exporter(MutableMapping):
         
         instance.path = kwargs.pop('path', None)
         instance.dotpath = path_to_dotpath(instance.path,
-                                           relative_to=BASEPATH)
+                                           relative_to=cls.basepath)
         
         if instance.dotpath is not None:
             cls.instances[instance.dotpath] = instance
@@ -251,6 +287,20 @@ class Exporter(MutableMapping):
         
         modules = dict(zip(modulenames, mods))
         return modules
+    
+    @classmethod
+    def nameof(cls, thing):
+        """ Find the name of a thing, if that thing should be found
+            to reside in one of the exported modules
+        """
+        return thingname(thing, *cls.modules().values())[1]
+    
+    @classmethod
+    def moduleof(cls, thing):
+        """ Find the module name for a thing, if that thing should be found
+            to reside in one of the exported modules
+        """
+        return thingname(thing, *cls.modules().values())[0]
     
     def __init__(self, *args, **kwargs):
         self.__exports__ = {}
@@ -496,7 +546,11 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 export(doctrim)
+export(itermodule)
+export(moduleids)
+export(itermoduleids)
 export(thingname_search)
+export(thingname)
 export(determine_name)
 export(path_to_dotpath)
 export(predicates_for_types)

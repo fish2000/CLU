@@ -161,6 +161,7 @@ function_nop = lambda iterable: None
 
 uncallable = negate(callable)
 pyname = lambda thing: pyattr(thing, 'qualname', 'name')
+pymodule = lambda thing: pyattr(thing, 'module', 'package')
 
 isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,
                                                 map, filter, reversed) or isenum(thing))
@@ -363,6 +364,7 @@ export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → bo
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns `None`")
 export(uncallable,      name='uncallable',      doc="uncallable(thing) → boolean predicate, shortcut for `not callable(thing)`")
 export(pyname,          name='pyname',          doc="pyname(thing) → Return either `__qualname__` or `__name__` from a given `thing`")
+export(pymodule,        name='pymodule',        doc="pymodule(thing) → Return either `__module__` or `__package__` from a given `thing`")
 
 export(isexpandable,    name='isexpandable',    doc="isexpandable(thing) → boolean predicate, True if `thing` can be `*expanded`")
 export(isnormative,     name='isnormative',     doc="isnormative(thing) → boolean predicate, True if `thing` is a string-like or bytes-like iterable")

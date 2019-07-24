@@ -402,6 +402,24 @@ else:
 __dir__ = lambda: list(__all__)
 modules = tuple(__dir__())
 
+# Set up some “example” instances –
+# I frequently create trivial lists, strings, tuples etc.,
+# to be used as exemplars from which I can check methods and
+# suchlike using the interactive interpreter:
+b = b'yo dogg'
+B = bytearray(b)
+c = complex(0, 1)
+d = { 'yo' : "dogg" }
+t = ('yo', 'dogg')
+l = ['yo', 'dogg']
+m = memoryview(B)
+S = { 'yo', 'dogg' }
+f = 0.666
+F = frozenset(S)
+i = 666
+o = object()
+s = 'yo dogg'
+
 # Remove duplicate sys.paths:
 import site
 site.removeduppaths()

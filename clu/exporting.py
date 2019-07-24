@@ -161,7 +161,10 @@ def path_to_dotpath(path, relative_to=None):
     dotpath = relpath.replace(os.path.sep, QUALIFIER)
     
     # Trim off any remaining “.py” suffixes,
-    # and extraneous dot-prefixes:
+    # and extraneous dot-prefixes –
+    # N.B. Items in “replaceable_endings” tuple that
+    # possibly contain other such items should appear
+    # *before* the items that they contain, e.g.:
     replaceable_endings = ('.__init__.py', '.py')
     
     for ending in replaceable_endings:

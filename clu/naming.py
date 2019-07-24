@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import warnings
 
-from clu.constants.consts import BUILTINS, DEBUG, QUALIFIER, NoDefault
+from clu.constants.consts import BASEPATH, BUILTINS, DEBUG, QUALIFIER, NoDefault
 from clu.exporting import determine_name, path_to_dotpath, Exporter
 
 exporter = Exporter(path=__file__)
@@ -156,11 +156,10 @@ def dotpath_to_prefix(dotpath, sep='-', end='-'):
     return dotpath.lower().replace(QUALIFIER, sep) + end
 
 @export
-def path_to_prefix(path, sep='-', end='-'):
+def path_to_prefix(path, sep='-', end='-', relative_to=BASEPATH):
     """ Shortcut for dotpath_to_prefix(path_to_dotpath(…)) """
-    from clu.constants.consts import BASEPATH
     return dotpath_to_prefix(path_to_dotpath(path,
-                                             relative_to=BASEPATH),
+                                             relative_to=relative_to),
                              sep=sep,
                              end=end)
 

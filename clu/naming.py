@@ -158,7 +158,9 @@ def dotpath_to_prefix(dotpath, sep='-', end='-'):
 @export
 def path_to_prefix(path, sep='-', end='-'):
     """ Shortcut for dotpath_to_prefix(path_to_dotpath(…)) """
-    return dotpath_to_prefix(path_to_dotpath(path),
+    from clu.constants.consts import BASEPATH
+    return dotpath_to_prefix(path_to_dotpath(path,
+                                             relative_to=BASEPATH),
                              sep=sep,
                              end=end)
 

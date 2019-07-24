@@ -4,7 +4,10 @@ from __future__ import print_function
 import os
 import re
 
-from clu.constants.consts import DYNAMIC_MODULE_PREFIX, PROJECT_NAME, VERBOTEN
+from clu.constants.consts import (BASEPATH,
+                                  DYNAMIC_MODULE_PREFIX,
+                                  PROJECT_NAME, VERBOTEN)
+
 from clu.constants.polyfills import cache_from_source
 from .namespace import SimpleNamespace, Namespace
 from clu.exporting import Exporter
@@ -76,7 +79,9 @@ def modulize(name, namespace, docs=None,
     if path:
         qualified_name = dotpath_join(DYNAMIC_MODULE_PREFIX,
                                       PROJECT_NAME,
-                                      path_to_dotpath(path), name)
+                                      path_to_dotpath(path,
+                                                      relative_to=BASEPATH),
+                                      name)
         
         # Note that one can use a file path that does not
         # have to necessarily exist on the filesystem in an

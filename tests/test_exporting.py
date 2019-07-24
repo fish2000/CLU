@@ -16,6 +16,7 @@ class TestExporting(object):
     
     @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_exporter_instance_registry(self, clumods):
+        from clu.constants.consts import BASEPATH
         from clu.constants.data import MODNAMES
         from clu.exporting import path_to_dotpath, Exporter
         
@@ -28,7 +29,8 @@ class TestExporting(object):
             module = clumods[modname]
             assert Exporter[modname]
             assert Exporter[modname].path == module.__file__
-            assert Exporter[modname].dotpath == path_to_dotpath(module.__file__)
+            assert Exporter[modname].dotpath == path_to_dotpath(module.__file__,
+                                                                relative_to=BASEPATH)
             assert Exporter[modname].all_tuple() == module.__all__
     
     def test_combine_real_world_exporters_2(self):

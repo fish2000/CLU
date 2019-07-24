@@ -408,14 +408,14 @@ modules = tuple(__dir__())
 # suchlike using the interactive interpreter:
 b = b'yo dogg'
 B = bytearray(b)
+m = memoryview(b)
 c = complex(0, 1)
 d = { 'yo' : "dogg" }
 t = ('yo', 'dogg')
 l = ['yo', 'dogg']
-m = memoryview(B)
 S = { 'yo', 'dogg' }
-f = 0.666
 F = frozenset(S)
+f = 0.666
 i = 666
 o = object()
 s = 'yo dogg'

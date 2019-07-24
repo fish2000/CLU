@@ -5,7 +5,7 @@ import sys, os
 import warnings
 import weakref
 
-from clu.constants.consts import λ, φ, NoDefault, pytuple
+from clu.constants.consts import λ, φ, BASEPATH, NoDefault, pytuple
 from clu.constants.exceptions import ExportError, ExportWarning
 from clu.constants.polyfills import MutableMapping, lru_cache
 
@@ -138,7 +138,7 @@ def determine_name(thing, name=None, try_repr=False):
     # up returning None:
     return thingname_search(thing)
 
-def path_to_dotpath(path):
+def path_to_dotpath(path, relative_to=None):
     """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
         to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
         would call a “quick and dirty” fashion.
@@ -147,24 +147,27 @@ def path_to_dotpath(path):
         dashes – I don’t quite know what to do about something
         like that besides warn, so erm. There you go.
     """
-    from clu.constants.consts import BASEPATH, QUALIFIER
+    from clu.constants.consts import QUALIFIER
     from clu.constants.exceptions import BadDotpathWarning
     
     # Garbage in, garbage out:
     if path is None:
         return None
     
-    # Relativize the path to the BASEPATH,
+    # Relativize the path to either the “relative_to” arg
+    # …or – if that’s not a thing – the filesystem root,
     # and replace slashes with dots:
-    relpath = os.path.relpath(path, start=BASEPATH)
+    relpath = os.path.relpath(path, start=relative_to or "/")
     dotpath = relpath.replace(os.path.sep, QUALIFIER)
     
     # Trim off any remaining “.py” suffixes,
     # and extraneous dot-prefixes:
-    if dotpath.endswith('.__init__.py'):
-        dotpath = dotpath[:len(dotpath)-12]
-    elif dotpath.endswith('.py'):
-        dotpath = dotpath[:len(dotpath)-3]
+    replaceable_endings = ('.__init__.py', '.py')
+    
+    for ending in replaceable_endings:
+        if dotpath.endswith(ending):
+            dotpath = dotpath[:len(dotpath)-len(ending)]
+    
     while dotpath.startswith(QUALIFIER):
         dotpath = dotpath[1:]
     
@@ -196,7 +199,8 @@ class Exporter(MutableMapping):
             instance = super(Exporter, cls).__new__(cls)
         
         instance.path = kwargs.pop('path', None)
-        instance.dotpath = path_to_dotpath(instance.path)
+        instance.dotpath = path_to_dotpath(instance.path,
+                                           relative_to=BASEPATH)
         
         if instance.dotpath is not None:
             cls.instances[instance.dotpath] = instance

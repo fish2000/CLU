@@ -7,7 +7,7 @@ import pickle
 
 from clu.constants.data import MODNAMES
 from clu.exporting import Exporter
-from clu.naming import determine_module, nameof
+from clu.naming import nameof, moduleof
 from clu.constants import consts
 from clu.repl import ansi
 from ansicolors import (green, red, lightred, cyan, dimcyan,
@@ -43,7 +43,7 @@ def import_clu_modules(modnames=MODNAMES):
 Mismatch = NamedTuple('Mismatch', ('which',
                                    'determine',
                                    'modulename',
-                                   'thingname',
+                                   'search_modules',
                                    'idx'), module=__file__)
 
 Results = NamedTuple('Results', ('total',
@@ -56,7 +56,7 @@ def compare_module_lookups_for_all_things():
         and look up the original module of the exported item with both:
             
             1) “pickle.whichmodule(…)” and
-            2) “clu.naming.determine_module(…)”
+            2) “clu.naming.moduleof(…)”
         
         … comparing the results of the two search functions and computing
         the overall results.
@@ -74,7 +74,7 @@ def compare_module_lookups_for_all_things():
         total += len(exports)
         for name, thing in exports.items():
             whichmodule = pickle.whichmodule(thing, None)
-            determination = determine_module(thing)
+            determination = moduleof(thing)
             try:
                 assert determination == whichmodule
             except AssertionError:
@@ -111,7 +111,7 @@ def show():
     for mismatch in results.mismatches:
         idx = f"{mismatch.idx}"
         
-        printout(f"{mismatch.thingname} [{idx.zfill(2)}]",
+        printout(f"{mismatch.search_modules} [{idx.zfill(2)}]",
                  f"{mismatch.which} ≠ {mismatch.determine}")
     
     print()

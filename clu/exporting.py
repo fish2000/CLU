@@ -73,7 +73,7 @@ def itermoduleids(module):
     ids = (id(getattr(module, key)) for key in keys)
     return zip(keys, ids)
 
-# Q.v. `thingname_search_by_id(…)` function sub.
+# Q.v. `search_by_id(…)` function sub.
 cache = lru_cache(maxsize=128, typed=False)
 
 # This goes against all logic and reason, but it fucking seems
@@ -84,7 +84,7 @@ cache = lru_cache(maxsize=128, typed=False)
 sysmods = lambda: reversed(tuple(frozenset(sys.modules.values())))
 
 @cache
-def thingname_search_by_id(thingID):
+def search_by_id(thingID):
     """ Cached function to find the name of a thing, according
         to what it is called in the context of a module in which
         it resides – searching across all currently imported
@@ -92,9 +92,9 @@ def thingname_search_by_id(thingID):
         `sys.modules.values()` (which is potentially completely
         fucking enormous).
         
-        This function implements `thingname_search(…)` – q.v.
+        This function implements `search_for_name(…)` – q.v.
         the calling function code sub., and is also used in the
-        implementdation of `determine_module(…)`, - also q.v.
+        implementation of `determine_module(…)`, - also q.v.
         the calling function code sub.
         
         Caching courtesy the `functools.lru_cache(…)` decorator.
@@ -112,20 +112,33 @@ def thingname_search_by_id(thingID):
                     return module, key
     return None, None
 
-def thingname_search(thing):
-    """ Attempt to find the name for thing, using the logic from
-        the `thingname(…)` function, applied to all currently
+def search_for_name(thing):
+    """ Attempt to find the name for “thing”, using the logic from
+        the `search_modules(…)` function, applied to all currently
         imported modules, as indicated from the inspection of
         `sys.modules.values()` (which that, as a search space,
         is potentially fucking enormous).
         
         This function may be called by `determine_name(…)`. Its
-        subordinate internal function, `thingname_search_by_id(…)`,
+        subordinate internal function, `search_by_id(…)`,
         uses the LRU cache from `functools`.
     """
-    return thingname_search_by_id(id(thing))[1]
+    return search_by_id(id(thing))[1]
 
-def thingname(thing, *modules):
+def search_for_module(thing):
+    """ Attempt to find the module containing “thing”, using the
+        logic from the `search_modules(…)` function, applied to
+        all currently imported modules, as indicated from the
+        inspection of `sys.modules.values()` (which that, as a
+        search space, is potentially fucking enormous).
+        
+        This function may be called by `determine_name(…)`. Its
+        subordinate internal function, `search_by_id(…)`,
+        uses the LRU cache from `functools`.
+    """
+    return search_by_id(id(thing))[0]
+
+def search_modules(thing, *modules):
     """ Find the name of a thing, according to what it is called
         in the context of a module in which it resides
     """
@@ -143,6 +156,9 @@ def determine_name(thing, name=None, try_repr=False):
     # Shortcut everything if a name was explictly specified:
     if name is not None:
         return name
+    # … or if called without a “thing”:
+    if thing is None:
+        return None
     # Check for telltale function-object attributes:
     code = None
     if hasattr(thing, '__code__'): # Python 3.x
@@ -170,7 +186,7 @@ def determine_name(thing, name=None, try_repr=False):
     # of objects within imported modules -- it is
     # possible (however unlikely) that this’ll ending
     # up returning None:
-    return thingname_search(thing)
+    return search_for_name(thing)
 
 def path_to_dotpath(path, relative_to=None):
     """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
@@ -290,17 +306,17 @@ class Exporter(MutableMapping):
     
     @classmethod
     def nameof(cls, thing):
-        """ Find the name of a thing, if that thing should be found
-            to reside in one of the exported modules
+        """ Find and return the name of a thing, if that thing
+            should be found to reside in one of the exported modules
         """
-        return thingname(thing, *cls.modules().values())[1]
+        return search_modules(thing, *cls.modules().values())[1]
     
     @classmethod
     def moduleof(cls, thing):
-        """ Find the module name for a thing, if that thing should be found
-            to reside in one of the exported modules
+        """ Find and return the module for a thing, if that thing
+            should be found to reside in one of the exported modules
         """
-        return thingname(thing, *cls.modules().values())[0]
+        return search_modules(thing, *cls.modules().values())[0]
     
     def __init__(self, *args, **kwargs):
         self.__exports__ = {}
@@ -403,10 +419,10 @@ class Exporter(MutableMapping):
         # a lambda, try to rename it with either our valid name,
         # or the result of an ID-based search for that lambda:
         if callable(thing) and hasattr(thing, '__name__'):
-            if getattr(thing, '__name__') in (λ, φ):
-                dname = getattr(thing, '__name__')
+            dname = getattr(thing, '__name__')
+            if dname in (λ, φ):
                 if named in (λ, φ):
-                    named = thingname_search(thing)
+                    named = search_for_name(thing)
                 if named is None:
                     raise ExportError(type(self).messages['noname'] % id(thing))
                 thing.__name__ = thing.__qualname__ = named
@@ -482,11 +498,11 @@ class Exporter(MutableMapping):
     
     def cache_info(self):
         """ Shortcut to get the CacheInfo namedtuple from the
-            cached internal `thingname_search_by_id(…)` function,
+            cached internal `search_by_id(…)` function,
             which is used in last-resort name lookups made by
             `determine_name(…)` during `export(…)` calls.
         """
-        return thingname_search_by_id.cache_info()
+        return search_by_id.cache_info()
     
     def __iter__(self):
         return iter(self.__exports__.keys())
@@ -549,8 +565,10 @@ export(doctrim)
 export(itermodule)
 export(moduleids)
 export(itermoduleids)
-export(thingname_search)
-export(thingname)
+export(search_by_id)
+export(search_for_name)
+export(search_for_module)
+export(search_modules)
 export(determine_name)
 export(path_to_dotpath)
 export(predicates_for_types)

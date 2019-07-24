@@ -167,10 +167,10 @@ class TestNaming(object):
             raise Nondeterminism(f"Nondeterminism in qualified_name(Weight) → {qname}")
     
     @pytest.mark.nondeterministic
-    def test_determine_module_failure_rate(self, clumods):
-        """ » Checking `determine_module(…)` against `pickle.whichmodule(…)` …"""
+    def test_moduleof_failure_rate(self, clumods):
+        """ » Checking `moduleof(…)` against `pickle.whichmodule(…)` …"""
         from clu.exporting import Exporter
-        from clu.naming import determine_module
+        from clu.naming import moduleof
         import pickle
         
         total = 0
@@ -184,7 +184,7 @@ class TestNaming(object):
             total += len(exports)
             for name, thing in exports.items():
                 whichmodule = pickle.whichmodule(thing, None)
-                determination = determine_module(thing)
+                determination = moduleof(thing)
                 try:
                     assert determination == whichmodule
                 except AssertionError:

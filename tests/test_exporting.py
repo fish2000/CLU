@@ -4,7 +4,7 @@ from __future__ import print_function
 import pytest
 
 # Currently these need to be defined at the module level,
-# in order for “thingname_search(…)” to find them properly –
+# in order for “search_for_name(…)” to find them properly –
 # q.v. “test_exporter_export_lambdas_no_name_provided(…)”
 # definition sub.:
 yo_dogg_lambda = lambda: print("Yo dogg.")
@@ -150,7 +150,7 @@ class TestExporting(object):
     
     @pytest.mark.TODO
     def test_exporter_export_lambdas_no_name_provided(self):
-        # N.B. “thingname_search()” should inspect locals (?!)
+        # N.B. “search_for_name()” should inspect locals (?!)
         # in order to make this work at non-module-level:
         from clu.exporting import Exporter
         from clu.naming import nameof

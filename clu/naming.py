@@ -2,7 +2,10 @@
 from __future__ import print_function
 
 from clu.constants.consts import BASEPATH, DEBUG, QUALIFIER, NoDefault
-from clu.exporting import determine_name, path_to_dotpath, Exporter
+from clu.exporting import (path_to_dotpath, determine_name,
+                                            search_for_name,
+                                            search_for_module)
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -10,6 +13,20 @@ export = exporter.decorator()
 # MODULE SEARCH FUNCTIONS: iterate and search modules, yielding
 # names, thing values, and/or id(thing) values, matching by given
 # by thing names or id(thing) values
+
+@export
+def determine_module(thing, name=None):
+    """ Private module function to find the module of a thing,
+        using “pickle.whichmodule(…)”
+    """
+    import pickle
+    
+    if name is not None:
+        return name
+    if thing is None:
+        return None
+    
+    return pickle.whichmodule(thing, None)
 
 @export
 def nameof(thing, default=NoDefault):
@@ -23,25 +40,28 @@ def nameof(thing, default=NoDefault):
     
     result = pyname(thing) or \
              Exporter.nameof(thing) or \
-             determine_name(thing)
+             search_for_name(thing)
     
     if default is NoDefault:
         return dotpath_split(result)[0]
     return dotpath_split(result)[0] or default
 
 @export
-def determine_module(thing):
+def moduleof(thing, default=NoDefault):
     """ Determine in which module a given thing is ensconced,
         and return that modules’ name as a string.
     """
-    import pickle
-    from clu.exporting import thingname_search_by_id
     from clu.predicates import pymodule
-    return pymodule(thing) or \
-           determine_name(
-               Exporter.moduleof(thing) or \
-               thingname_search_by_id(id(thing))[0]) or \
-           pickle.whichmodule(thing, None)
+    
+    result = pymodule(thing) or \
+             determine_name(
+                 Exporter.moduleof(thing) or \
+                 search_for_module(thing)) or \
+             determine_module(thing)
+    
+    if default is NoDefault:
+        return result
+    return result or default
 
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
 # assess a thing’s qualified name, etc etc.
@@ -52,18 +72,21 @@ def dotpath_join(base, *addenda):
     if base is None or base == '':
         return dotpath_join(*addenda)
     for addendum in addenda:
-        if not base.endswith(QUALIFIER):
-            base += QUALIFIER
-        if addendum.startswith(QUALIFIER):
-            if len(addendum) == 1:
-                raise ValueError(f'operand too short: {addendum}')
-            addendum = addendum[1:]
-        base += addendum
+        if addendum is not None:
+            if not base.endswith(QUALIFIER):
+                base += QUALIFIER
+            if addendum.startswith(QUALIFIER):
+                if len(addendum) == 1:
+                    raise ValueError(f'operand too short: {addendum}')
+                addendum = addendum[1:]
+            base += addendum
     # N.B. this might be overthinking it -- 
     # maybe we *want* to allow dotpaths
     # that happen to start and/or end with dots?
-    if base.endswith(QUALIFIER):
-        return base[:-1]
+    while base.startswith(QUALIFIER):
+        base = base[1:]
+    while base.endswith(QUALIFIER):
+        base = base[:-1]
     return base
 
 @export
@@ -74,7 +97,7 @@ def dotpath_split(dotpath):
         `dotpath_split(…)` returns `(string, None)`.
     """
     if dotpath is None:
-        return None
+        return None, None
     head = dotpath.split(QUALIFIER)[-1]
     tail = dotpath.replace(f"{QUALIFIER}{head}", '')
     return head, tail != head and tail or None
@@ -99,9 +122,7 @@ def qualified_name_tuple(thing):
     """ Get the module/package and thing-name for a class or module.
         e.g. ('instakit.processors.halftone', 'FloydSteinberg')
     """
-    return determine_module(thing), \
-           dotpath_split(
-           determine_name(thing))[0]
+    return moduleof(thing), nameof(thing)
 
 @export
 def qualified_name(thing):

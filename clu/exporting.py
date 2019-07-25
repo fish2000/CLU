@@ -257,7 +257,7 @@ class Prefix(abc.ABCMeta):
     
     def __new__(metacls, name, bases, attributes, **kwargs):
         """ Override for `abc.ABCMeta.__new__(…)` setting up a
-            derived class that pulls from a “prefix”
+            derived slotted class that pulls from a “prefix”
             with the requisite methods defined for access.
         """
         prefix = kwargs.pop('prefix', "/")

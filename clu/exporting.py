@@ -240,6 +240,19 @@ def predicates_for_types(*types):
         predicates.append(lambda thing: isinstance(thing, classtype))
     return tuple(predicates)
 
+class PrefixDescriptor(object):
+    
+    __slots__ = ('prefix',)
+    
+    def __init__(self, prefix):
+        self.prefix = prefix
+    
+    def __get__(self, *args):
+        return self.prefix
+    
+    def __repr__(self):
+        return repr(self.prefix)
+
 class Prefix(abc.ABCMeta):
     
     """ A metaclass to assign a “prefix” class property,
@@ -260,22 +273,11 @@ class Prefix(abc.ABCMeta):
             derived slotted class that pulls from a “prefix”
             with the requisite methods defined for access.
         """
-        prefix = kwargs.pop('prefix', "/")
-        
-        class PrefixDescriptor(object):
-            
-            __slots__ = tuple()
-            
-            def __get__(self, *args):
-                return prefix
-            
-            def __repr__(self):
-                return repr(prefix)
-        
         if '__slots__' not in attributes:
             attributes['__slots__'] = tuple()
         
-        attributes['prefix']        = PrefixDescriptor()
+        attributes['prefix']        = PrefixDescriptor(
+                                      kwargs.pop('prefix', "/"))
         
         return super(Prefix, metacls).__new__(metacls, name,
                                                        bases,

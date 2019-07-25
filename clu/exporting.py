@@ -273,11 +273,12 @@ class Prefix(abc.ABCMeta):
             derived slotted class that pulls from a “prefix”
             with the requisite methods defined for access.
         """
+        prefix = kwargs.pop('prefix', "/")
+        
         if '__slots__' not in attributes:
             attributes['__slots__'] = tuple()
         
-        attributes['prefix']        = PrefixDescriptor(
-                                      kwargs.pop('prefix', "/"))
+        attributes['prefix']        = PrefixDescriptor(prefix)
         
         return super(Prefix, metacls).__new__(metacls, name,
                                                        bases,

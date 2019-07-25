@@ -39,8 +39,8 @@ class CacheDescriptor(object):
         self.cache = {}
         self.lru = zict.LRU(18, self.cache,
                                 on_evict=(DEBUG \
-                                and evict_announcer \
-                                or None))
+                                      and evict_announcer \
+                                       or None))
     
     def __get__(self, *args):
         return self.lru

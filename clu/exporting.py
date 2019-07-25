@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import abc
 import sys, os
 import warnings
 import weakref
@@ -239,23 +240,70 @@ def predicates_for_types(*types):
         predicates.append(lambda thing: isinstance(thing, classtype))
     return tuple(predicates)
 
-class Exporter(MutableMapping):
+class Prefix(abc.ABCMeta):
     
-    """ A class representing a list of things for a module to export. """
+    """ A metaclass to assign a “prefix” class property,
+        extracted from a “prefix” class keyword, to a new
+        slotted type. 
+    """
+    
+    @classmethod
+    def __prepare__(metacls, name, bases, **kwargs):
+        """ Remove the “prefix” class keyword before calling up """
+        superkws = dict(kwargs)
+        if 'prefix' in superkws:
+            del superkws['prefix']
+        return super(Prefix, metacls).__prepare__(name, bases, **superkws)
+    
+    def __new__(metacls, name, bases, attributes, **kwargs):
+        """ Override for `abc.ABCMeta.__new__(…)` setting up a
+            derived class that pulls from a “prefix”
+            with the requisite methods defined for access.
+        """
+        prefix = kwargs.pop('prefix', "/")
+        
+        class PrefixDescriptor(object):
+            
+            __slots__ = tuple()
+            
+            def __get__(self, *args):
+                return prefix
+            
+            def __repr__(self):
+                return repr(prefix)
+        
+        if '__slots__' not in attributes:
+            attributes['__slots__'] = tuple()
+        
+        attributes['prefix']        = PrefixDescriptor()
+        
+        return super(Prefix, metacls).__new__(metacls, name,
+                                                       bases,
+                                                       attributes,
+                                                     **kwargs)
+
+class ExporterBase(MutableMapping, metaclass=Prefix):
+    
+    """ The base class for “clu.exporting.Exporter”. Override this
+        class in your own project to use the CLU exporting mechanism –
+        q.v. “clu.exporting.Exporter” docstring sub.
+        
+        This class uses the “clu.exporting.Prefix” metaclass, which
+        automatically adds a “prefix” class attribute.
+    """
+    
     __slots__ = pytuple('exports', 'weakref') + ('path', 'dotpath')
     instances = weakref.WeakValueDictionary()
     
-    basepath = BASEPATH
-    
     def __new__(cls, *args, **kwargs):
         try:
-            instance = super(Exporter, cls).__new__(cls, *args, **kwargs)
+            instance = super(ExporterBase, cls).__new__(cls, *args, **kwargs)
         except TypeError:
-            instance = super(Exporter, cls).__new__(cls)
+            instance = super(ExporterBase, cls).__new__(cls)
         
         instance.path = kwargs.pop('path', None)
         instance.dotpath = path_to_dotpath(instance.path,
-                                           relative_to=cls.basepath)
+                                           relative_to=cls.prefix)
         
         if instance.dotpath is not None:
             cls.instances[instance.dotpath] = instance
@@ -301,8 +349,7 @@ class Exporter(MutableMapping):
         for modulename in modulenames:
             mods.append(importlib.import_module(modulename))
         
-        modules = dict(zip(modulenames, mods))
-        return modules
+        return dict(zip(modulenames, mods))
     
     @classmethod
     def nameof(cls, thing):
@@ -558,6 +605,39 @@ class Exporter(MutableMapping):
     def __bool__(self):
         return len(self.__exports__) > 0
 
+class Exporter(ExporterBase, prefix=BASEPATH):
+    
+    """ A class representing a list of things for a module to export.
+        
+        This class is specifically germane to the CLU project – note
+        that the “prefix” class keyword is used to assign a value from
+        the CLU constants module.
+        
+        Users of CLU who wish to use the Exporter mechanism in their
+        own projects should create a subclass of ExporterBase of their
+        own. Like this one, it need only assign the “prefix” class
+        keyword; it is unnecessary (but OK!) to define further methods,
+        properties, class constants, and whatnot.
+        
+        When writing your subclass, if you •do• choose to add methods
+        or other things, it is imperative that you ensure you aren’t
+        accedentally clobbering anything important from ExporterBase,
+        or you risk UNDEFINED BEHAVIOR!!!! Erm.
+        
+        Also note that all derived subclasses of ExporterBase will
+        automatrically be slotted classes – a “__slots__” attribute
+        will be added to the class dict by the “clu.exporting.Prefix”
+        metaclass, if your subclass doesn’t define one – and so if
+        you desire a class with a working “__dict__” attribute for
+        some reason, you’ll need to specify:
+        
+            __slots__ = tuplize('__dict__')
+        
+        … in your class (or an equivalent).
+    """
+    
+    pass
+
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
@@ -575,6 +655,7 @@ export(predicates_for_types)
 export(sysmods,         name='sysmods',         doc="sysmods() → shortcut for reversed(tuple(frozenset(sys.modules.values()))) …OK? I know. It’s not my finest work, but it works.")
 
 # NO DOCS ALLOWED:
+export(ExporterBase)
 export(Exporter)        # hahaaaaa
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

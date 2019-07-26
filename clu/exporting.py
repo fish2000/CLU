@@ -326,7 +326,7 @@ class Registry(abc.ABC, metaclass=Slotted):
         cls.appname = ValueDescriptor(appname)
     
     @staticmethod
-    def appnames():
+    def all_appnames():
         """ Return a tuple of all registered appnames """
         return tuple(appnames)
     

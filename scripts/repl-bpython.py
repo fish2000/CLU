@@ -371,7 +371,7 @@ else:
 
 try:
     from clu.fs import appdirectories
-    from clu.fs.pypath import append_paths, remove_paths
+    from clu.fs.pypath import append_paths, remove_paths, remove_invalid_paths
     from clu.fs.filesystem import (DEFAULT_PREFIX, DEFAULT_TIMEOUT,
                                    ensure_path_is_valid,
                                    script_path, which, back_tick,
@@ -384,7 +384,8 @@ except (ImportError, SyntaxError):
     pass
 else:
     # Extend `__all__`:
-    __all__ += ('appdirectories', 'append_paths', 'remove_paths',
+    __all__ += ('appdirectories',
+                'append_paths', 'remove_paths', 'remove_invalid_paths',
                 'DEFAULT_PREFIX', 'DEFAULT_TIMEOUT',
                 'ensure_path_is_valid',
                 'script_path', 'which', 'back_tick',
@@ -433,6 +434,10 @@ s = 'yo dogg'
 # Remove duplicate sys.paths:
 import site
 site.removeduppaths()
+
+# Remove invalid sys.paths:
+if 'remove_invalid_paths' in __all__:
+    remove_invalid_paths()
 
 # Print the Python banner and/or warnings, messages, and other tripe:
 print_banner()

@@ -20,7 +20,7 @@ def append_paths(*putatives):
     if len(putatives) < 1:
         return out
     paths = frozenset(sys.path)
-    append_paths.oldsyspath.append(tuple(sys.path))
+    append_paths.oldpaths.append(tuple(sys.path))
     for pth in (os.fspath(putative) for putative in putatives):
         if not os.path.exists(pth):
             out[pth] = False
@@ -37,7 +37,19 @@ def append_paths(*putatives):
         continue
     return out
 
-append_paths.oldpaths = [tuple(sys.path)]
+append_paths.oldpaths = []
+
+def mutate_syspath(container):
+    """ Remove paths from `sys.path` that don’t match the input. """
+    from clu.predicates import isiterable
+    if not isiterable(container):
+        raise ValueError("iterable required")
+    new_syspath = list()
+    for path in sys.path:
+        if path in container:
+            new_syspath.append(path)
+    sys.path = new_syspath
+    return new_syspath
 
 @export
 def remove_paths(*putatives):
@@ -61,10 +73,34 @@ def remove_paths(*putatives):
         continue
     paths -= removals
     remove_paths.oldpaths.append(tuple(sys.path))
-    sys.path = list(paths)
+    mutate_syspath(paths)
     return out
 
-remove_paths.oldpaths = [tuple(sys.path)]
+remove_paths.oldpaths = []
+
+@export
+def remove_invalid_paths():
+    """ Mutate `sys.path` by removing any existing paths that don’t
+        actually lead to a valid place somewhere on the filesystem
+        (according to “os.path.exists(…)”). Path removal, as with
+        “remove_paths(…)”, is done atomically.
+    """
+    out = {}
+    removals = set()
+    paths = set(sys.path)
+    for p in paths:
+        if not os.path.exists(p):
+            out[p] = True
+            removals |= { p }
+            continue
+        out[p] = False
+        continue
+    paths -= removals
+    remove_invalid_paths.oldpaths.append(tuple(sys.path))
+    mutate_syspath(paths)
+    return out
+
+remove_invalid_paths.oldpaths = []
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

@@ -35,17 +35,19 @@ class TestExporting(object):
         
         @export
         def youlike():
-            pass
+            return "registries"
         
         assert os.path.exists(exporter.path)
         assert exporter.dotpath == 'yodogg.iheard'
-        assert 'clu' in Exporter.all_appnames()
-        assert 'yolocal' in Exporter.all_appnames()
+        assert 'clu' in Registry.all_appnames()
+        assert 'yolocal' in Registry.all_appnames()
         assert len(Exporter.modulenames()) == 1
         assert len(exporter) == 1
         assert exporter['youlike'] == youlike
         assert Exporter['yodogg.iheard'] == exporter
         assert Registry['yolocal'] is Exporter
+        
+        assert Registry['yolocal']['yodogg.iheard']['youlike']() == "registries"
     
     @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_exporter_instance_registry(self, clumods):

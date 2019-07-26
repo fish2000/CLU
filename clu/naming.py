@@ -5,7 +5,7 @@ from clu.constants.consts import BASEPATH, DEBUG, QUALIFIER, NoDefault
 from clu.exporting import (path_to_dotpath, determine_name,
                                             search_for_name,
                                             search_for_module)
-from clu.exporting import Exporter
+from clu.exporting import Exporter, Registry
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -39,7 +39,7 @@ def nameof(thing, default=NoDefault):
     from clu.predicates import pyname
     
     result = pyname(thing) or \
-             Exporter.nameof(thing) or \
+             Registry.nameof(thing) or \
              search_for_name(thing)
     
     if default is NoDefault:
@@ -55,7 +55,7 @@ def moduleof(thing, default=NoDefault):
     
     result = pymodule(thing) or \
              determine_name(
-                 Exporter.moduleof(thing) or \
+                 Registry.moduleof(thing) or \
                  search_for_module(thing)) or \
              determine_module(thing)
     

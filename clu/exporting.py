@@ -344,6 +344,33 @@ class Registry(abc.ABC, metaclass=Slotted):
                 assert Registry['clu'] is exporting.Exporter
         """
         return cls.for_appname(key)
+    
+    @classmethod
+    def module_getters(cls):
+        from clu.predicates import attr_across
+        return attr_across('modules', *[classes[appname] \
+                           for appname in cls.all_appnames()])
+    
+    @classmethod
+    def all_modules(cls):
+        from itertools import chain
+        return tuple(chain.from_iterable(modules().values() \
+                     for modules in cls.module_getters()))
+    
+    @classmethod
+    def nameof(cls, thing):
+        """ Find and return the name of a thing, if that thing
+            should be found to reside in one of the exported modules
+        """
+        return search_modules(thing, *cls.all_modules())[1]
+    
+    @classmethod
+    def moduleof(cls, thing):
+        """ Find and return the module for a thing, if that thing
+            should be found to reside in one of the exported modules
+        """
+        return search_modules(thing, *cls.all_modules())[0]
+    
 
 class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     
@@ -672,7 +699,9 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     
     def __dir__(self):
         return list(filter(lambda name: name not in ('all_appnames',
-                                                     'for_appname'),
+                                                     'for_appname',
+                                                     'module_getters',
+                                                     'all_modules'),
                            super(ExporterBase, self).__dir__()))
 
 class Exporter(ExporterBase, prefix=BASEPATH, appname=PROJECT_NAME):

@@ -31,14 +31,19 @@ class TestExporting(object):
         # Instantiate the ExporterBase subclass –
         # This will register the instance:
         exporter = Exporter(path=yodogg.subpath('iheard.py'))
-        # export = exporter.decorator()
+        export = exporter.decorator()
+        
+        @export
+        def youlike():
+            pass
         
         assert os.path.exists(exporter.path)
         assert exporter.dotpath == 'yodogg.iheard'
         assert 'clu' in Exporter.all_appnames()
         assert 'yolocal' in Exporter.all_appnames()
         assert len(Exporter.modulenames()) == 1
-        assert len(exporter) == 0
+        assert len(exporter) == 1
+        assert exporter['youlike'] == youlike
         assert Exporter['yodogg.iheard'] == exporter
         assert Registry['yolocal'] is Exporter
     

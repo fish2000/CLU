@@ -14,6 +14,27 @@ class TestExporting(object):
     
     """ Run the tests for the clu.exporting module. """
     
+    def test_exporterbase_subclass(self, dirname):
+        from clu.exporting import ExporterBase
+        
+        yodogg = dirname.subdirectory('yodogg')
+        assert yodogg.exists
+        
+        # Subclass ExporterBase locally -
+        # This will register the subclass:
+        class Exporter(ExporterBase, prefix=yodogg, appname="yolocal"):
+            pass
+        
+        # Instantiate the ExporterBase subclass –
+        # This will register the instance:
+        exporter = Exporter(path=yodogg.subpath('iheard'))
+        # export = exporter.decorator()
+        
+        assert 'clu' in Exporter.all_appnames()
+        assert 'yolocal' in Exporter.all_appnames()
+        assert len(Exporter.modulenames()) == 1
+        assert len(exporter) == 0
+    
     @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_exporter_instance_registry(self, clumods):
         from clu.constants.consts import BASEPATH

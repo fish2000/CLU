@@ -279,21 +279,17 @@ class Prefix(Slotted):
     """
     
     @classmethod
-    def __prepare__(metacls, name, bases, **kwargs):
+    def __prepare__(metacls, name, bases, prefix="/", **kwargs):
         """ Remove the “prefix” class keyword before calling up """
-        superkws = dict(kwargs)
-        if 'prefix' in superkws:
-            del superkws['prefix']
-        return super(Prefix, metacls).__prepare__(name, bases, **superkws)
+        return super(Prefix, metacls).__prepare__(name, bases, **kwargs)
     
-    def __new__(metacls, name, bases, attributes, **kwargs):
+    def __new__(metacls, name, bases, attributes, prefix="/", **kwargs):
         """ Override for `Slotted.__new__(…)` setting up a
             derived slotted class that pulls from a “prefix”
             with the requisite methods defined for access.
         """
-        prefix = kwargs.pop('prefix', "/")
-        
-        attributes['prefix'] = ValueDescriptor(prefix)
+        if 'prefix' not in attributes:
+            attributes['prefix'] = ValueDescriptor(prefix)
         
         return super(Prefix, metacls).__new__(metacls, name,
                                                        bases,
@@ -312,15 +308,14 @@ class Registry(abc.ABC, metaclass=Slotted):
     """
     
     @classmethod
-    def __init_subclass__(cls, **kwargs):
-        appname = kwargs.pop('appname', None)
-        if not appname:
-            appname = determine_name(cls)
-        else:
-            if appname in classes:
-                raise ValueError(f"appname already registered: {appname}")
+    def __init_subclass__(cls, appname=None, **kwargs):
+        if appname:
             appnames.add(appname)
-            classes[appname] = cls
+        else:
+            appname = determine_name(cls)
+        if appname in classes:
+            raise ValueError(f"appname already registered: {appname}")
+        classes[appname] = cls
         super(Registry, cls).__init_subclass__(**kwargs)
         cls.instances = weakref.WeakValueDictionary()
         cls.appname = ValueDescriptor(appname)
@@ -328,7 +323,7 @@ class Registry(abc.ABC, metaclass=Slotted):
     @staticmethod
     def all_appnames():
         """ Return a tuple of all registered appnames """
-        return tuple(appnames)
+        return tuple(sorted(appnames))
     
     @staticmethod
     def for_appname(appname):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from clu.exporting import Exporter
+from .exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

@@ -240,6 +240,24 @@ def predicates_for_types(*types):
         predicates.append(lambda thing: isinstance(thing, classtype))
     return tuple(predicates)
 
+class Slotted(abc.ABCMeta):
+    
+    """ A metaclass that ensures its classes, and all subclasses,
+        will be slotted types.
+    """
+    
+    def __new__(metacls, name, bases, attributes, **kwargs):
+        """ Override for `abc.ABCMeta.__new__(…)` setting up a
+            derived slotted class.
+        """
+        if '__slots__' not in attributes:
+            attributes['__slots__'] = tuple()
+        
+        return super(Slotted, metacls).__new__(metacls, name,
+                                                        bases,
+                                                        attributes,
+                                                      **kwargs)
+
 class PrefixDescriptor(object):
     
     __slots__ = ('prefix',)
@@ -253,7 +271,7 @@ class PrefixDescriptor(object):
     def __repr__(self):
         return repr(self.prefix)
 
-class Prefix(abc.ABCMeta):
+class Prefix(Slotted):
     
     """ A metaclass to assign a “prefix” class property,
         extracted from a “prefix” class keyword, to a new
@@ -269,14 +287,11 @@ class Prefix(abc.ABCMeta):
         return super(Prefix, metacls).__prepare__(name, bases, **superkws)
     
     def __new__(metacls, name, bases, attributes, **kwargs):
-        """ Override for `abc.ABCMeta.__new__(…)` setting up a
+        """ Override for `Slotted.__new__(…)` setting up a
             derived slotted class that pulls from a “prefix”
             with the requisite methods defined for access.
         """
         prefix = kwargs.pop('prefix', "/")
-        
-        if '__slots__' not in attributes:
-            attributes['__slots__'] = tuple()
         
         attributes['prefix']        = PrefixDescriptor(prefix)
         
@@ -304,6 +319,7 @@ class ExporterBase(MutableMapping, metaclass=Prefix):
         except TypeError:
             instance = super(ExporterBase, cls).__new__(cls)
         
+        instance.__exports__ = {}
         instance.path = kwargs.pop('path', None)
         instance.dotpath = path_to_dotpath(instance.path,
                                            relative_to=cls.prefix)
@@ -369,8 +385,6 @@ class ExporterBase(MutableMapping, metaclass=Prefix):
         return search_modules(thing, *cls.modules().values())[0]
     
     def __init__(self, *args, **kwargs):
-        self.__exports__ = {}
-        
         for arg in args:
             if hasattr(arg, '__exports__'):
                 self.__exports__.update(arg.__exports__)
@@ -546,7 +560,8 @@ class ExporterBase(MutableMapping, metaclass=Prefix):
         """
         return self.dir_function(), self.all_tuple() # OPPOSITE!
     
-    def cache_info(self):
+    @staticmethod
+    def cache_info():
         """ Shortcut to get the CacheInfo namedtuple from the
             cached internal `search_by_id(…)` function,
             which is used in last-resort name lookups made by

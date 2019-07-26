@@ -669,6 +669,11 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     
     def __bool__(self):
         return len(self.__exports__) > 0
+    
+    def __dir__(self):
+        return list(filter(lambda name: name not in ('all_appnames',
+                                                     'for_appname'),
+                           super(ExporterBase, self).__dir__()))
 
 class Exporter(ExporterBase, prefix=BASEPATH, appname=PROJECT_NAME):
     

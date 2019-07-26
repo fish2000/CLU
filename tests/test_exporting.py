@@ -39,6 +39,7 @@ class TestExporting(object):
         assert 'yolocal' in Exporter.all_appnames()
         assert len(Exporter.modulenames()) == 1
         assert len(exporter) == 0
+        assert Exporter['yodogg.iheard'] == exporter
         assert Registry['yolocal'] is Exporter
     
     @pytest.mark.filterwarnings("ignore::DeprecationWarning")

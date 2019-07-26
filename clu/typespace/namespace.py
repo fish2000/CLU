@@ -6,7 +6,7 @@ import re
 from clu.constants.consts import SEPARATOR_WIDTH, pytuple, NoDefault
 from clu.constants.polyfills import MutableMapping
 from clu.dicts import merge_two, asdict
-from clu.naming import determine_name
+from clu.naming import nameof
 from clu.predicates import ismergeable
 from clu.exporting import Exporter
 
@@ -33,8 +33,8 @@ class SimpleNamespace(object):
     
     def __repr__(self):
         items = ("{}={!r}".format(key, self.__dict__[key]) for key in sorted(self))
-        return "{}({}) @ {}".format(determine_name(type(self)),
-                         ",\n".join(items),          id(self))
+        return "{}({}) @ {}".format(nameof(type(self)),
+                         ",\n".join(items),  id(self))
     
     def __eq__(self, other):
         return self.__dict__ == asdict(other)
@@ -85,7 +85,7 @@ class Namespace(SimpleNamespace, MutableMapping):
     
     def __repr__(self):
         from pprint import pformat
-        return "{}({}) @ {}".format(determine_name(type(self)),
+        return "{}({}) @ {}".format(nameof(type(self)),
                                     self.winnower.sub(r'{\g<stuff>',
                                               pformat(self.__dict__,
                                                       width=SEPARATOR_WIDTH)),

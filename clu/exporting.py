@@ -363,14 +363,14 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     
     __slots__ = pytuple('exports', 'weakref') + ('path', 'dotpath')
     
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, path=None, **kwargs):
         try:
             instance = super(ExporterBase, cls).__new__(cls, *args, **kwargs)
         except TypeError:
             instance = super(ExporterBase, cls).__new__(cls)
         
         instance.__exports__ = {}
-        instance.path = kwargs.pop('path', None)
+        instance.path = path
         instance.dotpath = path_to_dotpath(instance.path,
                                            relative_to=cls.prefix)
         
@@ -434,7 +434,7 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
         """
         return search_modules(thing, *cls.modules().values())[0]
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, path=None, **kwargs):
         for arg in args:
             if hasattr(arg, '__exports__'):
                 self.__exports__.update(arg.__exports__)

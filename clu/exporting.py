@@ -341,7 +341,7 @@ class Registry(abc.ABC, metaclass=Slotted):
             given an “appname”, like e.g:
             
                 from clu import exporting
-                assert Registry['clu'] == exporting.Exporter
+                assert Registry['clu'] is exporting.Exporter
         """
         from clu.typology import isstring
         if not isstring(key):

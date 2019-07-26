@@ -370,7 +370,6 @@ class Registry(abc.ABC, metaclass=Slotted):
             should be found to reside in one of the exported modules
         """
         return search_modules(thing, *cls.all_modules())[0]
-    
 
 class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     

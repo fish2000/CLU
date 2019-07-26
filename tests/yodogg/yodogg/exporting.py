@@ -5,8 +5,11 @@ import os
 
 from clu.exporting import ExporterBase
 
-class Exporter(ExporterBase, prefix=os.path.dirname(__file__),
-                             appname="yodogg"):
+# The “prefix” is the directory enclosing the package root:
+prefix = os.path.dirname(
+         os.path.dirname(__file__))
+
+class Exporter(ExporterBase, prefix=prefix, appname="yodogg"):
     pass
 
 exporter = Exporter(path=__file__)
@@ -14,7 +17,7 @@ export = exporter.decorator()
 
 @export
 def youlike():
-    pass
+    return "registries"
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

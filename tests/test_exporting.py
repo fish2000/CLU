@@ -16,20 +16,25 @@ class TestExporting(object):
     
     def test_exporterbase_subclass(self, dirname):
         from clu.exporting import ExporterBase
+        import os
         
-        yodogg = dirname.subdirectory('yodogg')
+        prefix = dirname.subdirectory('yodogg')
+        yodogg = prefix.subdirectory('yodogg')
+        assert prefix.exists
         assert yodogg.exists
         
         # Subclass ExporterBase locally -
         # This will register the subclass:
-        class Exporter(ExporterBase, prefix=yodogg, appname="yolocal"):
+        class Exporter(ExporterBase, prefix=prefix, appname="yolocal"):
             pass
         
         # Instantiate the ExporterBase subclass –
         # This will register the instance:
-        exporter = Exporter(path=yodogg.subpath('iheard'))
+        exporter = Exporter(path=yodogg.subpath('iheard.py'))
         # export = exporter.decorator()
         
+        assert os.path.exists(exporter.path)
+        assert exporter.dotpath == 'yodogg.iheard'
         assert 'clu' in Exporter.all_appnames()
         assert 'yolocal' in Exporter.all_appnames()
         assert len(Exporter.modulenames()) == 1

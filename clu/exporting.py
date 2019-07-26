@@ -6,7 +6,7 @@ import sys, os
 import warnings
 import weakref
 
-from clu.constants.consts import λ, φ, BASEPATH, NoDefault, pytuple
+from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytuple
 from clu.constants.exceptions import ExportError, ExportWarning
 from clu.constants.polyfills import MutableMapping, lru_cache
 
@@ -293,25 +293,63 @@ class Prefix(Slotted):
         """
         prefix = kwargs.pop('prefix', "/")
         
-        attributes['prefix']        = PrefixDescriptor(prefix)
+        attributes['prefix'] = PrefixDescriptor(prefix)
         
         return super(Prefix, metacls).__new__(metacls, name,
                                                        bases,
                                                        attributes,
                                                      **kwargs)
 
-class ExporterBase(MutableMapping, metaclass=Prefix):
+classes = {}
+appnames = set()
+
+class Registry(abc.ABC, metaclass=Slotted):
+    
+    """ A class-registry mixin ancestor type suitable for use
+        in the ExporterBase inheritance chain – it uses the
+        “clu.exporting.Slotted” metaclass and respects the
+        class keywords already in use.
+    """
+    
+    @classmethod
+    def __init_subclass__(cls, **kwargs):
+        appname = kwargs.pop('appname', None)
+        if not appname:
+            appname = determine_name(cls)
+        else:
+            if appname in classes:
+                raise ValueError(f"appname already registered: {appname}")
+            appnames.add(appname)
+            classes[appname] = cls
+        super(Registry, cls).__init_subclass__(**kwargs)
+        cls.instances = weakref.WeakValueDictionary()
+    
+    @staticmethod
+    def appnames():
+        """ Return a tuple of all registered appnames """
+        return tuple(appnames)
+    
+    @staticmethod
+    def for_appname(appname):
+        """ Return a subclass for a registered appname """
+        if not appname:
+            raise ValueError("appname required")
+        return classes.get(appname, None)
+
+class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     
     """ The base class for “clu.exporting.Exporter”. Override this
         class in your own project to use the CLU exporting mechanism –
         q.v. “clu.exporting.Exporter” docstring sub.
         
         This class uses the “clu.exporting.Prefix” metaclass, which
-        automatically adds a “prefix” class attribute.
+        automatically adds a “prefix” class attribute, as well as
+        the “clu.exporting.Registry” mixin, which keeps a registry
+        containing it and all of its derived subclasses, and furnishes
+        the “instances” weak-value dictionary for instance registration.
     """
     
     __slots__ = pytuple('exports', 'weakref') + ('path', 'dotpath')
-    instances = weakref.WeakValueDictionary()
     
     def __new__(cls, *args, **kwargs):
         try:
@@ -623,7 +661,7 @@ class ExporterBase(MutableMapping, metaclass=Prefix):
     def __bool__(self):
         return len(self.__exports__) > 0
 
-class Exporter(ExporterBase, prefix=BASEPATH):
+class Exporter(ExporterBase, prefix=BASEPATH, appname=PROJECT_NAME):
     
     """ A class representing a list of things for a module to export.
         
@@ -644,7 +682,7 @@ class Exporter(ExporterBase, prefix=BASEPATH):
         
         Also note that all derived subclasses of ExporterBase will
         automatrically be slotted classes – a “__slots__” attribute
-        will be added to the class dict by the “clu.exporting.Prefix”
+        will be added to the class dict by the “clu.exporting.Slotted”
         metaclass, if your subclass doesn’t define one – and so if
         you desire a class with a working “__dict__” attribute for
         some reason, you’ll need to specify:

@@ -43,8 +43,8 @@ class TestExporting(object):
         assert 'yolocal' in Registry.all_appnames()
         assert len(Exporter.modulenames()) == 1
         assert len(exporter) == 1
-        assert exporter['youlike'] == youlike
-        assert Exporter['yodogg.iheard'] == exporter
+        assert exporter['youlike'] is youlike
+        assert Exporter['yodogg.iheard'] is exporter
         assert Registry['yolocal'] is Exporter
         
         assert Registry['yolocal']['yodogg.iheard']['youlike']() == "registries"

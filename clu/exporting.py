@@ -258,18 +258,18 @@ class Slotted(abc.ABCMeta):
                                                         attributes,
                                                       **kwargs)
 
-class PrefixDescriptor(object):
+class ValueDescriptor(object):
     
-    __slots__ = ('prefix',)
+    __slots__ = ('value',)
     
-    def __init__(self, prefix):
-        self.prefix = prefix
+    def __init__(self, value):
+        self.value = value
     
     def __get__(self, *args):
-        return self.prefix
+        return self.value
     
     def __repr__(self):
-        return repr(self.prefix)
+        return repr(self.value)
 
 class Prefix(Slotted):
     
@@ -293,7 +293,7 @@ class Prefix(Slotted):
         """
         prefix = kwargs.pop('prefix', "/")
         
-        attributes['prefix'] = PrefixDescriptor(prefix)
+        attributes['prefix'] = ValueDescriptor(prefix)
         
         return super(Prefix, metacls).__new__(metacls, name,
                                                        bases,
@@ -323,6 +323,7 @@ class Registry(abc.ABC, metaclass=Slotted):
             classes[appname] = cls
         super(Registry, cls).__init_subclass__(**kwargs)
         cls.instances = weakref.WeakValueDictionary()
+        cls.appname = ValueDescriptor(appname)
     
     @staticmethod
     def appnames():

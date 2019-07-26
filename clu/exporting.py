@@ -328,9 +328,25 @@ class Registry(abc.ABC, metaclass=Slotted):
     @staticmethod
     def for_appname(appname):
         """ Return a subclass for a registered appname """
+        from clu.typology import isstring
         if not appname:
             raise ValueError("appname required")
-        return classes.get(appname, None)
+        if not isstring(appname):
+            raise TypeError("class registry access by string keys only")
+        return classes[appname]
+    
+    @classmethod
+    def __class_getitem__(cls, key):
+        """ Return a specific registered class from the registry,
+            given an “appname”, like e.g:
+            
+                from clu import exporting
+                assert Registry['clu'] == exporting.Exporter
+        """
+        from clu.typology import isstring
+        if not isstring(key):
+            raise TypeError("class registry access by string keys only")
+        return classes[key]
 
 class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     
@@ -380,7 +396,7 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
         # b) it’s too useful a method to give it all up. So deal.
         from clu.typology import isstring
         if not isstring(key):
-            raise TypeError("instance access by string keys only")
+            raise TypeError("instance registry access by string keys only")
         return cls.instances[key]
     
     @classmethod
@@ -707,6 +723,7 @@ export(predicates_for_types)
 export(sysmods,         name='sysmods',         doc="sysmods() → shortcut for reversed(tuple(frozenset(sys.modules.values()))) …OK? I know. It’s not my finest work, but it works.")
 
 # NO DOCS ALLOWED:
+export(Registry)
 export(ExporterBase)
 export(Exporter)        # hahaaaaa
 

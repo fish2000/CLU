@@ -15,7 +15,7 @@ class TestExporting(object):
     """ Run the tests for the clu.exporting module. """
     
     def test_exporterbase_subclass(self, dirname):
-        from clu.exporting import ExporterBase
+        from clu.exporting import ExporterBase, Registry
         import os
         
         prefix = dirname.subdirectory('yodogg')
@@ -39,6 +39,7 @@ class TestExporting(object):
         assert 'yolocal' in Exporter.all_appnames()
         assert len(Exporter.modulenames()) == 1
         assert len(exporter) == 0
+        assert Registry['yolocal'] is Exporter
     
     @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_exporter_instance_registry(self, clumods):

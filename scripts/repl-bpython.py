@@ -59,8 +59,9 @@ from clu.exporting import (doctrim,
                            search_modules,
                            determine_name,
                            sysmods,
-                           Exporter, path_to_dotpath,
-                                     predicates_for_types)
+                           Exporter, ExporterBase, Registry,
+                           path_to_dotpath,
+                           predicates_for_types)
 
 from clu.sanitizer import sanitize, sanitizers, utf8_encode, utf8_decode
 from clu.version import version_info
@@ -268,7 +269,7 @@ __all__ = ('Image',
            'search_modules',
            'determine_name',
            'sysmods',
-           'Exporter',
+           'Exporter', 'ExporterBase', 'Registry',
            'path_to_dotpath', 'predicates_for_types',
            'negate',
            'ismetaclass', 'isclass', 'isclasstype', 'metaclass',

@@ -343,10 +343,7 @@ class Registry(abc.ABC, metaclass=Slotted):
                 from clu import exporting
                 assert Registry['clu'] is exporting.Exporter
         """
-        from clu.typology import isstring
-        if not isstring(key):
-            raise TypeError("class registry access by string keys only")
-        return classes[key]
+        return cls.for_appname(key)
 
 class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     

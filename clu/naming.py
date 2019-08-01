@@ -30,10 +30,10 @@ def determine_module(thing, name=None):
 
 @export
 def nameof(thing, default=NoDefault):
-    """ Get the name of a thing, according to either:
-        >>> thing.__qualname__
-        … or:
-        >>> thing.__name__
+    """ Get the name of a thing, according to its attributes,
+        how it appears as a registered item in any Exporter
+        subclasses, or (failing any of those) as it appears
+        in the module in which it appears to be ensconced –
         … optionally specifying a “default” fallback.
     """
     from clu.predicates import pyname

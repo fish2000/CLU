@@ -49,7 +49,8 @@ def nameof(thing, default=NoDefault):
 @export
 def moduleof(thing, default=NoDefault):
     """ Determine in which module a given thing is ensconced,
-        and return that modules’ name as a string.
+        and return that modules’ name as a string
+        … optionally specifying a “default” fallback.
     """
     from clu.predicates import pymodule
     

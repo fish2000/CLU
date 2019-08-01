@@ -20,16 +20,16 @@ export = exporter.decorator()
 @export
 class CLUInterface(AppDirs):
     
-    fields = ('appname', 'system', 
-                         'version',
-                         'version_info',
-                         'datadir',
-                         'count',
-                         'closed',
+    fields = ('appname',        'system', 
+                                'version',
+                                'version_info',
+                                'datadir',
+                                'count',
+                                'closed',
               
-              'site_config', 'site_data',
-              'user_cache',  'user_config',
-              'user_data',   'user_log',
+              'site_config',    'site_data',
+              'user_cache',     'user_config',
+              'user_data',      'user_log',
               'user_state')
     
     def __init__(self, appname=PROJECT_NAME,

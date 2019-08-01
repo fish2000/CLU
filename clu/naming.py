@@ -26,7 +26,7 @@ def determine_module(thing, name=None):
     if thing is None:
         return None
     
-    return pickle.whichmodule(thing, None)
+    return pickle.whichmodule(thing, None) or name
 
 @export
 def nameof(thing, default=NoDefault):

@@ -4,7 +4,7 @@ from __future__ import print_function
 import re
 
 from clu.constants.consts import SEPARATOR_WIDTH, pytuple, NoDefault
-from clu.constants.polyfills import MutableMapping
+from clu.constants.polyfills import MutableMapping, HashableABC
 from clu.dicts import merge_two, asdict
 from clu.naming import nameof
 from clu.predicates import ismergeable
@@ -16,7 +16,7 @@ export = exporter.decorator()
 # NAMESPACES: SimpleNamespace and Namespace
 
 @export
-class SimpleNamespace(object):
+class SimpleNamespace(HashableABC):
     
     """ Implementation courtesy this SO answer:
         • https://stackoverflow.com/a/37161391/298171
@@ -41,6 +41,10 @@ class SimpleNamespace(object):
     
     def __ne__(self, other):
         return self.__dict__ != asdict(other)
+    
+    def __hash__(self):
+        return hash(tuple(self.__dict__.keys()) +
+                    tuple(self.__dict__.values()))
 
 @export
 class Namespace(SimpleNamespace, MutableMapping):

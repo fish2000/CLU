@@ -3,16 +3,16 @@ PROJECT_NAME = clu
 
 clean: clean-cython clean-build-artifacts clean-pyc
 
-distclean: clean-test-artifacts clean-build-artifacts
+distclean: clean-cython clean-test-artifacts clean-build-artifacts
 
 rebuild: clean-build-artifacts cython
 
 dist: twine-upload
 
-upload: bump dist
+upload: clean-build-artifacts bump dist
 	git push
 
-bigupload: bigbump dist
+bigupload: clean-build-artifacts bigbump dist
 	git push
 
 clean-pyc:
@@ -21,7 +21,7 @@ clean-pyc:
 clean-cython:
 	find $(PROJECT_NAME)/ -name \*.so -print -delete
 
-clean-build-artifacts: clean-cython
+clean-build-artifacts:
 	rm -rf build dist python_$(PROJECT_NAME).egg-info
 
 clean-test-artifacts: clean-pyc
@@ -45,16 +45,20 @@ bump:
 bigbump:
 	bumpversion --verbose minor
 
-check: clean-build-artifacts
+check: clean-test-artifacts
 	check-manifest -v
 	python setup.py check -m -s
 	travis lint .travis.yml
 
-test: check
-	pytest
+pytest:
+	python -m pytest -p clu.testing.pytest
 
-test-all: check
+tox:
 	tox
+
+test: check pytest
+
+test-all: check tox
 
 .PHONY: clean distclean rebuild
 .PHONY: dist upload bigupload
@@ -63,5 +67,5 @@ test-all: check
 
 .PHONY: cython sdist wheel twine-upload bump bigbump
 
-.PHONY: check test test-all
+.PHONY: check pytest tox test test-all
 

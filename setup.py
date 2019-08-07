@@ -98,7 +98,10 @@ INSTALL_REQUIRES = project_content('requirements', 'install.txt').splitlines()
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'License :: OSI Approved :: MIT License',
+    'Framework :: Pytest',
     'Intended Audience :: Developers',
+    'Topic :: Software Development',
+    'Topic :: Software Development :: Testing',
     'Operating System :: MacOS',
     'Operating System :: Microsoft :: Windows',
     'Operating System :: OS Independent',
@@ -108,7 +111,10 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7']
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: Implementation :: CPython',
+    'Programming Language :: Python :: Implementation :: PyPy',
+]
 
 # NUMPY: C-API INCLUDE DIRECTORY
 try:
@@ -148,5 +154,9 @@ setup(
     zip_safe=True,
     
     install_requires=INSTALL_REQUIRES,
-    include_dirs=include_dirs
+    include_dirs=include_dirs,
+    
+    entry_points={
+        'pytest11' : ['clu-testing = clu.testing.pytest']
+    }
 )

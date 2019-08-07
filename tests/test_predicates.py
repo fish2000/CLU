@@ -341,7 +341,8 @@ class TestPredicates(object):
         """ » Checking “thing/class/slotted/dictish” lambdas from clu.predicates … """
         from clu.typespace import Namespace, SimpleNamespace
         from clu.predicates import (thing_has, class_has,
-                                    isslotted, isdictish, isslotdicty)
+                                    isslotted, isdictish, isslotdicty,
+                                    slots_for)
         
         assert isslotted(Namespace())
         assert isslotted(SimpleNamespace())
@@ -400,6 +401,37 @@ class TestPredicates(object):
         assert class_has(Dictish, 'dogg')
         assert not class_has(Dictish, 'wtf')
         assert not class_has(Dictish, 'hax')
+        
+        class DerivedSlottedNoSlots(Slotted):
+            __slots__ = tuple()
+        
+        class DerivedPlusSomeSlots(DerivedSlottedNoSlots):
+            __slots__ = ('i', 'heard', 'you', 'like')
+            
+            def __init__(self):
+                super(DerivedPlusSomeSlots, self).__init__()
+                self.i: str = "I"
+                self.heard: str = "HEARD"
+                self.you: str = "YOU"
+                self.like: str = "LIKE SLOTS"
+        
+        assert slots_for(Slotted)   == ('yo', 'dogg', 'wtf')
+        assert slots_for(Slotted()) == ('yo', 'dogg', 'wtf')
+        
+        assert slots_for(DerivedSlottedNoSlots)   == ('yo', 'dogg', 'wtf')
+        assert slots_for(DerivedSlottedNoSlots()) == ('yo', 'dogg', 'wtf')
+        
+        # Slots returned by “slots_for(…)” start with the lowest base class,
+        # and move up through the heirarchy, keeping the slot names in order,
+        # as they appear in the iterable specified in the slotted class:
+        assert slots_for(DerivedPlusSomeSlots)   == ('yo', 'dogg', 'wtf',
+                                                     'i', 'heard', 'you', 'like')
+        assert slots_for(DerivedPlusSomeSlots()) == ('yo', 'dogg', 'wtf',
+                                                     'i', 'heard', 'you', 'like')
+        
+        # Non-slotted types passed to “slots_for(…)” yield an empty tuple:
+        assert slots_for(Dictish)   == tuple()
+        assert slots_for(Dictish()) == tuple()
     
     def test_applyto(self):
         """ » Checking “apply_to(…)” core function from clu.predicates … """

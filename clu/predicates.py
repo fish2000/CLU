@@ -308,11 +308,11 @@ def slots_for(cls):
     """ slots_for(cls) → get the summation of the `__slots__` tuples for a class and its ancestors """
     # q.v. https://stackoverflow.com/a/6720815/298171
     if not isclasstype(cls):
-        return tuple()
+        return slots_for(type(cls))
     mro = pyattr(cls, 'mro', 'bases', tuplize(object))
     return tuple(iterchain(
                  getpyattr(ancestor, 'slots', tuple()) \
-                       for ancestor in mro))
+                       for ancestor in reversed(mro)))
 
 # MODULE EXPORTS:
 export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n" + negate_doc)

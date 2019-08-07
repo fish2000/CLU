@@ -4,7 +4,6 @@ from __future__ import print_function
 
 def print_version_command():
     from clu.version import version_info as version
-    import sys
     
     semantic = f"{version.major}.{version.minor}.{version.patch}"
     if version.pre:
@@ -18,7 +17,8 @@ def print_version_command():
     copyright = f"CLU version {semantic} © 2010-2032 Alexander Böhn"
     
     print(copyright)
-    sys.exit(0)
+    return 0
 
 if __name__ == '__main__':
-    print_version_command()
+    import sys
+    sys.exit(print_version_command())

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from inspect import getattr_static as getstatic
 from itertools import chain
 from functools import partial, wraps
+
+iterchain = chain.from_iterable
 
 from clu.constants.consts import λ, φ, pytuple, QUALIFIER
 from clu.enums import alias
@@ -74,7 +77,8 @@ isiterable = lambda thing: anypyattrs(thing, 'iter', 'getitem')
 # q.v. `merge_two(…)` implementation sub.
 ismergeable = lambda thing: bool(hasattr(thing, 'get') and isiterable(thing))
 
-# ACCESSORS: getattr(…) shortcuts:
+# ACCESSORS: getattr(…) shortcuts --
+# N.B. “getstatic(…)” is an alias for “inspect.getattr_static(…)”
 
 always = lambda thing: True
 never = lambda thing: False
@@ -82,11 +86,9 @@ nuhuh = lambda thing: None
 
 no_op     = lambda thing, atx, default=None: thing
 or_none   = lambda thing, atx: getattr(thing, atx, None)
+stor_none = lambda thing, atx: getstatic(thing, atx, None)
 getpyattr = lambda thing, atx, default=None: getattr(thing, f'__{atx}__', default)
-
-getitem   = lambda thing, itx, default=None: thing.__contains__(itx) \
-                                         and thing.__getitem__(itx) \
-                                          or default
+getitem   = lambda thing, itx, default=None: itx in thing and thing[itx] or default
 
 @export
 def resolve(thing, atx):
@@ -117,18 +119,22 @@ collator = lambda function, xatx, *things, default=tuple(): tuple(atx for atx in
                                                                        if atx is not None) or default
 
 attr     = lambda thing, *attrs, default=None: accessor(resolve,   thing, *attrs, default=default)
+stattr   = lambda thing, *attrs, default=None: accessor(stor_none, thing, *attrs, default=default)
 pyattr   = lambda thing, *attrs, default=None: accessor(getpyattr, thing, *attrs, default=default)
 item     = lambda thing, *items, default=None: accessor(getitem,   thing, *items, default=default)
 
 attrs    = lambda thing, *attrs, default=tuple(): acquirer(resolve,   thing, *attrs, default=default)
+stattrs  = lambda thing, *attrs, default=tuple(): acquirer(stor_none, thing, *attrs, default=default)
 pyattrs  = lambda thing, *attrs, default=tuple(): acquirer(getpyattr, thing, *attrs, default=default)
 items    = lambda thing, *items, default=tuple(): acquirer(getitem,   thing, *items, default=default)
 
 attr_search   = lambda atx, *things, default=None: searcher(resolve,   atx, *things, default=default)
+stattr_search = lambda atx, *things, default=None: searcher(stor_none, atx, *things, default=default)
 pyattr_search = lambda atx, *things, default=None: searcher(getpyattr, atx, *things, default=default)
 item_search   = lambda itx, *things, default=None: searcher(getitem,   itx, *things, default=default)
 
 attr_across   = lambda atx, *things, default=tuple(): collator(resolve,   atx, *things, default=default)
+stattr_across = lambda atx, *things, default=tuple(): collator(stor_none, atx, *things, default=default)
 pyattr_across = lambda atx, *things, default=tuple(): collator(getpyattr, atx, *things, default=default)
 item_across   = lambda itx, *things, default=tuple(): collator(getitem,   itx, *things, default=default)
 
@@ -260,16 +266,6 @@ isslotted = lambda thing: haspyattr(thing, 'slots') and negate(isclasstype)(thin
 isdictish = lambda thing: haspyattr(thing, 'dict') and negate(isclasstype)(thing)
 isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and negate(isclasstype)(thing)
 
-@export
-def slots_for(cls):
-    """ slots_for(cls) → get the summation of the `__slots__` tuples for a class and its ancestors """
-    # q.v. https://stackoverflow.com/a/6720815/298171
-    if not isclasstype(cls):
-        return tuple()
-    return tuple(chain.from_iterable(
-                 getpyattr(ancestor, 'slots', tuple()) \
-                       for ancestor in cls.__mro__))
-
 # For sorting with ALL_CAPS stuff first or last:
 case_sort = lambda c: c.lower() if c.isupper() else c.upper()
 
@@ -307,6 +303,17 @@ def noneof(*items):
     """ noneof(*items) → Return the result of “not any(…)” on all non-`None` arguments """
     return negate(any)(item for item in items if item is not None)
 
+@export
+def slots_for(cls):
+    """ slots_for(cls) → get the summation of the `__slots__` tuples for a class and its ancestors """
+    # q.v. https://stackoverflow.com/a/6720815/298171
+    if not isclasstype(cls):
+        return tuple()
+    mro = pyattr(cls, 'mro', 'bases', tuplize(object))
+    return tuple(iterchain(
+                 getpyattr(ancestor, 'slots', tuple()) \
+                       for ancestor in mro))
+
 # MODULE EXPORTS:
 export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n" + negate_doc)
 
@@ -335,23 +342,32 @@ export(never,           name='never',           doc="never(thing) → boolean pr
 export(nuhuh,           name='nuhuh',           doc="nuhuh(thing) → boolean predicate that always returns `None`")
 export(no_op,           name='no_op',           doc="no_op(thing, attribute[, default]) → shortcut for `(attribute or default)`")
 export(or_none,         name='or_none',         doc="or_none(thing, attribute) → shortcut for `getattr(thing, attribute, None)`")
+export(stor_none,       name='stor_none',       doc="stor_none(thing, attribute) → shortcut for `inspect.getattr_static(thing, attribute, None)`")
 export(getpyattr,       name='getpyattr',       doc="getpyattr(thing, attribute[, default]) → shortcut for `getattr(thing, '__%s__' % attribute[, default])`")
 export(getitem,         name='getitem',         doc="getitem(thing, item[, default]) → shortcut for `thing.get(item[, default])`")
+
 export(accessor,        name='accessor',        doc="accessor(func, thing, *attributes) → return the first non-None value had by successively applying func(thing, attribute) to all attributes")
 export(acquirer,        name='acquirer',        doc="acquirer(func, thing, *attributes) → return all of the non-None values had by successively applying func(thing, attribute) to all attributes")
 export(searcher,        name='searcher',        doc="searcher(func, attribute, *things) → return the first non-None value had by successively applying func(thing, attribute) sequentially to all things")
 export(collator,        name='collator',        doc="collator(func, attribute, *things) → return all of the non-None values had by successively applying func(thing, attribute) across all things")
 
 export(attr,            name='attr',            doc="attr(thing, *attributes) → Return the first existing attribute from `thing`, given 1+ attribute names")
+export(stattr,          name='stattr',          doc="stattr(thing, *attributes) → Statically return the first existing attribute from `thing`, given 1+ attribute names (q.v. “inspect.getattr_static(¬)” supra.)")
 export(pyattr,          name='pyattr',          doc="pyattr(thing, *attributes) → Return the first existing __special__ attribute from `thing`, given 1+ attribute names")
 export(item,            name='item',            doc="item(thing, *itemnames) → Return the first existing item held by `thing`, given 1+ item names")
+
 export(attrs,           name='attrs',           doc="attrs(thing, *attributes) → Return all of the existing named attributes from `thing`, given 1+ attribute names")
+export(stattrs,         name='stattrs',         doc="stattrs(thing, *attributes) → Statically return all of the existing named attributes from `thing`, given 1+ attribute names (q.v. “inspect.getattr_static(¬)” supra.)")
 export(pyattrs,         name='pyattrs',         doc="pyattrs(thing, *attributes) → Return all of the existing named __special__ attributes from `thing`, given 1+ attribute names")
 export(items,           name='items',           doc="items(thing, *itemnames) → Return all of the existing named items held by `thing`, given 1+ item names")
+
 export(attr_search,     name='attr_search',     doc="attr_search(attribute, *things) → Return the first-found existing attribute from a thing, given 1+ things")
+export(stattr_search,   name='stattr_search',   doc="stattr_search(attribute, *things) → Statically return the first-found existing attribute from a thing, given 1+ things (q.v. “inspect.getattr_static(¬)” supra.)")
 export(pyattr_search,   name='pyattr_search',   doc="pyattr_search(attribute, *things) → Return the first-found existing __special__ attribute from a thing, given 1+ things")
 export(item_search,     name='item_search',     doc="item_search(itemname, *things) → Return the first-found existing item from a thing, given 1+ things")
+
 export(attr_across,     name='attr_across',     doc="attr_across(attribute, *things) → Return all of the existing named attributes across all things (given 1+ things)")
+export(stattr_across,   name='stattr_across',   doc="stattr_across(attribute, *things) → Statically return all of the existing named attributes across all things (given 1+ things) (q.v. “inspect.getattr_static(¬)” supra.)")
 export(pyattr_across,   name='pyattr_across',   doc="pyattr_across(attribute, *things) → Return all of the existing named __special__ attributes across all things (given 1+ things)")
 export(item_across,     name='item_across',     doc="item_across(attribute, *things) → Return all of the existing named items held across all things (given 1+ things)")
 

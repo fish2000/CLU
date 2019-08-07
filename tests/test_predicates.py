@@ -7,6 +7,144 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates module. """
     
+    def test_static_accessors(self, environment):
+        from clu.predicates import isclasstype, pyattr
+        from clu.predicates import attr, attrs, stattr, stattrs
+        # from clu.predicates import (attr_search, attr_across,
+        #                           stattr_search, stattr_across)
+        
+        # Non-data descriptor wrapping a R/O value:
+        from clu.exporting import ValueDescriptor
+        
+        # We have to use these irritating default environment values everywhere,
+        # in case the testing environment is kertwanged:
+        home = environment.get('HOME', '/tmp')
+        user = environment.get('USER', 'nobody')
+        
+        # Non-data descriptor wrapping R/O access to a named environment variable,
+        # a default value for that variable, and the variables’ name:
+        class EnvironmentName(object):
+            
+            __slots__ = ('name', 'default')
+            
+            def __init__(self, name=None, default=None):
+                self.default = default
+                if name is not None:
+                    self.name = name
+            
+            def __set_name__(self, cls, name):
+                if name is not None:
+                    self.name = name
+            
+            def __get__(self, instance=None, cls=None):
+                if instance is not None:
+                    return environment.get(self.name,
+                                           self.default)
+                if isclasstype(cls):
+                    return self.name
+            
+            def __repr__(self):
+                clsname = pyattr(type(self), 'name', 'qualname')
+                selfname =  attr(     self,  'name', 'default')
+                return f"{clsname}<[{selfname}]>"
+        
+        # Slotted type with non-data descriptors,
+        # wrapping values and environment variables:
+        class Slotted(object):
+            __slots__ = ('yo', 'dogg', 'wtf')
+            
+            hax = ValueDescriptor('HAXXX')
+            HOME = EnvironmentName(default='/tmp')
+            USER = EnvironmentName(default='nobody')
+            
+            def __init__(self):
+                self.yo: str = "YO"
+                self.dogg: str = "DOGG"
+                self.wtf: str = "WTFFF"
+        
+        # Non-slotted (“dictish”) type with non-data descriptors,
+        # wrapping values and environment variables:
+        class Dictish(object):
+            yo: str = "YO"
+            dogg: str = "DOGG"
+            
+            wtf = ValueDescriptor('WTFFF')
+            HOME = EnvironmentName(default='/tmp')
+            USER = EnvironmentName(default='nobody')
+            
+            def __init__(self):
+                self.hax: str = "HAXXX"
+        
+        # The basics – Slotted type and instance attributes:
+        assert attr(Slotted,    'hax', 'HOME', 'USER') ==  'HAXXX'
+        assert attr(Slotted(),  'hax', 'HOME', 'USER') ==  'HAXXX'
+        assert attrs(Slotted,   'hax', 'HOME', 'USER') == ('HAXXX', 'HOME', 'USER')
+        assert attrs(Slotted(), 'hax', 'HOME', 'USER') == ('HAXXX',  home,   user)
+        
+        # More basics – Dictish type and instance attributes:
+        assert attr(Dictish,    'wtf', 'HOME', 'USER') ==  'WTFFF'
+        assert attr(Dictish(),  'wtf', 'HOME', 'USER') ==  'WTFFF'
+        assert attrs(Dictish,   'wtf', 'HOME', 'USER') == ('WTFFF', 'HOME', 'USER')
+        assert attrs(Dictish(), 'wtf', 'HOME', 'USER') == ('WTFFF',  home,   user)
+        
+        # Check statically obtained ValueDescriptor instances,
+        # from Slotted types and instances:
+        assert repr(stattr(Slotted,    'hax', 'HOME', 'USER')) ==                       'HAXXX'
+        assert repr(stattr(Slotted(),  'hax', 'HOME', 'USER')) ==                       'HAXXX'
+        assert repr(stattr(Slotted,    'hax', 'HOME', 'USER')) ==  repr(ValueDescriptor('HAXXX'))
+        assert repr(stattr(Slotted(),  'hax', 'HOME', 'USER')) ==  repr(ValueDescriptor('HAXXX'))
+        assert type(stattr(Slotted,    'hax', 'HOME', 'USER')) is       ValueDescriptor
+        assert type(stattr(Slotted(),  'hax', 'HOME', 'USER')) is       ValueDescriptor
+        # These don’t work (they need ValueDescriptor.__eq__() which might make things weird):
+        # assert      stattr(Slotted,    'hax', 'HOME', 'USER')  ==  ValueDescriptor('HAXXX')
+        # assert      stattr(Slotted(),  'hax', 'HOME', 'USER')  ==  ValueDescriptor('HAXXX')
+        
+        # Check statically obtained ValueDescriptor instances,
+        # from Dictish types and instances:
+        assert repr(stattr(Dictish,    'wtf', 'HOME', 'USER')) ==                       'WTFFF'
+        assert repr(stattr(Dictish(),  'wtf', 'HOME', 'USER')) ==                       'WTFFF'
+        assert repr(stattr(Dictish,    'wtf', 'HOME', 'USER')) ==  repr(ValueDescriptor('WTFFF'))
+        assert repr(stattr(Dictish(),  'wtf', 'HOME', 'USER')) ==  repr(ValueDescriptor('WTFFF'))
+        assert type(stattr(Dictish,    'wtf', 'HOME', 'USER')) is       ValueDescriptor
+        assert type(stattr(Dictish(),  'wtf', 'HOME', 'USER')) is       ValueDescriptor
+        # These don’t work (they need ValueDescriptor.__eq__() which might make things weird):
+        # assert      stattr(Dictish,    'wtf', 'HOME', 'USER')  ==  ValueDescriptor('WTFFF')
+        # assert      stattr(Dictish(),  'wtf', 'HOME', 'USER')  ==  ValueDescriptor('WTFFF')
+        
+        # Check statically obtained EnvironmentName instances,
+        # from both Slotted and Dictish types and instances:
+        assert repr(stattr(Slotted,   'HOME')) == repr(EnvironmentName('HOME', default='/tmp'))
+        assert repr(stattr(Slotted(), 'HOME')) == repr(EnvironmentName('HOME', default='/tmp'))
+        assert repr(stattr(Slotted,   'USER')) == repr(EnvironmentName('USER', default='nobody'))
+        assert repr(stattr(Slotted(), 'USER')) == repr(EnvironmentName('USER', default='nobody'))
+        assert repr(stattr(Slotted,   'HOME')) ==     "EnvironmentName<[HOME]>"
+        assert repr(stattr(Slotted(), 'HOME')) ==     "EnvironmentName<[HOME]>"
+        assert repr(stattr(Slotted,   'USER')) ==     "EnvironmentName<[USER]>"
+        assert repr(stattr(Slotted(), 'USER')) ==     "EnvironmentName<[USER]>"
+        assert repr(stattr(Dictish,   'HOME')) == repr(EnvironmentName('HOME', default='/tmp'))
+        assert repr(stattr(Dictish(), 'HOME')) == repr(EnvironmentName('HOME', default='/tmp'))
+        assert repr(stattr(Dictish,   'USER')) == repr(EnvironmentName('USER', default='nobody'))
+        assert repr(stattr(Dictish(), 'USER')) == repr(EnvironmentName('USER', default='nobody'))
+        assert repr(stattr(Dictish,   'HOME')) ==     "EnvironmentName<[HOME]>"
+        assert repr(stattr(Dictish(), 'HOME')) ==     "EnvironmentName<[HOME]>"
+        assert repr(stattr(Dictish,   'USER')) ==     "EnvironmentName<[USER]>"
+        assert repr(stattr(Dictish(), 'USER')) ==     "EnvironmentName<[USER]>"
+        
+        # Slotted attributes are named descriptors that can compare with __eq__():
+        assert stattr(Slotted, 'yo')   == stattr(Slotted(), 'yo')   == attr(Slotted, 'yo')
+        assert stattr(Slotted, 'dogg') == stattr(Slotted(), 'dogg') == attr(Slotted, 'dogg')
+        assert stattr(Slotted, 'wtf')  == stattr(Slotted(), 'wtf')  == attr(Slotted, 'wtf')
+        
+        # Dictish attributes are just attributes -- statically obtained attributes come from
+        # the class __dict__, while “normally” obtained attributes are probably coming out of
+        # the instance __dict__:
+        atts = ('yo', 'dogg', 'wtf')
+        assert stattrs(Dictish, *atts) == stattrs(Dictish(), *atts) != attrs(Dictish(), *atts)
+        
+        # N.B. Dictish.hax is a ValueDescriptor instance:
+        atts = ('yo', 'dogg', 'hax')
+        assert stattrs(Dictish, *atts) != stattrs(Dictish(), *atts) == attrs(Dictish(), *atts)
+    
     def test_resolve_accessor(self):
         from clu.predicates import resolve
         from clu.typespace.namespace import SimpleNamespace

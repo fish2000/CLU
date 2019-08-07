@@ -269,7 +269,10 @@ class ValueDescriptor(object):
         return self.value
     
     def __repr__(self):
-        return repr(self.value)
+        from clu.constants.consts import ENCODING
+        return isinstance(self.value, str)   and self.value or \
+               isinstance(self.value, bytes) and self.value.decode(ENCODING) or \
+                                            repr(self.value)
 
 class Prefix(Slotted):
     

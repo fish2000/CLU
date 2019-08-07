@@ -309,7 +309,7 @@ def slots_for(cls):
     # q.v. https://stackoverflow.com/a/6720815/298171
     if not isclasstype(cls):
         return slots_for(type(cls))
-    mro = pyattr(cls, 'mro', 'bases', tuplize(object))
+    mro = pyattr(cls, 'mro', 'bases', default=tuplize(object))
     return tuple(iterchain(
                  getpyattr(ancestor, 'slots', tuple()) \
                        for ancestor in reversed(mro)))

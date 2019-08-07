@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 def print_version_command():
+    """ Print a simple string with CLU’s current semantic version tag """
     from clu.version import version_info as version
     
     semantic = f"{version.major}.{version.minor}.{version.patch}"

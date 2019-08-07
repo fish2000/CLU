@@ -63,6 +63,12 @@ CWD = os.path.dirname(__file__)
 BASE_PATH = os.path.join(
             os.path.abspath(CWD), PROJECT_NAME)
 
+# ENTRY POINTS
+ENTRY_POINTS = {
+    'console_scripts'  : ['clu-version = clu.repl.cli.print_version:print_version_command'],
+    'pytest11'         : ['clu-testing = clu.testing.pytest']
+}
+
 def project_content(*filenames):
     import io
     filepath = os.path.join(CWD, *filenames)
@@ -153,10 +159,7 @@ setup(
     include_package_data=True,
     zip_safe=True,
     
+    entry_points=ENTRY_POINTS,
     install_requires=INSTALL_REQUIRES,
-    include_dirs=include_dirs,
-    
-    entry_points={
-        'pytest11' : ['clu-testing = clu.testing.pytest']
-    }
+    include_dirs=include_dirs
 )

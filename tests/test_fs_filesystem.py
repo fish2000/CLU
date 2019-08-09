@@ -15,6 +15,8 @@ class TestFsFilesystem(object):
     
     def test_flatten(self, datadir,
                            temporarydir):
+        from clu.testing.utils import countfiles
+        
         # target directory should not already exist:
         target = temporarydir.subdirectory('yodogg')
         
@@ -26,6 +28,13 @@ class TestFsFilesystem(object):
         
         # target and destination should be the same thing:
         assert target == destination
+        
+        # datadir, target and destination should each
+        # contain the same amount of things, regardless
+        # of any of their structures:
+        assert countfiles(datadir) \
+            == countfiles(target) \
+            == countfiles(destination)
     
     def test_zip_archive(self, datadir):
         from clu.fs.filesystem import temporary

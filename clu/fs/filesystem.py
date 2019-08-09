@@ -944,6 +944,84 @@ class Directory(collections.abc.Hashable,
                               os.path.join(self.name,
                                            os.pardir)))
     
+    def relparent(self, path):
+        """ Relativize a path, relative to the parent of the directory,
+            and return it as a string.
+            
+            Used internally in the implementations of the instance
+            methods “Directory.flatten(…)”, and “Directory.zip_archive(…)”.
+        """
+        return os.path.relpath(path,
+              start=os.path.abspath(
+                    os.path.join(self.name,
+                    os.pardir)))
+    
+    def relprefix(self, path):
+        """ Return a “prefix” string based on a file path –
+            the actual path separators are replaced with underscores,
+            with which the individual path segments are joined, creating
+            a single long string that is unique to the original file path.
+            
+            Used internally in the implementation of “Directory.flatten(…)”.
+        """
+        return (self.relparent(path) + os.sep).replace(os.sep, '_')
+    
+    def flatten(self, destination, suffix=None):
+        """ Copy the entire directory tree, all contents included, to a new
+            destination path – with all files residing within the same directory
+            level.
+            
+            That is to say, if the directory tree is like:
+            
+                yo/
+                yo/dogg/[0..9].jpg
+                yo/dogg/nodogg/[0..99].png
+            
+            … you end up with a single destination directory, filled with files,
+            all with names like:
+            
+                yo_dogg_[0..9].jpg
+                yo_dogg_nodogg_[0.99].png
+            
+           `flatten(…)` will not overwrite existant directories. Like, if
+            you have yourself an instance of Directory, `directory`, and you
+            want to copy it to `/home/me/myshit`, `/home/me` should already
+            exist but `/home/me/myshit` should not, as the subdirectory
+           `myshit` gets created by the `directory.flatten('/home/me/myshit')`
+            invocation (like as a side-effect).
+            
+            Does that make sense to you? Try it, you’ll get a `FilesystemError`
+            if it evidently did not make sense to you.
+            
+            The destination path may be specified using a string-like, with
+            another Directory object, or anything deemed path-y enough by
+           `os.fspath(…)`. Internally, this method uses `shutil.copy2(…)`
+            to tell the filesystem to copy and rename each file in succession.
+        """
+        whereto = self.directory(pth=destination)
+        if anyof(whereto.exists, os.path.isfile(whereto.name),
+                                 os.path.islink(whereto.name)):
+            raise FilesystemError(
+                f"flatten() destination exists: {whereto.name}")
+        if self.exists:
+            # Create destination directory, and list for the results:
+            whereto.makedirs()
+            results = []
+            # Walk source directory:
+            for root, dirs, files in self.walk(followlinks=True):
+                filenames = suffix and filter(suffix_searcher(suffix), files) \
+                                    or files
+                inputs = (os.path.join(root, filename) \
+                                         for filename in filenames)
+                outputs = ((whereto.subpath(self.relprefix(root) + filename)) \
+                                              for filename in filenames)
+                for infile, outfile in zip(inputs, outputs):
+                    copied = shutil.copy2(infile, outfile, follow_symlinks=True)
+                    assert os.path.exists(copied)
+                    results.append(copied)
+            # Return the destination directory instance and the result list:
+            return whereto, results
+    
     def copy_all(self, destination):
         """ Copy the entire directory tree, all contents included, to a new
             destination path. The destination must not already exist, and
@@ -998,13 +1076,12 @@ class Directory(collections.abc.Hashable,
                            suffix=zsuf[1:],
                            randomized=True) as ztmp:
             with zipfile.ZipFile(ztmp.name, "w", zmode) as ziphandle:
-                relparent = lambda p: os.path.relpath(p, os.fspath(self.parent()))
                 for root, dirs, files in self.walk(followlinks=True):
-                    ziphandle.write(root, relparent(root)) # add directory
+                    ziphandle.write(root, self.relparent(root)) # add directory
                     for filename in files:
                         filepath = os.path.join(root, filename)
                         if os.path.isfile(filepath): # regular files only
-                            arcname = os.path.join(relparent(root), filename)
+                            arcname = os.path.join(self.relparent(root), filename)
                             ziphandle.write(filepath, arcname) # add regular file
             assert ztmp.copy(zpth)
         return self.realpath(zpth)

@@ -13,6 +13,20 @@ class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     
+    def test_flatten(self, datadir,
+                           temporarydir):
+        # target directory should not already exist:
+        target = temporarydir.subdirectory('yodogg')
+        
+        # call flatten(…) on the datadir, collecting
+        # and copying all files contained within it into
+        # the target directory, renaming them as per their
+        # original pathnames:
+        destination, files = datadir.flatten(target)
+        
+        # target and destination should be the same thing:
+        assert target == destination
+    
     def test_zip_archive(self, datadir):
         from clu.fs.filesystem import temporary
         from clu.typology import isvalidpathlist

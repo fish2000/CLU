@@ -13,6 +13,7 @@ def clumods():
     
     for modname in MODNAMES:
         module = importlib.import_module(modname)
+        # Only include modules with an instance of “clu.exporting.Exporter”:
         if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
             modules[modname] = module
     
@@ -48,7 +49,7 @@ def dirname(request):
     from clu.predicates import resolve
     
     # Get the test-local (née “shared”) data path:
-    dirname = Directory(pth=resolve(request, 'fspath.dirname'))
+    dirname = Directory(resolve(request, 'fspath.dirname'))
     
     # Ensure it exists:
     assert dirname.exists
@@ -113,8 +114,13 @@ def temporarydir():
     
     with TemporaryDirectory(prefix=prefix,
                             change=False) as temporarydir:
+        # Assert that we exist:
+        assert temporarydir.exists
+        
+        # Yield the temporary directory:
         yield temporarydir
     
+    # Assert that we no longer exist after scope exit:
     assert not temporarydir.exists
 
 @pytest.fixture

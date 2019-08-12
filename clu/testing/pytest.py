@@ -140,12 +140,14 @@ def temporaryname():
     with ExitStack() as names:
         
         # Declare the fixture-factory function:
-        def temporaryname_factory(suffix, prefix=prefix):
+        def temporaryname_factory(suffix, prefix=prefix,
+                                          parent=None):
             """ The TemporaryName clu.testing fixture-factory function """
             # Enter the new TemoraryName instances’ context, and
             # return that instance:
             return names.enter_context(TemporaryName(prefix=prefix,
                                                      suffix=suffix,
+                                                     parent=parent,
                                                      randomized=True))
         
         # Yield the TemporaryName fixture-factory function:

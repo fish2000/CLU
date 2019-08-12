@@ -22,7 +22,7 @@ from clu.predicates import attr, allattrs, anyof
 from clu.sanitizer import utf8_encode
 from clu.typology import ispath, isvalidpath
 from .misc import masked_permissions
-from .misc import stringify, suffix_searcher, u8str
+from .misc import stringify, suffix_searcher, swapext, u8str
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -558,7 +558,7 @@ class TemporaryName(collections.abc.Hashable,
             if os.path.exists(destination):
                 if os.path.samefile(self._name, destination):
                     raise FilesystemError("Can’t copy to identical locations")
-                if os.path.isdir(self._name, destination):
+                if os.path.isdir(destination):
                     raise FilesystemError("Can’t copy files over a directory")
                 rm_rf(destination)
             return os.path.exists(
@@ -677,10 +677,10 @@ class Directory(collections.abc.Hashable,
             calls will be issued. Values for “pth” can be string-like, or existing
             Directory instances -- either will work.
             
-            There are two decendant classes of Directory (q.v. definitions below)
-            that enforce stipulations for the “pth” parameter: the `cd` class 
+            There are several decendant classes of Directory (q.v. definitions below)
+            that enforce stipulations for the “pth” parameter – e.g. the `cd` class 
             requires a target path to be provided (and therefore will nearly always
-            change the working directory when invoked as a context manager). Its
+            change the working directory when invoked as a context manager); its
             sibling class `wd` forbids the naming of a “pth” value, thereby always
             initializing itself with the current working directory as its target,
             and fundamentally avoids issuing any directory-change calls.
@@ -968,7 +968,7 @@ class Directory(collections.abc.Hashable,
         """
         return (self.relparent(path) + os.sep).replace(os.sep, separator)
     
-    def flatten(self, destination, suffix=None):
+    def flatten(self, destination, suffix=None, new_suffix=None):
         """ Copy the entire directory tree, all contents included, to a new
             destination path – with all files residing within the same directory
             level.
@@ -1009,16 +1009,18 @@ class Directory(collections.abc.Hashable,
             # Create destination directory, and list for the results:
             whereto.makedirs()
             results = []
+            searcher = suffix_searcher(suffix)
             # Walk source directory:
             for root, dirs, files in self.walk():
                 basic_prefix = self.relprefix(root)
-                filenames = suffix and filter(suffix_searcher(suffix), files) \
-                                    or files
-                inputs = (os.path.join(root, filename) for filename in filenames)
-                outputs = ((whereto.subpath(basic_prefix + filename)) \
-                                                       for filename in filenames)
-                for infile, outfile in zip(inputs, outputs):
-                    dstfile = shutil.copy2(infile, outfile, follow_symlinks=True)
+                filenames = tuple(filter(searcher, files))
+                iinputs = (os.path.join(root, filename) for filename in filenames)
+                outputs = ((whereto.subpath(basic_prefix + (new_suffix and \
+                                                    swapext(filename, new_suffix) or \
+                                                            filename))) \
+                                                        for filename in filenames)
+                for iinfile, outfile in zip(iinputs, outputs):
+                    dstfile = shutil.copy2(iinfile, outfile, follow_symlinks=True)
                     assert os.path.exists(dstfile)
                     assert os.path.samefile(dstfile, outfile)
                     results.append(dstfile)
@@ -1205,10 +1207,10 @@ class hd(Directory):
 @export
 class TemporaryDirectory(Directory):
     
-    """ It's funny how this code looks, like, 99 percent exactly like the above
+    """ It’s funny how this code looks, like, 99 percent exactly like the above
         TemporaryName class -- shit just works out that way. But this actually
         creates the directory in question; much like filesystem::TemporaryDirectory
-        from libimread, this class wraps tempfile.mkdtemp() and can be used as
+        from `libimread`, this class wraps tempfile.mkdtemp() and can be used as
         a context manager (the C++ orig used RAII).
     """
     
@@ -1341,7 +1343,7 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
                        suffix="tmp", prefix=DEFAULT_PREFIX,
                        directory=None,
                        delete=True):
-    """ Variation on tempfile.NamedTemporaryFile(…), such that suffixes
+    """ Variation on ``tempfile.NamedTemporaryFile(…)``, such that suffixes
         are passed WITHOUT specifying the period in front (versus the
         standard library version which makes you pass suffixes WITH
         the fucking period, ugh).

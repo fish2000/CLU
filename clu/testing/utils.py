@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-def countfiles(target):
+def countfiles(target, suffix=None):
     """ Return a count of all files in the target directory,
-        including all subdirectories.
+        including those found in all subdirectories.
+        
+        Optionally pass a “suffix” argument to only count files
+        matching a specific suffix.
     """
+    from clu.fs.misc import suffix_searcher
     count = 0
-    for root, dirs, files in target.walk(followlinks=True):
-        count += len(files)
+    searcher = suffix_searcher(suffix)
+    for root, dirs, files in target.walk():
+        count += len(tuple(filter(searcher, files)))
     return count

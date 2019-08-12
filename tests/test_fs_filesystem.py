@@ -34,7 +34,102 @@ class TestFsFilesystem(object):
         # of any of their structures:
         assert countfiles(datadir) \
             == countfiles(target) \
-            == countfiles(destination)
+            == countfiles(destination) \
+            == len(files)
+        
+        for f in files:
+            assert os.path.exists(f)
+            assert os.path.basename(f) in destination
+    
+    def test_flatten_with_suffix_filter(self, datadir,
+                                              temporarydir):
+        from clu.testing.utils import countfiles
+        
+        # target directory should not already exist:
+        target = temporarydir.subdirectory('yodogg')
+        
+        # call flatten(…) on the datadir, collecting
+        # and copying all files contained within it with
+        # the “jpg” suffix into the target directory,
+        # renaming them as per their original pathnames:
+        destination, files = datadir.flatten(target, suffix='jpg')
+        
+        # target and destination should be the same thing:
+        assert target == destination
+        
+        # datadir, target and destination should each
+        # contain the same amount of JPGs, regardless
+        # of any of their structures:
+        assert countfiles(datadir, suffix='jpg') \
+            == countfiles(target) \
+            == countfiles(destination) \
+            == len(files)
+        
+        for f in files:
+            assert f.endswith('.jpg')
+            assert os.path.exists(f)
+            assert os.path.basename(f) in destination
+    
+    def test_flatten_with_new_suffix(self, datadir,
+                                           temporarydir):
+        from clu.testing.utils import countfiles
+        
+        # target directory should not already exist:
+        target = temporarydir.subdirectory('yodogg')
+        
+        # call flatten(…) on the datadir, collecting
+        # and copying all files contained within it into
+        # the target directory, renaming them as per their
+        # original pathnames and giving *all* of them
+        # the “jpeg” suffix:
+        destination, files = datadir.flatten(target, new_suffix='jpeg')
+        
+        # target and destination should be the same thing:
+        assert target == destination
+        
+        # datadir, target and destination should each
+        # contain the same amount of things, regardless
+        # of any of their structures or file suffixes:
+        assert countfiles(datadir) \
+            == countfiles(target, suffix='jpeg') \
+            == countfiles(destination) \
+            == len(files)
+        
+        for f in files:
+            assert f.endswith('.jpeg')
+            assert os.path.exists(f)
+            assert os.path.basename(f) in destination
+    
+    def test_flatten_with_new_suffix_and_suffix_filter(self, datadir,
+                                                             temporarydir):
+        from clu.testing.utils import countfiles
+        
+        # target directory should not already exist:
+        target = temporarydir.subdirectory('yodogg')
+        
+        # call flatten(…) on the datadir, collecting
+        # and copying all files contained within it into
+        # the target directory, renaming them as per their
+        # original pathnames and giving *all* of them
+        # the “jpeg” suffix:
+        destination, files = datadir.flatten(target, suffix='jpg',
+                                                 new_suffix='jpeg')
+        
+        # target and destination should be the same thing:
+        assert target == destination
+        
+        # datadir, target and destination should each
+        # contain the same amount of things, regardless
+        # of any of their structures or file suffixes:
+        assert countfiles(datadir, suffix='jpg') \
+            == countfiles(target, suffix='jpeg') \
+            == countfiles(destination) \
+            == len(files)
+        
+        for f in files:
+            assert f.endswith('.jpeg')
+            assert os.path.exists(f)
+            assert os.path.basename(f) in destination
     
     def test_zip_archive(self, datadir):
         from clu.fs.filesystem import temporary

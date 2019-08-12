@@ -19,6 +19,7 @@ def wrap_value(value):
     return lambda *args, **kwargs: value
 
 none_function = wrap_value(None)
+true_function = wrap_value(True)
 
 @export
 def stringify(instance, fields):
@@ -50,6 +51,8 @@ def stringify(instance, fields):
     hex_id = hex(id(instance))
     return f"{typename}({field_dict_string}) @ {hex_id}"
 
+ex = os.path.extsep
+
 @export
 def suffix_searcher(suffix):
     """ Return a boolean function that will search for the given
@@ -62,15 +65,32 @@ def suffix_searcher(suffix):
         >>> mmsuffix = suffix_searcher('mm')
         >>> objcpp = (f for f in os.listdir() where mmsuffix(f))
     """
-    if len(suffix) < 1:
-        return lambda searching_for: True
-    regex_str = r""
-    if suffix.startswith(os.extsep):
-        regex_str += r"\%s$" % suffix
-    else:
-        regex_str += r"\%s%s$" % (os.extsep, suffix)
-    searcher = re.compile(regex_str, re.IGNORECASE).search
-    return lambda searching_for: bool(searcher(searching_for))
+    if not suffix:
+        return true_function
+    search_function = re.compile(rf"{ex}{suffix.lstrip(ex)}",
+                                 re.IGNORECASE).search
+    return lambda searching_for: bool(search_function(searching_for))
+
+@export
+def swapext(path, new_extension):
+    """ Swap the file extension of the path with a newly specified one –
+        if no extension is present, the newly specified extension will be
+        amended to the path; the new extension can provide or omit its
+        leading extension-separator (or a “period” in most human usage).
+        
+        Like E.G.:
+            
+            >>> swapext('/yo/dogg.obj', 'odb')
+            '/yo/dogg.odb'
+            >>> swapext('/yo/dogg.obj', '.odb')
+            '/yo/dogg.odb'
+            >>> swapext('/yo/dogg', 'odb')
+            '/yo/dogg.odb'
+    """
+    bulk = os.path.splitext(path)[0]
+    if new_extension is None:
+        return bulk
+    return ex.join((bulk, new_extension.lstrip(ex)))
 
 @export
 def u8encode(source):
@@ -122,7 +142,6 @@ def win32_longpath(path):
     else:
         return path
 
-
 # OS UTILITIES: deal with the umask value
 
 octalize = lambda integer: "0o%04o" % integer
@@ -153,6 +172,7 @@ def masked_chmod(pth, perms=0o666):
 # MODULE EXPORTS:
 export(current_umask,           name='current_umask')
 export(none_function,           name='none_function',       doc="none_function() → A function that always returns None")
+export(true_function,           name='true_function',       doc="true_function() → A function that always returns True")
 export(octalize,                name='octalize',            doc="octalize(integer) → Format an integer value as an octal number")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

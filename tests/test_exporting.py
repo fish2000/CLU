@@ -49,19 +49,22 @@ class TestExporting(object):
         
         assert Registry['yolocal']['yodogg.iheard']['youlike']() == "registries"
     
+    @pytest.mark.TODO
     @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_exporter_instance_registry(self, clumods):
         from clu.constants.consts import BASEPATH
         from clu.constants.data import MODNAMES
         from clu.exporting import path_to_dotpath, Exporter
         
-        # Check the number of modules:
+        # Check the number of modules – N.B. these hardcoded
+        # numbers should be removed, TODO:
+        assert len(MODNAMES) == 25
         assert len(clumods) == 19
-        assert len(MODNAMES) == 19
+        assert len(clumods) <= len(MODNAMES)
         
         # Check the Exporter instance against the module instance:
-        for modname in MODNAMES:
-            module = clumods[modname]
+        for modname, module in clumods.items():
+            assert modname in MODNAMES
             assert Exporter[modname]
             assert Exporter[modname].path == module.__file__
             assert Exporter[modname].dotpath == path_to_dotpath(module.__file__,

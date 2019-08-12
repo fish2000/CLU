@@ -206,8 +206,14 @@ MODNAMES = ('clu.compilation.compiledb',
             'clu.predicates',
             'clu.repl.ansi',
             'clu.repl.banners',
+            'clu.repl.cli',
+            'clu.repl.cli.print_version',
             'clu.sanitizer',
+            'clu.testing',
+            'clu.testing.utils',
             'clu.typespace',
             'clu.typespace.namespace',
-            'clu.typology')
+            'clu.typology',
+            'clu.version',
+            'clu.version.read_version')
 

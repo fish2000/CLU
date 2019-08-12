@@ -954,12 +954,11 @@ class Directory(collections.abc.Hashable,
             Used internally in the implementations of the instance
             methods “Directory.flatten(…)”, and “Directory.zip_archive(…)”.
         """
-        return os.path.relpath(path,
-              start=os.path.abspath(
-                    os.path.join(self.name,
-                    os.pardir)))
+        return os.path.relpath(path, start=os.path.abspath(
+                                           os.path.join(self.name,
+                                                        os.pardir)))
     
-    def relprefix(self, path):
+    def relprefix(self, path, separator='_'):
         """ Return a “prefix” string based on a file path –
             the actual path separators are replaced with underscores,
             with which the individual path segments are joined, creating
@@ -967,7 +966,7 @@ class Directory(collections.abc.Hashable,
             
             Used internally in the implementation of “Directory.flatten(…)”.
         """
-        return (self.relparent(path) + os.sep).replace(os.sep, '_')
+        return (self.relparent(path) + os.sep).replace(os.sep, separator)
     
     def flatten(self, destination, suffix=None):
         """ Copy the entire directory tree, all contents included, to a new
@@ -1012,16 +1011,17 @@ class Directory(collections.abc.Hashable,
             results = []
             # Walk source directory:
             for root, dirs, files in self.walk():
+                basic_prefix = self.relprefix(root)
                 filenames = suffix and filter(suffix_searcher(suffix), files) \
                                     or files
-                inputs = (os.path.join(root, filename) \
-                             for filename in filenames)
-                outputs = ((whereto.subpath(self.relprefix(root) + filename)) \
-                                                   for filename in filenames)
+                inputs = (os.path.join(root, filename) for filename in filenames)
+                outputs = ((whereto.subpath(basic_prefix + filename)) \
+                                                       for filename in filenames)
                 for infile, outfile in zip(inputs, outputs):
-                    copied = shutil.copy2(infile, outfile, follow_symlinks=True)
-                    assert os.path.exists(copied)
-                    results.append(copied)
+                    dstfile = shutil.copy2(infile, outfile, follow_symlinks=True)
+                    assert os.path.exists(dstfile)
+                    assert os.path.samefile(dstfile, outfile)
+                    results.append(dstfile)
             # Return the destination directory instance and the result list:
             return whereto, results
     

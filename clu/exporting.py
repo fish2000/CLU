@@ -756,6 +756,8 @@ export(predicates_for_types)
 export(sysmods,         name='sysmods',         doc="sysmods() → shortcut for reversed(tuple(frozenset(sys.modules.values()))) …OK? I know. It’s not my finest work, but it works.")
 
 # NO DOCS ALLOWED:
+export(Slotted)
+export(ValueDescriptor)
 export(Registry)
 export(ExporterBase)
 export(Exporter)        # hahaaaaa

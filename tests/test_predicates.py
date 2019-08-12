@@ -7,9 +7,11 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates module. """
     
+    @pytest.mark.TODO
     def test_static_accessors(self, environment):
         from clu.predicates import isclasstype, pyattr
         from clu.predicates import attr, attrs, stattr, stattrs
+        # TODO: test *_search and *_across static accessors:
         # from clu.predicates import (attr_search, attr_across,
         #                           stattr_search, stattr_across)
         

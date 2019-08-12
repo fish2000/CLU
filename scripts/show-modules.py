@@ -32,12 +32,13 @@ def printout(name, value):
 
 def import_clu_modules(modnames=MODNAMES):
     """ Import all exporter-equipped CLU modules. """
-    mods = []
+    modules = {}
     
     for modname in modnames:
-        mods.append(importlib.import_module(modname))
+        module = importlib.import_module(modname)
+        if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
+            modules[modname] = module
     
-    modules = dict(zip(MODNAMES, mods))
     return modules
 
 Mismatch = NamedTuple('Mismatch', ('which',
@@ -67,7 +68,7 @@ def compare_module_lookups_for_all_things():
     clumodules = import_clu_modules()
     modulenames = Exporter.modulenames()
     
-    assert len(clumodules) == len(modulenames) == len(MODNAMES)
+    assert len(clumodules) == len(modulenames) <= len(MODNAMES)
     
     for modulename in modulenames:
         exports = Exporter[modulename].exports()

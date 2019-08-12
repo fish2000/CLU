@@ -9,12 +9,12 @@ def clumods():
     """
     from clu.constants.data import MODNAMES
     import importlib
-    mods = []
+    modules = {}
     
     for modname in MODNAMES:
-        mods.append(importlib.import_module(modname))
-    
-    modules = dict(zip(MODNAMES, mods))
+        module = importlib.import_module(modname)
+        if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
+            modules[modname] = module
     
     yield modules
 

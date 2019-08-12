@@ -161,12 +161,12 @@ def masked_permissions(perms=0o666):
     return perms & ~current_umask()
 
 @export
-def masked_chmod(pth, perms=0o666):
+def masked_chmod(path, perms=0o666):
     """ Perform the `os.chmod(…)` operation, respecting the current
         umask value (q.v. `current_umask()` supra.)
     """
     masked_perms = masked_permissions(perms=perms)
-    os.chmod(pth, mode=masked_perms)
+    os.chmod(path, mode=masked_perms)
     return octalize(masked_perms)
 
 # MODULE EXPORTS:

@@ -867,12 +867,9 @@ class Directory(collections.abc.Hashable,
             Specify an optional “suffix” parameter to filter the list by a
             particular file suffix (leading dots unnecessary but unharmful).
         """
-        files = (str(direntry.name) \
-                 for direntry in filter(non_dotfile_matcher,
-                                scandir(self.realpath(pth))))
-        if not suffix:
-            return files
-        return filter(suffix_searcher(suffix), files)
+        return tuple(filter(suffix_searcher(suffix),
+                    (direntry.name for direntry in filter(non_dotfile_matcher,
+                                                  scandir(self.realpath(pth))))))
     
     def ls_la(self, pth=None, suffix=None):
         """ List all files, including files whose name starts with a dot.
@@ -888,11 +885,8 @@ class Directory(collections.abc.Hashable,
             commands I ever learned, and it reads better than `ls_a()` which
             I think looks awkward and goofy.)
         """
-        files = (str(direntry.name) \
-                 for direntry in scandir(self.realpath(pth)))
-        if not suffix:
-            return files
-        return filter(suffix_searcher(suffix), files)
+        return tuple(filter(suffix_searcher(suffix),
+                    (direntry.name for direntry in scandir(self.realpath(pth)))))
     
     def subpath(self, subpth, whence=None, requisite=False):
         """ Returns the path to a subpath of the instances’ target path. """

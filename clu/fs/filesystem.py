@@ -927,10 +927,13 @@ class Directory(collections.abc.Hashable,
             raise FilesystemError(str(os_error))
         return self
     
-    def walk(self, followlinks=False):
+    def walk(self, followlinks=True):
         """ Sugar for calling X.walk(self.name), where X is either
             `scandir` (in the case of python 2.7) or `os` (for
             python 3 and thereafter).
+            
+            Note that the “followlinks” default here is True, whereas
+            the underlying functions default to False for that argument.
         """
         return walk(self.name, followlinks=followlinks)
     
@@ -981,7 +984,7 @@ class Directory(collections.abc.Hashable,
             all with names like:
             
                 yo_dogg_[0..9].jpg
-                yo_dogg_nodogg_[0.99].png
+                yo_dogg_nodogg_[0..99].png
             
            `flatten(…)` will not overwrite existant directories. Like, if
             you have yourself an instance of Directory, `directory`, and you
@@ -1008,13 +1011,13 @@ class Directory(collections.abc.Hashable,
             whereto.makedirs()
             results = []
             # Walk source directory:
-            for root, dirs, files in self.walk(followlinks=True):
+            for root, dirs, files in self.walk():
                 filenames = suffix and filter(suffix_searcher(suffix), files) \
                                     or files
                 inputs = (os.path.join(root, filename) \
-                                         for filename in filenames)
+                             for filename in filenames)
                 outputs = ((whereto.subpath(self.relprefix(root) + filename)) \
-                                              for filename in filenames)
+                                                   for filename in filenames)
                 for infile, outfile in zip(inputs, outputs):
                     copied = shutil.copy2(infile, outfile, follow_symlinks=True)
                     assert os.path.exists(copied)
@@ -1076,7 +1079,7 @@ class Directory(collections.abc.Hashable,
                            suffix=zsuf[1:],
                            randomized=True) as ztmp:
             with zipfile.ZipFile(ztmp.name, "w", zmode) as ziphandle:
-                for root, dirs, files in self.walk(followlinks=True):
+                for root, dirs, files in self.walk():
                     ziphandle.write(root, self.relparent(root)) # add directory
                     for filename in files:
                         filepath = os.path.join(root, filename)

@@ -546,6 +546,11 @@ class TemporaryName(collections.abc.Hashable,
         return TemporaryNamedFile(self.do_not_destroy(),
                                   mode=self.mode)
     
+    @property
+    def filesize(self):
+        """ The filesize for the temporary file """
+        return os.lstat(self._name).st_size
+    
     def split(self):
         """ Return (dirname, basename) e.g. for /yo/dogg/i/heard/youlike,
             you get back (Directory("/yo/dogg/i/heard"), "youlike")

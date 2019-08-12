@@ -2,7 +2,7 @@
 
 import pytest
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope='module')
 def clumods():
     """ Import all CLU modules that use the “clu.exporting.Exporter”
         mechanism for listing and exporting their module contents
@@ -19,7 +19,7 @@ def clumods():
     
     yield modules
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope='package')
 def greektext():
     """ Greek-text fixture: yield a dictionary with several lorem-ipsum-ish
         blocks of text.
@@ -37,7 +37,7 @@ def greektext():
     from clu.constants.data import GREEKOUT
     yield dict(GREEKOUT)
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope='package')
 def dirname(request):
     """ Fixture for wrapping up the “request.fspath.dirname” value in a
         clu.fs.filesystem.Directory instance – this is intended to be a
@@ -122,6 +122,34 @@ def temporarydir():
     
     # Assert that we no longer exist after scope exit:
     assert not temporarydir.exists
+
+@pytest.fixture(scope='module')
+def temporaryname():
+    """ clu.fs.filesystem.TemporaryName fixture-factory function: yields
+        a function returning new instances of `TemporaryName`, without
+        making any calls to “os.chdir()”.
+    """
+    from clu.fs.filesystem import TemporaryName
+    from clu.naming import qualified_name, dotpath_to_prefix
+    from contextlib import ExitStack
+    
+    prefix = dotpath_to_prefix(
+             qualified_name(TemporaryName))
+    
+    # Enter a master-context stack:
+    with ExitStack() as names:
+        
+        # Declare the fixture-factory function:
+        def temporaryname_factory(suffix, prefix=prefix):
+            """ The TemporaryName clu.testing fixture-factory function """
+            # Enter the new TemoraryName instances’ context, and
+            # return that instance:
+            return names.enter_context(TemporaryName(prefix=prefix,
+                                                     suffix=suffix,
+                                                     randomized=True))
+        
+        # Yield the TemporaryName fixture-factory function:
+        yield temporaryname_factory
 
 @pytest.fixture
 def environment():

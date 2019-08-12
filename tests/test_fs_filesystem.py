@@ -131,6 +131,29 @@ class TestFsFilesystem(object):
             assert os.path.exists(f)
             assert os.path.basename(f) in destination
     
+    def test_zip_archive_temporaryname(self, datadir, temporaryname):
+        from clu.typology import isvalidpathlist
+        
+        # Ensure the “datadir” fixture has something
+        # in it, of which we can make use:
+        datafiles = tuple(datadir.subpath(p) for p in datadir.ls_la())
+        assert len(datafiles) > 0
+        assert isvalidpathlist(datafiles)
+        
+        # Use a temporary name for the zip archive:
+        tzip = temporaryname(prefix='test-zip-archive-',
+                             suffix='zip')
+        
+        fzip = datadir.zip_archive(tzip.name)
+        
+        assert tzip.exists
+        assert tzip.filesize > 10000
+        assert os.path.exists(tzip.name)
+        assert os.lstat(tzip.name).st_size > 10000
+        
+        assert os.path.exists(fzip)
+        assert os.path.samefile(tzip, fzip)
+    
     def test_zip_archive(self, datadir):
         from clu.fs.filesystem import temporary
         from clu.typology import isvalidpathlist

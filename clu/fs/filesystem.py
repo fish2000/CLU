@@ -23,7 +23,7 @@ from clu.sanitizer import utf8_encode
 from clu.typology import ispath, isvalidpath
 from .misc import masked_permissions
 from .misc import stringify, suffix_searcher, swapext, u8str
-from clu.exporting import Exporter
+from clu.exporting import ValueDescriptor, Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -285,6 +285,9 @@ class TypeLocker(abc.ABCMeta):
             clu.fs.filesystem.Directory(…) class, per
             the arguments:
         """
+        # Fill in the “types” attribute to prevent it
+        # from leaking from the metaclass:
+        attributes['types'] = ValueDescriptor(tuple())
         # Always replace the “directory” method anew:
         attributes['directory'] = staticmethod(
                                       lambda pth=None: \

@@ -549,6 +549,8 @@ class TemporaryName(collections.abc.Hashable,
     @property
     def filesize(self):
         """ The filesize for the temporary file """
+        if not self.exists:
+            return -1
         return os.lstat(self._name).st_size
     
     def split(self):

@@ -10,6 +10,7 @@ import os
 import re
 import shutil
 import sys
+import zipfile
     
 from distutils.spawn import find_executable
 from functools import wraps
@@ -856,13 +857,13 @@ class Directory(collections.abc.Hashable,
         self.ctx_initialize()
         return False
     
-    def realpath(self, pth=None):
+    def realpath(self, source=None):
         """ Sugar for calling os.path.realpath(self.name) """
         return u8str(
             os.path.realpath(
-            os.fspath(pth or self.name)))
+            os.fspath(source or self.name)))
     
-    def ls(self, pth=None, suffix=None):
+    def ls(self, suffix=None, source=None):
         """ List files -- defaults to the process’ current working directory.
             As per the UNIX custom, files whose name begins with a dot are
             omitted.
@@ -872,9 +873,9 @@ class Directory(collections.abc.Hashable,
         """
         return tuple(filter(suffix_searcher(suffix),
                     (direntry.name for direntry in filter(non_dotfile_matcher,
-                                                  scandir(self.realpath(pth))))))
+                                                  scandir(self.realpath(source))))))
     
-    def ls_la(self, pth=None, suffix=None):
+    def ls_la(self, suffix=None, source=None):
         """ List all files, including files whose name starts with a dot.
             The default is to use the process’ current working directory.
             
@@ -889,35 +890,35 @@ class Directory(collections.abc.Hashable,
             I think looks awkward and goofy.)
         """
         return tuple(filter(suffix_searcher(suffix),
-                    (direntry.name for direntry in scandir(self.realpath(pth)))))
+                    (direntry.name for direntry in scandir(self.realpath(source)))))
     
-    def subpath(self, subpth, whence=None, requisite=False):
+    def subpath(self, subpath, source=None, requisite=False):
         """ Returns the path to a subpath of the instances’ target path. """
-        fullpth = os.path.join(os.fspath(whence or self.name),
-                               os.fspath(subpth))
-        return (os.path.exists(fullpth) or not requisite) and fullpth or None
+        fullpath = os.path.join(os.fspath(source or self.name),
+                                os.fspath(subpath))
+        return (os.path.exists(fullpath) or not requisite) and fullpath or None
     
-    def subdirectory(self, subdir, whence=None):
+    def subdirectory(self, subdir, source=None):
         """ Returns the path to a subpath of the instances’ target path --
             much like Directory.subpath(…) -- as an instance of Directory.
         """
-        pth = self.subpath(subdir, whence, requisite=False)
-        if os.path.isfile(pth):
-            raise FilesystemError(f"file exists at subdirectory path: {pth}")
-        if os.path.islink(pth):
-            raise FilesystemError(f"symlink exists at subdirectory path: {pth}")
-        if os.path.ismount(pth):
-            raise FilesystemError(f"mountpoint exists at subdirectory path: {pth}")
-        return self.directory(pth)
+        path = self.subpath(subdir, source, requisite=False)
+        if os.path.isfile(path):
+            raise FilesystemError(f"file exists at subdirectory path: {path}")
+        if os.path.islink(path):
+            raise FilesystemError(f"symlink exists at subdirectory path: {path}")
+        if os.path.ismount(path):
+            raise FilesystemError(f"mountpoint exists at subdirectory path: {path}")
+        return self.directory(path)
     
-    def makedirs(self, pth=None, mode=0o755):
+    def makedirs(self, subpath=None, mode=0o755):
         """ Creates any parts of the target directory path that don’t
             already exist, á la the `mkdir -p` shell command.
         """
         try:
             os.makedirs(os.path.abspath(
                         os.path.join(self.name,
-                        os.fspath(pth or os.curdir))),
+                        os.fspath(subpath or os.curdir))),
                         exist_ok=False,
                         mode=masked_permissions(mode))
         except OSError as os_error:
@@ -1056,28 +1057,27 @@ class Directory(collections.abc.Hashable,
                 f"copy_all() source doesn’t exist: {self.name}")
         return False
     
-    def zip_archive(self, zpth=None, zmode=None):
+    def zip_archive(self, destination, compression_mode=zipfile.ZIP_DEFLATED):
         """ Recursively descends through the target directory, stowing all
-            that it finds into a zipfile at the specified path.
+            that it finds into a zipfile at the specified destination path.
             
-            Use the optional “zmode” parameter to specify the compression
-            algorithm, as per the constants found in the `zipfile` module;
-            the default value is `zipfile.ZIP_DEFLATED`.
+            Use the optional “compression_mode” parameter to specify the
+            compression algorithm, as per the constants found in the `zipfile`
+            module; the default value is `zipfile.ZIP_DEFLATED`.
         """
-        import zipfile
-        if zpth is None:
-            raise FilesystemError("Need to specify a zip-archive file path")
-        zpth = os.fspath(zpth)
+        if destination is None:
+            raise FilesystemError("zip-archive destination path cannot be None")
+        zpth = os.fspath(destination)
         zsuf = type(self).zip_suffix
         if not zpth.lower().endswith(zsuf):
-            zpth += zsuf
-        if not zmode:
-            zmode = zipfile.ZIP_DEFLATED
+            zpth = swapext(zpth, zsuf)
+        if not compression_mode:
+            compression_mode = zipfile.ZIP_DEFLATED
         ensure_path_is_valid(zpth)
         with TemporaryName(prefix="ziparchive-",
                            suffix=zsuf[1:],
                            randomized=True) as ztmp:
-            with zipfile.ZipFile(ztmp.name, "w", zmode) as ziphandle:
+            with zipfile.ZipFile(ztmp.name, "w", compression_mode) as ziphandle:
                 for root, dirs, files in self.walk():
                     ziphandle.write(root, self.relparent(root)) # add directory
                     for filename in files:
@@ -1088,9 +1088,9 @@ class Directory(collections.abc.Hashable,
             assert ztmp.copy(zpth)
         return self.realpath(zpth)
     
-    def symlink(self, destination, pth=None):
+    def symlink(self, destination, source=None):
         """ Create a symlink at `destination`, pointing to this instances’
-            directory path (or an alternative path, if specified).
+            directory path (or an alternative source path, if specified).
             
             The `destination` argument can be anything path-like: instances of
             `str`, `unicode`, `bytes`, `bytearray`, `pathlib.Path`, `os.PathLike`,
@@ -1098,7 +1098,7 @@ class Directory(collections.abc.Hashable,
         """
         if destination is None:
             raise FilesystemError("symlink destination cannot be None")
-        os.symlink(os.fspath(pth or self.name),
+        os.symlink(os.fspath(source or self.name),
                    os.fspath(destination),
                    target_is_directory=True)
         return self

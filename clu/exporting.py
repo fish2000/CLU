@@ -272,6 +272,9 @@ class ValueDescriptor(object):
     def __get__(self, *args):
         return self.value
     
+    def __set__(self, instance, value):
+        pass
+    
     def __repr__(self):
         from clu.constants.consts import ENCODING
         return isinstance(self.value, str)   and self.value or \
@@ -321,7 +324,7 @@ class Registry(abc.ABC, metaclass=Slotted):
         else:
             appname = determine_name(cls)
         if appname in classes:
-            raise ValueError(f"appname already registered: {appname}")
+            raise TypeError(f"appname already registered: {appname}")
         classes[appname] = cls
         super(Registry, cls).__init_subclass__(**kwargs)
         cls.instances = weakref.WeakValueDictionary()
@@ -401,8 +404,7 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
         
         instance.__exports__ = {}
         instance.path = path
-        instance.dotpath = path_to_dotpath(instance.path,
-                                           relative_to=cls.prefix)
+        instance.dotpath = path_to_dotpath(path, relative_to=cls.prefix)
         
         if instance.dotpath is not None:
             cls.instances[instance.dotpath] = instance
@@ -425,6 +427,8 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
         # “typing” shit and I am not interested at this time, and
         # b) it’s too useful a method to give it all up. So deal.
         from clu.typology import isstring
+        if not key:
+            raise ValueError("instance key required")
         if not isstring(key):
             raise TypeError("instance registry access by string keys only")
         return cls.instances[key]
@@ -493,6 +497,10 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     def values(self):
         """ Get a value view on the exported items dictionary. """
         return self.__exports__.values()
+    
+    def items(self):
+        """ Get a item view on the exported items dictionary. """
+        return self.__exports__.items()
     
     def get(self, key, default=NoDefault):
         """ Get and return a value for a key, with an optional default """

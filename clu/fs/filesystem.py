@@ -10,6 +10,7 @@ import os
 import re
 import shutil
 import sys
+import weakref
 import zipfile
     
 from distutils.spawn import find_executable
@@ -272,12 +273,12 @@ class TypeLocker(abc.ABCMeta):
         is utilized within at least one Directory method – sans any issues.
     """
     
-    # The metaclass-internal dictionary of generated classes:
-    types = collections.OrderedDict()
+    # The metaclass-internal dictionary of descendant type weakrefs:
+    types = weakref.WeakValueDictionary()
     
     def __new__(metacls, name, bases, attributes, **kwargs):
         """ All classes are initialized with a “directory(…)”
-            class method, lazily returning an instance of the
+            static method, lazily returning an instance of the
             clu.fs.filesystem.Directory(…) class.
             
             A read-only descriptor shadows the “types” attribute,

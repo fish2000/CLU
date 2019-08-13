@@ -1381,9 +1381,5 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
             os.close(descriptor)
         raise FilesystemError(str(base_exception))
 
-# NO DOCS ALLOWED:
-export(DEFAULT_PREFIX,          name='DEFAULT_PREFIX')
-export(DEFAULT_TIMEOUT,         name='DEFAULT_TIMEOUT')
-
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

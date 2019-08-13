@@ -68,7 +68,7 @@ def re_matcher(string):
     if not string:
         return true_function
     match_function = re.compile(string, re.IGNORECASE).match
-    return lambda searching_for: bool(match_function(searching_for))
+    return lambda searching: bool(match_function(searching))
 
 @export
 def re_searcher(string):
@@ -85,7 +85,7 @@ def re_searcher(string):
     if not string:
         return true_function
     search_function = re.compile(string, re.IGNORECASE).search
-    return lambda searching_for: bool(search_function(searching_for))
+    return lambda searching: bool(search_function(searching))
 
 @export
 def suffix(string):

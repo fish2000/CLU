@@ -59,7 +59,7 @@ class TestExporting(object):
         # Check the number of modules – N.B. these hardcoded
         # numbers should be removed, TODO:
         assert len(MODNAMES) == 25
-        assert len(clumods) == 19
+        assert len(clumods) == 20
         assert len(clumods) <= len(MODNAMES)
         
         # Check the Exporter instance against the module instance:

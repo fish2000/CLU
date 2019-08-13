@@ -193,7 +193,8 @@ def determine_name(thing, name=None, try_repr=False):
 # N.B. Items in the “replaceable_endings” tuple that
 # possibly contain other such items should appear
 # *before* the items that they contain, e.g.:
-replaceable_endings = ('.__init__.py', '.__main__.py')
+replaceable_endings = ('.__init__.py',  '.__main__.py',
+                       '.__init__.pyc', '.__main__.pyc')
 replaceable_endings += tuple(all_suffixes())
 
 def path_to_dotpath(path, relative_to=None):

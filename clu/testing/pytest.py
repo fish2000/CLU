@@ -126,8 +126,15 @@ def temporarydir():
 @pytest.fixture(scope='module')
 def temporaryname():
     """ clu.fs.filesystem.TemporaryName fixture-factory function: yields
-        a function returning new instances of `TemporaryName`, without
-        making any calls to “os.chdir()”.
+        a function returning new instances of `TemporaryName`, which
+        can be called multiple times – each time producing a new
+        `TemporaryName` instance under automatic context-management
+        (via a behind-the-scenes “contextlib.ExitStack” instance).
+        
+        The parent fixture is module-scoped; when the module in which
+        this fixture-factory function was first invoked enters cleanup,
+        the ExitStack is unwound and all `TemporaryName` instances are
+        __exit__(…)-ed at that time.
     """
     from clu.fs.filesystem import TemporaryName
     from clu.naming import qualified_name, dotpath_to_prefix
@@ -143,12 +150,12 @@ def temporaryname():
         def temporaryname_factory(suffix, prefix=prefix,
                                           parent=None):
             """ The TemporaryName clu.testing fixture-factory function """
-            # Enter the new TemoraryName instances’ context, and
-            # return that instance:
+            # Enter the new TemoraryName instances’ context,
+            # and return that instance:
             return names.enter_context(TemporaryName(prefix=prefix,
                                                      suffix=suffix,
                                                      parent=parent,
-                                                     randomized=True))
+                                                 randomized=True))
         
         # Yield the TemporaryName fixture-factory function:
         yield temporaryname_factory

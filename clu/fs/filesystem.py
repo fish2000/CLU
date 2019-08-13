@@ -22,7 +22,7 @@ from clu.constants.polyfills import lru_cache, scandir, walk
 from clu.predicates import attr, allattrs, anyof
 from clu.sanitizer import utf8_encode
 from clu.typology import ispath, isvalidpath
-from .misc import gethomedir, masked_permissions
+from .misc import filesize, gethomedir, masked_permissions
 from .misc import stringify, suffix_searcher, swapext, u8str
 from clu.exporting import ValueDescriptor, Exporter
 
@@ -549,9 +549,7 @@ class TemporaryName(collections.abc.Hashable,
     @property
     def filesize(self):
         """ The filesize for the temporary file """
-        if not self.exists:
-            return -1
-        return os.lstat(self._name).st_size
+        return filesize(self._name)
     
     def split(self):
         """ Return (dirname, basename) e.g. for /yo/dogg/i/heard/youlike,

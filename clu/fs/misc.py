@@ -104,6 +104,23 @@ def swapext(path, new_extension):
     return ex.join((bulk, new_extension.lstrip(ex)))
 
 @export
+def filesize(path):
+    """ Return the on-disk size (in bytes) of the file located at a path """
+    if not os.path.exists(path):
+        return -1
+    return os.lstat(path).st_size
+
+@export
+def samesize(path0, path1):
+    """ Compare the on-disk file sizes (in bytes) of two files by their paths """
+    from clu.constants.exceptions import FilesystemError
+    if any(p is None for p in (path0, path1)):
+        raise FilesystemError('paths must both be non-None')
+    if os.path.samefile(path0, path1):
+        return True
+    return filesize(path0) == filesize(path1)
+
+@export
 def u8encode(source):
     """ Encode a source as bytes using the UTF-8 codec """
     return bytes(source, encoding=ENCODING)

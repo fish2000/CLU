@@ -59,13 +59,6 @@ ex = os.path.extsep
 dolla = '$'
 
 @export
-def suffix(string):
-    """ Ensure that a string begins with “os.path.extsep” """
-    if string is None:
-        return None
-    return rf"{string.lstrip(ex).rstrip(dolla)}$"
-
-@export
 def re_matcher(string):
     """ Return a boolean function that will search for the given
         regular-expression within any strings with which it is called,
@@ -93,6 +86,15 @@ def re_searcher(string):
         return true_function
     search_function = re.compile(string, re.IGNORECASE).search
     return lambda searching_for: bool(search_function(searching_for))
+
+@export
+def suffix(string):
+    """ Remove any “os.path.extsep” prefixing a string and ensure
+        it ends with a “$” – to indicate a regular expression suffix.
+    """
+    if string is None:
+        return None
+    return rf"{string.lstrip(ex).rstrip(dolla)}$"
 
 @export
 def suffix_searcher(string):

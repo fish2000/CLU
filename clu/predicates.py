@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from inspect import getattr_static as getstatic
+from inspect import getattr_static
 from itertools import chain
 from functools import partial, wraps
 
@@ -14,6 +14,7 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 # PREDICATE LOGIC: negate(function) will “negate” a boolean predicate function –
+
 assigned = pytuple('doc', 'annotations')
 wrap = lambda function: wraps(function, assigned=assigned)
 
@@ -77,8 +78,7 @@ isiterable = lambda thing: anypyattrs(thing, 'iter', 'getitem')
 # q.v. `merge_two(…)` implementation sub.
 ismergeable = lambda thing: bool(hasattr(thing, 'get') and isiterable(thing))
 
-# ACCESSORS: getattr(…) shortcuts --
-# N.B. “getstatic(…)” is an alias for “inspect.getattr_static(…)”
+# ACCESSORS: getattr(…) shortcuts
 
 always = lambda thing: True
 never = lambda thing: False
@@ -86,7 +86,7 @@ nuhuh = lambda thing: None
 
 no_op     = lambda thing, atx, default=None: thing
 or_none   = lambda thing, atx: getattr(thing, atx, None)
-stor_none = lambda thing, atx: getstatic(thing, atx, None)
+stor_none = lambda thing, atx: getattr_static(thing, atx, None)
 getpyattr = lambda thing, atx, default=None: getattr(thing, f'__{atx}__', default)
 getitem   = lambda thing, itx, default=None: itx in thing and thing[itx] or default
 

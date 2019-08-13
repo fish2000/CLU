@@ -216,7 +216,7 @@ def path_to_dotpath(path, relative_to=None):
     # N.B. Items in “replaceable_endings” tuple that
     # possibly contain other such items should appear
     # *before* the items that they contain, e.g.:
-    replaceable_endings = ('.__init__.py', '.py')
+    replaceable_endings = ('.__init__.py', '.__main__.py', '.py')
     
     for ending in replaceable_endings:
         if dotpath.endswith(ending):
@@ -229,7 +229,7 @@ def path_to_dotpath(path, relative_to=None):
     # should contain dashes:
     if '-' in dotpath:
         warnings.warn(f"Dotpath contains dashes: “{dotpath}”",
-                      BadDotpathWarning, stacklevel=2)
+                        BadDotpathWarning, stacklevel=2)
     
     return dotpath
 

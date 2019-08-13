@@ -148,8 +148,8 @@ class TestFsFilesystem(object):
         
         assert tzip.exists
         assert tzip.filesize > 10000
-        assert os.path.exists(tzip.name)
-        assert os.lstat(tzip.name).st_size > 10000
+        assert os.path.exists(tzip)
+        assert os.lstat(tzip).st_size > 10000
         
         assert os.path.exists(fzip)
         assert os.path.samefile(tzip, fzip)
@@ -278,6 +278,7 @@ class TestFsFilesystem(object):
     def test_rm_rf(self, temporarydir):
         # Also involves `write_to_path(…)` and `Directory.walk()`
         from clu.fs.filesystem import write_to_path, rm_rf
+        from clu.testing.utils import countfiles
         
         # Make subdirectories:
         dd = temporarydir.subdirectory('yo')
@@ -309,24 +310,10 @@ class TestFsFilesystem(object):
         assert os.path.exists(ppp)
         assert os.path.exists(pppp)
         
-        yo_dogg_count = 0
-        
-        for root, dirs, files in dd.walk():
-            for filename in files:
-                if filename == 'yo-dogg.txt':
-                    yo_dogg_count += 1
-        
-        assert yo_dogg_count == 3
+        assert countfiles(dd, suffix='yo-dogg.txt') == 3
         assert rm_rf(dd)
         
-        yo_dogg_count = 0
-        
-        for root, dirs, files in dd.walk():
-            for filename in files:
-                if filename == 'yo-dogg.txt':
-                    yo_dogg_count += 1
-        
-        assert yo_dogg_count == 0
+        assert countfiles(dd, suffix='yo-dogg.txt') == 0
         
         # Re-check subdirectories:
         assert not dd.exists

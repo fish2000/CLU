@@ -53,10 +53,14 @@ def stringify(instance, fields):
 
 ex = os.path.extsep
 
+def suffix(string):
+    """ Ensure that a string begins with “os.path.extsep” """
+    return rf"{ex}{string.lstrip(ex)}"
+
 @export
-def suffix_searcher(suffix):
+def suffix_searcher(string):
     """ Return a boolean function that will search for the given
-        file suffix in strings with which it is called, returning
+        string within any strings with which it is called, returning
         True when they are found and False when they aren’t.
         
         Useful in filter(…) calls and comprehensions, e.g.:
@@ -65,11 +69,14 @@ def suffix_searcher(suffix):
         >>> mmsuffix = suffix_searcher('mm')
         >>> objcpp = (f for f in os.listdir() where mmsuffix(f))
     """
-    if not suffix:
+    if not string:
         return true_function
-    search_function = re.compile(rf"{ex}{suffix.lstrip(ex)}",
-                                 re.IGNORECASE).search
+    search_function = re.compile(string, re.IGNORECASE).search
     return lambda searching_for: bool(search_function(searching_for))
+
+@export
+def _suffix_searcher(string):
+    return searcher(suffix(string))
 
 @export
 def swapext(path, new_extension):

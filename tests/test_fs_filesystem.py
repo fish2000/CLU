@@ -16,6 +16,7 @@ class TestFsFilesystem(object):
     def test_flatten(self, datadir,
                            temporarydir):
         from clu.testing.utils import countfiles
+        from clu.typology import isvalidpathlist
         
         # target directory should not already exist:
         target = temporarydir.subdirectory('yodogg')
@@ -28,6 +29,9 @@ class TestFsFilesystem(object):
         
         # target and destination should be the same thing:
         assert target == destination
+        
+        # files should be a valid path list:
+        assert isvalidpathlist(files)
         
         # datadir, target and destination should each
         # contain the same amount of things, regardless
@@ -44,6 +48,7 @@ class TestFsFilesystem(object):
     def test_flatten_with_suffix_filter(self, datadir,
                                               temporarydir):
         from clu.testing.utils import countfiles
+        from clu.typology import isvalidpathlist
         
         # target directory should not already exist:
         target = temporarydir.subdirectory('yodogg')
@@ -56,6 +61,9 @@ class TestFsFilesystem(object):
         
         # target and destination should be the same thing:
         assert target == destination
+        
+        # files should be a valid path list:
+        assert isvalidpathlist(files)
         
         # datadir, target and destination should each
         # contain the same amount of JPGs, regardless
@@ -73,6 +81,7 @@ class TestFsFilesystem(object):
     def test_flatten_with_new_suffix(self, datadir,
                                            temporarydir):
         from clu.testing.utils import countfiles
+        from clu.typology import isvalidpathlist
         
         # target directory should not already exist:
         target = temporarydir.subdirectory('yodogg')
@@ -81,28 +90,32 @@ class TestFsFilesystem(object):
         # and copying all files contained within it into
         # the target directory, renaming them as per their
         # original pathnames and giving *all* of them
-        # the “jpeg” suffix:
-        destination, files = datadir.flatten(target, new_suffix='jpeg')
+        # the “image” suffix:
+        destination, files = datadir.flatten(target, new_suffix='image')
         
         # target and destination should be the same thing:
         assert target == destination
+        
+        # files should be a valid path list:
+        assert isvalidpathlist(files)
         
         # datadir, target and destination should each
         # contain the same amount of things, regardless
         # of any of their structures or file suffixes:
         assert countfiles(datadir) \
-            == countfiles(target, suffix='jpeg') \
+            == countfiles(target, suffix='image') \
             == countfiles(destination) \
             == len(files)
         
         for f in files:
-            assert f.endswith('.jpeg')
+            assert f.endswith('.image')
             assert os.path.exists(f)
             assert os.path.basename(f) in destination
     
     def test_flatten_with_new_suffix_and_suffix_filter(self, datadir,
                                                              temporarydir):
         from clu.testing.utils import countfiles
+        from clu.typology import isvalidpathlist
         
         # target directory should not already exist:
         target = temporarydir.subdirectory('yodogg')
@@ -118,6 +131,9 @@ class TestFsFilesystem(object):
         # target and destination should be the same thing:
         assert target == destination
         
+        # files should be a valid path list:
+        assert isvalidpathlist(files)
+        
         # datadir, target and destination should each
         # contain the same amount of things, regardless
         # of any of their structures or file suffixes:
@@ -132,15 +148,13 @@ class TestFsFilesystem(object):
             assert os.path.basename(f) in destination
     
     def test_zip_archive_temporaryname(self, datadir, temporaryname):
-        from clu.typology import isvalidpathlist
+        from clu.testing.utils import countfiles
         
         # Ensure the “datadir” fixture has something
         # in it, of which we can make use:
-        datafiles = tuple(datadir.subpath(p) for p in datadir.ls_la())
-        assert len(datafiles) > 0
-        assert isvalidpathlist(datafiles)
+        assert countfiles(datadir) > 10
         
-        # Use a temporary name for the zip archive:
+        # Use a TemporaryName instance for the zip archive:
         tzip = temporaryname(prefix='test-zip-archive-',
                              suffix='zip')
         
@@ -156,13 +170,11 @@ class TestFsFilesystem(object):
     
     def test_zip_archive(self, datadir):
         from clu.fs.filesystem import temporary
-        from clu.typology import isvalidpathlist
+        from clu.testing.utils import countfiles
         
         # Ensure the “datadir” fixture has something
         # in it, of which we can make use:
-        datafiles = tuple(datadir.subpath(p) for p in datadir.ls_la())
-        assert len(datafiles) > 0
-        assert isvalidpathlist(datafiles)
+        assert countfiles(datadir) > 10
         
         # Use a temporary file path for the zip archive:
         tzip = temporary(prefix='test-zip-archive-',

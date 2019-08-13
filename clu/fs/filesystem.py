@@ -16,7 +16,7 @@ from distutils.spawn import find_executable
 from functools import wraps
 from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
-from clu.constants.consts import DELETE_FLAG, ENCODING, PATH, SCRIPT_PATH
+from clu.constants.consts import λ, DELETE_FLAG, ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.constants.polyfills import lru_cache, scandir, walk
 from clu.predicates import attr, allattrs, anyof
@@ -261,8 +261,8 @@ class TypeLocker(abc.ABCMeta):
         
         … The point of this is to allow any of the classes throughout the
         clu.fs.filesystem module regardless of where they are defined
-        or from whom they inherit, to make use of cheaply-constructed Directory
-        instances wherever convenient.
+        or from whom they inherit, to make use of cheaply-constructed
+        Directory instances wherever convenient.
         
         Because the “directory(…)” method installed by TypeLocker performs
         a lazy-lookup of the Directory class, using its own type index dict,
@@ -275,30 +275,38 @@ class TypeLocker(abc.ABCMeta):
     # The metaclass-internal dictionary of generated classes:
     types = collections.OrderedDict()
     
-    @classmethod
-    def __prepare__(metacls, name, bases, **kwargs):
-        """ Maintain declaration order in class members: """
-        return collections.OrderedDict()
-    
     def __new__(metacls, name, bases, attributes, **kwargs):
         """ All classes are initialized with a “directory(…)”
             class method, lazily returning an instance of the
-            clu.fs.filesystem.Directory(…) class, per
-            the arguments:
+            clu.fs.filesystem.Directory(…) class.
+            
+            A read-only descriptor shadows the “types” attribute,
+            to block access to the metaclass type-registry dict
+            from generated subtypes, as well.
         """
-        # Fill in the “types” attribute to prevent it
-        # from leaking from the metaclass:
-        attributes['types'] = ValueDescriptor(tuple())
+        # Fill in the “types” attribute to prevent the metaclass’
+        # registry dict from leaking into subtypes:
+        attributes['types']         = ValueDescriptor(tuple())
+        
         # Always replace the “directory” method anew:
-        attributes['directory'] = staticmethod(
-                                      lambda pth=None: \
-                                      metacls.types['Directory'](pth=pth))
+        directory = lambda pth=None: metacls.types['Directory'](pth=pth)
+        
+        directory.__name__          = 'directory'
+        directory.__qualname__      = f'{name}.directory'
+        directory.__lambda_name__   = λ
+        attributes['directory']     = staticmethod(directory)
+        
+        # Call up (using a vanilla attributes dict):
         cls = super(TypeLocker, metacls).__new__(metacls, name,
                                                           bases,
-                                                          dict(attributes),
+                                                          attributes,
                                                         **kwargs)
+        
+        # Register with clu.fs.TypeLocker and os.PathLike:
         metacls.types[name] = cls
         os.PathLike.register(cls)
+        
+        # Return the new type
         return cls
 
 class TemporaryFileWrapper(TemporaryFileWrapperBase,
@@ -327,26 +335,28 @@ class TemporaryFileWrapper(TemporaryFileWrapperBase,
 cache = lru_cache(maxsize=128, typed=True)
 
 @cache
-def TemporaryNamedFile(tempth, mode='wb', buffer_size=-1, delete=True):
+def TemporaryNamedFile(temppath, mode='wb',
+                                 delete=True,
+                                 buffer_size=-1):
     """ Variation on ``tempfile.NamedTemporaryFile(…)``, for use within
         `filesystem.TemporaryName()` – q.v. class definition sub.
         
         Parameters
         ----------
-        tempth : str / bytes  / filename-ish
+        temppath : str / bytes  / filename-ish
             File name, path, or filename-ish instance to open.
         mode : str / bytes, optional
             String-like symbolic explication of mode with which to open
             the file -- q.v. ``io.open(…)`` or ``__builtins__.open(…)``
             supra.
-        buffer_size : int, optional
-            Integer indicating buffer size to use during file reading
-            and/or writing. Default value is -1 (which indicates that
-            reads and writes should be unbuffered).
         delete : bool, optional
             Boolean value indicating whether to delete the wrapped
             file upon scope exit or interpreter shutdown (whichever
             happens first). Default is True.
+        buffer_size : int, optional
+            Integer indicating buffer size to use during file reading
+            and/or writing. Default value is -1 (which indicates that
+            reads and writes should be unbuffered).
         
         Returns
         -------
@@ -376,7 +386,7 @@ def TemporaryNamedFile(tempth, mode='wb', buffer_size=-1, delete=True):
     path = None
     
     try:
-        path = os.fspath(tempth)
+        path = os.fspath(temppath)
         descriptor = os.open(path, flags)
         filehandle = os.fdopen(descriptor, mode, buffer_size)
         return TemporaryFileWrapper(filehandle, path, delete)
@@ -401,10 +411,10 @@ class TemporaryName(collections.abc.Hashable,
         Unless you say not to. Really it's your call dogg I could give AF
     """
     
-    fields = ('name', 'exists', 'destroy',
-              'mode', 'binary_mode',
-              'prefix', 'suffix',
-              'parent')
+    fields = ('name',   'exists', 
+                        'destroy',
+              'mode',   'binary_mode',
+              'prefix', 'suffix', 'parent')
     
     def __init__(self, prefix=None, suffix="tmp",
                        parent=None,
@@ -543,8 +553,8 @@ class TemporaryName(collections.abc.Hashable,
             on the filehandle instance you use. That’s fair, right? I think that’s
             totally fair to do it like that, OK.
         """
-        return TemporaryNamedFile(self.do_not_destroy(),
-                                  mode=self.mode)
+        return TemporaryNamedFile(temppath=self.do_not_destroy(),
+                                      mode=self.mode)
     
     @property
     def filesize(self):
@@ -574,6 +584,29 @@ class TemporaryName(collections.abc.Hashable,
                    shutil.copy2(self._name, os.fspath(destination),
                                 follow_symlinks=True))
         return False
+    
+    def read(self, *, original_position=False):
+        """ Read data from the temporary name, if it points to an existing file """
+        orig, out = 0, b""
+        if not self.exists:
+            if original_position:
+                return orig, out
+            return out
+        with open(self._name, "r+b") as handle:
+            orig = handle.seek(0)
+            out += handle.read()
+        if original_position:
+            return orig, out
+        return out
+    
+    def write(self, data):
+        """ Write data to the temporary name using a context-managed handle """
+        ensure_path_is_valid(self._name)
+        bytestring = utf8_encode(data)
+        with open(self._name, "xb") as handle:
+            handle.write(bytestring)
+            handle.flush()
+        return self.exists
     
     def do_not_destroy(self):
         """ Mark this TemporaryName instance as one that should not be automatically

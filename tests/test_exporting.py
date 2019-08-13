@@ -58,14 +58,14 @@ class TestExporting(object):
         
         # Check the number of modules – N.B. these hardcoded
         # numbers should be removed, TODO:
-        assert len(MODNAMES) == 25
-        assert len(clumods) == 20
+        # assert len(MODNAMES) == 25
+        # assert len(clumods) == 20
         assert len(clumods) <= len(MODNAMES)
         
         # Check the Exporter instance against the module instance:
         for modname, module in clumods.items():
             assert modname in MODNAMES
-            assert Exporter[modname]
+            assert Exporter[modname] # empty Exporter instances are Falsey
             assert Exporter[modname].path == module.__file__
             assert Exporter[modname].dotpath == path_to_dotpath(module.__file__,
                                                                 relative_to=BASEPATH)

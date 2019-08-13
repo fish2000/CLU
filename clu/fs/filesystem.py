@@ -22,7 +22,7 @@ from clu.constants.polyfills import lru_cache, scandir, walk
 from clu.predicates import attr, allattrs, anyof
 from clu.sanitizer import utf8_encode
 from clu.typology import ispath, isvalidpath
-from .misc import masked_permissions
+from .misc import gethomedir, masked_permissions
 from .misc import stringify, suffix_searcher, swapext, u8str
 from clu.exporting import ValueDescriptor, Exporter
 
@@ -1206,7 +1206,7 @@ class hd(Directory):
     def __init__(self):
         """ Initialize a Directory instance for the current user’s home directory.
         """
-        super(hd, self).__init__(pth=os.path.expanduser("~"))
+        super(hd, self).__init__(pth=gethomedir())
 
 @export
 class TemporaryDirectory(Directory):

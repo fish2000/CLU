@@ -94,7 +94,7 @@ def suffix(string):
     """
     if string is None:
         return None
-    return rf"{string.lstrip(ex).rstrip(dolla)}$"
+    return rf"{string.lower().lstrip(ex).rstrip(dolla)}$"
 
 @export
 def suffix_searcher(string):

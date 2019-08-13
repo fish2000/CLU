@@ -13,6 +13,8 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
+gethomedir = lambda: os.path.expanduser("~")
+
 @export
 def wrap_value(value):
     """ Get a “lazified” copy of a value, wrapped in a lamba """
@@ -177,6 +179,7 @@ def masked_chmod(path, perms=0o666):
     return octalize(masked_perms)
 
 # MODULE EXPORTS:
+export(gethomedir,              name='gethomedir',          doc="gethomedir() → Return the current user’s home directory")
 export(current_umask,           name='current_umask')
 export(none_function,           name='none_function',       doc="none_function() → A function that always returns None")
 export(true_function,           name='true_function',       doc="true_function() → A function that always returns True")

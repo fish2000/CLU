@@ -551,9 +551,8 @@ class TestFsFilesystem(object):
     def test_hd(self):
         """ Tests for clu.fs.filesystem.hd """
         from clu.fs.filesystem import hd
+        from clu.fs.misc import gethomedir
         initial = os.getcwd()
-        
-        gethomedir = lambda: os.path.expanduser("~")
         
         with hd() as home:
             # print("* Testing directory-change instance: %s" % tmp.name)

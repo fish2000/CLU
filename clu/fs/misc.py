@@ -13,6 +13,8 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
+# OS UTILITIES: get the current users’ home directory
+
 gethomedir = lambda: os.path.expanduser("~")
 
 @export

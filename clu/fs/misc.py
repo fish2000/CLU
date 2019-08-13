@@ -90,7 +90,7 @@ def re_searcher(string):
     return lambda searching: bool(search_function(searching))
 
 @export
-def suffix(string):
+def re_suffix(string):
     """ Remove any “os.path.extsep” prefixing a string and ensure
         it ends with a “$” – to indicate a regular expression suffix.
     """
@@ -110,7 +110,7 @@ def suffix_searcher(string):
         >>> mmsuffix = suffix_searcher('mm')
         >>> objcpp = (f for f in os.listdir() where mmsuffix(f))
     """
-    return re_searcher(suffix(string))
+    return re_searcher(re_suffix(string))
 
 @export
 def swapext(path, new_extension):

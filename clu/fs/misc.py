@@ -58,7 +58,7 @@ def stringify(instance, fields):
 ex = os.path.extsep
 dolla = '$'
 
-@lru_cache()
+@lru_cache(maxsize=32)
 def re_matcher(string):
     """ Return a boolean function that will search for the given
         regular-expression within any strings with which it is called,
@@ -70,7 +70,7 @@ def re_matcher(string):
     match_function = re.compile(string, re.IGNORECASE).match
     return lambda searching: bool(match_function(searching))
 
-@lru_cache()
+@lru_cache(maxsize=32)
 def re_searcher(string):
     """ Return a boolean function that will search for the given
         regular-expression within any strings with which it is called,

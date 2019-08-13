@@ -56,10 +56,43 @@ def stringify(instance, fields):
     return f"{typename}({field_dict_string}) @ {hex_id}"
 
 ex = os.path.extsep
+dolla = '$'
 
+@export
 def suffix(string):
     """ Ensure that a string begins with “os.path.extsep” """
-    return rf"{ex}{string.lstrip(ex)}"
+    if string is None:
+        return None
+    return rf"{string.lstrip(ex).rstrip(dolla)}$"
+
+@export
+def re_matcher(string):
+    """ Return a boolean function that will search for the given
+        regular-expression within any strings with which it is called,
+        returning True when the regex matches from the beginning of the
+        string, and False when it doesn’t.
+    """
+    if not string:
+        return true_function
+    match_function = re.compile(string, re.IGNORECASE).match
+    return lambda searching_for: bool(match_function(searching_for))
+
+@export
+def re_searcher(string):
+    """ Return a boolean function that will search for the given
+        regular-expression within any strings with which it is called,
+        returning True when the regex matches and False when it doesn’t.
+        
+        Useful in filter(…) calls and comprehensions, e.g.:
+        
+        >>> plists = filter(re_searcher(r'.plist$'), os.listdir())
+        >>> mmsuffix = suffix_searcher(r'.mm$')
+        >>> objcpp = (f for f in os.listdir() where mmsuffix(f))
+    """
+    if not string:
+        return true_function
+    search_function = re.compile(string, re.IGNORECASE).search
+    return lambda searching_for: bool(search_function(searching_for))
 
 @export
 def suffix_searcher(string):
@@ -73,14 +106,7 @@ def suffix_searcher(string):
         >>> mmsuffix = suffix_searcher('mm')
         >>> objcpp = (f for f in os.listdir() where mmsuffix(f))
     """
-    if not string:
-        return true_function
-    search_function = re.compile(string, re.IGNORECASE).search
-    return lambda searching_for: bool(search_function(searching_for))
-
-@export
-def _suffix_searcher(string):
-    return searcher(suffix(string))
+    return re_searcher(suffix(string))
 
 @export
 def swapext(path, new_extension):

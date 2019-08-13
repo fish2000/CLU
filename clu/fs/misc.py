@@ -58,7 +58,7 @@ def stringify(instance, fields):
 ex = os.path.extsep
 dolla = '$'
 
-@export
+@lru_cache()
 def re_matcher(string):
     """ Return a boolean function that will search for the given
         regular-expression within any strings with which it is called,
@@ -70,7 +70,7 @@ def re_matcher(string):
     match_function = re.compile(string, re.IGNORECASE).match
     return lambda searching: bool(match_function(searching))
 
-@export
+@lru_cache()
 def re_searcher(string):
     """ Return a boolean function that will search for the given
         regular-expression within any strings with which it is called,
@@ -227,10 +227,14 @@ def masked_chmod(path, perms=0o666):
 
 # MODULE EXPORTS:
 export(gethomedir,              name='gethomedir',          doc="gethomedir() → Return the current user’s home directory")
-export(current_umask,           name='current_umask')
 export(none_function,           name='none_function',       doc="none_function() → A function that always returns None")
 export(true_function,           name='true_function',       doc="true_function() → A function that always returns True")
+
+export(re_matcher,              name='re_matcher')
+export(re_searcher,             name='re_searcher')
+
 export(octalize,                name='octalize',            doc="octalize(integer) → Format an integer value as an octal number")
+export(current_umask,           name='current_umask')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

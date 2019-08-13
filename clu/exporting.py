@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from importlib.machinery import all_suffixes
 
 import abc
 import sys, os
@@ -189,6 +190,12 @@ def determine_name(thing, name=None, try_repr=False):
     # up returning None:
     return search_for_name(thing)
 
+# N.B. Items in the “replaceable_endings” tuple that
+# possibly contain other such items should appear
+# *before* the items that they contain, e.g.:
+replaceable_endings = ('.__init__.py', '.__main__.py')
+replaceable_endings += tuple(all_suffixes())
+
 def path_to_dotpath(path, relative_to=None):
     """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
         to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
@@ -212,12 +219,8 @@ def path_to_dotpath(path, relative_to=None):
     dotpath = relpath.replace(os.path.sep, QUALIFIER)
     
     # Trim off any remaining “.py” suffixes,
-    # and extraneous dot-prefixes –
-    # N.B. Items in “replaceable_endings” tuple that
-    # possibly contain other such items should appear
-    # *before* the items that they contain, e.g.:
-    replaceable_endings = ('.__init__.py', '.__main__.py', '.py')
-    
+    # and extraneous dot-prefixes:
+    # replaceable_endings = ('.__init__.py', '.__main__.py', '.py')
     for ending in replaceable_endings:
         if dotpath.endswith(ending):
             dotpath = dotpath[:len(dotpath)-len(ending)]

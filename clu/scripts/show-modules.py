@@ -11,6 +11,7 @@ from clu.exporting import Exporter
 from clu.naming import nameof, moduleof
 from clu.constants import consts
 from clu.repl import ansi
+from clu.repl.columnize import columnize
 from ansicolors import (green, red, lightred, cyan, dimcyan,
                         lightcyan, dimlightcyan, gray, dimgray,
                         yellow, blue, lightblue,
@@ -53,8 +54,7 @@ Mismatches = NamedTuple('Mismatches', ('total',
                                        'failure_rate'), module=__file__)
 
 Result = NamedTuple('Result', ('modulename',
-                               'thingname',
-                               'thingtype',
+                               'thingnames',
                                'idx'), module=__file__)
 
 Results = NamedTuple('Results', ('total',
@@ -84,13 +84,10 @@ def compare_module_lookups_for_all_things():
     for modulename in modulenames:
         exports = Exporter[modulename].exports()
         total += len(exports)
+        results.append(Result(modulename, tuple(exports.keys()), idx))
         for name, thing in exports.items():
             whichmodule = pickle.whichmodule(thing, None)
             determination = moduleof(thing)
-            results.append(Result(determination,
-                                  name,
-                                  nameof(type(thing)),
-                                  idx))
             try:
                 assert determination == whichmodule
             except AssertionError:
@@ -100,7 +97,7 @@ def compare_module_lookups_for_all_things():
                                            nameof(thing),
                                            mismatch_count))
                 mismatch_count += 1
-        idx += 1
+            idx += 1
     
     # In practice the failure rate seemed to be around 7.65 %
     failure_rate = 100 * (float(mismatch_count) / float(total))
@@ -124,9 +121,17 @@ def show():
     footer0 = f'MISMATCHES: {len(mismatches.mismatch_records)} (of {mismatches.total} total)'
     footer1 = f'FAILURE RATE: {mismatches.failure_rate}'
     
-    ansi.print_ansi('–' * WIDTH,        color=gray)
+    ansi.print_ansi('–' * WIDTH,         color=gray)
     ansi.print_ansi_centered(header0,    color=yellow)
     print()
+    
+    for result in results.result_records:
+        printout(f"{result.modulename}",
+                 f"{len(result.thingnames)} exported things")
+        print()
+        ansi.print_ansi(columnize(result.thingnames, displaywidth=WIDTH),
+                                         color=green)
+        print()
     
     ansi.print_ansi_centered(header1,    color=yellow)
     print()

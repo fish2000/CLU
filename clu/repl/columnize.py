@@ -43,9 +43,12 @@ def get_option(key, options):
     return options.get(key, default_opts.get(key))
 
 @export
-def columnize(array, displaywidth=80, colsep = '  ',
-              arrange_vertical=True, ljust=True, lineprefix='',
-              opts={}):
+def columnize(array, displaywidth=80,
+                     colsep = '  ',
+                     arrange_vertical=True,
+                     ljust=True,
+                     lineprefix='',
+                     opts={}):
     """ Return a list of strings as a compact set of columns arranged
         horizontally or vertically.
         

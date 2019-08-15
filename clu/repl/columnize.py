@@ -8,6 +8,11 @@ from __future__ import print_function
 
 import os
 
+from clu.exporting import Exporter
+
+exporter = Exporter(path=__file__)
+export = exporter.decorator()
+
 def computed_displaywidth():
     """ Figure out a reasonable default with.
         
@@ -37,6 +42,7 @@ default_opts = {
 def get_option(key, options):
     return options.get(key, default_opts.get(key))
 
+@export
 def columnize(array, displaywidth=80, colsep = '  ',
               arrange_vertical=True, ljust=True, lineprefix='',
               opts={}):
@@ -235,11 +241,15 @@ def columnize(array, displaywidth=80, colsep = '  ',
         
         return s
 
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
+
 def demo():
     print(columnize(list(range(12)),
-                      opts={'displaywidth':6, 'arrange_array':True}))
+                    opts={'displaywidth' : 6, 'arrange_array' : True}))
+    
     print(columnize(list(range(12)),
-                      opts={'displaywidth':10, 'arrange_array':True}))
+                    opts={'displaywidth' : 10, 'arrange_array' : True}))
     
     for t in ((4, 4,), (4, 7), (100, 80)):
         width = t[1]
@@ -271,9 +281,10 @@ def demo():
     print(columnize(data))
     print(columnize(data, arrange_vertical=False))
     
-    data = [str(i) for i in range(55)]
+    data = [str(idx) for idx in range(55)]
     
-    print(columnize(data, opts={'displaywidth':39, 'arrange_array':True}))
+    print(columnize(data, opts={'displaywidth' : 39, 'arrange_array' : True}))
+    
     print(columnize(data, displaywidth=39, ljust=False,
                     colsep=', ', lineprefix='    '))
     print(columnize(data, displaywidth=39, ljust=False,

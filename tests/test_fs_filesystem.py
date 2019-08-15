@@ -194,7 +194,6 @@ class TestFsFilesystem(object):
         finally:
             os.unlink(tzip)
     
-    @pytest.mark.xfail
     def test_script_path(self):
         from clu.fs.filesystem import script_path
         

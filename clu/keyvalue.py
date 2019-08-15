@@ -54,6 +54,8 @@ class CLUInterface(AppDirs):
         # Create the “datadir” directory if necessary:
         if not self.datadir.exists:
             self.datadir.makedirs()
+            if self.version is not None:
+                self.migrate_from_previous()
         
         # Configure zicts for key-value I/O:
         self.zfile = zict.File(str(self.datadir), mode='a')
@@ -70,6 +72,12 @@ class CLUInterface(AppDirs):
     @property
     def is_versioned(self):
         return self.version is not None
+    
+    def migrate_from(self, version):
+        pass
+    
+    def migrate_from_previous(self):
+        pass
     
     def has(self, key):
         """ Test if a key is contained in this key-value store. """

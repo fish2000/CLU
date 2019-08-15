@@ -11,23 +11,26 @@ from clu.naming import nameof, moduleof
 from clu.constants import consts
 from clu.repl import ansi
 from clu.repl.columnize import columnize
-from ansicolors import (green, red, lightred, cyan, dimcyan,
-                        lightcyan, dimlightcyan, gray, dimgray,
-                        yellow, blue, lightblue,
+from ansicolors import (green, lightgreen, red, lightred,
+                        cyan, dimcyan, lightcyan, dimlightcyan,
+                        gray, dimgray,
+                        yellow, blue, lightblue, brightblue,
                         green_bg, cyan_bg, yellow_bg, nothing)
 
 # socking them all in a tuple gets PyFlakes to shut up:
-colors = (green, red, lightred, cyan, dimcyan,
-          lightcyan, dimlightcyan, gray, dimgray,
-          yellow, blue, lightblue,
+colors = (green, lightgreen, red, lightred,
+          cyan, dimcyan, lightcyan, dimlightcyan,
+          gray, dimgray,
+          yellow, blue, lightblue, brightblue,
           green_bg, cyan_bg, yellow_bg, nothing)
 
 chevron = red.render("»")
+ronchev = gray.render("»")
 colon = gray.render(":")
 
 def printout(name, value):
     """ Format and colorize each segment of the name/value output """
-    itemname = lightblue.render(" %25s " % name)
+    itemname = brightblue.render(" %25s " % name)
     itemvalue = gray.render(f" {value}")
     ansi.print_ansi(chevron + itemname + colon + itemvalue, color=nothing)
 
@@ -106,6 +109,7 @@ def compare_module_lookups_for_all_things():
            Mismatches(total,         tuple(mismatches),
                                            failure_rate)
 
+isplural = lambda integer: integer != 1 and 's' or ''
 
 def show():
     """ Prettyprint the module lookup results """
@@ -124,9 +128,11 @@ def show():
     ansi.print_ansi_centered(header0,    color=yellow)
     print()
     
+    # lineprefix=f"{ronchev}    "
     for result in results.result_records:
+        thinglength = len(result.thingnames)
         printout(f"{result.modulename}",
-                 f"{len(result.thingnames)} exported things")
+                 f"{thinglength} exported thing{isplural(thinglength)}")
         print()
         ansi.print_ansi(columnize(result.thingnames, displaywidth=WIDTH),
                                          color=green)

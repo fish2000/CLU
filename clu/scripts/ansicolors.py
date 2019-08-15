@@ -5,6 +5,7 @@ from clu.repl import ansi
     
 # ANSI colors:
 green       = ansi.ANSIFormat(text=ansi.Text.GREEN)
+lightgreen  = ansi.ANSIFormat(text=ansi.Text.LIGHTGREEN)
 
 red         = ansi.ANSIFormat(text=ansi.Text.RED)
 lightred    = ansi.ANSIFormat(text=ansi.Text.LIGHTRED)
@@ -23,6 +24,8 @@ dimgray     = ansi.ANSIFormat(text=ansi.Text.GRAY,
 yellow      = ansi.ANSIFormat(text=ansi.Text.YELLOW)
 blue        = ansi.ANSIFormat(text=ansi.Text.BLUE)
 lightblue   = ansi.ANSIFormat(text=ansi.Text.LIGHTBLUE)
+brightblue  = ansi.ANSIFormat(text=ansi.Text.LIGHTBLUE,
+                              weight=ansi.Weight.BRIGHT)
 
 
 green_bg    = ansi.ANSIFormat(text=ansi.Text.BLACK,

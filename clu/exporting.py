@@ -738,7 +738,7 @@ class Exporter(ExporterBase, prefix=BASEPATH, appname=PROJECT_NAME):
         or you risk UNDEFINED BEHAVIOR!!!! Erm.
         
         Also note that all derived subclasses of ExporterBase will
-        automatrically be slotted classes – a “__slots__” attribute
+        automatically be slotted classes – a “__slots__” attribute
         will be added to the class dict by the “clu.exporting.Slotted”
         metaclass, if your subclass doesn’t define one – and so if
         you desire a class with a working “__dict__” attribute for

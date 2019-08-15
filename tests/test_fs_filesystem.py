@@ -199,6 +199,7 @@ class TestFsFilesystem(object):
         
         scripts = Directory(script_path())
         assert scripts.exists
+        assert scripts.parent().basename == 'clu'
         assert '.gitignore' in scripts
         assert '__init__.py' in scripts # it’s a Python module directory
     

@@ -6,6 +6,7 @@ import importlib
 import pickle
 
 from clu.constants.data import MODNAMES
+from clu.constants.terminalsize import get_terminal_size
 from clu.exporting import Exporter
 from clu.naming import nameof, moduleof
 from clu.constants import consts
@@ -47,10 +48,18 @@ Mismatch = NamedTuple('Mismatch', ('which',
                                    'thingname',
                                    'idx'), module=__file__)
 
+Mismatches = NamedTuple('Mismatches', ('total',
+                                       'mismatch_records',
+                                       'failure_rate'), module=__file__)
+
+Result = NamedTuple('Result', ('modulename',
+                               'thingname',
+                               'thingtype',
+                               'idx'), module=__file__)
+
 Results = NamedTuple('Results', ('total',
                                  'modulenames',
-                                 'mismatches',
-                                 'failure_rate'), module=__file__)
+                                 'result_records'), module=__file__)
 
 def compare_module_lookups_for_all_things():
     """ Iterate through each exported item, for each exported module,
@@ -62,9 +71,11 @@ def compare_module_lookups_for_all_things():
         … comparing the results of the two search functions and computing
         the overall results.
     """
+    idx = 0
     total = 0
     mismatch_count = 0
     mismatches = []
+    results = []
     clumodules = import_clu_modules()
     modulenames = Exporter.modulenames()
     
@@ -76,6 +87,10 @@ def compare_module_lookups_for_all_things():
         for name, thing in exports.items():
             whichmodule = pickle.whichmodule(thing, None)
             determination = moduleof(thing)
+            results.append(Result(determination,
+                                  name,
+                                  nameof(type(thing)),
+                                  idx))
             try:
                 assert determination == whichmodule
             except AssertionError:
@@ -85,12 +100,15 @@ def compare_module_lookups_for_all_things():
                                            nameof(thing),
                                            mismatch_count))
                 mismatch_count += 1
+        idx += 1
     
     # In practice the failure rate seemed to be around 7.65 %
     failure_rate = 100 * (float(mismatch_count) / float(total))
     # assert failure_rate < 8.0 # percent
     
-    return Results(total, modulenames, mismatches, failure_rate)
+    return Results(idx, modulenames, tuple(results)), \
+           Mismatches(total,         tuple(mismatches),
+                                           failure_rate)
 
 
 def show():
@@ -99,17 +117,21 @@ def show():
     WIDTH = consts.TEXTMATE and max(consts.SEPARATOR_WIDTH, 125) \
                                  or consts.SEPARATOR_WIDTH
     
-    results = compare_module_lookups_for_all_things()
+    results, mismatches = compare_module_lookups_for_all_things()
     
-    header = f'MODULE LOOKUPS ({results.total} performed)'
-    footer0 = f'MISMATCHES: {len(results.mismatches)} (of {results.total} total)'
-    footer1 = f'FAILURE RATE: {results.failure_rate}'
+    header0 = f'MODULE LOOKUPS ({results.total} performed)'
+    header1 = f'MISMATCHES FOUND (of {mismatches.total} total)'
+    footer0 = f'MISMATCHES: {len(mismatches.mismatch_records)} (of {mismatches.total} total)'
+    footer1 = f'FAILURE RATE: {mismatches.failure_rate}'
     
     ansi.print_ansi('–' * WIDTH,        color=gray)
-    ansi.print_ansi_centered(header,    color=yellow)
+    ansi.print_ansi_centered(header0,    color=yellow)
     print()
     
-    for mismatch in results.mismatches:
+    ansi.print_ansi_centered(header1,    color=yellow)
+    print()
+    
+    for mismatch in mismatches.mismatch_records:
         idx = f"{mismatch.idx}"
         
         printout(f"{mismatch.thingname} [{idx.zfill(2)}]",

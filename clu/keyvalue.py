@@ -4,7 +4,7 @@ from __future__ import print_function
 import plistlib
 import zict
 
-from clu.constants.consts import ENCODING, PROJECT_NAME, NoDefault
+from clu.constants.consts import ENCODING, NoDefault
 from clu.constants.enums import System
 from clu.constants.exceptions import KeyValueError
 from clu.fs.appdirectories import AppDirs
@@ -32,16 +32,19 @@ class CLUInterface(AppDirs):
               'user_data',      'user_log',
               'user_state')
     
-    def __init__(self, appname=PROJECT_NAME,
+    def __init__(self, appname=None,
                        version=None,
                        datadir=None):
         """ Initialize a key-value store with a default “appname” parameter `clu` –
             q.v. ``clu.constants.consts``, the “PROJECT_NAME” constant supra. –
             and set up all required I/O interfaces based on this name:
         """
+        # Get CLU’s version, if necessary:
+        import clu
+        
         # …also, use the Linux directory layout:
-        super(CLUInterface, self).__init__(appname=appname,
-                                           version=version,
+        super(CLUInterface, self).__init__(appname=appname or clu.__title__,
+                                           version=version or clu.__version__,
                                             system=System.LINUX2)
         
         # Use passed-in “datadir” or “user_config”
@@ -64,8 +67,9 @@ class CLUInterface(AppDirs):
         # WE ARE *NOT* CLOSED
         self._closed = False
     
-    def get_datadir(self):
-        return getattr(self, 'datadir', None)
+    @property
+    def is_versioned(self):
+        return self.version is not None
     
     def has(self, key):
         """ Test if a key is contained in this key-value store. """
@@ -103,10 +107,12 @@ class CLUInterface(AppDirs):
         """ Return an iterator for this key-value store. """
         return iter(self.zfunc)
     
-    def update(self, dictish=None, **updates):
+    def update(self, dictish=NoDefault, **updates):
         """ Update the key-value store with key/value pairs and/or an iterator;
             q.v. `dict.update(…)` docstring supra.
         """
+        if dictish is NoDefault:
+            return self.zfunc.update(**updates)
         return self.zfunc.update(dictish, **updates)
     
     def keys(self):
@@ -222,8 +228,10 @@ def iterate():
     return interface.iterate()
 
 @export
-def update(dictish=None, **updates):
+def update(dictish=NoDefault, **updates):
     """ Update the CLU key-value store with key/value pairs, and/or an iterator """
+    if dictish is NoDefault:
+        return interface.update(**updates)
     return interface.update(dictish, **updates)
 
 @export

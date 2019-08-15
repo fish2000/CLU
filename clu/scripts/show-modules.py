@@ -131,11 +131,11 @@ def show():
     # lineprefix=f"{ronchev}    "
     for result in results.result_records:
         thinglength = len(result.thingnames)
+        columns = columnize(result.thingnames, displaywidth=WIDTH)
         printout(f"{result.modulename}",
                  f"{thinglength} exported thing{isplural(thinglength)}")
         print()
-        ansi.print_ansi(columnize(result.thingnames, displaywidth=WIDTH),
-                                         color=green)
+        ansi.print_ansi(columns,         color=green)
         print()
     
     ansi.print_ansi_centered(header1,    color=yellow)

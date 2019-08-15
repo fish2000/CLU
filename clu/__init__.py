@@ -46,7 +46,7 @@ __title__ = 'clu'
 __author__ = 'Alexander Böhn'
 __maintainer__ = __author__
 __license__ = 'MIT'
-__copyright__ = '© 2012-2025 %s' % __author__
+__copyright__ = f'{__title__} © 2012-2025 {__author__}'
 
 # The CLU project version:
 version_info = VersionInfo(__version__)

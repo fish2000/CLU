@@ -6,7 +6,6 @@ import importlib
 import pickle
 
 from clu.constants.data import MODNAMES
-from clu.constants.terminalsize import get_terminal_size
 from clu.exporting import Exporter
 from clu.naming import nameof, moduleof
 from clu.constants import consts

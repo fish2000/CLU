@@ -25,7 +25,7 @@ from clu.constants.enums import CSIDL, System, SYSTEM
 from clu.constants.exceptions import UnusedValueWarning
 from clu.constants.polyfills import unicode
 from clu.version import VersionInfo
-from .filesystem import Directory
+from .filesystem import Directory, hd
 from .misc import stringify
 from clu.exporting import Exporter
 
@@ -34,6 +34,10 @@ export = exporter.decorator()
 
 __version__ = "1.4.4"
 __version_info__ = VersionInfo(__version__)
+
+home = hd()
+library = home.subdirectory('Library')
+config = home.subdirectory('.config')
 
 @export
 class AppDirs(object):
@@ -290,11 +294,11 @@ class AppDirs(object):
                 else:
                     path = os.path.join(path, appname)
         elif self.system == System.DARWIN:
-            path = os.path.expanduser('~/Library/Application Support/')
+            path = str(library.subdirectory('Application Support'))
             if appname:
                 path = os.path.join(path, appname)
         else:
-            path = os.getenv('XDG_DATA_HOME', os.path.expanduser("~/.local/share"))
+            path = os.getenv('XDG_DATA_HOME', str(home.subdirectory('.local').subdirectory('share')))
             if appname:
                 path = os.path.join(path, appname)
         if appname and version:
@@ -404,11 +408,11 @@ class AppDirs(object):
         if self.system == System.WIN32:
             path = self.get_user_data_dir(appname, appauthor, None, roaming)
         elif self.system == System.DARWIN:
-            path = os.path.expanduser('~/Library/Preferences/')
+            path = str(library.subdirectory('Preferences'))
             if appname:
                 path = os.path.join(path, appname)
         else:
-            path = os.getenv('XDG_CONFIG_HOME', os.path.expanduser("~/.config"))
+            path = os.getenv('XDG_CONFIG_HOME', str(config))
             if appname:
                 path = os.path.join(path, appname)
         if appname and version:

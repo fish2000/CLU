@@ -56,7 +56,7 @@ KEYWORDS = ('command',
             'command-line',
             'modules',
             'predicates',
-            'REPR', 'tools')
+            'REPL', 'tools')
 
 # PROJECT DIRECTORY
 CWD = os.path.dirname(__file__)

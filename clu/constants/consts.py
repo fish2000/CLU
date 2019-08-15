@@ -80,7 +80,7 @@ NotImplementedType = type(NotImplemented)
 SINGLETON_TYPES = (bool, NoneType, EllipsisType, NotImplementedType)
 
 # Path to the script directory:
-SCRIPT_PATH = sys.intern(os.path.join(BASEPATH, 'scripts'))
+SCRIPT_PATH = sys.intern(os.path.join(BASEPATH, 'clu', 'scripts'))
 
 # Path to the project tests:
 TEST_PATH = sys.intern(os.path.join(BASEPATH, 'tests'))

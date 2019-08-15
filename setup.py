@@ -65,8 +65,9 @@ BASE_PATH = os.path.join(
 
 # ENTRY POINTS
 ENTRY_POINTS = {
-    'console_scripts'  : ['clu-version = clu.repl.cli.print_version:print_version_command'],
-    'pytest11'         : ['clu-testing = clu.testing.pytest']
+    'console_scripts'  : [    'clu-version = clu.repl.cli.print_version:print_version_command',
+                          'clu-boilerplate = clu.repl.cli.boilerplate:boilerplate_command'],
+    'pytest11'         : [    'clu-testing = clu.testing.pytest']
 }
 
 def project_content(*filenames):

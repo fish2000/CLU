@@ -94,7 +94,7 @@ def compare_module_lookups_for_all_things():
 
 
 def show():
-    """ Prettyprint the module lookup results """    
+    """ Prettyprint the module lookup results """
     # Terminal width:
     WIDTH = consts.TEXTMATE and max(consts.SEPARATOR_WIDTH, 125) \
                                  or consts.SEPARATOR_WIDTH

@@ -123,6 +123,7 @@ from clu.naming import (determine_module, nameof, moduleof,
                         dotpath_to_prefix, path_to_prefix,
                         split_abbreviations)
 
+from clu.csv import pad_csv
 from clu.dicts import merge_two, merge_as, merge, asdict
 
 # Add miscellaneous necessities:
@@ -325,6 +326,7 @@ __all__ = ('Image',
            'qualified_import', 'qualified_name_tuple', 'qualified_name',
            'dotpath_to_prefix', 'path_to_prefix',
            'split_abbreviations',
+           'pad_csv',
            'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',
            'print_separator', 'evict_announcer',
@@ -382,6 +384,11 @@ try:
                                                   cd, wd, td, hd,
                                    TemporaryDirectory, Intermediate,
                                    NamedTemporaryFile)
+    from clu.fs.misc import (gethomedir,
+                             re_matcher, re_searcher,
+                             re_suffix, suffix_searcher,
+                             swapext,
+                             filesize, samesize)
 except (ImportError, SyntaxError):
     pass
 else:
@@ -395,7 +402,12 @@ else:
                 'TemporaryName', 'Directory',
                                  'cd', 'wd', 'td', 'hd',
                 'TemporaryDirectory', 'Intermediate',
-                'NamedTemporaryFile')
+                'NamedTemporaryFile',
+                'gethomedir',
+                're_matcher', 're_searcher',
+                're_suffix', 'suffix_searcher',
+                'swapext',
+                'filesize', 'samesize')
 
 try:
     from instakit.utils.static import asset

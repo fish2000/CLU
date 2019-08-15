@@ -1062,7 +1062,7 @@ class Directory(collections.abc.Hashable,
                     assert os.path.samefile(dstfile, outfile)
                     results.append(dstfile)
             # Return the destination directory instance and the result list:
-            return whereto, results
+            return whereto, tuple(results)
     
     def copy_all(self, destination):
         """ Copy the entire directory tree, all contents included, to a new

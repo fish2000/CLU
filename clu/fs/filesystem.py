@@ -1063,6 +1063,10 @@ class Directory(collections.abc.Hashable,
                     results.append(dstfile)
             # Return the destination directory instance and the result list:
             return whereto, tuple(results)
+        else:
+            raise FilesystemError(
+                f"flatten(…) source doesn’t exist: {self.name}")
+        return None, tuple()
     
     def copy_all(self, destination):
         """ Copy the entire directory tree, all contents included, to a new
@@ -1093,7 +1097,7 @@ class Directory(collections.abc.Hashable,
                                    symlinks=False))
         else:
             raise FilesystemError(
-                f"copy_all() source doesn’t exist: {self.name}")
+                f"copy_all(…) source doesn’t exist: {self.name}")
         return False
     
     def zip_archive(self, destination, compression_mode=zipfile.ZIP_DEFLATED):

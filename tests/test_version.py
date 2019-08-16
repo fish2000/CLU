@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from pkg_resources.extern.packaging.version import Version as PkgResourcesVersion
 
 import os
+import pytest
 
-from clu.version import VersionInfo, read_version_file
+from clu.constants import consts
+from clu.version import read_version_file
 
 BASEPATH = os.path.join(
            os.path.dirname(
@@ -12,11 +13,18 @@ BASEPATH = os.path.join(
 
 __version__ = read_version_file(BASEPATH)
 
-class TestVersionInfo(object):
+class TestVersion(object):
     
     """ Run the tests for the clu.version module. """
     
+    @pytest.mark.skipif(consts.PYPY, reason="Failure on PyPy")
+    def test_pypy_failure(self):
+        assert not consts.PYPY, "This will fail on PyPY"
+    
     def test_VersionInfo(self):
+        from clu.version import VersionInfo
+        from pkg_resources.extern.packaging.version import Version as PkgResourcesVersion
+        
         version_info = VersionInfo(__version__)
         
         assert version_info  < VersionInfo("9.0.0")

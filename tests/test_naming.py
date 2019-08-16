@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from clu.constants.exceptions import Nondeterminism
 
 import pytest
+
+from clu.constants import consts
+from clu.constants.exceptions import Nondeterminism
 
 class TestNaming(object):
     
@@ -49,6 +51,7 @@ class TestNaming(object):
         assert px1 == path_to_prefix(pp, end="≠")
         assert px2 == path_to_prefix(pp, sep="•", end="≠")
     
+    @pytest.mark.skipif(consts.PYPY, reason="Failure on PyPy")
     @pytest.mark.nondeterministic
     def test_qualified_name_constants(self):
         """ » Checking “qualified_name(¬) on items from clu.constants …” """

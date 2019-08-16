@@ -11,7 +11,8 @@ from abc import abstractmethod as abstract
 
 from clu.constants.consts import ENCODING
 from clu.constants.exceptions import CDBError
-from clu.fs import TemporaryName, Directory, rm_rf, stringify, u8str
+from clu.fs.filesystem import TemporaryName, Directory, rm_rf
+from clu.fs.misc import stringify, u8str
 from clu.predicates import tuplize
 from clu.exporting import Exporter
 

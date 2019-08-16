@@ -58,7 +58,6 @@ def stringify(instance, fields):
 ex = os.path.extsep
 dolla = '$'
 
-@export
 @lru_cache(maxsize=32)
 def re_matcher(string):
     """ Return a boolean function that will search for the given
@@ -71,7 +70,6 @@ def re_matcher(string):
     match_function = re.compile(string, re.IGNORECASE).match
     return lambda searching: bool(match_function(searching))
 
-@export
 @lru_cache(maxsize=32)
 def re_searcher(string):
     """ Return a boolean function that will search for the given
@@ -229,6 +227,9 @@ def masked_chmod(path, perms=0o666):
     return octalize(masked_perms)
 
 # MODULE EXPORTS:
+export(re_matcher,              name='re_matcher')
+export(re_searcher,             name='re_searcher')
+
 export(gethomedir,              name='gethomedir',          doc="gethomedir() → Return the current user’s home directory")
 export(none_function,           name='none_function',       doc="none_function() → A function that always returns None")
 export(true_function,           name='true_function',       doc="true_function() → A function that always returns True")

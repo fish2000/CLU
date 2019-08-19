@@ -1187,6 +1187,12 @@ class Directory(collections.abc.Hashable,
     def __contains__(self, filename):
         return self.subpath(filename, requisite=True) is not None
     
+    def __truediv__(self, filename):
+        return self.subpath(filename, requisite=False)
+    
+    def __rtruediv__(self, filepath):
+        return self.directory(filepath).subdirectory(self)
+    
     def __eq__(self, other):
         if not ispath(other):
             return NotImplemented

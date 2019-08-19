@@ -14,9 +14,10 @@ from clu.constants.consts import λ, φ
 from clu.constants.polyfills import long, unicode, numpy
 from clu.constants.polyfills import HashableABC, SequenceABC, Path
 from clu.constants.polyfills import Mapping, MutableMapping
+from clu.enums import alias
 from clu.exporting import Exporter
 
-from clu.predicates import (isclasstype,
+from clu.predicates import (isclasstype, isenum,
                             allpyattrs, haspyattr, nopyattr,
                             isiterable, haslength,
                             getpyattr, or_none,
@@ -113,15 +114,23 @@ callable_types += attrs(types, 'Coroutine',
 # PREDICATE FUNCTIONS: is<something>() unary-predicates, many of which make use
 # of the aforementioned typelists:
 
+# Path types:
 ispathtype = lambda cls: issubclass(cls, path_types)
 ispath = lambda thing: subclasscheck(thing, path_types) or haspyattr(thing, 'fspath')
 isvalidpath = lambda thing: ispath(thing) and os.path.exists(os.path.expanduser(thing))
 
+# Abstract items and context managers:
 isabstractmethod = lambda method: getpyattr(method, 'isabstractmethod', False)
 isabstract = lambda thing: bool(pyattr(thing, 'abstractmethods', 'isabstractmethod'))
 isabstractcontextmanager = lambda cls: subclasscheck(cls, contextlib.AbstractContextManager)
 iscontextmanager = lambda cls: allpyattrs(cls, 'enter', 'exit') or isabstractcontextmanager(cls)
 
+# Enum and enum alias types:
+isaliasdescriptor = lambda thing: isinstance(thing, alias)
+hasmembers = lambda thing: isenum(thing) and haspyattr(thing, 'members')
+hasaliases = lambda thing: isenum(thing) and haspyattr(thing, 'aliases')
+
+# Typelist predicates:
 isnumber = lambda thing: subclasscheck(thing, numeric_types)
 isnumeric = lambda thing: subclasscheck(thing, numeric_types)
 iscomplex = lambda thing: subclasscheck(thing, complex)
@@ -140,6 +149,7 @@ issequence = lambda thing: isinstance(thing, SequenceABC)
 isxlist = lambda predicate, thinglist: issequence(thinglist) and predicate_all(predicate, thinglist)
 isxtypelist = lambda predicate, thinglist: istypelist(thinglist) and predicate_all(predicate, thinglist)
 
+# Typelist list-type predicates (?!)
 ispathtypelist = predicate_all(lambda thing: isclasstype(thing) and ispathtype(thing))
 ispathlist = predicate_all(ispath)
 isvalidpathlist = predicate_all(isvalidpath)
@@ -196,6 +206,11 @@ export(isabstractmethod,                    doc="isabstractmethod(thing) → boo
 export(isabstract,                          doc="isabstract(thing) → boolean predicate, True if `thing` is an abstract method OR an “abstract base class” (née ABC)")
 export(isabstractcontextmanager,            doc="isabstractcontextmanager(thing) → boolean predicate, True if `thing` decends from `contextlib.AbstractContextManager`")
 export(iscontextmanager,                    doc="iscontextmanager(thing) → boolean predicate, True if `thing` is a context manager (either abstract or concrete)")
+
+export(isaliasdescriptor,                       name='isaliasdescriptor',
+                                                doc="isaliasdescriptor(thing) → boolean predicate, returns True if `thing` is an aliasing descriptor bound to an existing Enum member")
+export(hasmembers,      name='hasmembers',      doc="hasmembers(cls) → boolean predicate, True if `cls` descends from Enum and has 1+ items in its `__members__` dict")
+export(hasaliases,      name='hasaliases',      doc="hasaliases(cls) → boolean predicate, True if `cls` descends from Enum and has 1+ items in its `__aliases__` dict")
 
 export(isnumber,        name='isnumber',    doc="isnumber(thing) → boolean predicate, True if `thing` is a numeric type or an instance of same")
 export(isnumeric,       name='isnumeric',   doc="isnumeric(thing) → boolean predicate, True if `thing` is a numeric type or an instance of same")

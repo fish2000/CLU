@@ -7,7 +7,6 @@ from functools import partial, wraps
 iterchain = chain.from_iterable
 
 from clu.constants.consts import λ, φ, pytuple, QUALIFIER
-from clu.enums import alias
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -155,10 +154,6 @@ def enumchoices(cls):
     if not isenum(cls):
         return tuple()
     return tuple(choice.name for choice in cls)
-
-isaliasdescriptor = lambda thing: isinstance(thing, alias)
-hasmembers = lambda thing: isenum(thing) and haspyattr(thing, 'members')
-hasaliases = lambda thing: isenum(thing) and haspyattr(thing, 'aliases')
 
 # PREDICATE LOGCIAL FUNCTIONS: all/any/and/or/xor shortcuts:
 
@@ -370,11 +365,6 @@ export(attr_across,     name='attr_across',     doc="attr_across(attribute, *thi
 export(stattr_across,   name='stattr_across',   doc="stattr_across(attribute, *things) → Statically return all of the existing named attributes across all things (given 1+ things) (q.v. “inspect.getattr_static(¬)” supra.)")
 export(pyattr_across,   name='pyattr_across',   doc="pyattr_across(attribute, *things) → Return all of the existing named __special__ attributes across all things (given 1+ things)")
 export(item_across,     name='item_across',     doc="item_across(attribute, *things) → Return all of the existing named items held across all things (given 1+ things)")
-
-export(isaliasdescriptor,                       name='isaliasdescriptor',
-                                                doc="isaliasdescriptor(thing) → boolean predicate, returns True if `thing` is an aliasing descriptor bound to an existing Enum member")
-export(hasmembers,      name='hasmembers',      doc="hasmembers(cls) → boolean predicate, True if `cls` descends from Enum and has 1+ items in its `__members__` dict")
-export(hasaliases,      name='hasaliases',      doc="hasaliases(cls) → boolean predicate, True if `cls` descends from Enum and has 1+ items in its `__aliases__` dict")
 
 export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns `None`")
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns `None`")

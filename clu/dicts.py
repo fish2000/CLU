@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-
-from clu.predicates import haspyattr
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -21,11 +19,10 @@ def merge_two(one, two, cls=dict):
     return cls(merged)
 
 @export
-def merge_as(*dicts, **overrides):
+def merge_as(*dicts, cls=dict, **overrides):
     """ Merge all dictionary arguments into a new instance of the specified class,
         passing all additional keyword arguments to the class constructor as overrides
     """
-    cls = overrides.pop('cls', dict)
     if not cls:
         cls = len(dicts) and type(dicts[0]) or dict
     merged = cls(**overrides)
@@ -47,10 +44,20 @@ def merge(*dicts, **overrides):
 @export
 def asdict(thing):
     """ asdict(thing) → returns either thing, thing.__dict__, or dict(thing) as necessary """
+    from clu.predicates import haspyattr
+    from clu.typology import ismapping
     if isinstance(thing, dict):
         return thing
     if haspyattr(thing, 'dict'):
-        return thing.__dict__
+        return asdict(thing.__dict__)
+    if hasattr(thing, '_asdict'):
+        return asdict(thing._asdict())
+    if hasattr(thing, 'to_dict'):
+        return asdict(thing.to_dict())
+    if hasattr(thing, 'dict'):
+        return asdict(thing.dict)
+    if ismapping(thing):
+        return dict(thing)
     return dict(thing)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

@@ -9,7 +9,7 @@ from clu.constants.consts import (BASEPATH,
                                   PROJECT_NAME, VERBOTEN)
 
 from clu.constants.polyfills import cache_from_source
-from .namespace import SimpleNamespace, Namespace
+from clu.typespace.namespace import SimpleNamespace, Namespace
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -44,16 +44,28 @@ setattr(types, '__package__',     os.path.splitext(
 
 @export
 def modulize(name, namespace, docs=None,
-                              path=None):
+                              path=None,
+                           appname=PROJECT_NAME,
+                       relative_to=BASEPATH):
     """ Convert a dictionary mapping into a legit Python module """
     from clu.exporting import doctrim, path_to_dotpath
     from clu.naming import dotpath_join
+    from clu.typology import ismapping
     import sys
     
     # Ensure a module with the given module name we received
     # doesn’t already exist in `sys.modules`:
+    if name is None:
+        raise TypeError("Module name cannot be None")
     if name in sys.modules:
         raise LookupError(f"Module “{name}” already in sys.modules")
+    if namespace is None:
+        raise TypeError("Module namespace cannot be None")
+    if not ismapping(namespace):
+        raise TypeError("Module namespace must be a mapping type")
+    
+    # Ensure “namespace” is an instance of “clu.typespace.namespace.Namespace”:
+    namespace = Namespace(namespace)
     
     # Update the namespace with '__all__' and '__dir__' if necessary:
     ns_all = None
@@ -64,7 +76,8 @@ def modulize(name, namespace, docs=None,
     
     if '__dir__' not in namespace:
         if ns_all is None:
-            ns_all = namespace['__all__']
+            ns_all = namespace.get('__all__', None) or \
+                     tuple(sorted(namespace.keys()))
         namespace['__dir__'] = lambda: list(ns_all)
     
     # Check for a __file__ entry in the namespace if we weren’t
@@ -78,9 +91,9 @@ def modulize(name, namespace, docs=None,
     # some reasonable prefixes:
     if path:
         qualified_name = dotpath_join(DYNAMIC_MODULE_PREFIX,
-                                      PROJECT_NAME,
+                                      appname,
                                       path_to_dotpath(path,
-                                                      relative_to=BASEPATH),
+                                                      relative_to),
                                       name)
         
         # Note that one can use a file path that does not
@@ -90,7 +103,7 @@ def modulize(name, namespace, docs=None,
                          '__cached__' : cache_from_source(path) })
     else:
         qualified_name = dotpath_join(DYNAMIC_MODULE_PREFIX,
-                                      PROJECT_NAME,
+                                      appname,
                                       name)
     
     # Ensure we have a name and a package dotpath in our namespace:
@@ -103,7 +116,7 @@ def modulize(name, namespace, docs=None,
     module = types.Module(qualified_name, doctrim(docs))
     
     # Update the module’s `__dict__` with our namespaced mapping
-    module.__dict__.update(namespace)
+    module.__dict__.update(namespace.__dict__)
     
     # Update the `sys.modules` mapping with the new module,
     # as required by Python’s internal import machinery --

@@ -91,7 +91,7 @@ class TestTypology(object):
         from clu.typespace import SimpleNamespace
         from clu.typology import (subclasscheck,
                                   ispathtype, ispath, isvalidpath,
-                                  isnumber, isnumeric, isarray,
+                                  isnumber, isnumeric, ismapping, isarray,
                                   isstring, isbytes,
                                   islambda,
                                   isfunction)
@@ -126,6 +126,10 @@ class TestTypology(object):
         assert isbytes(bytes)
         assert isbytes(bytearray)
         assert isbytes(b"")
+        
+        assert ismapping(dict)
+        assert ismapping(dict())
+        assert ismapping({})
         
         assert islambda(lambda: None)
         assert islambda(attr)

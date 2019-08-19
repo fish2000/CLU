@@ -90,8 +90,9 @@ path_types = string_types + bytes_types + path_classes
 file_types = (io.TextIOBase, io.BufferedIOBase, io.RawIOBase, io.IOBase)
 
 dict_types = { dict, OrderedDict, DefaultDict, Counter }
+namespace_types = { types.SimpleNamespace, types.Namespace }
 mapping_types = { Mapping, MutableMapping }
-mapping_classes = dict_types | mapping_types
+mapping_classes = dict_types | namespace_types | mapping_types
 
 function_types = Λ = (types.Function,
                       types.Method,
@@ -134,6 +135,7 @@ hasaliases = lambda thing: isenum(thing) and haspyattr(thing, 'aliases')
 isnumber = lambda thing: subclasscheck(thing, numeric_types)
 isnumeric = lambda thing: subclasscheck(thing, numeric_types)
 iscomplex = lambda thing: subclasscheck(thing, complex)
+ismapping = lambda thing: subclasscheck(thing, mapping_classes)
 isarray = lambda thing: subclasscheck(thing, array_types)
 isscalar = lambda thing: subclasscheck(thing, scalar_types)
 isstring = lambda thing: subclasscheck(thing, string_types)
@@ -157,6 +159,7 @@ isvalidpathlist = predicate_all(isvalidpath)
 isnumberlist = predicate_all(isnumber)
 isnumericlist = predicate_all(isnumeric)
 iscomplexlist = predicate_all(iscomplex)
+ismappinglist = predicate_all(ismapping)
 isarraylist = predicate_all(isarray)
 isscalarlist = predicate_all(isscalar)
 isstringlist = predicate_all(isstring)
@@ -215,6 +218,7 @@ export(hasaliases,      name='hasaliases',      doc="hasaliases(cls) → boolean
 export(isnumber,        name='isnumber',    doc="isnumber(thing) → boolean predicate, True if `thing` is a numeric type or an instance of same")
 export(isnumeric,       name='isnumeric',   doc="isnumeric(thing) → boolean predicate, True if `thing` is a numeric type or an instance of same")
 export(iscomplex,       name='iscomplex',   doc="iscomplex(thing) → boolean predicate, True if `thing` is a complex numeric type or an instance of same")
+export(ismapping,       name='ismapping',   doc="ismapping(thing) → boolean predicate, True if `thing` is a mapping (dict-ish) type or an instance of same")
 export(isarray,         name='isarray',     doc="isarray(thing) → boolean predicate, True if `thing` is an array type or an instance of same")
 export(isscalar,        name='isscalar',    doc="isscalar(thing) → boolean predicate, True if `thing` is a numpy scalar numeric type or an instance of same")
 export(isstring,        name='isstring',    doc="isstring(thing) → boolean predicate, True if `thing` is a string type or an instance of same")
@@ -239,6 +243,7 @@ export(isvalidpathlist, name='isvalidpathlist', doc="isvalidpathlist(thinglist) 
 export(isnumberlist,    name='isnumberlist',    doc="isnumberlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of numeric types")
 export(isnumericlist,   name='isnumericlist',   doc="isnumericlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of numeric types")
 export(iscomplexlist,   name='iscomplexlist',   doc="iscomplexlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of complex numeric types")
+export(ismappinglist,   name='ismappinglist',   doc="ismappinglist(thinglist) → boolean predicate, True if `thinglist` is a sequence of mapping (dict-ish) types")
 export(isarraylist,     name='isarraylist',     doc="isarraylist(thinglist) → boolean predicate, True if `thinglist` is a sequence of array types")
 export(isscalarlist,    name='isscalarlist',    doc="isscalarlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of numpy scalar numeric types")
 export(isstringlist,    name='isstringlist',    doc="isstringlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of string types")

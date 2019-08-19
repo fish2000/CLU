@@ -193,6 +193,9 @@ faintly you came tapping, tapping at my chamber door?
 
 MODNAMES = ('clu.compilation.compiledb',
             'clu.compilation.macros',
+            'clu.config',
+            'clu.config.base',
+            'clu.config.env',
             'clu.constants.enums',
             'clu.csv',
             'clu.dicts',

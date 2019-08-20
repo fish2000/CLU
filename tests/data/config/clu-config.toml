@@ -1,0 +1,27 @@
+# Real-world putative example CLU config file
+
+project = 'clu'
+
+description = """
+CLU – Common Lightweight Utilities (née Command-Line Utilities)
+==================================================
+
+This is a packaged-up and sanely version-controlled version of [the Python tools I wrote for my REPLs](https://github.com/fish2000/homage/blob/master/.script-bin/replutilities.py), divided up into
+a bunch of subordinate packages.
+
+If you assumed that the project name was a Tron reference, you are in fact correct.
+"""
+
+description-content-type = "text/markdown"
+
+[userinfo]
+user = 'fish'
+email = 'fish2000@gmail.com'
+fullname = 'Alexander Böhn'
+organization = 'Objects In Space And Time, LLC'
+
+[debugging]
+debug = true
+loggging = true
+logdir = "/usr/local/var/run/clu"
+

@@ -1,0 +1,14 @@
+# Toy example TOML config file
+
+yo = "dogg"
+i_heard = "you like"
+nested = "dicts"
+so = "we put dicts in your dicts"
+
+[wat]
+yo = "dogggggg"
+yoyo = "dogggggggggg"
+
+[nodogg]
+yo = "dogggggg"
+yoyo = "dogggggggggg"

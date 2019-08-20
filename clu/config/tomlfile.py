@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import copy
+import sys
 import toml
 
 from clu.constants.consts import PROJECT_NAME
@@ -41,12 +42,21 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     from clu.constants import consts
     from clu.repl.columnize import columnize
+    from clu.fs.filesystem import Directory
+    from clu.predicates import tuplize
     # from pprint import pprint
+    
+    # print(toml.__file__)
+    # sys.exit()
     
     WIDTH = consts.TEXTMATE and max(consts.SEPARATOR_WIDTH, 125) \
                                  or consts.SEPARATOR_WIDTH
     
-    toml_file = TomlFile()
+    project_path = Directory(consts.PROJECT_PATH)
+    tests = project_path.parent().subdirectory('tests')
+    cfgs = tests.subdirectory('data').subdirectory('config')
+    
+    toml_file = TomlFile(extra_user_dirs=tuplize(cfgs))
     
     print()
     

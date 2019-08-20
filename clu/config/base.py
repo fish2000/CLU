@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from copy import copy
 from itertools import chain
 
 iterchain = chain.from_iterable
@@ -94,6 +95,9 @@ class NamespacedMutableMapping(abc.ABC):
     def namespaces(self):
         ...
     
+    def clone(self):
+        raise NotImplementedError("clone() not implemented")
+    
     def update(self, dictish=NoDefault, **updates):
         if dictish is not NoDefault:
             for key, value in dictish.items():
@@ -178,6 +182,10 @@ class Flat(NamespacedMutableMapping):
         return tuple(frozenset(self.unpack_ns(key)[0] \
                     for key in self.dictionary.keys() \
                      if NAMESPACE_SEP in key))
+    
+    def clone(self):
+        return type(self)(dictionary=copy(self.dictionary))
+
 
 @export
 class Nested(NamespacedMutableMapping):
@@ -252,6 +260,9 @@ class Nested(NamespacedMutableMapping):
         return tuple(frozenset(key \
                for key, value in self.tree.items() \
                 if ismapping(value)))
+    
+    def clone(self):
+        return type(self)(tree=copy(self.tree))
 
 export(NAMESPACE_SEP, name='NAMESPACE_SEP')
 

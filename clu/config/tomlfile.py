@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import copy
-import sys
 import toml
 
 from clu.constants.consts import PROJECT_NAME
@@ -13,20 +11,8 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-toml_appname  = PROJECT_NAME
-toml_filename = f'{PROJECT_NAME}-config.toml'
-
 @export
-class TomlFile(FileBase, Nested, appname=toml_appname, filename=toml_filename):
-    
-    # def __init__(self, *args, **kwargs):
-    #     try:
-    #         super(TomlFile, self).__init__(*args, **kwargs)
-    #     except TypeError:
-    #         super(TomlFile, self).__init__()
-    #     for arg in args:
-    #         if isinstance(arg, Nested):
-    #             self.tree = copy.copy(arg.tree)
+class TomlFileBase(FileBase, Nested):
     
     def loads(self, text):
         """ Load nested namespaced dictionary data from a TOML-encoded string """
@@ -36,6 +22,14 @@ class TomlFile(FileBase, Nested, appname=toml_appname, filename=toml_filename):
         """ Dump a TOML-encoded string from nested namespaced dictionary data """
         return toml.dumps(self.tree)
 
+toml_appname  = PROJECT_NAME
+toml_filename = f'{PROJECT_NAME}-config.toml'
+
+@export
+class TomlFile(TomlFileBase, appname=toml_appname,
+                            filename=toml_filename):
+    pass
+
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
@@ -44,7 +38,8 @@ def test():
     from clu.repl.columnize import columnize
     from clu.fs.filesystem import Directory
     from clu.predicates import tuplize
-    # from pprint import pprint
+    from pprint import pformat
+    # import sys
     
     # print(toml.__file__)
     # sys.exit()
@@ -70,7 +65,7 @@ def test():
     print(f"»       cls.filename = {toml_file.filename}")
     print()
     
-    print(f"»          self.tree = {toml_file.tree}")
+    print(f"»          self.tree = {pformat(toml_file.tree)}")
     print(f"»      self.filepath = {toml_file.filepath}")
     print(f"»    self.filesuffix = {toml_file.filesuffix}")
     print()

@@ -72,6 +72,9 @@ class EnvBase(NamespacedMutableMapping, AppName):
         envkeys = (key.lstrip(prefix) for key in self.environment.keys() if key.startswith(prefix))
         prefixes = frozenset(key.lower().split(PREFIX_SEP, 1)[0] for key in envkeys if PREFIX_SEP in key)
         return tuple(prefixes)
+    
+    def clone(self):
+        return type(self)(environment=self.environment)
 
 @export
 class Env(EnvBase, appname=PROJECT_NAME):

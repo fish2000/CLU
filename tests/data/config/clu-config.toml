@@ -12,7 +12,7 @@ a bunch of subordinate packages.
 If you assumed that the project name was a Tron reference, you are in fact correct.
 """
 
-description-content-type = "text/markdown"
+description_content_type = "text/markdown"
 
 [userinfo]
 user = 'fish'

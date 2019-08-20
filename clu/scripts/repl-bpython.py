@@ -124,6 +124,11 @@ from clu.naming import (determine_module, nameof, moduleof,
                         dotpath_to_prefix, path_to_prefix,
                         split_abbreviations)
 
+from clu.config.base import NamespacedMutableMapping, Flat, Nested
+from clu.config.env import Env
+from clu.config.filebase import FileName, FileBase
+from clu.config.tomlfile import TomlFile
+
 from clu.csv import pad_csv
 from clu.dicts import merge_two, merge_as, merge, asdict
 
@@ -327,6 +332,8 @@ __all__ = ('Image',
            'qualified_import', 'qualified_name_tuple', 'qualified_name',
            'dotpath_to_prefix', 'path_to_prefix',
            'split_abbreviations',
+           'NamespacedMutableMapping', 'Flat', 'Nested',
+           'Env', 'FileName', 'FileBase', 'TomlFile',
            'pad_csv',
            'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',

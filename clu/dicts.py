@@ -12,10 +12,11 @@ def merge_two(one, two, cls=dict):
     """ Merge two dictionaries into an instance of the specified class
         Based on this docopt example source: https://git.io/fjCZ6
     """
+    from clu.predicates import getitem
     if not cls:
         cls = type(one)
     keys = frozenset(one) | frozenset(two)
-    merged = ((key, one.get(key, None) or two.get(key, None)) for key in keys)
+    merged = ((key, getitem(one, key) or getitem(two, key)) for key in keys)
     return cls(merged)
 
 @export

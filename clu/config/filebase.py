@@ -58,7 +58,8 @@ for system in systems:
 class FileBase(NamespacedMutableMapping, AppName, FileName):
     
     @classmethod
-    def find_file(cls):
+    def find_file(cls, site_dirs=site_dirs,
+                       user_dirs=user_dirs):
         root_dir = None
         # Search site directories first:
         for site_dir in site_dirs:
@@ -76,7 +77,7 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
             raise FileNotFoundError(f"Couldn’t find config file {cls.filename}")
         return Directory(root_dir.realpath()).subpath(cls.filename)
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, filepath=None, *args, **kwargs):
         try:
             super(FileBase, self).__init__(*args, **kwargs)
         except TypeError:
@@ -84,7 +85,7 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
         try:
             self.filepath = type(self).find_file()
         except FileNotFoundError:
-            self.filepath = None
+            self.filepath = filepath
     
     def load(self, filepath=None):
         if filepath is None:
@@ -103,11 +104,12 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
         if filepath is None:
             filepath = self.filepath
         if filepath is None:
-            return
-        cls = type(self)
+            return ''
         text = self.dumps()
+        if not text:
+            return text
         with TemporaryName(prefix="filebase-dump-",
-                           suffix=cls.filesuffix,
+                           suffix=type(self).filesuffix,
                            randomized=True) as tdmp:
             assert tdmp.write(text)
             assert tdmp.copy(filepath)

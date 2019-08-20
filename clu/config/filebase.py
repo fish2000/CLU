@@ -86,6 +86,8 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
             self.filepath = type(self).find_file()
         except FileNotFoundError:
             self.filepath = filepath
+        if self.filepath is not None:
+            self.load()
     
     def load(self, filepath=None):
         if filepath is None:

@@ -58,6 +58,9 @@ class System(Enum):
     def __eq__(self, other):
         return str(self) == str(other)
     
+    def __hash__(self):
+        return hash(self.to_string())
+    
     @property
     def os_name(self):
         """ A given System value’s “os_name” (as reported when

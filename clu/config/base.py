@@ -22,10 +22,16 @@ class AppName(abc.ABC):
     
     @classmethod
     def __init_subclass__(cls, appname=None, **kwargs):
+        """ Translate the “appname” class-keyword into an “appname” read-only
+            descriptor value
+        """
         super(AppName, cls).__init_subclass__(**kwargs)
         cls.appname = ValueDescriptor(appname)
     
     def __init__(self, *args, **kwargs):
+        """ Stub __init__(…) method, throwing a lookup error for subclasses
+            upon which the “appname” value is None
+        """
         if type(self).appname is None:
             raise LookupError("Cannot instantiate a base config class "
                               "(appname is None)")
@@ -35,12 +41,28 @@ class NamespacedMutableMapping(abc.ABC):
     
     @staticmethod
     def unpack_ns(string):
+        """ Unpack a namespaced key into a namespace name and a key name.
+            
+            To wit: if the namespaced key is “yo:dogg”, calling “unpack_ns(…)”
+            on it will return the tuple ('yo', 'dogg');
+            
+            If the key is not namespaced (like e.g. “wat”) the “unpack_ns(…)”
+            call will return the tuple (None, 'wat').
+        """
         if NAMESPACE_SEP not in string:
             return None, string
         return string.split(NAMESPACE_SEP, 1)
     
     @staticmethod
     def pack_ns(string, namespace=None):
+        """ Pack a key and an (optional) namespace name into a namespaced key.
+            
+            To wit: if called as “pack_ns('dogg', namespace='yo')” the return
+            value will be the string "yo:dogg".
+            
+            If “None” is the namespace (like e.g. “pack_ns('wat', namespace=None)”)
+            the return value will be the string "wat".
+        """
         if namespace is None:
             return string
         return NAMESPACE_SEP.join((namespace, string))
@@ -134,10 +156,23 @@ class Flat(NamespacedMutableMapping):
         del self.dictionary[nskey]
     
     def keys(self, namespace=None):
-        return self.dictionary.keys()
+        if namespace is None:
+            return self.dictionary.keys()
+        return (key for key in self.dictionary.keys() \
+                     if key.startswith(namespace + NAMESPACE_SEP))
     
     def values(self, namespace=None):
-        return self.dictionary.values()
+        if namespace is None:
+            return self.dictionary.values()
+        return (value for key, value in self.dictionary.items() \
+                       if key.startswith(namespace + NAMESPACE_SEP))
+    
+    def nestify(self, cls=None):
+        if cls is None:
+            cls = Nested
+        out = cls()
+        out.update(self.dictionary)
+        return out
     
     def namespaces(self):
         return tuple(frozenset(self.unpack_ns(key)[0] \
@@ -170,7 +205,8 @@ class Nested(NamespacedMutableMapping):
             raise KeyError(f"Invalid key: {key}")
         if namespace is None:
             self.tree[key] = value
-        elif namespace not in self.namespaces():
+            return
+        if namespace not in self.tree:
             if not namespace.isidentifier():
                 raise KeyError(f"Invalid namespace: {namespace}")
             self.tree[namespace] = {}
@@ -203,6 +239,15 @@ class Nested(NamespacedMutableMapping):
             return self.tree[namespace].values()
         raise KeyError(f"Unknown namespace: {namespace}")
     
+    def flatten(self, cls=None):
+        plain_kvs = ((key, value) for key, value in self.tree.items() if not ismapping(value))
+        namespaced_kvs = iterchain(((self.pack_ns(nskey, namespace=key), nsvalue) for nskey, nsvalue in value.items()) \
+                                                                                  for key, value in self.tree.items() \
+                                                                                   if ismapping(value))
+        if cls is None:
+            cls = Flat
+        return cls(dictionary=dict(chain(plain_kvs, namespaced_kvs)))
+    
     def namespaces(self):
         return tuple(frozenset(key \
                for key, value in self.tree.items() \
@@ -231,16 +276,44 @@ def test():
     
     nested = Nested(tree=tree)
     
-    print("» KEYS:")
+    print("» (nested) KEYS:")
     pprint(tuple(nested.keys()))
     print()
     
-    print("» VALUES:")
+    print("» (nested) VALUES:")
     pprint(tuple(nested.values()))
     print()
     
-    print("» NAMESPACES:")
+    print("» (nested) NAMESPACES:")
     pprint(tuple(nested.namespaces()))
+    print()
+    
+    flat = nested.flatten()
+    
+    print("» (flat) KEYS:")
+    pprint(tuple(flat.keys()))
+    print()
+    
+    print("» (flat) VALUES:")
+    pprint(tuple(flat.values()))
+    print()
+    
+    print("» (flat) NAMESPACES:")
+    pprint(tuple(flat.namespaces()))
+    print()
+    
+    renestified = flat.nestify()
+    
+    print("» (renestified) KEYS:")
+    pprint(tuple(renestified.keys()))
+    print()
+    
+    print("» (renestified) VALUES:")
+    pprint(tuple(renestified.values()))
+    print()
+    
+    print("» (renestified) NAMESPACES:")
+    pprint(tuple(renestified.namespaces()))
     print()
     
 

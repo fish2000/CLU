@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import copy
 import toml
 
 from clu.constants.consts import PROJECT_NAME
@@ -15,13 +16,24 @@ toml_appname  = PROJECT_NAME
 toml_filename = f'{PROJECT_NAME}-config.toml'
 
 @export
-class TomlFile(FileBase, Flat, appname=toml_appname, filename=toml_filename):
+class TomlFile(FileBase, Nested, appname=toml_appname, filename=toml_filename):
+    
+    # def __init__(self, *args, **kwargs):
+    #     try:
+    #         super(TomlFile, self).__init__(*args, **kwargs)
+    #     except TypeError:
+    #         super(TomlFile, self).__init__()
+    #     for arg in args:
+    #         if isinstance(arg, Nested):
+    #             self.tree = copy.copy(arg.tree)
     
     def loads(self, text):
-        self.dictionary = toml.loads(text)
+        """ Load nested namespaced dictionary data from a TOML-encoded string """
+        self.tree = toml.loads(text)
     
     def dumps(self):
-        return toml.dumps(self.dictionary)
+        """ Dump a TOML-encoded string from nested namespaced dictionary data """
+        return toml.dumps(self.tree)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -48,7 +60,7 @@ def test():
     print(f"»       cls.filename = {toml_file.filename}")
     print()
     
-    print(f"»    self.dictionary = {toml_file.dictionary}")
+    print(f"»          self.tree = {toml_file.tree}")
     print(f"»      self.filepath = {toml_file.filepath}")
     print(f"»    self.filesuffix = {toml_file.filesuffix}")
     print()

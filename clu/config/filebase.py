@@ -11,7 +11,7 @@ from clu.constants.enums import System, SYSTEM
 from clu.config.base import AppName, NamespacedMutableMapping
 from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import TemporaryName, Directory
-from clu.predicates import tuplize
+from clu.predicates import isiterable, tuplize
 from clu.exporting import ValueDescriptor, Exporter
 
 exporter = Exporter(path=__file__)
@@ -22,15 +22,92 @@ class FileName(abc.ABC):
     
     @classmethod
     def __init_subclass__(cls, filename=None, **kwargs):
+        """ Transform the “filename” class-keyword into “filename” and “filesuffix”
+            read-only descriptor values
+        """
         super(FileName, cls).__init_subclass__(**kwargs)
         cls.filename = ValueDescriptor(filename)
         cls.filesuffix = ValueDescriptor((filename is not None) and \
                          os.path.splitext(filename)[1].lstrip(os.extsep) or None)
     
     def __init__(self, *args, **kwargs):
+        """ Stub __init__(…) method, throwing a lookup error for subclasses
+            upon which the “filename” value is None
+        """
         if type(self).filename is None:
             raise LookupError("Cannot instantiate a base config class "
                               "(filename is None)")
+    
+    @classmethod
+    def systems(cls):
+        """ Return a set of the valid “clu.constants.enums.System” enum members
+            for the current platform
+        """
+        out = { SYSTEM }
+        if SYSTEM is System.DARWIN:
+            out |= { System.LINUX2 }
+        return out
+    
+    @classmethod
+    def site_dirs(cls):
+        """ Return a set of “clu.fs.filesystem.Directory” instances pointing
+            to the filesystem locations of site- (aka system-) config directories
+        """
+        if 'XDG_CONFIG_DIRS' in os.environ:
+            xdgs = os.environ.get('XDG_CONFIG_DIRS')
+            dirs = (Directory(xdg) for xdg in xdgs.split(os.pathsep))
+            sdirs = set(d.subdirectory(PROJECT_NAME) for d in dirs)
+        else:
+            sdirs = set()
+        for system in cls.systems():
+            appdir = AppDirs(appname=cls.appname, system=system)
+            sdirs |= { appdir.site_config }
+        return sdirs
+    
+    @classmethod
+    def user_dirs(cls):
+        """ Return a set of “clu.fs.filesystem.Directory” instances pointing
+            to the filesystem locations of user-configuration directories
+        """
+        if 'XDG_CONFIG_HOME' in os.environ:
+            xdg = os.environ.get('XDG_CONFIG_HOME')
+            udirs = set(tuplize(Directory(xdg).subdirectory(PROJECT_NAME)))
+        else:
+            udirs = set()
+        for system in cls.systems():
+            appdir = AppDirs(appname=cls.appname, system=system)
+            udirs |= { appdir.user_config }
+        return udirs
+    
+    @classmethod
+    def find_file(cls, extra_site_dirs=None,
+                       extra_user_dirs=None):
+        """ Search available directories for the named file """
+        site_dirs = cls.site_dirs()
+        user_dirs = cls.user_dirs()
+        
+        if isiterable(extra_site_dirs):
+            site_dirs.update(extra_site_dirs)
+        if isiterable(extra_user_dirs):
+            user_dirs.update(extra_user_dirs)
+        
+        root_dir = None
+        # Search site directories first:
+        for site_dir in site_dirs:
+            if site_dir.exists:
+                if cls.filename in site_dir:
+                    root_dir = site_dir
+                    break
+        # Then search user directories:
+        for user_dir in user_dirs:
+            if user_dir.exists:
+                if cls.filename in user_dir:
+                    root_dir = user_dir
+                    break
+        if root_dir is None:
+            raise FileNotFoundError(f"Couldn’t find config file {cls.filename}")
+        return Directory(root_dir.realpath()).subpath(cls.filename)
+
 
 systems = { SYSTEM }
 if SYSTEM is System.DARWIN:
@@ -57,39 +134,35 @@ for system in systems:
 @export
 class FileBase(NamespacedMutableMapping, AppName, FileName):
     
-    @classmethod
-    def find_file(cls, site_dirs=site_dirs,
-                       user_dirs=user_dirs):
-        root_dir = None
-        # Search site directories first:
-        for site_dir in site_dirs:
-            if site_dir.exists:
-                if cls.filename in site_dir:
-                    root_dir = site_dir
-                    break
-        # Then search user directories:
-        for user_dir in user_dirs:
-            if user_dir.exists:
-                if cls.filename in user_dir:
-                    root_dir = user_dir
-                    break
-        if root_dir is None:
-            raise FileNotFoundError(f"Couldn’t find config file {cls.filename}")
-        return Directory(root_dir.realpath()).subpath(cls.filename)
-    
     def __init__(self, filepath=None, *args, **kwargs):
+        """ FileBase __init__(…):
+            
+            Keyword Arguments:
+                • filepath          (default: None)*
+                • extra_site_dirs   (default: None)
+                • extra_user_dirs   (default: None)
+            
+            * The “filepath” arg will be ignored if “FileName.find_file(…)”
+              returns a valid path to a file
+        """
+        extra_site_dirs = kwargs.pop('extra_site_dirs', None)
+        extra_user_dirs = kwargs.pop('extra_user_dirs', None)
         try:
             super(FileBase, self).__init__(*args, **kwargs)
         except TypeError:
             super(FileBase, self).__init__()
         try:
-            self.filepath = type(self).find_file()
+            self.filepath = type(self).find_file(extra_site_dirs=extra_site_dirs,
+                                                 extra_user_dirs=extra_user_dirs)
         except FileNotFoundError:
             self.filepath = filepath
         if self.filepath is not None:
             self.load()
     
     def load(self, filepath=None):
+        """ Load from a file, either from a specified “filepath,” or
+            from the internally-discovered path to the configuration file
+        """
         if filepath is None:
             filepath = self.filepath
         if filepath is None:
@@ -100,9 +173,15 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
     
     @abstract
     def loads(self, text):
+        """ Load a datatype-specific namespaced dictionary from
+            arbitrary encoded string data
+        """
         ...
     
     def dump(self, filepath=None):
+        """ Dump to a file, either to the specified “filepath,” or
+            to the internally-discovered path to the configuration file
+        """
         if filepath is None:
             filepath = self.filepath
         if filepath is None:
@@ -120,6 +199,9 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
     
     @abstract
     def dumps(self):
+        """ Dump a datatype-specific encoded string data out from
+            the internal namespaced dictionary
+        """
         ...
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

@@ -8,7 +8,7 @@ import abc
 
 abstract = abc.abstractmethod
 
-from clu.constants.consts import PROJECT_NAME, NoDefault
+from clu.constants.consts import NoDefault
 from clu.typology import ismapping
 from clu.exporting import ValueDescriptor, Exporter
 
@@ -18,12 +18,20 @@ export = exporter.decorator()
 NAMESPACE_SEP = ':'
 
 @export
-class Base(abc.ABC):
+class AppName(abc.ABC):
     
     @classmethod
     def __init_subclass__(cls, appname=None, **kwargs):
-        super(Base, cls).__init_subclass__(**kwargs)
+        super(AppName, cls).__init_subclass__(**kwargs)
         cls.appname = ValueDescriptor(appname)
+    
+    def __init__(self, *args, **kwargs):
+        if type(self).appname is None:
+            raise LookupError("Cannot instantiate a base config class "
+                              "(appname is None)")
+
+@export
+class NamespacedMutableMapping(abc.ABC):
     
     @staticmethod
     def unpack_ns(string):
@@ -36,10 +44,6 @@ class Base(abc.ABC):
         if namespace is None:
             return string
         return NAMESPACE_SEP.join((namespace, string))
-    
-    def __init__(self, *args, **kwargs):
-        if type(self).appname is None:
-            raise LookupError("Cannot instantiate a base config class")
     
     @abstract
     def get(self, key, namespace=None, default=NoDefault):
@@ -75,6 +79,9 @@ class Base(abc.ABC):
         for key, value in updates.items():
             self[key] = value
     
+    def __iter__(self):
+        return iter(self.keys())
+    
     def __len__(self):
         return len(self.keys())
     
@@ -103,13 +110,48 @@ class Base(abc.ABC):
         return len(self.keys()) > 0
 
 @export
-class NestedBase(Base):
+class Flat(NamespacedMutableMapping):
+    
+    def __init__(self, dictionary=None, *args, **kwargs):
+        try:
+            super(Flat, self).__init__(*args, **kwargs)
+        except TypeError:
+            super(Flat, self).__init__()
+        self.dictionary = dictionary or {}
+    
+    def get(self, key, namespace=None, default=NoDefault):
+        nskey = self.pack_ns(key, namespace=namespace)
+        if default is NoDefault:
+            return self.dictionary.get(nskey)
+        return self.dictionary.get(nskey, default)
+    
+    def set(self, key, value, namespace=None):
+        nskey = self.pack_ns(key, namespace=namespace)
+        self.dictionary[nskey] = value
+    
+    def delete(self, key, namespace=None):
+        nskey = self.pack_ns(key, namespace=namespace)
+        del self.dictionary[nskey]
+    
+    def keys(self, namespace=None):
+        return self.dictionary.keys()
+    
+    def values(self, namespace=None):
+        return self.dictionary.values()
+    
+    def namespaces(self):
+        return tuple(frozenset(self.unpack_ns(key)[0] \
+                    for key in self.dictionary.keys() \
+                     if NAMESPACE_SEP in key))
+
+@export
+class Nested(NamespacedMutableMapping):
     
     def __init__(self, tree=None, *args, **kwargs):
         try:
-            super(NestedBase, self).__init__(*args, **kwargs)
+            super(Nested, self).__init__(*args, **kwargs)
         except TypeError:
-            super(NestedBase, self).__init__()
+            super(Nested, self).__init__()
         self.tree = tree or {}
     
     def get(self, key, namespace=None, default=NoDefault):
@@ -117,23 +159,27 @@ class NestedBase(Base):
             if default is NoDefault:
                 return self.tree.get(key)
             return self.tree.get(key, default)
-        if namespace in self.namespaces():
+        elif namespace in self.namespaces():
             if default is NoDefault:
                 return self.tree[namespace].get(key)
             return self.tree[namespace].get(key, default)
         raise KeyError(f"Unknown namespace: {namespace}")
     
     def set(self, key, value, namespace=None):
+        if not key.isidentifier():
+            raise KeyError(f"Invalid key: {key}")
         if namespace is None:
             self.tree[key] = value
-        if namespace not in self.namespaces():
+        elif namespace not in self.namespaces():
+            if not namespace.isidentifier():
+                raise KeyError(f"Invalid namespace: {namespace}")
             self.tree[namespace] = {}
         self.tree[namespace][key] = value
     
     def delete(self, key, namespace=None):
         if namespace is None:
             del self.tree[key]
-        if namespace in self.namespaces():
+        elif namespace in self.namespaces():
             del self.tree[namespace][key]
         raise KeyError(f"Unknown namespace: {namespace}")
     
@@ -144,7 +190,7 @@ class NestedBase(Base):
                                                                    for key, value in self.tree.items() \
                                                                     if ismapping(value))
             return chain(keys, nskeys)
-        if namespace in self.namespaces():
+        elif namespace in self.namespaces():
             return self.tree[namespace].keys()
         raise KeyError(f"Unknown namespace: {namespace}")
     
@@ -153,16 +199,14 @@ class NestedBase(Base):
             values = (value for value in self.tree.values() if not ismapping(value))
             nsvalues = iterchain(value.values() for value in self.tree.values() if ismapping(value))
             return chain(values, nsvalues)
-        if namespace in self.namespaces():
+        elif namespace in self.namespaces():
             return self.tree[namespace].values()
         raise KeyError(f"Unknown namespace: {namespace}")
     
     def namespaces(self):
-        return tuple(frozenset(key for key, value in self.tree.items() if ismapping(value)))
-
-@export
-class Nested(NestedBase, appname=PROJECT_NAME):
-    pass
+        return tuple(frozenset(key \
+               for key, value in self.tree.items() \
+                if ismapping(value)))
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -174,6 +218,7 @@ def test():
         'yo'        : "dogg",
         'i_heard'   : "you like",
         'nested'    : "dicts",
+        'so'        : "we put dicts in your dicts",
         
         'wat'       : { 'yo'        : "dogggggg",
                         'yoyo'      : "dogggggggggg" },

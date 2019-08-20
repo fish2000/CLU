@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 
 from clu.constants.consts import PROJECT_NAME, NoDefault
-from clu.config.base import Base, NAMESPACE_SEP
+from clu.config.base import AppName, NamespacedMutableMapping, NAMESPACE_SEP
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -13,12 +13,14 @@ export = exporter.decorator()
 PREFIX_SEP = '_'
 
 @export
-class EnvBase(Base):
+class EnvBase(NamespacedMutableMapping, AppName):
     
     @classmethod
     def prefix(cls, namespace=None):
         if not namespace:
             return cls.appname.upper() + PREFIX_SEP
+        if not str(namespace).isidentifier():
+            raise KeyError(f"Invalid namespace: {namespace!s}")
         return cls.appname.upper() + PREFIX_SEP + \
             str(namespace).upper() + PREFIX_SEP
     
@@ -49,6 +51,8 @@ class EnvBase(Base):
             return default
     
     def set(self, key, value, namespace=None):
+        if not key.isidentifier():
+            raise KeyError(f"Invalid key: {key}")
         self.environment[type(self).envkey(key, namespace)] = value
     
     def delete(self, key, namespace=None):

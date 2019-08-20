@@ -10,6 +10,7 @@ import abc
 abstract = abc.abstractmethod
 
 from clu.constants.consts import NoDefault
+from clu.naming import nameof
 from clu.typology import ismapping
 from clu.exporting import ValueDescriptor, Exporter
 
@@ -109,7 +110,7 @@ class NamespacedMutableMapping(abc.ABC):
         return iter(self.keys())
     
     def __len__(self):
-        return len(self.keys())
+        return len(tuple(self.keys()))
     
     def __contains__(self, key):
         ns, string = self.unpack_ns(key)
@@ -143,7 +144,7 @@ class Flat(NamespacedMutableMapping):
             super(Flat, self).__init__(*args, **kwargs)
         except TypeError:
             super(Flat, self).__init__()
-        self.dictionary = dictionary or {}
+        self.dictionary = dict(dictionary or {})
     
     def get(self, key, namespace=None, default=NoDefault):
         nskey = self.pack_ns(key, namespace=namespace)
@@ -185,6 +186,12 @@ class Flat(NamespacedMutableMapping):
     
     def clone(self):
         return type(self)(dictionary=copy(self.dictionary))
+    
+    def __repr__(self):
+        cnm = nameof(type(self))
+        dic = repr(self.dictionary)
+        hxa = hex(id(self))
+        return f"{cnm}({dic}) @ {hxa}"
 
 
 @export
@@ -195,7 +202,7 @@ class Nested(NamespacedMutableMapping):
             super(Nested, self).__init__(*args, **kwargs)
         except TypeError:
             super(Nested, self).__init__()
-        self.tree = tree or {}
+        self.tree = dict(tree or {})
     
     def get(self, key, namespace=None, default=NoDefault):
         if namespace is None:
@@ -263,6 +270,12 @@ class Nested(NamespacedMutableMapping):
     
     def clone(self):
         return type(self)(tree=copy(self.tree))
+    
+    def __repr__(self):
+        cnm = nameof(type(self))
+        dic = repr(self.tree)
+        hxa = hex(id(self))
+        return f"{cnm}({dic}) @ {hxa}"
 
 export(NAMESPACE_SEP, name='NAMESPACE_SEP')
 
@@ -313,6 +326,10 @@ def test():
     pprint(tuple(flat.namespaces()))
     print()
     
+    print("» (flat) __repr__:")
+    pprint(flat)
+    print()
+    
     renestified = flat.nestify()
     
     print("» (renestified) KEYS:")
@@ -325,6 +342,10 @@ def test():
     
     print("» (renestified) NAMESPACES:")
     pprint(tuple(renestified.namespaces()))
+    print()
+    
+    print("» (renestified) __repr__:")
+    pprint(renestified)
     print()
     
 

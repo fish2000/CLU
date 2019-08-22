@@ -22,6 +22,6 @@ organization = 'Objects In Space And Time, LLC'
 
 [debugging]
 debug = true
-loggging = true
+logging = true
 logdir = "/usr/local/var/run/clu"
 

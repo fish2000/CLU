@@ -83,7 +83,7 @@ always = lambda thing: True
 never = lambda thing: False
 nuhuh = lambda thing: None
 
-no_op     = lambda thing, atx, default=None: thing
+no_op     = lambda thing, atx=None, default=None: thing
 or_none   = lambda thing, atx: getattr(thing, atx, None)
 stor_none = lambda thing, atx: getattr_static(thing, atx, None)
 getpyattr = lambda thing, atx, default=None: getattr(thing, f'__{atx}__', default)

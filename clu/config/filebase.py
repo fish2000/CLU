@@ -12,6 +12,7 @@ from clu.config.base import AppName, NamespacedMutableMapping
 from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import TemporaryName, Directory
 from clu.predicates import isiterable, tuplize
+from clu.typology import isvalidpath
 from clu.exporting import ValueDescriptor, Exporter
 
 exporter = Exporter(path=__file__)
@@ -80,9 +81,10 @@ class FileName(abc.ABC):
         return udirs
     
     @classmethod
-    def find_file(cls, extra_site_dirs=None,
-                       extra_user_dirs=None):
+    def find_file(cls, filename=None, *, extra_site_dirs=None,
+                                         extra_user_dirs=None):
         """ Search available directories for the named file """
+        file_name = filename or cls.filename
         site_dirs = cls.site_dirs()
         user_dirs = cls.user_dirs()
         
@@ -95,18 +97,18 @@ class FileName(abc.ABC):
         # Search site directories first:
         for site_dir in site_dirs:
             if site_dir.exists:
-                if cls.filename in site_dir:
+                if file_name in site_dir:
                     root_dir = site_dir
                     break
         # Then search user directories:
         for user_dir in user_dirs:
             if user_dir.exists:
-                if cls.filename in user_dir:
+                if file_name in user_dir:
                     root_dir = user_dir
                     break
         if root_dir is None:
-            raise FileNotFoundError(f"Couldn’t find config file {cls.filename}")
-        return Directory(root_dir.realpath()).subpath(cls.filename)
+            raise FileNotFoundError(f"Couldn’t find config file {file_name}")
+        return Directory(root_dir.realpath()).subpath(file_name)
 
 
 systems = { SYSTEM }
@@ -139,24 +141,30 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
             
             Keyword Arguments:
                 • filepath          (default: None)*
+                • filename          (default: None)
                 • extra_site_dirs   (default: None)
                 • extra_user_dirs   (default: None)
             
             * The “filepath” arg will be ignored if “FileName.find_file(…)”
               returns a valid path to a file
         """
+        filename        = kwargs.pop('filename', None)
         extra_site_dirs = kwargs.pop('extra_site_dirs', None)
         extra_user_dirs = kwargs.pop('extra_user_dirs', None)
+        
         try:
             super(FileBase, self).__init__(*args, **kwargs)
         except TypeError:
             super(FileBase, self).__init__()
+        
         try:
-            self.filepath = type(self).find_file(extra_site_dirs=extra_site_dirs,
-                                                 extra_user_dirs=extra_user_dirs)
+            self.filepath = type(self).find_file(filename=filename,
+                                                 extra_user_dirs=extra_user_dirs,
+                                                 extra_site_dirs=extra_site_dirs)
         except FileNotFoundError:
             self.filepath = filepath
-        if self.filepath is not None:
+        
+        if isvalidpath(self.filepath):
             self.load()
     
     def load(self, filepath=None):
@@ -165,10 +173,12 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
         """
         if filepath is None:
             filepath = self.filepath
-        if filepath is None:
-            return
+        if not isvalidpath(filepath):
+            raise FileNotFoundError("No valid filepath available for load()")
+        
         with open(filepath, "r") as handle:
             filetext = handle.read()
+        
         return self.loads(filetext)
     
     @abstract
@@ -185,16 +195,19 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
         if filepath is None:
             filepath = self.filepath
         if filepath is None:
-            return ''
+            raise FileNotFoundError("No valid filepath available for dump()")
+        
         text = self.dumps()
         if not text:
             return text
+        
         with TemporaryName(prefix="filebase-dump-",
                            suffix=type(self).filesuffix,
                            randomized=True) as tdmp:
             assert tdmp.write(text)
             assert tdmp.copy(filepath)
-        assert os.path.exists(filepath)
+        
+        assert isvalidpath(filepath)
         return text
     
     @abstract
@@ -209,6 +222,20 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     from pprint import pprint
+    
+    class Context(object):
+        
+        with open('/tmp/yodogg.txt', 'w') as write_handle:
+            write_handle.write("Yo dogg.")
+            write_handle.flush()
+        
+        with open('/tmp/yodogg.txt', 'r') as read_handle:
+            contextualized = read_handle.read()
+    
+    ctx = Context()
+    print("» CONTEXTUALIZED:")
+    print(ctx.contextualized)
+    print()
     
     print("» SITE DIRS:")
     pprint(site_dirs)

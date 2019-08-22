@@ -6,6 +6,7 @@ from itertools import chain
 iterchain = chain.from_iterable
 
 import abc
+import collections.abc
 
 abstract = abc.abstractmethod
 
@@ -39,7 +40,8 @@ class AppName(abc.ABC):
                               "(appname is None)")
 
 @export
-class NamespacedMutableMapping(abc.ABC):
+class NamespacedMutableMapping(collections.abc.MutableMapping,
+                               collections.abc.Collection):
     
     @staticmethod
     def unpack_ns(string):
@@ -180,9 +182,9 @@ class Flat(NamespacedMutableMapping):
         return out
     
     def namespaces(self):
-        return tuple(frozenset(self.unpack_ns(key)[0] \
-                    for key in self.dictionary.keys() \
-                     if NAMESPACE_SEP in key))
+        return tuple(sorted(frozenset(self.unpack_ns(key)[0] \
+                           for key in self.dictionary.keys() \
+                            if NAMESPACE_SEP in key)))
     
     def clone(self):
         return type(self)(dictionary=copy(self.dictionary))
@@ -264,9 +266,9 @@ class Nested(NamespacedMutableMapping):
         return cls(dictionary=dict(chain(plain_kvs, namespaced_kvs)))
     
     def namespaces(self):
-        return tuple(frozenset(key \
+        return tuple(sorted(frozenset(key \
                for key, value in self.tree.items() \
-                if ismapping(value)))
+                if ismapping(value))))
     
     def clone(self):
         return type(self)(tree=copy(self.tree))
@@ -324,6 +326,10 @@ def test():
     
     print("» (flat) NAMESPACES:")
     pprint(tuple(flat.namespaces()))
+    print()
+    
+    print("» (flat) dictionary:")
+    pprint(flat.dictionary)
     print()
     
     print("» (flat) __repr__:")

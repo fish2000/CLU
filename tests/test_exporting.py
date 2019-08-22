@@ -69,7 +69,7 @@ class TestExporting(object):
             assert Exporter[modname].path == module.__file__
             assert Exporter[modname].dotpath == path_to_dotpath(module.__file__,
                                                                 relative_to=BASEPATH)
-            assert Exporter[modname].all_tuple() == module.__all__
+            assert set(Exporter[modname].all_tuple()).issubset(module.__all__)
     
     def test_combine_real_world_exporters_2(self):
         from clu.predicates import exporter as exporter0

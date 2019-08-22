@@ -618,15 +618,15 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
         """
         return self.export
     
-    def all_tuple(self):
+    def all_tuple(self, *additionals):
         """ For use in module `__all__` tuple definitions """
-        return tuple(self.keys())
+        return tuple(self.keys()) + tuple(additionals)
     
-    def dir_function(self):
+    def dir_function(self, *additionals):
         """ Return a list containing the exported module names. """
-        return lambda: list(self.keys())
+        return lambda: list(tuple(self.keys()) + tuple(additionals))
     
-    def all_and_dir(self):
+    def all_and_dir(self, *additionals):
         """ Assign a modules’ __all__ and __dir__ values, e.g.:
             
                 __all__, __dir__ = exporter.all_and_dir()
@@ -635,9 +635,10 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
             all calls to `exporter.export(…)` (aka @export) have
             been made – q.v. the “decorator()” method supra.
         """
-        return self.all_tuple(), self.dir_function()
+        return self.all_tuple(*additionals), \
+               self.dir_function(*additionals)
     
-    def dir_and_all(self):
+    def dir_and_all(self, *additionals):
         """ Assign a modules’ __dir__ and __all__ values, e.g.:
             
                 __dir__, __all__ = exporter.dir_and_all()
@@ -646,7 +647,8 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
             all calls to `exporter.export(…)` (aka @export) have
             been made – q.v. the “decorator()” method supra.
         """
-        return self.dir_function(), self.all_tuple() # OPPOSITE!
+        return self.dir_function(*additionals), \
+               self.all_tuple(*additionals) # OPPOSITE!
     
     @staticmethod
     def cache_info():

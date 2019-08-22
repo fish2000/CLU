@@ -57,8 +57,6 @@ class TestConfig(object):
         assert renestified == flat
         assert flat == nested
         assert renestified == nested
-        
-        nested['wat:thefuck'] = 'IS GOING ON'
     
     def test_FlatOrderedSet(self):
         from clu.config.fieldtypes import FlatOrderedSet

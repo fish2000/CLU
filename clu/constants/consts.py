@@ -69,6 +69,10 @@ PY3 = sys.version_info.major > 2
 # Determine if we’re on PyPy:
 PYPY = hasattr(sys, 'pypy_version_info')
 
+# A float representation of the Python version:
+PYTHON_VERSION = float("%s%s%s" % (sys.version_info.major, os.extsep,
+                                   sys.version_info.minor))
+
 # Qualifier for qualified-name operations:
 QUALIFIER = sys.intern(os.extsep)
 
@@ -136,6 +140,7 @@ __all__ = ('BASEPATH',
            'PARTIAL', 'φ',
            'PROJECT_NAME', 'PROJECT_PATH',
            'PY3', 'PYPY',
+           'PYTHON_VERSION',
            'QUALIFIER',
            'SEPARATOR_WIDTH',
            'SINGLETON_TYPES',

@@ -12,9 +12,8 @@ from clu.constants.consts import DEBUG, NoDefault
 from clu.config.base import NAMESPACE_SEP
 from clu.fs.misc import stringify, wrap_value
 from clu.naming import nameof
-from clu.predicates import (negate,
-                            isclasstype, always, no_op,
-                            haspyattr, getpyattr,
+from clu.predicates import (negate, isclasstype,
+                            getpyattr, always, no_op,
                             uncallable, isexpandable, iscontainer,
                             tuplize, slots_for)
 from clu.typology import ismapping, isnumber, isstring
@@ -28,16 +27,6 @@ class ValidationError(Exception):
     pass
 
 hoist = lambda thing: uncallable(thing) and wrap_value(thing) or thing
-
-# functional_and = lambda thing, *functions: all(function(thing) \
-#                                            for function in functions
-#                                             if function is not None)
-#
-# def functional_set(thing, *functions):
-#     for function in functions:
-#         if function is not None:
-#             thing = function(thing)
-#     return thing
 
 @export
 class FlatOrderedSet(collections.abc.Set,
@@ -54,14 +43,15 @@ class FlatOrderedSet(collections.abc.Set,
         if len(things) == 1:
             if isexpandable(things[0]):
                 things = things[0]
-            if iscontainer(things[0]):
+            elif iscontainer(things[0]):
                 things = tuple(things[0])
         for thing in things:
             if thing is not None:
                 if isinstance(thing, type(self)):
                     for other in thing.things:
-                        if other not in thinglist:
-                            thinglist.append(other)
+                        if predicate(other):
+                            if other not in thinglist:
+                                thinglist.append(other)
                 elif predicate(thing):
                     if thing not in thinglist:
                         thinglist.append(thing)
@@ -164,11 +154,11 @@ class FieldBase(abc.ABC, metaclass=Slotted):
         except (TypeError, ValueError, ValidationError) as exc:
             raise ValidationError(f"Extraction failue in “{self.name}”: {exc}")
         
-        if not self.validator(value):
-            raise ValidationError(f"Validation failue in “{self.name}”")
+        if not (value is None and self.allow_none):
+            if not self.validator(value):
+                raise ValidationError(f"Validation failue in “{self.name}”: {self.validator!r}")
         
         # Set and return:
-        # getpyattr(instance, 'fields')[self.name] = value
         getpyattr(instance, 'fields').set(self.name, value,
                                 namespace=self.namespace)
         return value
@@ -292,7 +282,7 @@ class UIntField(IntField):
         
         super(UIntField, self).__init__(default=default or 0,
                                         validator=functional_and(validator,
-                                                                 lambda thing: thing > 0),
+                                                                 lambda thing: thing >= 0),
                                         extractor=extractor,
                                         allow_none=allow_none,
                                         min_value=min_value or 0,
@@ -403,9 +393,7 @@ class NamespaceContext(contextlib.AbstractContextManager,
 def field(method):
     @wraps(method)
     def namespacer(self, *args, **kwargs):
-        # cls = globals()[f"{method.__name__}Field"]
-        cls = method(self)
-        instance = cls(*args, **kwargs)
+        instance = method(self)(*args, **kwargs)
         instance.namespace = self.namespace
         return instance
     return namespacer
@@ -429,7 +417,7 @@ class NamespacedFieldManager(object):
     
     @property
     def namespace(self):
-        return NAMESPACE_SEP.join(self.namespace_stack)
+        return NAMESPACE_SEP.join(self.namespace_stack) or None
     
     def __len__(self):
         return len(self.namespace_stack)
@@ -503,3 +491,65 @@ export(istimedelta,     name='istimedelta', doc="istimedelta(thing) → boolean 
 # Assign the modules’ `__all__` using the exporter:
 __all__ = exporter.all_tuple('fields')
 __dir__ = lambda: list(__all__)
+
+def test():
+    from pprint import pprint
+    from clu.config.base import Nested
+    import os
+    
+    yodogg_file = '/tmp/yodogg.txt'
+    
+    class SampleContext(object):
+        
+        with open(yodogg_file, 'w') as write_handle:
+            write_handle.write("Yo dogg.")
+            write_handle.flush()
+        
+        with open(yodogg_file, 'r') as read_handle:
+            contextualized = read_handle.read()
+    
+    sampctx = SampleContext()
+    print("» SAMPLE:")
+    print(sampctx.contextualized)
+    print()
+    
+    os.unlink(yodogg_file)
+    
+    fields = NamespacedFieldManager()
+    
+    class Context(object):
+        
+        __fields__ = Nested()
+        
+        yo = fields.String("«yo»")
+        dogg = fields.String("«yo»")
+        
+        print("NAMESPACE [0]:", fields.namespace)
+        
+        with fields.ns("iheard"):
+            
+            yodogg = fields.String()
+            youlike = fields.String()
+            
+            print("NAMESPACE [1]:", fields.namespace)
+        
+        print("NAMESPACE [0]:", fields.namespace)
+        
+        with fields.ns("so"):
+            
+            weput = fields.Int(0)
+            some = fields.UInt(0)
+            
+            print("NAMESPACE [1]:", fields.namespace)
+        
+        print("NAMESPACE [0]:", fields.namespace)
+    
+    ctx = Context()
+    print("» CONTEXTUALIZED:")
+    pprint(ctx.__fields__)
+    print()
+    
+    
+
+if __name__ == '__main__':
+    test()

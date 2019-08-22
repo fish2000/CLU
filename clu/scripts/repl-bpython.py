@@ -15,6 +15,7 @@ from clu.constants.consts import (BASEPATH,
                                   PARTIAL, φ,
                                   PROJECT_NAME, PROJECT_PATH,
                                   PY3, PYPY,
+                                  PYTHON_VERSION,
                                   QUALIFIER,
                                   SEPARATOR_WIDTH,
                                   SINGLETON_TYPES,
@@ -127,6 +128,11 @@ from clu.naming import (determine_module, nameof, moduleof,
 from clu.config.base import NamespacedMutableMapping, Flat, Nested
 from clu.config.env import Env
 from clu.config.filebase import FileName, FileBase
+from clu.config.fieldtypes import ValidationError, hoist, FlatOrderedSet
+from clu.config.fieldtypes import functional_and, functional_set
+from clu.config.fieldtypes import FieldBase
+from clu.config.fieldtypes import fields
+from clu.config.settings import Schema
 from clu.config.tomlfile import TomlFile
 
 from clu.csv import pad_csv
@@ -239,6 +245,7 @@ __all__ = ('Image',
            'PARTIAL', 'φ',
            'PROJECT_NAME', 'PROJECT_PATH',
            'PY3', 'PYPY',
+           'PYTHON_VERSION',
            'QUALIFIER',
            'SEPARATOR_WIDTH',
            'SINGLETON_TYPES',
@@ -334,6 +341,9 @@ __all__ = ('Image',
            'split_abbreviations',
            'NamespacedMutableMapping', 'Flat', 'Nested',
            'Env', 'FileName', 'FileBase', 'TomlFile',
+           'ValidationError', 'hoist', 'FlatOrderedSet',
+           'functional_and', 'functional_set',
+           'FieldBase', 'fields',
            'pad_csv',
            'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',

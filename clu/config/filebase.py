@@ -223,20 +223,6 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     from pprint import pprint
     
-    class Context(object):
-        
-        with open('/tmp/yodogg.txt', 'w') as write_handle:
-            write_handle.write("Yo dogg.")
-            write_handle.flush()
-        
-        with open('/tmp/yodogg.txt', 'r') as read_handle:
-            contextualized = read_handle.read()
-    
-    ctx = Context()
-    print("» CONTEXTUALIZED:")
-    print(ctx.contextualized)
-    print()
-    
     print("» SITE DIRS:")
     pprint(site_dirs)
     print()

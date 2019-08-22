@@ -225,7 +225,7 @@ class Nested(NamespacedMutableMapping):
             return
         if namespace not in self.tree:
             if not namespace.isidentifier():
-                raise KeyError(f"Invalid namespace: {namespace}")
+                raise KeyError(f"Invalid namespace: “{namespace}”")
             self.tree[namespace] = {}
         self.tree[namespace][key] = value
     

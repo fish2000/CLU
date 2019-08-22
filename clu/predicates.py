@@ -101,6 +101,18 @@ def resolve(thing, atx):
         thing = or_none(thing, atn)
     return thing
 
+@export
+def stresolve(thing, atx):
+    """ stresolve(thing, atx) → statically retrieve and resolve an attribute,
+        following each dotted segment, back from its host thing.
+        
+        Q.v. the standard library “operator” module notes supra.:
+            https://docs.python.org/3/library/operator.html#operator.attrgetter
+    """
+    for atn in atx.split(QUALIFIER):
+        thing = stor_none(thing, atn)
+    return thing
+
 accessor = lambda function, thing, *attrs, default=None: ([atx for atx in (function(thing, atx) \
                                                                for atx in attrs) \
                                                                 if atx is not None] or [default]).pop(0)
@@ -118,22 +130,22 @@ collator = lambda function, xatx, *things, default=tuple(): tuple(atx for atx in
                                                                        if atx is not None) or default
 
 attr     = lambda thing, *attrs, default=None: accessor(resolve,   thing, *attrs, default=default)
-stattr   = lambda thing, *attrs, default=None: accessor(stor_none, thing, *attrs, default=default)
+stattr   = lambda thing, *attrs, default=None: accessor(stresolve, thing, *attrs, default=default)
 pyattr   = lambda thing, *attrs, default=None: accessor(getpyattr, thing, *attrs, default=default)
 item     = lambda thing, *items, default=None: accessor(getitem,   thing, *items, default=default)
 
 attrs    = lambda thing, *attrs, default=tuple(): acquirer(resolve,   thing, *attrs, default=default)
-stattrs  = lambda thing, *attrs, default=tuple(): acquirer(stor_none, thing, *attrs, default=default)
+stattrs  = lambda thing, *attrs, default=tuple(): acquirer(stresolve, thing, *attrs, default=default)
 pyattrs  = lambda thing, *attrs, default=tuple(): acquirer(getpyattr, thing, *attrs, default=default)
 items    = lambda thing, *items, default=tuple(): acquirer(getitem,   thing, *items, default=default)
 
 attr_search   = lambda atx, *things, default=None: searcher(resolve,   atx, *things, default=default)
-stattr_search = lambda atx, *things, default=None: searcher(stor_none, atx, *things, default=default)
+stattr_search = lambda atx, *things, default=None: searcher(stresolve, atx, *things, default=default)
 pyattr_search = lambda atx, *things, default=None: searcher(getpyattr, atx, *things, default=default)
 item_search   = lambda itx, *things, default=None: searcher(getitem,   itx, *things, default=default)
 
 attr_across   = lambda atx, *things, default=tuple(): collator(resolve,   atx, *things, default=default)
-stattr_across = lambda atx, *things, default=tuple(): collator(stor_none, atx, *things, default=default)
+stattr_across = lambda atx, *things, default=tuple(): collator(stresolve, atx, *things, default=default)
 pyattr_across = lambda atx, *things, default=tuple(): collator(getpyattr, atx, *things, default=default)
 item_across   = lambda itx, *things, default=tuple(): collator(getitem,   itx, *things, default=default)
 

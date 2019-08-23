@@ -93,7 +93,7 @@ class Schema(abc.ABC, metaclass=MetaSchema):
                     logging = fields.Boolean(False)
                     logdir = fields.String(f"/usr/local/var/log/{appname.default.lower()}")
                 
-                with fields.ns("concurrency")
+                with fields.ns("concurrency"):
                     
                     processes = fields.UInt(os.cpu_count())
                     threads = fields.UInt(os.cpu_count() * 4)
@@ -225,7 +225,6 @@ class Schema(abc.ABC, metaclass=MetaSchema):
                 for v in value:
                     if hasattr(v, 'validate'):
                         v.validate()
-
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

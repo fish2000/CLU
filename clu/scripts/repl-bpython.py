@@ -134,10 +134,6 @@ from clu.config.fieldtypes import FieldBase
 from clu.config.fieldtypes import fields
 from clu.config.settings import Schema
 from clu.config.formats import JsonFile, PickleFile, TomlFile, YamlFile
-# from clu.config.jsonfile import JsonFile
-# from clu.config.picklefile import PickleFile
-# from clu.config.tomlfile import TomlFile
-# from clu.config.yamlfile import YamlFile
 
 from clu.csv import pad_csv
 from clu.dicts import merge_two, merge_as, merge, asdict

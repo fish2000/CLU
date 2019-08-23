@@ -6,9 +6,11 @@ from functools import wraps
 import abc
 import collections.abc
 import contextlib
+import os
 import weakref
 
 from clu.constants.consts import DEBUG, NoDefault
+from clu.constants.polyfills import Path
 from clu.config.base import NAMESPACE_SEP
 from clu.fs.misc import stringify, wrap_value
 from clu.naming import nameof
@@ -16,7 +18,7 @@ from clu.predicates import (negate, isclasstype,
                             getpyattr, always, no_op,
                             uncallable, isexpandable, iscontainer,
                             tuplize, slots_for)
-from clu.typology import ismapping, isnumber, isstring
+from clu.typology import ismapping, isnumber, isstring, ispath, isvalidpath
 from clu.exporting import Slotted, Exporter
 
 exporter = Exporter(path=__file__)
@@ -257,6 +259,10 @@ class FieldBase(abc.ABC, metaclass=Slotted):
     def __set_name__(self, cls, name):
         self.name = name
     
+    def get_default(self):
+        """ Ensure our default value is callable – and then call it: """
+        return hoist(self.default)()
+    
     def __get__(self, instance, cls=None):
         if instance is None:
             return self
@@ -371,6 +377,40 @@ class StringField(FieldBase):
             if len(out) <= self.max_length:
                 raise ValidationError(f"Validation failure in {nameof(type(self))}: len(string) > max_length")
         return out
+
+@export
+class PathField(StringField):
+    
+    __slots__ = tuplize('requisite')
+    
+    def __init__(self, default=None,
+                       validator=None,
+                       extractor=None,
+                       allow_none=True,
+                       requisite=False,
+                       min_length=None,
+                       max_length=None):
+        
+        """ Initialize a PathField – used to hold objects representing filesystem paths. """
+        
+        if requisite:
+            allow_none = False
+        
+        super(PathField, self).__init__(default=default,
+                                        validator=functional_and(validator,
+                                                                 requisite and isvalidpath or ispath),
+                                        extractor=functional_set(extractor, os.fspath),
+                                        allow_none=allow_none,
+                                        min_length=min_length,
+                                        max_length=max_length)
+        
+        self.requisite = requisite
+    
+    def __get__(self, instance, cls=None):
+        if instance is None:
+            return self
+        out = super(PathField, self).__get__(instance, cls)
+        return out and Path(out) or None
 
 @export
 class IntField(FieldBase):
@@ -550,11 +590,11 @@ class DateTimeField(FieldBase):
         
         """ Initialize a DateTimeField – used to hold instances of “datetime.datetime”. """
         
-        super(BooleanField, self).__init__(default=default,
-                                           validator=functional_and(validator,
-                                                                    isdatetime),
-                                           extractor=extractor,
-                                           allow_none=False)
+        super(DateTimeField, self).__init__(default=default,
+                                            validator=functional_and(validator,
+                                                                     isdatetime),
+                                            extractor=extractor,
+                                            allow_none=False)
 
 @export
 class TimeDeltaField(FieldBase):
@@ -566,11 +606,215 @@ class TimeDeltaField(FieldBase):
         
         """ Initialize a TimeDeltaField – used to hold instances of “datetime.timedelta”. """
         
-        super(BooleanField, self).__init__(default=default,
-                                           validator=functional_and(validator,
-                                                                    istimedelta),
-                                           extractor=extractor,
-                                           allow_none=False)
+        super(TimeDeltaField, self).__init__(default=default,
+                                             validator=functional_and(validator,
+                                                                      istimedelta),
+                                             extractor=extractor,
+                                             allow_none=False)
+
+@export
+class ListField(FieldBase):
+    
+    def __init__(self, default=list,
+                       value=None,
+                       validator=None,
+                       extractor=None):
+        
+        super(ListField, self).__init__(default=default,
+                                        validator=validator,
+                                        extractor=extractor,
+                                        allow_none=False)
+        
+        if value is not None and not isinstance(value, FieldBase):
+            raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
+        
+        self.value = value
+    
+    def __set__(self, instance, value):
+        from clu.config.settings import Schema
+        
+        if value is None:
+            value = []
+        elif not isinstance(value, (list, tuple)):
+            raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a list')
+        
+        if self.value is not None:
+            newvalue = list()
+            schema = Schema()
+            for thing in value:
+                try:
+                    thing = self.value.__set__(schema, thing)
+                except ValidationError as exc:
+                    raise ValidationError(f'Validation failure in {self.name}: {exc}')
+                newvalue.append(thing)
+            value = newvalue
+        
+        return super(ListField, self).__set__(instance, value)
+
+@export
+class TupleField(FieldBase):
+    
+    def __init__(self, default=tuple,
+                       value=None,
+                       validator=None,
+                       extractor=None):
+        
+        super(TupleField, self).__init__(default=default,
+                                         validator=validator,
+                                         extractor=extractor,
+                                         allow_none=False)
+        
+        if value is not None and not isinstance(value, FieldBase):
+            raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
+        
+        self.value = value
+    
+    def __set__(self, instance, value):
+        from clu.config.settings import Schema
+        
+        if value is None:
+            value = []
+        elif not isinstance(value, (list, tuple)):
+            raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a tuple')
+        
+        if self.value is not None:
+            newvalue = list()
+            schema = Schema()
+            for thing in value:
+                try:
+                    thing = self.value.__set__(schema, thing)
+                except ValidationError as exc:
+                    raise ValidationError(f'Validation failure in {self.name}: {exc}')
+                newvalue.append(thing)
+            value = tuple(newvalue)
+        
+        return super(TupleField, self).__set__(instance, value)
+
+@export
+class SetField(FieldBase):
+    
+    def __init__(self, default=set,
+                       value=None,
+                       validator=None,
+                       extractor=None):
+        
+        super(SetField, self).__init__(default=default,
+                                       validator=validator,
+                                       extractor=extractor,
+                                       allow_none=False)
+        
+        if value is not None and not isinstance(value, FieldBase):
+            raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
+        
+        self.value = value
+    
+    def __set__(self, instance, value):
+        from clu.config.settings import Schema
+        
+        if value is None:
+            value = []
+        elif not isinstance(value, (set, frozenset)):
+            raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a set')
+        
+        if self.value is not None:
+            newvalue = set()
+            schema = Schema()
+            for thing in value:
+                try:
+                    thing = self.value.__set__(schema, thing)
+                except ValidationError as exc:
+                    raise ValidationError(f'Validation failure in {self.name}: {exc}')
+                newvalue.add(thing)
+            value = newvalue
+        
+        return super(SetField, self).__set__(instance, value)
+
+@export
+class FrozenSetField(FieldBase):
+    
+    def __init__(self, default=frozenset,
+                       value=None,
+                       validator=None,
+                       extractor=None):
+        
+        super(FrozenSetField, self).__init__(default=default,
+                                             validator=validator,
+                                             extractor=extractor,
+                                             allow_none=False)
+        
+        if value is not None and not isinstance(value, FieldBase):
+            raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
+        
+        self.value = value
+    
+    def __set__(self, instance, value):
+        from clu.config.settings import Schema
+        
+        if value is None:
+            value = []
+        elif not isinstance(value, (set, frozenset)):
+            raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a frozenset')
+        
+        if self.value is not None:
+            newvalue = set()
+            schema = Schema()
+            for thing in value:
+                try:
+                    thing = self.value.__set__(schema, thing)
+                except ValidationError as exc:
+                    raise ValidationError(f'Validation failure in {self.name}: {exc}')
+                newvalue.add(thing)
+            value = frozenset(newvalue)
+        
+        return super(FrozenSetField, self).__set__(instance, value)
+
+@export
+class DictField(FieldBase):
+    
+    def __init__(self, default=dict,
+                       key=None,
+                       value=None,
+                       validator=None,
+                       extractor=None):
+        
+        super(DictField, self).__init__(default=default,
+                                        validator=validator,
+                                        extractor=extractor,
+                                        allow_none=False)
+        
+        if key is not None and not isinstance(key, FieldBase):
+            raise TypeError(f'key must be either None or derived from FieldBase (not {value})')
+        
+        self.key = key
+        
+        if value is not None and not isinstance(value, FieldBase):
+            raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
+        
+        self.value = value
+    
+    def __set__(self, instance, value):
+        from clu.config.settings import Schema
+        
+        if value is None:
+            value = {}
+        elif not isinstance(value, dict):
+            raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a dict')
+        
+        newvalue = {}
+        schema = Schema()
+        for k, v in value.items():
+            if self.key is not None:
+                try:
+                    k = self.key.__set__(schema, k)
+                except ValidationError as exc:
+                    raise ValidationError(f'Validation failure in {self.name} [key]: {exc}')
+            if self.value is not None:
+                try:
+                    v = self.value.__set__(schema, v)
+                except ValidationError as exc:
+                    raise ValidationError(f'Validation failure in {self.name} [value]: {exc}')
+            newvalue[k] = v
+        return super(DictField, self).__set__(instance, newvalue)
 
 class NamespaceContext(contextlib.AbstractContextManager,
                        metaclass=Slotted):
@@ -635,6 +879,8 @@ class NamespacedFieldManager(object):
             No parameters are accepted.
         """
         self.namespace_stack = []
+        self.__qualname__ = self.__name__ = 'fields'
+        self.__file__ = __file__
     
     def push(self, namespace):
         """ Push a namespace onto the stack. """
@@ -669,6 +915,10 @@ class NamespacedFieldManager(object):
     def __len__(self):
         return len(self.namespace_stack)
     
+    def __repr__(self):
+        return f"<pseudo-module '{self.__module__}.{self.__name__}' from '{self.__file__}' " \
+               f"[{self.__module__}.{self.__class__.__name__} instance @ {hex(id(self))}]>"
+    
     @field
     def Schema(self,        cls,
                             validator=None): return SchemaField
@@ -680,6 +930,15 @@ class NamespacedFieldManager(object):
                             allow_none=True,
                             min_length=None,
                             max_length=None): return StringField
+    
+    @field
+    def Path(self,          default=None,
+                            validator=None,
+                            extractor=None,
+                            allow_none=True,
+                            requisite=False,
+                            min_length=None,
+                            max_length=None): return PathField
     
     @field
     def Int(self,           default=None,
@@ -721,6 +980,37 @@ class NamespacedFieldManager(object):
                             validator=None,
                             extractor=None,
                             allow_none=True): return TimeDeltaField
+    
+    @field
+    def List(self,          default=list,
+                            value=None,
+                            validator=None,
+                            extractor=None): return ListField
+    
+    @field
+    def Tuple(self,         default=tuple,
+                            value=None,
+                            validator=None,
+                            extractor=None): return TupleField
+    
+    @field
+    def Set(self,           default=set,
+                            value=None,
+                            validator=None,
+                            extractor=None): return SetField
+    
+    @field
+    def FrozenSet(self,     default=frozenset,
+                            value=None,
+                            validator=None,
+                            extractor=None): return FrozenSetField
+    
+    @field
+    def Dict(self,          default=dict,
+                            key=None,
+                            value=None,
+                            validator=None,
+                            extractor=None): return DictField
 
 def __getattr__(key):
     """ Module __getattr__(…) instances the NamespacedFieldManager on-demand """

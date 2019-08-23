@@ -124,7 +124,7 @@ class Schema(abc.ABC, metaclass=MetaSchema):
         field_names, field_index = pyattrs(type(self), 'field_names',
                                                        'field_index')
         for field, nsfield in zip(field_names, field_index):
-            self.__fields__[nsfield] = stattr(self, field).default
+            self.__fields__[nsfield] = stattr(self, field).get_default()
         for key, value in kwargs.items():
             if key in field_names:
                 setattr(self, key, value)

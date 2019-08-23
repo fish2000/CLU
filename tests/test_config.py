@@ -137,7 +137,7 @@ class TestConfig(object):
         assert 'envtest0' not in env.namespaces()
     
     def test_toml_and_file_search(self, dirname, environment):
-        from clu.config.tomlfile import TomlFile
+        from clu.config.formats import TomlFile
         from clu.predicates import tuplize
         
         cfgs = dirname.subdirectory('data').subdirectory('config')

@@ -133,7 +133,11 @@ from clu.config.fieldtypes import functional_and, functional_set
 from clu.config.fieldtypes import FieldBase
 from clu.config.fieldtypes import fields
 from clu.config.settings import Schema
-from clu.config.tomlfile import TomlFile
+from clu.config.formats import JsonFile, PickleFile, TomlFile, YamlFile
+# from clu.config.jsonfile import JsonFile
+# from clu.config.picklefile import PickleFile
+# from clu.config.tomlfile import TomlFile
+# from clu.config.yamlfile import YamlFile
 
 from clu.csv import pad_csv
 from clu.dicts import merge_two, merge_as, merge, asdict
@@ -340,10 +344,11 @@ __all__ = ('Image',
            'dotpath_to_prefix', 'path_to_prefix',
            'split_abbreviations',
            'NamespacedMutableMapping', 'Flat', 'Nested',
-           'Env', 'FileName', 'FileBase', 'TomlFile',
+           'Env', 'FileName', 'FileBase',
            'ValidationError', 'hoist', 'FlatOrderedSet',
            'functional_and', 'functional_set',
            'FieldBase', 'fields',
+           'Schema', 'JsonFile', 'PickleFile', 'TomlFile', 'YamlFile',
            'pad_csv',
            'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',

@@ -277,7 +277,8 @@ class FieldBase(abc.ABC, metaclass=Slotted):
         
         # Do extraction and validation:
         try:
-            value = self.extractor(value)
+            if value is not None:
+                value = self.extractor(value)
         except (TypeError, ValueError, ValidationError) as exc:
             raise ValidationError(f"Extraction failue in “{self.name}”: {exc}")
         
@@ -612,8 +613,17 @@ class TimeDeltaField(FieldBase):
                                              extractor=extractor,
                                              allow_none=False)
 
+optional = lambda abcls: (lambda thing: isinstance(thing, abcls) or (thing is None))
+
+maybemapping    = optional(collections.abc.Mapping)
+maybesequence   = optional(collections.abc.Sequence)
+maybeset        = optional(collections.abc.Set)
+maybefieldbase  = optional(FieldBase)
+
 @export
 class ListField(FieldBase):
+    
+    __slots__ = tuplize('value')
     
     def __init__(self, default=list,
                        value=None,
@@ -621,22 +631,26 @@ class ListField(FieldBase):
                        extractor=None):
         
         super(ListField, self).__init__(default=default,
-                                        validator=validator,
+                                        validator=functional_and(validator,
+                                                                 maybesequence),
                                         extractor=extractor,
                                         allow_none=False)
         
-        if value is not None and not isinstance(value, FieldBase):
+        # if value is not None and not isinstance(value, FieldBase):
+        if not maybefieldbase(value):
             raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
         
         self.value = value
+        self.value.__set_name__(None, 'interstitial')
     
     def __set__(self, instance, value):
         from clu.config.settings import Schema
         
         if value is None:
-            value = []
-        elif not isinstance(value, (list, tuple)):
-            raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a list')
+            # value = []
+            value = self.get_default()
+        # elif not isinstance(value, (list, tuple)):
+        #     raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a list')
         
         if self.value is not None:
             newvalue = list()
@@ -654,28 +668,34 @@ class ListField(FieldBase):
 @export
 class TupleField(FieldBase):
     
+    __slots__ = tuplize('value')
+    
     def __init__(self, default=tuple,
                        value=None,
                        validator=None,
                        extractor=None):
         
         super(TupleField, self).__init__(default=default,
-                                         validator=validator,
+                                         validator=functional_and(validator,
+                                                                  maybesequence),
                                          extractor=extractor,
                                          allow_none=False)
         
-        if value is not None and not isinstance(value, FieldBase):
+        # if value is not None and not isinstance(value, FieldBase):
+        if not maybefieldbase(value):
             raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
         
         self.value = value
+        self.value.__set_name__(None, 'interstitial')
     
     def __set__(self, instance, value):
         from clu.config.settings import Schema
         
         if value is None:
-            value = []
-        elif not isinstance(value, (list, tuple)):
-            raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a tuple')
+            # value = tuple()
+            value = self.get_default()
+        # elif not isinstance(value, (list, tuple)):
+        #     raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a tuple')
         
         if self.value is not None:
             newvalue = list()
@@ -693,28 +713,34 @@ class TupleField(FieldBase):
 @export
 class SetField(FieldBase):
     
+    __slots__ = tuplize('value')
+    
     def __init__(self, default=set,
                        value=None,
                        validator=None,
                        extractor=None):
         
         super(SetField, self).__init__(default=default,
-                                       validator=validator,
+                                       validator=functional_and(validator,
+                                                                maybeset),
                                        extractor=extractor,
                                        allow_none=False)
         
-        if value is not None and not isinstance(value, FieldBase):
+        # if value is not None and not isinstance(value, FieldBase):
+        if not maybefieldbase(value):
             raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
         
         self.value = value
+        self.value.__set_name__(None, 'interstitial')
     
     def __set__(self, instance, value):
         from clu.config.settings import Schema
         
         if value is None:
-            value = []
-        elif not isinstance(value, (set, frozenset)):
-            raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a set')
+            # value = set()
+            value = self.get_default()
+        # elif not isinstance(value, (set, frozenset)):
+        #     raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a set')
         
         if self.value is not None:
             newvalue = set()
@@ -732,28 +758,34 @@ class SetField(FieldBase):
 @export
 class FrozenSetField(FieldBase):
     
+    __slots__ = tuplize('value')
+    
     def __init__(self, default=frozenset,
                        value=None,
                        validator=None,
                        extractor=None):
         
         super(FrozenSetField, self).__init__(default=default,
-                                             validator=validator,
+                                             validator=functional_and(validator,
+                                                                      maybeset),
                                              extractor=extractor,
                                              allow_none=False)
         
-        if value is not None and not isinstance(value, FieldBase):
+        # if value is not None and not isinstance(value, FieldBase):
+        if not maybefieldbase(value):
             raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
         
         self.value = value
+        self.value.__set_name__(None, 'interstitial')
     
     def __set__(self, instance, value):
         from clu.config.settings import Schema
         
         if value is None:
-            value = []
-        elif not isinstance(value, (set, frozenset)):
-            raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a frozenset')
+            # value = frozenset()
+            value = self.get_default()
+        # elif not isinstance(value, (set, frozenset)):
+        #     raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a frozenset')
         
         if self.value is not None:
             newvalue = set()
@@ -771,6 +803,8 @@ class FrozenSetField(FieldBase):
 @export
 class DictField(FieldBase):
     
+    __slots__ = tuplize('value')
+    
     def __init__(self, default=dict,
                        key=None,
                        value=None,
@@ -778,27 +812,33 @@ class DictField(FieldBase):
                        extractor=None):
         
         super(DictField, self).__init__(default=default,
-                                        validator=validator,
+                                        validator=functional_and(validator,
+                                                                 maybemapping),
                                         extractor=extractor,
                                         allow_none=False)
         
-        if key is not None and not isinstance(key, FieldBase):
+        # if key is not None and not isinstance(key, FieldBase):
+        if not maybefieldbase(key):
             raise TypeError(f'key must be either None or derived from FieldBase (not {value})')
         
         self.key = key
+        self.key.__set_name__(None, 'interstitial_key')
         
-        if value is not None and not isinstance(value, FieldBase):
+        # if value is not None and not isinstance(value, FieldBase):
+        if not maybefieldbase(value):
             raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
         
         self.value = value
+        self.value.__set_name__(None, 'interstitial_value')
     
     def __set__(self, instance, value):
         from clu.config.settings import Schema
         
         if value is None:
-            value = {}
-        elif not isinstance(value, dict):
-            raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a dict')
+            # value = {}
+            value = self.get_default()
+        # elif not isinstance(value, dict):
+        #     raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a dict')
         
         newvalue = {}
         schema = Schema()
@@ -1021,9 +1061,15 @@ def __getattr__(key):
     raise AttributeError(f"module {__name__} has no attribute {key}")
 
 # MODULE EXPORTS:
-export(hoist,           name='hoist',       doc="hoist(thing) → if “thing” isn’t already callable, turn it into a lambda that returns it as a value (using “wrap_value(…)”).")
-export(isdatetime,      name='isdatetime',  doc="isdatetime(thing) → boolean predicate, True if `thing` is an instance of “datetime.datetime”")
-export(istimedelta,     name='istimedelta', doc="istimedelta(thing) → boolean predicate, True if `thing` is an instance of “datetime.timedelta”")
+export(hoist,           name='hoist',           doc="hoist(thing) → if “thing” isn’t already callable, turn it into a lambda that returns it as a value (using “wrap_value(…)”).")
+export(isdatetime,      name='isdatetime',      doc="isdatetime(thing) → boolean predicate, True if `thing` is an instance of “datetime.datetime”")
+export(istimedelta,     name='istimedelta',     doc="istimedelta(thing) → boolean predicate, True if `thing` is an instance of “datetime.timedelta”")
+
+export(optional,        name='optional',        doc="optional(cls) → Returns a new “maybe” boolean predicate, which will return True if passed either None or an instance of “cls”")
+export(maybemapping,    name='maybemapping',    doc="maybemapping(thing) → “maybe” boolean predicate, returning True for either None or an instance of “collections.abc.Mapping”")
+export(maybesequence,   name='maybesequence',   doc="maybesequence(thing) → “maybe” boolean predicate, returning True for either None or an instance of “collections.abc.Sequence”")
+export(maybeset,        name='maybeset',        doc="maybeset(thing) → “maybe” boolean predicate, returning True for either None or an instance of “collections.abc.Set”")
+export(maybefieldbase,  name='maybefieldbase',  doc="maybefieldbase(thing) → “maybe” boolean predicate, returning True for either None or an instance of “clu.config.fieldtypes.FieldBase”")
 
 # Assign the modules’ `__all__` using the exporter:
 __all__ = exporter.all_tuple('fields')

@@ -249,7 +249,7 @@ def test():
             
             yodogg = fields.String("Yo dogg,")
             iheard = fields.String("I heard")
-            andalso = fields.String(f"and: {additional.default}")
+            andalso = fields.List(value=fields.String("«also»", allow_none=False))
     
     instance = MySchema()
     instance.validate()
@@ -294,6 +294,7 @@ def test():
     
     instance0.considerations = "Whatever man."
     instance0.iheard = "Actually I haven’t heard."
+    instance0.andalso = ['additionally', 'we', 'put', 'some', 'strings']
     
     print("» JSON:")
     print()

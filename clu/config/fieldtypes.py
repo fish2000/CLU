@@ -636,7 +636,6 @@ class ListField(FieldBase):
                                         extractor=extractor,
                                         allow_none=False)
         
-        # if value is not None and not isinstance(value, FieldBase):
         if not maybefieldbase(value):
             raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
         
@@ -647,10 +646,7 @@ class ListField(FieldBase):
         from clu.config.settings import Schema
         
         if value is None:
-            # value = []
             value = self.get_default()
-        # elif not isinstance(value, (list, tuple)):
-        #     raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a list')
         
         if self.value is not None:
             newvalue = list()
@@ -681,7 +677,6 @@ class TupleField(FieldBase):
                                          extractor=extractor,
                                          allow_none=False)
         
-        # if value is not None and not isinstance(value, FieldBase):
         if not maybefieldbase(value):
             raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
         
@@ -692,10 +687,7 @@ class TupleField(FieldBase):
         from clu.config.settings import Schema
         
         if value is None:
-            # value = tuple()
             value = self.get_default()
-        # elif not isinstance(value, (list, tuple)):
-        #     raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a tuple')
         
         if self.value is not None:
             newvalue = list()
@@ -726,7 +718,6 @@ class SetField(FieldBase):
                                        extractor=extractor,
                                        allow_none=False)
         
-        # if value is not None and not isinstance(value, FieldBase):
         if not maybefieldbase(value):
             raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
         
@@ -737,10 +728,7 @@ class SetField(FieldBase):
         from clu.config.settings import Schema
         
         if value is None:
-            # value = set()
             value = self.get_default()
-        # elif not isinstance(value, (set, frozenset)):
-        #     raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a set')
         
         if self.value is not None:
             newvalue = set()
@@ -771,7 +759,6 @@ class FrozenSetField(FieldBase):
                                              extractor=extractor,
                                              allow_none=False)
         
-        # if value is not None and not isinstance(value, FieldBase):
         if not maybefieldbase(value):
             raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
         
@@ -782,10 +769,7 @@ class FrozenSetField(FieldBase):
         from clu.config.settings import Schema
         
         if value is None:
-            # value = frozenset()
             value = self.get_default()
-        # elif not isinstance(value, (set, frozenset)):
-        #     raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a frozenset')
         
         if self.value is not None:
             newvalue = set()
@@ -817,14 +801,12 @@ class DictField(FieldBase):
                                         extractor=extractor,
                                         allow_none=False)
         
-        # if key is not None and not isinstance(key, FieldBase):
         if not maybefieldbase(key):
             raise TypeError(f'key must be either None or derived from FieldBase (not {value})')
         
         self.key = key
         self.key.__set_name__(None, 'interstitial_key')
         
-        # if value is not None and not isinstance(value, FieldBase):
         if not maybefieldbase(value):
             raise TypeError(f'value must be either None or derived from FieldBase (not {value})')
         
@@ -835,10 +817,7 @@ class DictField(FieldBase):
         from clu.config.settings import Schema
         
         if value is None:
-            # value = {}
             value = self.get_default()
-        # elif not isinstance(value, dict):
-        #     raise ValidationError(f'Validation failure in {self.name}: {value!r} is not a dict')
         
         newvalue = {}
         schema = Schema()

@@ -136,6 +136,26 @@ for system in systems:
 @export
 class FileBase(NamespacedMutableMapping, AppName, FileName):
     
+    """ The FileBase abstract base class furnishes two methods:
+        
+            • “dump(…)” and
+            • “load(…)”;
+        
+        … and defines two abstract methods that are called by
+        the above two definitions:
+        
+            • “dumps(…)” and
+            • “loads(…)”.
+        
+        … Anyone who has serialized or deserialized anything at
+        all with Python – JSON, YAML, TOML, plists, pickles,
+        msgpacks, protobufs, bencodes… whatevs – in the last 15
+        years, will no doubt recognize these method names and 
+        will know immediately what they do. If in case, somehow,
+        you don’t know, lookit the docstrings for the methods
+        themselves, doggie. Yes.
+    """
+    
     def __init__(self, filepath=None, *args, **kwargs):
         """ FileBase __init__(…):
             
@@ -177,9 +197,9 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
             raise FileNotFoundError("No valid filepath available for load()")
         
         with open(filepath, "r") as handle:
-            filetext = handle.read()
+            loaded = handle.read()
         
-        return self.loads(filetext)
+        return self.loads(loaded)
     
     @abstract
     def loads(self, text):
@@ -197,18 +217,18 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
         if filepath is None:
             raise FileNotFoundError("No valid filepath available for dump()")
         
-        text = self.dumps()
-        if not text:
-            return text
+        dumped = self.dumps()
+        if not dumped:
+            return dumped
         
         with TemporaryName(prefix="filebase-dump-",
                            suffix=type(self).filesuffix,
                            randomized=True) as tdmp:
-            assert tdmp.write(text)
+            assert tdmp.write(dumped)
             assert tdmp.copy(filepath)
         
         assert isvalidpath(filepath)
-        return text
+        return dumped
     
     @abstract
     def dumps(self):

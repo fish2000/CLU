@@ -65,6 +65,7 @@ class TestConfig(object):
         summary = FlatOrderedSet("a", "b", "c", "d")
         
         assert stuff.things == summary.things
+        assert stuff == summary
         assert not stuff.isdisjoint(summary)
     
     def test_NamespacedFieldManager_module_getattr_instancing(self):

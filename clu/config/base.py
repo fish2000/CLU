@@ -73,35 +73,70 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
     
     @abstract
     def get(self, key, namespace=None, default=NoDefault):
+        """ Retrieve a (possibly namespaced) value for a given key.
+            
+            An optional default value may be specified, to be returned
+            if the key in question is not found in the mapping.
+        """
         ...
     
     @abstract
     def set(self, key, value, namespace=None):
+        """ Set a (possibly namespaced) value for a given key. """
         ...
     
     def delete(self, key, namespace=None):
+        """ Delete a (possibly namespaced) value from the mapping.
+            
+            N.B. – The default implementation is a no-op. Subclasses must
+                   explicitly override this method to allow deletion.
+        """
         pass
     
     @abstract
     def keys(self, namespace=None):
+        """ Return an iterable generator over either all keys in the mapping,
+            or over only those keys in the mapping matching the specified
+            namespace value.
+        """
         ...
     
     @abstract
     def values(self, namespace=None):
+        """ Return an iterable generator over either all values in the mapping,
+            or over only those values in the mapping whose keys match the specified
+            namespace value.
+        """
         ...
     
     def items(self, namespace=None):
+        """ Return an iterable generator over either all keys and values in the
+            mapping, or over only those values in the mapping whose keys match the
+            specified namespace value.
+            
+            The generator yields the keys and values as two-tuples containing both:
+                
+                >>> (key, value)
+        """
         return zip(self.keys(namespace),
                    self.values(namespace))
     
     @abstract
     def namespaces(self):
+        """ Return a sorted tuple listing all of the namespaces defined in
+            the mapping.
+        """
         ...
     
     def clone(self):
+        """ Return a cloned copy of this NamespacedMutableMapping instance. """
         raise NotImplementedError("clone() not implemented")
     
     def update(self, dictish=NoDefault, **updates):
+        """ NamespacedMutableMapping.update([E, ]**F) -> None.
+            
+            Update D from dict/iterable E and/or F.
+        """
         if dictish is not NoDefault:
             for key, value in dictish.items():
                 self[key] = value

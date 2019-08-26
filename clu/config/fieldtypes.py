@@ -690,14 +690,14 @@ class TupleField(FieldBase):
             value = self.get_default()
         
         if self.value is not None:
-            newvalue = list()
+            newvalue = tuple()
             schema = Schema()
             for thing in value:
                 try:
                     thing = self.value.__set__(schema, thing)
                 except ValidationError as exc:
                     raise ValidationError(f'Validation failure in {self.name}: {exc}')
-                newvalue.append(thing)
+                newvalue += tuplize(thing)
             value = tuple(newvalue)
         
         return super(TupleField, self).__set__(instance, value)

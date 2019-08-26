@@ -145,7 +145,7 @@ class Schema(abc.ABC, metaclass=MetaSchema):
             if haspyattr(value, 'json'):
                 out[key] = value.__json__()
             elif iscontainer(value):
-                out[key] = [v.__json__() if haspyattr(v, 'json') else v for v in value]
+                out[key] = tuple(v.__json__() if haspyattr(v, 'json') else v for v in value)
             elif ismapping(value):
                 out[key] = dict((k, v.__json__() if haspyattr(v, 'json') else k, v) \
                              for k, v in value.items())
@@ -249,7 +249,7 @@ def test():
             
             yodogg = fields.String("Yo dogg,")
             iheard = fields.String("I heard")
-            andalso = fields.List(value=fields.String("«also»", allow_none=False))
+            andalso = fields.Tuple(value=fields.String("«also»", allow_none=False))
     
     instance = MySchema()
     instance.validate()
@@ -294,7 +294,7 @@ def test():
     
     instance0.considerations = "Whatever man."
     instance0.iheard = "Actually I haven’t heard."
-    instance0.andalso = ['additionally', 'we', 'put', 'some', 'strings']
+    instance0.andalso = ('additionally', 'we', 'put', 'some', 'strings')
     
     print("» JSON:")
     print()

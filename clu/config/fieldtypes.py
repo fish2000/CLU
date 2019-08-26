@@ -1001,32 +1001,27 @@ class NamespacedFieldManager(object):
                             allow_none=True): return TimeDeltaField
     
     @field
-    def List(self,          default=list,
-                            value=None,
+    def List(self,          value=None,
                             validator=None,
                             extractor=None): return ListField
     
     @field
-    def Tuple(self,         default=tuple,
-                            value=None,
+    def Tuple(self,         value=None,
                             validator=None,
                             extractor=None): return TupleField
     
     @field
-    def Set(self,           default=set,
-                            value=None,
+    def Set(self,           value=None,
                             validator=None,
                             extractor=None): return SetField
     
     @field
-    def FrozenSet(self,     default=frozenset,
-                            value=None,
+    def FrozenSet(self,     value=None,
                             validator=None,
                             extractor=None): return FrozenSetField
     
     @field
-    def Dict(self,          default=dict,
-                            key=None,
+    def Dict(self,          key=None,
                             value=None,
                             validator=None,
                             extractor=None): return DictField

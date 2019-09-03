@@ -5,6 +5,7 @@ heapdict>=0.9.0
 numpy>=1.7.0
 lmdb>=0.8.0
 pygments>=2.0.0
+PyYAML>=5.0.0
 setuptools>=20.0.0
 six>=1.10.0
 termcolor>=1.0.0

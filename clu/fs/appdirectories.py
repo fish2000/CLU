@@ -2,18 +2,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-# Copyright (c) 2005-2010 ActiveState Software Inc.
-# Copyright (c) 2013 Eddy Petrișor
-# Copyright  ©  2019 Alexander Böhn
-"""Utilities for determining application-specific dirs.
-
-See <https://github.com/fish2000/CLU> for details and usage.
 """
-# Dev Notes:
-# - MSDN on where to store app data files:
-#   http://support.microsoft.com/default.aspx?scid=kb;en-us;310294#XSLTH3194121123120121120120
-# - Mac OS X: http://developer.apple.com/documentation/MacOSX/Conceptual/BPFileSystem/index.html
-# - XDG spec for Un*x: https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
+Utilities for determining application-specific dirs.
+
+Copyright (c) 2005-2010 ActiveState Software Inc.
+Copyright (c) 2013 Eddy Petrișor
+Copyright  ©  2019 Alexander Böhn
+
+For details and usage, q.v. https://github.com/fish2000/CLU sub.
+
+Dev Notes:
+- MSDN on where to store app data files:
+  http://support.microsoft.com/default.aspx?scid=kb;en-us;310294#XSLTH3194121123120121120120
+- Mac OS X: http://developer.apple.com/documentation/MacOSX/Conceptual/BPFileSystem/index.html
+- XDG spec for Un*x: https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
+"""
 
 import sys
 import os
@@ -23,16 +26,16 @@ import warnings
 from clu.constants.consts import ENCODING, PY3
 from clu.constants.enums import CSIDL, System, SYSTEM
 from clu.constants.exceptions import UnusedValueWarning
-from clu.constants.polyfills import unicode
 from clu.version import VersionInfo
-from .filesystem import Directory
-from .misc import stringify
+from clu.fs.filesystem import Directory
+from clu.fs.misc import stringify
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-__version__ = "1.4.4"
+# Module-specific version/version-info:
+__version__ = "2.2.0"
 __version_info__ = VersionInfo(__version__)
 
 @export
@@ -134,18 +137,18 @@ class AppDirs(object):
         """
         try:
             import win32com.shell as win32api
-            out =_get_win_folder_with_pywin32
+            out = get_win_folder_with_pywin32
         except ImportError:
             try:
                 from ctypes import windll as win32api
-                out = _get_win_folder_with_ctypes
+                out = get_win_folder_with_ctypes
             except ImportError:
                 try:
                     import com.sun.jna as win32api
-                    out = _get_win_folder_with_jna
+                    out = get_win_folder_with_jna
                 except ImportError:
                     win32api = None
-                    out = _get_win_folder_from_registry
+                    out = get_win_folder_from_registry
         del win32api
         return out
     
@@ -236,13 +239,14 @@ class AppDirs(object):
     def user_state(self):
         return Directory(self.user_state_dir)
     
-    def _get_win_folder(self, argument):
+    def get_win_folder(self, argument):
         """ Retrieve the module-private Win32 API access function from
             the AppDirs instance (so as not to invoke it as a bound method)
             before calling it with the supplied argument
         """
         return os.path.normpath(
-               getattr(self, '_win_folder_function', lambda arg: None)(argument))
+                        getattr(self, '_win_folder_function',
+                                       lambda thing: str(thing))(argument))
     
     def get_user_data_dir(self, appname=None,
                                 appauthor=None,
@@ -282,8 +286,8 @@ class AppDirs(object):
         if self.system == System.WIN32:
             if appauthor is None:
                 appauthor = appname
-            path = self._get_win_folder(roaming and CSIDL.APPDATA \
-                                           or CSIDL.LOCAL_APPDATA)
+            path = self.get_win_folder(roaming and CSIDL.APPDATA \
+                                          or CSIDL.LOCAL_APPDATA)
             if appname:
                 if appauthor is not False:
                     path = os.path.join(path, appauthor, appname)
@@ -338,7 +342,7 @@ class AppDirs(object):
         if self.system == System.WIN32:
             if appauthor is None:
                 appauthor = appname
-            path = self._get_win_folder(CSIDL.COMMON_APPDATA)
+            path = self.get_win_folder(CSIDL.COMMON_APPDATA)
             if appname:
                 if appauthor is not False:
                     path = os.path.join(path, appauthor, appname)
@@ -512,7 +516,7 @@ class AppDirs(object):
         if self.system == System.WIN32:
             if appauthor is None:
                 appauthor = appname
-            path = self._get_win_folder(CSIDL.LOCAL_APPDATA)
+            path = self.get_win_folder(CSIDL.LOCAL_APPDATA)
             if appname:
                 if appauthor is not False:
                     path = os.path.join(path, appauthor, appname)
@@ -629,9 +633,9 @@ class AppDirs(object):
             path = os.path.join(path, version)
         return path
 
-#---- Internal Windows support stuff
+# Internal Windows directory-retrieval support stuff:
 
-def _get_win_folder_from_registry(csidl):
+def get_win_folder_from_registry(csidl):
     """ This is a fallback technique at best. I'm not sure if using the
         sregistry for this guarantees us the correct answer for all CSIDL_*
         names.
@@ -648,18 +652,19 @@ def _get_win_folder_from_registry(csidl):
     directory, _ = winreg.QueryValueEx(key, csidl.shell_folder_name)
     return directory
 
-def _get_win_folder_with_pywin32(csidl):
+def get_win_folder_with_pywin32(csidl):
     """ Use the PyWin32 Python C-API wrappers to make a fairly direct
         win32 filesystem API call
     """
     from win32com.shell import shellcon, shell
+    
     directory = shell.SHGetFolderPath(0, getattr(shellcon, csidl.fullname), 0, 0)
     
     # Try to make this a unicode path because SHGetFolderPath does
     # not return unicode strings when there is unicode data in the
     # path.
     try:
-        directory = unicode(directory)
+        directory = str(directory, encoding=ENCODING)
         
         # Downgrade to short path name if have highbit chars. See
         # <http://bugs.activestate.com/show_bug.cgi?id=85099>.
@@ -679,7 +684,7 @@ def _get_win_folder_with_pywin32(csidl):
     
     return directory
 
-def _get_win_folder_with_ctypes(csidl):
+def get_win_folder_with_ctypes(csidl):
     """ Use ctypes to call into the win32 filesystem API """
     import ctypes
     
@@ -700,7 +705,7 @@ def _get_win_folder_with_ctypes(csidl):
     
     return buf.value
 
-def _get_win_folder_with_jna(csidl):
+def get_win_folder_with_jna(csidl):
     """ Use the Python Java wrappers to invoke – circuitously,
         I might add – a win32 filesystem API call
     """
@@ -738,11 +743,9 @@ export(SYSTEM,  name='SYSTEM')
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
-#---- Self-Test Code:
-
 def test():
     """ Inline tests for appdirectories """
-    from repl import print_separator
+    from clu.repl.ansi import print_separator
     
     appname = "MyApp"
     appauthor = "MyCompany"

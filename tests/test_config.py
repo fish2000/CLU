@@ -6,6 +6,81 @@ import pytest
 
 class TestConfig(object):
     
+    def test_package_schema_subclasses_Env(self, dirname, environment):
+        from clu.fs import pypath
+        
+        # Ensure “sys.path” contains the “yodogg” package:
+        prefix = dirname.subdirectory('yodogg')
+        assert prefix.exists
+        pypath.remove_invalid_paths()  # cleans “sys.path”
+        pypath.append_paths(prefix)    # extends “sys.path”
+        
+        # from yodogg.config import Env, JsonFile, TomlFile
+        from yodogg.config import Env
+        from yodogg.config import MySchema
+        
+        schema = MySchema()
+        env = Env()
+        
+        assert 'YODOGG_TITLE' not in environment
+        assert 'YODOGG_VERSION' not in environment
+        assert 'YODOGG_APPVERSION' not in environment
+        
+        assert 'YODOGG_METADATA_RELEASEDATE' not in environment
+        assert 'YODOGG_METADATA_AUTHOR' not in environment
+        assert 'YODOGG_METADATA_COPYRIGHT' not in environment
+        
+        assert 'YODOGG_YODOGG_YODOGG' not in environment
+        assert 'YODOGG_YODOGG_IHEARD' not in environment
+        assert 'YODOGG_YODOGG_ANDALSO' not in environment
+        
+        env.update(schema.nestify(stringify=True))
+        
+        assert environment['YODOGG_TITLE'] == "YoDoggApp"
+        assert environment['YODOGG_VERSION'] == "1"
+        assert environment['YODOGG_APPVERSION'] == "0.1"
+        
+        assert environment['YODOGG_METADATA_RELEASEDATE']
+        assert environment['YODOGG_METADATA_AUTHOR'] == "Alexander Böhn"
+        # assert environment['YODOGG_METADATA_CONSIDERATIONS'] is None
+        assert 'YODOGG_METADATA_CONSIDERATIONS' not in environment
+        assert environment['YODOGG_METADATA_COPYRIGHT']
+        
+        assert environment['YODOGG_YODOGG_YODOGG'] == "Yo dogg,"
+        assert environment['YODOGG_YODOGG_IHEARD'] == "I heard"
+        assert environment['YODOGG_YODOGG_ANDALSO'] == "and: YoDoggApp"
+    
+    def test_package_schema(self, dirname):
+        from datetime import datetime
+        from clu.fs import pypath
+        
+        # Ensure “sys.path” contains the “yodogg” package:
+        prefix = dirname.subdirectory('yodogg')
+        assert prefix.exists
+        pypath.remove_invalid_paths()  # cleans “sys.path”
+        pypath.append_paths(prefix)    # extends “sys.path”
+        
+        from yodogg.config import MySchema
+        
+        schema = MySchema()
+        
+        assert schema.title         == "YoDoggApp"
+        assert schema.version       == 1.0
+        assert schema.appversion    == 0.1
+        
+        # NAMESPACE: metadata
+        assert schema.releasedate        < datetime.utcnow()
+        assert schema.author            == "Alexander Böhn"
+        assert schema.considerations    is None
+        assert "Alexander Böhn"         in schema.copyright
+        assert "©"                      in schema.copyright
+        assert schema.copyright.startswith("YoDoggApp")
+        
+        # NAMESPACE: yodogg
+        assert schema.yodogg        == "Yo dogg,"
+        assert schema.iheard        == "I heard"
+        assert schema.andalso       == "and: YoDoggApp"
+    
     def test_nested_and_flat(self):
         from clu.config.base import Nested
         
@@ -137,6 +212,10 @@ class TestConfig(object):
         assert 'envtest0' not in env.namespaces()
     
     def test_toml_and_file_search(self, dirname, environment):
+        # N.B. we use the “environment” fixture here to winnow out
+        # any XDG variable definitions, some of which are inspected by
+        # the “clu.config.filebase.FileName” file-search internals,
+        # upon which the “clu.config.formats.TomlFile” class is built.
         from clu.config.formats import TomlFile
         from clu.predicates import tuplize
         

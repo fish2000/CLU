@@ -272,8 +272,9 @@ class FieldBase(abc.ABC, metaclass=Slotted):
     
     def __set__(self, instance, value):
         # Check for outlawed Nones:
-        if value is None and not self.allow_none:
-            raise ValidationError(f"Field “{self.name}” does not allow None values")
+        if value is None:
+            if not self.allow_none:
+                raise ValidationError(f"Field “{self.name}” does not allow None values")
         
         # Do extraction and validation:
         try:
@@ -371,12 +372,13 @@ class StringField(FieldBase):
     
     def __set__(self, instance, value):
         out = super(StringField, self).__set__(instance, value)
-        if self.min_length is not None:
-            if len(out) < self.min_length:
-                raise ValidationError(f"Validation failure in {nameof(type(self))}: len(string) < min_length")
-        if self.max_length is not None:
-            if len(out) <= self.max_length:
-                raise ValidationError(f"Validation failure in {nameof(type(self))}: len(string) > max_length")
+        if isstring(out):
+            if self.min_length is not None:
+                if len(out) < self.min_length:
+                    raise ValidationError(f"Validation failure in {nameof(type(self))}: len(string) < min_length")
+            if self.max_length is not None:
+                if len(out) <= self.max_length:
+                    raise ValidationError(f"Validation failure in {nameof(type(self))}: len(string) > max_length")
         return out
 
 @export
@@ -1000,14 +1002,12 @@ class NamespacedFieldManager(object):
     @field
     def DateTime(self,      default=None,
                             validator=None,
-                            extractor=None,
-                            allow_none=True): return DateTimeField
+                            extractor=None): return DateTimeField
     
     @field
     def TimeDelta(self,     default=None,
                             validator=None,
-                            extractor=None,
-                            allow_none=True): return TimeDeltaField
+                            extractor=None): return TimeDeltaField
     
     @field
     def List(self,          value=None,

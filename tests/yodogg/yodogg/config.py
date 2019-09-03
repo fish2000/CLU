@@ -42,8 +42,7 @@ class MySchema(Schema):
     
     with fields.ns('metadata'):
         
-        releasedate = fields.DateTime(default=datetime.utcnow,
-                                      allow_none=False)
+        releasedate = fields.DateTime(default=datetime.utcnow)
         
         author = fields.String("Alexander Böhn")
         copyright = fields.String(f"{title.default} © {releasedate.default} {author.default}")

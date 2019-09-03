@@ -7,7 +7,7 @@ from clu.constants.consts import ENCODING, PYTHON_VERSION
 from clu.config.base import Flat, Nested
 from clu.config.fieldtypes import FieldBase
 from clu.fs.misc import stringify
-from clu.predicates import haspyattr, getpyattr, stattr, pyattrs, iscontainer
+from clu.predicates import haspyattr, getpyattr, stattr, pyattrs, iscontainer, no_op
 from clu.typology import ismapping
 from clu.exporting import Exporter
 
@@ -166,29 +166,30 @@ class Schema(abc.ABC, metaclass=MetaSchema):
         """
         return self.__fields__.namespaces()
     
-    def nestify(self):
+    def nestify(self, stringify=False):
         """ Return an instance of “clu.config.base.Nested” – a concrete
             NamespacedMutableMapping subclass – containing all of the data from
             the Schema instance – including any embedded sub-Schema data.
         """
+        converter = stringify and str or no_op
         out = Nested()
         for key, value in self.__fields__.items():
             if haspyattr(value, 'json'):
-                out[key] = value.__json__()
+                out[key] = value.__json__(stringify=stringify)
             elif iscontainer(value):
-                out[key] = tuple(v.__json__() if haspyattr(v, 'json') else v for v in value)
+                out[key] = tuple(v.__json__(stringify=stringify) if haspyattr(v, 'json') else v for v in value)
             elif ismapping(value):
-                out[key] = dict((k, v.__json__() if haspyattr(v, 'json') else k, v) \
+                out[key] = dict((k, v.__json__(stringify=stringify) if haspyattr(v, 'json') else k, v) \
                              for k, v in value.items())
             else:
-                out[key] = value
+                out[key] = (value is not None) and converter(value) or value
         return out
     
-    def __json__(self):
+    def __json__(self, **kwargs):
         """ Return a nested set of dicts, suitable for serializing as JSON
             (and other similar formats).
         """
-        return self.nestify().tree
+        return self.nestify(**kwargs).tree
     
     def to_json(self):
         """ Return a stringified JSON representation of this Schema’s data """

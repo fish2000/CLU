@@ -111,7 +111,11 @@ class EnvBase(NamespacedMutableMapping, AppName):
         """
         if not key.isidentifier():
             raise KeyError(f"Invalid key: {key}")
-        self.environment[type(self).envkey(key, namespace)] = value
+        if value is None:
+            if type(self).envkey(key, namespace) in self.environment:
+                self.delete(key, namespace=namespace)
+        else:
+            self.environment[type(self).envkey(key, namespace)] = value
     
     def delete(self, key, namespace=None):
         """ Delete a (possibly namespaced) variable from the environment. """

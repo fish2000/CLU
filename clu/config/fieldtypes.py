@@ -98,7 +98,7 @@ class FlatOrderedSet(collections.abc.Set,
         return thing in self.things
     
     def __getitem__(self, idx):
-        return self.thing[idx]
+        return self.things[idx]
     
     def __bool__(self):
         return len(self.things) > 0

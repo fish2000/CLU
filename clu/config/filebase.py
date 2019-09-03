@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from abc import abstractmethod as abstract
 
-import abc
 import os
-
-abstract = abc.abstractmethod
+import sys
 
 from clu.constants.consts import PROJECT_NAME
 from clu.constants.enums import System, SYSTEM
 from clu.config.base import AppName, NamespacedMutableMapping
 from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import TemporaryName, Directory
+from clu.fs.pypath import remove_invalid_paths
 from clu.predicates import isiterable, tuplize
 from clu.typology import isvalidpath
 from clu.exporting import ValueDescriptor, Exporter
@@ -19,7 +19,7 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 @export
-class FileName(abc.ABC):
+class FileName(AppName):
     
     @classmethod
     def __init_subclass__(cls, filename=None, **kwargs):
@@ -39,8 +39,8 @@ class FileName(abc.ABC):
             raise LookupError("Cannot instantiate a base config class "
                               "(filename is None)")
     
-    @classmethod
-    def systems(cls):
+    @staticmethod
+    def systems():
         """ Return a set of the valid “clu.constants.enums.System” enum members
             for the current platform
         """
@@ -48,6 +48,14 @@ class FileName(abc.ABC):
         if SYSTEM is System.DARWIN:
             out |= { System.LINUX2 }
         return out
+    
+    @staticmethod
+    def sys_path_dirs():
+        """ Return a tuple of “clu.fs.filesystem.Directory” instances, each
+            corresponding to one of the valid entries in the “sys.path” list
+        """
+        remove_invalid_paths()
+        return tuple(Directory(p) for p in sys.path)
     
     @classmethod
     def site_dirs(cls):
@@ -57,7 +65,7 @@ class FileName(abc.ABC):
         if 'XDG_CONFIG_DIRS' in os.environ:
             xdgs = os.environ.get('XDG_CONFIG_DIRS')
             dirs = (Directory(xdg) for xdg in xdgs.split(os.pathsep))
-            sdirs = set(d.subdirectory(PROJECT_NAME) for d in dirs)
+            sdirs = set(d.subdirectory(cls.appname) for d in dirs)
         else:
             sdirs = set()
         for system in cls.systems():
@@ -72,7 +80,7 @@ class FileName(abc.ABC):
         """
         if 'XDG_CONFIG_HOME' in os.environ:
             xdg = os.environ.get('XDG_CONFIG_HOME')
-            udirs = set(tuplize(Directory(xdg).subdirectory(PROJECT_NAME)))
+            udirs = set(tuplize(Directory(xdg).subdirectory(cls.appname)))
         else:
             udirs = set()
         for system in cls.systems():
@@ -82,7 +90,8 @@ class FileName(abc.ABC):
     
     @classmethod
     def find_file(cls, filename=None, *, extra_site_dirs=None,
-                                         extra_user_dirs=None):
+                                         extra_user_dirs=None,
+                                         search_sys_path=False):
         """ Search available directories for the named file """
         file_name = filename or cls.filename
         site_dirs = cls.site_dirs()
@@ -100,6 +109,13 @@ class FileName(abc.ABC):
                 if file_name in site_dir:
                     root_dir = site_dir
                     break
+        # Then possibly try “sys.path”:
+        if search_sys_path:
+            for syspath_dir in cls.sys_path_dirs():
+                if syspath_dir.exists:
+                    if file_name in syspath_dir:
+                        root_dir = syspath_dir
+                        break
         # Then search user directories:
         for user_dir in user_dirs:
             if user_dir.exists:
@@ -134,7 +150,7 @@ for system in systems:
     user_dirs |= { app_dirs.user_config }
 
 @export
-class FileBase(NamespacedMutableMapping, AppName, FileName):
+class FileBase(NamespacedMutableMapping, FileName):
     
     """ The FileBase abstract base class furnishes two methods:
         
@@ -164,6 +180,7 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
                 • filename          (default: None)
                 • extra_site_dirs   (default: None)
                 • extra_user_dirs   (default: None)
+                • search_sys_path   (default: False)
             
             * The “filepath” arg will be ignored if “FileName.find_file(…)”
               returns a valid path to a file
@@ -171,6 +188,7 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
         filename        = kwargs.pop('filename', None)
         extra_site_dirs = kwargs.pop('extra_site_dirs', None)
         extra_user_dirs = kwargs.pop('extra_user_dirs', None)
+        search_sys_path = kwargs.pop('search_sys_path', False)
         
         try:
             super(FileBase, self).__init__(*args, **kwargs)
@@ -180,7 +198,8 @@ class FileBase(NamespacedMutableMapping, AppName, FileName):
         try:
             self.filepath = type(self).find_file(filename=filename,
                                                  extra_user_dirs=extra_user_dirs,
-                                                 extra_site_dirs=extra_site_dirs)
+                                                 extra_site_dirs=extra_site_dirs,
+                                                 search_sys_path=search_sys_path)
         except FileNotFoundError:
             self.filepath = filepath
         

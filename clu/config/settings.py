@@ -20,14 +20,14 @@ class MetaSchema(abc.ABCMeta):
     
     """ The MetaSchema metaclass is used by the Schema class – q.v.
         class definition sub. – to properly record all of the field
-        attributes that have been defined on its subclasses.
+        attributes and namespaces that are defined on its subclasses.
     """
     
     def __new__(metacls, name, bases, attributes, **kwargs):
         """ Create a new schema type, with bookkeeping structures
-            in place for all of out defined field attributes:
+            in place to record all defined field attributes and
+            namespaces:
         """
-        
         # Use both a namespaced mapping and a standard dict
         # as class-based records of our field attributes:
         field_index = Flat()
@@ -73,11 +73,11 @@ class MetaSchema(abc.ABCMeta):
 @export
 class Schema(abc.ABC, metaclass=MetaSchema):
     
-    """ The Schema class is the root class for all configuration schemas.
+    """ The Schema class is the root class for all CLU configuration schemas.
         
         One defines field attributes on a schema subclass – this will seem
         familiar to veterans of SQLAlchemy or Django model-class definition –
-        like so, using the “clu.config.fieldtypes.fields” pseudo-module:
+        like so, using the “clu.config.fieldtypes.fields” pseudo-module:‡
             
             from clu.config.fieldtypes import fields
             
@@ -85,19 +85,19 @@ class Schema(abc.ABC, metaclass=MetaSchema):
                 
                 appname = fields.String("YoDogg")
                 version = fields.Float(1.0)
-                title = fields.String(f"{appname.default} Schema v{version.default!s}")
+                title = fields.String(f"{appname.default} Config {version.default!r}")
                 
                 with fields.ns("debug"):
                     
                     debugging = fields.Boolean(False)
                     logging = fields.Boolean(False)
-                    logdir = fields.String(f"/usr/local/var/log/{appname.default.lower()}")
+                    logdir = fields.String(f"/var/log/{appname.default}")
                 
                 with fields.ns("concurrency"):
                     
                     processes = fields.UInt(os.cpu_count())
                     threads = fields.UInt(os.cpu_count() * 4)
-                    lockfile = fields.String(f"/usr/local/var/lock/{appname.default.lower()}/shared.lock")
+                    lockfile = fields.String(f"/var/lock/{appname.default}/shared.lock")
             
         … after defining your schema in this way, you can then instantiate it:
             
@@ -114,20 +114,51 @@ class Schema(abc.ABC, metaclass=MetaSchema):
         
         … The two preceding lines are equivalent – see the definition of 
         “clu.config.base.NamespacedMutableMapping” for further information.
+        
+        The Schema class initializes its instances through implementing a
+        “__new__(…)” method – When defining your own Schema subclass, it is
+        therefore advisable to add any initialization logic you may have in
+        a custom “__init__(…)” method, as you can omit calling up to the
+        superclass in such an implementation.
+        
+        ‡ – N.B. For the curious, what I am calling a “pseudo-module” here
+            isn’t a module at all; it is an instance of a private class called
+            “NamespacedFieldManager” that manages the statefulness necessary
+            for implementing namespacing using context-management. When you
+            import it using a “from” import statement, as above, a module-level
+            “__getattr__(…)” function within the “fieldtypes” module instances
+            the “NamespacedFieldManager” class and returns it anew each time.
     """
     
-    def __init__(self, **kwargs):
-        """ Initialize an instance of a Schema, passing keyword arguments
+    def __new__(cls, **kwargs):
+        """ Allocate a new instance of a Schema, passing keyword arguments
             as values with which to override the field defaults.
         """
-        self.__fields__ = Flat()
-        field_names, field_index = pyattrs(type(self), 'field_names',
-                                                       'field_index')
+        # Call up to allocate the new instance:
+        try:
+            instance = super(Schema, cls).__new__(cls, **kwargs)
+        except TypeError:
+            instance = super(Schema, cls).__new__(cls)
+        
+        # Create the “__fields__” attribute and retrieve the class-based
+        # field indexes, “__field_names__” and “__field_index__”:
+        instance.__fields__ = Flat()
+        field_names, field_index = pyattrs(cls, 'field_names',
+                                                'field_index')
+        
+        # Set each of the field-default values through a call to
+        # the underlying descriptor instances’ “get_default()” method:
         for field, nsfield in zip(field_names, field_index):
-            self.__fields__[nsfield] = stattr(self, field).get_default()
+            instance.__fields__[nsfield] = stattr(instance, field).get_default()
+        
+        # Override defaults with any instance-specific values,
+        # as specfied through keywords:
         for key, value in kwargs.items():
             if key in field_names:
-                setattr(self, key, value)
+                setattr(instance, key, value)
+        
+        # Return the new instance:
+        return instance
     
     def namespaces(self):
         """ Return a sorted tuple of all of the namespaces that have been
@@ -137,8 +168,8 @@ class Schema(abc.ABC, metaclass=MetaSchema):
     
     def nestify(self):
         """ Return an instance of “clu.config.base.Nested” – a concrete
-            NamespacedMutableMapping subclass – containing all of the 
-            data from the Schema – including embedded sub-Schemas.
+            NamespacedMutableMapping subclass – containing all of the data from
+            the Schema instance – including any embedded sub-Schema data.
         """
         out = Nested()
         for key, value in self.__fields__.items():
@@ -187,18 +218,22 @@ class Schema(abc.ABC, metaclass=MetaSchema):
         return yaml.dump(self.__json__())
     
     def to_string(self):
-        """ Return a stringified Python representation of this Schema’s data """
-        return str(self.__json__())
+        """ Return a prettified string representation of this Schema’s data """
+        from pprint import pformat
+        return str(pformat(self.__json__(), indent=4))
+    
+    def to_bytes(self):
+        """ Return a prettified and byte-encoded representation of this Schema’s data """
+        return self.to_string().encode(ENCODING)
     
     def __str__(self):
         return self.to_string()
     
     def __bytes__(self):
-        return self.to_string().encode(ENCODING)
+        return self.to_bytes()
     
     def __repr__(self):
-        field_names = getpyattr(type(self), 'field_names')
-        return stringify(self, field_names.keys())
+        return stringify(self, getpyattr(type(self), 'field_names').keys())
     
     def update(self, mapping):
         """ Update the Schema with data from a mapping instance. """
@@ -210,9 +245,10 @@ class Schema(abc.ABC, metaclass=MetaSchema):
                 setattr(self, key, value)
     
     def validate(self):
-        """ Validate the schema data.
+        """ Validate the schema data. Override this function to add
+            additional validation logic.
             
-            Override this function to add additional validation logic.
+            N.B. Be sure to call up using “super(…)” when overriding.
         """
         field_names, field_index = pyattrs(type(self), 'field_names',
                                                        'field_index')
@@ -225,6 +261,7 @@ class Schema(abc.ABC, metaclass=MetaSchema):
                 for v in value:
                     if hasattr(v, 'validate'):
                         v.validate()
+        return True
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

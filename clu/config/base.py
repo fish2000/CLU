@@ -12,6 +12,7 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import NoDefault
 from clu.naming import nameof
+from clu.predicates import isiterable
 from clu.typology import ismapping
 from clu.exporting import ValueDescriptor, Exporter
 
@@ -138,7 +139,11 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
             Update D from dict/iterable E and/or F.
         """
         if dictish is not NoDefault:
-            for key, value in dictish.items():
+            if hasattr(dictish, 'items'):
+                dictish = dictish.items()
+            if not isiterable(dictish):
+                raise TypeError(f"{dictish!r} is not iterable")
+            for key, value in dictish:
                 self[key] = value
         for key, value in updates.items():
             self[key] = value
@@ -229,7 +234,6 @@ class Flat(NamespacedMutableMapping):
         dic = repr(self.dictionary)
         hxa = hex(id(self))
         return f"{cnm}({dic}) @ {hxa}"
-
 
 @export
 class Nested(NamespacedMutableMapping):

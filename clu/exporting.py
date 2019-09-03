@@ -3,6 +3,7 @@ from __future__ import print_function
 from importlib.machinery import all_suffixes
 
 import abc
+import itertools
 import sys, os
 import warnings
 import weakref
@@ -193,9 +194,15 @@ def determine_name(thing, name=None, try_repr=False):
 # N.B. Items in the “replaceable_endings” tuple that
 # possibly contain other such items should appear
 # *before* the items that they contain, e.g.:
-replaceable_endings = ('.__init__.pyc', '.__main__.pyc',
-                       '.__init__.py',  '.__main__.py')
-replaceable_endings += tuple(all_suffixes())
+ending_prefixes = tuple(f"{os.extsep}{name}" \
+                                  for name \
+                                   in pytuple('init', 'main'))
+ending_suffixes = tuple(all_suffixes())
+replaceable_endings  = tuple(f"{pre}{suf}" \
+                            for pre, suf \
+                             in itertools.product(ending_prefixes,
+                                                  ending_suffixes))
+replaceable_endings += ending_suffixes
 
 def path_to_dotpath(path, relative_to=None):
     """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
@@ -221,7 +228,6 @@ def path_to_dotpath(path, relative_to=None):
     
     # Trim off any remaining “.py” suffixes,
     # and extraneous dot-prefixes:
-    # replaceable_endings = ('.__init__.py', '.__main__.py', '.py')
     for ending in replaceable_endings:
         if dotpath.endswith(ending):
             dotpath = dotpath[:len(dotpath)-len(ending)]

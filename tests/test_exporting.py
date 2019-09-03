@@ -14,6 +14,36 @@ class TestExporting(object):
     
     """ Run the tests for the clu.exporting module. """
     
+    def test_exporterbase_subclass_package(self, dirname):
+        from clu.exporting import Registry
+        from clu.fs import pypath
+        import os
+        
+        # Ensure “sys.path” contains the “yodogg” package:
+        prefix = dirname.subdirectory('yodogg')
+        assert prefix.exists
+        pypath.remove_invalid_paths()  # cleans “sys.path”
+        pypath.append_paths(prefix)    # extends “sys.path”
+        
+        # Bring in the package-specific ExporterBase subclass,
+        # as well as the module-local instance of that subclass,
+        # and an exemplary function that instance exports:
+        from yodogg.exporting import Exporter
+        from yodogg.iheard import exporter, youlike
+        
+        assert os.path.exists(exporter.path)
+        assert exporter.dotpath == 'yodogg.iheard'
+        assert 'clu' in Registry.all_appnames()
+        assert 'yodogg' in Registry.all_appnames()
+        assert len(Exporter.modulenames()) == 2 # “yodogg.exporting” and “yodogg.iheard”
+        assert len(exporter) == 1
+        assert exporter['youlike'] is youlike
+        assert Exporter['yodogg.iheard'] is exporter
+        assert Registry['yodogg'] is Exporter
+        
+        # __class_getitem__ method abuse 4 LYFE:
+        assert Registry['yodogg']['yodogg.iheard']['youlike']() == "registries"
+    
     def test_exporterbase_subclass(self, dirname):
         from clu.exporting import ExporterBase, Registry
         import os
@@ -33,6 +63,7 @@ class TestExporting(object):
         exporter = Exporter(path=yodogg.subpath('iheard.py'))
         export = exporter.decorator()
         
+        # Export an exemplary function:
         @export
         def youlike():
             return "registries"
@@ -47,19 +78,16 @@ class TestExporting(object):
         assert Exporter['yodogg.iheard'] is exporter
         assert Registry['yolocal'] is Exporter
         
+        # __class_getitem__ method abuse 4 LYFE:
         assert Registry['yolocal']['yodogg.iheard']['youlike']() == "registries"
     
-    @pytest.mark.TODO
     @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_exporter_instance_registry(self, clumods):
         from clu.constants.consts import BASEPATH
         from clu.constants.data import MODNAMES
         from clu.exporting import path_to_dotpath, Exporter
         
-        # Check the number of modules – N.B. these hardcoded
-        # numbers should be removed, TODO:
-        # assert len(MODNAMES) == 25
-        # assert len(clumods) == 20
+        # Sanity-check the number of modules:
         assert len(clumods) <= len(MODNAMES)
         
         # Check the Exporter instance against the module instance:

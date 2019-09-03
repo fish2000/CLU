@@ -196,7 +196,7 @@ class FieldBase(abc.ABC, metaclass=Slotted):
         
             >>> from clu.config.fieldtypes import fields
         
-        … you should be good to go†.
+        … you should be good to go‡.
         
         Validator functions, if provided, should be of the arity:
         
@@ -586,8 +586,7 @@ class DateTimeField(FieldBase):
     
     def __init__(self, default=None,
                        validator=None,
-                       extractor=None,
-                       allow_none=True):
+                       extractor=None):
         
         """ Initialize a DateTimeField – used to hold instances of “datetime.datetime”. """
         
@@ -602,8 +601,7 @@ class TimeDeltaField(FieldBase):
     
     def __init__(self, default=None,
                        validator=None,
-                       extractor=None,
-                       allow_none=True):
+                       extractor=None):
         
         """ Initialize a TimeDeltaField – used to hold instances of “datetime.timedelta”. """
         
@@ -852,10 +850,12 @@ class NamespaceContext(contextlib.AbstractContextManager,
             instance, forgoing hard (and potentially circular) references. The namespace
             argument must be passed as a string type.
         """
+        if not fieldmgr:
+            raise ValueError("A truthy fieldmanager instance is required")
         if not namespace:
             raise ValueError("A truthy namespace declaration is required")
         if not isstring(namespace):
-            raise ValueError("A string-type namespace declaration is required")
+            raise ValueError("A string namespace declaration is required")
         self.fieldmgr = weakref.ReferenceType(fieldmgr)
         self.namespace = namespace
     
@@ -910,8 +910,10 @@ class NamespacedFieldManager(object):
         return self.namespace_stack.pop()
     
     def _clear(self):
-        """ Reset the namespace stack to a pristine empty list. """
+        """ Reset the namespace stack to a pristine list, returning the previous value. """
+        out = self.namespace_stack
         self.namespace_stack = []
+        return out
     
     def ns(self, namespace):
         """ The context-management wrapper method for creating a new namespace.
@@ -934,9 +936,16 @@ class NamespacedFieldManager(object):
     def __len__(self):
         return len(self.namespace_stack)
     
+    def __iter__(self):
+        # TODO: make this iterate over the currently defined field instances:
+        return iter(self.namespace_stack)
+    
     def __repr__(self):
         return f"<pseudo-module '{self.__module__}.{self.__name__}' from '{self.__file__}' " \
                f"[{self.__module__}.{self.__class__.__name__} instance @ {hex(id(self))}]>"
+    
+    def __bool__(self):
+        return True
     
     @field
     def Schema(self,        cls,

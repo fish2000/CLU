@@ -21,7 +21,7 @@ include tox.ini
 
 recursive-include clu *
 recursive-include requirements *.txt
-recursive-include tests *.py *.jpg *.png
+recursive-include tests *.py *.jpg *.png *.toml *.json
 
 recursive-exclude clu *.pyc *~ *.so .DS_Store
 recursive-exclude requirements *.pyc *~ *.so .DS_Store

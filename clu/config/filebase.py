@@ -126,29 +126,6 @@ class FileName(AppName):
             raise FileNotFoundError(f"Couldn’t find config file {file_name}")
         return Directory(root_dir.realpath()).subpath(file_name)
 
-
-systems = { SYSTEM }
-if SYSTEM is System.DARWIN:
-    systems |= { System.LINUX2 }
-
-if 'XDG_CONFIG_DIRS' in os.environ:
-    xdgs = os.environ.get('XDG_CONFIG_DIRS')
-    dirs = (Directory(xdg) for xdg in xdgs.split(os.pathsep))
-    site_dirs = set(d.subdirectory(PROJECT_NAME) for d in dirs)
-else:
-    site_dirs = set()
-
-if 'XDG_CONFIG_HOME' in os.environ:
-    xdg = os.environ.get('XDG_CONFIG_HOME')
-    user_dirs = set(tuplize(Directory(xdg).subdirectory(PROJECT_NAME)))
-else:
-    user_dirs = set()
-
-for system in systems:
-    app_dirs = AppDirs(appname=PROJECT_NAME, system=system)
-    site_dirs |= { app_dirs.site_config }
-    user_dirs |= { app_dirs.user_config }
-
 @export
 class FileBase(NamespacedMutableMapping, FileName):
     
@@ -258,17 +235,3 @@ class FileBase(NamespacedMutableMapping, FileName):
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
-
-def test():
-    from pprint import pprint
-    
-    print("» SITE DIRS:")
-    pprint(site_dirs)
-    print()
-    
-    print("» USER DIRS:")
-    pprint(user_dirs)
-    print()
-
-if __name__ == '__main__':
-    test()

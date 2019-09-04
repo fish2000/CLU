@@ -52,7 +52,7 @@ class JsonFile(JsonFileBase, appname=json_appname,
         assign values that are CLU-specific.
         
         CLU users who wish to use JSON files as NamespacedMutableMappings
-        in their own projects should create a subclass of TomlFileBase of
+        in their own projects should create a subclass of JsonFileBase of
         their own. Like this one, it needs to assign both the “appname”
         and the “filename” class keywords; it is unnecessary (but OK!) to
         define further methods, properties, class constants, and whatnot.

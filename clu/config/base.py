@@ -10,7 +10,7 @@ import collections.abc
 
 abstract = abc.abstractmethod
 
-from clu.constants.consts import NoDefault
+from clu.constants.consts import DEBUG, NoDefault
 from clu.naming import nameof
 from clu.predicates import isiterable
 from clu.typology import ismapping
@@ -175,6 +175,11 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
         ns, string = self.unpack_ns(key)
         return self.delete(string, namespace=ns)
     
+    def __missing__(self, key):
+        if DEBUG:
+            print(f"__missing__(…): {key}")
+        raise KeyError(key)
+    
     def __bool__(self):
         return len(self.keys()) > 0
 
@@ -191,7 +196,7 @@ class Flat(NamespacedMutableMapping):
     def get(self, key, namespace=None, default=NoDefault):
         nskey = self.pack_ns(key, namespace=namespace)
         if default is NoDefault:
-            return self.dictionary.get(nskey)
+            return self.dictionary[nskey]
         return self.dictionary.get(nskey, default)
     
     def set(self, key, value, namespace=None):
@@ -248,11 +253,11 @@ class Nested(NamespacedMutableMapping):
     def get(self, key, namespace=None, default=NoDefault):
         if namespace is None:
             if default is NoDefault:
-                return self.tree.get(key)
+                return self.tree[key]
             return self.tree.get(key, default)
         elif namespace in self.namespaces():
             if default is NoDefault:
-                return self.tree[namespace].get(key)
+                return self.tree[namespace][key]
             return self.tree[namespace].get(key, default)
         raise KeyError(f"Unknown namespace: {namespace}")
     

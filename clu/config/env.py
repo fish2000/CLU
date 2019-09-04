@@ -115,7 +115,7 @@ class EnvBase(NamespacedMutableMapping, AppName):
             if type(self).envkey(key, namespace) in self.environment:
                 self.delete(key, namespace=namespace)
         else:
-            self.environment[type(self).envkey(key, namespace)] = value
+            self.environment[type(self).envkey(key, namespace)] = str(value)
     
     def delete(self, key, namespace=None):
         """ Delete a (possibly namespaced) variable from the environment. """

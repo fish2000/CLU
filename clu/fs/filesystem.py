@@ -246,6 +246,7 @@ def temporary(suffix='', prefix='', parent=None, **kwargs):
         raise FilesystemError(f"temporary(): file exists: {fullpth}")
     return fullpth
 
+@export
 class TypeLocker(abc.ABCMeta):
     
     """ clu.fs.filesystem.TypeLocker is a metaclass that does two
@@ -563,8 +564,8 @@ class TemporaryName(collections.abc.Hashable,
         return filesize(self._name)
     
     def split(self):
-        """ Return (dirname, basename) e.g. for /yo/dogg/i/heard/youlike,
-            you get back (Directory("/yo/dogg/i/heard"), "youlike")
+        """ Return (dirname, basename) e.g. for /yo/dogg/i/heard/youlike.jpg,
+            you get back (Directory("/yo/dogg/i/heard"), "youlike.jpg")
         """
         return self.dirname, self.basename
     

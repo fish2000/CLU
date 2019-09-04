@@ -2,19 +2,136 @@
 from __future__ import print_function
 
 import abc
+import os
+
+abstract = abc.abstractmethod
 
 from clu.constants.consts import ENCODING, PYTHON_VERSION
 from clu.config.base import Flat, Nested
 from clu.config.fieldtypes import FieldBase
 from clu.fs.misc import stringify
 from clu.predicates import haspyattr, getpyattr, stattr, pyattrs, iscontainer, no_op
-from clu.typology import ismapping
-from clu.exporting import Exporter
+from clu.typology import ismapping, isstring
+from clu.exporting import Slotted, Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 NEED_NAME = PYTHON_VERSION < 3.6
+
+class Nestifier(abc.ABC):
+    
+    @abstract
+    def namespaced_fields(self):
+        """ Return a NamespacedMutableMapping of fields """
+        ...
+    
+    def nestify(self, stringify=False, **kwargs):
+        """ Return an instance of “clu.config.base.Nested” – a concrete
+            NamespacedMutableMapping subclass – containing all of the data from
+            the Schema instance – including any embedded sub-Schema data.
+        """
+        converter = stringify and str or no_op
+        out = Nested()
+        # out = self.namespaced_fields().nestify()
+        for key, value in self.namespaced_fields().items():
+            keywords = dict(stringify=stringify,
+                            instance=kwargs.get('instance', self))
+            if haspyattr(value, 'json'):
+                out[key] = value.__json__(**keywords)
+            elif iscontainer(value):
+                out[key] = tuple(v.__json__(**keywords) if haspyattr(v, 'json') else v for v in value)
+            elif ismapping(value):
+                out[key] = dict((k, v.__json__(**keywords) if haspyattr(v, 'json') else k, v) \
+                             for k, v in value.items())
+            else:
+                out[key] = (value is not None) and converter(value) or value
+        return out
+    
+    def __json__(self, **kwargs):
+        """ Return a nested set of dicts, suitable for serializing as JSON
+            (and other similar formats).
+        """
+        return self.nestify(instance=self, **kwargs).tree
+
+class Namespace(FieldBase, Nestifier, metaclass=Slotted):
+    
+    __slots__ = ('namespaced_dict', 'namespace', 'initialized')
+    
+    def __new__(cls, *args, **kwargs):
+        try:
+            instance = super(Namespace, cls).__new__(cls, *args, **kwargs)
+        except TypeError:
+            instance = super(Namespace, cls).__new__(cls)
+        # super(Namespace, instance).__setattr__('namespaced_dict', None)
+        # super(Namespace, instance).__setattr__('namespace',       None)
+        # super(Namespace, instance).__setattr__('initialized',     False)
+        instance.namespaced_dict = None
+        instance.namespace = None
+        instance.initialized = False
+        return instance
+    
+    def __init__(self, namespaced_dict, namespace=None):
+        if not namespaced_dict:
+            raise ValueError("A truthy namespaced dictionary is required")
+        if not namespace:
+            raise ValueError("A truthy namespace declaration is required")
+        if not isstring(namespace):
+            raise ValueError("A string namespace declaration is required")
+        # self.namespaced_dict = weakref.ReferenceType(namespaced_dict)
+        # master_dict = Flat()
+        # master_dict.update(namespaced_dict.items(namespace))
+        self.namespaced_dict = Flat()
+        self.namespaced_dict.update(namespaced_dict.items(namespace))
+        # self.namespace = namespace
+        self.__set_name__(None, namespace)
+        self.initialized = True
+        # super(Namespace, self).__setattr__('namespaced_dict', weakref.ReferenceType(namespaced_dict))
+        # super(Namespace, self).__setattr__('namespace',       namespace)
+        # super(Namespace, self).__setattr__('initialized',     True)
+    
+    def __getattr__(self, key):
+        try:
+            return self.namespaced_fields().get(key, namespace=self.namespace)
+        except KeyError:
+            if key == 'name':
+                return object.__getattribute__(self, 'namespace')
+            return object.__getattribute__(self, key)
+    
+    # def __setattr__(self, key, value):
+    #     self.namespaced_dict().set(key, value, namespace=self.namespace)
+    
+    def __delattr__(self, key):
+        self.namespaced_fields().delete(key,     namespace=self.namespace)
+    
+    def __set_name__(self, cls, name):
+        self.namespace = name
+    
+    def get_default(self):
+        return self
+    
+    def namespaced_fields(self):
+        return self.namespaced_dict
+    
+    def __get__(self, instance, cls=None):
+        return self
+    
+    def __set__(self, instance, value):
+        return value
+    
+    def __delete__(self, instance):
+        pass
+    
+    def __json__(self, **kwargs):
+        # return self.nestify(**kwargs).tree
+        return self.namespaced_fields().nestify().tree
+    
+    # def __str__(self):
+    #     return self.namespace
+    
+    # @property
+    # def name(self):
+    #     return self.namespace
 
 class MetaSchema(abc.ABCMeta):
     
@@ -59,6 +176,13 @@ class MetaSchema(abc.ABCMeta):
                     field_index.set(attribute, value,
                                     namespace=value.namespace)
         
+        for namespace in field_index.namespaces():
+            nsfield = Namespace(field_index, namespace=namespace)
+            if NEED_NAME:
+                nsfield.__set_name__(None, namespace)
+            attributes[namespace] = nsfield
+            field_names[namespace] = nsfield
+        
         # Add both the field-index and the field-names mappings
         # to the class dictionary for the new type:
         attributes['__field_index__'] = field_index
@@ -71,7 +195,7 @@ class MetaSchema(abc.ABCMeta):
                                                          **kwargs)
 
 @export
-class Schema(abc.ABC, metaclass=MetaSchema):
+class Schema(Nestifier, metaclass=MetaSchema):
     
     """ The Schema class is the root class for all CLU configuration schemas.
         
@@ -160,30 +284,14 @@ class Schema(abc.ABC, metaclass=MetaSchema):
         # Return the new instance:
         return instance
     
+    def namespaced_fields(self):
+        return self.__fields__
+    
     def namespaces(self):
         """ Return a sorted tuple of all of the namespaces that have been
             defined on this Schema.
         """
-        return self.__fields__.namespaces()
-    
-    def nestify(self, stringify=False):
-        """ Return an instance of “clu.config.base.Nested” – a concrete
-            NamespacedMutableMapping subclass – containing all of the data from
-            the Schema instance – including any embedded sub-Schema data.
-        """
-        converter = stringify and str or no_op
-        out = Nested()
-        for key, value in self.__fields__.items():
-            if haspyattr(value, 'json'):
-                out[key] = value.__json__(stringify=stringify)
-            elif iscontainer(value):
-                out[key] = tuple(v.__json__(stringify=stringify) if haspyattr(v, 'json') else v for v in value)
-            elif ismapping(value):
-                out[key] = dict((k, v.__json__(stringify=stringify) if haspyattr(v, 'json') else k, v) \
-                             for k, v in value.items())
-            else:
-                out[key] = (value is not None) and converter(value) or value
-        return out
+        return self.namespaced_fields().namespaces()
     
     def __json__(self, **kwargs):
         """ Return a nested set of dicts, suitable for serializing as JSON
@@ -269,6 +377,8 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     from clu.config.fieldtypes import fields
+    from clu.config.formats import JsonFile
+    from clu.fs.filesystem import TemporaryName
     from clu.repl.ansi import print_separator
     from pprint import pprint
     
@@ -285,8 +395,8 @@ def test():
         
         with fields.ns('yodogg'):
             
-            yodogg = fields.String("Yo dogg,")
             iheard = fields.String("I heard")
+            youlike = fields.String("you like:")
             andalso = fields.Tuple(value=fields.String("«also»", allow_none=False))
     
     instance = MySchema()
@@ -296,7 +406,20 @@ def test():
     
     print("» JSON:")
     print()
-    print(instance.to_json())
+    # print(instance.to_json())
+    
+    with TemporaryName(prefix='temp-config-settings-',
+                       suffix='json',
+                       randomize=True) as tj:
+        jsonfile = JsonFile(tj.name, filename=os.path.split(tj.name)[-1])
+        jsonfile.update(instance.nestify(stringify=False))
+        json = jsonfile.dumps()
+        # pprint(jsonfile.tree)
+    
+    assert not jsonfile.exists
+    print(json)
+    
+    print()
     print()
     
     # YOU CAN’T HANDLE THE “NoneType”:
@@ -305,15 +428,15 @@ def test():
     # print(instance.to_plist())
     # print()
     
-    print("» TOML:")
-    print()
-    print(instance.to_toml())
-    print()
+    # print("» TOML:")
+    # print()
+    # print(instance.to_toml())
+    # print()
     
-    print("» YAML:")
-    print()
-    print(instance.to_yaml())
-    print()
+    # print("» YAML:")
+    # print()
+    # print(instance.to_yaml())
+    # print()
     
     print("» __repr__(…):")
     print()

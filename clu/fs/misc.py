@@ -26,7 +26,7 @@ none_function = wrap_value(None)
 true_function = wrap_value(True)
 
 @export
-def stringify(instance, fields):
+def stringify(instance, fields, *, try_callables=True):
     """ Stringify an object instance, using an iterable field list to
         extract and render its values, and printing them along with the 
         typename of the instance and its memory address -- yielding a
@@ -40,11 +40,21 @@ def stringify(instance, fields):
             def __repr__(self):
                 return stringify(self, type(self).__slots__)
         
+        Callable fields, by default, will be called with no arguments
+        to obtain their value. To supress this behavior – if you wish
+        to represent callable fields that require arguments – you can
+        pass the keyword-only “try_callables” flag as False:
+            
+            def __repr__(self):
+                return stringify(self,
+                            type(self).__slots__,
+                            try_callables=False)
     """
     field_dict = {}
     for field in fields:
         field_value = getattr(instance, field, "")
-        field_value = callable(field_value) and field_value() or field_value
+        if try_callables:
+            field_value = callable(field_value) and field_value() or field_value
         if field_value:
             field_dict.update({ u8str(field) : field_value })
     field_dict_items = []

@@ -50,9 +50,10 @@ class MySchema(Schema):
     
     with fields.ns('yodogg'):
         
-        yodogg = fields.String("Yo dogg,")
-        iheard = fields.String("I heard")
-        andalso = fields.String(f"and: {title.default}")
+        iheard = fields.String("…I heard")
+        youlike = fields.String("you like:")
+        # andalso = fields.String(f"and: {title.default}")
+        andalso = fields.Tuple(value=fields.String("«also»", allow_none=False))
 
 
 

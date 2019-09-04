@@ -15,10 +15,12 @@ from clu.config.base import NAMESPACE_SEP
 from clu.fs.misc import stringify, wrap_value
 from clu.naming import nameof
 from clu.predicates import (negate, isclasstype,
-                            getpyattr, always, no_op,
+                            getpyattr, always, no_op, attr,
                             uncallable, isexpandable, iscontainer,
                             tuplize, slots_for)
-from clu.typology import ismapping, isnumber, isstring, ispath, isvalidpath
+from clu.typology import (isderivative, ismapping,
+                                        isnumber,
+                                        isstring, ispath, isvalidpath)
 from clu.exporting import Slotted, Exporter
 
 exporter = Exporter(path=__file__)
@@ -266,9 +268,9 @@ class FieldBase(abc.ABC, metaclass=Slotted):
     def __get__(self, instance, cls=None):
         if instance is None:
             return self
-        return getpyattr(instance, 'fields').get(self.name,
-                                       namespace=self.namespace,
-                                         default=self.default or NoDefault)
+        return getpyattr(instance, 'fields').get(attr(self, 'name', 'namespace'),
+                                            namespace=self.namespace,
+                                              default=self.default or NoDefault)
     
     def __set__(self, instance, value):
         # Check for outlawed Nones:
@@ -300,7 +302,16 @@ class FieldBase(abc.ABC, metaclass=Slotted):
         return self.name
     
     def __repr__(self):
-        return stringify(self, slots_for(type(self)))
+        # slots = (slot for slot in slots_for(type(self)) if slot not in ('validator', 'extractor'))
+        return stringify(self,
+               slots_for(self),
+               try_callables=False)
+    
+    def __json__(self, **kwargs):
+        instance = kwargs.get('instance')
+        return self.__get__(instance, cls=None)
+
+predicate_for = lambda cls: lambda thing: isderivative(thing, cls)
 
 @export
 class SchemaField(FieldBase):
@@ -314,12 +325,11 @@ class SchemaField(FieldBase):
             it’s a Schema-backed fieldset).
         """
         self.cls = cls
-        isthisclass = lambda thing: isinstance(thing, cls)
         super(SchemaField, self).__init__(default=cls,
                                           validator=functional_and(validator,
-                                                                   isthisclass,
+                                                                   predicate_for(cls),
                                                                    isclasstype))
-        
+    
     def __set__(self, instance, value):
         try:
             if ismapping(value):
@@ -580,8 +590,8 @@ class BooleanField(FieldBase):
                                            extractor=functional_set(extractor, bool),
                                            allow_none=False)
 
-isdatetime = lambda thing: isinstance(thing, datetime)
-istimedelta = lambda thing: isinstance(thing, timedelta)
+isdatetime = predicate_for(datetime)
+istimedelta = predicate_for(timedelta)
 
 @export
 class DateTimeField(FieldBase):
@@ -1045,6 +1055,7 @@ def __getattr__(key):
 
 # MODULE EXPORTS:
 export(hoist,           name='hoist',           doc="hoist(thing) → if “thing” isn’t already callable, turn it into a lambda that returns it as a value (using “wrap_value(…)”).")
+export(predicate_for,   name='predicate_for',   doc="predicate_for(cls) → a predicate factory, returning a new predicate function that returns True for instances of “cls”")
 export(isdatetime,      name='isdatetime',      doc="isdatetime(thing) → boolean predicate, True if `thing` is an instance of “datetime.datetime”")
 export(istimedelta,     name='istimedelta',     doc="istimedelta(thing) → boolean predicate, True if `thing` is an instance of “datetime.timedelta”")
 

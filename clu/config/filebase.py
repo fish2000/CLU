@@ -5,11 +5,11 @@ from abc import abstractmethod as abstract
 import os
 import sys
 
-from clu.constants.consts import PROJECT_NAME
 from clu.constants.enums import System, SYSTEM
 from clu.config.base import AppName, NamespacedMutableMapping
 from clu.fs.appdirectories import AppDirs
-from clu.fs.filesystem import TemporaryName, Directory
+from clu.fs.filesystem import TypeLocker, TemporaryName, Directory
+from clu.fs.misc import filesize
 from clu.fs import pypath
 from clu.predicates import isiterable, tuplize
 from clu.typology import isvalidpath
@@ -127,7 +127,7 @@ class FileName(AppName):
         return Directory(root_dir.realpath()).subpath(file_name)
 
 @export
-class FileBase(NamespacedMutableMapping, FileName):
+class FileBase(NamespacedMutableMapping, FileName, metaclass=TypeLocker):
     
     """ The FileBase abstract base class furnishes two methods:
         
@@ -182,6 +182,45 @@ class FileBase(NamespacedMutableMapping, FileName):
         
         if isvalidpath(self.filepath):
             self.load()
+    
+    @property
+    def name(self):
+        return self.filepath
+    
+    @property
+    def basename(self):
+        """ The basename (aka the filename) of the config file path. """
+        return os.path.basename(self._name)
+    
+    @property
+    def dirname(self):
+        """ The dirname (aka the enclosing directory) of the config file. """
+        return self.parent()
+    
+    @property
+    def exists(self):
+        return os.path.isfile(self.name)
+    
+    @property
+    def filesize(self):
+        """ The filesize for the config file """
+        return filesize(self.name)
+    
+    def split(self):
+        """ Return (dirname, basename) e.g. for /yo/dogg/i/heard/youlike.jpg,
+            you get back (Directory("/yo/dogg/i/heard"), "youlike.jpg")
+        """
+        return self.dirname, self.basename
+    
+    def parent(self):
+        """ Sugar for `os.path.abspath(os.path.join(self.name, os.pardir))`
+            which, if you are curious, gets you the parent directory of
+            the instances’ target filename, wrapped in a Directory
+            instance.
+        """
+        return self.directory(os.path.abspath(
+                              os.path.join(self.name,
+                                           os.pardir)))
     
     def load(self, filepath=None):
         """ Load from a file, either from a specified “filepath,” or

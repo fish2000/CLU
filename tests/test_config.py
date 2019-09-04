@@ -30,11 +30,11 @@ class TestConfig(object):
         assert 'YODOGG_METADATA_AUTHOR' not in environment
         assert 'YODOGG_METADATA_COPYRIGHT' not in environment
         
-        assert 'YODOGG_YODOGG_YODOGG' not in environment
         assert 'YODOGG_YODOGG_IHEARD' not in environment
+        assert 'YODOGG_YODOGG_YOULIKE' not in environment
         assert 'YODOGG_YODOGG_ANDALSO' not in environment
         
-        env.update(schema.nestify(stringify=True))
+        env.update(schema.nestify(stringify=False))
         
         assert environment['YODOGG_TITLE'] == "YoDoggApp"
         assert environment['YODOGG_VERSION'] == "1"
@@ -46,9 +46,9 @@ class TestConfig(object):
         assert 'YODOGG_METADATA_CONSIDERATIONS' not in environment
         assert environment['YODOGG_METADATA_COPYRIGHT']
         
-        assert environment['YODOGG_YODOGG_YODOGG'] == "Yo dogg,"
-        assert environment['YODOGG_YODOGG_IHEARD'] == "I heard"
-        assert environment['YODOGG_YODOGG_ANDALSO'] == "and: YoDoggApp"
+        assert environment['YODOGG_YODOGG_IHEARD'] == "…I heard"
+        assert environment['YODOGG_YODOGG_YOULIKE'] == "you like:"
+        # assert environment['YODOGG_YODOGG_ANDALSO'] == "and: YoDoggApp"
     
     def test_package_schema(self, dirname):
         from datetime import datetime
@@ -77,9 +77,9 @@ class TestConfig(object):
         assert schema.copyright.startswith("YoDoggApp")
         
         # NAMESPACE: yodogg
-        assert schema.yodogg        == "Yo dogg,"
-        assert schema.iheard        == "I heard"
-        assert schema.andalso       == "and: YoDoggApp"
+        # assert schema.yodogg.iheard        == "…I heard"
+        assert schema.youlike       == "you like:"
+        # assert schema.andalso       == "and: YoDoggApp"
     
     def test_nested_and_flat(self):
         from clu.config.base import Nested

@@ -55,7 +55,7 @@ class FileName(AppName):
             corresponding to one of the valid entries in the “sys.path” list
         """
         pypath.remove_invalid_paths()
-        return tuple(Directory(p) for p in sys.path)
+        return tuple(Directory(p) for p in sys.path if os.path.isdir(p))
     
     @classmethod
     def site_dirs(cls):

@@ -1,3 +1,4 @@
 -r install.txt
 check-manifest>=0.36
 pytest>=5.0.0
+PyYAML>=5.0.0

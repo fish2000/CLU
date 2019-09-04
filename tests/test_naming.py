@@ -120,7 +120,6 @@ class TestNaming(object):
             raise Nondeterminism(f"Nondeterminism in qualified_name(types) → {qname}")
     
     @pytest.mark.nondeterministic
-    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_qualified_import(self):
         """ » Checking “qualified_import(¬) …” """
         from clu.naming import qualified_import, qualified_name

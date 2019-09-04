@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import pytest
-
 class TestKeyValue(object):
     
     """ Run the tests for the clu.keyvalue module. """
     
-    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_keyvalue_cluinterface_basics(self, environment,
                                                 temporarydir):
         from clu.keyvalue import CLUInterface
@@ -45,7 +42,6 @@ class TestKeyValue(object):
         
         assert len(tuple(temporarydir.ls())) == 4
     
-    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_keyvalue_cluinterface_long_text(self, environment,
                                                    temporarydir,
                                                    greektext):

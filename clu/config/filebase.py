@@ -10,7 +10,7 @@ from clu.constants.enums import System, SYSTEM
 from clu.config.base import AppName, NamespacedMutableMapping
 from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import TemporaryName, Directory
-from clu.fs.pypath import remove_invalid_paths
+from clu.fs import pypath
 from clu.predicates import isiterable, tuplize
 from clu.typology import isvalidpath
 from clu.exporting import ValueDescriptor, Exporter
@@ -54,7 +54,7 @@ class FileName(AppName):
         """ Return a tuple of “clu.fs.filesystem.Directory” instances, each
             corresponding to one of the valid entries in the “sys.path” list
         """
-        remove_invalid_paths()
+        pypath.remove_invalid_paths()
         return tuple(Directory(p) for p in sys.path)
     
     @classmethod

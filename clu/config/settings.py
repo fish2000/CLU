@@ -10,7 +10,10 @@ from clu.constants.consts import ENCODING, PYTHON_VERSION
 from clu.config.base import Flat, Nested
 from clu.config.fieldtypes import FieldBase
 from clu.fs.misc import stringify
-from clu.predicates import haspyattr, getpyattr, stattr, pyattrs, iscontainer, no_op
+from clu.predicates import (haspyattr, getpyattr,
+                            stattr, pyattrs,
+                            always, no_op,
+                            iscontainer)
 from clu.typology import ismapping, isstring
 from clu.exporting import Slotted, Exporter
 
@@ -63,8 +66,12 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
         except TypeError:
             instance = super(Namespace, cls).__new__(cls)
         instance.namespaced_dict = None
+        instance.default = None
         instance.namespace = None
         instance.initialized = False
+        instance.allow_none = False
+        instance.validator = always
+        instance.extractor = no_op
         return instance
     
     def __init__(self, namespaced_dict, namespace=None):
@@ -76,22 +83,15 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
             raise ValueError("A string namespace declaration is required")
         self.namespaced_dict = Flat()
         self.namespaced_dict.update(namespaced_dict.items(namespace))
-        self.__set_name__(None, namespace)
+        self.default = Flat()
+        self.name = namespace
         self.initialized = True
     
     def __getattr__(self, key):
         try:
-            return self.namespaced_fields().get(key, namespace=self.namespace)
+            return self.default.get(key, namespace=self.namespace)
         except KeyError:
-            if key == 'name':
-                return object.__getattribute__(self, 'namespace')
             return object.__getattribute__(self, key)
-    
-    # def __delattr__(self, key):
-    #     self.namespaced_fields().delete(key,     namespace=self.namespace)
-    
-    def __set_name__(self, cls, name):
-        self.namespace = name
     
     def get_default(self):
         return self
@@ -99,18 +99,34 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
     def namespaced_fields(self):
         return self.namespaced_dict
     
+    @property
+    def name(self):
+        return self.namespace
+    
+    @name.setter
+    def name(self, value):
+        self.namespace = str(value)
+    
+    def __set_name__(self, cls, name):
+        self.name = name
+    
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        # return stringify(self, self.default.keys())
+        return repr(self.default)
+    
     def __get__(self, instance, cls=None):
+        self.default.update(instance.namespaced_fields().items(namespace=self.name))
         return self
     
     def __set__(self, instance, value):
+        # self.default.update(instance.namespaced_fields().items(namespace=self.name))
         return value
     
-    def __delete__(self, instance):
-        pass
-    
     def __json__(self, **kwargs):
-        # return self.nestify(**kwargs).tree
-        return self.namespaced_fields().nestify().tree
+        return self.default.nestify().tree
 
 class MetaSchema(abc.ABCMeta):
     
@@ -260,6 +276,10 @@ class Schema(Nestifier, metaclass=MetaSchema):
             if key in field_names:
                 setattr(instance, key, value)
         
+        for namespace in instance.__fields__.namespaces():
+            if namespace in field_names:
+                setattr(instance, namespace, field_names[namespace])
+        
         # Return the new instance:
         return instance
     
@@ -341,8 +361,8 @@ class Schema(Nestifier, metaclass=MetaSchema):
         field_names, field_index = pyattrs(type(self), 'field_names',
                                                        'field_index')
         for field, nsfield in zip(field_names, field_index):
-            setattr(self, field, self.__fields__[nsfield])
-        for value in self.__fields__.values():
+            setattr(self, field, self.namespaced_fields()[nsfield])
+        for value in self.namespaced_fields().values():
             if hasattr(value, 'validate'):
                 value.validate()
             elif iscontainer(value):
@@ -378,106 +398,132 @@ def test():
             youlike = fields.String("you like:")
             andalso = fields.Tuple(value=fields.String("«also»", allow_none=False))
     
-    instance = MySchema()
-    instance.validate()
+    def test_one():
     
-    print_separator()
+        instance = MySchema()
+        instance.validate()
+        
+        print_separator()
+        
+        print("str(instance.yodogg) =",  str(instance.yodogg))
+        print()
+        print("repr(instance.yodogg) =", repr(instance.yodogg))
+        print()
+        print("str(instance.yodogg.iheard) =",  str(instance.yodogg.iheard))
+        print()
+        print("repr(instance.yodogg.iheard) =", repr(instance.yodogg.iheard))
+        print()
+        
+        print_separator()
+        
+        print("» JSON:")
+        print()
+        # print(instance.to_json())
+        
+        with TemporaryName(prefix='temp-config-settings-',
+                           suffix='json',
+                           randomize=True) as tj:
+            jsonfile = JsonFile(tj.name, filename=os.path.split(tj.name)[-1])
+            jsonfile.update(instance.nestify(stringify=False))
+            json = jsonfile.dumps()
+            # pprint(jsonfile.tree)
+        
+        assert not jsonfile.exists
+        print(json)
+        print()
+        print_separator()
+        
+        # YOU CAN’T HANDLE THE “NoneType”:
+        # print("» PLIST:")
+        # print()
+        # print(instance.to_plist())
+        # print()
+        # print_separator()
+        
+        print("» TOML:")
+        print()
+        print(instance.to_toml())
+        print()
+        print_separator()
+        
+        # print("» YAML:")
+        # print()
+        # print(instance.to_yaml())
+        # print()
+        # print_separator()
+        
+        print("» __repr__(…):")
+        print()
+        print(repr(instance))
+        print()
+        print_separator()
+        
+        print("» namespaces:")
+        print()
+        pprint(instance.namespaces())
+        print()
+        # print_separator()
     
-    print("» JSON:")
-    print()
-    # print(instance.to_json())
+    def test_two():
+        print_separator(filler='•')
+        
+        instance0 = MySchema(title="YO DOGG", count=666, where=-8)
+        instance0.validate()
+        
+        instance0.considerations = "Whatever man."
+        instance0.iheard = "Actually I haven’t heard."
+        instance0.andalso = ('additionally', 'we', 'put', 'some', 'strings')
+        
+        print("» JSON:")
+        print()
+        print(instance0.to_json())
+        print()
+        
+        # YOU CAN’T HANDLE THE “NoneType”:
+        # print_separator()
+        # print("» PLIST:")
+        # print()
+        # print(instance0.to_plist())
+        # print()
+        
+        print_separator()
+        print("» TOML:")
+        print()
+        print(instance0.to_toml())
+        print()
+        
+        print_separator()
+        print("» YAML:")
+        print()
+        print(instance0.to_yaml())
+        print()
+        
+        print_separator()
+        print("» __repr__(…):")
+        print()
+        print(repr(instance0))
+        print()
+        
+        print_separator()
+        print("» __str__(…):")
+        print()
+        print(str(instance0))
+        print()
+        
+        print_separator()
+        print("» __bytes__(…):")
+        print()
+        print(bytes(instance0))
+        print()
+        
+        print_separator()
+        print("» namespaces:")
+        print()
+        pprint(instance0.namespaces())
+        print()
     
-    with TemporaryName(prefix='temp-config-settings-',
-                       suffix='json',
-                       randomize=True) as tj:
-        jsonfile = JsonFile(tj.name, filename=os.path.split(tj.name)[-1])
-        jsonfile.update(instance.nestify(stringify=False))
-        json = jsonfile.dumps()
-        # pprint(jsonfile.tree)
-    
-    assert not jsonfile.exists
-    print(json)
-    
-    print()
-    print()
-    
-    # YOU CAN’T HANDLE THE “NoneType”:
-    # print("» PLIST:")
-    # print()
-    # print(instance.to_plist())
-    # print()
-    
-    # print("» TOML:")
-    # print()
-    # print(instance.to_toml())
-    # print()
-    
-    # print("» YAML:")
-    # print()
-    # print(instance.to_yaml())
-    # print()
-    
-    print("» __repr__(…):")
-    print()
-    print(repr(instance))
-    print()
-    
-    print("» namespaces:")
-    print()
-    pprint(instance.namespaces())
-    print()
-    
-    print_separator()
-    
-    instance0 = MySchema(title="YO DOGG", count=666, where=-8)
-    instance0.validate()
-    
-    instance0.considerations = "Whatever man."
-    instance0.iheard = "Actually I haven’t heard."
-    instance0.andalso = ('additionally', 'we', 'put', 'some', 'strings')
-    
-    print("» JSON:")
-    print()
-    print(instance0.to_json())
-    print()
-    
-    # YOU CAN’T HANDLE THE “NoneType”:
-    # print("» PLIST:")
-    # print()
-    # print(instance0.to_plist())
-    # print()
-    
-    print("» TOML:")
-    print()
-    print(instance0.to_toml())
-    print()
-    
-    print("» YAML:")
-    print()
-    print(instance0.to_yaml())
-    print()
-    
-    print("» __repr__(…):")
-    print()
-    print(repr(instance0))
-    print()
-    
-    print("» __str__(…):")
-    print()
-    print(str(instance0))
-    print()
-    
-    print("» __bytes__(…):")
-    print()
-    print(bytes(instance0))
-    print()
-    
-    print("» namespaces:")
-    print()
-    pprint(instance0.namespaces())
-    print()
-
-
+    test_one()
+    # test_two()
 
 if __name__ == '__main__':
     test()

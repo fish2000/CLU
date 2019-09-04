@@ -15,7 +15,6 @@ class TestConfig(object):
         pypath.remove_invalid_paths()  # cleans “sys.path”
         pypath.append_paths(prefix)    # extends “sys.path”
         
-        # from yodogg.config import Env, JsonFile, TomlFile
         from yodogg.config import Env
         from yodogg.config import MySchema
         
@@ -42,7 +41,6 @@ class TestConfig(object):
         
         assert environment['YODOGG_METADATA_RELEASEDATE']
         assert environment['YODOGG_METADATA_AUTHOR'] == "Alexander Böhn"
-        # assert environment['YODOGG_METADATA_CONSIDERATIONS'] is None
         assert 'YODOGG_METADATA_CONSIDERATIONS' not in environment
         assert environment['YODOGG_METADATA_COPYRIGHT']
         

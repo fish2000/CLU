@@ -194,10 +194,11 @@ def determine_name(thing, name=None, try_repr=False):
 # N.B. Items in the “replaceable_endings” tuple that
 # possibly contain other such items should appear
 # *before* the items that they contain, e.g.:
+ending_suffixes = tuple(all_suffixes())
 ending_prefixes = tuple(f"{os.extsep}{name}" \
                                   for name \
                                    in pytuple('init', 'main'))
-ending_suffixes = tuple(all_suffixes())
+
 replaceable_endings  = tuple(f"{pre}{suf}" \
                             for pre, suf \
                              in itertools.product(ending_prefixes,

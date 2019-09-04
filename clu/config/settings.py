@@ -33,7 +33,6 @@ class Nestifier(abc.ABC):
         """
         converter = stringify and str or no_op
         out = Nested()
-        # out = self.namespaced_fields().nestify()
         for key, value in self.namespaced_fields().items():
             keywords = dict(stringify=stringify,
                             instance=kwargs.get('instance', self))
@@ -63,9 +62,6 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
             instance = super(Namespace, cls).__new__(cls, *args, **kwargs)
         except TypeError:
             instance = super(Namespace, cls).__new__(cls)
-        # super(Namespace, instance).__setattr__('namespaced_dict', None)
-        # super(Namespace, instance).__setattr__('namespace',       None)
-        # super(Namespace, instance).__setattr__('initialized',     False)
         instance.namespaced_dict = None
         instance.namespace = None
         instance.initialized = False
@@ -78,17 +74,10 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
             raise ValueError("A truthy namespace declaration is required")
         if not isstring(namespace):
             raise ValueError("A string namespace declaration is required")
-        # self.namespaced_dict = weakref.ReferenceType(namespaced_dict)
-        # master_dict = Flat()
-        # master_dict.update(namespaced_dict.items(namespace))
         self.namespaced_dict = Flat()
         self.namespaced_dict.update(namespaced_dict.items(namespace))
-        # self.namespace = namespace
         self.__set_name__(None, namespace)
         self.initialized = True
-        # super(Namespace, self).__setattr__('namespaced_dict', weakref.ReferenceType(namespaced_dict))
-        # super(Namespace, self).__setattr__('namespace',       namespace)
-        # super(Namespace, self).__setattr__('initialized',     True)
     
     def __getattr__(self, key):
         try:
@@ -98,11 +87,8 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
                 return object.__getattribute__(self, 'namespace')
             return object.__getattribute__(self, key)
     
-    # def __setattr__(self, key, value):
-    #     self.namespaced_dict().set(key, value, namespace=self.namespace)
-    
-    def __delattr__(self, key):
-        self.namespaced_fields().delete(key,     namespace=self.namespace)
+    # def __delattr__(self, key):
+    #     self.namespaced_fields().delete(key,     namespace=self.namespace)
     
     def __set_name__(self, cls, name):
         self.namespace = name
@@ -125,13 +111,6 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
     def __json__(self, **kwargs):
         # return self.nestify(**kwargs).tree
         return self.namespaced_fields().nestify().tree
-    
-    # def __str__(self):
-    #     return self.namespace
-    
-    # @property
-    # def name(self):
-    #     return self.namespace
 
 class MetaSchema(abc.ABCMeta):
     

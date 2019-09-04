@@ -302,7 +302,6 @@ class FieldBase(abc.ABC, metaclass=Slotted):
         return self.name
     
     def __repr__(self):
-        # slots = (slot for slot in slots_for(type(self)) if slot not in ('validator', 'extractor'))
         return stringify(self,
                slots_for(self),
                try_callables=False)

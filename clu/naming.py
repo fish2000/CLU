@@ -10,10 +10,6 @@ from clu.exporting import Exporter, Registry
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-# MODULE SEARCH FUNCTIONS: iterate and search modules, yielding
-# names, thing values, and/or id(thing) values, matching by given
-# by thing names or id(thing) values
-
 @export
 def determine_module(thing, name=None):
     """ Private module function to find the module of a thing,
@@ -27,6 +23,48 @@ def determine_module(thing, name=None):
         return None
     
     return pickle.whichmodule(thing, None) or name
+
+"""
+NAME AND MODULE SEARCH FUNCTIONS: the “nameof(…)” and “moduleof(…)”
+functions each search through, in order:
+  
+  1) the object itself for relevant attributes (e.g “__name__”
+     or “__module__”) – this is nearly instantaneous;
+  
+  2) The “clu.exporting” registry of Exporter classes and their
+     registered instances – this is very fast, equivalent to an
+     iteration over the values in a sequence of dicts;
+  
+  3) The entirety of all currently loaded module namespaces,
+     as per “sys.modules” – this is potentially a large search
+     space (the virtualenv I am using now to develop this code
+     currently has 1235 unique modules loaded up); we use the
+     standard-library “@functools.lru_cache” decorator to
+     cache the ID values of the objects for which we search
+     to return near-instantaneous results for repeat queries
+     without much overhead.
+
+… The “nameof(…)” and “moduleof(…)” functions in “clu.naming”
+are intended as a top-level, users-of-CLU-facing API. They each
+call functions that are also available to users (like e.g. the
+“pyname(…)” and “pymodule(…)” functions from “clu.predicates”
+and the eponymous class methods of “clu.exporting.Registry”).
+
+One caveat is that a number of lower-level functions returning
+a module for an object will return the actual module instance
+itself, rather than a string name or qualified name value.
+
+The functions “determine_name(…)” and “determine_module(…)”,
+while exported publicly, are intended as private utilities for
+which no guarantees are made about how they work, their arity,
+their time complexity, or their very existence.
+
+In general, these functions will work as fast as possible –
+near attribute-access speed – for 99.9 percent of use-cases;
+the few remainig 0.99 percent will be nearly as fast, and for
+that pathological 0.001-percent case… well, that may be an
+indication that you need to change something, dogg.
+"""
 
 @export
 def nameof(thing, default=NoDefault):

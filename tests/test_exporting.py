@@ -35,7 +35,6 @@ class TestExporting(object):
         assert exporter.dotpath == 'yodogg.iheard'
         assert 'clu' in Registry.all_appnames()
         assert 'yodogg' in Registry.all_appnames()
-        # assert len(Exporter.modulenames()) == 3 # “yodogg.exporting” and “yodogg.iheard”
         assert len(exporter) == 1
         assert exporter['youlike'] is youlike
         assert Exporter['yodogg.iheard'] is exporter

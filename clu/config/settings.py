@@ -13,8 +13,9 @@ from clu.fs.misc import stringify
 from clu.predicates import (haspyattr, getpyattr,
                             stattr, pyattrs,
                             always, no_op,
-                            iscontainer)
-from clu.typology import ismapping, isstring
+                            iscontainer,
+                            uniquify, slots_for)
+from clu.typology import differentlength, ismapping, isstring
 from clu.exporting import Slotted, Exporter
 
 exporter = Exporter(path=__file__)
@@ -58,7 +59,7 @@ class Nestifier(abc.ABC):
 
 class Namespace(FieldBase, Nestifier, metaclass=Slotted):
     
-    __slots__ = ('namespaced_dict', 'namespace', 'initialized')
+    __slots__ = ('namespaced_dict', 'namespace', 'initialized', 'slots')
     
     def __new__(cls, *args, **kwargs):
         try:
@@ -68,10 +69,11 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
         instance.namespaced_dict = None
         instance.default = None
         instance.namespace = None
-        instance.initialized = False
         instance.allow_none = False
         instance.validator = always
         instance.extractor = no_op
+        instance.initialized = False
+        instance.slots = uniquify(*slots_for(cls))
         return instance
     
     def __init__(self, namespaced_dict, namespace=None):
@@ -89,15 +91,29 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
     
     def __getattr__(self, key):
         try:
-            return self.default.get(key, namespace=self.namespace)
+            return self.namespaced_fields().get(key, namespace=self.namespace)
         except KeyError:
             return object.__getattribute__(self, key)
+    
+    def __setattr__(self, key, value):
+        print(f"SETATTR: {key} : {value}")
+        try:
+            if super(Namespace, self).__getattribute__('initialized') == True:
+                print("INITIALIZED")
+                # if self.pack_ns(key, namespace=self.namespace) in self.namespaced_fields():
+                if key not in self.slots:
+                    print(f"NAMESPACED FIELDS SET: {key} : {value}")
+                    self.namespaced_fields().set(key, value, namespace=self.namespace)
+                    return
+        except AttributeError:
+            pass
+        object.__setattr__(self, key, value)
     
     def get_default(self):
         return self
     
     def namespaced_fields(self):
-        return self.namespaced_dict
+        return self.default
     
     @property
     def name(self):
@@ -107,26 +123,36 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
     def name(self, value):
         self.namespace = str(value)
     
+    def update(self, instance):
+        """ Update the live-data fields from a Nestifier instance """
+        if instance is None:
+            return
+        if differentlength(tuple(instance.namespaced_fields().keys(namespace=self.name)),
+                                     self.namespaced_fields()):
+            self.namespaced_fields().update(
+        instance.namespaced_fields().items(
+                 namespace=self.name))
+    
     def __set_name__(self, cls, name):
         self.name = name
+    
+    def __get__(self, instance, cls=None):
+        self.update(instance)
+        return self
+    
+    def __set__(self, instance, value):
+        self.update(instance)
+        return value
+    
+    def __json__(self, **kwargs):
+        return self.namespaced_fields().nestify().tree
     
     def __str__(self):
         return self.name
     
     def __repr__(self):
-        # return stringify(self, self.default.keys())
-        return repr(self.default)
-    
-    def __get__(self, instance, cls=None):
-        self.default.update(instance.namespaced_fields().items(namespace=self.name))
-        return self
-    
-    def __set__(self, instance, value):
-        # self.default.update(instance.namespaced_fields().items(namespace=self.name))
-        return value
-    
-    def __json__(self, **kwargs):
-        return self.default.nestify().tree
+        # return stringify(self, self.namespaced_fields().keys())
+        return repr(self.namespaced_fields())
 
 class MetaSchema(abc.ABCMeta):
     
@@ -409,6 +435,18 @@ def test():
         print()
         print("repr(instance.yodogg) =", repr(instance.yodogg))
         print()
+        print("repr(instance.yodogg.slots) =", repr(instance.yodogg.slots))
+        print()
+        print("str(instance.yodogg.iheard) =",  str(instance.yodogg.iheard))
+        print()
+        print("repr(instance.yodogg.iheard) =", repr(instance.yodogg.iheard))
+        print()
+        
+        instance.yodogg = Namespace(instance.yodogg.default.clone(), 'yodogg')
+        instance.yodogg.iheard = 'I REALLY DID HEAR'
+        
+        print_separator()
+        
         print("str(instance.yodogg.iheard) =",  str(instance.yodogg.iheard))
         print()
         print("repr(instance.yodogg.iheard) =", repr(instance.yodogg.iheard))

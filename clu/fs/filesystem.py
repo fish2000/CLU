@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
@@ -1370,14 +1369,14 @@ class Intermediate(TemporaryDirectory, Directory):
         a new TemporaryDirectory instance instead.
     """
     
-    def __new__(cls, pth=None):
+    def __new__(cls, pth=None, change=False):
         """ The constructor simply delegates to the creation of either a new
             Directory or a new TemporaryDirectory.
         """
         if pth is not None:
             return Directory(pth=pth)
         return TemporaryDirectory(prefix=f"{cls.__name__}-",
-                                  change=False)
+                                  change=change)
     
     def __init__(self, pth=None):
         """ The initializer explicitly does nothing, as it will always be called

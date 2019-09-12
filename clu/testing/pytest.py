@@ -72,7 +72,7 @@ def datadir(dirname):
         operations through instance methods (vs. raw calls to “shutil.copytree(…)”).
     """
     from clu.fs.filesystem import TemporaryDirectory
-    from clu.naming import determine_module, dotpath_join, dotpath_to_prefix
+    from clu.naming import moduleof, dotpath_join, dotpath_to_prefix
     
     # Get the test-local (née “shared”) data path:
     datadir = dirname.subdirectory('data')
@@ -82,7 +82,7 @@ def datadir(dirname):
     
     prefix = dotpath_to_prefix(
              dotpath_join(
-             determine_module(TemporaryDirectory), 'ttd', 'datadir'))
+             moduleof(TemporaryDirectory), 'ttd', 'datadir'))
     
     with TemporaryDirectory(prefix=prefix,
                             change=False) as temporarydir:

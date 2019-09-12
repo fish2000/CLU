@@ -13,8 +13,7 @@ from clu.fs.misc import stringify
 from clu.predicates import (haspyattr, getpyattr,
                             stattr, pyattrs,
                             always, no_op,
-                            iscontainer,
-                            uniquify, slots_for)
+                            iscontainer, slots_for)
 from clu.typology import differentlength, ismapping, isstring
 from clu.exporting import Slotted, Exporter
 
@@ -24,6 +23,8 @@ export = exporter.decorator()
 NEED_NAME = PYTHON_VERSION < 3.6
 
 class Nestifier(abc.ABC):
+    
+    __slots__ = tuple()
     
     @abstract
     def namespaced_fields(self):
@@ -59,21 +60,24 @@ class Nestifier(abc.ABC):
 
 class Namespace(FieldBase, Nestifier, metaclass=Slotted):
     
-    __slots__ = ('namespaced_dict', 'namespace', 'initialized', 'slots')
+    __slots__ = ('namespaced_dict',
+                 'namespace',
+                 'initialized')
+    
+    slots = tuple() # This will be filled in below
     
     def __new__(cls, *args, **kwargs):
         try:
             instance = super(Namespace, cls).__new__(cls, *args, **kwargs)
         except TypeError:
             instance = super(Namespace, cls).__new__(cls)
-        instance.namespaced_dict = None
-        instance.default = None
+        instance.namespaced_dict = Flat()
+        instance.default = Flat()
         instance.namespace = None
         instance.allow_none = False
         instance.validator = always
         instance.extractor = no_op
         instance.initialized = False
-        instance.slots = uniquify(*slots_for(cls))
         return instance
     
     def __init__(self, namespaced_dict, namespace=None):
@@ -83,10 +87,9 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
             raise ValueError("A truthy namespace declaration is required")
         if not isstring(namespace):
             raise ValueError("A string namespace declaration is required")
-        self.namespaced_dict = Flat()
-        self.namespaced_dict.update(namespaced_dict.items(namespace))
-        self.default = Flat()
-        self.name = namespace
+        self.namespaced_dict.update(
+             namespaced_dict.items(namespace))
+        self.namespace = namespace
         self.initialized = True
     
     def __getattr__(self, key):
@@ -127,11 +130,11 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
         """ Update the live-data fields from a Nestifier instance """
         if instance is None:
             return
-        if differentlength(tuple(instance.namespaced_fields().keys(namespace=self.name)),
+        if differentlength(tuple(instance.namespaced_fields().keys(namespace=self.namespace)),
                                      self.namespaced_fields()):
             self.namespaced_fields().update(
         instance.namespaced_fields().items(
-                 namespace=self.name))
+                 namespace=self.namespace))
     
     def __set_name__(self, cls, name):
         self.name = name
@@ -148,11 +151,14 @@ class Namespace(FieldBase, Nestifier, metaclass=Slotted):
         return self.namespaced_fields().nestify().tree
     
     def __str__(self):
-        return self.name
+        return self.namespace
     
     def __repr__(self):
         # return stringify(self, self.namespaced_fields().keys())
         return repr(self.namespaced_fields())
+
+# Set the “slots” class attribute once and only once:
+Namespace.slots = slots_for(Namespace)
 
 class MetaSchema(abc.ABCMeta):
     

@@ -1058,10 +1058,11 @@ class Directory(collections.abc.Hashable,
                                                             filename))) \
                                                         for filename in filenames)
                 for iinfile, outfile in zip(iinputs, outputs):
-                    dstfile = shutil.copy2(iinfile, outfile, follow_symlinks=True)
+                    results.append(
+                      shutil.copy2(iinfile, outfile, follow_symlinks=True))
                     # assert os.path.exists(dstfile)
                     # assert os.path.samefile(dstfile, outfile)
-                    results.append(dstfile)
+                    # results.append(dstfile)
             # Return the destination directory instance and the result list:
             return whereto, tuple(results)
         else:

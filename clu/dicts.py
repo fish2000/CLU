@@ -21,51 +21,75 @@ class ClassWrapRepr(abc.ABC):
 
 @export
 class OrderedMappingView(collections.abc.MappingView,
+                         collections.abc.Sequence,
                          collections.abc.Reversible,
                          ClassWrapRepr):
     
-    """ A mapping view class implementing “collections.abc.Reversible” """
+    """ A mapping view class implementing “collections.abc.Sequence”
+        and “collections.abc.Reversible”
+    """
     
     def __reversed__(self):
         yield from reversed(self._mapping)
+    
+    def __getitem__(self, idx):
+        return tuple(self)[idx]
     
     __repr__ = ClassWrapRepr.__repr__
 
 @export
 class OrderedItemsView(collections.abc.ItemsView,
+                       collections.abc.Sequence,
                        collections.abc.Reversible,
                        ClassWrapRepr):
     
-    """ An items-view class implementing “collections.abc.Reversible” """
+    """ An items-view class implementing “collections.abc.Sequence”
+        and “collections.abc.Reversible”
+    """
     
     def __reversed__(self):
         for key in reversed(self._mapping):
             yield (key, self._mapping[key])
     
+    def __getitem__(self, idx):
+        return tuple(self)[idx]
+    
     __repr__ = ClassWrapRepr.__repr__
 
 @export
 class OrderedKeysView(collections.abc.KeysView,
+                      collections.abc.Sequence,
                       collections.abc.Reversible,
                       ClassWrapRepr):
     
-    """ A keys-view class implementing “collections.abc.Reversible” """
+    """ A keys-view class implementing “collections.abc.Sequence”
+        and “collections.abc.Reversible”
+    """
     
     def __reversed__(self):
         yield from reversed(self._mapping)
+    
+    def __getitem__(self, idx):
+        return tuple(self)[idx]
     
     __repr__ = ClassWrapRepr.__repr__
 
 @export
 class OrderedValuesView(collections.abc.ValuesView,
+                        collections.abc.Sequence,
                         collections.abc.Reversible,
                         ClassWrapRepr):
     
-    """ A values-view class implementing “collections.abc.Reversible” """
+    """ A values-view class implementing “collections.abc.Sequence”
+        and “collections.abc.Reversible”
+    """
     
     def __reversed__(self):
         for key in reversed(self._mapping):
             yield self._mapping[key]
+    
+    def __getitem__(self, idx):
+        return tuple(self)[idx]
     
     __repr__ = ClassWrapRepr.__repr__
 

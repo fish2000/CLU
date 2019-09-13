@@ -164,19 +164,22 @@ def temporaryname():
 def environment():
     """ Environment testing fixture: yields an instance of `os.environ`,
         free of XDG variables
+        
+        Q.v. implementation https://git.io/JeYmf supra.
     """
     from clu.constants.data import XDGS
     import os
-    stash = {}
+    
+    # Setup: stash environment mapping:
+    stash = os.environ.copy()
     
     # Setup: remove XDG variables from environment:
     for key in XDGS:
         if key in os.environ:
-            stash[key] = os.environ.get(key)
             del os.environ[key]
     
+    # Yield the mapping:
     yield os.environ
     
-    # Teardown: restore environment:
-    for key, value in stash.items():
-        os.environ[key] = value
+    # Teardown: restore environment mapping wholesale:
+    os.environ = stash

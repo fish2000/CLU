@@ -667,7 +667,7 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
         return search_by_id.cache_info()
     
     def __iter__(self):
-        return iter(self.__exports__.keys())
+        yield from iter(self.__exports__.keys())
     
     def __len__(self):
         return len(self.__exports__)

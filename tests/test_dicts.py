@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-# from pprint import pprint
 
 from clu.dicts import merge
 from clu.typespace import Namespace
-# from clu.repl import print_separator
 
-class TestDictAndNamespaceMerge(object):
+class TestDicts(object):
     
     """ Run the tests for merging dicts (the clu.dicts module), and
         namespaces (the clu.typespace and clu.typespace.namespace modules).

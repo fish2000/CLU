@@ -1185,10 +1185,23 @@ class Directory(collections.abc.Hashable,
         return self.exists
     
     def __iter__(self):
-        yield from scandir(self.realpath())
+        # yield from scandir(
+        #            os.path.realpath(
+        #            self.name))
+        out = self.exists \
+              and scandir(
+                  os.path.realpath(self.name)) \
+               or iter(tuple())
+        yield from out
     
     def __len__(self):
-        return len(list(scandir(self.realpath())))
+        # return len(os.listdir(
+        #            os.path.realpath(
+        #            self.name)))
+        return self.exists \
+               and len(os.listdir(
+                       os.path.realpath(self.name))) \
+                or 0
     
     def __getitem__(self, filename):
         pth = self.subpath(filename, requisite=True)

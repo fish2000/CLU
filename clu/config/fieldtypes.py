@@ -36,6 +36,7 @@ hoist = lambda thing: uncallable(thing) and wrap_value(thing) or thing
 @export
 class FlatOrderedSet(collections.abc.Set,
                      collections.abc.Sequence,
+                     collections.abc.Reversible,
                      collections.abc.Hashable,
                      metaclass=Slotted):
     
@@ -91,7 +92,10 @@ class FlatOrderedSet(collections.abc.Set,
         self.things = tuple(thinglist)
     
     def __iter__(self):
-        return iter(self.things)
+        yield from iter(self.things)
+    
+    def __reversed__(self):
+        yield from reversed(self.things)
     
     def __len__(self):
         return len(self.things)
@@ -137,7 +141,7 @@ class functional_and(FlatOrderedSet,
             otherwise, False is returned.
         """
         return all(function(thing) \
-               for function in reversed(self.things) \
+               for function in reversed(self) \
                 if function is not None)
 
 @export
@@ -164,7 +168,7 @@ class functional_set(FlatOrderedSet,
             each function in turn, and finally returning the last return value
             once the sequence of functions has been exhausted.
         """
-        for function in reversed(self.things):
+        for function in reversed(self):
             if function is not None:
                 thing = function(thing)
         return thing
@@ -949,7 +953,7 @@ class NamespacedFieldManager(object):
     
     def __iter__(self):
         # TODO: make this iterate over the currently defined field instances:
-        return iter(self.namespace_stack)
+        yield from self.namespace_stack
     
     def __repr__(self):
         return f"<pseudo-module '{self.__module__}.{self.__name__}' from '{self.__file__}' " \

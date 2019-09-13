@@ -234,6 +234,12 @@ class Flat(NamespacedMutableMapping):
     def clone(self):
         return type(self)(dictionary=copy(self.dictionary))
     
+    def __getstate__(self):
+        return self.dictionary
+    
+    def __setstate__(self, state):
+        self.dictionary = state
+    
     def __repr__(self):
         cnm = nameof(type(self))
         dic = repr(self.dictionary)
@@ -316,6 +322,12 @@ class Nested(NamespacedMutableMapping):
     
     def clone(self):
         return type(self)(tree=copy(self.tree))
+    
+    def __getstate__(self):
+        return self.tree
+    
+    def __setstate__(self, state):
+        self.tree = state
     
     def __repr__(self):
         cnm = nameof(type(self))

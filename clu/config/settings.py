@@ -410,8 +410,10 @@ def test():
     from clu.config.fieldtypes import fields
     from clu.config.formats import JsonFile
     from clu.fs.filesystem import TemporaryName
-    from clu.repl.ansi import print_separator
+    from clu.repl.ansi import print_separator, print_ansi_centered, ANSIFormat
     from pprint import pprint
+    
+    nullformat = ANSIFormat.null()
     
     class MySchema(Schema):
         
@@ -431,11 +433,14 @@ def test():
             andalso = fields.Tuple(value=fields.String("«also»", allow_none=False))
     
     def test_one():
-    
+        
         instance = MySchema()
         instance.validate()
         
-        print_separator()
+        print_separator(filler='•')
+        print_ansi_centered("TEST ONE", color=nullformat)
+        print_separator(filler='•')
+        print()
         
         print("str(instance.yodogg) =",  str(instance.yodogg))
         print()
@@ -510,6 +515,9 @@ def test():
     
     def test_two():
         print_separator(filler='•')
+        print_ansi_centered("TEST TWO", color=nullformat)
+        print_separator(filler='•')
+        print()
         
         instance0 = MySchema(title="YO DOGG", count=666, where=-8)
         instance0.validate()
@@ -567,7 +575,7 @@ def test():
         print()
     
     test_one()
-    # test_two()
+    test_two()
 
 if __name__ == '__main__':
     test()

@@ -277,6 +277,8 @@ class ANSIFormat(ANSIFormatBase):
         """ Instantiate an ANSIFormat, populating its fields per args """
         if from_value is not None:
             if type(from_value) is cls:
+                if all(field is None for field in from_value):
+                    return from_value
                 return cls.from_dict(from_value.to_dict())
             elif hasattr(from_value, 'to_dict'):
                 return cls.from_dict(from_value.to_dict())
@@ -289,6 +291,13 @@ class ANSIFormat(ANSIFormatBase):
         instance = super(ANSIFormat, cls).__new__(cls, Text.convert(text),
                                                        Background.convert(background),
                                                        Weight.convert(weight))
+        return instance
+    
+    @classmethod
+    def null(cls):
+        instance = super(ANSIFormat, cls).__new__(cls, None,
+                                                       None,
+                                                       None)
         return instance
     
     def __str__(self):
@@ -317,7 +326,9 @@ class ANSIFormat(ANSIFormatBase):
             called for by this ANSIFormat instance, ending with the necessary
             ANSI reset sequence(s).
         """
-        return f"{self.to_string()}{string!s}{self.RESET_ALL}"
+        prefix = self.to_string()
+        suffix = prefix and self.RESET_ALL or ""
+        return f"{prefix}{string!s}{suffix}"
 
 @export
 def print_ansi(text, color=''):
@@ -337,7 +348,7 @@ def print_ansi_centered(text, color='',
     asterisks = int((width / 2) - (len(message) / 2))
     
     aa = filler[0] * asterisks
-    ab = filler[0] * (asterisks + 1 - (len(message) % 2))
+    ab = filler[0] * (asterisks + ((width % 2) - (len(message) % 2)))
     
     print_ansi(f"{aa}{message}{ab}", color=color)
 

@@ -691,6 +691,7 @@ non_dotfile_matcher = lambda p: non_dotfile_match(p.name)
 
 @export
 class Directory(collections.abc.Hashable,
+                collections.abc.Reversible,
                 collections.abc.Mapping,
                 collections.abc.Sized,
                 contextlib.AbstractContextManager,
@@ -1186,6 +1187,13 @@ class Directory(collections.abc.Hashable,
         out = self.exists \
               and (k.name for k in scandir(
                                    os.path.realpath(self.name))) \
+               or iter(tuple())
+        yield from out
+    
+    def __reversed__(self):
+        out = self.exists \
+              and (k.name for k in reversed(scandir(
+                                   os.path.realpath(self.name)))) \
                or iter(tuple())
         yield from out
     

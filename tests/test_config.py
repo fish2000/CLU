@@ -154,9 +154,6 @@ class TestConfig(object):
             del yodogg
         assert "cannot import name" in str(exc.value)
     
-    def test_dict_merge(self):
-        pass
-    
     def test_env_get(self, environment):
         from clu.config.env import Env
         env = Env()

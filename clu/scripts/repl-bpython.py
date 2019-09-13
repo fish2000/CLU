@@ -61,8 +61,7 @@ from clu.exporting import (doctrim,
                            determine_name,
                            sysmods,
                            Exporter, ExporterBase, Registry,
-                           path_to_dotpath,
-                           predicates_for_types)
+                           path_to_dotpath)
 
 from clu.sanitizer import sanitize, sanitizers, utf8_encode, utf8_decode
 from clu.version import version_info
@@ -229,7 +228,6 @@ __all__ = ('Image',
            'σ', 'Σ',
            'isdtype', 'isnumpything', 'isnumpytype', 'isnumpythinglist', 'isnumpytypelist',
            'Clamper', 'clamp',
-           'predicates_for_types',
            'version_info',
            'BASEPATH',
            'BUILTINS',
@@ -285,7 +283,7 @@ __all__ = ('Image',
            'determine_name',
            'sysmods',
            'Exporter', 'ExporterBase', 'Registry',
-           'path_to_dotpath', 'predicates_for_types',
+           'path_to_dotpath',
            'negate',
            'ismetaclass', 'isclass', 'isclasstype', 'metaclass',
            'noattr', 'haspyattr', 'nopyattr',

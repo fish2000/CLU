@@ -1,7 +1,6 @@
 -r tox.txt
 Click
 Pillow
-PyYAML
 asciiplotlib
 bpython
 bumpversion
@@ -11,9 +10,10 @@ cython
 flake8
 flake8-bugbear
 gfm
-instakit
+# instakit
 imageio
 ipython
+jupyter
 multidict
 pythonpy
 pytz

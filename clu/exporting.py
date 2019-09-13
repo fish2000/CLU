@@ -8,6 +8,8 @@ import sys, os
 import warnings
 import weakref
 
+iterchain = itertools.chain.from_iterable
+
 from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytuple
 from clu.constants.exceptions import ExportError, ExportWarning
 from clu.constants.polyfills import MutableMapping, lru_cache
@@ -333,7 +335,7 @@ class Registry(abc.ABC, metaclass=Slotted):
     @staticmethod
     def all_appnames():
         """ Return a tuple of all registered appnames """
-        return tuple(sorted(appnames))
+        return sorted(appnames)
     
     @staticmethod
     def for_appname(appname):
@@ -358,14 +360,13 @@ class Registry(abc.ABC, metaclass=Slotted):
     @classmethod
     def module_getters(cls):
         from clu.predicates import attr_across
-        return attr_across('modules', *[classes[appname] \
-                           for appname in cls.all_appnames()])
+        return attr_across('modules', *(classes[appname] \
+                           for appname in cls.all_appnames()))
     
     @classmethod
     def all_modules(cls):
-        from itertools import chain
-        return tuple(chain.from_iterable(modules().values() \
-                     for modules in cls.module_getters()))
+        return iterchain(modules().values() \
+                     for modules in cls.module_getters())
     
     @classmethod
     def nameof(cls, thing):
@@ -438,7 +439,7 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
         """ Get a sorted list of module names – the keys to the Exporter
             instance registry – that are currently available
         """
-        return tuple(sorted(cls.instances.keys()))
+        return sorted(cls.instances.keys())
     
     @classmethod
     def modules(cls):

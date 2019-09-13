@@ -4,7 +4,8 @@ from __future__ import print_function
 import os
 
 from clu.constants.consts import PROJECT_NAME, NoDefault
-from clu.config.base import AppName, NamespacedMutableMapping, NAMESPACE_SEP
+from clu.config.abc import NamespacedMutableMapping, NAMESPACE_SEP
+from clu.config.base import AppName
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

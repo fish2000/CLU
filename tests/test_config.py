@@ -132,7 +132,7 @@ class TestConfig(object):
         assert renestified == nested
     
     def test_FlatOrderedSet(self):
-        from clu.config.fieldtypes import FlatOrderedSet
+        from clu.config.abc import FlatOrderedSet
         
         stuff = FlatOrderedSet(None, "a", "b", FlatOrderedSet("c", None, "a", "d"))
         summary = FlatOrderedSet("a", "b", "c", "d")

@@ -11,13 +11,12 @@ import weakref
 
 from clu.constants.consts import DEBUG, NoDefault
 from clu.constants.polyfills import Path
-from clu.config.base import NAMESPACE_SEP
+from clu.config.abc import NAMESPACE_SEP, FlatOrderedSet
 from clu.fs.misc import stringify, wrap_value
 from clu.naming import nameof
 from clu.predicates import (negate, isclasstype,
                             getpyattr, always, no_op, attr,
-                            uncallable, isexpandable, iscontainer,
-                            tuplize, slots_for)
+                            uncallable, tuplize, slots_for)
 from clu.typology import (isderivative, ismapping,
                                         isnumber,
                                         isstring, ispath, isvalidpath)
@@ -32,91 +31,6 @@ class ValidationError(Exception):
     pass
 
 hoist = lambda thing: uncallable(thing) and wrap_value(thing) or thing
-
-@export
-class FlatOrderedSet(collections.abc.Set,
-                     collections.abc.Sequence,
-                     collections.abc.Reversible,
-                     collections.abc.Hashable,
-                     metaclass=Slotted):
-    
-    """ FlatOrderedSet is a structure designed to coalesce any nested
-        elements with which it is initialized into a flat, ordered sequence
-        devoid of None-values. It has both set and sequence properties –
-        membership can be tested as with a set; comparisons can be made with
-        less-than and greater-than operators, as with a set; recombinant 
-        operations are performed with binary-and and binary-or operators, as
-        with a set – but like a sequence, iterating a FlatOrderedSet has a
-        stable and deterministic order and items may be retrieved from an
-        instance using subscript indexes (e.g. flat_ordered_set[3]). 
-        
-        Here’s an example of the coalescing behavior:
-        
-            stuff = FlatOrderedSet(None, "a", "b", FlatOrderedSet("c", None, "a", "d"))
-            summary = FlatOrderedSet("a", "b", "c", "d")
-            
-            assert stuff == summary
-        
-        One can optionally specify, as a keyword-only argument, a unary boolean
-        function “predicate” that will be used to filter out any of the items
-        used to initialize the FlatOrderedSet for which the predicate returns
-        a Falsey value. 
-    """
-    
-    __slots__ = tuplize('things')
-    
-    def __init__(self, *things, predicate=always):
-        """ Initialize a new FlatOrderedSet instance with zero or more things.
-            
-            Optionally, a unary boolean function “predicate” may be specified
-            to filter the list of things.
-        """
-        if uncallable(predicate):
-            raise ValueError("FlatOrderedSet requires a callable predicate")
-        thinglist = []
-        if len(things) == 1:
-            if isexpandable(things[0]):
-                things = things[0]
-            elif iscontainer(things[0]):
-                things = tuple(things[0])
-        for thing in things:
-            if thing is not None:
-                if isinstance(thing, type(self)):
-                    for other in thing.things:
-                        if predicate(other):
-                            if other not in thinglist:
-                                thinglist.append(other)
-                elif predicate(thing):
-                    if thing not in thinglist:
-                        thinglist.append(thing)
-        self.things = tuple(thinglist)
-    
-    def __iter__(self):
-        yield from iter(self.things)
-    
-    def __reversed__(self):
-        yield from reversed(self.things)
-    
-    def __len__(self):
-        return len(self.things)
-    
-    def __contains__(self, thing):
-        return thing in self.things
-    
-    def __getitem__(self, idx):
-        return self.things[idx]
-    
-    def __bool__(self):
-        return len(self.things) > 0
-    
-    def __hash__(self):
-        return hash(self.things) & hash(id(self.things))
-    
-    def __repr__(self):
-        cnm = nameof(type(self))
-        lst = repr(self.things)
-        hxa = hex(id(self))
-        return f"{cnm}({lst}) @ {hxa}"
 
 @export
 class functional_and(FlatOrderedSet,

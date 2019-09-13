@@ -844,11 +844,11 @@ class TestPredicates(object):
                                   'name', 'hash', 'dir')
     
     def test_class_predicates(self):
-        """ » Checking “ismetaclass/isclass/isclasstype/metaclass” from clu.predicates … """
+        """ » Checking “ismetaclass/isclass/isclasstype/metaclass/typeof” from clu.predicates … """
         from clu.predicates import (ismetaclass,
                                     isclass,
                                     isclasstype,
-                                    metaclass)
+                                    metaclass, typeof)
         
         class Class(object):
             pass
@@ -882,6 +882,18 @@ class TestPredicates(object):
         
         assert metaclass(Class()) is type
         assert metaclass(ClassWithMeta()) is MetaClass
+        
+        # Check the results of “typeof(…)”:
+        assert typeof(Class) is Class
+        assert typeof(MetaClass) is MetaClass
+        assert typeof(ClassWithMeta) is ClassWithMeta
+        
+        assert typeof(Class()) is Class
+        assert typeof(ClassWithMeta()) is ClassWithMeta
+        assert typeof(object()) is object
+        assert typeof([]) is list
+        assert typeof({}) is dict
+        assert typeof('') is str
     
     def test_attr_accessor(self):
         """ » Checking “attr(•) accessor from clu.predicates …” """

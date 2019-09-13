@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import collections
+import collections.abc
 import os
 import re
 
@@ -35,6 +37,9 @@ for typename in dir(thetypes):
 # Substitute our own SimpleNamespace class, instead of the provided version:
 setattr(types, 'SimpleNamespace', SimpleNamespace)
 setattr(types, 'Namespace',       Namespace)
+
+# Add the collections.abc.MappingView base type:
+setattr(types, 'MappingView',     collections.abc.MappingView)
 
 # Manually set `types.__file__` and related attributes:
 setattr(types, '__file__',        __file__)

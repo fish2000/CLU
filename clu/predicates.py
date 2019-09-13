@@ -55,6 +55,8 @@ metaclass = lambda thing: ismetaclass(thing) and thing \
                           or (isclass(thing) and type(thing) \
                           or (type(type(thing))))
 
+typeof = lambda thing: isclasstype(thing) and thing or type(thing)
+
 # PREDICATE FUNCTIONS: hasattr(…) shortcuts:
 
 noattr = lambda thing, atx: negate(hasattr)(thing, atx)
@@ -331,6 +333,7 @@ export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → bool
 export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object` but not `type`")
 export(isclasstype,     name='isclasstype',     doc="isclasstype(thing) → boolean predicate, True if thing is a class type, descending from either `object` or `type`")
 export(metaclass,       name='metaclass',       doc="metaclass(thing) → Returns: a) thing, if thing is a metaclass; b) type(thing), if thing is a class; or c) type(type(thing)), for all other instances")
+export(typeof,          name='typeof',          doc="typeof(thing) → Returns thing, if thing is a class type; or type(thing), if it is not")
 
 export(noattr,          name='noattr',          doc="noattr(thing, attribute) → boolean predicate, shortcut for `(not hasattr(thing, attribute))`")
 export(haspyattr,       name='haspyattr',       doc="haspyattr(thing, attribute) → boolean predicate, shortcut for `hasattr(thing, '__%s__' % attribute)`")

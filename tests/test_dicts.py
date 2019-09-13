@@ -13,15 +13,22 @@ class TestDicts(object):
             “directory.values()”.
         """
         from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
-        from clu.typology import issequence
+        from clu.fs.filesystem import Directory
+        from clu.typology import ismapping, issequence
         
         # READ-ONLY:
         data = dirname.subdirectory('data')
         
         # Ensure type:
+        assert type(dirname) is Directory
+        assert type(data) is Directory
         assert type(data.items()) is OrderedItemsView
         assert type(data.keys()) is OrderedKeysView
         assert type(data.values()) is OrderedValuesView
+        
+        # Ensure it’s a mapping:
+        assert ismapping(dirname)
+        assert ismapping(data)
         
         # Ensure it’s a sequence:
         assert issequence(data.items())
@@ -29,6 +36,8 @@ class TestDicts(object):
         assert issequence(data.values())
         
         # Ensure repr:
+        assert repr(dirname).startswith('Directory')
+        assert repr(data).startswith('Directory')
         assert repr(data.items()).startswith('OrderedItemsView')
         assert repr(data.keys()).startswith('OrderedKeysView')
         assert repr(data.values()).startswith('OrderedValuesView')

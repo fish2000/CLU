@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from collections import OrderedDict, defaultdict as DefaultDict, Counter
 
 import array
 import argparse
+import collections
+import collections.abc
 import contextlib
 import decimal
 import io
@@ -12,8 +13,7 @@ import os
 
 from clu.constants.consts import λ, φ
 from clu.constants.polyfills import long, unicode, numpy
-from clu.constants.polyfills import HashableABC, SequenceABC, Path
-from clu.constants.polyfills import Mapping, MutableMapping
+from clu.constants.polyfills import Path
 from clu.enums import alias
 from clu.exporting import Exporter
 
@@ -89,9 +89,18 @@ path_classes = tuplize(argparse.FileType, or_none(os, 'PathLike'), Path) # Path 
 path_types = string_types + bytes_types + path_classes
 file_types = (io.TextIOBase, io.BufferedIOBase, io.RawIOBase, io.IOBase)
 
-dict_types = { dict, OrderedDict, DefaultDict, Counter }
-namespace_types = { types.SimpleNamespace, types.Namespace }
-mapping_types = { Mapping, MutableMapping }
+dict_types      = { dict, collections.defaultdict,
+                          collections.OrderedDict,
+                          collections.Counter,
+                          collections.ChainMap }
+
+namespace_types = { types.SimpleNamespace,
+                    types.Namespace }
+
+mapping_types   = { collections.abc.Mapping,
+                    collections.abc.MutableMapping,
+                    types.MappingProxy }
+
 mapping_classes = dict_types | namespace_types | mapping_types
 
 function_types = Λ = (types.Function,
@@ -131,6 +140,13 @@ isaliasdescriptor = lambda thing: isinstance(thing, alias)
 hasmembers = lambda thing: isenum(thing) and haspyattr(thing, 'members')
 hasaliases = lambda thing: isenum(thing) and haspyattr(thing, 'aliases')
 
+# MappingView → KeysView, ValuesView, ItemsView types –
+# These predicates work for the extension types returned by e.g. {}.keys():
+isview       = lambda thing: subclasscheck(thing, collections.abc.MappingView)
+iskeysview   = lambda thing: isinstance(thing,    collections.abc.KeysView)
+isvaluesview = lambda thing: isinstance(thing,    collections.abc.ValuesView)
+isitemsview  = lambda thing: isinstance(thing,    collections.abc.ItemsView)
+
 # Typelist predicates:
 isnumber = lambda thing: subclasscheck(thing, numeric_types)
 isnumeric = lambda thing: subclasscheck(thing, numeric_types)
@@ -144,8 +160,8 @@ ismodule = lambda thing: subclasscheck(thing, types.Module)
 isfunction = ΛΛ = lambda thing: isinstance(thing, Λ) and not isclasstype(thing)
 islambda = λλ = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') in (λ, φ)
 iscallable = lambda thing: haspyattr(thing, 'call') and nopyattr(thing, 'code')
-ishashable = lambda thing: isinstance(thing, HashableABC)
-issequence = lambda thing: isinstance(thing, SequenceABC)
+issequence = lambda thing: isinstance(thing, collections.abc.Sequence)
+ishashable = lambda thing: isinstance(thing, collections.abc.Hashable)
 
 # Helper predicates for composing sequence-based predicates:
 isxlist = lambda predicate, thinglist: issequence(thinglist) and predicate_all(predicate, thinglist)
@@ -168,8 +184,8 @@ ismodulelist = predicate_all(ismodule)
 isfunctionlist = predicate_all(ΛΛ)
 islambdalist = predicate_all(λλ)
 iscallablelist = predicate_all(iscallable)
-ishashablelist = predicate_all(ishashable)
 issequencelist = predicate_all(issequence)
+ishashablelist = predicate_all(ishashable)
 
 # MODULE EXPORTS:
 export(samelength,      name='samelength',  doc="samelength(a, b) → boolean predicate, True if both `len(a)` and `len(b)` are defined and equal to each other")
@@ -215,6 +231,11 @@ export(isaliasdescriptor,                       name='isaliasdescriptor',
 export(hasmembers,      name='hasmembers',      doc="hasmembers(cls) → boolean predicate, True if `cls` descends from Enum and has 1+ items in its `__members__` dict")
 export(hasaliases,      name='hasaliases',      doc="hasaliases(cls) → boolean predicate, True if `cls` descends from Enum and has 1+ items in its `__aliases__` dict")
 
+export(isview,          name='isview',          doc="isview(thing) → boolean predicate, True if `thing` is any sort of mapping view instance – keys, values, or items")
+export(iskeysview,      name='iskeysview',      doc="iskeysview(thing) → boolean predicate, True if `thing` is a mapping-keys view instance")
+export(isvaluesview,    name='isvaluesview',    doc="isvaluesview(thing) → boolean predicate, True if `thing` is a mapping-values view instance")
+export(isitemsview,     name='isitemsview',     doc="isitemsview(thing) → boolean predicate, True if `thing` is a mapping-items view instance")
+
 export(isnumber,        name='isnumber',    doc="isnumber(thing) → boolean predicate, True if `thing` is a numeric type or an instance of same")
 export(isnumeric,       name='isnumeric',   doc="isnumeric(thing) → boolean predicate, True if `thing` is a numeric type or an instance of same")
 export(iscomplex,       name='iscomplex',   doc="iscomplex(thing) → boolean predicate, True if `thing` is a complex numeric type or an instance of same")
@@ -252,8 +273,8 @@ export(ismodulelist,    name='ismodulelist',    doc="ismodulelist(thinglist) →
 export(isfunctionlist,  name='isfunctionlist',  doc="isfunctionlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of callable function types")
 export(islambdalist,    name='islambdalist',    doc="islambdalist(thinglist) → boolean predicate, True if `thinglist` is a sequence of functions created with the «lambda» keyword")
 export(iscallablelist,  name='iscallablelist',  doc="iscallablelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of callable types (class types with “__call__” methods or instances of same)")
-export(ishashablelist,  name='ishashablelist',  doc="ishashablelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of things that can be hashed, via the builtin `hash(…)` function")
 export(issequencelist,  name='issequencelist',  doc="issequencelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of sequence types")
+export(ishashablelist,  name='ishashablelist',  doc="ishashablelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of things that can be hashed, via the builtin `hash(…)` function")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

@@ -63,6 +63,7 @@ class TestDicts(object):
         keys = data.keys()
         for idx in range(len(keys)):
             assert keys[idx] == list(keys)[idx]
+            assert keys[idx] in data
     
     def test_dict_and_namespace_merge(self):
         from clu.dicts import merge

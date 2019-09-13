@@ -172,13 +172,16 @@ class FileBase(NamespacedMutableMapping, FileName, metaclass=TypeLocker):
         except TypeError:
             super(FileBase, self).__init__()
         
-        try:
-            self.filepath = type(self).find_file(filename=filename,
-                                                 extra_user_dirs=extra_user_dirs,
-                                                 extra_site_dirs=extra_site_dirs,
-                                                 search_sys_path=search_sys_path)
-        except FileNotFoundError:
+        if isvalidpath(filepath):
             self.filepath = filepath
+        else:
+            try:
+                self.filepath = type(self).find_file(filename=filename,
+                                                     extra_user_dirs=extra_user_dirs,
+                                                     extra_site_dirs=extra_site_dirs,
+                                                     search_sys_path=search_sys_path)
+            except FileNotFoundError:
+                self.filepath = filename
         
         if isvalidpath(self.filepath):
             self.load()
@@ -190,7 +193,7 @@ class FileBase(NamespacedMutableMapping, FileName, metaclass=TypeLocker):
     @property
     def basename(self):
         """ The basename (aka the filename) of the config file path. """
-        return os.path.basename(self._name)
+        return os.path.basename(self.name)
     
     @property
     def dirname(self):

@@ -209,6 +209,51 @@ class TestConfig(object):
         
         assert 'envtest0' not in env.namespaces()
     
+    def test_toml_and_file_direct(self, dirname):
+        from clu.config.formats import TomlFile
+        
+        cfgs = dirname.subdirectory('data').subdirectory('config')
+        
+        assert cfgs.exists
+        assert TomlFile.appname in TomlFile.filename
+        assert TomlFile.filename in cfgs
+        
+        # Instantiate a TomlFile by direct filesystem path:
+        toml_path = cfgs[TomlFile.filename]
+        toml_file = TomlFile(toml_path)
+        
+        assert os.path.exists(toml_file.filepath)
+        assert toml_file.filesuffix == 'toml'
+        assert toml_file.filepath.endswith(toml_file.filesuffix)
+        
+        assert toml_file.namespaces() == ('debugging', 'userinfo')
+        assert toml_file['project'] == 'clu'
+        assert toml_file['description'] is not None
+        assert toml_file['description_content_type'] == 'text/markdown'
+        assert toml_file['debugging:debug'] == True
+        assert toml_file['debugging:logging'] == True
+        assert toml_file['debugging:logdir'] == '/usr/local/var/run/clu'
+        assert toml_file['userinfo:user'] == 'fish'
+        assert toml_file['userinfo:email'] == 'fish2000@gmail.com'
+        assert toml_file['userinfo:fullname'] == 'Alexander Böhn'
+        assert toml_file['userinfo:organization'] == 'Objects In Space And Time, LLC'
+        
+        flat = toml_file.flatten()
+        
+        assert flat.namespaces() == ('debugging', 'userinfo')
+        assert flat['project'] == 'clu'
+        assert flat['description'] is not None
+        assert flat['description_content_type'] == 'text/markdown'
+        assert flat['debugging:debug'] == True
+        assert flat['debugging:logging'] == True
+        assert flat['debugging:logdir'] == '/usr/local/var/run/clu'
+        assert flat['userinfo:user'] == 'fish'
+        assert flat['userinfo:email'] == 'fish2000@gmail.com'
+        assert flat['userinfo:fullname'] == 'Alexander Böhn'
+        assert flat['userinfo:organization'] == 'Objects In Space And Time, LLC'
+        
+        assert toml_file == flat
+    
     def test_toml_and_file_search(self, dirname, environment):
         # N.B. we use the “environment” fixture here to winnow out
         # any XDG variable definitions, some of which are inspected by
@@ -223,6 +268,7 @@ class TestConfig(object):
         assert TomlFile.appname in TomlFile.filename
         assert TomlFile.filename in cfgs
         
+        # Instantiate a TomlFile by searching:
         toml_file = TomlFile(extra_user_dirs=tuplize(cfgs))
         
         assert os.path.exists(toml_file.filepath)
@@ -257,12 +303,14 @@ class TestConfig(object):
         
         assert toml_file == flat
         
+        # Call “find_file(…)” directly, returning a file path:
         default_toml = TomlFile.find_file(extra_user_dirs=tuplize(cfgs))
         different_toml = TomlFile.find_file(filename='yodogg.toml', extra_user_dirs=tuplize(cfgs))
         
         assert default_toml.endswith('tests/data/config/clu-config.toml')
         assert different_toml.endswith('tests/data/config/yodogg.toml')
         
+        # Try to find a nonexistant file:
         with pytest.raises(FileNotFoundError) as exc:
             TomlFile.find_file(filename='NO-DOGG.toml', extra_user_dirs=tuplize(cfgs))
         assert "config file NO-DOGG.toml" in str(exc.value)

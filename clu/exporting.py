@@ -244,13 +244,6 @@ def path_to_dotpath(path, relative_to=None):
     
     return dotpath
 
-def predicates_for_types(*types):
-    """ For a list of types, return a list of “isinstance” predicates """
-    predicates = []
-    for classtype in frozenset(types):
-        predicates.append(lambda thing: isinstance(thing, classtype))
-    return tuple(predicates)
-
 class Slotted(abc.ABCMeta):
     
     """ A metaclass that ensures its classes, and all subclasses,
@@ -773,7 +766,6 @@ export(search_for_module)
 export(search_modules)
 export(determine_name)
 export(path_to_dotpath)
-export(predicates_for_types)
 export(sysmods,         name='sysmods',         doc="sysmods() → shortcut for reversed(tuple(frozenset(sys.modules.values()))) …OK? I know. It’s not my finest work, but it works.")
 
 # NO DOCS ALLOWED:

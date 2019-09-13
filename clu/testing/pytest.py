@@ -2,7 +2,7 @@
 
 import pytest
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='package')
 def clumods():
     """ Import all CLU modules that use the “clu.exporting.Exporter”
         mechanism for listing and exporting their module contents

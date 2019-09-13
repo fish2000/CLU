@@ -19,6 +19,7 @@ from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 from clu.constants.consts import λ, DELETE_FLAG, ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.constants.polyfills import lru_cache, scandir, walk
+from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
 from clu.predicates import attr, allattrs, anyof
 from clu.sanitizer import utf8_encode
 from clu.typology import ispath, isvalidpath
@@ -1154,6 +1155,18 @@ class Directory(collections.abc.Hashable,
         """ Stringify the Directory instance. """
         return stringify(self, type(self).fields)
     
+    @wraps(dict.items)
+    def items(self):
+        return OrderedItemsView(self)
+    
+    @wraps(dict.keys)
+    def keys(self):
+        return OrderedKeysView(self)
+    
+    @wraps(dict.values)
+    def values(self):
+        return OrderedValuesView(self)
+    
     def __repr__(self):
         return self.to_string()
     
@@ -1172,10 +1185,10 @@ class Directory(collections.abc.Hashable,
         return self.exists
     
     def __iter__(self):
-        return scandir(self.realpath())
+        yield from scandir(self.realpath())
     
     def __len__(self):
-        return len(list(self))
+        return len(list(scandir(self.realpath())))
     
     def __getitem__(self, filename):
         pth = self.subpath(filename, requisite=True)

@@ -1,9 +1,73 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+
+import abc
+import collections
+import collections.abc
+
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
+
+# DICT VIEWS: OrderedMappingView and friends
+
+class ClassWrapRepr(abc.ABC):
+    
+    def __repr__(self):
+        clsname = type(self).__name__
+        mapping = repr(self._mapping)
+        return f"{clsname}<{mapping}>"
+
+@export
+class OrderedMappingView(collections.abc.MappingView,
+                         collections.abc.Reversible,
+                         ClassWrapRepr):
+    
+    """ A mapping view class implementing “collections.abc.Reversible” """
+    
+    def __reversed__(self):
+        yield from reversed(self._mapping)
+    
+    __repr__ = ClassWrapRepr.__repr__
+
+@export
+class OrderedItemsView(collections.abc.ItemsView,
+                       collections.abc.Reversible,
+                       ClassWrapRepr):
+    
+    """ An items-view class implementing “collections.abc.Reversible” """
+    
+    def __reversed__(self):
+        for key in reversed(self._mapping):
+            yield (key, self._mapping[key])
+    
+    __repr__ = ClassWrapRepr.__repr__
+
+@export
+class OrderedKeysView(collections.abc.KeysView,
+                      collections.abc.Reversible,
+                      ClassWrapRepr):
+    
+    """ A keys-view class implementing “collections.abc.Reversible” """
+    
+    def __reversed__(self):
+        yield from reversed(self._mapping)
+    
+    __repr__ = ClassWrapRepr.__repr__
+
+@export
+class OrderedValuesView(collections.abc.ValuesView,
+                        collections.abc.Reversible,
+                        ClassWrapRepr):
+    
+    """ A values-view class implementing “collections.abc.Reversible” """
+    
+    def __reversed__(self):
+        for key in reversed(self._mapping):
+            yield self._mapping[key]
+    
+    __repr__ = ClassWrapRepr.__repr__
 
 # DICT FUNCTIONS: dictionary-merging
 

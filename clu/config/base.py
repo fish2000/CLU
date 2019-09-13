@@ -149,10 +149,10 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
             self[key] = value
     
     def __iter__(self):
-        return iter(self.keys())
+        yield from iter(self.keys())
     
     def __len__(self):
-        return len(tuple(self.keys()))
+        return len(list(self.keys()))
     
     def __contains__(self, key):
         ns, string = self.unpack_ns(key)

@@ -1186,8 +1186,8 @@ class Directory(collections.abc.Hashable,
     
     def __iter__(self):
         out = self.exists \
-              and scandir(
-                  os.path.realpath(self.name)) \
+              and (k.name for k in scandir(
+                                   os.path.realpath(self.name))) \
                or iter(tuple())
         yield from out
     

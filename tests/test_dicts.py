@@ -56,11 +56,13 @@ class TestDicts(object):
         kU = k1 | k2
         assert type(kU) is set
         assert len(kU) == len(k1) + len(k2)
+        assert kU.issuperset(k1)
+        assert kU.issuperset(k2)
         
         # Sequence properties:
         keys = data.keys()
         for idx in range(len(keys)):
-            assert str(keys[idx]) == str(list(keys)[idx])
+            assert keys[idx] == list(keys)[idx]
     
     def test_dict_and_namespace_merge(self):
         from clu.dicts import merge

@@ -1233,9 +1233,6 @@ class Directory(collections.abc.Hashable,
     
     def __hash__(self):
         return hash((self.name, self.exists))
-    
-    def __call__(self, *args, **kwargs):
-        return self
 
 @export
 class cd(Directory):

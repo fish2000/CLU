@@ -739,9 +739,8 @@ class TestPredicates(object):
         
         class TechnicallyMergeable(object):
             """ This is to show the limitations of the predicate """
-            __iter__ = "wtf"
-            __getitem__ = "hax"
-            get = "IDK"
+            __getitem__ = "wtf"
+            __contains__ = "hax"
         
         assert ismergeable(TechnicallyMergeable)
         assert ismergeable(TechnicallyMergeable())

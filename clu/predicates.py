@@ -74,8 +74,11 @@ haslength = lambda thing: haspyattr(thing, 'len')
 # Things with either __iter__(…) OR __getitem__(…) are iterable:
 isiterable = lambda thing: anypyattrs(thing, 'iter', 'getitem')
 
-# q.v. `merge_two(…)` implementation sub.
-ismergeable = lambda thing: bool(hasattr(thing, 'get') and isiterable(thing))
+# q.v. `merge_two(…)` implementation sub. –
+# this predicate could also be called “isgetitemable()” in terms of
+# the implementation of “getitem(…)” as below:
+ismergeable = lambda thing: isiterable(thing) and \
+                            allpyattrs(thing, 'getitem', 'contains')
 
 # ACCESSORS: getattr(…) shortcuts
 

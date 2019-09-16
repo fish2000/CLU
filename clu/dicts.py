@@ -100,11 +100,10 @@ def merge_two(one, two, cls=dict):
     """ Merge two dictionaries into an instance of the specified class
         Based on this docopt example source: https://git.io/fjCZ6
     """
-    from clu.predicates import typeof, getitem
+    from clu.predicates import typeof, item_search
     cls = typeof(cls or one)
     keys = frozenset(one) | frozenset(two)
-    merged = ((key, getitem(one, key) or getitem(two, key)) for key in keys)
-    return cls(merged)
+    return cls((key, item_search(key, one, two)) for key in keys)
 
 @export
 def merge_as(*dicts, cls=dict, **overrides):

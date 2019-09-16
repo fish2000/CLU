@@ -11,7 +11,7 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import NoDefault
 from clu.config.abc import NAMESPACE_SEP, Cloneable, NamespacedMutableMapping
-from clu.naming import nameof
+from clu.fs.misc import typename_hexid
 from clu.typology import ismapping
 from clu.exporting import ValueDescriptor, Exporter
 
@@ -95,9 +95,8 @@ class Flat(NamespacedMutableMapping, Cloneable):
         self.dictionary = state
     
     def __repr__(self):
-        cnm = nameof(type(self))
+        cnm, hxa = typename_hexid(self)
         dic = repr(self.dictionary)
-        hxa = hex(id(self))
         return f"{cnm}({dic}) @ {hxa}"
 
 @export
@@ -184,9 +183,8 @@ class Nested(NamespacedMutableMapping, Cloneable):
         self.tree = state
     
     def __repr__(self):
-        cnm = nameof(type(self))
+        cnm, hxa = typename_hexid(self)
         dic = repr(self.tree)
-        hxa = hex(id(self))
         return f"{cnm}({dic}) @ {hxa}"
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

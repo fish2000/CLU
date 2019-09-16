@@ -158,9 +158,10 @@ isscalar = lambda thing: subclasscheck(thing, scalar_types)
 isstring = lambda thing: subclasscheck(thing, string_types)
 isbytes = lambda thing: subclasscheck(thing, bytes_types)
 ismodule = lambda thing: subclasscheck(thing, types.Module)
-isfunction = ΛΛ = lambda thing: isinstance(thing, Λ) and not isclasstype(thing)
+isfunction = ΛΛ = lambda thing: isinstance(thing, Λ) and nopyattr(thing, 'mro')
 islambda = λλ = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') in (λ, φ)
 iscallable = lambda thing: haspyattr(thing, 'call') and nopyattr(thing, 'code')
+iscallabletype = lambda thing: isinstance(thing, callable_types) and nopyattr(thing, 'mro')
 issequence = lambda thing: isinstance(thing, collections.abc.Sequence)
 ishashable = lambda thing: isinstance(thing, collections.abc.Hashable)
 
@@ -185,6 +186,7 @@ ismodulelist = predicate_all(ismodule)
 isfunctionlist = predicate_all(ΛΛ)
 islambdalist = predicate_all(λλ)
 iscallablelist = predicate_all(iscallable)
+iscallabletypelist = predicate_all(iscallabletype)
 issequencelist = predicate_all(issequence)
 ishashablelist = predicate_all(ishashable)
 
@@ -253,6 +255,7 @@ export(islambda,        name='islambda',    doc="islambda(thing) → boolean pre
 export(λλ,              name='λλ',          doc="λλ(thing) → boolean predicate, True if `thing` is a function created with the «lambda» keyword")
 export(iscallable,      name='iscallable',  doc="iscallable(thing) → boolean predicate, True if `thing` is a callable type (a class with a “__call__” method) or an instance of same\n\n"
                                                 "N.B. this predicate is *NOT* the same as the built-in “callable(…)” predicate")
+export(iscallabletype,  name='iscallabletype',  doc="iscallabletype(thing) → boolean predicate, True if `thing` is one of the predefined callable types (q.v. “clu.typology.callable_types” supra.)")
 export(ishashable,      name='ishashable',  doc="ishashable(thing) → boolean predicate, True if `thing` can be hashed, via the builtin `hash(…)` function")
 export(issequence,      name='issequence',  doc="issequence(thing) → boolean predicate, True if `thing` is a sequence type (e.g. a `tuple` or `list` type)")
 
@@ -275,6 +278,7 @@ export(ismodulelist,    name='ismodulelist',    doc="ismodulelist(thinglist) →
 export(isfunctionlist,  name='isfunctionlist',  doc="isfunctionlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of callable function types")
 export(islambdalist,    name='islambdalist',    doc="islambdalist(thinglist) → boolean predicate, True if `thinglist` is a sequence of functions created with the «lambda» keyword")
 export(iscallablelist,  name='iscallablelist',  doc="iscallablelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of callable types (class types with “__call__” methods or instances of same)")
+export(iscallabletypelist,  name='iscallabletypelist',  doc="iscallabletypelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of predefined callable types (q.v. “clu.typology.callable_types” supra.)")
 export(issequencelist,  name='issequencelist',  doc="issequencelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of sequence types")
 export(ishashablelist,  name='ishashablelist',  doc="ishashablelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of things that can be hashed, via the builtin `hash(…)` function")
 

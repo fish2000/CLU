@@ -148,7 +148,14 @@ class EnvBase(NamespacedMutableMapping, Cloneable, AppName):
         prefixes = frozenset(key.lower().split(PREFIX_SEP, 1)[0] for key in envkeys if PREFIX_SEP in key)
         return tuple(sorted(prefixes))
     
-    def clone(self):
+    def inner_repr(self):
+        """ Return some readable meta-information about this instance """
+        prefix = type(self).prefix(namespace=None)
+        namespaces = len(self.namespaces())
+        keys = len(list(self.keys()))
+        return f"[prefix=“{prefix}*”, namespaces={namespaces}, keys={keys}]"
+    
+    def clone(self, deep=False):
         """ Return a cloned copy of this NamespacedMutableMapping environment
             interface.
         """

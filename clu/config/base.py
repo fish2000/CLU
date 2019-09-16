@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from copy import copy
 from itertools import chain
 
 iterchain = chain.from_iterable
 
 import abc
+import copy
 
 abstract = abc.abstractmethod
 
 from clu.constants.consts import NoDefault
 from clu.config.abc import NAMESPACE_SEP, Cloneable, NamespacedMutableMapping
-from clu.fs.misc import typename_hexid
 from clu.typology import ismapping
 from clu.exporting import ValueDescriptor, Exporter
 
@@ -85,19 +84,17 @@ class Flat(NamespacedMutableMapping, Cloneable):
                            for key in self.dictionary.keys() \
                             if NAMESPACE_SEP in key)))
     
-    def clone(self):
-        return type(self)(dictionary=copy(self.dictionary))
-    
     def __getstate__(self):
         return self.dictionary
     
     def __setstate__(self, state):
         self.dictionary = state
     
-    def __repr__(self):
-        cnm, hxa = typename_hexid(self)
-        dic = repr(self.dictionary)
-        return f"{cnm}({dic}) @ {hxa}"
+    def inner_repr(self):
+        return repr(self.dictionary)
+    
+    def clone(self, deep=False):
+        return type(self)(dictionary=copy.copy(self.dictionary))
 
 @export
 class Nested(NamespacedMutableMapping, Cloneable):
@@ -173,19 +170,17 @@ class Nested(NamespacedMutableMapping, Cloneable):
                for key, value in self.tree.items() \
                 if ismapping(value))))
     
-    def clone(self):
-        return type(self)(tree=copy(self.tree))
-    
     def __getstate__(self):
         return self.tree
     
     def __setstate__(self, state):
         self.tree = state
     
-    def __repr__(self):
-        cnm, hxa = typename_hexid(self)
-        dic = repr(self.tree)
-        return f"{cnm}({dic}) @ {hxa}"
+    def inner_repr(self):
+        return repr(self.tree)
+    
+    def clone(self, deep=False):
+        return type(self)(tree=copy.copy(self.tree))
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

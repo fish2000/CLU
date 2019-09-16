@@ -6,7 +6,8 @@ import os
 from clu.constants.consts import PROJECT_NAME, NoDefault
 from clu.config.abc import NAMESPACE_SEP, Cloneable, NamespacedMutableMapping
 from clu.config.base import AppName
-from clu.exporting import Exporter
+from clu.predicates import tuplize
+from clu.exporting import Slotted, Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -14,7 +15,8 @@ export = exporter.decorator()
 PREFIX_SEP = '_'
 
 @export
-class EnvBase(NamespacedMutableMapping, Cloneable, AppName):
+class EnvBase(NamespacedMutableMapping,
+              Cloneable, AppName, metaclass=Slotted):
     
     """ The base class for “clu.config.env.Env”. Override this class in
         your own project for access to an interface to the environment
@@ -26,6 +28,7 @@ class EnvBase(NamespacedMutableMapping, Cloneable, AppName):
         class keyword and furnishes a read-only descriptor based on that
         keywords’ value.
     """
+    __slots__ = tuplize('environment')
     
     @classmethod
     def prefix(cls, namespace=None):

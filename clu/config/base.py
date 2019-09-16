@@ -20,6 +20,8 @@ export = exporter.decorator()
 @export
 class AppName(abc.ABC):
     
+    __slots__ = tuple()
+    
     @classmethod
     def __init_subclass__(cls, appname=None, **kwargs):
         """ Translate the “appname” class-keyword into an “appname” read-only

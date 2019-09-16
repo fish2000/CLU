@@ -187,6 +187,8 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
                                collections.abc.Reversible,
                                ReprWrapper):
     
+    __slots__ = tuple()
+    
     @staticmethod
     def unpack_ns(string):
         """ Unpack a namespaced key into a namespace name and a key name.

@@ -173,7 +173,7 @@ class FlatOrderedSet(collections.abc.Set,
         cls = type(self)
         out = cls.__new__(cls)
         things = list()
-        copier = deep and copy.deepcopy or copy.copy
+        copier = getattr(copy, deep and 'deepcopy' or 'copy')
         for thing in self.things:
             things.append(copier(thing))
         super(cls, out).__init__(*things)

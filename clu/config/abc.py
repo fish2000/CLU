@@ -77,7 +77,7 @@ class Cloneable(abc.ABC):
     __slots__ = tuple()
     
     @abstract
-    def clone(self, deep=False):
+    def clone(self, deep=False, memo=None):
         """ Return a cloned copy of this instance """
         ...
     
@@ -87,7 +87,7 @@ class Cloneable(abc.ABC):
     
     def __deepcopy__(self, memo):
         """ Return a deep copy of this instance """
-        return self.clone(deep=memo)
+        return self.clone(deep=True, memo=memo)
 
 @export
 class FlatOrderedSet(collections.abc.Set,
@@ -169,7 +169,7 @@ class FlatOrderedSet(collections.abc.Set,
     def __hash__(self):
         return hash(self.things) & hash(id(self.things))
     
-    def clone(self, deep=False):
+    def clone(self, deep=False, memo=None):
         # Q.v. https://stackoverflow.com/a/48550898/298171
         cls = type(self)
         out = cls.__new__(cls)

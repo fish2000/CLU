@@ -95,7 +95,7 @@ class Flat(NamespacedMutableMapping, Cloneable):
     def inner_repr(self):
         return repr(self.dictionary)
     
-    def clone(self, deep=False):
+    def clone(self, deep=False, memo=None):
         return type(self)(dictionary=copy.copy(self.dictionary))
 
 @export
@@ -181,7 +181,7 @@ class Nested(NamespacedMutableMapping, Cloneable):
     def inner_repr(self):
         return repr(self.tree)
     
-    def clone(self, deep=False):
+    def clone(self, deep=False, memo=None):
         return type(self)(tree=copy.copy(self.tree))
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

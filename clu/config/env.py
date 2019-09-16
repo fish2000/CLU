@@ -158,7 +158,7 @@ class EnvBase(NamespacedMutableMapping,
         keys = len(list(self.keys()))
         return f"[prefix=“{prefix}*”, namespaces={namespaces}, keys={keys}]"
     
-    def clone(self, deep=False):
+    def clone(self, deep=False, memo=None):
         """ Return a cloned copy of this NamespacedMutableMapping environment
             interface.
         """

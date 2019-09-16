@@ -241,7 +241,7 @@ class FileBase(NamespacedMutableMapping, FileName, metaclass=TypeLocker):
         return self.loads(loaded)
     
     @abstract
-    def loads(self, text):
+    def loads(self, loaded):
         """ Load a datatype-specific namespaced dictionary from
             arbitrary encoded string data
         """

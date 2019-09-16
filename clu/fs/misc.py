@@ -224,16 +224,14 @@ def u8bytes(source):
     """
     if type(source) is bytes:
         return source
-    elif type(source) is bytearray:
-        return bytes(source)
     elif isstring(source):
         return u8encode(source)
-    elif isnumeric(source):
-        return u8encode(str(source))
     elif type(source) is bool:
         return source and b'True' or b'False'
     elif source is None:
         return b'None'
+    elif isnumeric(source):
+        return u8encode(str(source))
     return bytes(source)
 
 @export

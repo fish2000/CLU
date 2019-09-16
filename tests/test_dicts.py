@@ -98,11 +98,6 @@ class TestDicts(object):
                                    'format' : 'png',
                                        'yo' : 'DOGG' }
         
-        # print_separator()
-        # pprint(merged)
-        # print_separator()
-        # print()
-        
         # print("» Checking “Namespace.operator+(•) …”")
         # print()
         
@@ -115,11 +110,6 @@ class TestDicts(object):
                                  'optimize' : True,
                                    'format' : 'png',
                                        'yo' : 'dogg' }
-        
-        # print_separator()
-        # pprint(merged)
-        # print_separator()
-        # print()
         
         # print("» Checking “Namespace.operator+=(•) …”")
         # print()

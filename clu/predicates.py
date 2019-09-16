@@ -322,7 +322,7 @@ def noneof(*items):
 def slots_for(cls):
     """ slots_for(cls) → get the summation of the `__slots__` tuples for a class and its ancestors """
     # q.v. https://stackoverflow.com/a/6720815/298171
-    if nopyattr(cls, 'mro'):
+    if nopyattrs(cls, 'mro', 'bases'):
         return slots_for(type(cls))
     mro = pyattr(cls, 'mro', 'bases', default=tuplize(object))
     return tuple(iterchain(

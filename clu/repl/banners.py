@@ -20,7 +20,7 @@ import os
 import sys
 
 from clu.constants.consts import DEBUG, PY3, PYPY, TEXTMATE
-from .ansi import Text, print_ansi_centered
+from clu.repl.ansi import Text, print_ansi_centered
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

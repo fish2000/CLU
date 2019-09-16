@@ -17,7 +17,7 @@ from clu.constants.polyfills import Path
 from clu.enums import alias
 from clu.exporting import Exporter
 
-from clu.predicates import (isclasstype, isenum,
+from clu.predicates import (negate, isclasstype, isenum,
                             allpyattrs, haspyattr, nopyattr,
                             isiterable, haslength,
                             getpyattr, or_none,
@@ -125,8 +125,9 @@ callable_types += attrs(types, 'Coroutine',
 # of the aforementioned typelists:
 
 # Path types:
-ispathtype = lambda cls: issubclass(cls, path_types)
-ispath = lambda thing: subclasscheck(thing, path_types) or haspyattr(thing, 'fspath')
+ispathtype  = lambda cls: issubclass(cls, path_types)
+ispath      = lambda thing: subclasscheck(thing, path_types) or haspyattr(thing, 'fspath')
+isnotpath   = negate(ispath)
 isvalidpath = lambda thing: ispath(thing) and os.path.exists(os.path.expanduser(thing))
 
 # Abstract items and context managers:
@@ -218,7 +219,8 @@ export(Λ,               name='Λ')
 export(callable_types,  name='callable_types')
 
 export(ispathtype,      name='ispathtype',  doc="ispathtype(thing) → boolean predicate, True if `thing` is a path type")
-export(ispath,          name='ispath',      doc="ispath(thing) → boolean predicate, True if `thing` seems to be path-ish instance")
+export(ispath,          name='ispath',      doc="ispath(thing) → boolean predicate, True if `thing` seems to be a path-ish instance")
+export(isnotpath,       name='isnotpath',   doc="isnotpath(thing) → boolean predicate, True if `thing` seems not to be a path-ish instance")
 export(isvalidpath,     name='isvalidpath', doc="isvalidpath(thing) → boolean predicate, True if `thing` represents a valid path on the filesystem")
 
 export(isabstractmethod,                    doc="isabstractmethod(thing) → boolean predicate, True if `thing` is a method declared “abstract” with `@abc.abstractmethod`")

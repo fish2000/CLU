@@ -55,20 +55,23 @@ metaclass = lambda thing: ismetaclass(thing) and thing \
                           or (isclass(thing) and type(thing) \
                           or (type(type(thing))))
 
-typeof = lambda thing: isclasstype(thing) and thing or type(thing)
-
 # PREDICATE FUNCTIONS: hasattr(…) shortcuts:
 
-noattr = lambda thing, atx: negate(hasattr)(thing, atx)
+noattr = negate(hasattr)
 haspyattr = lambda thing, atx: hasattr(thing, f'__{atx}__')
-nopyattr = lambda thing, atx: negate(haspyattr)(thing, atx)
+nopyattr = negate(haspyattr)
 
 anyattrs = lambda thing, *attrs: any(hasattr(thing, atx) for atx in attrs)
 allattrs = lambda thing, *attrs: all(hasattr(thing, atx) for atx in attrs)
-noattrs = lambda thing, *attrs: negate(anyattrs)(thing, *attrs)
+noattrs = negate(anyattrs)
+
 anypyattrs = lambda thing, *attrs: any(haspyattr(thing, atx) for atx in attrs)
 allpyattrs = lambda thing, *attrs: all(haspyattr(thing, atx) for atx in attrs)
-nopyattrs = lambda thing, *attrs: negate(anypyattrs)(thing, *attrs)
+nopyattrs = negate(anypyattrs)
+
+# Calling “typeof(…)” on a thing returns either its type, or – if it is
+# a classtype – the thing itself:
+typeof = lambda thing: nopyattr(thing, 'mro') and type(thing) or thing
 
 # Things with a __len__(…) method “have length”:
 haslength = lambda thing: haspyattr(thing, 'len')

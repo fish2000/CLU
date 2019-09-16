@@ -22,7 +22,7 @@ from clu.constants.polyfills import lru_cache, scandir, walk
 from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
 from clu.predicates import attr, allattrs, anyof
 from clu.sanitizer import utf8_encode
-from clu.typology import ispath, isvalidpath
+from clu.typology import isnotpath, isvalidpath
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
 from clu.fs.misc import stringify, suffix_searcher, swapext, u8str
 from clu.exporting import ValueDescriptor, Exporter
@@ -36,7 +36,7 @@ DEFAULT_PREFIX = "yo-dogg-"
 @export
 def ensure_path_is_valid(pth):
     """ Raise an exception if we can’t write to the specified path """
-    if not ispath(pth):
+    if isnotpath(pth):
         raise FilesystemError(f"Operand must be a path type: {pth}")
     if os.path.exists(pth):
         if os.path.isdir(pth):
@@ -194,26 +194,26 @@ def back_tick(command,  as_str=True,
     return (as_str and output.decode(encoding) or output)
 
 @export
-def rm_rf(pth):
+def rm_rf(path):
     """ rm_rf() does what `rm -rf` does – so, for the love of fuck,
         BE FUCKING CAREFUL WITH IT.
     """
-    if not isvalidpath(pth):
+    if not isvalidpath(path):
         raise ExecutionError(
             "Can’t rm -rf without something to rm arr-effedly")
-    pth = os.fspath(pth)
+    path = os.fspath(path)
     try:
-        if os.path.isfile(pth) or os.path.islink(pth):
-            os.unlink(pth)
-        elif os.path.isdir(pth):
+        if os.path.isfile(path) or os.path.islink(path):
+            os.unlink(path)
+        elif os.path.isdir(path):
             subdirs = []
-            for path, dirs, files in walk(pth, followlinks=True):
+            for root, dirs, files in walk(path, followlinks=True):
                 for tf in files:
-                    os.unlink(os.path.join(path, tf))
-                subdirs.extend([os.path.join(path, td) for td in dirs])
+                    os.unlink(os.path.join(root, tf))
+                subdirs.extend((os.path.join(root, td) for td in dirs))
             for subdir in reversed(subdirs):
                 os.rmdir(subdir)
-            os.rmdir(pth)
+            os.rmdir(path)
         return True
     except (OSError, IOError):
         pass
@@ -666,7 +666,7 @@ class TemporaryName(collections.abc.Hashable,
         return self.exists
     
     def __eq__(self, other):
-        if not ispath(other):
+        if isnotpath(other):
             return NotImplemented
         try:
             return os.path.samefile(self._name,
@@ -675,7 +675,7 @@ class TemporaryName(collections.abc.Hashable,
             return False
     
     def __ne__(self, other):
-        if not ispath(other):
+        if isnotpath(other):
             return NotImplemented
         try:
             return differentfile(self._name,
@@ -1219,7 +1219,7 @@ class Directory(collections.abc.Hashable,
         return self.directory(filepath).subdirectory(self)
     
     def __eq__(self, other):
-        if not ispath(other):
+        if isnotpath(other):
             return NotImplemented
         try:
             return os.path.samefile(self.name,
@@ -1228,7 +1228,7 @@ class Directory(collections.abc.Hashable,
             return False
     
     def __ne__(self, other):
-        if not ispath(other):
+        if isnotpath(other):
             return NotImplemented
         try:
             return differentfile(self.name,

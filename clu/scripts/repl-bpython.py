@@ -104,7 +104,7 @@ from clu.typology import (samelength, differentlength, isunique, istypelist, mak
                           path_classes, path_types, file_types,
                           dict_types, mapping_types, mapping_classes,
                           function_types, Λ, callable_types,
-                          ispathtype, ispath, isvalidpath,
+                          ispathtype, ispath, isnotpath, isvalidpath,
                           isaliasdescriptor, hasmembers, hasaliases,
                           isabstractmethod, isabstract, isabstractcontextmanager, iscontextmanager,
                           isnumber, isnumeric, iscomplex, ismapping,
@@ -125,7 +125,7 @@ from clu.naming import (determine_module, nameof, moduleof,
                         dotpath_to_prefix, path_to_prefix,
                         split_abbreviations)
 
-from clu.config.abc import NAMESPACE_SEP, NamespacedMutableMapping, FlatOrderedSet
+from clu.config.abc import NAMESPACE_SEP, NamespacedMutableMapping, Cloneable, FlatOrderedSet
 from clu.config.base import Flat, Nested
 from clu.config.env import Env
 from clu.config.filebase import FileName, FileBase
@@ -323,7 +323,7 @@ __all__ = ('Image',
            'path_classes', 'path_types', 'file_types',
            'dict_types', 'mapping_types', 'mapping_classes',
            'function_types', 'Λ', 'callable_types',
-           'ispathtype', 'ispath', 'isvalidpath',
+           'ispathtype', 'ispath', 'isnotpath', 'isvalidpath',
            'isaliasdescriptor', 'hasmembers', 'hasaliases',
            'isabstractmethod', 'isabstract', 'isabstractcontextmanager', 'iscontextmanager',
            'isnumber', 'isnumeric', 'iscomplex', 'ismapping',
@@ -341,7 +341,7 @@ __all__ = ('Image',
            'qualified_import', 'qualified_name_tuple', 'qualified_name',
            'dotpath_to_prefix', 'path_to_prefix',
            'split_abbreviations',
-           'NAMESPACE_SEP', 'NamespacedMutableMapping', 'FlatOrderedSet',
+           'NAMESPACE_SEP', 'NamespacedMutableMapping', 'Cloneable', 'FlatOrderedSet',
            'Flat', 'Nested',
            'Env', 'FileName', 'FileBase',
            'ValidationError', 'hoist',
@@ -403,15 +403,20 @@ try:
                                    ensure_path_is_valid,
                                    script_path, which, back_tick,
                                    rm_rf, temporary,
+                                   TypeLocker,
                                    TemporaryName, Directory,
                                                   cd, wd, td, hd,
                                    TemporaryDirectory, Intermediate,
                                    NamedTemporaryFile)
-    from clu.fs.misc import (gethomedir,
+    from clu.fs.misc import (gethomedir, isinvalidpath,
+                             stringify, stringify_value,
+                             wrap_value,
+                             hexid, typenameof, typename_hexid,
                              re_matcher, re_searcher,
                              re_suffix, suffix_searcher,
                              swapext,
-                             filesize, samesize)
+                             differentfile,
+                             filesize, samesize, differentsize)
 except (ImportError, SyntaxError):
     pass
 else:
@@ -422,15 +427,20 @@ else:
                 'ensure_path_is_valid',
                 'script_path', 'which', 'back_tick',
                 'rm_rf', 'temporary',
+                'TypeLocker',
                 'TemporaryName', 'Directory',
                                  'cd', 'wd', 'td', 'hd',
                 'TemporaryDirectory', 'Intermediate',
                 'NamedTemporaryFile',
-                'gethomedir',
+                'gethomedir', 'isinvalidpath',
+                'stringify', 'stringify_value',
+                'wrap_value',
+                'hexid', 'typenameof', 'typename_hexid',
                 're_matcher', 're_searcher',
                 're_suffix', 'suffix_searcher',
                 'swapext',
-                'filesize', 'samesize')
+                'differentfile',
+                'filesize', 'samesize', 'differentsize')
     D = Directory()
 
 try:

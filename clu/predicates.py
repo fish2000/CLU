@@ -164,7 +164,7 @@ item_across   = lambda itx, *things, default=tuple(): collator(getitem,   itx, *
 def isenum(cls):
     """ isenum(cls) → boolean predicate, True if cls descends from `Enum`. """
     from clu.constants.polyfills import Enum
-    if not isclasstype(cls):
+    if nopyattr(cls, 'mro'):
         return False
     return Enum in cls.__mro__
 
@@ -322,7 +322,7 @@ def noneof(*items):
 def slots_for(cls):
     """ slots_for(cls) → get the summation of the `__slots__` tuples for a class and its ancestors """
     # q.v. https://stackoverflow.com/a/6720815/298171
-    if not isclasstype(cls):
+    if nopyattr(cls, 'mro'):
         return slots_for(type(cls))
     mro = pyattr(cls, 'mro', 'bases', default=tuplize(object))
     return tuple(iterchain(

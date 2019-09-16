@@ -11,7 +11,7 @@ import sys
 from clu.constants.consts import ENCODING, SINGLETON_TYPES
 from clu.constants.polyfills import lru_cache
 from clu.predicates import negate, ismetaclass, typeof, or_none, isenum, enumchoices, pyname
-from clu.typology import string_types, isvalidpath, isnumeric, isbytes, isstring
+from clu.typology import isvalidpath, isnumeric, isbytes, isstring
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -226,9 +226,9 @@ def u8bytes(source):
         return source
     elif type(source) is bytearray:
         return bytes(source)
-    elif isinstance(source, string_types):
+    elif isstring(source):
         return u8encode(source)
-    elif isinstance(source, (int, float)):
+    elif isnumeric(source):
         return u8encode(str(source))
     elif type(source) is bool:
         return source and b'True' or b'False'

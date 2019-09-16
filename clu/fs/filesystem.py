@@ -23,8 +23,8 @@ from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
 from clu.predicates import attr, allattrs, anyof
 from clu.sanitizer import utf8_encode
 from clu.typology import ispath, isvalidpath
-from .misc import filesize, gethomedir, masked_permissions
-from .misc import stringify, suffix_searcher, swapext, u8str
+from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
+from clu.fs.misc import stringify, suffix_searcher, swapext, u8str
 from clu.exporting import ValueDescriptor, Exporter
 
 exporter = Exporter(path=__file__)
@@ -416,7 +416,7 @@ class TemporaryName(collections.abc.Hashable,
     fields = ('name',   'exists', 
                         'destroy',
               'mode',   'binary_mode',
-              'prefix', 'suffix', 'parent')
+              'prefix', 'suffix', 'dirname')
     
     def __init__(self, prefix=None, suffix="tmp",
                        parent=None,
@@ -646,7 +646,7 @@ class TemporaryName(collections.abc.Hashable,
     
     def to_string(self):
         """ Stringify the TemporaryName instance. """
-        return stringify(self, type(self).fields)
+        return stringify(self, type(self).fields, try_callables=False)
     
     def __repr__(self):
         return self.to_string()
@@ -678,8 +678,8 @@ class TemporaryName(collections.abc.Hashable,
         if not ispath(other):
             return NotImplemented
         try:
-            return not os.path.samefile(self._name,
-                                        os.fspath(other))
+            return differentfile(self._name,
+                                 os.fspath(other))
         except FileNotFoundError:
             return True
     
@@ -866,8 +866,7 @@ class Directory(collections.abc.Hashable,
         """
         self.ctx_set_targets(old=os.getcwd())
         if os.path.isdir(self.new):
-            self.will_change = not os.path.samefile(self.old,
-                                                    self.new)
+            self.will_change = differentfile(self.old, self.new)
         else:
             self.will_change = False
         self.did_change = False
@@ -1232,8 +1231,8 @@ class Directory(collections.abc.Hashable,
         if not ispath(other):
             return NotImplemented
         try:
-            return not os.path.samefile(self.name,
-                                        os.fspath(other))
+            return differentfile(self.name,
+                                 os.fspath(other))
         except FileNotFoundError:
             return True
     

@@ -8,8 +8,9 @@ import collections.abc
 abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, NoDefault
-from clu.predicates import (isiterable, always,
-                            uncallable, isexpandable, iscontainer,
+from clu.fs.misc import typename_hexid
+from clu.predicates import (isiterable, always, uncallable,
+                            isexpandable, iscontainer,
                             tuplize)
 from clu.exporting import Slotted, Exporter
 
@@ -98,14 +99,31 @@ class FlatOrderedSet(collections.abc.Set,
         return hash(self.things) & hash(id(self.things))
     
     def __repr__(self):
-        cnm = type(self).__name__
+        cnm, hxa = typename_hexid(self)
         lst = repr(self.things)
-        hxa = hex(id(self))
         return f"{cnm}({lst}) @ {hxa}"
 
 @export
+class Cloneable(abc.ABC):
+    
+    """ An abstract class representing something “clonable.” A cloneable
+        subclass need only implement the one method, “clone()” – taking no
+        arguments and returning a new instance of said class, populated
+        as a cloned copy of the instance upon which the “clone()” method
+        was called.
+        
+        Implementors are at liberty to use shallow- or deep-copy methods,
+        or a mixture of the two, in creating these cloned instances.
+    """
+    
+    @abstract
+    def clone(self):
+        """ Return a cloned copy of this instance. """
+        ...
+
+@export
 class NamespacedMutableMapping(collections.abc.MutableMapping,
-                               collections.abc.Collection):
+                               collections.abc.Reversible):
     
     @staticmethod
     def unpack_ns(string):
@@ -192,10 +210,6 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
         """
         ...
     
-    def clone(self):
-        """ Return a cloned copy of this NamespacedMutableMapping instance. """
-        raise NotImplementedError("clone() not implemented")
-    
     def update(self, dictish=NoDefault, **updates):
         """ NamespacedMutableMapping.update([E, ]**F) -> None.
             
@@ -213,6 +227,9 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
     
     def __iter__(self):
         yield from iter(self.keys())
+    
+    def __reversed__(self):
+        yield from reversed(self.keys())
     
     def __len__(self):
         return len(list(self.keys()))

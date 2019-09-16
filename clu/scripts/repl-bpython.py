@@ -137,6 +137,7 @@ from clu.config.settings import Schema
 from clu.config.formats import JsonFile, PickleFile, TomlFile, YamlFile
 
 from clu.csv import pad_csv
+from clu.dicts import OrderedMappingView, OrderedItemsView, OrderedKeysView, OrderedValuesView
 from clu.dicts import merge_two, merge_as, merge, asdict
 
 # Add miscellaneous necessities:
@@ -348,6 +349,7 @@ __all__ = ('Image',
            'FieldBase', 'fields',
            'Schema', 'JsonFile', 'PickleFile', 'TomlFile', 'YamlFile',
            'pad_csv',
+           'OrderedMappingView', 'OrderedItemsView', 'OrderedKeysView', 'OrderedValuesView',
            'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',
            'print_separator', 'evict_announcer',
@@ -429,6 +431,7 @@ else:
                 're_suffix', 'suffix_searcher',
                 'swapext',
                 'filesize', 'samesize')
+    D = Directory()
 
 try:
     from instakit.utils.static import asset

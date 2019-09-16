@@ -6,6 +6,7 @@ import os
 import sys
 
 from clu.constants.enums import System, SYSTEM
+from clu.config.abc import NamespacedMutableMapping
 from clu.config.base import AppName
 from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import TypeLocker, TemporaryName, Directory
@@ -127,7 +128,7 @@ class FileName(AppName):
         return Directory(root_dir.realpath()).subpath(file_name)
 
 @export
-class FileBase(FileName, metaclass=TypeLocker):
+class FileBase(NamespacedMutableMapping, FileName, metaclass=TypeLocker):
     
     """ The FileBase abstract base class furnishes two methods:
         

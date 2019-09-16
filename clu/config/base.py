@@ -10,7 +10,7 @@ import abc
 abstract = abc.abstractmethod
 
 from clu.constants.consts import NoDefault
-from clu.config.abc import NAMESPACE_SEP, NamespacedMutableMapping
+from clu.config.abc import NAMESPACE_SEP, Cloneable, NamespacedMutableMapping
 from clu.naming import nameof
 from clu.typology import ismapping
 from clu.exporting import ValueDescriptor, Exporter
@@ -38,7 +38,7 @@ class AppName(abc.ABC):
                               "(appname is None)")
 
 @export
-class Flat(NamespacedMutableMapping):
+class Flat(NamespacedMutableMapping, Cloneable):
     
     def __init__(self, dictionary=None, *args, **kwargs):
         try:
@@ -101,7 +101,7 @@ class Flat(NamespacedMutableMapping):
         return f"{cnm}({dic}) @ {hxa}"
 
 @export
-class Nested(NamespacedMutableMapping):
+class Nested(NamespacedMutableMapping, Cloneable):
     
     def __init__(self, tree=None, *args, **kwargs):
         try:

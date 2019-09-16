@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from itertools import chain
+
+iterchain = chain.from_iterable
 
 import os
 import re
 import sys
 
-from clu.constants.consts import ENCODING
+from clu.constants.consts import ENCODING, SINGLETON_TYPES
 from clu.constants.polyfills import lru_cache
-from clu.typology import string_types
+from clu.predicates import negate, ismetaclass, typeof, or_none, isenum, enumchoices, pyname
+from clu.typology import string_types, isvalidpath, isnumeric, isbytes, isstring
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -16,6 +20,7 @@ export = exporter.decorator()
 # OS UTILITIES: get the current users’ home directory
 
 gethomedir = lambda: os.path.expanduser("~")
+isinvalidpath = negate(isvalidpath)
 
 @export
 def wrap_value(value):
@@ -25,8 +30,33 @@ def wrap_value(value):
 none_function = wrap_value(None)
 true_function = wrap_value(True)
 
+hexid = lambda thing: hex(id(thing))
+typenameof = lambda thing: pyname(typeof(thing))
+typename_hexid = lambda thing: (pyname(typeof(thing)), hex(id(thing)))
+
+def stringify_value(v):
+    """ Basic, simple, straightforward type-switch-based sub-repr """
+    T = type(v)
+    if isstring(T):
+        return f"“{v}”"
+    elif T in SINGLETON_TYPES:
+        return str(v)
+    elif isnumeric(T):
+        return str(v)
+    elif isbytes(T):
+        return f"“{v.decode(ENCODING)}”"
+    elif ismetaclass(T):
+        if isenum(v):
+            typename, hex_id = typename_hexid(v)
+            choices = ", ".join(enumchoices(v))
+            return f"‘{typename}<{v.__name__}({choices}) @ {hex_id}>’"
+        return repr(v)
+    return f"‘{v!r}’"
+
 @export
-def stringify(instance, fields, *, try_callables=True):
+def stringify(instance, fields,
+                       *extras, try_callables=True,
+                      **attributes):
     """ Stringify an object instance, using an iterable field list to
         extract and render its values, and printing them along with the 
         typename of the instance and its memory address -- yielding a
@@ -50,20 +80,18 @@ def stringify(instance, fields, *, try_callables=True):
                             type(self).__slots__,
                             try_callables=False)
     """
-    field_dict = {}
-    for field in fields:
-        field_value = getattr(instance, field, "")
-        if try_callables:
-            field_value = callable(field_value) and field_value() or field_value
+    typename, hex_id = typename_hexid(instance)
+    if all(len(param) < 1 for param in (fields, extras, attributes)):
+        return f"{typename}(¬) @ {hex_id}"
+    attrs = dict(attributes)
+    for field in chain(fields, extras):
+        field_value = or_none(instance, field)
+        if try_callables and callable(field_value):
+            field_value = field_value()
         if field_value:
-            field_dict.update({ u8str(field) : field_value })
-    field_dict_items = []
-    for k, v in field_dict.items():
-        field_dict_items.append(f'''{k}="{v}"''')
-    typename = type(instance).__name__
-    field_dict_string = ", ".join(field_dict_items)
-    hex_id = hex(id(instance))
-    return f"{typename}({field_dict_string}) @ {hex_id}"
+            attrs[field] = stringify_value(field_value)
+    attr_string = ", ".join(f'{k}={v}' for k, v in attrs.items()) or "…"
+    return f"{typename}({attr_string}) @ {hex_id}"
 
 ex = os.path.extsep
 dolla = '$'
@@ -144,19 +172,45 @@ def swapext(path, new_extension):
 @export
 def filesize(path):
     """ Return the on-disk size (in bytes) of the file located at a path """
-    if not os.path.exists(path):
+    if isinvalidpath(path):
         return -1
     return os.lstat(path).st_size
 
+differentfile = negate(os.path.samefile)
+
 @export
 def samesize(path0, path1):
-    """ Compare the on-disk file sizes (in bytes) of two files by their paths """
+    """ Compare the on-disk file sizes (in bytes) of two files by their paths,
+        returning True if they are the same, and False otherwise
+        
+        “FilesystemError” will be raised if either of the paths are invalid
+    """
     from clu.constants.exceptions import FilesystemError
     if any(p is None for p in (path0, path1)):
         raise FilesystemError('paths must both be non-None')
-    if os.path.samefile(path0, path1):
+    if any(isinvalidpath(p) for p in (path0, path1)):
+        raise FilesystemError('paths must both be valid and existent')
+    if differentfile(path0, path1):
+        return filesize(path0) == filesize(path1)
+    else:
         return True
-    return filesize(path0) == filesize(path1)
+
+@export
+def differentsize(path0, path1):
+    """ Compare the on-disk file sizes (in bytes) of two files by their paths,
+        returning True if they are different, and False otherwise
+        
+        “FilesystemError” will be raised if either of the paths are invalid
+    """
+    from clu.constants.exceptions import FilesystemError
+    if any(p is None for p in (path0, path1)):
+        raise FilesystemError('paths must both be non-None')
+    if any(isinvalidpath(p) for p in (path0, path1)):
+        raise FilesystemError('paths must both be valid and existent')
+    if differentfile(path0, path1):
+        return filesize(path0) != filesize(path1)
+    else:
+        return False
 
 @export
 def u8encode(source):
@@ -237,12 +291,19 @@ def masked_chmod(path, perms=0o666):
     return octalize(masked_perms)
 
 # MODULE EXPORTS:
+export(gethomedir,              name='gethomedir',          doc="gethomedir() → Return the current user’s home directory")
+export(isinvalidpath,           name='isinvalidpath',       doc="isinvalidpath(thing) → boolean predicate, True if `thing` does not represent a valid path on the filesystem")
+export(none_function,           name='none_function',       doc="none_function() → A function that always returns None")
+export(true_function,           name='true_function',       doc="true_function() → A function that always returns True")
+
+export(hexid,                   name='hexid',               doc="hexid(thing) → Return the hex-ified representation of “thing”’s ID – Equivalent to “hex(id(thing))”")
+export(typenameof,              name='typenameof',          doc="typenameof(thing) → Return the string name of the type of “thing” – Equivalent to “pyname(typeof(thing))”, q.v. “clu.predicates”")
+export(typename_hexid,          name='typename_hexid',      doc="typename_hexid(thing) → Return a two-tuple containing “thing”’s hex-ified ID and the string name of the type of “thing” – Equivalent to “(hexid(thing), typenameof(thing))”")
+export(differentfile,           name='differentfile',       doc="differentfile(path0, path1) → Return True if path0 and path1 point to different locations on the filesystem")
+
 export(re_matcher,              name='re_matcher')
 export(re_searcher,             name='re_searcher')
 
-export(gethomedir,              name='gethomedir',          doc="gethomedir() → Return the current user’s home directory")
-export(none_function,           name='none_function',       doc="none_function() → A function that always returns None")
-export(true_function,           name='true_function',       doc="true_function() → A function that always returns True")
 export(octalize,                name='octalize',            doc="octalize(integer) → Format an integer value as an octal number")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

@@ -4,7 +4,7 @@ from __future__ import print_function
 import os
 
 from clu.constants.consts import PROJECT_NAME, NoDefault
-from clu.config.abc import NamespacedMutableMapping, NAMESPACE_SEP
+from clu.config.abc import NAMESPACE_SEP, Cloneable, NamespacedMutableMapping
 from clu.config.base import AppName
 from clu.exporting import Exporter
 
@@ -14,7 +14,7 @@ export = exporter.decorator()
 PREFIX_SEP = '_'
 
 @export
-class EnvBase(NamespacedMutableMapping, AppName):
+class EnvBase(NamespacedMutableMapping, Cloneable, AppName):
     
     """ The base class for “clu.config.env.Env”. Override this class in
         your own project for access to an interface to the environment

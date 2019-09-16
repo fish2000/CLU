@@ -15,8 +15,9 @@ export = exporter.decorator()
 PREFIX_SEP = '_'
 
 @export
-class EnvBase(NamespacedMutableMapping,
-              Cloneable, AppName, metaclass=Slotted):
+class EnvBase(NamespacedMutableMapping, Cloneable,
+                                        AppName,
+                                        metaclass=Slotted):
     
     """ The base class for “clu.config.env.Env”. Override this class in
         your own project for access to an interface to the environment

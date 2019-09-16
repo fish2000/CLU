@@ -93,9 +93,9 @@ class Cloneable(abc.ABC):
 class FlatOrderedSet(collections.abc.Set,
                      collections.abc.Sequence,
                      collections.abc.Reversible,
-                     collections.abc.Hashable,
-                     Cloneable, ReprWrapper,
-                     metaclass=Slotted):
+                     collections.abc.Hashable, Cloneable,
+                                               ReprWrapper,
+                                               metaclass=Slotted):
     
     """ FlatOrderedSet is a structure designed to coalesce any nested
         elements with which it is initialized into a flat, ordered sequence
@@ -119,7 +119,6 @@ class FlatOrderedSet(collections.abc.Set,
         used to initialize the FlatOrderedSet for which the predicate returns
         a Falsey value. 
     """
-    
     __slots__ = tuplize('things')
     
     def __init__(self, *things, predicate=always):

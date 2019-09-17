@@ -51,7 +51,7 @@ def isderivative(putative, thing):
     """
     try:
         return issubclass(putative, thing)
-    except TypeError:
+    except (AttributeError, TypeError):
         return isinstance(putative, thing)
 
 # PREDICATE FUNCTION “subclasscheck”: A wrapper for `issubclass(…)` and

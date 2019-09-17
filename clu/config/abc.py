@@ -184,8 +184,7 @@ class FlatOrderedSet(collections.abc.Set,
 
 @export
 class NamespacedMutableMapping(collections.abc.MutableMapping,
-                               collections.abc.Reversible,
-                               ReprWrapper):
+                               collections.abc.Reversible):
     
     __slots__ = tuple()
     

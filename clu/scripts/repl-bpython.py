@@ -63,6 +63,11 @@ from clu.exporting import (doctrim,
                            Exporter, ExporterBase, Registry,
                            path_to_dotpath)
 
+from clu.extending import (Extensible,
+                           pair, pairtype, pairmro,
+                           DoubleDutchRegistry,
+                           DoubleDutchFunction)
+
 from clu.sanitizer import sanitize, sanitizers, utf8_encode, utf8_decode
 from clu.version import version_info
 
@@ -287,6 +292,8 @@ __all__ = ('Image',
            'sysmods',
            'Exporter', 'ExporterBase', 'Registry',
            'path_to_dotpath',
+           'Extensible', 'pair', 'pairtype', 'pairmro',
+           'DoubleDutchRegistry', 'DoubleDutchFunction',
            'negate',
            'ismetaclass', 'isclass', 'isclasstype',
            'metaclass', 'typeof',

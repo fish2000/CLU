@@ -57,27 +57,34 @@ metaclass = lambda thing: ismetaclass(thing) and thing \
 
 # PREDICATE FUNCTIONS: hasattr(…) shortcuts:
 
-noattr = negate(hasattr)
-haspyattr = lambda thing, atx: hasattr(thing, f'__{atx}__')
-nopyattr = negate(haspyattr)
+hasitem     = lambda thing, itx: itx in thing
+noattr      = negate(hasattr)
+noitem      = negate(hasitem)
 
-anyattrs = lambda thing, *attrs: any(hasattr(thing, atx) for atx in attrs)
-allattrs = lambda thing, *attrs: all(hasattr(thing, atx) for atx in attrs)
-noattrs = negate(anyattrs)
+haspyattr   = lambda thing, atx: hasattr(thing, f'__{atx}__')
+nopyattr    = negate(haspyattr)
 
-anypyattrs = lambda thing, *attrs: any(haspyattr(thing, atx) for atx in attrs)
-allpyattrs = lambda thing, *attrs: all(haspyattr(thing, atx) for atx in attrs)
-nopyattrs = negate(anypyattrs)
+anyitems    = lambda thing, *items: any(hasitem(thing, itx) for itx in items)
+allitems    = lambda thing, *items: all(hasitem(thing, itx) for itx in items)
+noitems     = negate(anyitems)
+
+anyattrs    = lambda thing, *attrs: any(hasattr(thing, atx) for atx in attrs)
+allattrs    = lambda thing, *attrs: all(hasattr(thing, atx) for atx in attrs)
+noattrs     = negate(anyattrs)
+
+anypyattrs  = lambda thing, *attrs: any(haspyattr(thing, atx) for atx in attrs)
+allpyattrs  = lambda thing, *attrs: all(haspyattr(thing, atx) for atx in attrs)
+nopyattrs   = negate(anypyattrs)
 
 # Calling “typeof(…)” on a thing returns either its type, or – if it is
 # a classtype – the thing itself:
-typeof = lambda thing: nopyattr(thing, 'mro') and type(thing) or thing
+typeof      = lambda thing: nopyattr(thing, 'mro') and type(thing) or thing
 
 # Things with a __len__(…) method “have length”:
-haslength = lambda thing: haspyattr(thing, 'len')
+haslength   = lambda thing: haspyattr(thing, 'len')
 
 # Things with either __iter__(…) OR __getitem__(…) are iterable:
-isiterable = lambda thing: anypyattrs(thing, 'iter', 'getitem')
+isiterable  = lambda thing: anypyattrs(thing, 'iter', 'getitem')
 
 # q.v. `merge_two(…)` implementation sub. –
 # this predicate could also be called “isgetitemable()” in terms of
@@ -349,6 +356,13 @@ def slots_for(cls):
                  getpyattr(ancestor, 'slots', tuple()) \
                        for ancestor in reversed(mro)))
 
+# SEARCH FUNCTION: custom one-off “finditem(…)” returns a mapping
+# that contains the specified item:
+
+finditem = lambda itx, *things, default=None: apply_to(lambda thing: hasitem(thing, itx) and thing or None,
+                                                       lambda total: (listify(*total) or [default]).pop(0),
+                                                      *things)
+
 # MODULE EXPORTS:
 export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n" + negate_doc)
 
@@ -358,13 +372,21 @@ export(isclasstype,     name='isclasstype',     doc="isclasstype(thing) → bool
 export(metaclass,       name='metaclass',       doc="metaclass(thing) → Returns: a) thing, if thing is a metaclass; b) type(thing), if thing is a class; or c) type(type(thing)), for all other instances")
 export(typeof,          name='typeof',          doc="typeof(thing) → Returns thing, if thing is a class type; or type(thing), if it is not")
 
+export(hasitem,         name='hasitem',         doc="hasitem(thing, item) → boolean predicate, shortcut for `item in thing`")
 export(noattr,          name='noattr',          doc="noattr(thing, attribute) → boolean predicate, shortcut for `(not hasattr(thing, attribute))`")
+export(noitem,          name='noitem',          doc="noitem(thing, item) → boolean predicate, shortcut for `(not hasitem(thing, item))`")
+
 export(haspyattr,       name='haspyattr',       doc="haspyattr(thing, attribute) → boolean predicate, shortcut for `hasattr(thing, '__%s__' % attribute)`")
 export(nopyattr,        name='nopyattr',        doc="nopyattr(thing, attribute) → boolean predicate, shortcut for `(not hasattr(thing, '__%s__' % attribute))`")
 
+export(anyitems,        name='anyitems',        doc="anyitems(thing, *items) → boolean predicate, shortcut for `any(hasitem(thing, itx) for itx in items)`")
+export(allitems,        name='allitems',        doc="allitems(thing, *items) → boolean predicate, shortcut for `all(hasitem(thing, itx) for itx in items)`")
+export(noitems,         name='noitems',         doc="noitems(thing, *items) → boolean predicate, shortcut for `(not anyitems(*attributes)`")
+
 export(anyattrs,        name='anyattrs',        doc="anyattrs(thing, *attributes) → boolean predicate, shortcut for `any(hasattr(thing, atx) for atx in attributes)`")
 export(allattrs,        name='allattrs',        doc="allattrs(thing, *attributes) → boolean predicate, shortcut for `all(hasattr(thing, atx) for atx in attributes)`")
-export(noattrs,         name='noattrs',         doc="noattrs(thing, *attributes) → boolean predicate, shortcut for `(not anypyattrs(hasattr(thing, atx) for atx in attributes))`")
+export(noattrs,         name='noattrs',         doc="noattrs(thing, *attributes) → boolean predicate, shortcut for `(not anypyattrs(*attributes)`")
+
 export(anypyattrs,      name='anypyattrs',      doc="anypyattrs(thing, *attributes) → boolean predicate, shortcut for `any(haspyattr(thing, atx) for atx in attributes)`")
 export(allpyattrs,      name='allpyattrs',      doc="allpyattrs(thing, *attributes) → boolean predicate, shortcut for `all(haspyattr(thing, atx) for atx in attributes)`")
 export(nopyattrs,       name='nopyattrs',       doc="nopyattrs(thing, *attributes) → boolean predicate, shortcut for `(not any(haspyattr(thing, atx) for atx in attributes))`")
@@ -433,6 +455,8 @@ export(class_has,       name='class_has',       doc="class_has(cls, attribute) �
 export(isslotted,       name='isslotted',       doc="isslotted(thing) → boolean predicate, True if `thing` has both an `__mro__` and a `__slots__` attribute")
 export(isdictish,       name='isdictish',       doc="isdictish(thing) → boolean predicate, True if `thing` has both an `__mro__` and a `__dict__` attribute")
 export(isslotdicty,     name='isslotdicty',     doc="isslotdicty(thing) → boolean predicate, True if `thing` has `__mro__`, `__slots__`, and `__dict__` attributes")
+
+export(finditem,        name='finditem',        doc="finditem(itx, *mappings, default=None) → Return the first mapping that contains “itx”, or “default” if “itx” can’t be foundn in any of them")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

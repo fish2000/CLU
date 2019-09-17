@@ -203,6 +203,12 @@ class ChainMap(collections.abc.MutableMapping, metaclass=Slotted):
         self.maps[0].clear()
         return self
     
+    def mapcontains(self, itx, default=NoDefault):
+        from clu.predicates import finditem
+        if default is NoDefault:
+            return finditem(itx, *self.maps) or self.__missing__(itx)
+        return finditem(itx, *self.maps, default=default)
+    
     def flatten(self):
         return merge(*reversed(self.maps))
     
@@ -287,3 +293,46 @@ def asdict(thing):
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
+
+def test():
+    from clu.constants.consts import TEST_PATH
+    from clu.constants.data import XDGS
+    from clu.fs.filesystem import Directory
+    from clu.testing.utils import stdpout
+    import os
+    pout = stdpout()
+    
+    dirname = Directory(TEST_PATH)
+    data = dirname.subdirectory('data')
+    stash = os.environ.copy()
+    
+    # Arbitrary:
+    dict_one = {
+        'yo'    : "dogg",
+        'i'     : "heard",
+        'you'   : "liked",
+        'dict'  : "chains" }
+    
+    def environment():
+        for key in XDGS:
+            if key in os.environ:
+                del os.environ[key]
+        return os.environ
+    
+    def test_one():
+        
+        try:
+            env = environment()
+            
+            chain = ChainMap(dict_one, data, env)
+            
+            pout.vs(env)
+            pout.vs(chain)
+        
+        finally:
+            os.environ = stash
+        
+    test_one()
+
+if __name__ == '__main__':
+    test()

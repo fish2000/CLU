@@ -119,9 +119,10 @@ class TestDicts(object):
                 assert key in orig.flatten()
                 assert try_items(key, *orig.maps, default=None) is not None
                 assert try_items(key, *clone.maps, default=None) is not None
+                assert try_items(key, *orig.maps, default=None) == try_items(key, *clone.maps, default=None)
+                # FAILS:
                 # assert try_items(key, *orig.maps, default=None) == orig[key]
                 # assert try_items(key, *clone.maps, default=None) == clone[key]
-                assert try_items(key, *orig.maps, default=None) == try_items(key, *clone.maps, default=None)
     
     def test_ordered_mapping_views(self, dirname):
         """ The ordered mapping views are returned from “clu.fs.filesystem.Directory”

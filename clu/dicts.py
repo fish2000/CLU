@@ -298,6 +298,7 @@ def test():
     from clu.constants.consts import TEST_PATH
     from clu.constants.data import XDGS
     from clu.fs.filesystem import Directory
+    from clu.predicates import try_items
     from clu.testing.utils import stdpout
     import os
     pout = stdpout()
@@ -320,15 +321,49 @@ def test():
         return os.environ
     
     def test_one():
-        
         try:
             env = environment()
             
-            chain = ChainMap(dict_one, data, env)
+            chain0 = ChainMap(dict_one, data, env)
             
-            pout.vs(env)
-            pout.vs(chain)
-        
+            # pout.v(sorted(env.keys()))
+            pout.v(sorted(chain0.keys()))
+            
+            # First: shallow clone
+            chain1 = chain0.clone()
+            assert len(chain0) == len(chain1)
+            for key in chain0.keys():
+                assert key in chain0
+                assert key in chain0.flatten()
+                assert key in chain1
+                assert key in chain1.flatten()
+                assert try_items(key, *chain0.maps, default=None) is not None
+                assert try_items(key, *chain1.maps, default=None) is not None
+                assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
+                assert try_items(key, *chain0.maps, default=None) == chain0[key]
+                assert try_items(key, *chain0.maps, default=None) == chain1[key]
+            
+            # Next: deep clone
+            chainX = chain0.clone(deep=True)
+            assert len(chain0) == len(chainX)
+            for key in chain0.keys():
+                assert key in chain0
+                assert key in chain0.flatten()
+                assert key in chainX
+                assert key in chainX.flatten()
+                assert try_items(key, *chain0.maps, default=None) is not None
+                assert try_items(key, *chainX.maps, default=None) is not None
+                assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
+                assert try_items(key, *chain0.maps, default=None) == chain0[key]
+                assert try_items(key, *chain0.maps, default=None) == chainX[key]
+            
+            assert chain0 == ChainMap(dict_one, data, env)
+            assert chain0 == chain1
+            assert chain0 == chainX
+            assert chainX == chain1
+            
+            pout.v(sorted(chainX.keys()))
+            
         finally:
             os.environ = stash
         

@@ -6,7 +6,7 @@ from functools import partial, wraps
 
 iterchain = chain.from_iterable
 
-from clu.constants.consts import λ, φ, pytuple, QUALIFIER
+from clu.constants.consts import λ, φ, pytuple, NoDefault, QUALIFIER
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -156,6 +156,26 @@ attr_across   = lambda atx, *things, default=tuple(): collator(resolve,   atx, *
 stattr_across = lambda atx, *things, default=tuple(): collator(stresolve, atx, *things, default=default)
 pyattr_across = lambda atx, *things, default=tuple(): collator(getpyattr, atx, *things, default=default)
 item_across   = lambda itx, *things, default=tuple(): collator(getitem,   itx, *things, default=default)
+
+@export
+def try_items(itx, *things, default=NoDefault):
+    """ try_items(itx, *things[, default]) → attempt to retrieve an item
+        from each of the things, in sequence – falling back to a default,
+        or raising a KeyError if no default is specified.
+        
+        This works like “item_search(itx, *things[, default])” – with the
+        notable exception that, if any of the things are instances of
+        “collections.defaultdict”, “try_items(…)” will correctly trigger
+        any “defaultdict” instances’ default factories.
+    """
+    for thing in things:
+        try:
+            return thing[itx]
+        except KeyError:
+            pass
+    if default is not NoDefault:
+        return default
+    raise KeyError(f"{itx} not found in any of things: {things!r}")
 
 # ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)

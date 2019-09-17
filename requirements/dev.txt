@@ -15,6 +15,7 @@ imageio
 ipython
 jupyter
 multidict
+pout
 pythonpy
 pytz
 readme-renderer
@@ -23,4 +24,5 @@ scipy
 tifffile
 twine
 yajl
+yapf
 xerox

@@ -138,7 +138,7 @@ from clu.config.formats import JsonFile, PickleFile, TomlFile, YamlFile
 
 from clu.csv import pad_csv
 from clu.dicts import OrderedMappingView, OrderedItemsView, OrderedKeysView, OrderedValuesView
-from clu.dicts import merge_two, merge_as, merge, asdict
+from clu.dicts import ChainMap, merge_two, merge_as, merge, asdict
 
 # Add miscellaneous necessities:
 from PIL import Image
@@ -350,7 +350,7 @@ __all__ = ('Image',
            'Schema', 'JsonFile', 'PickleFile', 'TomlFile', 'YamlFile',
            'pad_csv',
            'OrderedMappingView', 'OrderedItemsView', 'OrderedKeysView', 'OrderedValuesView',
-           'merge_two', 'merge_as', 'merge', 'asdict',
+           'ChainMap', 'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',
            'print_separator', 'evict_announcer',
            'print_ansi', 'print_ansi_centered',
@@ -376,6 +376,14 @@ except (ImportError, SyntaxError):
 else:
     # Extend `__all__`:
     __all__ += ('colorio', 'colormath')
+
+try:
+    import pout
+except (ImportError, SyntaxError):
+    pass
+else:
+    # Extend `__all__`:
+    __all__ += ('pout',)
 
 try:
     import pytz

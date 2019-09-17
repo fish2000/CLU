@@ -65,7 +65,7 @@ from clu.exporting import (doctrim,
 
 from clu.extending import (Extensible,
                            pair, pairtype, pairmro,
-                           DoubleDutchRegistry,
+                           DoubleDutchRegistry, doubledutch,
                            DoubleDutchFunction)
 
 from clu.sanitizer import sanitize, sanitizers, utf8_encode, utf8_decode
@@ -293,7 +293,8 @@ __all__ = ('Image',
            'Exporter', 'ExporterBase', 'Registry',
            'path_to_dotpath',
            'Extensible', 'pair', 'pairtype', 'pairmro',
-           'DoubleDutchRegistry', 'DoubleDutchFunction',
+           'DoubleDutchRegistry', 'doubledutch',
+           'DoubleDutchFunction',
            'negate',
            'ismetaclass', 'isclass', 'isclasstype',
            'metaclass', 'typeof',

@@ -15,7 +15,6 @@ imageio
 ipython
 jupyter
 multidict
-pout>=0.8.10
 pythonpy
 pytz
 readme-renderer

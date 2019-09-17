@@ -6,8 +6,7 @@ import os
 import sys
 
 from clu.constants.enums import System, SYSTEM
-from clu.config.abc import NamespacedMutableMapping
-from clu.config.base import AppName
+from clu.config.abc import AppName, NamespacedMutableMapping
 from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import TypeLocker, TemporaryName, Directory
 from clu.fs.misc import filesize

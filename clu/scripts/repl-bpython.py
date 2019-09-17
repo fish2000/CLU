@@ -125,7 +125,7 @@ from clu.naming import (determine_module, nameof, moduleof,
                         dotpath_to_prefix, path_to_prefix,
                         split_abbreviations)
 
-from clu.config.abc import NAMESPACE_SEP, NamespacedMutableMapping, Cloneable, FlatOrderedSet
+from clu.config.abc import NAMESPACE_SEP, Cloneable, ReprWrapper, FlatOrderedSet, NamespacedMutableMapping
 from clu.config.base import Flat, Nested
 from clu.config.env import Env
 from clu.config.filebase import FileName, FileBase
@@ -341,7 +341,7 @@ __all__ = ('Image',
            'qualified_import', 'qualified_name_tuple', 'qualified_name',
            'dotpath_to_prefix', 'path_to_prefix',
            'split_abbreviations',
-           'NAMESPACE_SEP', 'NamespacedMutableMapping', 'Cloneable', 'FlatOrderedSet',
+           'NAMESPACE_SEP', 'Cloneable', 'ReprWrapper', 'FlatOrderedSet', 'NamespacedMutableMapping',
            'Flat', 'Nested',
            'Env', 'FileName', 'FileBase',
            'ValidationError', 'hoist',

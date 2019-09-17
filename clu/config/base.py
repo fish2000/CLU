@@ -1,42 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from itertools import chain
+import copy
 
 iterchain = chain.from_iterable
 
-import abc
-import copy
-
-abstract = abc.abstractmethod
-
 from clu.constants.consts import NoDefault
-from clu.config.abc import NAMESPACE_SEP, ReprWrapper, Cloneable, NamespacedMutableMapping
+from clu.config.abc import (NAMESPACE_SEP, Cloneable,
+                                           ReprWrapper,
+                                           NamespacedMutableMapping)
 from clu.typology import ismapping
-from clu.exporting import ValueDescriptor, Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
-
-@export
-class AppName(abc.ABC):
-    
-    __slots__ = tuple()
-    
-    @classmethod
-    def __init_subclass__(cls, appname=None, **kwargs):
-        """ Translate the “appname” class-keyword into an “appname” read-only
-            descriptor value
-        """
-        super(AppName, cls).__init_subclass__(**kwargs)
-        cls.appname = ValueDescriptor(appname)
-    
-    def __init__(self, *args, **kwargs):
-        """ Stub __init__(…) method, throwing a lookup error for subclasses
-            upon which the “appname” value is None
-        """
-        if type(self).appname is None:
-            raise LookupError("Cannot instantiate a base config class "
-                              "(appname is None)")
 
 @export
 class Flat(NamespacedMutableMapping, ReprWrapper, Cloneable):

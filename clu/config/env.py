@@ -4,8 +4,10 @@ from __future__ import print_function
 import os
 
 from clu.constants.consts import PROJECT_NAME, NoDefault
-from clu.config.abc import NAMESPACE_SEP, Cloneable, NamespacedMutableMapping
-from clu.config.base import AppName
+from clu.config.abc import (NAMESPACE_SEP, AppName,
+                                           Cloneable,
+                                           ReprWrapper,
+                                           NamespacedMutableMapping)
 from clu.predicates import tuplize
 from clu.exporting import Slotted, Exporter
 
@@ -15,8 +17,9 @@ export = exporter.decorator()
 PREFIX_SEP = '_'
 
 @export
-class EnvBase(NamespacedMutableMapping, Cloneable,
-                                        AppName,
+class EnvBase(NamespacedMutableMapping, AppName,
+                                        Cloneable,
+                                        ReprWrapper,
                                         metaclass=Slotted):
     
     """ The base class for “clu.config.env.Env”. Override this class in

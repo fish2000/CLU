@@ -82,13 +82,6 @@ def pairmro(cls0, cls1):
         
         This order is compatible with the mro of `pairtype(cls0, cls1)`
     """
-    # N.B. do this with itertools?…
-    # for base1 in cls1.__mro__:
-    #     for base0 in cls0.__mro__:
-    #         yield (base0, base1)
-    # for base0 in cls0.__mro__:
-    #     for base1 in cls1.__mro__:
-    #         yield (base0, base1)
     yield from dot_product(cls0.mro(), cls1.mro())
 
 @export
@@ -180,14 +173,11 @@ def test():
         
         # pout.v((tup, tup))
         for tup in pairmro(FOSet, NaMutMap):
-            # pout.r(tup)
             pair.append(tuple(str(el) for el in tup))
         
         for itp in dot_product(FOSet.__mro__, NaMutMap.__mro__):
-            # pout.r(itp)
             product.append(tuple(str(el) for el in itp))
         
-        # pout.v(pair, product)
         # for t0, t1 in zip(pair, product):
         #     pout.v(t0, t1)
         
@@ -204,7 +194,6 @@ def test():
     def test_two():
         pairs    = list(pairmro(FOSet, NaMutMap))
         products = list(dot_product(FOSet.mro(), NaMutMap.mro()))
-        # products = list(itertools.product(FOSet.__mro__, NaMutMap.__mro__))
         
         print("PAIRS    »", len(pairs))
         print("PRODUCTS »", len(products))

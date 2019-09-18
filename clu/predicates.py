@@ -360,7 +360,7 @@ def uniquify(*items):
 @itervariadic
 def listify(*items):
     """ listify(*items) → Return a new list containing all non-`None` arguments """
-    return list(item for item in items if item is not None)
+    return [item for item in items if item is not None]
 
 # UTILITY FUNCTIONS: helpers for builtin predicate functions over iterables:
 
@@ -393,12 +393,17 @@ def slots_for(cls):
                  getpyattr(ancestor, 'slots', tuple()) \
                        for ancestor in reversed(mro)))
 
-# SEARCH FUNCTION: custom one-off “finditem(…)” returns a mapping
-# that contains the specified item:
+# SEARCH FUNCTIONS: custom one-off “finditem(…)”  and “finditems(…)”
+# return, respectively, the first mapping that contains the specified item,
+# or •all• mappings that contain it:
 
-finditem = lambda itx, *things, default=None: apply_to(lambda thing:  hasitem(thing, itx) and thing or None,
-                                                       lambda total: (listify(*total, expand=False) or [default]).pop(0),
-                                                      *things)
+finditem  = lambda itx, *things, default=None:    apply_to(lambda thing:  hasitem(thing, itx) and thing or None,
+                                                           lambda total: (listify(*total, expand=False) or [default]).pop(0),
+                                                          *things)
+
+finditems = lambda itx, *things, default=tuple(): apply_to(lambda thing:  hasitem(thing, itx) and thing or None,
+                                                           lambda total:  tuplize(*total, expand=False) or default,
+                                                          *things)
 
 # MODULE EXPORTS:
 export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n" + negate_doc)
@@ -494,7 +499,8 @@ export(isslotted,       name='isslotted',       doc="isslotted(thing) → boolea
 export(isdictish,       name='isdictish',       doc="isdictish(thing) → boolean predicate, True if `thing` has both an `__mro__` and a `__dict__` attribute")
 export(isslotdicty,     name='isslotdicty',     doc="isslotdicty(thing) → boolean predicate, True if `thing` has `__mro__`, `__slots__`, and `__dict__` attributes")
 
-export(finditem,        name='finditem',        doc="finditem(itx, *mappings, default=None) → Return the first mapping that contains “itx”, or “default” if “itx” can’t be foundn in any of them")
+export(finditem,        name='finditem',        doc="finditem(itx, *mappings, default=None) → Return the first mapping that contains “itx”, or “default” if “itx” isn’t found in any of them")
+export(finditems,       name='finditems',       doc="finditems(itx, *mappings, default=tuple()) → Return a tuple of all mappings that contain “itx”, or “default” if “itx” isn’t found in any of them")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

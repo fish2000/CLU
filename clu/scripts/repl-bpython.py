@@ -96,10 +96,13 @@ from clu.predicates import (negate,
                             predicate_all, predicate_any, predicate_none,
                             predicate_and, predicate_or, predicate_xor,
                             thing_has, class_has,
-                            isslotted, isdictish, isslotdicty, slots_for,
+                            isslotted, isdictish, isslotdicty,
                             case_sort,
+                            itervariadic,
                             tuplize, uniquify, listify,
-                            allof, anyof, noneof)
+                            allof, anyof, noneof,
+                            slots_for,
+                            finditem, finditems)
 
 from clu.typespace import SimpleNamespace, Namespace, types, modulize
 
@@ -320,8 +323,11 @@ __all__ = ('Image',
            'predicate_all', 'predicate_any', 'predicate_none',
            'predicate_and', 'predicate_or', 'predicate_xor',
            'thing_has', 'class_has',
-           'isslotted', 'isdictish', 'isslotdicty', 'slots_for',
+           'isslotted', 'isdictish', 'isslotdicty',
+           'slots_for',
+           'finditem', 'finditems',
            'case_sort',
+           'itervariadic',
            'tuplize', 'uniquify', 'listify',
            'allof', 'anyof', 'noneof',
            'SimpleNamespace', 'Namespace', 'types', 'modulize',

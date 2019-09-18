@@ -64,7 +64,7 @@ from clu.exporting import (doctrim,
                            path_to_dotpath)
 
 from clu.extending import (Extensible,
-                           pair, pairtype, pairmro,
+                           pair, Ω, pairtype, pairmro,
                            DoubleDutchRegistry, doubledutch,
                            DoubleDutchFunction)
 
@@ -192,8 +192,8 @@ from clu.repl.ansi import (print_separator, evict_announcer,
 from clu.repl.banners import print_banner
 
 # Compile all Greekly definitions and their names:
-GREEK_STRINGS = ('σ', 'Σ', 'λ', 'λλ', 'Λ', 'ΛΛ', 'φ')
-GREEK_DEFS = (σ, Σ, λ, λλ, Λ, ΛΛ, φ)
+GREEK_STRINGS = ('σ', 'Σ', 'λ', 'λλ', 'Λ', 'ΛΛ', 'φ', 'Ω')
+GREEK_DEFS = (σ, Σ, λ, λλ, Λ, ΛΛ, φ, Ω)
 
 GREEK_PHONETICS = ('sigma-lower',
                    'sigma-upper',
@@ -201,7 +201,8 @@ GREEK_PHONETICS = ('sigma-lower',
                    'double-lambda-lower',
                    'lambda-upper',
                    'double-lambda-upper',
-                   'phi-lower')
+                   'phi-lower',
+                   'omega-lower')
 
 GREEK_STRINGDICT = dict(zip(GREEK_STRINGS, GREEK_DEFS))
 GREEK_NAMEDICT = dict(zip(GREEK_PHONETICS, GREEK_DEFS))
@@ -295,7 +296,7 @@ __all__ = ('Image',
            'sysmods',
            'Exporter', 'ExporterBase', 'Registry',
            'path_to_dotpath',
-           'Extensible', 'pair', 'pairtype', 'pairmro',
+           'Extensible', 'pair', 'Ω', 'pairtype', 'pairmro',
            'DoubleDutchRegistry', 'doubledutch',
            'DoubleDutchFunction',
            'negate',

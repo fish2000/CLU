@@ -181,10 +181,10 @@ def determine_name(thing, name=None, try_repr=False):
             name = code.co_name
     # … Otherwise, try the standard name attributes:
     if name is None:
-        if hasattr(thing, '__qualname__'):
-            name = thing.__qualname__
-        elif hasattr(thing, '__name__'):
+        if hasattr(thing, '__name__'):
             name = thing.__name__
+        elif hasattr(thing, '__qualname__'):
+            name = thing.__qualname__
     # We likely have something by now:
     if name is not None:
         return name
@@ -361,6 +361,22 @@ class Registry(abc.ABC, metaclass=Slotted):
         """
         return cls.for_appname(key)
     
+    @staticmethod
+    def unregister(appname):
+        """ Unregister a previously-registered appname, returning the
+            successfully unregistered ExporterBase subclass.
+            
+            Attempting to unregister the core CLU application’s exporter
+            is not allowed and will raise a KeyError.
+        """
+        if appname == PROJECT_NAME:
+            raise KeyError("Can’t unregister the core application exporter")
+        cls = classes.pop(appname, None)
+        if cls:
+            if appname in appnames:
+                appnames.remove(appname)
+        return cls
+    
     @classmethod
     def module_getters(cls):
         from clu.predicates import attr_across
@@ -437,6 +453,16 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
         if not isstring(key):
             raise TypeError("instance registry access by string keys only")
         return cls.instances[key]
+    
+    @classmethod
+    def unregister(cls, dotpath):
+        """ Unregister a previously-registered ExporterBase instance,
+            specified by the dotted path (née “dotpath”) of the module
+            in which it is ensconced.
+            
+            Returns the successfully unregistered instance in question.
+        """
+        return cls.instances.pop(dotpath, None)
     
     @classmethod
     def modulenames(cls):

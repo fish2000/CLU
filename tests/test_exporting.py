@@ -79,6 +79,17 @@ class TestExporting(object):
         
         # __class_getitem__ method abuse 4 LYFE:
         assert Registry['yolocal']['yodogg.iheard']['youlike']() == "registries"
+        
+        # UNREGISTRATION » instance:
+        assert Exporter.unregister('yodogg.iheard') is exporter
+        assert len(Exporter.modulenames()) == 0
+        assert 'yodogg.iheard' not in Exporter.modulenames()
+        assert 'yodogg.iheard' not in Exporter.instances
+        
+        # UNREGISTRATION » subclass:
+        assert Registry.unregister('yolocal') is Exporter
+        assert 'yolocal' not in Registry.all_appnames()
+        
     
     @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_exporter_instance_registry(self, clumods):
@@ -294,6 +305,43 @@ class TestExporting(object):
             print("Yo dogg.")
         
         @export
+        def i_heard(*wat):
+            """ i_heard() → Prints “I heard you like …” with argument reprs """
+            print("I heard you like %s" % ", ".join(repr(w) for w in wat))
+        
+        assert 'yo_dogg' in exporter
+        assert 'i_heard' in exporter
+        assert nameof(yo_dogg) == 'yo_dogg'
+        assert nameof(i_heard) == 'i_heard'
+        
+        assert 'yo_dogg() → Prints “Yo dogg.”' in yo_dogg.__doc__
+        assert 'i_heard() → Prints “I heard you like …” with argument reprs' in i_heard.__doc__
+        
+        test_all, test_dir = exporter.all_and_dir()
+        
+        assert len(test_all) == 2
+        assert len(test_dir()) == 2
+        assert 'yo_dogg' in test_all
+        assert 'i_heard' in test_all
+        assert 'yo_dogg' in test_dir()
+        assert 'i_heard' in test_dir()
+    
+    def test_exporter_export_wrapped_functions(self):
+        from clu.exporting import Exporter
+        from clu.naming import nameof
+        from functools import lru_cache
+        
+        exporter = Exporter()
+        export = exporter.decorator()
+        
+        @export
+        @lru_cache(maxsize=32)
+        def yo_dogg():
+            """ yo_dogg() → Prints “Yo dogg.” """
+            print("Yo dogg.")
+        
+        @export
+        @lru_cache(maxsize=32)
         def i_heard(*wat):
             """ i_heard() → Prints “I heard you like …” with argument reprs """
             print("I heard you like %s" % ", ".join(repr(w) for w in wat))

@@ -208,7 +208,7 @@ predicate_nop   = lambda *things: None
 function_nop    = lambda iterable: None
 
 uncallable      = negate(callable)
-pyname          = lambda thing: pyattr(thing, 'qualname', 'name')
+pyname          = lambda thing: pyattr(thing, 'name', 'qualname')
 pymodule        = lambda thing: pyattr(thing, 'module', 'package')
 
 the_expandables = (tuple, list, set, frozenset,

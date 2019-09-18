@@ -55,6 +55,7 @@ def modulize(name, namespace, docs=None,
     """ Convert a dictionary mapping into a legit Python module """
     from clu.exporting import doctrim, path_to_dotpath
     from clu.naming import dotpath_join
+    from clu.predicates import nopyattr
     from clu.typology import ismapping
     import sys
     
@@ -75,7 +76,7 @@ def modulize(name, namespace, docs=None,
     # Update the namespace with '__all__' and '__dir__' if necessary:
     ns_all = None
     
-    if '__all__' not in namespace and not hasattr(namespace, '__all__'):
+    if '__all__' not in namespace and not nopyattr(namespace, 'all'):
         ns_all = tuple(sorted(namespace.keys()))
         namespace['__all__'] = ns_all
     

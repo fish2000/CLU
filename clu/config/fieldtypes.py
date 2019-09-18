@@ -16,7 +16,8 @@ from clu.fs.misc import stringify, wrap_value
 from clu.naming import nameof
 from clu.predicates import (negate, isclasstype,
                             getpyattr, always, no_op, attr,
-                            uncallable, tuplize, slots_for)
+                            uncallable, tuplize, slots_for,
+                            isnotnone)
 from clu.typology import (isderivative, ismapping,
                                         isnumber,
                                         isstring, ispath, isvalidpath)
@@ -82,7 +83,7 @@ class functional_set(FlatOrderedSet,
             each function in turn, and finally returning the last return value
             once the sequence of functions has been exhausted.
         """
-        for function in reversed(self):
+        for function in reversed(filter(isnotnone, self)):
             if function is not None:
                 thing = function(thing)
         return thing

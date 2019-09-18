@@ -39,7 +39,7 @@ differentlength = lambda a, b: haslength(a) and haslength(b) and operator.ne(len
 isunique = lambda thing: isiterable(thing) and samelength(tuple(thing), frozenset(thing))
 istypelist = predicate_all(isclasstype)
 maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
-                        lambda total: tuple(frozenset(total)))
+                        lambda total: uniquify(*total))
 
 @export
 def isderivative(putative, thing):

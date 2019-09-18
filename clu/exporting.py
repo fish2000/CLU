@@ -8,6 +8,7 @@ import sys, os
 import warnings
 import weakref
 
+chain = itertools.chain
 iterchain = itertools.chain.from_iterable
 
 from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytuple
@@ -172,6 +173,9 @@ def determine_name(thing, name=None, try_repr=False):
         code = thing.func_code
     # Use the function’s code object, if found…
     if code is not None:
+        # Check for a function wrapper:
+        if hasattr(thing, '__wrapped__'):
+            return determine_name(thing.__wrapped__)
         if hasattr(code, 'co_name') and \
        not hasattr(thing, '__lambda_name__'):
             name = code.co_name
@@ -621,11 +625,11 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     
     def all_tuple(self, *additionals):
         """ For use in module `__all__` tuple definitions """
-        return tuple(self.keys()) + tuple(additionals)
+        return tuple(chain(self.keys(), additionals))
     
     def dir_function(self, *additionals):
         """ Return a list containing the exported module names. """
-        return lambda: list(tuple(self.keys()) + tuple(additionals))
+        return lambda: list(chain(self.keys(), additionals))
     
     def all_and_dir(self, *additionals):
         """ Assign a modules’ __all__ and __dir__ values, e.g.:

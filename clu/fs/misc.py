@@ -25,7 +25,9 @@ isinvalidpath = negate(isvalidpath)
 @export
 def wrap_value(value):
     """ Get a “lazified” copy of a value, wrapped in a lamba """
-    return lambda *args, **kwargs: value
+    wrapper = lambda *args, **kwargs: value
+    wrapper.__wrapped__ = value
+    return wrapper
 
 none_function = wrap_value(None)
 true_function = wrap_value(True)

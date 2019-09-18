@@ -169,7 +169,7 @@ class FlatOrderedSet(collections.abc.Set,
         self.things = tuple(thinglist)
     
     def __iter__(self):
-        yield from iter(self.things)
+        yield from self.things
     
     def __reversed__(self):
         yield from reversed(self.things)
@@ -310,7 +310,7 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
             self[key] = value
     
     def __iter__(self):
-        yield from iter(self.keys())
+        yield from self.keys()
     
     def __reversed__(self):
         yield from reversed(self.keys())

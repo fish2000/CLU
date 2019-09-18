@@ -113,7 +113,7 @@ class CLUInterface(AppDirs):
     
     def iterate(self):
         """ Return an iterator for this key-value store. """
-        return iter(self.zfunc)
+        yield from self.zfunc
     
     def update(self, dictish=NoDefault, **updates):
         """ Update the key-value store with key/value pairs and/or an iterator;
@@ -186,7 +186,7 @@ class CLUInterface(AppDirs):
         return len(self) > 0
     
     def __iter__(self):
-        return iter(self.zfunc)
+        yield from self.zfunc
     
     def __contains__(self, key):
         return key in self.zfunc
@@ -233,7 +233,7 @@ def delete(key):
 @export
 def iterate():
     """ Return an iterator for the key-value store. """
-    return interface.iterate()
+    yield from interface
 
 @export
 def update(dictish=NoDefault, **updates):

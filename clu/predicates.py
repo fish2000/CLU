@@ -44,16 +44,16 @@ ismetaclass = lambda thing: hasattr(thing, '__mro__') and \
                                 len(thing.__mro__) > 1 and \
                                     thing.__mro__[-2] is type
 
-isclass = lambda thing: (thing is object) or (hasattr(thing, '__mro__') and \
-                         thing.__mro__[-1] is object and \
-                         thing.__mro__[-2] is not type)
+isclass     = lambda thing: (thing is object) or (hasattr(thing, '__mro__') and \
+                             thing.__mro__[-1] is object and \
+                             thing.__mro__[-2] is not type)
 
 isclasstype = lambda thing: hasattr(thing, '__mro__') and \
                                     thing.__mro__[-1] is object
 
-metaclass = lambda thing: ismetaclass(thing) and thing \
-                          or (isclass(thing) and type(thing) \
-                          or (type(type(thing))))
+metaclass   = lambda thing: ismetaclass(thing) and thing \
+                            or (isclass(thing) and type(thing) \
+                            or (type(type(thing))))
 
 # PREDICATE FUNCTIONS: hasattr(…) shortcuts:
 
@@ -204,24 +204,28 @@ def enumchoices(cls):
 
 # PREDICATE LOGCIAL FUNCTIONS: all/any/and/or/xor shortcuts:
 
-predicate_nop = lambda *things: None
-function_nop = lambda iterable: None
+predicate_nop   = lambda *things: None
+function_nop    = lambda iterable: None
 
-uncallable = negate(callable)
-pyname = lambda thing: pyattr(thing, 'qualname', 'name')
-pymodule = lambda thing: pyattr(thing, 'module', 'package')
+uncallable      = negate(callable)
+pyname          = lambda thing: pyattr(thing, 'qualname', 'name')
+pymodule        = lambda thing: pyattr(thing, 'module', 'package')
 
-isexpandable = lambda thing: isinstance(thing, (tuple, list, set, frozenset,
-                                                map, filter, reversed) or isenum(thing))
+the_expandables = (tuple, list, set, frozenset,
+                   map, filter, reversed)
 
-isnormative = lambda thing: isinstance(thing, (str, bytes, bytearray))
-iscontainer = lambda thing: isiterable(thing) and \
-                        not isnormative(thing) and \
-                        not isclasstype(thing)
+the_normies     = (str, bytes, bytearray)
+
+isexpandable    = lambda thing: isinstance(thing, the_expandables) or isenum(thing)
+
+isnormative     = lambda thing: isinstance(thing, the_normies) or haspyattr(thing, 'fspath')
+iscontainer     = lambda thing: isiterable(thing) and \
+                            not isnormative(thing) and \
+                            not isclasstype(thing)
 
 # This is the equivalent of a lambda types’ built-in __repr__ function:
-lambda_repr = lambda instance, default=λ: "<function %s at 0x%0x>" % (pyname(instance) or default,
-                                                                          id(instance))
+lambda_repr     = lambda instance, default=λ: "<function %s at 0x%0x>" % (pyname(instance) or default,
+                                                                              id(instance))
 
 class Partial(partial):
     
@@ -313,17 +317,47 @@ case_sort = lambda c: c.lower() if c.isupper() else c.upper()
 
 # UTILITY FUNCTIONS: helpers for builtin container types:
 
+isnotnone = lambda thing: thing is not None
+
 @export
+def itervariadic(function):
+    """ Wrap a variadic function – one with the signature “function(•args)” –
+        in logic that allows it to be called with a single-argument iterable
+        (“function(iterable)”) with the same effect.
+    
+        Screens out strings, bytes-y, and file-path-ish operands without
+        iterating or expanding them.
+    """
+    @wraps(function)
+    def wrapper(*args):
+        if len(args) == 1:
+            if isexpandable(args[0]):
+                return function(*args[0])
+            if iscontainer(args[0]):
+                return function(*tuple(args[0]))
+        return function(*args)
+    return wrapper
+
+@export
+@itervariadic
 def tuplize(*items):
     """ tuplize(*items) → Return a new tuple containing all non-`None` arguments """
     return tuple(item for item in items if item is not None)
 
 @export
+@itervariadic
 def uniquify(*items):
     """ uniquify(*items) → Return a tuple with a unique set of all non-`None` arguments """
-    return tuple(frozenset(item for item in items if item is not None))
+    seen = set()
+    stuff = []
+    for item in filter(isnotnone, items):
+        if item not in seen:
+            seen.add(item)
+            stuff.append(item)
+    return tuple(stuff)
 
 @export
+@itervariadic
 def listify(*items):
     """ listify(*items) → Return a new list containing all non-`None` arguments """
     return list(item for item in items if item is not None)
@@ -331,16 +365,19 @@ def listify(*items):
 # UTILITY FUNCTIONS: helpers for builtin predicate functions over iterables:
 
 @export
+@itervariadic
 def allof(*items):
     """ allof(*items) → Return the result of “all(…)” on all non-`None` arguments """
     return all(item for item in items if item is not None)
 
 @export
+@itervariadic
 def anyof(*items):
     """ anyof(*items) → Return the result of “any(…)” on all non-`None` arguments """
     return any(item for item in items if item is not None)
 
 @export
+@itervariadic
 def noneof(*items):
     """ noneof(*items) → Return the result of “not any(…)” on all non-`None` arguments """
     return negate(any)(item for item in items if item is not None)
@@ -449,6 +486,7 @@ export(predicate_or,    name='predicate_or',    doc="predicate_or(predicate, a, 
 export(predicate_xor,   name='predicate_xor',   doc="predicate_xor(predicate, a, b) → boolean predicate, shortcut for `apply_to(predicate, any, a, b) and not apply_to(predicate, all, a, b)`")
 
 export(case_sort,       name='case_sort',       doc="case_sort(string) → Sorting predicate to sort UPPERCASE names first")
+export(isnotnone,       name='isnotnone',       doc="isnotnone(thing) → poolean predicate, return True if “thing” is not None")
 
 export(thing_has,       name='thing_has',       doc="thing_has(thing, attribute) → boolean predicate, True if `thing` has “attribute” (in either `__dict__` or `__slots__`)")
 export(class_has,       name='class_has',       doc="class_has(cls, attribute) → boolean predicate, True if `cls` is a class type and has “attribute” (in either `__dict__` or `__slots__`)")

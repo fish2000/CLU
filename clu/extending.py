@@ -114,6 +114,27 @@ class DoubleDutchRegistry(object):
         self.registry[clspair] = value
         self.cache = self.registry.copy()
 
+@export
+class DoubleDutchFunction(object):
+    
+    def __init__(self, function):
+        self.registry = DoubleDutchRegistry()
+        self._default = self.__wrapped__ = function
+    
+    def __call__(self, argument0, argument1, *args, **kwargs):
+        try:
+            function = self.registry[type(argument0),
+                                     type(argument1)]
+        except KeyError:
+            function = self._default
+        return function(argument0, argument1, *args, **kwargs)
+    
+    def domain(self, cls0, cls1):
+        def decoration(function):
+            self.registry[cls0, cls1] = function
+            return function
+        return decoration
+
 @export    
 def doubledutch(function):
     """ Decorator returning a double-dispatch function.
@@ -124,7 +145,7 @@ def doubledutch(function):
         ... def func(x, y):
         ...     return 0
         >>> 
-        >>> @func.types(str, str)
+        >>> @func.domain(str, str)
         ... def func_str_str(x, y):
         ...     return 42
         >>> 
@@ -135,27 +156,6 @@ def doubledutch(function):
         --------------------------------
     """
     return DoubleDutchFunction(function)
-
-@export
-class DoubleDutchFunction(object):
-    
-    def __init__(self, function):
-        self.registry = DoubleDutchRegistry()
-        self._default = function
-    
-    def __call__(self, argument0, argument1, *args, **kwargs):
-        try:
-            function = self.registry[type(argument0),
-                                     type(argument1)]
-        except KeyError:
-            function = self._default
-        return function(argument0, argument1, *args, **kwargs)
-    
-    def types(self, cls0, cls1):
-        def decorator(function):
-            self.registry[cls0, cls1] = function
-            return function
-        return decorator
 
 export(Ω, name='Ω')
 

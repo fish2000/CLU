@@ -80,7 +80,7 @@ class FileName(AppName):
         """
         if 'XDG_CONFIG_HOME' in os.environ:
             xdg = os.environ.get('XDG_CONFIG_HOME')
-            udirs = set(tuplize(Directory(xdg).subdirectory(cls.appname)))
+            udirs = set([Directory(xdg).subdirectory(cls.appname)])
         else:
             udirs = set()
         for system in cls.systems():

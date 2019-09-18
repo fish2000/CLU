@@ -29,7 +29,7 @@ class SimpleNamespace(HashableABC):
         self.__dict__.update(kwargs)
     
     def __iter__(self):
-        return iter(self.__dict__.keys())
+        yield from self.__dict__
     
     def __repr__(self):
         items = ("{}={!r}".format(key, self.__dict__[key]) for key in sorted(self))
@@ -84,8 +84,8 @@ class Namespace(SimpleNamespace, MutableMapping):
     
     @property
     def __all__(self):
-        """ Get a tuple with all the stringified keys in the namespace. """
-        return tuple(str(key) for key in sorted(self))
+        """ Get a list with all the stringified keys in the namespace. """
+        return list(str(key) for key in sorted(self))
     
     def __repr__(self):
         from pprint import pformat

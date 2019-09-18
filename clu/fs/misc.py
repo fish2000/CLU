@@ -98,6 +98,7 @@ def stringify(instance, fields,
 ex = os.path.extsep
 dolla = '$'
 
+@export
 @lru_cache(maxsize=32)
 def re_matcher(string):
     """ Return a boolean function that will search for the given
@@ -110,6 +111,7 @@ def re_matcher(string):
     match_function = re.compile(string, re.IGNORECASE).match
     return lambda searching: bool(match_function(searching))
 
+@export
 @lru_cache(maxsize=32)
 def re_searcher(string):
     """ Return a boolean function that will search for the given
@@ -300,9 +302,6 @@ export(hexid,                   name='hexid',               doc="hexid(thing) �
 export(typenameof,              name='typenameof',          doc="typenameof(thing) → Return the string name of the type of “thing” – Equivalent to “pyname(typeof(thing))”, q.v. “clu.predicates”")
 export(typename_hexid,          name='typename_hexid',      doc="typename_hexid(thing) → Return a two-tuple containing “thing”’s hex-ified ID and the string name of the type of “thing” – Equivalent to “(hexid(thing), typenameof(thing))”")
 export(differentfile,           name='differentfile',       doc="differentfile(path0, path1) → Return True if path0 and path1 point to different locations on the filesystem")
-
-export(re_matcher,              name='re_matcher')
-export(re_searcher,             name='re_searcher')
 
 export(octalize,                name='octalize',            doc="octalize(integer) → Format an integer value as an octal number")
 

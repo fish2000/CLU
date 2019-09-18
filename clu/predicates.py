@@ -329,8 +329,8 @@ def itervariadic(function):
         iterating or expanding them.
     """
     @wraps(function)
-    def wrapper(*args):
-        if len(args) == 1:
+    def wrapper(*args, expand=True):
+        if len(args) == 1 and expand:
             if isexpandable(args[0]):
                 return function(*args[0])
             if iscontainer(args[0]):
@@ -396,8 +396,8 @@ def slots_for(cls):
 # SEARCH FUNCTION: custom one-off “finditem(…)” returns a mapping
 # that contains the specified item:
 
-finditem = lambda itx, *things, default=None: apply_to(lambda thing: hasitem(thing, itx) and thing or None,
-                                                       lambda total: (listify(*total) or [default]).pop(0),
+finditem = lambda itx, *things, default=None: apply_to(lambda thing:  hasitem(thing, itx) and thing or None,
+                                                       lambda total: (listify(*total, expand=False) or [default]).pop(0),
                                                       *things)
 
 # MODULE EXPORTS:

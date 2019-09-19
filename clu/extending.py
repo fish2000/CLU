@@ -70,9 +70,9 @@ def pairtype(cls0, cls1):
         PairType = pairtype_cache[cls0, cls1]
     except KeyError:
         name = f"pairtype({cls0.__name__}, {cls1.__name__})"
-        bases0 = [pairtype(base0, cls1) for base0 in cls0.__bases__]
-        bases1 = [pairtype(cls0, base1) for base1 in cls1.__bases__]
-        bases = tuple(bases0 + bases1) or tobject # tuple is the root base
+        bases0 = (pairtype(base0, cls1) for base0 in cls0.__bases__)
+        bases1 = (pairtype(cls0, base1) for base1 in cls1.__bases__)
+        bases = tuple(chain(bases0, bases1)) or tobject # tuple is the root base
         PairType = pairtype_cache[cls0, cls1] = Extensible(name, bases, {})
     return PairType
 
@@ -200,8 +200,32 @@ def test():
         
         assert set(pairs) == set(products) # REALLY.
     
+    def test_three():
+        
+        class __extend__(pairtype(int, int)):
+            
+            __name__ = "Coordinate"
+            
+            def ratio(xy):
+                x, y = xy
+                return x / y
+        
+        assert Ω(2, 3).ratio() == 2 / 3
+        
+        class __extend__(pairtype(str, str)):
+            
+            __name__ = "NamespacedKey"
+            
+            def pack(tup):
+                ns, key = tup
+                return f"{ns}:{key}"
+        
+        assert Ω('yo', 'dogg').pack() == "yo:dogg"
+    
+    # Run aggregate inline tests:
     test_one()
     test_two()
+    test_three()
 
 if __name__ == '__main__':
     test()

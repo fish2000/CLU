@@ -89,7 +89,6 @@ class TestExporting(object):
         # UNREGISTRATION » subclass:
         assert Registry.unregister('yolocal') is Exporter
         assert 'yolocal' not in Registry.all_appnames()
-        
     
     @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_exporter_instance_registry(self, clumods):

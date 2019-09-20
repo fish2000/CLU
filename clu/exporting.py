@@ -746,9 +746,10 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     
     def __dir__(self):
         return list(filter(lambda name: name not in ('all_appnames',
+                                                     'all_modules',
                                                      'for_appname',
                                                      'module_getters',
-                                                     'all_modules'),
+                                                     'unregister'),
                            super(ExporterBase, self).__dir__()))
 
 class Exporter(ExporterBase, prefix=BASEPATH, appname=PROJECT_NAME):

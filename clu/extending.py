@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from itertools import chain, product as dot_product
+from functools import update_wrapper
 
 iterchain = chain.from_iterable
 
@@ -76,6 +77,8 @@ def pairtype(cls0, cls1):
         PairType = pairtype_cache[cls0, cls1] = Extensible(name, bases, {})
     return PairType
 
+ΩΩ = pairtype
+
 @export
 def pairmro(cls0, cls1):
     """ Return the resolution order on pairs of types for double dispatch.
@@ -83,6 +86,8 @@ def pairmro(cls0, cls1):
         This order is compatible with the mro of `pairtype(cls0, cls1)`
     """
     yield from dot_product(cls0.mro(), cls1.mro())
+
+ω = pairmro
 
 @export
 def pair(one, two):
@@ -94,6 +99,8 @@ def pair(one, two):
 
 @export
 class DoubleDutchRegistry(object):
+    
+    __slots__ = ('registry', 'cache')
     
     def __init__(self):
         self.registry = {}
@@ -114,12 +121,19 @@ class DoubleDutchRegistry(object):
         self.registry[clspair] = value
         self.cache = self.registry.copy()
 
+assignments = pytuple('module', 'name', 'qualname', 'doc')
+
 @export
 class DoubleDutchFunction(object):
+    
+    __slots__ = ('registry', '_default', '__wrapped__')
     
     def __init__(self, function):
         self.registry = DoubleDutchRegistry()
         self._default = self.__wrapped__ = function
+        update_wrapper(self, function,
+                             assigned=assignments,
+                             updated=tuple())
     
     def __call__(self, argument0, argument1, *args, **kwargs):
         try:
@@ -157,7 +171,9 @@ def doubledutch(function):
     """
     return DoubleDutchFunction(function)
 
-export(Ω, name='Ω')
+export(ΩΩ, name='ΩΩ')
+export(ω,  name='ω')
+export(Ω,  name='Ω')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -172,7 +188,7 @@ def test():
         product = []
         
         # pout.v((tup, tup))
-        for tup in pairmro(FOSet, NaMutMap):
+        for tup in ω(FOSet, NaMutMap):
             pair.append(tuple(str(el) for el in tup))
         
         for itp in dot_product(FOSet.__mro__, NaMutMap.__mro__):
@@ -190,19 +206,26 @@ def test():
         assert sorted(pair, key=retros) == sorted(product, key=retros)
         assert sorted(pair) == sorted(product)
         assert pair == product
+        
+        print()
+        print("PASSED: test_one()")
     
     def test_two():
-        pairs    = list(pairmro(FOSet, NaMutMap))
+        pairs    = list(ω(FOSet, NaMutMap))
         products = list(dot_product(FOSet.mro(), NaMutMap.mro()))
         
+        print()
         print("PAIRS    »", len(pairs))
         print("PRODUCTS »", len(products))
         
         assert set(pairs) == set(products) # REALLY.
+        
+        print()
+        print("PASSED: test_two()")
     
     def test_three():
         
-        class __extend__(pairtype(int, int)):
+        class __extend__(ΩΩ(int, int)):
             
             __name__ = "Coordinate"
             
@@ -212,7 +235,7 @@ def test():
         
         assert Ω(2, 3).ratio() == 2 / 3
         
-        class __extend__(pairtype(str, str)):
+        class __extend__(ΩΩ(str, str)):
             
             __name__ = "NamespacedKey"
             
@@ -221,11 +244,23 @@ def test():
                 return f"{ns}:{key}"
         
         assert Ω('yo', 'dogg').pack() == "yo:dogg"
+        
+        print()
+        print("PASSED: test_three()")
+    
+    def test_four():
+        pout.v(__all__)
+        pout.v(__dir__())
+        pout.v(exporter)
+        
+        print()
+        print("PASSED: test_four()")
     
     # Run aggregate inline tests:
     test_one()
     test_two()
     test_three()
+    test_four()
 
 if __name__ == '__main__':
     test()

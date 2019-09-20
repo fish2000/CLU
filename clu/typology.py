@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import abc
 import array
 import argparse
 import collections
@@ -15,12 +16,14 @@ from clu.constants.consts import λ, φ
 from clu.constants.polyfills import long, unicode, numpy
 from clu.constants.polyfills import Path
 from clu.enums import alias
-from clu.exporting import Exporter
+from clu.extending import Extensible
+from clu.exporting import Slotted, Exporter
 
-from clu.predicates import (negate, isclasstype, isenum,
+from clu.predicates import (negate,
+                            ismetaclass, isclasstype, metaclass,
                             allpyattrs, haspyattr, nopyattr,
-                            isiterable, haslength,
-                            getpyattr, or_none,
+                            isiterable, haslength, typeof,
+                            getpyattr, or_none, isenum,
                             pyattr, attrs,
                             tuplize, uniquify,
                             apply_to, predicate_any,
@@ -37,9 +40,11 @@ export = exporter.decorator()
 samelength = lambda a, b: haslength(a) and haslength(b) and operator.eq(len(a), len(b))
 differentlength = lambda a, b: haslength(a) and haslength(b) and operator.ne(len(a), len(b))
 isunique = lambda thing: isiterable(thing) and samelength(tuple(thing), frozenset(thing))
+
 istypelist = predicate_all(isclasstype)
-maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
-                        lambda total: uniquify(*total))
+ismetatypelist = predicate_all(ismetaclass)
+maketypelist = apply_to(typeof, uniquify)
+makemetatypelist = apply_to(metaclass, uniquify)
 
 @export
 def isderivative(putative, thing):
@@ -59,8 +64,11 @@ def isderivative(putative, thing):
 # all sorts of TypeErrors willy-nilly at the slightest misconfiguration:
 
 subclasscheck = lambda putative, *thinglist: predicate_any(
-                lambda thing: isderivative(putative, thing),
-                                                *thinglist)
+                lambda thing: isderivative(putative, thing), *thinglist)
+
+metaclasscheck = lambda putative, *thinglist: predicate_any(
+                 lambda thing: isderivative(metaclass(putative), thing),
+                                                                *thinglist)
 
 # LEGACY CODE SUPPORT:
 graceful_issubclass = subclasscheck
@@ -148,6 +156,10 @@ iskeysview   = lambda thing: isinstance(thing,    collections.abc.KeysView)
 isvaluesview = lambda thing: isinstance(thing,    collections.abc.ValuesView)
 isitemsview  = lambda thing: isinstance(thing,    collections.abc.ItemsView)
 
+isabc = lambda thing: metaclasscheck(thing, abc.ABCMeta)
+isslottedtype = lambda thing: metaclasscheck(thing, Slotted)
+isextensibletype = lambda thing: metaclasscheck(thing, Extensible)
+
 # Typelist predicates:
 isnumber = lambda thing: subclasscheck(thing, numeric_types)
 isnumeric = lambda thing: subclasscheck(thing, numeric_types)
@@ -168,6 +180,9 @@ ishashable = lambda thing: isinstance(thing, collections.abc.Hashable)
 # Helper predicates for composing sequence-based predicates:
 isxlist = lambda predicate, thinglist: issequence(thinglist) and predicate_all(predicate, thinglist)
 isxtypelist = lambda predicate, thinglist: istypelist(thinglist) and predicate_all(predicate, thinglist)
+isxmetatypelist = lambda predicate, thinglist: ismetatypelist(thinglist) and predicate_all(predicate, thinglist)
+
+isabclist = lambda thinglist: isxtypelist(lambda thing: metaclasscheck(thing, abc.ABCMeta), thinglist)
 
 # Typelist list-type predicates (?!)
 ispathtypelist = predicate_all(lambda thing: isclasstype(thing) and ispathtype(thing))
@@ -195,14 +210,22 @@ export(samelength,      name='samelength',  doc="samelength(a, b) → boolean pr
 export(differentlength, name='differentlength', doc="differentlength(a, b) → boolean predicate, True if both `len(a)` and `len(b)` are defined, but are unequal")
 export(isunique,        name='isunique',    doc="isunique(thing) → boolean predicate, True if `thing` is an iterable with unique contents")
 export(istypelist,      name='istypelist',  doc="istypelist(thing) → boolean predicate, True if `thing` is a “typelist” – a list consisting only of class types")
+export(ismetatypelist,  name='ismetatypelist',
+                         doc="ismetatypelist(thing) → boolean predicate, True if `thing` is a “metatypelist” – a list consisting only of metaclass types")
 export(maketypelist,    name='maketypelist',
                          doc="maketypelist(iterable) → convert an iterable of unknown things into a uniquified typelist – a list consisting only of class types")
+export(makemetatypelist, name='makemetatypelist',
+                         doc="makemetatypelist(iterable) → convert an iterable of unknown things into a uniquified metatypelist – a list consisting only of metaclass types")
 
 export(subclasscheck,   name='subclasscheck',
-                         doc="subclasscheck(putative, *cls_or_tuple) → A wrapper for `issubclass(…)` and `isinstance(…)` that tries to work with you`")
+                         doc="subclasscheck(putative, *cls_or_tuple) → A wrapper for `issubclass(…)` and `isinstance(…)` that tries to work with you")
+
+export(metaclasscheck,  name='metaclasscheck',
+                         doc="metaclasscheck(putative, *cls_or_tuple) → A wrapper for `issubclass(…)` and `isinstance(…)` that specifically inspects the metaclass of its primary operand")
 
 export(graceful_issubclass,
                         name='graceful_issubclass')
+
 
 # NO DOCS ALLOWED:
 export(numeric_types,   name='numeric_types')
@@ -240,6 +263,11 @@ export(iskeysview,      name='iskeysview',      doc="iskeysview(thing) → boole
 export(isvaluesview,    name='isvaluesview',    doc="isvaluesview(thing) → boolean predicate, True if `thing` is a mapping-values view instance")
 export(isitemsview,     name='isitemsview',     doc="isitemsview(thing) → boolean predicate, True if `thing` is a mapping-items view instance")
 
+export(isabc,           name='isabc',           doc="isabc(thing) → boolean predicate, True if `thing` is an abstract base class (née ‘ABC’) or a descendant or instance of same")
+export(isslottedtype,   name='isslottedtype',   doc="isslottedtype(thing) → boolean predicate, True if `thing` has “clu.exporting.Slotted” as its metaclass")
+export(isextensibletype,    name='isextensibletype',
+                             doc="isextensibletype(thing) → boolean predicate, True if `thing` is an “extensible” type (q.v. “clu.extending” source supra.)")
+
 export(isnumber,        name='isnumber',    doc="isnumber(thing) → boolean predicate, True if `thing` is a numeric type or an instance of same")
 export(isnumeric,       name='isnumeric',   doc="isnumeric(thing) → boolean predicate, True if `thing` is a numeric type or an instance of same")
 export(iscomplex,       name='iscomplex',   doc="iscomplex(thing) → boolean predicate, True if `thing` is a complex numeric type or an instance of same")
@@ -261,6 +289,9 @@ export(issequence,      name='issequence',  doc="issequence(thing) → boolean p
 
 export(isxlist,         name='isxlist',     doc="isxlist(predicate, thinglist) → boolean predicate, True if `thinglist` is a sequence of items, all of which match the predicate function")
 export(isxtypelist,     name='isxtypelist', doc="isxtypelist(predicate, thinglist) → boolean predicate, True if `thinglist` is a typelist, all types in which match the predicate function")
+export(isxmetatypelist, name='isxmetatypelist',
+                         doc="isxmetatypelist(predicate, thinglist) → boolean predicate, True if `thinglist` is a metatypelist, all types in which match the predicate function")
+export(isabclist,       name='isabclist' ,      doc="isabclist(thinglist) → boolean predicate, True if `thinglist` is a sequence of abstract base classes (née ABCs)")
 
 export(ispathtypelist,  name='ispathtypelist',  doc="ispathtypelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of path-related class types")
 export(ispathlist,      name='ispathlist',      doc="ispathlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of path-like instances")

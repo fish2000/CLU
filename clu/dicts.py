@@ -299,9 +299,8 @@ def test():
     from clu.constants.data import XDGS
     from clu.fs.filesystem import Directory
     from clu.predicates import try_items
-    from clu.testing.utils import stdpout
+    from clu.testing.utils import pout
     import os
-    pout = stdpout()
     
     dirname = Directory(TEST_PATH)
     data = dirname.subdirectory('data')

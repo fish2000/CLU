@@ -7,6 +7,55 @@ class TestTypology(object):
     
     """ Run the tests for the clu.typology module. """
     
+    def test_metatypelists(self):
+        from clu.typology import istypelist, ismetatypelist, makemetatypelist, maketypelist
+        from clu.extending import Extensible
+        from clu.exporting import Slotted, Prefix, Registry, ExporterBase, Exporter
+        
+        things = ('', b'', Exporter(), ExporterBase, Prefix, Registry, Slotted, Extensible)
+        
+        metas = makemetatypelist(things)
+        types = maketypelist(things)
+        
+        assert ismetatypelist(metas)
+        assert istypelist(metas)
+        
+        assert not ismetatypelist(types)
+        assert istypelist(types)
+        
+        assert not ismetatypelist(things)
+        assert not istypelist(things)
+    
+    def test_isslottedtype_isextensibletype(self):
+        from clu.typology import isslottedtype, isextensibletype
+        from clu.extending import pairtype, ΩΩ, DoubleDutchRegistry
+        from clu.exporting import Exporter
+        
+        assert isslottedtype(Exporter)
+        assert not isslottedtype(DoubleDutchRegistry) # has __slots__ but isn’t “slotted”
+        assert isextensibletype(pairtype(int, int))
+        assert isextensibletype(ΩΩ(str, str))
+        assert not isextensibletype(DoubleDutchRegistry)
+    
+    def test_metaclasscheck_isabclist(self):
+        import abc
+        from clu.predicates import metaclass, predicate_all
+        from clu.typology import subclasscheck, metaclasscheck, isxtypelist, isabclist
+        from clu.config.abc import (AppName, Cloneable, ReprWrapper,
+                                    FlatOrderedSet, NamespacedMutableMapping)
+        
+        abclist = (AppName, Cloneable, ReprWrapper,
+                   FlatOrderedSet, NamespacedMutableMapping)
+        
+        for cls in abclist:
+            assert subclasscheck(metaclass(cls), abc.ABCMeta)
+            assert metaclasscheck(cls, abc.ABCMeta)
+        
+        assert predicate_all(lambda thing: subclasscheck(metaclass(thing), abc.ABCMeta), abclist)
+        assert isxtypelist(lambda thing: subclasscheck(metaclass(thing), abc.ABCMeta), abclist)
+        assert isxtypelist(lambda thing: metaclasscheck(thing, abc.ABCMeta), abclist)
+        assert isabclist(abclist)
+    
     def test_samelength_differentlength_and_isunique(self):
         from clu.typology import samelength, differentlength, isunique
         from clu.typology import (numeric_types,

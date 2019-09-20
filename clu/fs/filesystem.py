@@ -1400,7 +1400,7 @@ class Intermediate(TemporaryDirectory, Directory):
         return TemporaryDirectory(prefix=f"{cls.__name__}-",
                                   change=change)
     
-    def __init__(self, pth=None):
+    def __init__(self, pth=None, change=False):
         """ The initializer explicitly does nothing, as it will always be called
             on an already-initialized instance of some other class.
         """

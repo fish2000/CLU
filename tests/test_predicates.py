@@ -439,7 +439,7 @@ class TestPredicates(object):
         """ » Checking “apply_to(…)” core function from clu.predicates … """
         from string import capwords
         from clu.constants.consts import ENCODING, SINGLETON_TYPES
-        from clu.predicates import apply_to, isclasstype
+        from clu.predicates import apply_to, isclasstype, typeof, uniquify
         from clu.typology import (numeric_types, string_types, bytes_types,
                                   callable_types, array_types, path_types)
         
@@ -460,8 +460,7 @@ class TestPredicates(object):
         # N.B. this is the exact implementation of actual functions
         # in use in clu.typology:
         istypelist = apply_to(isclasstype, all)
-        maketypelist = apply_to(lambda thing: isclasstype(thing) and thing or type(thing),
-                                lambda total: tuple(frozenset(total)))
+        maketypelist = apply_to(typeof, uniquify)
         
         assert istypelist(SINGLETON_TYPES)
         assert istypelist(numeric_types)

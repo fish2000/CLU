@@ -2,7 +2,6 @@
 from __future__ import print_function
 
 import abc
-import array
 import argparse
 import collections
 import collections.abc
@@ -64,7 +63,8 @@ def isderivative(putative, thing):
 # all sorts of TypeErrors willy-nilly at the slightest misconfiguration:
 
 subclasscheck = lambda putative, *thinglist: predicate_any(
-                lambda thing: isderivative(putative, thing), *thinglist)
+                lambda thing: isderivative(putative, thing),
+                                                    *thinglist)
 
 metaclasscheck = lambda putative, *thinglist: predicate_any(
                  lambda thing: isderivative(metaclass(putative), thing),
@@ -77,7 +77,7 @@ graceful_issubclass = subclasscheck
 # and other similar stuff.
 
 numeric_types = uniquify(bool, int, long, float, complex, decimal.Decimal)
-array_types = (array.ArrayType, bytearray, memoryview)
+array_types = (types.Array, bytearray, memoryview)
 array_types += attrs(numpy, 'ndarray',
                             'matrix',
                             'ma.core.MaskedArray')

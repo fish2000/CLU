@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import array
 import collections
 import collections.abc
 import os
@@ -37,6 +38,9 @@ for typename in dir(thetypes):
 # Substitute our own SimpleNamespace class, instead of the provided version:
 setattr(types, 'SimpleNamespace', SimpleNamespace)
 setattr(types, 'Namespace',       Namespace)
+
+# Add the array.ArrayType base type as “Array”:
+setattr(types, 'Array',           array.ArrayType)
 
 # Add the collections.abc.MappingView base type:
 setattr(types, 'MappingView',     collections.abc.MappingView)

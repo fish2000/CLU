@@ -3,6 +3,7 @@ from __future__ import print_function
 
 from collections import Counter, OrderedDict
 from enum import Enum, EnumMeta, unique, _is_dunder as ispyname
+from functools import wraps
 
 from .consts import PY3, pytuple
 
@@ -61,7 +62,10 @@ except ImportError:
     def lru_cache(**keywrds):
         """ No-op dummy decorator for lesser Pythons """
         def inside(function):
-            return function
+            @wraps(function)
+            def wrapper(*args, **kwargs):
+                return function(*args, **kwargs)
+            return wrapper
         return inside
 
 try:

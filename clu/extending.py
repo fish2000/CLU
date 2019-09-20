@@ -162,7 +162,7 @@ class DoubleDutchFunction(object):
     def domain(self, cls0, cls1):
         def decoration(function):
             self.registry[cls0, cls1] = function
-            return function
+            return self
         return decoration
     
     @property
@@ -175,7 +175,7 @@ class DoubleDutchFunction(object):
                 classes[idx] = annotation(parameter)
             regkey = tuplize(*classes[:2])
             self.registry[regkey] = function
-            return function
+            return self
         return decoration
 
 @export
@@ -295,15 +295,15 @@ def test():
             return None
         
         @yodogg.domain(int, int)
-        def yodogg_ii(x, y):
+        def yodogg(x, y):
             return f"INTS: {x}, {y}"
         
         @yodogg.domain(str, str)
-        def yodogg_ss(x, y):
+        def yodogg(x, y):
             return f"STRS: {x}, {y}"
         
         @yodogg.annotated
-        def yodogg_ff(x: float, y: float):
+        def yodogg(x: float, y: float):
             return f"FLTS: {x}, {y}"
         
         print(yodogg(10, 20))

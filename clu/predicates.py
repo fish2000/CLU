@@ -105,9 +105,6 @@ getpyattr = lambda thing, atx, default=None: getattr(thing, f'__{atx}__', defaul
 getitem   = lambda thing, itx, default=None: itx in thing and thing[itx] or default
 retrieve  = lambda thing, itx, default=None: itx in thing and thing or default
 
-# retrieve  = lambda thing, itx, default=None:   hasitem(thing, itx) and thing or default
-# getitem   = lambda thing, itx, default=None: (retrieve(thing, itx)  or { itx  : default })[itx]
-
 @export
 def resolve(thing, atx):
     """ resolve(thing, atx) → retrieve and resolve an attribute, following
@@ -399,18 +396,6 @@ def slots_for(cls):
     return tuple(iterchain(
                  getpyattr(ancestor, 'slots', tuple()) \
                        for ancestor in reversed(mro)))
-
-# SEARCH FUNCTIONS: custom one-off “finditem(…)”  and “finditems(…)”
-# return, respectively, the first mapping that contains the specified item,
-# or •all• mappings that contain it:
-
-# finditem  = lambda itx, *things, default=None:    apply_to(lambda thing:  retrieve(thing, itx),
-#                                                            lambda total: (listify(*total, expand=False) or [default]).pop(0),
-#                                                           *things)
-#
-# finditems = lambda itx, *things, default=tuple(): apply_to(lambda thing:  retrieve(thing, itx),
-#                                                            lambda total:  tuplize(*total, expand=False) or default,
-#                                                           *things)
 
 # MODULE EXPORTS:
 export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n" + negate_doc)

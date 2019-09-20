@@ -2,9 +2,9 @@
 from __future__ import print_function
 from itertools import chain, product as dot_product
 from functools import update_wrapper
-from zict import LRU
 
 import inspect
+import zict
 
 iterchain = chain.from_iterable
 
@@ -107,7 +107,13 @@ class DoubleDutchRegistry(object):
     
     def __init__(self):
         self.registry = {}
-        self.cache    = LRU(64, self.registry)
+        self.cache    = zict.LRU(64, self.registry)
+    
+    def __len__(self):
+        return len(self.registry)
+    
+    def __contains__(self, clspair):
+        return clspair in self.registry
     
     def __getitem__(self, clspair):
         try:

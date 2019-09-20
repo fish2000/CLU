@@ -222,9 +222,9 @@ class rename(object):
         self.dotpath = dotpath or path_to_dotpath(path,
                                                   relative_to=BASEPATH)
     
-    def assign_name(self, function):
+    def assign_name(self, function, name=None):
         """ Assign the function’s new name. Returns the mutated function. """
-        named = determine_name(function, name=self.named)
+        named = determine_name(function, name=name or self.named)
         dname = getattr(function, '__name__')
         if dname in (λ, φ):
             if named in (λ, φ):
@@ -237,9 +237,8 @@ class rename(object):
                 function.__module__ = str(self.dotpath) # Reset __module__ for phi-types
         return function
     
-    def __call__(self, function):
-        # return self.assign_name(function)
-        function = self.assign_name(function)
+    def __call__(self, f):
+        function = self.assign_name(f)
         if not inspect.isfunction(function):
             return function
         @wraps(function)

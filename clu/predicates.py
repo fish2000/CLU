@@ -103,6 +103,10 @@ or_none   = lambda thing, atx: getattr(thing, atx, None)
 stor_none = lambda thing, atx: getattr_static(thing, atx, None)
 getpyattr = lambda thing, atx, default=None: getattr(thing, f'__{atx}__', default)
 getitem   = lambda thing, itx, default=None: itx in thing and thing[itx] or default
+retrieve  = lambda thing, itx, default=None: itx in thing and thing or default
+
+# retrieve  = lambda thing, itx, default=None:   hasitem(thing, itx) and thing or default
+# getitem   = lambda thing, itx, default=None: (retrieve(thing, itx)  or { itx  : default })[itx]
 
 @export
 def resolve(thing, atx):
@@ -163,6 +167,9 @@ attr_across   = lambda atx, *things, default=tuple(): collator(resolve,   atx, *
 stattr_across = lambda atx, *things, default=tuple(): collator(stresolve, atx, *things, default=default)
 pyattr_across = lambda atx, *things, default=tuple(): collator(getpyattr, atx, *things, default=default)
 item_across   = lambda itx, *things, default=tuple(): collator(getitem,   itx, *things, default=default)
+
+finditem      = lambda itx, *things, default=None:    searcher(retrieve,  itx, *things, default=default)
+finditems     = lambda itx, *things, default=tuple(): collator(retrieve,  itx, *things, default=default)
 
 @export
 def try_items(itx, *things, default=NoDefault):
@@ -397,13 +404,13 @@ def slots_for(cls):
 # return, respectively, the first mapping that contains the specified item,
 # or •all• mappings that contain it:
 
-finditem  = lambda itx, *things, default=None:    apply_to(lambda thing:  hasitem(thing, itx) and thing or None,
-                                                           lambda total: (listify(*total, expand=False) or [default]).pop(0),
-                                                          *things)
-
-finditems = lambda itx, *things, default=tuple(): apply_to(lambda thing:  hasitem(thing, itx) and thing or None,
-                                                           lambda total:  tuplize(*total, expand=False) or default,
-                                                          *things)
+# finditem  = lambda itx, *things, default=None:    apply_to(lambda thing:  retrieve(thing, itx),
+#                                                            lambda total: (listify(*total, expand=False) or [default]).pop(0),
+#                                                           *things)
+#
+# finditems = lambda itx, *things, default=tuple(): apply_to(lambda thing:  retrieve(thing, itx),
+#                                                            lambda total:  tuplize(*total, expand=False) or default,
+#                                                           *things)
 
 # MODULE EXPORTS:
 export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n" + negate_doc)
@@ -445,6 +452,7 @@ export(or_none,         name='or_none',         doc="or_none(thing, attribute) �
 export(stor_none,       name='stor_none',       doc="stor_none(thing, attribute) → shortcut for `inspect.getattr_static(thing, attribute, None)`")
 export(getpyattr,       name='getpyattr',       doc="getpyattr(thing, attribute[, default]) → shortcut for `getattr(thing, '__%s__' % attribute[, default])`")
 export(getitem,         name='getitem',         doc="getitem(thing, item[, default]) → shortcut for `thing.get(item[, default])`")
+export(retrieve,        name='retrieve',        doc="retrieve(thing, item[, default]) → shortcut for `hasitem(thing, itx) and thing or default`")
 
 export(accessor,        name='accessor',        doc="accessor(func, thing, *attributes) → return the first non-None value had by successively applying func(thing, attribute) to all attributes")
 export(acquirer,        name='acquirer',        doc="acquirer(func, thing, *attributes) → return all of the non-None values had by successively applying func(thing, attribute) to all attributes")
@@ -470,6 +478,9 @@ export(attr_across,     name='attr_across',     doc="attr_across(attribute, *thi
 export(stattr_across,   name='stattr_across',   doc="stattr_across(attribute, *things) → Statically return all of the existing named attributes across all things (given 1+ things) (q.v. “inspect.getattr_static(¬)” supra.)")
 export(pyattr_across,   name='pyattr_across',   doc="pyattr_across(attribute, *things) → Return all of the existing named __special__ attributes across all things (given 1+ things)")
 export(item_across,     name='item_across',     doc="item_across(attribute, *things) → Return all of the existing named items held across all things (given 1+ things)")
+
+export(finditem,        name='finditem',        doc="finditem(itx, *mappings, default=None) → Return the first mapping that contains “itx”, or “default” if “itx” isn’t found in any of them")
+export(finditems,       name='finditems',       doc="finditems(itx, *mappings, default=tuple()) → Return a tuple of all mappings that contain “itx”, or “default” if “itx” isn’t found in any of them")
 
 export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns `None`")
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns `None`")
@@ -498,9 +509,6 @@ export(class_has,       name='class_has',       doc="class_has(cls, attribute) �
 export(isslotted,       name='isslotted',       doc="isslotted(thing) → boolean predicate, True if `thing` has both an `__mro__` and a `__slots__` attribute")
 export(isdictish,       name='isdictish',       doc="isdictish(thing) → boolean predicate, True if `thing` has both an `__mro__` and a `__dict__` attribute")
 export(isslotdicty,     name='isslotdicty',     doc="isslotdicty(thing) → boolean predicate, True if `thing` has `__mro__`, `__slots__`, and `__dict__` attributes")
-
-export(finditem,        name='finditem',        doc="finditem(itx, *mappings, default=None) → Return the first mapping that contains “itx”, or “default” if “itx” isn’t found in any of them")
-export(finditems,       name='finditems',       doc="finditems(itx, *mappings, default=tuple()) → Return a tuple of all mappings that contain “itx”, or “default” if “itx” isn’t found in any of them")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

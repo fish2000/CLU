@@ -121,18 +121,20 @@ class DoubleDutchRegistry(object):
         self.registry[clspair] = value
         self.cache = self.registry.copy()
 
-assignments = pytuple('module', 'name', 'qualname', 'doc')
+ASSIGNMENTS = pytuple('name', 'qualname', 'doc')
 
 @export
 class DoubleDutchFunction(object):
     
-    __slots__ = ('registry', '_default', '__wrapped__')
+    __slots__ = tuplize('registry') \
+              + pytuple('wrapped', 'weakref') \
+              + ASSIGNMENTS
     
     def __init__(self, function):
         self.registry = DoubleDutchRegistry()
-        self._default = self.__wrapped__ = function
+        self.__wrapped__ = function
         update_wrapper(self, function,
-                             assigned=assignments,
+                             assigned=ASSIGNMENTS,
                              updated=tuple())
     
     def __call__(self, argument0, argument1, *args, **kwargs):
@@ -140,7 +142,7 @@ class DoubleDutchFunction(object):
             function = self.registry[type(argument0),
                                      type(argument1)]
         except KeyError:
-            function = self._default
+            function = self.__wrapped__
         return function(argument0, argument1, *args, **kwargs)
     
     def domain(self, cls0, cls1):
@@ -256,11 +258,33 @@ def test():
         print()
         print("PASSED: test_four()")
     
+    def test_five():
+        
+        @doubledutch
+        def yodogg(x, y):
+            return None
+        
+        @yodogg.domain(int, int)
+        def yodogg_int_int(x, y):
+            return f"INTS: {x}, {y}"
+        
+        @yodogg.domain(str, str)
+        def yodogg_str_str(x, y):
+            return f"STRS: {x}, {y}"
+        
+        print(yodogg(10, 20))
+        print(yodogg('yo', 'dogg'))
+        print("DEFAULTING »", yodogg(object(), object()))
+        
+        print()
+        print("PASSED: test_five()")
+    
     # Run aggregate inline tests:
     test_one()
     test_two()
     test_three()
     test_four()
+    test_five()
 
 if __name__ == '__main__':
     test()

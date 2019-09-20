@@ -10,9 +10,28 @@ import pytest
 yo_dogg_lambda = lambda: print("Yo dogg.")
 i_heard_lambda = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
 
+yo_dogg_rename = lambda: print("Yo dogg.")
+i_heard_rename = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
+
 class TestExporting(object):
     
     """ Run the tests for the clu.exporting module. """
+    
+    def test_renamer(self):
+        from clu.exporting import rename
+        from clu.predicates import pyname
+        fake_dotpath = 'yodogg.iheard'
+        
+        renamer = rename(dotpath=fake_dotpath)
+        
+        # yo_dogg = lambda: print("Yo dogg.")
+        # i_heard = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
+        
+        yo_dogg = renamer(yo_dogg_rename)
+        i_heard = renamer(i_heard_rename)
+        
+        assert pyname(yo_dogg) == pyname(yo_dogg_rename) == 'yo_dogg_rename'
+        assert pyname(i_heard) == pyname(i_heard_rename) == 'i_heard_rename'
     
     def test_exporterbase_subclass_package(self, dirname):
         from clu.exporting import Registry

@@ -2,11 +2,14 @@
 from __future__ import print_function
 from itertools import chain, product as dot_product
 from functools import update_wrapper
+from zict import LRU
+
+import inspect
 
 iterchain = chain.from_iterable
 
 from clu.constants.consts import pytuple
-from clu.predicates import tuplize
+from clu.predicates import typeof, tuplize, attr
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -66,7 +69,7 @@ tobject = tuplize(tuple)
 
 @export
 def pairtype(cls0, cls1):
-    """ `type(pair(a, b))` is “pairtype(type(a), type(b))” """
+    """ `type(pair(a, b))` is “pairtype(typeof(a), typeof(b))” """
     try:
         PairType = pairtype_cache[cls0, cls1]
     except KeyError:
@@ -92,8 +95,8 @@ def pairmro(cls0, cls1):
 @export
 def pair(one, two):
     """ Return a pair object – a descendant of “__builtin__.tuple” """
-    TupleType = pairtype(type(one), type(two))
-    return TupleType((one, two))
+    PairType = pairtype(typeof(one), typeof(two))
+    return PairType((one, two))
 
 Ω = pair
 
@@ -104,7 +107,7 @@ class DoubleDutchRegistry(object):
     
     def __init__(self):
         self.registry = {}
-        self.cache    = {}
+        self.cache    = LRU(64, self.registry)
     
     def __getitem__(self, clspair):
         try:
@@ -118,10 +121,18 @@ class DoubleDutchRegistry(object):
                 raise
     
     def __setitem__(self, clspair, value):
-        self.registry[clspair] = value
-        self.cache = self.registry.copy()
+        self.cache[clspair] = value
+    
+    def __repr__(self):
+        from clu.fs.misc import typename_hexid
+        typename, hex_id = typename_hexid(self)
+        return f"{typename}{self.cache!r}(i={self.cache.i!r}, d={self.cache.d!r}) @ {hex_id}"
 
 ASSIGNMENTS = pytuple('name', 'qualname', 'doc')
+UPDATES = tuple()
+
+isempty = lambda param: attr(param, 'annotation', default=inspect._empty) is inspect._empty
+annotation = lambda param: isempty(param) and object or typeof(param.annotation)
 
 @export
 class DoubleDutchFunction(object):
@@ -135,23 +146,39 @@ class DoubleDutchFunction(object):
         self.__wrapped__ = function
         update_wrapper(self, function,
                              assigned=ASSIGNMENTS,
-                             updated=tuple())
+                             updated=UPDATES)
     
     def __call__(self, argument0, argument1, *args, **kwargs):
         try:
-            function = self.registry[type(argument0),
-                                     type(argument1)]
+            function = self.registry[typeof(argument0),
+                                     typeof(argument1)]
         except KeyError:
             function = self.__wrapped__
-        return function(argument0, argument1, *args, **kwargs)
+        return function(argument0,
+                        argument1,
+                       *args,
+                      **kwargs)
     
     def domain(self, cls0, cls1):
         def decoration(function):
             self.registry[cls0, cls1] = function
             return function
         return decoration
+    
+    @property
+    def annotated(self):
+        def decoration(function):
+            classes = [object, object]
+            signature = inspect.signature(function)
+            for idx, key in enumerate(signature.parameters):
+                parameter = signature.parameters[key]
+                classes[idx] = annotation(parameter)
+            regkey = tuplize(*classes[:2])
+            self.registry[regkey] = function
+            return function
+        return decoration
 
-@export    
+@export
 def doubledutch(function):
     """ Decorator returning a double-dispatch function.
         
@@ -251,6 +278,8 @@ def test():
         print("PASSED: test_three()")
     
     def test_four():
+        print()
+        
         pout.v(__all__)
         pout.v(__dir__())
         pout.v(exporter)
@@ -259,22 +288,31 @@ def test():
         print("PASSED: test_four()")
     
     def test_five():
+        print()
         
         @doubledutch
         def yodogg(x, y):
             return None
         
         @yodogg.domain(int, int)
-        def yodogg_int_int(x, y):
+        def yodogg_ii(x, y):
             return f"INTS: {x}, {y}"
         
         @yodogg.domain(str, str)
-        def yodogg_str_str(x, y):
+        def yodogg_ss(x, y):
             return f"STRS: {x}, {y}"
+        
+        @yodogg.annotated
+        def yodogg_ff(x: float, y: float):
+            return f"FLTS: {x}, {y}"
         
         print(yodogg(10, 20))
         print(yodogg('yo', 'dogg'))
+        print(yodogg(3.14, 2.78))
         print("DEFAULTING »", yodogg(object(), object()))
+        
+        print()
+        print("REGISTRY »", repr(yodogg.registry))
         
         print()
         print("PASSED: test_five()")

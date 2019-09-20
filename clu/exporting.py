@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from functools import wraps
 from importlib.machinery import all_suffixes
 
 import abc
+import inspect
 import itertools
 import sys, os
 import warnings
@@ -196,6 +198,54 @@ def determine_name(thing, name=None, try_repr=False):
     # possible (however unlikely) that this’ll ending
     # up returning None:
     return search_for_name(thing)
+
+class rename(object):
+    
+    """ Function-rename decorator. Use like so:
+        
+            @rename(named='yodogg')
+            def YoDogg(*args):
+                ...
+        
+        … or:
+            
+            yodogg = lambda *args: ...
+            yodogg = rename()(yodogg) # awkward syntax, I know
+        
+    """
+    
+    def __init__(self, named=None,
+                        path=None,
+                     dotpath=None):
+        """ Initialize a @rename object decorator. All parameters are optional. """
+        self.named = named
+        self.dotpath = dotpath or path_to_dotpath(path,
+                                                  relative_to=BASEPATH)
+    
+    def assign_name(self, function):
+        """ Assign the function’s new name. Returns the mutated function. """
+        named = determine_name(function, name=self.named)
+        dname = getattr(function, '__name__')
+        if dname in (λ, φ):
+            if named in (λ, φ):
+                named = search_for_name(function)
+            if named is None:
+                raise NameError(str(id(function)))
+            function.__name__ = function.__qualname__ = named
+            function.__lambda_name__ = dname # To recall the lambda’s genesis
+            if dname == φ and self.dotpath is not None:
+                function.__module__ = str(self.dotpath) # Reset __module__ for phi-types
+        return function
+    
+    def __call__(self, function):
+        # return self.assign_name(function)
+        function = self.assign_name(function)
+        if not inspect.isfunction(function):
+            return function
+        @wraps(function)
+        def renamed(*args, **kwargs):
+            return function(*args, **kwargs)
+        return function
 
 # N.B. Items in the “replaceable_endings” tuple that
 # possibly contain other such items should appear
@@ -797,6 +847,7 @@ export(search_for_name)
 export(search_for_module)
 export(search_modules)
 export(determine_name)
+export(rename)
 export(path_to_dotpath)
 export(sysmods,         name='sysmods',         doc="sysmods() → shortcut for reversed(tuple(frozenset(sys.modules.values()))) …OK? I know. It’s not my finest work, but it works.")
 

@@ -31,7 +31,7 @@ class FakeNumpy(object):
 # Try to get `auto` from `enum`, falling back to the polyfill:
 try:
     from enum import auto
-except ImportError:
+except (ImportError, SyntaxError):
     auto = AutoType()
 
 # Deal with some “missing” Python 3 things:
@@ -44,7 +44,7 @@ try:
                                  Hashable as HashableABC,
                                  Sequence as SequenceABC,
                                  Sized as SizedABC)
-except ImportError:
+except (ImportError, SyntaxError):
     from collections import (Mapping, MutableMapping,
                              Hashable as HashableABC,
                              Sequence as SequenceABC,
@@ -52,13 +52,13 @@ except ImportError:
 
 try:
     from importlib.util import cache_from_source
-except ImportError:
+except (ImportError, SyntaxError):
     # As far as I can tell, this is what Python 2.x does:
     cache_from_source = lambda pth: f'{pth}c'
 
 try:
     from functools import lru_cache
-except ImportError:
+except (ImportError, SyntaxError):
     def lru_cache(**keywrds):
         """ No-op dummy decorator for lesser Pythons """
         def inside(function):
@@ -70,10 +70,10 @@ except ImportError:
 
 try:
     from pathlib import Path
-except ImportError:
+except (ImportError, SyntaxError):
     try:
         from pathlib2 import Path
-    except ImportError:
+    except (ImportError, SyntaxError):
         Path = None
 
 try:

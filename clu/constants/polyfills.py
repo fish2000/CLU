@@ -5,7 +5,7 @@ from collections import Counter, OrderedDict
 from enum import Enum, EnumMeta, unique, _is_dunder as ispyname
 from functools import wraps
 
-from .consts import PY3, pytuple
+from clu.constants.consts import PY3, pytuple
 
 class AutoType(object):
     

@@ -3,7 +3,7 @@ from __future__ import print_function
 
 MOCK_NUMPY = False
 
-from clu.constants.polyfills import numpy, reduce
+from clu.constants.polyfills import numpy, reduce # type: ignore
 from clu.naming import moduleof
 from clu.predicates import isclasstype
 from clu.typology import isxlist

@@ -120,7 +120,7 @@ class ChainMap(collections.abc.MutableMapping, metaclass=Slotted):
             same as as “clu.dicts.merge(…)” (q.v. definition sub.)
         """
         extras = [dict(**overrides)]
-        maps = []
+        maps = [] # type: list
         for d in dicts:
             if isinstance(d, type(self)):
                 # maps.extend(map for map in d.maps if bool(map))
@@ -364,7 +364,7 @@ def test():
             pout.v(sorted(chainX.keys()))
             
         finally:
-            os.environ = stash
+            os.environ = stash # type: ignore
         
     test_one()
 

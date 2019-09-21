@@ -22,7 +22,7 @@ def determine_module(thing, name=None):
     if thing is None:
         return None
     
-    return pickle.whichmodule(thing, None) or name
+    return pickle.whichmodule(thing, None) or name # type: ignore
 
 """
 NAME AND MODULE SEARCH FUNCTIONS: the “nameof(…)” and “moduleof(…)”
@@ -216,7 +216,7 @@ def split_abbreviations(s):
         If you still find this function inscrutable,
         have a look here: https://gist.github.com/4027079
     """
-    abbreviations = []
+    abbreviations = [] # type: list
     current_token = ''
     for char in s.split(';')[0]:
         if current_token == '':

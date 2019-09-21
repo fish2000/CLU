@@ -27,18 +27,19 @@ from __future__ import print_function
 from pkgutil import extend_path
 from os.path import dirname
 
-from clu.version import read_version_file, VersionInfo
+from clu.version.read_version import read_version_file
+from clu.version import VersionInfo
 
 # Module exports:
 __all__ = ('__version__', 'version_info',
            '__title__', '__author__', '__maintainer__',
-           '__license__', '__copyright__')
+           '__license__', '__copyright__') # type: ignore
 
 __dir__ = lambda: list(__all__)
 
 if '__path__' in locals():
-    __path__ = extend_path(__path__, __name__)
-    __all__ += ('__path__',)
+    __path__ = extend_path(__path__, __name__) # type: ignore
+    __all__ += ('__path__',) # type: ignore
 
 # Embedded project metadata:
 __version__ = read_version_file(dirname(__file__))

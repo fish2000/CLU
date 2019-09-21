@@ -6,7 +6,7 @@ from functools import partial, wraps
 
 iterchain = chain.from_iterable
 
-from clu.constants.consts import λ, φ, pytuple, NoDefault, QUALIFIER
+from clu.constants.consts import λ, φ, pytuple, NoDefault, QUALIFIER # type: ignore
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -58,7 +58,7 @@ metaclass   = lambda thing: ismetaclass(thing) and thing \
 # PREDICATE FUNCTIONS: hasattr(…) shortcuts:
 
 hasitem     = lambda thing, itx: itx in thing
-noattr      = negate(hasattr)
+noattr      = negate(hasattr) # type: ignore
 noitem      = negate(hasitem)
 
 haspyattr   = lambda thing, atx: hasattr(thing, f'__{atx}__')
@@ -194,7 +194,7 @@ def try_items(itx, *things, default=NoDefault):
 @export
 def isenum(cls):
     """ isenum(cls) → boolean predicate, True if cls descends from `Enum`. """
-    from clu.constants.polyfills import Enum
+    from clu.constants.polyfills import Enum # type: ignore
     if nopyattr(cls, 'mro'):
         return False
     return Enum in cls.__mro__
@@ -211,7 +211,7 @@ def enumchoices(cls):
 predicate_nop   = lambda *things: None
 function_nop    = lambda iterable: None
 
-uncallable      = negate(callable)
+uncallable      = negate(callable) # type: ignore
 pyname          = lambda thing: pyattr(thing, 'name', 'qualname')
 pymodule        = lambda thing: pyattr(thing, 'module', 'package')
 
@@ -220,7 +220,7 @@ the_expandables = (tuple, list, set, frozenset,
 
 the_normies     = (str, bytes, bytearray)
 
-isexpandable    = lambda thing: isinstance(thing, the_expandables) or isenum(thing)
+isexpandable    = lambda thing: isinstance(thing, the_expandables) or isenum(thing) # type: ignore
 
 isnormative     = lambda thing: isinstance(thing, the_normies) or haspyattr(thing, 'fspath')
 iscontainer     = lambda thing: isiterable(thing) and \
@@ -246,7 +246,7 @@ class Partial(partial):
         try:
             super(Partial, self).__init__(*args, **kwargs)
         except:
-            super(Partial, self).__init__()
+            super(Partial, self).__init__() # type: ignore
     
     @property
     def predicate(self):
@@ -279,7 +279,7 @@ def apply_to(predicate, function, *things):
     # Ensure both the predicate and function are callable:
     if any(uncallable(f) for f in (predicate, function)):
         names = tuple(pyname(f) for f in (predicate, function))
-        raise ValueError("Noncallable passed to apply_to(%s, %s, …)" % names)
+        raise ValueError("Noncallable passed to apply_to(%s, %s, …)" % names) # type: ignore
     if len(things) < 1:
         # Return a Partial for this predicate and function:
         return Partial(apply_to, predicate, function)
@@ -352,7 +352,7 @@ def tuplize(*items):
 @itervariadic
 def uniquify(*items):
     """ uniquify(*items) → Return a tuple with a unique set of all non-`None` arguments """
-    seen = set()
+    seen = set() # type: set
     stuff = []
     for item in filter(isnotnone, items):
         if item not in seen:

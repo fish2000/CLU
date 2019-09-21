@@ -84,7 +84,7 @@ class CDBBase(CDBSubBase, collections.abc.Sequence,
         return len(self.entries)
     
     def clear(self):
-        self.entries = {}
+        self.entries = {} # type: dict
         return self
     
     def __len__(self):

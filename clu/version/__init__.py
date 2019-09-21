@@ -10,17 +10,17 @@ if not hasattr(__builtins__, 'cmp'):
 
 from collections import OrderedDict, namedtuple as NamedTuple
 from functools import wraps
-from pkg_resources import parse_version as pkg_resources_parse_version
+from pkg_resources import parse_version as pkg_resources_parse_version # type: ignore
 from pkg_resources.extern.packaging.version import Version as PkgResourcesVersion
 
-from .read_version import read_version_file
+from clu.version.read_version import read_version_file
 
 FIELDS = ('major', 'minor', 'patch',
           'pre',   'build')
 
 # The `namedtuple` ancestor,
 # from which our VersionInfo struct inherits:
-VersionAncestor = NamedTuple('VersionAncestor', FIELDS, module=__name__)
+VersionAncestor = NamedTuple('VersionAncestor', FIELDS, module=__name__) # type: ignore
 
 # sets, for various comparisons and checks:
 fields = frozenset(FIELDS)
@@ -41,7 +41,7 @@ def strify(arg):
     if type(arg) in string_types:
         return arg
     if type(arg) in byte_types:
-        return arg.decode('UTF-8')
+        return arg.decode('UTF-8') # type: ignore
     return str(arg)
 
 def dictify(arg):
@@ -143,7 +143,7 @@ class VersionInfo(VersionAncestor):
     
     def to_dict(self):
         """ Really an OrderedDict but who’s counting? """
-        out = OrderedDict()
+        out = OrderedDict() # type: OrderedDict
         for field in FIELDS:
             if getattr(self, field, None) is not None:
                 out[field] = getattr(self, field)

@@ -4,6 +4,8 @@ from functools import wraps
 from importlib.machinery import all_suffixes
 
 import abc
+import collections
+import collections.abc
 import inspect
 import itertools
 import sys, os
@@ -13,9 +15,9 @@ import weakref
 chain = itertools.chain
 iterchain = itertools.chain.from_iterable
 
-from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytuple
+from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytuple # type: ignore
 from clu.constants.exceptions import ExportError, ExportWarning
-from clu.constants.polyfills import MutableMapping, lru_cache
+from clu.constants.polyfills import lru_cache # type: ignore
 
 def doctrim(docstring):
     """ This function is straight outta PEP257 -- q.v. `trim(…)`,
@@ -312,7 +314,7 @@ class Slotted(abc.ABCMeta):
         if '__slots__' not in attributes:
             attributes['__slots__'] = tuple()
         
-        return super(Slotted, metacls).__new__(metacls, name,
+        return super(Slotted, metacls).__new__(metacls, name, # type: ignore
                                                         bases,
                                                         attributes,
                                                       **kwargs)
@@ -381,7 +383,7 @@ class Registry(abc.ABC, metaclass=Slotted):
         if appname in classes:
             raise TypeError(f"appname already registered: {appname}")
         classes[appname] = cls
-        super(Registry, cls).__init_subclass__(**kwargs)
+        super(Registry, cls).__init_subclass__(**kwargs) # type: ignore
         cls.instances = weakref.WeakValueDictionary()
         cls.appname = ValueDescriptor(appname)
     
@@ -451,7 +453,7 @@ class Registry(abc.ABC, metaclass=Slotted):
         """
         return search_modules(thing, *cls.all_modules())[0]
 
-class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
+class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
     
     """ The base class for “clu.exporting.Exporter”. Override this
         class in your own project to use the CLU exporting mechanism –
@@ -468,7 +470,7 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     
     def __new__(cls, *args, path=None, **kwargs):
         try:
-            instance = super(ExporterBase, cls).__new__(cls, *args, **kwargs)
+            instance = super(ExporterBase, cls).__new__(cls, *args, **kwargs) # type: ignore
         except TypeError:
             instance = super(ExporterBase, cls).__new__(cls)
         
@@ -566,7 +568,7 @@ class ExporterBase(MutableMapping, Registry, metaclass=Prefix):
     
     def exports(self):
         """ Get a new dictionary instance filled with the exports. """
-        out = {}
+        out = {} # type: dict
         out.update(self.__exports__)
         return out
     

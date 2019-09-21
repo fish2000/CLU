@@ -11,9 +11,9 @@ import io
 import operator
 import os
 
-from clu.constants.consts import λ, φ
+from clu.constants.consts import λ, φ # type: ignore
 from clu.constants.polyfills import long, unicode, numpy
-from clu.constants.polyfills import Path
+from clu.constants.polyfills import Path # type: ignore
 from clu.enums import alias
 from clu.extending import Extensible
 from clu.exporting import Slotted, Exporter
@@ -77,7 +77,7 @@ graceful_issubclass = subclasscheck
 # and other similar stuff.
 
 numeric_types = uniquify(bool, int, long, float, complex, decimal.Decimal)
-array_types = (types.Array, bytearray, memoryview)
+array_types = (types.Array, bytearray, memoryview) # type: tuple
 array_types += attrs(numpy, 'ndarray',
                             'matrix',
                             'ma.core.MaskedArray')
@@ -94,7 +94,7 @@ except (ImportError, SyntaxError):
 
 bytes_types = (bytes, bytearray)
 path_classes = tuplize(argparse.FileType, or_none(os, 'PathLike'), Path) # Path may be “None” in disguise
-path_types = string_types + bytes_types + path_classes
+path_types = string_types + bytes_types + path_classes # type: ignore
 file_types = (io.TextIOBase, io.BufferedIOBase, io.RawIOBase, io.IOBase)
 
 dict_types      = { dict, collections.defaultdict,

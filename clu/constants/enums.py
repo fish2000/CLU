@@ -4,8 +4,8 @@ from __future__ import print_function
 import sys
 import platform
 
-from .consts import ENCODING
-from .polyfills import Enum, unique
+from clu.constants.consts import ENCODING
+from clu.constants.polyfills import Enum, unique
 
 @unique
 class System(Enum):

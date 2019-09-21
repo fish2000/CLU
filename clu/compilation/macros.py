@@ -90,7 +90,7 @@ class Macro(object):
 @export
 class Macros(SimpleNamespace):
     
-    __slots__ = tuple()
+    __slots__ = tuple() # type: tuple
     
     def define(self, name, definition=None,
                            *,

@@ -4,7 +4,7 @@ from itertools import chain, product as dot_product
 from functools import update_wrapper
 
 import inspect
-import zict
+import zict # type: ignore
 
 iterchain = chain.from_iterable
 
@@ -60,7 +60,7 @@ class Extensible(type):
                     setattr(cls, key, value)
             return None
         
-        return super(Extensible, metacls).__new__(metacls, name,
+        return super(Extensible, metacls).__new__(metacls, name, # type: ignore
                                                            bases,
                                                            attributes,
                                                          **kwargs)
@@ -106,7 +106,7 @@ class DoubleDutchRegistry(object):
     __slots__ = ('registry', 'cache')
     
     def __init__(self):
-        self.registry = {}
+        self.registry = {} # type: dict
         self.cache    = zict.LRU(64, self.registry)
     
     def __len__(self):
@@ -135,7 +135,7 @@ class DoubleDutchRegistry(object):
         return f"{typename}{self.cache!r}(i={self.cache.i!r}, d={self.cache.d!r}) @ {hex_id}"
 
 ASSIGNMENTS = pytuple('name', 'qualname', 'doc')
-UPDATES = tuple()
+UPDATES = tuple() # type: tuple
 
 isempty = lambda param: attr(param, 'annotation', default=inspect._empty) is inspect._empty
 annotation = lambda param: isempty(param) and object or typeof(param.annotation)
@@ -260,7 +260,7 @@ def test():
     
     def test_three():
         
-        class __extend__(ΩΩ(int, int)):
+        class __extend__(ΩΩ(int, int)): # type: ignore
             
             __name__ = "Coordinate"
             
@@ -270,7 +270,7 @@ def test():
         
         assert Ω(2, 3).ratio() == 2 / 3
         
-        class __extend__(ΩΩ(str, str)):
+        class __extend__(ΩΩ(str, str)): # type: ignore
             
             __name__ = "NamespacedKey"
             

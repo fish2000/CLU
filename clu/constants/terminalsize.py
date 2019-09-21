@@ -37,7 +37,7 @@ def get_terminal_size(default=(80, 25)):
  
 def _get_terminal_size_windows():
     try:
-        from ctypes import windll, create_string_buffer
+        from ctypes import windll, create_string_buffer # type: ignore
         # stdin handle is -10
         # stdout handle is -11
         # stderr handle is -12
@@ -72,7 +72,7 @@ def _get_terminal_size_linux():
             import fcntl
             import termios
             cr = struct.unpack('hh',
-                               fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
+                               fcntl.ioctl(fd, termios.TIOCGWINSZ, 1234))
             return cr
         except:
             pass

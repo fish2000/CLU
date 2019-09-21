@@ -52,7 +52,7 @@ PYTHON_BIN = os.path.join(sysconfig.get_path('data'), 'bin')
 DEFAULT_PATH = os.pathsep.join(filter(os.path.exists, (PYTHON_BIN,
                                                        "/usr/local/bin",
                                                        "/bin",  "/usr/bin",
-                                                       "/sbin", "/usr/sbin")))
+                                                       "/sbin", "/usr/sbin"))) # type: ignore
 PATH = os.getenv("PATH", DEFAULT_PATH)
 
 φ = PARTIAL = sys.intern("<Partial>")
@@ -117,12 +117,12 @@ XDG_RUNTIME_MODE = 0o700
 
 class NoDefault(object):
     """ A singleton object to signify a lack of an argument. """
-    __slots__ = tuple()
+    __slots__ = tuple() # type: tuple
     def __new__(cls, *a, **k):
         return cls
 
 # Manually rename `pytuple(…)` per mechanism of “clu.exporting.Exporter”:
-pytuple.__lambda_name__ = λ
+pytuple.__lambda_name__ = λ # type: ignore
 pytuple.__qualname__ = pytuple.__name__ = 'pytuple'
 pytuple.__doc__ = "pytuple(*attrs) → turns ('do', 're', 'mi') into ('__do__', '__re__', '__mi__')"
 

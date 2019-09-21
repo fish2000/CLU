@@ -2,7 +2,7 @@
 from __future__ import print_function
 
 import plistlib
-import zict
+import zict # type: ignore
 
 from clu.constants.consts import ENCODING, NoDefault
 from clu.constants.enums import System
@@ -144,7 +144,7 @@ class CLUInterface(AppDirs):
     
     def close(self):
         """ Attept to close zicts """
-        from zict.common import close as closer
+        from zict.common import close as closer # type: ignore
         closer(self.zfunc)
         closer(self.zutf8)
         closer(self.zfile)

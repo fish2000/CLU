@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from abc import abstractmethod as abstract
+# from abc import abstractmethod as abstract
 
+import abc
 import os
 import sys
+
+abstract = abc.abstractmethod
 
 from clu.constants.enums import System, SYSTEM
 from clu.config.abc import AppName, NamespacedMutableMapping
@@ -11,7 +14,7 @@ from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import TypeLocker, TemporaryName, Directory
 from clu.fs.misc import filesize
 from clu.fs import pypath
-from clu.predicates import isiterable, tuplize
+from clu.predicates import isiterable
 from clu.typology import isvalidpath
 from clu.exporting import ValueDescriptor, Exporter
 
@@ -19,7 +22,7 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 @export
-class FileName(AppName):
+class FileName(AppName, metaclass=abc.ABCMeta):
     
     @classmethod
     def __init_subclass__(cls, filename=None, **kwargs):
@@ -64,8 +67,11 @@ class FileName(AppName):
         """
         if 'XDG_CONFIG_DIRS' in os.environ:
             xdgs = os.environ.get('XDG_CONFIG_DIRS')
-            dirs = (Directory(xdg) for xdg in xdgs.split(os.pathsep))
-            sdirs = set(d.subdirectory(cls.appname) for d in dirs)
+            if xdgs is None:
+                sdirs = set()
+            else:
+                dirs = (Directory(xdg) for xdg in xdgs.split(os.pathsep))
+                sdirs = set(d.subdirectory(cls.appname) for d in dirs)
         else:
             sdirs = set()
         for system in cls.systems():
@@ -80,7 +86,10 @@ class FileName(AppName):
         """
         if 'XDG_CONFIG_HOME' in os.environ:
             xdg = os.environ.get('XDG_CONFIG_HOME')
-            udirs = set([Directory(xdg).subdirectory(cls.appname)])
+            if xdg is None:
+                udirs = set()
+            else:
+                udirs = set([Directory(xdg).subdirectory(cls.appname)])
         else:
             udirs = set()
         for system in cls.systems():
@@ -127,7 +136,7 @@ class FileName(AppName):
         return Directory(root_dir.realpath()).subpath(file_name)
 
 @export
-class FileBase(NamespacedMutableMapping, FileName, metaclass=TypeLocker):
+class FileBase(NamespacedMutableMapping, FileName, metaclass=TypeLocker): # type: ignore
     
     """ The FileBase abstract base class furnishes two methods:
         

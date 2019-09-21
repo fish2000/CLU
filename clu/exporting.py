@@ -363,6 +363,10 @@ class Prefix(Slotted):
                                                        attributes,
                                                      **kwargs)
 
+# One-off private versions of “ismergeable” and “isstring” – NOT FOR EXPORT:
+ismergeable = lambda thing: isinstance(thing, collections.abc.Mapping)
+isstring = lambda thing: isinstance(thing, str)
+
 classes = {}
 appnames = set()
 
@@ -395,7 +399,6 @@ class Registry(abc.ABC, metaclass=Slotted):
     @staticmethod
     def for_appname(appname):
         """ Return a subclass for a registered appname """
-        from clu.typology import isstring
         if not appname:
             raise ValueError("appname required")
         if not isstring(appname):
@@ -429,15 +432,10 @@ class Registry(abc.ABC, metaclass=Slotted):
         return cls
     
     @classmethod
-    def module_getters(cls):
-        from clu.predicates import attr_across
-        return attr_across('modules', *(classes[appname] \
-                           for appname in cls.all_appnames()))
-    
-    @classmethod
     def all_modules(cls):
         return iterchain(modules().values() \
-                     for modules in cls.module_getters())
+                     for modules in (classes[appname].modules \
+                     for appname in cls.all_appnames()))
     
     @classmethod
     def nameof(cls, thing):
@@ -498,7 +496,6 @@ class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
         # already spent more than enough time fucking around with
         # “typing” shit and I am not interested at this time, and
         # b) it’s too useful a method to give it all up. So deal.
-        from clu.typology import isstring
         if not key:
             raise ValueError("instance key required")
         if not isstring(key):
@@ -761,7 +758,6 @@ class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
     
     def __add__(self, operand):
         # On add, old values are not overwritten
-        from clu.predicates import ismergeable
         from clu.dicts import merge_two
         if not ismergeable(operand):
             return NotImplemented
@@ -769,7 +765,6 @@ class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
     
     def __radd__(self, operand):
         # On reverse-add, old values are overwritten
-        from clu.predicates import ismergeable
         from clu.dicts import merge_two
         if not ismergeable(operand):
             return NotImplemented
@@ -777,7 +772,6 @@ class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
     
     def __iadd__(self, operand):
         # On in-place add, old values are updated and replaced
-        from clu.predicates import ismergeable
         if not ismergeable(operand):
             return NotImplemented
         self.update(**getattr(operand, '__exports__', operand))
@@ -799,7 +793,6 @@ class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
         return list(filter(lambda name: name not in ('all_appnames',
                                                      'all_modules',
                                                      'for_appname',
-                                                     'module_getters',
                                                      'unregister'),
                            super(ExporterBase, self).__dir__()))
 

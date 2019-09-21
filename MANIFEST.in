@@ -5,16 +5,18 @@ include .editorconfig
 include .gitignore
 include .landscape.yml
 include .travis.yml
+include appveyor.yml
 
 include ABOUT.md
-include appveyor.yml
 include CODE_OF_CONDUCT.md
-include conftest.py
 include COPYING.md
 include LICENSE.txt
-include Makefile
-include pyproject.toml
 include README.md
+
+include Makefile
+include mypy.ini
+include pyproject.toml
+include pytype.cfg
 include setup.cfg
 include setup.py
 include tox.ini

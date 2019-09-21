@@ -16,16 +16,24 @@ bigupload: clean-build-artifacts bigbump dist
 	git push
 
 clean-pyc:
-	find . -name \*.pyc -print -delete
+	find $(PROJECT_BASE) -name \*.pyc -print -delete
 
 clean-cython:
-	find $(PROJECT_NAME)/ -name \*.so -print -delete
+	find $(PROJECT_BASE) -name \*.so -print -delete
 
 clean-build-artifacts:
 	rm -rf build dist python_$(PROJECT_NAME).egg-info
 
 clean-test-artifacts: clean-pyc
-	rm -rf ../.pytest_cache ../.hypothesis .pytest_cache .hypothesis .tox
+	rm -rf  $(PROJECT_ROOT)/.pytest_cache \
+			$(PROJECT_ROOT)/.hypothesis \
+			$(PROJECT_BASE).pytest_cache \
+			$(PROJECT_BASE).hypothesis \
+			$(PROJECT_BASE).tox
+
+clean-type-caches:
+	rm -rf $(PROJECT_VENV)/var/cache/mypy_cache
+	rm -rf $(PROJECT_VENV)/var/cache/pytype
 
 cython:
 	python setup.py build_ext --inplace
@@ -37,7 +45,7 @@ wheel:
 	python setup.py bdist_wheel
 
 twine-upload: cython sdist wheel
-	twine upload -s dist/*
+	twine upload -s $(PROJECT_BASE)/dist/*
 
 bump:
 	bumpversion --verbose patch
@@ -49,6 +57,12 @@ check: clean-test-artifacts
 	check-manifest -v
 	python setup.py check -m -s
 	travis lint .travis.yml
+
+mypy:
+	mypy --config-file mypy.ini
+
+pytype:
+	pytype --config pytype.cfg --verbosity=2
 
 pytest:
 	python -m pytest -p clu.testing.pytest

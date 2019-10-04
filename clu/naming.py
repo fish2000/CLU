@@ -102,6 +102,50 @@ def moduleof(thing, default=NoDefault):
         return result
     return result or default
 
+# MODULE INSPECTOR PREDICATES: determine what undergirds a module object
+
+isbuiltin = lambda thing: moduleof(thing) == 'builtins'
+
+@export
+def isnativemodule(module):
+    """ isnativemodule(thing) → boolean predicate, True if `module`
+        is a native-compiled (“extension”) module.
+        
+        Q.v. this fine StackOverflow answer on this subject:
+            https://stackoverflow.com/a/39304199/298171
+    """
+    import importlib.machinery, inspect, os
+    from clu.predicates import getpyattr
+    from clu.typology import ismodule
+    
+    # Step one: modules only beyond this point:
+    if not ismodule(module):
+        return False
+    
+    # Step two: return truly when “__loader__” is set:
+    if isinstance(getpyattr(module, 'loader'),
+                  importlib.machinery.ExtensionFileLoader):
+        return True
+    
+    # Step three: in leu of either of those indicators,
+    # check the module path:
+    pth = inspect.getfile(module)
+    ext = os.path.splitext(pth)[1]
+    return ext in importlib.machinery.EXTENSION_SUFFIXES
+
+@export
+def isnative(thing):
+    """ isnative(thing) → boolean predicate, True if `thing`
+        comes from a native-compiled (“extension”) module.
+    """
+    import importlib
+    module = moduleof(thing)
+    if module == 'builtins':
+        return False
+    return isnativemodule(
+           importlib.import_module(
+                            module))
+
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
 # assess a thing’s qualified name, etc etc.
 
@@ -233,6 +277,8 @@ def split_abbreviations(s):
         if current_token not in abbreviations:
             abbreviations.append(current_token)
     return tuple(abbreviations)
+
+export(isbuiltin,      name='isbuiltin',  doc="isbuiltin(thing) → boolean predicate, True if `thing` is a builtin function/method/class")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

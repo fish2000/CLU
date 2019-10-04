@@ -188,6 +188,17 @@ def try_items(itx, *things, default=NoDefault):
         return default
     raise KeyError(f"{itx} not found in any of things: {things!r}")
 
+# SOME COMMON SHORTCUTS:
+
+dunder_or   = lambda thing, atx: getpyattr(thing, atx, thing)
+
+mro         = lambda thing: getpyattr(typeof(thing), 'mro')
+unwrap      = lambda thing: dunder_or(thing, 'wrapped')
+origin      = lambda thing: dunder_or(typeof(thing), 'origin')
+
+isancestor  = lambda cls, ancestor=object: isclasstype(cls) and (ancestor in mro(cls))
+isorigin    = lambda cls, original=object: isclasstype(cls) and isancestor(origin(cls), typeof(original))
+
 # ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)
 

@@ -10,6 +10,35 @@ class TestNaming(object):
     
     """ Run the tests for the clu.naming module. """
     
+    def test_module_inspectors_0(self):
+        from clu.naming import isbuiltin
+        
+        assert isbuiltin(callable)
+        assert isbuiltin(set)
+        assert not isbuiltin(isbuiltin)
+    
+    def test_module_inspectors_1(self):
+        from clu.naming import isnativemodule
+        
+        imaging = pytest.importorskip('PIL._imaging')
+        zict = pytest.importorskip('zict')
+        import os
+        
+        assert isnativemodule(imaging)
+        assert not isnativemodule(zict)
+        assert not isnativemodule(os) # builtins don’t qualify
+    
+    def test_module_inspectors_2(self):
+        from clu.naming import isnative
+        
+        imaging = pytest.importorskip('PIL._imaging')
+        Image = pytest.importorskip('PIL.Image')
+        
+        assert isnative(imaging.alpha_composite)
+        assert not isnative(Image)
+        assert not isnative(callable) # builtins don’t qualify
+        assert not isnative(dict) # I just said they don’t qualify
+    
     def test_dotpath_to_prefix_and_path_to_prefix(self):
         from clu.naming import dotpath_to_prefix, path_to_prefix
         

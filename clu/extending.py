@@ -192,16 +192,22 @@ def doubledutch(function):
         --------------------------------
         >>> @doubledutch
         ... def func(x, y):
-        ...     return 0
-        >>> 
-        >>> @func.domain(str, str)
-        ... def func_str_str(x, y):
         ...     return 42
         >>> 
-        >>> func(1, 2)
-        0
-        >>> func('x', 'y')
+        >>> @func.domain(str, str)
+        ... def func(x, y):
+        ...     return "42"
+        >>> 
+        >>> @func.annotated
+        ... def func(x: int, y: int):
+        ...     return x * y
+        >>> 
+        >>> func(None, None)
         42
+        >>> func(1, 42)
+        42
+        >>> func('x', 'y')
+        "42"
         --------------------------------
     """
     return DoubleDutchFunction(function)

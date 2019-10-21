@@ -43,14 +43,14 @@ class MetaRegistry(NonSlotted):
     def monomers(cls):
         return monomers
     
-    @monomers.setter
-    def monomers(cls, value):
-        global monomers
-        monomers = value
-    
-    @monomers.deleter
-    def monomers(cls):
-        raise TypeError("Can’t delete the module registry dictionary")
+    # @monomers.setter
+    # def monomers(cls, value):
+    #     global monomers
+    #     monomers = value
+    #
+    # @monomers.deleter
+    # def monomers(cls):
+    #     raise TypeError("Can’t delete the module registry dictionary")
     
     @staticmethod
     def all_appnames():

@@ -267,8 +267,8 @@ class ModuleBase(Package, Registry, metaclass=NonSlotted):
                             cls.appspace)
     
     def __dir__(self):
-        names = set().union(chain(type(self).__dict__.keys(),
-                                  super(ModuleBase, self).__dir__()))
+        names = set().union(type(self).__dict__.keys(),
+                            super(ModuleBase, self).__dir__())
         return list(names - DO_NOT_INCLUDE)
 
 @export

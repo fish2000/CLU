@@ -390,7 +390,7 @@ def test():
     def three_and_a_half():
         finder = Finder()
         assert type(finder.loader) is Loader
-        assert finder in sys.meta_path
+        assert type(finder) in sys.meta_path
         
         class FindMe(Module):
             pass

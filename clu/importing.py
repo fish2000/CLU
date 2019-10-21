@@ -46,7 +46,7 @@ class MetaRegistry(NonSlotted):
     @staticmethod
     def all_appnames():
         """ Return a tuple of strings, listing all registered app names """
-        return tuple(Registry.monomers.keys())
+        return tuple(sorted(Registry.monomers.keys()))
     
     @staticmethod
     def all_modules():

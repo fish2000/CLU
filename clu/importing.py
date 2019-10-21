@@ -236,8 +236,6 @@ class ModuleBase(Package, Registry, metaclass=NonSlotted):
     
     @classmethod
     def __init_subclass__(cls, appname=None, appspace=None, **kwargs):
-        if any(field is None for field in (appname, appspace)):
-            pass
         ancestors = mro(cls)
         cls.appname  = appname  or attr_search('appname', *ancestors)
         cls.appspace = appspace or attr_search('appspace', *ancestors)

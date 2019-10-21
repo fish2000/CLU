@@ -175,8 +175,8 @@ class LoaderBase(AppName, importlib.abc.Loader):
         """ Create a new class-based module from a spec instance """
         cls = type(self)
         if Registry.has_appname(cls.appname):
-            modulename, packagename = dotpath_split(spec.name)
             if spec.name in Registry[cls.appname]:
+                modulename, _ = dotpath_split(spec.name)
                 ModuleClass = Registry[cls.appname][spec.name]
                 module = ModuleClass(modulename,
                                      getpyattr(ModuleClass, 'doc'))

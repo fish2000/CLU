@@ -125,7 +125,7 @@ class Package(types.Module):
     
     """ A subclass of ‘types.Module’ which assigns all instances
         of which either an empty list or the value of the “path”
-        keyword argument to “__init__(…)”
+        keyword argument to its “__path__” attribute in “__init__(…)”
     """
     
     def __init__(self, name, doc=None, path=None):

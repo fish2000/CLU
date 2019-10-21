@@ -153,6 +153,13 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
         return None
 
 @export
+class Package(types.Module):
+    
+    def __init__(self, name, doc=None, path=None):
+        super(Package, self).__init__(name, doc)
+        self.__path__ = path or []
+
+@export
 class LoaderBase(AppName, importlib.abc.Loader):
     
     """ The base class for all class-based module loaders.
@@ -166,9 +173,7 @@ class LoaderBase(AppName, importlib.abc.Loader):
     @staticmethod
     def package_module(name):
         """ Convenience method, returning an empty package module """
-        module = types.Module(name, f"Package (filler) module {name}")
-        module.__path__ = [] # for now …?
-        return module
+        return Package(name, f"Package (filler) module {name}")
     
     def create_module(self, spec):
         """ Create a new class-based module from a spec instance """

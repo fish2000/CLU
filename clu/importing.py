@@ -262,6 +262,20 @@ class ModuleBase(types.Module, Registry, metaclass=NonSlotted):
 
 @export
 def initialize_types(appname, appspace='app'):
+    """ Initialize subtypes of FinderBase, LoaderBase, and ModuleBase,
+        configured for a specific “appname” and “appspace” (the latter
+        of which defaults to ‘app’).
+        
+        You use ‘initialize_types(…)’ in one of your own app’s modules
+        like so:
+        
+            Module, Finder, Loader = initialize_types('myappname')
+        
+        … if you insert that line of code in a module of yours called,
+        say, “myappname/modules.py” you could then either a) proceed
+        to subclass Module to create your class-modules, or b) import
+        the ‘Module’ class from elsewhere and subclass it subsequently.
+    """
     
     class Loader(LoaderBase, appname=appname):
         pass

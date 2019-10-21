@@ -86,7 +86,7 @@ class TestImporting(object):
         # assert repr(module) == "<class-module ‘clu.app.findme’ from “clu.app”>"
     
     def test_derived_import(self):
-        from clu.importing import Module
+        from clu.importing import Module, DO_NOT_INCLUDE
         
         class Derived(Module):
             
@@ -104,6 +104,9 @@ class TestImporting(object):
         
         for attname in dir(derived):
             assert hasattr(derived, attname)
+        
+        for attname in DO_NOT_INCLUDE:
+            assert attname not in dir(derived)
         
         assert derived.iheard() == 'I heard you like'
     

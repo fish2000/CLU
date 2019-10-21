@@ -163,9 +163,12 @@ class LoaderBase(AppName, importlib.abc.Loader):
         your own app.
     """
     
-    def package_module(self, name):
+    @staticmethod
+    def package_module(name):
         """ Convenience method, returning an empty package module """
-        return types.Module(name, f"Package (filler) module {name}")
+        module = types.Module(name, f"Package (filler) module {name}")
+        module.__path__ = [] # for now …?
+        return module
     
     def create_module(self, spec):
         """ Create a new class-based module from a spec instance """

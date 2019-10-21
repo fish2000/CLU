@@ -102,6 +102,11 @@ class TestImporting(object):
             def iheard(self):
                 return "I heard you like"
         
+        # Normally we’d just call the class “derived”, rather
+        # than “Derived” – in this case we need to differentiate
+        # betweeen the name of the defined class and the thing
+        # we imported within the same code block (normally they’d
+        # be in separate files):
         from clu.app import Derived as derived
         
         assert type(derived) is Derived

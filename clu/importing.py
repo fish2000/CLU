@@ -163,15 +163,6 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
         if cls.appname == fullname.split(QUALIFIER).pop(0):
             return ModuleSpec(fullname, cls.loader)
         return None
-    
-    def __eq__(self, other):
-        if not subclasscheck(other, type(self)):
-            return NotImplemented
-        if not hasattr(type(self), 'appname'):
-            return NotImplemented
-        if not hasattr(type(other), 'appname'):
-            return NotImplemented
-        return type(self).appname == type(other).appname
 
 @export
 class LoaderBase(AppName, importlib.abc.Loader):
@@ -218,7 +209,6 @@ class LoaderBase(AppName, importlib.abc.Loader):
         typename = subclasscheck(module, ModuleBase) \
                                   and 'class-module' \
                                    or 'module'
-        # typename = 'class-module'
         out = f"<{typename} ‘{name}’"
         if location:
             out += f" from “{location}”"

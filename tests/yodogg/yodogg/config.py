@@ -6,17 +6,22 @@ from clu.config.env import EnvBase
 from clu.config.fieldtypes import fields
 from clu.config.formats import JsonFileBase, TomlFileBase
 from clu.config.settings import Schema
+from clu.importing import initialize_types
 
 import sys
 from pprint import pprint
 pprint(sys.path)
+
+appname = 'yodogg'
+Module, Finder, Loader = initialize_types(appname, 'modules')
+
+pprint(sys.meta_path)
 
 from .exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
  
-appname = 'yodogg'
 filename_base = f"{appname}."
 json_filename = filename_base + "json"
 toml_filename = filename_base + "toml"
@@ -54,7 +59,9 @@ class MySchema(Schema):
         youlike = fields.String("you like:")
         andalso = fields.Tuple(value=fields.String("«also»", allow_none=False))
 
-
+export(Module, name='Module')
+export(Finder, name='Finder')
+export(Loader, name='Loader')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

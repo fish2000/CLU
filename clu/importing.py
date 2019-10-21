@@ -12,12 +12,12 @@ import importlib.machinery
 import sys
 import weakref
 
-from clu.constants.consts import PROJECT_NAME
+from clu.constants.consts import PROJECT_NAME, QUALIFIER
 from clu.abstract import NonSlotted, AppName
 from clu.predicates import attr, getpyattr, attr_search, mro
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.typespace import types
-from clu.typology import isstring
+from clu.typology import isstring, subclasscheck
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -160,9 +160,18 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
         # “from appname.appspace.xxx import xxx” would fail
         # when the method was called unbound-method-style
         # with classes like 'str' …?!
-        if Registry.has_appname(cls.appname):
+        if cls.appname == fullname.split(QUALIFIER).pop(0):
             return ModuleSpec(fullname, cls.loader)
         return None
+    
+    def __eq__(self, other):
+        if not subclasscheck(other, type(self)):
+            return NotImplemented
+        if not hasattr(type(self), 'appname'):
+            return NotImplemented
+        if not hasattr(type(other), 'appname'):
+            return NotImplemented
+        return type(self).appname == type(other).appname
 
 @export
 class LoaderBase(AppName, importlib.abc.Loader):
@@ -191,6 +200,7 @@ class LoaderBase(AppName, importlib.abc.Loader):
                                      getpyattr(ModuleClass, 'doc'))
                 return module
             return self.package_module(spec.name)
+        return None
     
     def exec_module(self, module):
         """ Execute a newly created module – this is a no-op for
@@ -205,9 +215,10 @@ class LoaderBase(AppName, importlib.abc.Loader):
                                 '__file__',
                                 '__package__')
         name = attr(module, '__name__', 'name')
-        typename = isinstance(module, ModuleBase) \
-                               and 'class-module' \
-                                or 'module'
+        typename = subclasscheck(module, ModuleBase) \
+                                  and 'class-module' \
+                                   or 'module'
+        # typename = 'class-module'
         out = f"<{typename} ‘{name}’"
         if location:
             out += f" from “{location}”"
@@ -389,7 +400,7 @@ def test():
     def three_and_a_half():
         finder = Finder()
         assert type(finder.loader) is Loader
-        assert type(finder) in sys.meta_path
+        assert finder in sys.meta_path
         
         class FindMe(Module):
             pass

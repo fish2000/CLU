@@ -125,4 +125,38 @@ class TestImporting(object):
         
         assert iheard() == 'I heard you like'
     
-    
+    def test_initialize_types(self, dirname):
+        from clu.fs import pypath
+        
+        # Ensure “sys.path” contains the “yodogg” package:
+        prefix = dirname.subdirectory('yodogg')
+        assert prefix.exists
+        pypath.remove_invalid_paths()  # cleans “sys.path”
+        pypath.append_paths(prefix)    # extends “sys.path”
+        
+        # Bring in the package-specific Module subclass
+        from yodogg.config import Module
+        
+        class Derived(Module):
+            
+            """ I heard you like docstrings """
+            
+            yo = 'dogg'
+            
+            def iheard(self):
+                return "I heard you like"
+        
+        from yodogg.modules import Derived as derived
+        
+        assert type(derived) is Derived
+        assert repr(derived) == "<class-module ‘yodogg.modules.Derived’ from “yodogg.modules”>"
+        assert derived.yo == 'dogg'
+        
+        for attname in dir(derived):
+            assert hasattr(derived, attname)
+        
+        assert derived.iheard() == 'I heard you like'
+        
+        from yodogg.modules.Derived import iheard
+        
+        assert iheard() == 'I heard you like'

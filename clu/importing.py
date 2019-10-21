@@ -208,7 +208,11 @@ class LoaderBase(AppName, importlib.abc.Loader):
         typename = isinstance(module, ModuleBase) \
                                and 'class-module' \
                                 or 'module'
-        return f"<{typename} ‘{name}’ from “{location}”>"
+        out = f"<{typename} ‘{name}’"
+        if location:
+            out += f" from “{location}”"
+        out += ">"
+        return out
 
 DO_NOT_INCLUDE = { '__abstractmethods__', '_abc_impl' }
 

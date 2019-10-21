@@ -82,7 +82,7 @@ class TestNaming(object):
     
     @pytest.mark.skipif(consts.PYPY, reason="Failure on PyPy")
     @pytest.mark.nondeterministic
-    def test_qualified_name_constants(self):
+    def _test_qualified_name_constants(self):
         """ » Checking “qualified_name(¬) on items from clu.constants …” """
         from clu.constants.consts import (BASEPATH, HOSTNAME, VERBOTEN, SCRIPT_PATH, TEST_PATH)
         from clu.naming import qualified_name
@@ -154,8 +154,8 @@ class TestNaming(object):
         from clu.naming import qualified_import, qualified_name
         # is_python2_dead     = qualified_import('clu.repl.banners.is_python2_dead')
         
-        print_python_banner = qualified_import('clu.repl.print_python_banner')
-        print_warning       = qualified_import('clu.repl.print_warning')
+        print_python_banner = qualified_import('clu.repl.banners.print_python_banner')
+        print_warning       = qualified_import('clu.repl.banners.print_warning')
         Text                = qualified_import('clu.repl.ansi.Text')
         Background          = qualified_import('clu.repl.ansi.Background')
         Weight              = qualified_import('clu.repl.ansi.Weight')

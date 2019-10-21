@@ -87,6 +87,10 @@ from clu.predicates import (negate,
                             attrs, stattrs, pyattrs, items,
                             attr_search, stattr_search, pyattr_search, item_search,
                             attr_across, stattr_across, pyattr_across, item_across,
+                            finditem, finditems,
+                            try_items,
+                            dunder_or, mro, unwrap, origin,
+                            isancestor, isorigin,
                             isenum, enumchoices,
                             predicate_nop, function_nop, uncallable,
                             pyname, pymodule,
@@ -101,8 +105,7 @@ from clu.predicates import (negate,
                             itervariadic,
                             tuplize, uniquify, listify,
                             allof, anyof, noneof,
-                            slots_for,
-                            finditem, finditems)
+                            slots_for)
 
 from clu.typespace import SimpleNamespace, Namespace, types, modulize
 
@@ -136,7 +139,9 @@ from clu.naming import (determine_module, nameof, moduleof,
                         dotpath_to_prefix, path_to_prefix,
                         split_abbreviations)
 
-from clu.config.abc import NAMESPACE_SEP, Cloneable, ReprWrapper, FlatOrderedSet, NamespacedMutableMapping
+from clu.abstract import Cloneable, ReprWrapper
+
+from clu.config.abc import NAMESPACE_SEP, FlatOrderedSet, NamespacedMutableMapping
 from clu.config.base import Flat, Nested
 from clu.config.env import Env
 from clu.config.filebase import FileName, FileBase
@@ -321,6 +326,10 @@ __all__ = ('Image',
            'attrs', 'stattrs', 'pyattrs', 'items',
            'attr_search', 'stattr_search', 'pyattr_search', 'item_search',
            'attr_across', 'stattr_across', 'pyattr_across', 'item_across',
+           'finditem', 'finditems',
+           'try_items',
+           'dunder_or', 'mro', 'unwrap', 'origin',
+           'isancestor', 'isorigin',
            'isenum', 'enumchoices',
            'predicate_nop', 'function_nop', 'uncallable',
            'pyname', 'pymodule',
@@ -332,7 +341,6 @@ __all__ = ('Image',
            'thing_has', 'class_has',
            'isslotted', 'isdictish', 'isslotdicty',
            'slots_for',
-           'finditem', 'finditems',
            'case_sort',
            'itervariadic',
            'tuplize', 'uniquify', 'listify',

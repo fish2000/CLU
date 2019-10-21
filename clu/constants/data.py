@@ -191,7 +191,8 @@ implore; But the fact is I was napping, and so gently you came rapping, And so
 faintly you came tapping, tapping at my chamber door?
 """
 
-MODNAMES = ('clu.compilation',
+MODNAMES = ('clu.abstract',
+            'clu.compilation',
             'clu.compilation.compiledb',
             'clu.compilation.macros',
             'clu.config',
@@ -213,6 +214,7 @@ MODNAMES = ('clu.compilation',
             'clu.enums',
             'clu.exporting',
             'clu.extending',
+            'clu.importing',
             'clu.fs',
             'clu.fs.appdirectories',
             'clu.fs.filesystem',

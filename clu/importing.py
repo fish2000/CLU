@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from collections import defaultdict
+from collections import defaultdict as DefaultDict
 from itertools import chain
 
 iterchain = chain.from_iterable
@@ -11,42 +11,33 @@ import importlib.abc
 import importlib.machinery
 import sys
 import weakref
-# import zict
 
 from clu.constants.consts import PROJECT_NAME
-from clu.predicates import getpyattr, or_none, attr_search, mro
+from clu.abstract import NonSlotted, AppName
+from clu.predicates import attr, getpyattr, attr_search, mro
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.typespace import types
 from clu.typology import isstring
-from clu.exporting import ValueDescriptor, Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-@export
-class NonSlotted(abc.ABCMeta):
-    
-    """ A metaclass that ensures its classes, and all subclasses,
-        will •not• use the “__slots__” optimization.
-    """
-    
-    def __new__(metacls, name, bases, attributes, **kwargs):
-        """ Override for `abc.ABCMeta.__new__(…)` setting up a
-            derived un-slotted class.
-        """
-        if '__slots__' in attributes:
-            del attributes['__slots__']
-        
-        return super(NonSlotted, metacls).__new__(metacls, name,
-                                                           bases,
-                                                           attributes,
-                                                         **kwargs)
-
 # The module-subclass registry dictionary:
-# monomers = weakref.WeakValueDictionary()
-monomers = defaultdict(weakref.WeakValueDictionary)
+monomers = DefaultDict(weakref.WeakValueDictionary)
 
 class MetaRegistry(NonSlotted):
+    
+    """ A metaclass for the class-based-module registry, wrapping all
+        access to the actual dict-of-dicts registry structure§ with
+        class methods.
+        
+        End-users shouldn’t have to use this in their own code, hence
+        it is not exported.
+        
+        § Actually a “collections.defaultdict” containing instances of
+         “weakref.WeakValueDictionary” – but who’s counting, really.
+    """
     
     @property
     def monomers(cls):
@@ -63,14 +54,17 @@ class MetaRegistry(NonSlotted):
     
     @staticmethod
     def all_appnames():
+        """ Return a tuple of strings, listing all registered app names """
         return tuple(Registry.monomers.keys())
     
     @staticmethod
     def all_modules():
+        """ Return a tuple filled with instances of all registered class-based modules """
         return tuple(iterchain(modules.values() for modules in Registry.monomers.values()))
     
     @staticmethod
     def has_appname(name):
+        """ Check if a given app name has been registered """
         return name in Registry.monomers
     
     @staticmethod
@@ -83,14 +77,21 @@ class MetaRegistry(NonSlotted):
         return Registry.monomers[name]
     
     def __getitem__(cls, key):
+        """ Allows lookup of an app name through subscripting the Registry class """
         return Registry.for_appname(key)
 
 @export
 class Registry(abc.ABC, metaclass=MetaRegistry):
     
+    """ The Registry mixin handles the registration of all
+        class-based module subclasses.
+    """
+    
     @classmethod
     def __init_subclass__(cls, **kwargs):
-        
+        """ Properly set the “appname” and “appspace” class attributes
+            on registered class-based module subclasses
+        """
         # We were called with a class for which the values
         # of appname, appspace, and __name__ have been assigned:
         if cls.appname and cls.appspace and nameof(cls):
@@ -108,31 +109,20 @@ class Registry(abc.ABC, metaclass=MetaRegistry):
         # Call up:
         super(Registry, cls).__init_subclass__(**kwargs)
 
-class AppName(abc.ABC):
-    
-    __slots__ = tuple()
-    
-    @classmethod
-    def __init_subclass__(cls, appname=None, **kwargs):
-        """ Translate the “appname” class-keyword into an “appname” read-only
-            descriptor value
-        """
-        super(AppName, cls).__init_subclass__(**kwargs)
-        cls.appname = ValueDescriptor(appname)
-    
-    def __init__(self, *args, **kwargs):
-        """ Stub __init__(…) method, throwing a lookup error for subclasses
-            upon which the “appname” value is None
-        """
-        if type(self).appname is None:
-            name = type(self).__name__
-            raise LookupError(f"Cannot instantiate base config class {name} "
-                              f"(appname is None)")
-
 @export
 class ModuleSpec(importlib.machinery.ModuleSpec):
     
+    """ A local “importlib.machinery.ModuleSpec” subclass
+        that conveniently deals with setting the “origin”
+        attribute, and identifies all of its instances as
+        package modules.
+    """
+    
     def __init__(self, name, loader):
+        """ Initialize a new ModuleSpec, with a qualified (dotted)
+            path string, and a module loader instance (both of which
+            are required).
+        """
         _, packagename = dotpath_split(name)
         super(ModuleSpec, self).__init__(name,
                                          loader,
@@ -142,6 +132,14 @@ class ModuleSpec(importlib.machinery.ModuleSpec):
 @export
 class FinderBase(AppName, importlib.abc.MetaPathFinder):
     
+    """ The base class for all class-based module finders.
+        
+        One must subclass this class once per app, specifying
+        an “appname” – the name of the app. Q.v. the function
+        “initialize_types(…)” sub. to easily set these up for
+        your own app.
+    """
+    
     @classmethod
     def find_spec(cls, fullname, path=None, target=None):
         # N.B. this shouldn’t technically be a class method,
@@ -150,7 +148,6 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
         # “from appname.appspace.xxx import xxx” would fail
         # when the method was called unbound-method-style
         # with classes like 'str' …?!
-        # print('CLASS [finder]:', cls)
         if Registry.has_appname(cls.appname):
             return ModuleSpec(fullname, cls.loader)
         return None
@@ -158,12 +155,21 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
 @export
 class LoaderBase(AppName, importlib.abc.Loader):
     
+    """ The base class for all class-based module loaders.
+        
+        One must subclass this class once per app, specifying
+        an “appname” – the name of the app. Q.v. the function
+        “initialize_types(…)” sub. to easily set these up for
+        your own app.
+    """
+    
     def package_module(self, name):
-        return types.Module(name, "Package (filler) module")
+        """ Convenience method, returning an empty package module """
+        return types.Module(name, f"Package (filler) module {name}")
     
     def create_module(self, spec):
+        """ Create a new class-based module from a spec instance """
         cls = type(self)
-        # print('CLASS [loader]:', cls)
         if Registry.has_appname(cls.appname):
             modulename, packagename = dotpath_split(spec.name)
             if spec.name in Registry[cls.appname]:
@@ -174,12 +180,43 @@ class LoaderBase(AppName, importlib.abc.Loader):
             return self.package_module(spec.name)
     
     def exec_module(self, module):
+        """ Execute a newly created module – this is a no-op for
+            class-based modules, as they have by definition already
+            been executed by the interpreter
+        """
         pass
+    
+    def module_repr(self, module):
+        """ A nicer, kindler, gentler module repr-function """
+        location = attr(module, '__spec__.origin',
+                                '__file__',
+                                '__package__')
+        name = attr(module, '__name__', 'name')
+        typename = isinstance(module, ModuleBase) \
+                               and 'class-module' \
+                                or 'module'
+        return f"<{typename} ‘{name}’ from “{location}”>"
 
 DO_NOT_INCLUDE = { '__abstractmethods__', '_abc_impl' }
 
 @export
 class ModuleBase(types.Module, Registry, metaclass=NonSlotted):
+    
+    """ The base class for all class-based modules.
+        
+        One must subclass this class once per app, specifying
+        an “appname” – the name of the app – and an “appspace” –
+        an optional prefix from which all class-based modules
+        will be found and imported. Q.v. “initialize_types(…)”
+        sub. to easily set these up for your own app.
+        
+        Within CLU, the appname is “clu” (duh) and the appspace
+        is “app” – all class-based modules are therefore imported
+        from “clu.app”, á la:
+            
+            from clu.app import class_based_module
+    """
+    
     appname = None
     appspace = None
     
@@ -193,11 +230,14 @@ class ModuleBase(types.Module, Registry, metaclass=NonSlotted):
         super(ModuleBase, cls).__init_subclass__(**kwargs)
     
     def __init__(self, name, doc=None):
+        """ Initialize a new class-based module instance, using the name
+            as specified and an optional docstring.
+        """
         qualified_name = None
         if self.namespace:
             qualified_name = dotpath_join(self.namespace, name)
         super(ModuleBase, self).__init__(qualified_name or name, doc)
-        self.__path__ = []
+        self.__path__ = [] # All class-based modules are packages
     
     @property
     def name(self):
@@ -220,6 +260,7 @@ class ModuleBase(types.Module, Registry, metaclass=NonSlotted):
                                   super(ModuleBase, self).__dir__()))
         return list(names - DO_NOT_INCLUDE)
 
+@export
 def initialize_types(appname, appspace='app'):
     
     class Loader(LoaderBase, appname=appname):
@@ -232,7 +273,7 @@ def initialize_types(appname, appspace='app'):
                              appspace=appspace):
         __loader__ = Finder.loader
     
-    if Loader not in sys.meta_path:
+    if Finder not in sys.meta_path:
         sys.meta_path.append(Finder)
     
     return Module, Finder, Loader
@@ -245,7 +286,6 @@ export(Loader, name='Loader')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
-
 
 def test():
     

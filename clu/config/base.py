@@ -5,10 +5,9 @@ import copy
 
 iterchain = chain.from_iterable
 
+from clu.abstract import Cloneable, ReprWrapper
 from clu.constants.consts import NoDefault
-from clu.config.abc import (NAMESPACE_SEP, Cloneable,
-                                           ReprWrapper,
-                                           NamespacedMutableMapping)
+from clu.config.abc import (NAMESPACE_SEP, NamespacedMutableMapping)
 from clu.typology import ismapping
 from clu.exporting import Exporter
 

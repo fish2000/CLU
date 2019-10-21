@@ -41,10 +41,11 @@ class TestTypology(object):
         import abc
         from clu.predicates import metaclass, predicate_all
         from clu.typology import subclasscheck, metaclasscheck, isxtypelist, isabclist
-        from clu.config.abc import (AppName, Cloneable, ReprWrapper,
-                                    FlatOrderedSet, NamespacedMutableMapping)
+        from clu.abstract import Slotted, NonSlotted, AppName, Cloneable, ReprWrapper
+        from clu.config.abc import FlatOrderedSet, NamespacedMutableMapping
         
-        abclist = (AppName, Cloneable, ReprWrapper,
+        abclist = (Slotted, NonSlotted,
+                   AppName, Cloneable, ReprWrapper,
                    FlatOrderedSet, NamespacedMutableMapping)
         
         for cls in abclist:

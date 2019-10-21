@@ -478,6 +478,13 @@ export(item_across,     name='item_across',     doc="item_across(attribute, *thi
 export(finditem,        name='finditem',        doc="finditem(itx, *mappings, default=None) → Return the first mapping that contains “itx”, or “default” if “itx” isn’t found in any of them")
 export(finditems,       name='finditems',       doc="finditems(itx, *mappings, default=tuple()) → Return a tuple of all mappings that contain “itx”, or “default” if “itx” isn’t found in any of them")
 
+export(dunder_or,       name='dunder_or',       doc="dunder_or(thing, atx) → Like “getpyattr(…)” only with a default return value of `thing` itself")
+export(mro,             name='mro',             doc="mro(thing) → Return the method resolution order (née “MRO”) tuple for thing (using “type(thing)” for non-classtype operands)")
+export(unwrap,          name='unwrap',          doc="unwrap(thing) → Return either `thing.__wrapped__` or `thing` for a given `thing`")
+export(origin,          name='origin',          doc="origin(thing) → Return either `typeof(thing).__origin__` or `typeof(thing)` for a given `thing`")
+export(isancestor,      name='isancestor',      doc="isancestor(thing, ancestor=object) → boolean predicate, True if `ancestor` is found in “mro(thing)”")
+export(isorigin,        name='isorigin',        doc="isorigin(thing, original=object) → boolean predicate, True if `original` is an ancestor of “origin(thing)”")
+
 export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns `None`")
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns `None`")
 export(uncallable,      name='uncallable',      doc="uncallable(thing) → boolean predicate, shortcut for `not callable(thing)`")
@@ -498,7 +505,7 @@ export(predicate_or,    name='predicate_or',    doc="predicate_or(predicate, a, 
 export(predicate_xor,   name='predicate_xor',   doc="predicate_xor(predicate, a, b) → boolean predicate, shortcut for `apply_to(predicate, any, a, b) and not apply_to(predicate, all, a, b)`")
 
 export(case_sort,       name='case_sort',       doc="case_sort(string) → Sorting predicate to sort UPPERCASE names first")
-export(isnotnone,       name='isnotnone',       doc="isnotnone(thing) → poolean predicate, return True if “thing” is not None")
+export(isnotnone,       name='isnotnone',       doc="isnotnone(thing) → boolean predicate, return True if “thing” is not None")
 
 export(thing_has,       name='thing_has',       doc="thing_has(thing, attribute) → boolean predicate, True if `thing` has “attribute” (in either `__dict__` or `__slots__`)")
 export(class_has,       name='class_has',       doc="class_has(cls, attribute) → boolean predicate, True if `cls` is a class type and has “attribute” (in either `__dict__` or `__slots__`)")

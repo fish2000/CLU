@@ -3,11 +3,9 @@ from __future__ import print_function
 
 import os
 
+from clu.abstract import AppName, Cloneable, ReprWrapper
 from clu.constants.consts import PROJECT_NAME, NoDefault
-from clu.config.abc import (NAMESPACE_SEP, AppName,
-                                           Cloneable,
-                                           ReprWrapper,
-                                           NamespacedMutableMapping)
+from clu.config.abc import NAMESPACE_SEP, NamespacedMutableMapping
 from clu.predicates import tuplize
 from clu.exporting import Slotted, Exporter
 

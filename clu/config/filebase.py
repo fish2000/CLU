@@ -8,8 +8,9 @@ import sys
 
 abstract = abc.abstractmethod
 
+from clu.abstract import AppName
 from clu.constants.enums import System, SYSTEM
-from clu.config.abc import AppName, NamespacedMutableMapping
+from clu.config.abc import NamespacedMutableMapping
 from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import TypeLocker, TemporaryName, Directory
 from clu.fs.misc import filesize

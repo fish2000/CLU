@@ -233,6 +233,11 @@ class ModuleBase(Package, Registry, metaclass=NonSlotted):
         from “clu.app”, á la:
             
             from clu.app import class_based_module
+        
+        Note that class-based modules are forbidden from using
+        the “__slots__” class attribute – the module class’ metaclass
+        will remove any __slots__ it encounters, in fact, so don’t
+        even bother with ’em.
     """
     
     appname = None

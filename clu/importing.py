@@ -130,6 +130,13 @@ class ModuleSpec(importlib.machinery.ModuleSpec):
                                          is_package=True)
 
 @export
+class Package(types.Module):
+    
+    def __init__(self, name, doc=None, path=None):
+        super(Package, self).__init__(name, doc)
+        self.__path__ = path or []
+
+@export
 class FinderBase(AppName, importlib.abc.MetaPathFinder):
     
     """ The base class for all class-based module finders.
@@ -151,13 +158,6 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
         if Registry.has_appname(cls.appname):
             return ModuleSpec(fullname, cls.loader)
         return None
-
-@export
-class Package(types.Module):
-    
-    def __init__(self, name, doc=None, path=None):
-        super(Package, self).__init__(name, doc)
-        self.__path__ = path or []
 
 @export
 class LoaderBase(AppName, importlib.abc.Loader):
@@ -208,7 +208,7 @@ class LoaderBase(AppName, importlib.abc.Loader):
 DO_NOT_INCLUDE = { '__abstractmethods__', '_abc_impl' }
 
 @export
-class ModuleBase(types.Module, Registry, metaclass=NonSlotted):
+class ModuleBase(Package, Registry, metaclass=NonSlotted):
     
     """ The base class for all class-based modules.
         
@@ -245,7 +245,6 @@ class ModuleBase(types.Module, Registry, metaclass=NonSlotted):
         if self.namespace:
             qualified_name = dotpath_join(self.namespace, name)
         super(ModuleBase, self).__init__(qualified_name or name, doc)
-        self.__path__ = [] # All class-based modules are packages
     
     @property
     def name(self):

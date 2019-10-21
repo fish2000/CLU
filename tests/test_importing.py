@@ -109,5 +109,9 @@ class TestImporting(object):
             assert attname not in dir(derived)
         
         assert derived.iheard() == 'I heard you like'
+        
+        from clu.app.Derived import iheard
+        
+        assert iheard() == 'I heard you like'
     
     

@@ -11,6 +11,7 @@ import importlib.abc
 import importlib.machinery
 import sys
 import weakref
+import zict
 
 from clu.constants.consts import PROJECT_NAME, QUALIFIER
 from clu.abstract import NonSlotted, AppName
@@ -141,7 +142,13 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
         an “appname” – the name of the app. Q.v. the function
         “initialize_types(…)” sub. to easily set these up for
         your own app.
+        
+        The method “FinderBase.find_spec(…)” caches returned
+        instances of “ModuleSpec” using a ‘zict.LRU’ buffer.
     """
+    
+    specs = {}
+    cache = zict.LRU(64, specs)
     
     @classmethod
     def find_spec(cls, fullname, path=None, target=None):
@@ -151,8 +158,16 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
         # “from appname.appspace.xxx import xxx” would fail
         # when the method was called unbound-method-style
         # with classes like 'str' …?!
+        if fullname in cls.cache:
+            return cls.cache[fullname]
         if cls.appname == fullname.split(QUALIFIER).pop(0):
-            return ModuleSpec(fullname, cls.loader)
+            out = cls.cache[fullname] = ModuleSpec(fullname, cls.loader)
+            return out
+        return None
+    
+    @classmethod
+    def invalidate_caches(cls):
+        cls.cache.clear()
         return None
 
 @export

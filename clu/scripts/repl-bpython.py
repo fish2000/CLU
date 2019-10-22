@@ -68,6 +68,12 @@ from clu.extending import (Extensible,
                            DoubleDutchRegistry, doubledutch,
                            DoubleDutchFunction)
 
+from clu.importing import (Module, Finder, Loader,
+                           initialize_types,
+                           ModuleBase, FinderBase, LoaderBase,
+                           Package, ModuleSpec,
+                           Registry as ClassModuleRegistry)
+
 from clu.sanitizer import sanitize, sanitizers, utf8_encode, utf8_decode
 from clu.version import version_info
 
@@ -310,6 +316,11 @@ __all__ = ('Image',
            'pairtype', 'ΩΩ', 'pairmro', 'ω', 'pair', 'Ω',
            'DoubleDutchRegistry', 'doubledutch',
            'DoubleDutchFunction',
+           'Module', 'Finder', 'Loader',
+           'initialize_types',
+           'ModuleBase', 'FinderBase', 'LoaderBase',
+           'Package', 'ModuleSpec',
+           'ClassModuleRegistry',
            'negate',
            'ismetaclass', 'isclass', 'isclasstype',
            'metaclass', 'typeof',

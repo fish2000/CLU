@@ -268,18 +268,19 @@ class MetaModule(MetaRegistry):
         # If an appname is defined, try to install
         # an instance of the appropriate Exporter:
         if cls.appname is not None and name != 'Module':
-            ExporterClass = ExporterRegistry[cls.appname]
-            qualified_name = dotpath_join(cls.appname,
-                                          cls.appspace,
-                                getpyattr(cls, 'name'))
-            exporter_instance = ExporterClass(dotpath=qualified_name)
-            cls.exporter = exporter_instance
-            
-            # Invoke all of our argument sinks against the
-            # Exporter instance’s “export(…)” function:
-            sinks = getattr(deferred_export, 'sinks', [])
-            for sink in sinks:
-                sink(cls.exporter.export)
+            if ExporterRegistry.has_appname(cls.appname):
+                ExporterClass = ExporterRegistry[cls.appname]
+                qualified_name = dotpath_join(cls.appname,
+                                              cls.appspace,
+                                    getpyattr(cls, 'name'))
+                exporter_instance = ExporterClass(dotpath=qualified_name)
+                cls.exporter = exporter_instance
+                
+                # Invoke all of our argument sinks against the
+                # Exporter instance’s “export(…)” function:
+                sinks = getattr(deferred_export, 'sinks', [])
+                for sink in sinks:
+                    sink(cls.exporter.export)
         
         # Return the new module class:
         return cls

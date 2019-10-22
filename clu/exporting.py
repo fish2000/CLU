@@ -405,6 +405,11 @@ class Registry(abc.ABC, metaclass=Slotted):
             raise TypeError("class registry access by string keys only")
         return classes[appname]
     
+    @staticmethod
+    def has_appname(appname):
+        """ Check to see if a given appname has a registered subclass """
+        return (appname in appnames) and (appname in classes)
+    
     @classmethod
     def __class_getitem__(cls, key):
         """ Return a specific registered class from the registry,

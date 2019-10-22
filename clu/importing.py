@@ -242,17 +242,21 @@ class ArgumentSink(object):
             >>> sink = ArgumentSink('yo', 'dogg', iheard="you like")
             >>> assert sink.args == ('yo', 'dogg')
             >>> assert sink.kwargs == dict(iheard="you like")
-            >>> sink(stringify) # prints “str(iheard=you like) @ 0x10bd8a4b0”
+            >>> sink(stringify) # prints “str(iheard=you like) @ 0x10bd”
     """
     __slots__ = ('args', 'kwargs')
     
     def __init__(self, *args, **kwargs):
-        """ Initialize an ArgumentSink, with arbitrary positional and/or keyword arguments """
+        """ Initialize an ArgumentSink, with arbitrary positional
+            and/or keyword arguments
+        """
         self.args = args
         self.kwargs = kwargs
     
     def __call__(self, function):
-        """ Apply the sinks’ arguments to a function – or any callable – returning the result """
+        """ Apply the sinks’ arguments to a function – or, indeed,
+            any callable – returning the result
+        """
         return function(*self.args, **self.kwargs)
 
 class MetaModule(MetaRegistry):

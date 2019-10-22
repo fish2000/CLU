@@ -2,12 +2,12 @@
 from __future__ import print_function
 
 import re
+import collections.abc
 
 from clu.constants.consts import SEPARATOR_WIDTH, pytuple, NoDefault
-from clu.constants.polyfills import MutableMapping, HashableABC
+from clu.predicates import ismergeable
 from clu.dicts import merge_two, asdict
 from clu.naming import nameof
-from clu.predicates import ismergeable
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -16,7 +16,8 @@ export = exporter.decorator()
 # NAMESPACES: SimpleNamespace and Namespace
 
 @export
-class SimpleNamespace(HashableABC):
+class SimpleNamespace(collections.abc.Hashable,
+                      collections.abc.Iterable):
     
     """ Implementation courtesy this SO answer:
         • https://stackoverflow.com/a/37161391/298171
@@ -47,7 +48,8 @@ class SimpleNamespace(HashableABC):
                     tuple(self.__dict__.values()))
 
 @export
-class Namespace(SimpleNamespace, MutableMapping):
+class Namespace(SimpleNamespace,
+                collections.abc.MutableMapping):
     
     """ Namespace adds the `get(…)`, `__len__()`, `__contains__(…)`, `__getitem__(…)`,
         `__setitem__(…)`, `__add__(…)`, and `__bool__()` methods to its ancestor class

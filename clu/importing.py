@@ -493,8 +493,8 @@ def test():
         # pout.v(registry)
         # pout.v(Module.__dict__)
         
-        # pout.v(Registry.all_appnames())
-        # pout.v(Registry.all_modules())
+        pout.v(all_registered_appnames())
+        pout.v(all_registered_modules())
         
         m = Module(name=PROJECT_NAME)
         

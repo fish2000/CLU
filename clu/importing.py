@@ -56,18 +56,18 @@ class MetaRegistry(NonSlotted):
         return tuple(iterchain(modules.values() for modules in Registry.monomers.values()))
     
     @staticmethod
-    def has_appname(name):
+    def has_appname(appname):
         """ Check if a given app name has been registered """
-        return name in Registry.monomers
+        return appname in Registry.monomers
     
     @staticmethod
-    def for_appname(name):
+    def for_appname(appname):
         """ Return the module with the qualified registered module name """
-        if not name:
-            raise ValueError("name required")
-        if not isstring(name):
+        if not appname:
+            raise ValueError("appname required")
+        if not isstring(appname):
             raise TypeError("module registry access by string keys only")
-        return Registry.monomers[name]
+        return Registry.monomers[appname]
     
     def __getitem__(cls, key):
         """ Allows lookup of an app name through subscripting the Registry class """

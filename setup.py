@@ -90,7 +90,7 @@ try:
             '__version__.py')).read(),
             '__version__.py', 'exec'))
 except:
-    __version__ = '0.3.9'
+    __version__ = '0.4.0'
 
 # PROJECT DESCRIPTION
 LONG_DESCRIPTION = project_content('ABOUT.md')

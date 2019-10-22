@@ -15,11 +15,11 @@ import zict
 
 from clu.constants.consts import PROJECT_NAME, QUALIFIER
 from clu.abstract import NonSlotted, AppName
-from clu.predicates import attr, getpyattr, attr_search, mro
+from clu.predicates import getpyattr, attr, attr_search, mro
 from clu.naming import nameof, dotpath_split, dotpath_join
-from clu.typespace import types
+from clu.typespace import Namespace, types
 from clu.typology import isstring, subclasscheck
-from clu.exporting import Exporter
+from clu.exporting import ValueDescriptor, Registry as ExporterRegistry, Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -71,6 +71,17 @@ class MetaRegistry(NonSlotted):
     def __getitem__(cls, key):
         """ Allows lookup of an app name through subscripting the Registry class """
         return Registry.for_appname(key)
+    
+    @staticmethod
+    def unregister(appname, qualified_name):
+        """ Unregister a previously-registered per-appname class from the registry """
+        if Registry.has_appname(appname):
+            if qualified_name in Registry.monomers[appname]:
+                cls = Registry.monomers[appname].pop(qualified_name)
+                if hasattr(cls, 'exporter'):
+                    cls.exporter.unregister(qualified_name)
+                return bool(cls)
+        return False
 
 @export
 class Registry(abc.ABC, metaclass=MetaRegistry):
@@ -91,12 +102,9 @@ class Registry(abc.ABC, metaclass=MetaRegistry):
                                           cls.appspace,
                                 getpyattr(cls, 'name'))
             
-            # Raise if an existing module has that name:
-            if qualified_name in Registry.monomers[cls.appname]:
-                raise TypeError(f"module class already exists: {qualified_name}")
-            
-            # Register if the names are good
-            Registry.monomers[cls.appname][qualified_name] = cls
+            # Register if the names are good:
+            if qualified_name not in Registry.monomers[cls.appname]:
+                Registry.monomers[cls.appname][qualified_name] = cls
         
         # Call up:
         super(Registry, cls).__init_subclass__(**kwargs)
@@ -221,10 +229,65 @@ class LoaderBase(AppName, importlib.abc.Loader):
         out += ">"
         return out
 
-DO_NOT_INCLUDE = { '__abstractmethods__', '_abc_impl' }
+@export
+class ArgumentSink(object):
+    
+    __slots__ = ('args', 'kwargs')
+    
+    def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+    
+    def __call__(self, function):
+        return function(*self.args, **self.kwargs)
+
+class MetaModule(MetaRegistry):
+    
+    @classmethod
+    def __prepare__(metacls, name, bases, **kwargs):
+        
+        def deferred_export(thing, name=None, doc=None):
+            deferred_export.sinks.append(ArgumentSink(thing,
+                                                      name=name,
+                                                      doc=doc))
+            return thing
+        
+        deferred_export.sinks = []
+        return Namespace(export=deferred_export)
+    
+    def __new__(metacls, name, bases, attributes, **kwargs):
+        # Remove the deferred export function:
+        deferred_export = attributes.pop('export')
+        
+        # Call up, creating and initializing the module class:
+        cls = super(MetaRegistry, metacls).__new__(metacls, name,
+                                                            bases,
+                                                            dict(attributes),
+                                                          **kwargs)
+        
+        # If an appname is defined, try to install
+        # an instance of the appropriate Exporter:
+        if cls.appname is not None and name != 'Module':
+            ExporterClass = ExporterRegistry[cls.appname]
+            qualified_name = dotpath_join(cls.appname,
+                                          cls.appspace,
+                                getpyattr(cls, 'name'))
+            exporter_instance = ExporterClass(dotpath=qualified_name)
+            cls.exporter = exporter_instance
+            
+            # Invoke all of our argument sinks against the
+            # Exporter instance’s “export(…)” function:
+            sinks = getattr(deferred_export, 'sinks', [])
+            for sink in sinks:
+                sink(cls.exporter.export)
+        
+        # Return the new module class:
+        return cls
+
+DO_NOT_INCLUDE = { '__abstractmethods__', '_abc_impl', 'monomers' }
 
 @export
-class ModuleBase(Package, Registry, metaclass=NonSlotted):
+class ModuleBase(Package, Registry, metaclass=MetaModule):
     
     """ The base class for all class-based modules.
         
@@ -246,13 +309,17 @@ class ModuleBase(Package, Registry, metaclass=NonSlotted):
         even bother with ’em.
     """
     
+    # The appname and appspace default to None:
     appname = None
     appspace = None
+    
+    # Block access to the registry’s underlying data:
+    monomers = ValueDescriptor({})
     
     @classmethod
     def __init_subclass__(cls, appname=None, appspace=None, **kwargs):
         ancestors = mro(cls)
-        cls.appname  = appname  or attr_search('appname', *ancestors)
+        cls.appname  = appname  or attr_search('appname',  *ancestors)
         cls.appspace = appspace or attr_search('appspace', *ancestors)
         super(ModuleBase, cls).__init_subclass__(**kwargs)
     
@@ -261,8 +328,8 @@ class ModuleBase(Package, Registry, metaclass=NonSlotted):
             as specified and an optional docstring.
         """
         qualified_name = None
-        if self.namespace:
-            qualified_name = dotpath_join(self.namespace, name)
+        if self.prefix:
+            qualified_name = dotpath_join(self.prefix, name)
         super(ModuleBase, self).__init__(qualified_name or name, doc)
     
     @property
@@ -270,7 +337,7 @@ class ModuleBase(Package, Registry, metaclass=NonSlotted):
         return nameof(self)
     
     @property
-    def namespace(self):
+    def prefix(self):
         cls = type(self)
         if any(field is None for field in (cls.appname, cls.appspace)):
             if cls.appname:
@@ -281,10 +348,18 @@ class ModuleBase(Package, Registry, metaclass=NonSlotted):
         return dotpath_join(cls.appname,
                             cls.appspace)
     
+    @property
+    def qualname(self):
+        return dotpath_join(self.prefix,
+                            self.name)
+    
     def __dir__(self):
-        names = set().union(type(self).__dict__.keys(),
+        cls = type(self)
+        if hasattr(cls, 'exporter'):
+            return cls.exporter.dir_function()()
+        names = set().union(cls.__dict__.keys(),
                             super(ModuleBase, self).__dir__())
-        return list(names - DO_NOT_INCLUDE)
+        return sorted(list(names - DO_NOT_INCLUDE))
 
 @export
 def initialize_types(appname, appspace='app'):
@@ -383,7 +458,7 @@ def test():
         except AttributeError:
             pass
         else:
-            raise
+            pass
         
         pout.v(m.__dict__)
         
@@ -423,6 +498,14 @@ def test():
             """ I heard you like docstrings """
             
             yo = 'dogg'
+            
+            @export
+            def yodogg(self):
+                return "I heard you like"
+            
+            @export
+            def nodogg(self):
+                return None
         
         from clu.app import Derived as derived
         
@@ -439,6 +522,7 @@ def test():
             assert hasattr(derived, attname)
         
         pout.v(dir(derived))
+        pout.v(derived.exporter.exports())
         
         print("test_four(): PASSED")
     

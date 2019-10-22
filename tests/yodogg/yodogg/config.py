@@ -8,6 +8,8 @@ from clu.config.formats import JsonFileBase, TomlFileBase
 from clu.config.settings import Schema
 from clu.importing import initialize_types
 
+from .exporting import Exporter
+
 import sys
 from pprint import pprint
 pprint(sys.path)
@@ -16,8 +18,6 @@ appname = 'yodogg'
 Module, Finder, Loader = initialize_types(appname, 'modules')
 
 pprint(sys.meta_path)
-
-from .exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import pytest
+# import pytest
 
 class TestImporting(object):
     
@@ -19,9 +19,10 @@ class TestImporting(object):
         
         assert len(Registry.monomers) > 0
         
-        with pytest.raises(AttributeError) as exc:
-            assert len(m.monomers) == 0
-        assert "has no attribute" in str(exc.value)
+        # with pytest.raises(AttributeError) as exc:
+        #     assert len(m.monomers) == 0
+        # assert "has no attribute" in str(exc.value)
+        assert len(m.monomers) == 0
     
     def test_derived_modules(self):
         from clu.importing import ModuleBase, Module
@@ -91,39 +92,44 @@ class TestImporting(object):
         assert finder.loader.module_repr(module) == "<class-module ‘clu.app.findme’>"
     
     def test_derived_import(self):
-        from clu.importing import Module, DO_NOT_INCLUDE
+        from clu.importing import Module, Registry, DO_NOT_INCLUDE
         
-        class Derived(Module):
+        try:
+        
+            class Derived(Module):
+                
+                """ I heard you like docstrings """
+                
+                yo = 'dogg'
+                
+                def iheard(self):
+                    return "I heard you like"
             
-            """ I heard you like docstrings """
+            # Normally we’d just call the class “derived”, rather
+            # than “Derived” – in this case we need to differentiate
+            # betweeen the name of the defined class and the thing
+            # we imported within the same code block (normally they’d
+            # be in separate files):
+            from clu.app import Derived as derived
             
-            yo = 'dogg'
+            assert type(derived) is Derived
+            assert repr(derived) == "<class-module ‘clu.app.Derived’ from “clu.app”>"
+            assert derived.yo == 'dogg'
             
-            def iheard(self):
-                return "I heard you like"
+            for attname in dir(derived):
+                assert hasattr(derived, attname)
+            
+            for attname in DO_NOT_INCLUDE:
+                assert attname not in dir(derived)
+            
+            assert derived.iheard() == 'I heard you like'
+            
+            from clu.app.Derived import iheard
+            
+            assert iheard() == 'I heard you like'
         
-        # Normally we’d just call the class “derived”, rather
-        # than “Derived” – in this case we need to differentiate
-        # betweeen the name of the defined class and the thing
-        # we imported within the same code block (normally they’d
-        # be in separate files):
-        from clu.app import Derived as derived
-        
-        assert type(derived) is Derived
-        assert repr(derived) == "<class-module ‘clu.app.Derived’ from “clu.app”>"
-        assert derived.yo == 'dogg'
-        
-        for attname in dir(derived):
-            assert hasattr(derived, attname)
-        
-        for attname in DO_NOT_INCLUDE:
-            assert attname not in dir(derived)
-        
-        assert derived.iheard() == 'I heard you like'
-        
-        from clu.app.Derived import iheard
-        
-        assert iheard() == 'I heard you like'
+        finally:
+            Registry.unregister(derived.appname, derived.qualname)
     
     def test_initialize_types(self, dirname):
         from clu.fs import pypath
@@ -137,26 +143,32 @@ class TestImporting(object):
         # Bring in the package-specific Module subclass
         from yodogg.config import Module
         
-        class Derived(Module):
+        try:
             
-            """ I heard you like docstrings """
+            class Derived(Module):
+                
+                """ I heard you like docstrings """
+                
+                yo = 'dogg'
+                
+                def iheard(self):
+                    return "I heard you like"
             
-            yo = 'dogg'
+            from yodogg.modules import Derived as derived
             
-            def iheard(self):
-                return "I heard you like"
+            assert type(derived) is Derived
+            assert repr(derived) == "<class-module ‘yodogg.modules.Derived’ from “yodogg.modules”>"
+            assert derived.yo == 'dogg'
+            
+            for attname in dir(derived):
+                assert hasattr(derived, attname)
+            
+            assert derived.iheard() == 'I heard you like'
+            
+            from yodogg.modules.Derived import iheard
+            
+            assert iheard() == 'I heard you like'
         
-        from yodogg.modules import Derived as derived
-        
-        assert type(derived) is Derived
-        assert repr(derived) == "<class-module ‘yodogg.modules.Derived’ from “yodogg.modules”>"
-        assert derived.yo == 'dogg'
-        
-        for attname in dir(derived):
-            assert hasattr(derived, attname)
-        
-        assert derived.iheard() == 'I heard you like'
-        
-        from yodogg.modules.Derived import iheard
-        
-        assert iheard() == 'I heard you like'
+        finally:
+            from clu.importing import Registry
+            Registry.unregister(derived.appname, derived.qualname)

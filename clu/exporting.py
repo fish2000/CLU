@@ -466,7 +466,7 @@ class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
     
     __slots__ = pytuple('exports', 'weakref') + ('path', 'dotpath')
     
-    def __new__(cls, *args, path=None, **kwargs):
+    def __new__(cls, *args, path=None, dotpath=None, **kwargs):
         try:
             instance = super(ExporterBase, cls).__new__(cls, *args, **kwargs) # type: ignore
         except TypeError:
@@ -474,7 +474,8 @@ class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
         
         instance.__exports__ = {}
         instance.path = path
-        instance.dotpath = path_to_dotpath(path, relative_to=cls.prefix)
+        instance.dotpath = path_to_dotpath(path,
+             relative_to=cls.prefix) or dotpath
         
         if instance.dotpath is not None:
             cls.instances[instance.dotpath] = instance
@@ -547,7 +548,7 @@ class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
         """
         return search_modules(thing, *cls.modules().values())[0]
     
-    def __init__(self, *args, path=None, **kwargs):
+    def __init__(self, *args, path=None, dotpath=None, **kwargs):
         for arg in args:
             if hasattr(arg, '__exports__'):
                 self.__exports__.update(arg.__exports__)

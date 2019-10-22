@@ -46,16 +46,6 @@ class MetaRegistry(NonSlotted):
         return monomers
     
     @staticmethod
-    def all_appnames():
-        """ Return a tuple of strings, listing all registered app names """
-        return tuple(sorted(Registry.monomers.keys()))
-    
-    @staticmethod
-    def all_modules():
-        """ Return a tuple filled with instances of all registered class-based modules """
-        return tuple(iterchain(modules.values() for modules in Registry.monomers.values()))
-    
-    @staticmethod
     def has_appname(appname):
         """ Check if a given app name has been registered """
         return appname in Registry.monomers
@@ -83,6 +73,16 @@ class MetaRegistry(NonSlotted):
                     cls.exporter.unregister(qualified_name)
                 return bool(cls)
         return False
+
+@export
+def all_appnames():
+    """ Return a tuple of strings, listing all registered app names """
+    return tuple(sorted(Registry.monomers.keys()))
+
+@export
+def all_modules():
+    """ Return a tuple filled with instances of all registered class-based modules """
+    return tuple(iterchain(modules.values() for modules in Registry.monomers.values()))
 
 @export
 class Registry(abc.ABC, metaclass=MetaRegistry):

@@ -75,12 +75,12 @@ class MetaRegistry(NonSlotted):
         return False
 
 @export
-def all_appnames():
+def all_registered_appnames():
     """ Return a tuple of strings, listing all registered app names """
     return tuple(sorted(Registry.monomers.keys()))
 
 @export
-def all_modules():
+def all_registered_modules():
     """ Return a tuple filled with instances of all registered class-based modules """
     return tuple(iterchain(modules.values() for modules in Registry.monomers.values()))
 

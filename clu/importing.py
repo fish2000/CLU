@@ -19,7 +19,8 @@ from clu.predicates import getpyattr, attr, attr_search, mro
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.typespace import Namespace, types
 from clu.typology import isstring, subclasscheck
-from clu.exporting import ValueDescriptor, Registry as ExporterRegistry, Exporter
+from clu.exporting import Registry as ExporterRegistry
+from clu.exporting import ValueDescriptor, ExporterBase, Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -232,30 +233,72 @@ class LoaderBase(AppName, importlib.abc.Loader):
 @export
 class ArgumentSink(object):
     
+    """ ArgumentSink is a class that stores the arguments with
+        which it is initialized, for either later retrieval or
+        subsequent functional application.
+        
+        To wit:
+        
+            >>> sink = ArgumentSink('yo', 'dogg', iheard="you like")
+            >>> assert sink.args == ('yo', 'dogg')
+            >>> assert sink.kwargs == dict(iheard="you like")
+            >>> sink(stringify) # prints “str(iheard=you like) @ 0x10bd8a4b0”
+    """
     __slots__ = ('args', 'kwargs')
     
     def __init__(self, *args, **kwargs):
+        """ Initialize an ArgumentSink, with arbitrary positional and/or keyword arguments """
         self.args = args
         self.kwargs = kwargs
     
     def __call__(self, function):
+        """ Apply the sinks’ arguments to a function – or any callable – returning the result """
         return function(*self.args, **self.kwargs)
 
 class MetaModule(MetaRegistry):
     
+    """ A metaclass for class-module subclasses.
+        
+        This metaclass inherits from the private MetaRegistry
+        metaclass, by necessity – like its ancestor, it’s a
+        private resource and would be of questionable value
+        to CLU users if exported.
+        
+        MetaModule defines “__prepare__” and “__new__” metaclass
+        methods typical of many metaclasses. Specifically, the
+        “__prepare__” method is used to inject a specialized
+        version of the familiar “@export” decorator, which, when
+        used in class-body definition namespaces, will export
+        things so decorated via a custom behind-the-scenes employ
+        of the “clu.exporting” machinery.
+    """
+    
     @classmethod
     def __prepare__(metacls, name, bases, **kwargs):
-        
+        """ Prepare the class-module namespace with an injected
+            “@export” decorator
+        """
+        # Define a deferred export function, utilizing
+        # a private list of ArgumentSink instances:
         def deferred_export(thing, name=None, doc=None):
             deferred_export.sinks.append(ArgumentSink(thing,
                                                       name=name,
                                                       doc=doc))
             return thing
         
+        # Set attributes:
         deferred_export.sinks = []
+        deferred_export.__doc__ = ExporterBase.export.__doc__
+        
+        # Return a new Namespace with the deferred export function
+        # defined as “export”:
         return Namespace(export=deferred_export)
     
     def __new__(metacls, name, bases, attributes, **kwargs):
+        """ Create a new class-module subclass, expanding any
+            deferred export directives embedded in the class-module
+            definition’s namespace
+        """
         # Remove the deferred export function:
         deferred_export = attributes.pop('export')
         
@@ -273,13 +316,11 @@ class MetaModule(MetaRegistry):
                 qualified_name = dotpath_join(cls.appname,
                                               cls.appspace,
                                     getpyattr(cls, 'name'))
-                exporter_instance = ExporterClass(dotpath=qualified_name)
-                cls.exporter = exporter_instance
+                cls.exporter = ExporterClass(dotpath=qualified_name)
                 
                 # Invoke all of our argument sinks against the
                 # Exporter instance’s “export(…)” function:
-                sinks = getattr(deferred_export, 'sinks', [])
-                for sink in sinks:
+                for sink in getattr(deferred_export, 'sinks', []):
                     sink(cls.exporter.export)
         
         # Return the new module class:

@@ -129,6 +129,7 @@ class TestImporting(object):
             assert iheard() == 'I heard you like'
         
         finally:
+            
             Registry.unregister(derived.appname, derived.qualname)
     
     def test_initialize_types(self, dirname):
@@ -170,5 +171,69 @@ class TestImporting(object):
             assert iheard() == 'I heard you like'
         
         finally:
+            
             from clu.importing import Registry
+            Registry.unregister(derived.appname, derived.qualname)
+    
+    def test_derived_import_with_export(self):
+        from clu.importing import Module, Registry, DO_NOT_INCLUDE
+        from clu.exporting import Exporter
+        export = None # SHUT UP, PYFLAKES!!
+        
+        try:
+        
+            class AnotherDerived(Module):
+                
+                """ I heard you like docstrings """
+                
+                yo = 'dogg'
+                
+                @export
+                def iheard(self):
+                    return "I heard"
+                
+                @export
+                def youlike(self):
+                    return "you like"
+                
+                def unexported(self):
+                    return "conditionally exporting things"
+            
+            # Normally we’d just call the class “derived”, rather
+            # than “Derived” – in this case we need to differentiate
+            # betweeen the name of the defined class and the thing
+            # we imported within the same code block (normally they’d
+            # be in separate files):
+            from clu.app import AnotherDerived as derived
+            
+            assert type(derived) is AnotherDerived
+            assert repr(derived) == "<class-module ‘clu.app.AnotherDerived’ from “clu.app”>"
+            assert derived.yo == 'dogg'
+            
+            assert type(derived.exporter) is Exporter
+            assert len(derived.exporter) == len(dir(derived))
+            assert derived.exporter.dotpath == derived.qualname
+            
+            durr = dir(derived)
+            assert 'iheard' in durr
+            assert 'youlike' in durr
+            assert 'unexported' not in durr
+            
+            for attname in dir(derived):
+                assert hasattr(derived, attname)
+            
+            for attname in DO_NOT_INCLUDE:
+                assert attname not in dir(derived)
+            
+            assert derived.iheard() == 'I heard'
+            assert derived.youlike() == 'you like'
+            assert derived.unexported() == 'conditionally exporting things'
+            
+            from clu.app.AnotherDerived import iheard, youlike
+            
+            assert iheard() == 'I heard'
+            assert youlike() == 'you like'
+        
+        finally:
+            
             Registry.unregister(derived.appname, derived.qualname)

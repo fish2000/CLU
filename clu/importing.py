@@ -13,9 +13,9 @@ import sys
 import weakref
 import zict
 
-from clu.constants.consts import PROJECT_NAME, QUALIFIER
+from clu.constants.consts import PROJECT_NAME, QUALIFIER, NoDefault
 from clu.abstract import NonSlotted, AppName
-from clu.predicates import getpyattr, attr, attr_search, mro, union
+from clu.predicates import getpyattr, attr, attr_search, mro, newtype, union
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.typespace import Namespace, types
 from clu.typology import isstring, subclasscheck
@@ -304,7 +304,7 @@ class MetaModule(MetaRegistry):
             definition’s namespace
         """
         # Remove the deferred export function:
-        deferred_export = attributes.pop('export')
+        deferred_export = attributes.pop('export', None)
         
         # Call up, creating and initializing the module class:
         cls = super(MetaRegistry, metacls).__new__(metacls, name,
@@ -441,6 +441,45 @@ def initialize_types(appname, appspace='app'):
 
 Module, Finder, Loader = initialize_types(PROJECT_NAME)
 
+@export
+class SubModule(object):
+    
+    """ A context manager that creates a temporary
+        class-module subclass on enter, and unregisters
+        the temporary subclass on exit. Handy for testing.
+    """
+    
+    __slots__ = ('ModuleClass',
+                 'ModuleSubclass',
+                 'name', 'appname', 'appspace')
+    
+    def __init__(self, name='ModuleSubclass', ModuleClass=NoDefault):
+        """ Initializes a SubModule context manager with a given
+            module class (defaults to “clu.importing.Module”).
+        """
+        if not name:
+            raise TypeError("a name is required")
+        if ModuleClass in (None, NoDefault):
+            ModuleClass = Module
+        self.ModuleClass = ModuleClass
+        self.name = name
+        self.appname = ModuleClass.appname
+        self.appspace = ModuleClass.appspace
+    
+    def __enter__(self):
+        """ Create and return the temporary class-module subclass """
+        self.ModuleSubclass = newtype(self.name, self.ModuleClass)
+        return self.ModuleSubclass
+    
+    def __exit__(self, exc_type=None, exc_val=None, exc_tb=None):
+        """ Unregister the temporary class-module subclass """
+        qualified_name = dotpath_join(self.appname,
+                                      self.appspace,
+                               nameof(self.ModuleSubclass))
+        Registry.unregister(self.appname,
+                            qualified_name)
+        return exc_type is None
+
 export(Module, name='Module')
 export(Finder, name='Finder')
 export(Loader, name='Loader')
@@ -571,12 +610,28 @@ def test():
         
         assert type(derived.exporter).__name__ == 'Exporter'
     
+    @inline
+    def test_five():
+        
+        before = all_registered_modules()
+        
+        with SubModule('derived_module') as DerivedModule:
+            from clu.app import derived_module as derived
+            
+            assert type(derived) is DerivedModule
+            assert type(derived.exporter).__name__ == 'Exporter'
+            assert len(all_registered_modules()) == len(before) + 1
+        
+        after = all_registered_modules()
+        assert before == after
+    
     # Run all tests:
     test_one()
     test_two()
     test_three()
     three_and_a_half()
     test_four()
+    test_five()
 
 if __name__ == '__main__':
     test()

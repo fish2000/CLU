@@ -199,6 +199,8 @@ origin      = lambda thing: dunder_or(typeof(thing), 'origin')
 isancestor  = lambda cls, ancestor=object: isclasstype(cls) and (ancestor in mro(cls))
 isorigin    = lambda cls, original=object: isclasstype(cls) and isancestor(origin(cls), typeof(original))
 
+newtype     = lambda name, *bases, **attributes: type(name, tuple(bases) or (object,), dict(attributes))
+
 # ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)
 
@@ -490,6 +492,7 @@ export(unwrap,          name='unwrap',          doc="unwrap(thing) → Return ei
 export(origin,          name='origin',          doc="origin(thing) → Return either `typeof(thing).__origin__` or `typeof(thing)` for a given `thing`")
 export(isancestor,      name='isancestor',      doc="isancestor(thing, ancestor=object) → boolean predicate, True if `ancestor` is found in “mro(thing)”")
 export(isorigin,        name='isorigin',        doc="isorigin(thing, original=object) → boolean predicate, True if `original` is an ancestor of “origin(thing)”")
+export(newtype,         name='newtype',         doc="newtype(name, *bases, **attributes) → Shortcut for “type(name, tuple(bases) or (object,), dict(attributes))”")
 
 export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns `None`")
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns `None`")

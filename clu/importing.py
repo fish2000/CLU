@@ -15,7 +15,7 @@ import zict
 
 from clu.constants.consts import PROJECT_NAME, QUALIFIER
 from clu.abstract import NonSlotted, AppName
-from clu.predicates import getpyattr, attr, attr_search, mro
+from clu.predicates import getpyattr, attr, attr_search, mro, union
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.typespace import Namespace, types
 from clu.typology import isstring, subclasscheck
@@ -403,8 +403,8 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         cls = type(self)
         if hasattr(cls, 'exporter'):
             return cls.exporter.dir_function()()
-        names = set().union(cls.__dict__.keys(),
-                            super(ModuleBase, self).__dir__())
+        names = union(cls.__dict__.keys(),
+                      super(ModuleBase, self).__dir__())
         return sorted(list(names - DO_NOT_INCLUDE))
 
 @export

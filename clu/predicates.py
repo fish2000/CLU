@@ -377,6 +377,12 @@ def listify(*items):
     """ listify(*items) → Return a new list containing all non-`None` arguments """
     return [item for item in items if item is not None]
 
+@export
+@itervariadic
+def union(*items):
+    """ union(*items) → Return the set-union of the contents of all non-`None` arguments """
+    return set().union(item for item in items if item is not None)
+
 # UTILITY FUNCTIONS: helpers for builtin predicate functions over iterables:
 
 @export

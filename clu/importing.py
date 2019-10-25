@@ -625,6 +625,21 @@ def test():
         after = all_registered_modules()
         assert before == after
     
+    @inline
+    def test_six():
+        
+        before = all_registered_modules()
+        
+        with SubModule('derived_module') as DerivedModule:
+            derived = importlib.import_module('clu.app.derived_module')
+            
+            # assert type(derived) is DerivedModule ????
+            assert type(derived.exporter).__name__ == 'Exporter'
+            assert len(all_registered_modules()) == len(before) + 1
+        
+        after = all_registered_modules()
+        assert before == after
+    
     # Run all tests:
     test_one()
     test_two()
@@ -632,6 +647,7 @@ def test():
     three_and_a_half()
     test_four()
     test_five()
+    test_six()
 
 if __name__ == '__main__':
     test()

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from functools import wraps
 
-from clu.constants.consts import DEBUG
+from clu.constants.consts import (DEBUG, QUALIFIER,
+                                  SEPARATOR_WIDTH,
+                                  TEXTMATE)
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -21,6 +24,66 @@ def countfiles(target, suffix=None):
     for root, dirs, files in target.walk():
         count += len(tuple(filter(searcher, files)))
     return count
+
+WIDTH = TEXTMATE and max(SEPARATOR_WIDTH, 100) or SEPARATOR_WIDTH
+asterisks = lambda filler='*': print(filler * WIDTH)
+printout = lambda name, value: print("» %25s : %s" % (name, value))
+
+@export
+def inline(function):
+    """ Function decorator for an individual inline test. Example usage:
+            
+            def test():
+                
+                @inline
+                def test_one():
+                    # ...
+                
+                @inline
+                def test_two():
+                    # ...
+            
+            test_one()
+            test_two()
+            
+            if __name__ == '__main__':
+                test()
+    """
+    from clu.naming import nameof
+    from pprint import pprint
+    import time
+    
+    # Get the name of the decorated function:
+    name = nameof(function, default='<unnamed>')
+    
+    @wraps(function)
+    def test_wrapper(*args, **kwargs):
+        # Print header:
+        print()
+        print(f"TESTING: “{name}”")
+        asterisks('-')
+        print()
+        
+        # Run the wrapped function, timing it:
+        t1 = time.time()
+        out = function(*args, **kwargs)
+        t2 = time.time()
+        dt = str((t2 - t1) * 1.00)
+        dtout = dt[:(dt.find(QUALIFIER) + 4)]
+        
+        # Print the results and execution time:
+        asterisks('-')
+        if out is not None:
+            print("RESULTS:")
+            pprint(out)
+        print(f"Test function “{name}” ran in {dtout}s")
+        asterisks('=')
+        
+        # Return as per the decorated function:
+        return out
+    
+    # Return the test wrapper function:
+    return test_wrapper
 
 @export
 def stdpout():

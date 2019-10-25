@@ -83,7 +83,7 @@ class functional_set(FlatOrderedSet,
             each function in turn, and finally returning the last return value
             once the sequence of functions has been exhausted.
         """
-        for function in reversed(filter(isnotnone, self)):
+        for function in reversed(tuple(filter(isnotnone, self))):
             if function is not None:
                 thing = function(thing)
         return thing

@@ -222,8 +222,9 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     from clu.config.abc import FlatOrderedSet as FOSet
     from clu.config.abc import NamespacedMutableMapping as NaMutMap
-    from clu.testing.utils import pout
+    from clu.testing.utils import pout, inline
     
+    @inline
     def test_one():
         pair = []
         product = []
@@ -247,10 +248,8 @@ def test():
         assert sorted(pair, key=retros) == sorted(product, key=retros)
         assert sorted(pair) == sorted(product)
         assert pair == product
-        
-        print()
-        print("PASSED: test_one()")
     
+    @inline
     def test_two():
         pairs    = list(ω(FOSet, NaMutMap))
         products = list(dot_product(FOSet.mro(), NaMutMap.mro()))
@@ -260,10 +259,8 @@ def test():
         print("PRODUCTS »", len(products))
         
         assert set(pairs) == set(products) # REALLY.
-        
-        print()
-        print("PASSED: test_two()")
     
+    @inline
     def test_three():
         
         class __extend__(ΩΩ(int, int)): # type: ignore
@@ -285,20 +282,16 @@ def test():
                 return f"{ns}:{key}"
         
         assert Ω('yo', 'dogg').pack() == "yo:dogg"
-        
-        print()
-        print("PASSED: test_three()")
     
+    @inline
     def test_four():
         print()
         
         pout.v(__all__)
         pout.v(__dir__())
         pout.v(exporter)
-        
-        print()
-        print("PASSED: test_four()")
     
+    @inline
     def test_five():
         print()
         
@@ -325,9 +318,6 @@ def test():
         
         print()
         print("REGISTRY »", repr(yodogg.registry))
-        
-        print()
-        print("PASSED: test_five()")
     
     # Run aggregate inline tests:
     test_one()

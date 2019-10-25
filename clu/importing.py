@@ -450,8 +450,9 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     
-    from clu.testing.utils import pout
+    from clu.testing.utils import inline, pout
     
+    @inline
     def test_one():
         
         m = Module(name=PROJECT_NAME)
@@ -462,9 +463,8 @@ def test():
         assert nameof(m) == PROJECT_NAME
         print(nameof(m))
         print(m.__name__)
-        
-        print("test_one(): PASSED")
     
+    @inline
     def test_two():
         
         class OtherModule(ModuleBase):
@@ -483,9 +483,8 @@ def test():
         assert o
         assert d
         assert O
-        
-        print("test_two(): PASSED")
     
+    @inline
     def test_three():
         assert pout
         
@@ -514,9 +513,8 @@ def test():
         assert nameof(m) == PROJECT_NAME
         
         pout.v(mro(m))
-        
-        print("test_three(): PASSED")
     
+    @inline
     def three_and_a_half():
         finder = Finder()
         assert type(finder.loader) is Loader
@@ -534,9 +532,8 @@ def test():
         assert type(module) is FindMe
         
         pout.v(mro(finder))
-        
-        print("three_and_a_half(): PASSED")
     
+    @inline
     def test_four():
         
         class Derived(Module):
@@ -569,8 +566,6 @@ def test():
         
         pout.v(dir(derived))
         pout.v(derived.exporter.exports())
-        
-        print("test_four(): PASSED")
     
     # Run all tests:
     test_one()

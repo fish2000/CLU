@@ -411,6 +411,7 @@ def test():
     from clu.config.formats import JsonFile
     from clu.fs.filesystem import TemporaryName
     from clu.repl.ansi import print_separator, print_ansi_centered, ANSIFormat
+    from clu.testing.utils import inline
     from pprint import pprint
     
     nullformat = ANSIFormat.null()
@@ -432,6 +433,7 @@ def test():
             youlike = fields.String("you like:")
             andalso = fields.Tuple(value=fields.String("«also»", allow_none=False))
     
+    @inline
     def test_one():
         
         instance = MySchema()
@@ -513,6 +515,7 @@ def test():
         print()
         # print_separator()
     
+    @inline
     def test_two():
         print_separator(filler='•')
         print_ansi_centered("TEST TWO", color=nullformat)

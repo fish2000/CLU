@@ -9,6 +9,7 @@ import abc
 import importlib
 import importlib.abc
 import importlib.machinery
+import pkgutil
 import sys
 import weakref
 import zict
@@ -85,6 +86,13 @@ def all_registered_modules():
     return tuple(iterchain(modules.values() for modules in Registry.monomers.values()))
 
 @export
+def modules_for_appname(appname):
+    """ Return a tuple filled with instances of an apps’ registered class-based modules """
+    if appname not in Registry.monomers:
+        return tuple()
+    return tuple(Registry.monomers[appname].values())
+
+@export
 class Registry(abc.ABC, metaclass=MetaRegistry):
     
     """ The Registry mixin handles the registration of all
@@ -93,19 +101,16 @@ class Registry(abc.ABC, metaclass=MetaRegistry):
     
     @classmethod
     def __init_subclass__(cls, **kwargs):
-        """ Properly set the “appname” and “appspace” class attributes
-            on registered class-based module subclasses
+        """ If the qualified name of this class is not yet registered,
+            then register it – store a weakref to it in the per-appname
+            dictionary, indexed by the qualified name.
         """
         # We were called with a class for which the values
         # of appname, appspace, and __name__ have been assigned:
         if cls.appname and cls.appspace and nameof(cls):
-            qualified_name = dotpath_join(cls.appname,
-                                          cls.appspace,
-                                getpyattr(cls, 'name'))
-            
             # Register if the names are good:
-            if qualified_name not in Registry.monomers[cls.appname]:
-                Registry.monomers[cls.appname][qualified_name] = cls
+            if cls.qualname not in Registry.monomers[cls.appname]:
+                Registry.monomers[cls.appname][cls.qualname] = cls
         
         # Call up:
         super(Registry, cls).__init_subclass__(**kwargs)
@@ -173,6 +178,20 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
             out = cls.cache[fullname] = ModuleSpec(fullname, cls.loader)
             return out
         return None
+    
+    @classmethod
+    def iter_modules(cls):
+        """ This “non-standard API method”§ yields ‘pkgutil.ModuleInfo’
+            instances for each registered class-module in the finder
+            subclasses’ given app.
+            
+            § q.v. boxed notation sub., Python documentation,
+              https://docs.python.org/3/library/pkgutil.html#pkgutil.iter_modules
+        """
+        yield from (pkgutil.ModuleInfo(cls,
+                                       module.qualname,
+                                       ispkg=True) \
+                    for module in modules_for_appname(cls.appname))
     
     @classmethod
     def invalidate_caches(cls):
@@ -277,6 +296,26 @@ class MetaModule(MetaRegistry):
         of the “clu.exporting” machinery.
     """
     
+    @property
+    def name(cls):
+        return nameof(cls)
+    
+    @property
+    def prefix(cls):
+        if any(field is None for field in (cls.appname, cls.appspace)):
+            if cls.appname:
+                return cls.appname
+            if cls.appspace:
+                return cls.appspace
+            return None
+        return dotpath_join(cls.appname,
+                            cls.appspace)
+    
+    @property
+    def qualname(cls):
+        return dotpath_join(cls.prefix,
+                            cls.name)
+    
     @classmethod
     def __prepare__(metacls, name, bases, **kwargs):
         """ Prepare the class-module namespace with an injected
@@ -317,10 +356,7 @@ class MetaModule(MetaRegistry):
         if cls.appname is not None and name != 'Module':
             if ExporterRegistry.has_appname(cls.appname):
                 ExporterClass = ExporterRegistry[cls.appname]
-                qualified_name = dotpath_join(cls.appname,
-                                              cls.appspace,
-                                    getpyattr(cls, 'name'))
-                cls.exporter = ExporterClass(dotpath=qualified_name)
+                cls.exporter = ExporterClass(dotpath=cls.qualname)
                 
                 # Invoke all of our argument sinks against the
                 # Exporter instance’s “export(…)” function:
@@ -364,6 +400,9 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
     
     @classmethod
     def __init_subclass__(cls, appname=None, appspace=None, **kwargs):
+        """ Properly set the “appname” and “appspace” class attributes
+            on any registered class-based module subclasses.
+        """
         ancestors = mro(cls)
         cls.appname  = appname  or attr_search('appname',  *ancestors)
         cls.appspace = appspace or attr_search('appspace', *ancestors)
@@ -384,20 +423,11 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
     
     @property
     def prefix(self):
-        cls = type(self)
-        if any(field is None for field in (cls.appname, cls.appspace)):
-            if cls.appname:
-                return cls.appname
-            if cls.appspace:
-                return cls.appspace
-            return None
-        return dotpath_join(cls.appname,
-                            cls.appspace)
+        return type(self).prefix
     
     @property
     def qualname(self):
-        return dotpath_join(self.prefix,
-                            self.name)
+        return type(self).qualname
     
     def __dir__(self):
         cls = type(self)
@@ -490,6 +520,7 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline, pout
+    from pprint import pprint
     
     @inline
     def test_one():
@@ -633,7 +664,11 @@ def test():
         with SubModule('derived_module') as DerivedModule:
             derived = importlib.import_module('clu.app.derived_module')
             
-            # assert type(derived) is DerivedModule ????
+            # assert type(derived) is DerivedModule
+            print(type(DerivedModule))
+            print(DerivedModule)
+            print(type(derived))
+            pprint(mro(derived))
             assert type(derived.exporter).__name__ == 'Exporter'
             assert len(all_registered_modules()) == len(before) + 1
         

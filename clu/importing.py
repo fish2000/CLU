@@ -479,9 +479,7 @@ class SubModule(object):
         the temporary subclass on exit. Handy for testing.
     """
     
-    __slots__ = ('ModuleClass',
-                 'ModuleSubclass',
-                 'name', 'appname', 'appspace')
+    __slots__ = ('ModuleClass', 'ModuleSubclass', 'name')
     
     def __init__(self, name='ModuleSubclass', ModuleClass=NoDefault):
         """ Initializes a SubModule context manager with a given
@@ -493,8 +491,6 @@ class SubModule(object):
             ModuleClass = Module
         self.ModuleClass = ModuleClass
         self.name = name
-        self.appname = ModuleClass.appname
-        self.appspace = ModuleClass.appspace
     
     def __enter__(self):
         """ Create and return the temporary class-module subclass """
@@ -503,11 +499,8 @@ class SubModule(object):
     
     def __exit__(self, exc_type=None, exc_val=None, exc_tb=None):
         """ Unregister the temporary class-module subclass """
-        qualified_name = dotpath_join(self.appname,
-                                      self.appspace,
-                               nameof(self.ModuleSubclass))
-        Registry.unregister(self.appname,
-                            qualified_name)
+        Registry.unregister(self.ModuleSubclass.appname,
+                            self.ModuleSubclass.qualname)
         return exc_type is None
 
 export(Module, name='Module')

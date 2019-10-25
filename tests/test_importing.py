@@ -198,6 +198,8 @@ class TestImporting(object):
                 
                 def unexported(self):
                     return "conditionally exporting things"
+                
+                export(yo, name='yo')
             
             # Normally we’d just call the class “derived”, rather
             # than “Derived” – in this case we need to differentiate
@@ -215,6 +217,7 @@ class TestImporting(object):
             assert derived.exporter.dotpath == derived.qualname
             
             durr = dir(derived)
+            assert 'yo' in durr
             assert 'iheard' in durr
             assert 'youlike' in durr
             assert 'unexported' not in durr
@@ -229,8 +232,9 @@ class TestImporting(object):
             assert derived.youlike() == 'you like'
             assert derived.unexported() == 'conditionally exporting things'
             
-            from clu.app.AnotherDerived import iheard, youlike
+            from clu.app.AnotherDerived import yo, iheard, youlike
             
+            assert yo == 'dogg'
             assert iheard() == 'I heard'
             assert youlike() == 'you like'
         

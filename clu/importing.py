@@ -549,6 +549,8 @@ def test():
             @export
             def nodogg(self):
                 return None
+            
+            export(yo, name='yo')
         
         from clu.app import Derived as derived
         

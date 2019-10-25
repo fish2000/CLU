@@ -626,7 +626,6 @@ def test():
         # pout.v(derived.__dict__.keys())
         
         for attname in dir(derived):
-            # assert or_none(derived, attname) is not None
             assert hasattr(derived, attname)
         
         pout.v(dir(derived))

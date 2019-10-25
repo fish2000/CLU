@@ -568,6 +568,8 @@ def test():
         
         pout.v(dir(derived))
         pout.v(derived.exporter.exports())
+        
+        assert type(derived.exporter).__name__ == 'Exporter'
     
     # Run all tests:
     test_one()

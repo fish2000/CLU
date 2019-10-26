@@ -24,7 +24,7 @@ except ImportError:
 
 from clu.constants.consts import PROJECT_NAME, QUALIFIER, NoDefault
 from clu.abstract import NonSlotted, AppName
-from clu.predicates import getpyattr, attr, attr_search, mro, newtype, union
+from clu.predicates import getpyattr, attr, attr_search, mro, typeof, newtype, union
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.typespace import Namespace, types
 from clu.typology import isstring, subclasscheck
@@ -528,7 +528,11 @@ class SubModule(object):
             raise TypeError("a name is required")
         if ModuleClass in (None, NoDefault):
             ModuleClass = Module
-        self.ModuleClass = ModuleClass
+        if not subclasscheck(ModuleClass, ModuleBase):
+            cls = typeof(ModuleClass)
+            raise TypeError(f"Module class must derive from “clu.importing.ModuleBase” "
+                            f"(class {cls.__qualname__} does not)")
+        self.ModuleClass = typeof(ModuleClass)
         self.name = name
         self.kwargs = kwargs
     

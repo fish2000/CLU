@@ -443,6 +443,16 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
                       super(ModuleBase, self).__dir__())
         return sorted(list(names - DO_NOT_INCLUDE))
 
+def installed_appnames():
+    """ Return a set of the appnames for all installed finders
+        that have one defined.
+    """
+    appnames = set()
+    for finder in sys.meta_path:
+        if hasattr(finder, 'appname'):
+            appnames.add(finder.appname)
+    return appnames
+
 @export
 def initialize_types(appname, appspace='app'):
     """ Initialize subtypes of FinderBase, LoaderBase, and ModuleBase,
@@ -470,7 +480,7 @@ def initialize_types(appname, appspace='app'):
                              appspace=appspace):
         __loader__ = Finder.loader
     
-    if Finder not in sys.meta_path:
+    if appname not in installed_appnames():
         sys.meta_path.append(Finder)
     
     return Module, Finder, Loader

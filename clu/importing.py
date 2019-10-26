@@ -433,7 +433,8 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
     
     @property
     def qualname(self):
-        return type(self).qualname
+        return dotpath_join(self.prefix,
+                            self.name)
     
     def __dir__(self):
         cls = type(self)

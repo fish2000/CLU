@@ -674,7 +674,7 @@ class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
         # a settable __doc__ slot or established attribute).
         if doc is not None:
             try:
-                thing.__doc__ = doctrim(doc)
+                thing.__doc__ = inspect.cleandoc(doc)
             except (AttributeError, TypeError):
                 typename = determine_name(type(thing))
                 warnings.warn(type(self).messages['docstr'] % (named, typename),

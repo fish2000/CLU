@@ -5,13 +5,15 @@ from collections import namedtuple as NamedTuple
 import colorama
 colorama.init()
 
+import inspect
+import math
 import sys
+import textwrap
 import zict
 
 from clu.constants.consts import DEBUG, ENCODING, SEPARATOR_WIDTH
 from clu.constants.polyfills import Enum, unique, auto
 from clu.naming import nameof, qualified_name
-from clu.predicates import getpyattr
 from clu.typology import string_types, bytes_types, dict_types
 from clu.enums import alias, AliasingEnumMeta
 from clu.exporting import doctrim, Exporter
@@ -345,27 +347,54 @@ def print_ansi_centered(text, color='',
     """ print_ansi_centered(…) → Print a string to the terminal, centered
                                  and bookended with asterisks """
     message = f" {text.strip()} "
-    asterisks = int((width / 2) - (len(message) / 2))
+    asterisks = math.ceil((width / 2) - (len(message) / 2))
     
     aa = filler[0] * asterisks
     ab = filler[0] * (asterisks + ((width % 2) - (len(message) % 2)))
     
     print_ansi(f"{aa}{message}{ab}", color=color)
 
+INITIAL     = '  ¶ '
+SUBSEQUENT  = '    '
+
+@export
+def paragraphize(doc):
+    """ Split a docstring into continuous paragraphs. """
+    lines = [line.strip() for line in doc.strip().splitlines()]
+    for idx, line in enumerate(lines):
+        if line == '':
+            lines[idx] = "\n\n"
+        else:
+            lines[idx] += " "
+    return ''.join(lines).splitlines()
+
 @export
 def ansidoc(*things):
     """ ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
+    sys.__stdout__.flush()
+    sys.stdout.flush()
+    print()
     for thing in things:
-        print(file=sys.__stdout__)
         print_ansi_centered(f"__doc__ for “{nameof(thing)}”", color=Text.CYAN)
         print(file=sys.__stdout__)
-        print_ansi(getpyattr(thing, 'doc', "«unknown»"), color=Text.GRAY)
+        doc = inspect.getdoc(thing) or "«unknown»"
+        paras = paragraphize(doc)
+        for para in paras:
+            if para:
+                print_ansi(textwrap.fill(para, initial_indent=INITIAL,
+                                            subsequent_indent=SUBSEQUENT,
+                                           replace_whitespace=False,
+                                                        width=80),
+                                                        color=Text.GRAY)
+            else:
+                print(file=sys.__stdout__)
         print(file=sys.__stdout__)
         print_ansi_centered("¡FUCK YEAH!", filler='Ø',
                                            color=ANSIFormat(text=Text.BLACK,
-                                                            background=Background.CYAN,
-                                                            weight=Weight.DIM))
-        print(file=sys.__stdout__)
+                                                      background=Background.GRAY))
+        print()
+        sys.__stdout__.flush()
+        sys.stdout.flush()
 
 @export
 def highlight(code_string, language='json',

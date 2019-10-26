@@ -353,9 +353,14 @@ class MetaModule(MetaRegistry):
         deferred_export.sinks = []
         deferred_export.__doc__ = ExporterBase.export.__doc__
         
+        # Call up:
+        attributes = super(MetaModule, metacls).__prepare__(name,
+                                                            bases,
+                                                          **kwargs)
+        
         # Return a new Namespace with the deferred export function
         # defined as “export”:
-        return Namespace(export=deferred_export)
+        return Namespace(export=deferred_export, **attributes)
     
     def __new__(metacls, name, bases, attributes, **kwargs):
         """ Create a new class-module subclass, expanding any
@@ -366,10 +371,10 @@ class MetaModule(MetaRegistry):
         deferred_export = attributes.pop('export', None)
         
         # Call up, creating and initializing the module class:
-        cls = super(MetaRegistry, metacls).__new__(metacls, name,
-                                                            bases,
-                                                            dict(attributes),
-                                                          **kwargs)
+        cls = super(MetaModule, metacls).__new__(metacls, name,
+                                                          bases,
+                                                          dict(attributes),
+                                                        **kwargs)
         
         # If an appname is defined, try to install
         # an instance of the appropriate Exporter:
@@ -510,9 +515,11 @@ class SubModule(object):
         the temporary subclass on exit. Handy for testing.
     """
     
-    __slots__ = ('ModuleClass', 'ModuleSubclass', 'name')
+    __slots__ = ('ModuleClass', 'ModuleSubclass', 'name', 'kwargs')
     
-    def __init__(self, name='ModuleSubclass', ModuleClass=NoDefault):
+    def __init__(self, name='ModuleSubclass',
+                       ModuleClass=NoDefault,
+                     **kwargs):
         """ Initializes a SubModule context manager with a given
             module class (defaults to “clu.importing.Module”).
         """
@@ -522,10 +529,13 @@ class SubModule(object):
             ModuleClass = Module
         self.ModuleClass = ModuleClass
         self.name = name
+        self.kwargs = kwargs
     
     def __enter__(self):
         """ Create and return the temporary class-module subclass """
-        self.ModuleSubclass = newtype(self.name, self.ModuleClass)
+        self.ModuleSubclass = newtype(self.name,
+                                      self.ModuleClass,
+                                    **self.kwargs)
         return self.ModuleSubclass
     
     def __exit__(self, exc_type=None, exc_val=None, exc_tb=None):
@@ -669,8 +679,8 @@ def test():
         
         before = all_registered_modules()
         
-        with SubModule('derived_module') as DerivedModule:
-            from clu.app import derived_module as derived
+        with SubModule('derived_module0', __module__=__name__) as DerivedModule:
+            from clu.app import derived_module0 as derived
             
             assert type(derived) is DerivedModule
             assert type(derived.exporter).__name__ == 'Exporter'
@@ -684,10 +694,13 @@ def test():
         
         before = all_registered_modules()
         
-        with SubModule('derived_module') as DerivedModule:
-            derived = importlib.import_module('clu.app.derived_module')
+        with SubModule('derived_module1', __module__=__name__) as DerivedModule:
+            derived = importlib.import_module('clu.app.derived_module1')
             
-            # assert type(derived) is DerivedModule
+            assert type(derived) is DerivedModule
+            assert derived.__class__ is DerivedModule
+            assert isinstance(derived, DerivedModule)
+            assert subclasscheck(type(derived), DerivedModule)
             print(type(DerivedModule))
             print(DerivedModule)
             print(type(derived))

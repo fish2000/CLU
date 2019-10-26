@@ -4,7 +4,7 @@ from collections import defaultdict as DefaultDict
 from functools import lru_cache
 from itertools import chain
 
-cache = lru_cache()
+cache = lambda function: lru_cache()(function)
 iterchain = chain.from_iterable
 
 import abc

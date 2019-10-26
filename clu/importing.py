@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import defaultdict as DefaultDict
+from functools import lru_cache
 from itertools import chain
 
+cache = lru_cache()
 iterchain = chain.from_iterable
 
 import abc
@@ -140,6 +142,12 @@ class ModuleSpec(importlib.machinery.ModuleSpec):
                                          loader,
                                          origin=packagename,
                                          is_package=True)
+    
+    def __hash__(self):
+        return hash(self.loader) \
+             & hash(self.name) \
+             & hash(self.origin) \
+             & hash(self.parent)
 
 @export
 class Package(types.Module):
@@ -167,7 +175,6 @@ class Package(types.Module):
             out += f" from “{location}”"
         out += ">"
         return out
-        
 
 @export
 class FinderBase(AppName, importlib.abc.MetaPathFinder):
@@ -202,6 +209,12 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
         return None
     
     @classmethod
+    def invalidate_caches(cls):
+        cls.loader.create_module.cache_clear()
+        cls.cache.clear()
+        return super(FinderBase, cls).invalidate_caches(cls())
+    
+    @classmethod
     def iter_modules(cls):
         """ This “non-standard API method”§ yields ‘pkgutil.ModuleInfo’
             instances for each registered class-module in the finder
@@ -214,11 +227,6 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
                                        module.qualname,
                                        ispkg=True) \
                     for module in modules_for_appname(cls.appname))
-    
-    @classmethod
-    def invalidate_caches(cls):
-        cls.cache.clear()
-        return None
 
 @export
 class LoaderBase(AppName, importlib.abc.Loader):
@@ -229,6 +237,10 @@ class LoaderBase(AppName, importlib.abc.Loader):
         an “appname” – the name of the app. Q.v. the function
         “initialize_types(…)” sub. to easily set these up for
         your own app.
+        
+        The method “LoaderBase.create_module(…)” caches returned
+        instances of “types.Module” using the ‘functools.lru_cache’
+        function decorator.
     """
     
     @staticmethod
@@ -236,6 +248,7 @@ class LoaderBase(AppName, importlib.abc.Loader):
         """ Convenience method, returning an empty package module """
         return Package(name, f"Package (filler) module {name}")
     
+    @cache
     def create_module(self, spec):
         """ Create a new class-based module from a spec instance """
         cls = type(self)

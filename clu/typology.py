@@ -14,9 +14,10 @@ import os
 from clu.constants.consts import λ, φ # type: ignore
 from clu.constants.polyfills import long, unicode, numpy
 from clu.constants.polyfills import Path # type: ignore
+from clu.abstract import Slotted
 from clu.enums import alias
 from clu.extending import Extensible
-from clu.exporting import Slotted, Exporter
+from clu.exporting import Exporter
 
 from clu.predicates import (negate,
                             ismetaclass, isclasstype, metaclass,

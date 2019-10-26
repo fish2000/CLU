@@ -7,6 +7,7 @@ import os
 abstract = abc.abstractmethod
 
 from clu.constants.consts import ENCODING, PYTHON_VERSION
+from clu.abstract import Slotted
 from clu.config.base import Flat, Nested
 from clu.config.fieldtypes import FieldBase
 from clu.fs.misc import stringify
@@ -15,7 +16,7 @@ from clu.predicates import (haspyattr, getpyattr,
                             always, no_op,
                             iscontainer, slots_for)
 from clu.typology import differentlength, ismapping, isstring
-from clu.exporting import Slotted, Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

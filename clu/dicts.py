@@ -9,7 +9,8 @@ import collections
 import collections.abc
 
 from clu.constants.consts import NoDefault
-from clu.exporting import Slotted, Exporter
+from clu.abstract import Slotted
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

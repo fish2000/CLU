@@ -1,16 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-
 import abc
 
 abstract = abc.abstractmethod
 
-from clu.exporting import ValueDescriptor, Exporter
-
-exporter = Exporter(path=__file__)
-export = exporter.decorator()
-
-@export
 class Slotted(abc.ABCMeta):
     
     """ A metaclass that ensures its classes, and all subclasses,
@@ -29,7 +22,6 @@ class Slotted(abc.ABCMeta):
                                                         attributes,
                                                       **kwargs)
 
-@export
 class NonSlotted(abc.ABCMeta):
     
     """ A metaclass that ensures its classes, and all subclasses,
@@ -48,7 +40,25 @@ class NonSlotted(abc.ABCMeta):
                                                            attributes,
                                                          **kwargs)
 
-@export
+class ValueDescriptor(object):
+    
+    __slots__ = ('value',)
+    
+    def __init__(self, value):
+        self.value = value
+    
+    def __get__(self, *args):
+        return self.value
+    
+    def __set__(self, instance, value):
+        pass
+    
+    def __repr__(self):
+        from clu.constants.consts import ENCODING
+        return isinstance(self.value, str)   and self.value or \
+               isinstance(self.value, bytes) and self.value.decode(ENCODING) or \
+                                            repr(self.value)
+
 class AppName(abc.ABC):
     
     __slots__ = tuple()
@@ -69,7 +79,6 @@ class AppName(abc.ABC):
             raise LookupError("Cannot instantiate a base config class "
                               "(appname is None)")
 
-@export
 class Cloneable(abc.ABC):
     
     """ An abstract class representing something “clonable.” A cloneable
@@ -96,7 +105,6 @@ class Cloneable(abc.ABC):
         """ Return a deep copy of this instance """
         return self.clone(deep=True, memo=memo)
 
-@export
 class ReprWrapper(abc.ABC):
     
     """ ReprWrapper fills in a default template for __repr__ results,
@@ -139,6 +147,10 @@ class ReprWrapper(abc.ABC):
         rpr = self.inner_repr()
         return f"{cnm}({rpr}) @ {hxa}"
 
+__all__ = ('Slotted', 'NonSlotted',
+           'ValueDescriptor',
+           'AppName',
+           'Cloneable',
+           'ReprWrapper')
 
-# Assign the modules’ `__all__` and `__dir__` using the exporter:
-__all__, __dir__ = exporter.all_and_dir()
+__dir__ = lambda: list(__all__)

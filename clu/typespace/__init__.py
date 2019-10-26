@@ -57,11 +57,11 @@ def modulize(name, namespace, docs=None,
                            appname=PROJECT_NAME,
                        relative_to=BASEPATH):
     """ Convert a dictionary mapping into a legit Python module """
-    from clu.exporting import doctrim, path_to_dotpath
+    from clu.exporting import path_to_dotpath
     from clu.naming import dotpath_join
     from clu.predicates import nopyattr
     from clu.typology import ismapping
-    import sys
+    import inspect, sys
     
     # Ensure a module with the given module name we received
     # doesn’t already exist in `sys.modules`:
@@ -123,7 +123,7 @@ def modulize(name, namespace, docs=None,
     
     # Construct the module type from the qualified name, using
     # any given docstring text:
-    module = types.Module(qualified_name, doctrim(docs))
+    module = types.Module(qualified_name, inspect.cleandoc(docs))
     
     # Update the module’s `__dict__` with our namespaced mapping
     module.__dict__.update(namespace.__dict__)

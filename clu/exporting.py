@@ -18,40 +18,10 @@ iterchain = itertools.chain.from_iterable
 from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytuple # type: ignore
 from clu.constants.exceptions import ExportError, ExportWarning
 from clu.constants.polyfills import lru_cache # type: ignore
+from clu.abstract import Slotted, ValueDescriptor
 
 # Q.v. `search_by_id(…)` function sub.
 cache = lambda function: lru_cache(maxsize=128, typed=False)(function)
-
-def doctrim(docstring):
-    """ This function is straight outta PEP257 -- q.v. `trim(…)`,
-       “Handling Docstring Indentation” subsection sub.:
-            https://www.python.org/dev/peps/pep-0257/#id18
-    """
-    from clu.constants.consts import MAXINT
-    
-    if not docstring:
-        return ''
-    # Convert tabs to spaces (following the normal Python rules)
-    # and split into a list of lines:
-    lines = docstring.expandtabs().splitlines()
-    # Determine minimum indentation (first line doesn't count):
-    indent = MAXINT
-    for line in lines[1:]:
-        stripped = line.lstrip()
-        if stripped:
-            indent = min(indent, len(line) - len(stripped))
-    # Remove indentation (first line is special):
-    trimmed = [lines[0].strip()]
-    if indent < MAXINT:
-        for line in lines[1:]:
-            trimmed.append(line[indent:].rstrip())
-    # Strip off trailing and leading blank lines:
-    while trimmed and not trimmed[-1]:
-        trimmed.pop()
-    while trimmed and not trimmed[0]:
-        trimmed.pop(0)
-    # Return a single string:
-    return '\n'.join(trimmed)
 
 def itermodule(module):
     """ Get an iterable of `(name, thing)` tuples for all things
@@ -300,43 +270,6 @@ def path_to_dotpath(path, relative_to=None):
                         BadDotpathWarning, stacklevel=2)
     
     return dotpath
-
-class Slotted(abc.ABCMeta):
-    
-    """ A metaclass that ensures its classes, and all subclasses,
-        will be slotted types.
-    """
-    
-    def __new__(metacls, name, bases, attributes, **kwargs):
-        """ Override for `abc.ABCMeta.__new__(…)` setting up a
-            derived slotted class.
-        """
-        if '__slots__' not in attributes:
-            attributes['__slots__'] = tuple()
-        
-        return super(Slotted, metacls).__new__(metacls, name, # type: ignore
-                                                        bases,
-                                                        attributes,
-                                                      **kwargs)
-
-class ValueDescriptor(object):
-    
-    __slots__ = ('value',)
-    
-    def __init__(self, value):
-        self.value = value
-    
-    def __get__(self, *args):
-        return self.value
-    
-    def __set__(self, instance, value):
-        pass
-    
-    def __repr__(self):
-        from clu.constants.consts import ENCODING
-        return isinstance(self.value, str)   and self.value or \
-               isinstance(self.value, bytes) and self.value.decode(ENCODING) or \
-                                            repr(self.value)
 
 class Prefix(Slotted):
     
@@ -838,7 +771,6 @@ class Exporter(ExporterBase, prefix=BASEPATH, appname=PROJECT_NAME):
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-export(doctrim)
 export(itermodule)
 export(moduleids)
 export(itermoduleids)
@@ -852,8 +784,6 @@ export(path_to_dotpath)
 export(sysmods,         name='sysmods',         doc="sysmods() → shortcut for reversed(tuple(frozenset(sys.modules.values()))) …OK? I know. It’s not my finest work, but it works.")
 
 # NO DOCS ALLOWED:
-export(Slotted)
-export(ValueDescriptor)
 export(Registry)
 export(ExporterBase)
 export(Exporter)        # hahaaaaa

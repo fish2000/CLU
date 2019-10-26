@@ -8,7 +8,7 @@ import sys
 
 abstract = abc.abstractmethod
 
-from clu.abstract import AppName
+from clu.abstract import ValueDescriptor, AppName
 from clu.constants.enums import System, SYSTEM
 from clu.config.abc import NamespacedMutableMapping
 from clu.fs.appdirectories import AppDirs
@@ -17,7 +17,7 @@ from clu.fs.misc import filesize
 from clu.fs import pypath
 from clu.predicates import isiterable
 from clu.typology import isvalidpath
-from clu.exporting import ValueDescriptor, Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

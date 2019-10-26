@@ -42,8 +42,9 @@ def isdtype(thing):
 @export
 class Clamper(object):
     
-    __slots__ = ('type', 'info')
     """ A callable object representing a per-dtype clamp function """
+    
+    __slots__ = ('type', 'info')
     
     def __init__(self, dtype):
         """ Initialize a Clamper callable with a numpy dtype """

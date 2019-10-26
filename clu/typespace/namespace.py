@@ -5,6 +5,7 @@ import re
 import collections.abc
 
 from clu.constants.consts import SEPARATOR_WIDTH, pytuple, NoDefault
+from clu.abstract import Slotted
 from clu.predicates import ismergeable
 from clu.dicts import merge_two, asdict
 from clu.naming import nameof
@@ -17,7 +18,8 @@ export = exporter.decorator()
 
 @export
 class SimpleNamespace(collections.abc.Hashable,
-                      collections.abc.Iterable):
+                      collections.abc.Iterable,
+                      metaclass=Slotted):
     
     """ Implementation courtesy this SO answer:
         • https://stackoverflow.com/a/37161391/298171
@@ -60,8 +62,6 @@ class Namespace(SimpleNamespace,
         
         Additionally, Namespace furnishes an `__all__` property implementation.
     """
-    __slots__ = tuple()
-    
     winnower = re.compile(r"\{(?:\s+)(?P<stuff>.+)")
     
     def get(self, key, default=NoDefault):

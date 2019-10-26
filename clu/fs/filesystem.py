@@ -19,13 +19,14 @@ from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 from clu.constants.consts import λ, DELETE_FLAG, ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.constants.polyfills import lru_cache, scandir, walk
+from clu.abstract import ValueDescriptor
 from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
 from clu.predicates import attr, allattrs, anyof
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
 from clu.fs.misc import stringify, suffix_searcher, swapext, u8str
-from clu.exporting import ValueDescriptor, Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

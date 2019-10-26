@@ -24,13 +24,13 @@ except ImportError:
     importlib.metadata = _metadata
 
 from clu.constants.consts import PROJECT_NAME, QUALIFIER, NoDefault
-from clu.abstract import NonSlotted, AppName
+from clu.abstract import NonSlotted, ValueDescriptor, AppName
 from clu.predicates import attr, attr_search, mro, typeof, newtype, union
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.typespace import Namespace, types
 from clu.typology import isstring, subclasscheck
 from clu.exporting import Registry as ExporterRegistry
-from clu.exporting import ValueDescriptor, ExporterBase, Exporter
+from clu.exporting import ExporterBase, Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

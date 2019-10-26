@@ -16,7 +16,7 @@ from clu.constants.polyfills import Enum, unique, auto
 from clu.naming import nameof, qualified_name
 from clu.typology import string_types, bytes_types, dict_types
 from clu.enums import alias, AliasingEnumMeta
-from clu.exporting import doctrim, Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -107,7 +107,7 @@ class ANSI(AliasingEnumMeta):
         attributes['__init__']  = init_method
         attributes['__str__']   = str_method
         attributes['__add__']   = add_method
-        attributes['__doc__']   = doctrim(doc_string)
+        attributes['__doc__']   = inspect.cleandoc(doc_string)
         attributes['to_string'] = to_string
         
         return super(ANSI, metacls).__new__(metacls, name,

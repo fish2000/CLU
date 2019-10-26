@@ -7,8 +7,9 @@ import sys
 
 from clu.constants.exceptions import ExecutionError
 from clu.constants.polyfills import Path
+from clu.abstract import Slotted
 from clu.fs.filesystem import back_tick, Intermediate
-from clu.exporting import Slotted, Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

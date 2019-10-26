@@ -11,6 +11,7 @@ import weakref
 
 from clu.constants.consts import DEBUG, NoDefault
 from clu.constants.polyfills import Path
+from clu.abstract import Slotted
 from clu.config.abc import NAMESPACE_SEP, FlatOrderedSet
 from clu.fs.misc import stringify, wrap_value
 from clu.naming import nameof
@@ -21,7 +22,7 @@ from clu.predicates import (negate, isclasstype,
 from clu.typology import (isderivative, ismapping,
                                         isnumber,
                                         isstring, ispath, isvalidpath)
-from clu.exporting import Slotted, Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

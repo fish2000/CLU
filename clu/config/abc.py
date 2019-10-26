@@ -8,13 +8,12 @@ import copy
 
 abstract = abc.abstractmethod
 
-from clu.abstract import Cloneable, ReprWrapper
+from clu.abstract import Slotted, Cloneable, ReprWrapper
 from clu.constants.consts import DEBUG, NoDefault
-from clu.fs.misc import typename_hexid
 from clu.predicates import (isiterable, always, uncallable,
                             isexpandable, iscontainer,
                             tuplize)
-from clu.exporting import Slotted, ValueDescriptor, Exporter
+from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

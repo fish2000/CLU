@@ -152,6 +152,22 @@ class Package(types.Module):
     def __init__(self, name, doc=None, path=None):
         super(Package, self).__init__(name, doc)
         self.__path__ = path or []
+    
+    def __repr__(self):
+        """ A nicer, kindler, gentler module repr-function """
+        location = attr(self, '__spec__.origin',
+                              '__file__',
+                              '__package__')
+        name = attr(self, '__name__', 'name')
+        typename = subclasscheck(self, ModuleBase) \
+                                  and 'class-module' \
+                                   or 'module'
+        out = f"<{typename} ‘{name}’"
+        if location:
+            out += f" from “{location}”"
+        out += ">"
+        return out
+        
 
 @export
 class FinderBase(AppName, importlib.abc.MetaPathFinder):
@@ -239,21 +255,6 @@ class LoaderBase(AppName, importlib.abc.Loader):
             been executed by the interpreter
         """
         pass
-    
-    def module_repr(self, module):
-        """ A nicer, kindler, gentler module repr-function """
-        location = attr(module, '__spec__.origin',
-                                '__file__',
-                                '__package__')
-        name = attr(module, '__name__', 'name')
-        typename = subclasscheck(module, ModuleBase) \
-                                  and 'class-module' \
-                                   or 'module'
-        out = f"<{typename} ‘{name}’"
-        if location:
-            out += f" from “{location}”"
-        out += ">"
-        return out
 
 @export
 class ArgumentSink(object):

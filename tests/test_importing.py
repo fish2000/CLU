@@ -83,13 +83,10 @@ class TestImporting(object):
         
         module = finder.loader.create_module(spec)
         assert type(module) is findme
-        
-        # The “module_repr(…)” function won’t automatically work on class-modules
-        # that weren’t directly imported:
-        # assert repr(module) == "<class-module ‘clu.app.findme’ from “clu.app”>"
+        assert repr(module) == "<class-module ‘clu.app.findme’>"
         
         # …calling “module_repr(…)” directly doesn’t know about the location:
-        assert finder.loader.module_repr(module) == "<class-module ‘clu.app.findme’>"
+        # assert finder.loader.module_repr(module) == "<class-module ‘clu.app.findme’>"
     
     def test_derived_import(self):
         from clu.importing import Module, Registry, DO_NOT_INCLUDE

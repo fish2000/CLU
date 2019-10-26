@@ -11,6 +11,7 @@ import abc
 import importlib
 import importlib.abc
 import importlib.machinery
+import inspect
 import pkgutil
 import sys
 import weakref
@@ -24,7 +25,7 @@ except ImportError:
 
 from clu.constants.consts import PROJECT_NAME, QUALIFIER, NoDefault
 from clu.abstract import NonSlotted, AppName
-from clu.predicates import getpyattr, attr, attr_search, mro, typeof, newtype, union
+from clu.predicates import attr, attr_search, mro, typeof, newtype, union
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.typespace import Namespace, types
 from clu.typology import isstring, subclasscheck
@@ -257,8 +258,7 @@ class LoaderBase(AppName, importlib.abc.Loader):
             if spec.name in Registry[cls.appname]:
                 modulename, _ = dotpath_split(spec.name)
                 ModuleClass = Registry[cls.appname][spec.name]
-                module = ModuleClass(modulename,
-                                     getpyattr(ModuleClass, 'doc'))
+                module = ModuleClass(modulename, inspect.getdoc(ModuleClass))
                 return module
             return self.package_module(spec.name)
         return None

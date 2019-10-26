@@ -14,6 +14,12 @@ import sys
 import weakref
 import zict
 
+try:
+    import importlib.metadata
+except ImportError:
+    import importlib_metadata as _metadata
+    importlib.metadata = _metadata
+
 from clu.constants.consts import PROJECT_NAME, QUALIFIER, NoDefault
 from clu.abstract import NonSlotted, AppName
 from clu.predicates import getpyattr, attr, attr_search, mro, newtype, union

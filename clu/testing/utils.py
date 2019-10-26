@@ -76,6 +76,7 @@ def inline(function):
         if out is not None:
             print("RESULTS:")
             pprint(out)
+            asterisks('-')
         print(f"Test function “{name}” ran in {dtout}s")
         asterisks('=')
         

@@ -19,6 +19,9 @@ from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytu
 from clu.constants.exceptions import ExportError, ExportWarning
 from clu.constants.polyfills import lru_cache # type: ignore
 
+# Q.v. `search_by_id(…)` function sub.
+cache = lambda function: lru_cache(maxsize=128, typed=False)(function)
+
 def doctrim(docstring):
     """ This function is straight outta PEP257 -- q.v. `trim(…)`,
        “Handling Docstring Indentation” subsection sub.:
@@ -82,9 +85,6 @@ def itermoduleids(module):
                       if key not in BUILTINS)
     ids = (id(getattr(module, key)) for key in keys)
     return zip(keys, ids)
-
-# Q.v. `search_by_id(…)` function sub.
-cache = lru_cache(maxsize=128, typed=False)
 
 # This goes against all logic and reason, but it fucking seems
 # to fix the problem of constants, etc showing up erroneously

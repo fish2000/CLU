@@ -4,12 +4,11 @@ from itertools import chain
 
 iterchain = chain.from_iterable
 
-import abc
 import collections
 import collections.abc
 
 from clu.constants.consts import NoDefault
-from clu.abstract import Slotted
+from clu.abstract import Slotted, Cloneable, ReprWrapper
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -17,18 +16,16 @@ export = exporter.decorator()
 
 # DICT VIEWS: OrderedMappingView and friends
 
-class ClassWrapRepr(abc.ABC):
+class MappingViewRepr(ReprWrapper):
     
-    def __repr__(self):
-        clsname = type(self).__name__
-        mapping = repr(self._mapping)
-        return f"{clsname}<{mapping}>"
+    def inner_repr(self):
+        return repr(self._mapping)
 
 @export
 class OrderedMappingView(collections.abc.MappingView,
                          collections.abc.Sequence,
                          collections.abc.Reversible,
-                         ClassWrapRepr):
+                         MappingViewRepr):
     
     """ A mapping view class implementing “collections.abc.Sequence”
         and “collections.abc.Reversible”
@@ -39,14 +36,12 @@ class OrderedMappingView(collections.abc.MappingView,
     
     def __getitem__(self, idx):
         return tuple(self)[idx]
-    
-    __repr__ = ClassWrapRepr.__repr__
 
 @export
 class OrderedItemsView(collections.abc.ItemsView,
                        collections.abc.Sequence,
                        collections.abc.Reversible,
-                       ClassWrapRepr):
+                       MappingViewRepr):
     
     """ An items-view class implementing “collections.abc.Sequence”
         and “collections.abc.Reversible”
@@ -58,14 +53,12 @@ class OrderedItemsView(collections.abc.ItemsView,
     
     def __getitem__(self, idx):
         return tuple(self)[idx]
-    
-    __repr__ = ClassWrapRepr.__repr__
 
 @export
 class OrderedKeysView(collections.abc.KeysView,
                       collections.abc.Sequence,
                       collections.abc.Reversible,
-                      ClassWrapRepr):
+                      MappingViewRepr):
     
     """ A keys-view class implementing “collections.abc.Sequence”
         and “collections.abc.Reversible”
@@ -76,14 +69,12 @@ class OrderedKeysView(collections.abc.KeysView,
     
     def __getitem__(self, idx):
         return tuple(self)[idx]
-    
-    __repr__ = ClassWrapRepr.__repr__
 
 @export
 class OrderedValuesView(collections.abc.ValuesView,
                         collections.abc.Sequence,
                         collections.abc.Reversible,
-                        ClassWrapRepr):
+                        MappingViewRepr):
     
     """ A values-view class implementing “collections.abc.Sequence”
         and “collections.abc.Reversible”
@@ -95,13 +86,14 @@ class OrderedValuesView(collections.abc.ValuesView,
     
     def __getitem__(self, idx):
         return tuple(self)[idx]
-    
-    __repr__ = ClassWrapRepr.__repr__
 
 # CHAINMAP: a reimplementation
 
 @export
-class ChainMap(collections.abc.MutableMapping, metaclass=Slotted):
+class ChainMap(collections.abc.MutableMapping,
+               Cloneable,
+               ReprWrapper,
+               metaclass=Slotted):
     
     __slots__ = ('maps', '__weakref__')
     
@@ -124,7 +116,6 @@ class ChainMap(collections.abc.MutableMapping, metaclass=Slotted):
         maps = [] # type: list
         for d in dicts:
             if isinstance(d, type(self)):
-                # maps.extend(map for map in d.maps if bool(map))
                 for map in d.maps:
                     if bool(map):
                         if map not in maps:
@@ -145,7 +136,6 @@ class ChainMap(collections.abc.MutableMapping, metaclass=Slotted):
         return try_items(key, *self.maps, default=None) or self.__missing__(key)
     
     def __len__(self):
-        # return len(set().union(*self.maps))
         return len(frozenset(iterchain(self.maps)))
     
     def __bool__(self):
@@ -225,18 +215,6 @@ class ChainMap(collections.abc.MutableMapping, metaclass=Slotted):
     def inner_repr(self):
         from pprint import pformat
         return pformat(self.maps)
-    
-    def __repr__(self):
-        from clu.repr import typename_hexid
-        cnm, hxa = typename_hexid(self)
-        rpr = self.inner_repr()
-        return f"{cnm}({rpr}) @ {hxa}"
-    
-    def __copy__(self):
-        return self.clone()
-    
-    def __deepcopy__(self, memo):
-        return self.clone(deep=True, memo=memo)
 
 # DICT FUNCTIONS: dictionary-merging
 

@@ -223,10 +223,19 @@ def enumchoices(cls):
 
 # PREDICATE LOGCIAL FUNCTIONS: all/any/and/or/xor shortcuts:
 
-predicate_nop   = lambda *things: None
-function_nop    = lambda iterable: None
+@export
+def wrap_value(value):
+    """ Get a “lazified” copy of a value, wrapped in a lamba """
+    wrapper = lambda *args, **kwargs: value
+    wrapper.__wrapped__ = value
+    return wrapper
+
+none_function   = predicate_nop = function_nop = wrap_value(None)
+true_function   = wrap_value(True)
 
 uncallable      = negate(callable) # type: ignore
+hoist           = lambda thing: uncallable(thing) and wrap_value(thing) or thing
+
 pyname          = lambda thing: pyattr(thing, 'name', 'qualname')
 pymodule        = lambda thing: pyattr(thing, 'module', 'package')
 
@@ -506,7 +515,10 @@ export(newtype,         name='newtype',         doc="newtype(name, *bases, **att
 
 export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns `None`")
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns `None`")
+export(none_function,   name='none_function',   doc="none_function() → A function that always returns None")
+export(true_function,   name='true_function',   doc="true_function() → A function that always returns True")
 export(uncallable,      name='uncallable',      doc="uncallable(thing) → boolean predicate, shortcut for `not callable(thing)`")
+export(hoist,           name='hoist',           doc="hoist(thing) → if “thing” isn’t already callable, turn it into a lambda that returns it as a value (using “wrap_value(…)”).")
 export(pyname,          name='pyname',          doc="pyname(thing) → Return either `__qualname__` or `__name__` from a given `thing`")
 export(pymodule,        name='pymodule',        doc="pymodule(thing) → Return either `__module__` or `__package__` from a given `thing`")
 

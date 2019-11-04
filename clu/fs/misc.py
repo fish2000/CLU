@@ -7,7 +7,7 @@ import sys
 
 from clu.constants.consts import ENCODING
 from clu.constants.polyfills import lru_cache
-from clu.predicates import negate, uncallable
+from clu.predicates import negate, true_function
 from clu.typology import isvalidpath, isnumeric, isstring
 from clu.exporting import Exporter
 
@@ -18,18 +18,6 @@ export = exporter.decorator()
 
 gethomedir = lambda: os.path.expanduser("~")
 isinvalidpath = negate(isvalidpath)
-
-@export
-def wrap_value(value):
-    """ Get a “lazified” copy of a value, wrapped in a lamba """
-    wrapper = lambda *args, **kwargs: value
-    wrapper.__wrapped__ = value
-    return wrapper
-
-none_function = wrap_value(None)
-true_function = wrap_value(True)
-
-hoist = lambda thing: uncallable(thing) and wrap_value(thing) or thing
 
 ex = os.path.extsep
 dolla = '$'
@@ -231,11 +219,6 @@ def masked_chmod(path, perms=0o666):
 # MODULE EXPORTS:
 export(gethomedir,              name='gethomedir',          doc="gethomedir() → Return the current user’s home directory")
 export(isinvalidpath,           name='isinvalidpath',       doc="isinvalidpath(thing) → boolean predicate, True if `thing` does not represent a valid path on the filesystem")
-
-export(none_function,           name='none_function',       doc="none_function() → A function that always returns None")
-export(true_function,           name='true_function',       doc="true_function() → A function that always returns True")
-export(hoist,                   name='hoist',               doc="hoist(thing) → if “thing” isn’t already callable, turn it into a lambda that returns it as a value (using “wrap_value(…)”).")
-
 export(differentfile,           name='differentfile',       doc="differentfile(path0, path1) → Return True if path0 and path1 point to different locations on the filesystem")
 export(octalize,                name='octalize',            doc="octalize(integer) → Format an integer value as an octal number")
 

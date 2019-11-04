@@ -13,11 +13,10 @@ from clu.constants.consts import DEBUG, NoDefault
 from clu.constants.polyfills import Path
 from clu.abstract import Slotted
 from clu.config.abc import NAMESPACE_SEP, FlatOrderedSet
-from clu.fs.misc import hoist
 from clu.naming import nameof
 from clu.predicates import (negate, isclasstype,
                             getpyattr, always, no_op, attr,
-                            uncallable, tuplize, slots_for,
+                            uncallable, hoist, tuplize, slots_for,
                             isnotnone)
 from clu.repr import stringify
 from clu.typology import (isderivative, ismapping,

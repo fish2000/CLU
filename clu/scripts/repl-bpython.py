@@ -101,7 +101,9 @@ from clu.predicates import (negate, reverse,
                             dunder_or, mro, rmro, unwrap, origin,
                             isancestor, isorigin, newtype,
                             isenum, enumchoices,
-                            predicate_nop, function_nop, uncallable,
+                            predicate_nop, function_nop,
+                            wrap_value, none_function, true_function,
+                            uncallable, hoist,
                             pyname, pymodule,
                             isexpandable, isnormative, iscontainer,
                             lambda_repr,
@@ -155,7 +157,7 @@ from clu.config.abc import NAMESPACE_SEP, FlatOrderedSet, NamespacedMutableMappi
 from clu.config.base import Flat, Nested
 from clu.config.env import Env
 from clu.config.filebase import FileName, FileBase
-from clu.config.fieldtypes import ValidationError, hoist
+from clu.config.fieldtypes import ValidationError
 from clu.config.fieldtypes import functional_and, functional_set
 from clu.config.fieldtypes import FieldBase
 from clu.config.fieldtypes import fields
@@ -351,7 +353,9 @@ __all__ = ('Image',
            'dunder_or', 'mro', 'rmro', 'unwrap', 'origin',
            'isancestor', 'isorigin', 'newtype',
            'isenum', 'enumchoices',
-           'predicate_nop', 'function_nop', 'uncallable',
+           'predicate_nop', 'function_nop',
+           'wrap_value', 'none_function', 'true_function',
+           'uncallable', 'hoist',
            'pyname', 'pymodule',
            'isexpandable', 'isnormative', 'iscontainer',
            'lambda_repr',
@@ -471,14 +475,13 @@ try:
                                    TemporaryDirectory, Intermediate,
                                    NamedTemporaryFile)
     from clu.fs.misc import (gethomedir, isinvalidpath,
-                             wrap_value,
-                             hexid, typenameof, typename_hexid,
                              re_matcher, re_searcher,
                              re_suffix, suffix_searcher,
                              swapext,
                              differentfile,
                              filesize, samesize, differentsize)
-    from clu.repr import strfield, strfields, stringify
+    from clu.repr import (hexid, typenameof, typename_hexid,
+                          strfield, strfields, stringify)
 except (ImportError, SyntaxError):
     pass
 else:
@@ -496,7 +499,6 @@ else:
                 'NamedTemporaryFile',
                 'gethomedir', 'isinvalidpath',
                 'strfield', 'strfields', 'stringify',
-                'wrap_value',
                 'hexid', 'typenameof', 'typename_hexid',
                 're_matcher', 're_searcher',
                 're_suffix', 'suffix_searcher',

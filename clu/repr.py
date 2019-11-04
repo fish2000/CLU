@@ -5,10 +5,9 @@ from itertools import chain
 iterchain = chain.from_iterable
 
 from clu.constants.consts import ENCODING, SINGLETON_TYPES
-from clu.fs.misc import hoist
 from clu.predicates import (ismetaclass, typeof,
                             resolve, attr,
-                            isenum, enumchoices, pyname)
+                            isenum, enumchoices, hoist, pyname)
 from clu.typology import isnumeric, isbytes, isstring
 from clu.exporting import Exporter
 

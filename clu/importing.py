@@ -352,7 +352,7 @@ class MetaModule(MetaRegistry):
         
         # Set attributes:
         deferred_export.sinks = []
-        deferred_export.__doc__ = ExporterBase.export.__doc__
+        deferred_export.__doc__ = inspect.getdoc(ExporterBase.export)
         
         # Call up:
         attributes = super(MetaModule, metacls).__prepare__(name,

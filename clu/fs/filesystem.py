@@ -604,7 +604,8 @@ class TemporaryName(collections.abc.Hashable,
     
     def write(self, data):
         """ Write data to the temporary name using a context-managed handle """
-        ensure_path_is_valid(self._name)
+        assert self.exists or os.path.isdir(
+                              os.path.dirname(self._name))
         bytestring = utf8_encode(data)
         with open(self._name, "xb") as handle:
             handle.write(bytestring)

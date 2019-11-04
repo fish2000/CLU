@@ -19,9 +19,11 @@ def countfiles(target, suffix=None):
         matching a specific suffix.
     """
     from clu.fs.misc import suffix_searcher
+    from clu.constants.polyfills import walk
+    import os
     count = 0
     searcher = suffix_searcher(suffix)
-    for root, dirs, files in target.walk():
+    for root, dirs, files in walk(os.fspath(target)):
         count += len(tuple(filter(searcher, files)))
     return count
 

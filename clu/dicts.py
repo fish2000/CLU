@@ -4,11 +4,12 @@ from itertools import chain
 
 iterchain = chain.from_iterable
 
+import clu.abstract
 import collections
 import collections.abc
 
 from clu.constants.consts import NoDefault
-from clu.abstract import Slotted, Cloneable, ReprWrapper
+# from clu.abstract import Slotted, Cloneable, ReprWrapper
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -16,7 +17,7 @@ export = exporter.decorator()
 
 # DICT VIEWS: OrderedMappingView and friends
 
-class MappingViewRepr(ReprWrapper):
+class MappingViewRepr(clu.abstract.ReprWrapper):
     
     def inner_repr(self):
         return repr(self._mapping)
@@ -91,9 +92,9 @@ class OrderedValuesView(collections.abc.ValuesView,
 
 @export
 class ChainMap(collections.abc.MutableMapping,
-               Cloneable,
-               ReprWrapper,
-               metaclass=Slotted):
+               clu.abstract.Cloneable,
+               clu.abstract.ReprWrapper,
+               metaclass=clu.abstract.Slotted):
     
     __slots__ = ('maps', '__weakref__')
     

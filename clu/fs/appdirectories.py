@@ -25,9 +25,9 @@ import warnings
 from clu.constants.consts import ENCODING, PY3
 from clu.constants.enums import CSIDL, System, SYSTEM
 from clu.constants.exceptions import UnusedValueWarning
-from clu.version import VersionInfo
 from clu.fs.filesystem import Directory
-from clu.fs.misc import stringify
+from clu.repr import stringify
+from clu.version import VersionInfo
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

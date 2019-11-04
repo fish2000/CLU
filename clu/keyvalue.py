@@ -9,8 +9,8 @@ from clu.constants.enums import System
 from clu.constants.exceptions import KeyValueError
 from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import Directory
-from clu.fs.misc import stringify
 from clu.predicates import attr
+from clu.repr import stringify
 from clu.typology import isstring, isbytes
 from clu.exporting import Exporter
 

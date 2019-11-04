@@ -13,12 +13,13 @@ from clu.constants.consts import DEBUG, NoDefault
 from clu.constants.polyfills import Path
 from clu.abstract import Slotted
 from clu.config.abc import NAMESPACE_SEP, FlatOrderedSet
-from clu.fs.misc import stringify, wrap_value
+from clu.fs.misc import hoist
 from clu.naming import nameof
 from clu.predicates import (negate, isclasstype,
                             getpyattr, always, no_op, attr,
                             uncallable, tuplize, slots_for,
                             isnotnone)
+from clu.repr import stringify
 from clu.typology import (isderivative, ismapping,
                                         isnumber,
                                         isstring, ispath, isvalidpath)
@@ -31,8 +32,6 @@ export = exporter.decorator()
 class ValidationError(Exception):
     """ An error occuring during field validation or configuration. """
     pass
-
-hoist = lambda thing: uncallable(thing) and wrap_value(thing) or thing
 
 @export
 class functional_and(FlatOrderedSet,
@@ -973,7 +972,6 @@ def __getattr__(key):
     raise AttributeError(f"module {__name__} has no attribute {key}")
 
 # MODULE EXPORTS:
-export(hoist,           name='hoist',           doc="hoist(thing) → if “thing” isn’t already callable, turn it into a lambda that returns it as a value (using “wrap_value(…)”).")
 export(predicate_for,   name='predicate_for',   doc="predicate_for(cls) → a predicate factory, returning a new predicate function that returns True for instances of “cls”")
 export(isdatetime,      name='isdatetime',      doc="isdatetime(thing) → boolean predicate, True if `thing` is an instance of “datetime.datetime”")
 export(istimedelta,     name='istimedelta',     doc="istimedelta(thing) → boolean predicate, True if `thing` is an instance of “datetime.timedelta”")

@@ -130,7 +130,7 @@ class DoubleDutchRegistry(object):
         self.cache[clspair] = value
     
     def __repr__(self):
-        from clu.fs.misc import typename_hexid
+        from clu.repr import typename_hexid
         typename, hex_id = typename_hexid(self)
         return f"{typename}{self.cache!r}(i={self.cache.i!r}, d={self.cache.d!r}) @ {hex_id}"
 

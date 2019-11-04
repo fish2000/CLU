@@ -142,7 +142,7 @@ class ReprWrapper(abc.ABC):
     
     def __repr__(self):
         """ This classes’ object instances’ unique string representation """
-        from clu.fs.misc import typename_hexid
+        from clu.repr import typename_hexid
         cnm, hxa = typename_hexid(self)
         rpr = self.inner_repr()
         return f"{cnm}({rpr}) @ {hxa}"

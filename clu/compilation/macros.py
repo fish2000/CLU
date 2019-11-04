@@ -3,9 +3,10 @@ from __future__ import print_function
 
 from clu.constants.consts import ENCODING, TOKEN
 from clu.constants.exceptions import ConfigurationError
+from clu.fs.misc import u8str
+from clu.repr import stringify
 from clu.typespace.namespace import SimpleNamespace
 from clu.typology import isstring
-from clu.fs.misc import stringify, u8str
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

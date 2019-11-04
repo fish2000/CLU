@@ -22,10 +22,11 @@ from clu.constants.polyfills import lru_cache, scandir, walk
 from clu.abstract import ValueDescriptor
 from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
 from clu.predicates import attr, allattrs, anyof
+from clu.repr import stringify
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
-from clu.fs.misc import stringify, suffix_searcher, swapext, u8str
+from clu.fs.misc import suffix_searcher, swapext, u8str
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

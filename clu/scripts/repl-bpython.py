@@ -471,7 +471,6 @@ try:
                                    TemporaryDirectory, Intermediate,
                                    NamedTemporaryFile)
     from clu.fs.misc import (gethomedir, isinvalidpath,
-                             strfield, strfields, stringify,
                              wrap_value,
                              hexid, typenameof, typename_hexid,
                              re_matcher, re_searcher,
@@ -479,6 +478,7 @@ try:
                              swapext,
                              differentfile,
                              filesize, samesize, differentsize)
+    from clu.repr import strfield, strfields, stringify
 except (ImportError, SyntaxError):
     pass
 else:

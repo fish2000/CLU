@@ -282,7 +282,7 @@ class Registry(abc.ABC, metaclass=Slotted):
     
     """ A class-registry mixin ancestor type suitable for use
         in the ExporterBase inheritance chain – it uses the
-        “clu.exporting.Slotted” metaclass and respects the
+        “clu.abstract.Slotted” metaclass and respects the
         class keywords already in use.
     """
     
@@ -370,7 +370,7 @@ class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
         class in your own project to use the CLU exporting mechanism –
         q.v. “clu.exporting.Exporter” docstring sub.
         
-        This class uses the “clu.exporting.Prefix” metaclass, which
+        This class uses the “clu.abstract.Prefix” metaclass, which
         automatically adds a “prefix” class attribute, as well as
         the “clu.exporting.Registry” mixin, which keeps a registry
         containing it and all of its derived subclasses, and furnishes
@@ -731,7 +731,7 @@ class Exporter(ExporterBase, prefix=BASEPATH, appname=PROJECT_NAME):
         
         Also note that all derived subclasses of ExporterBase will
         automatically be slotted classes – a “__slots__” attribute
-        will be added to the class dict by the “clu.exporting.Slotted”
+        will be added to the class dict by the “clu.abstract.Slotted”
         metaclass, if your subclass doesn’t define one – and so if
         you desire a class with a working “__dict__” attribute for
         some reason, you’ll need to specify:

@@ -588,6 +588,16 @@ class TemporaryName(collections.abc.Hashable,
                                 follow_symlinks=True))
         return False
     
+    def parent(self):
+        """ Sugar for `os.path.abspath(os.path.join(self.name, os.pardir))`
+            which, if you are curious, gets you the parent directory of
+            the instances’ target filename, wrapped in a Directory
+            instance.
+        """
+        return self.directory(os.path.abspath(
+                              os.path.join(self.name,
+                                           os.pardir)))
+    
     def read(self, *, original_position=False):
         """ Read data from the temporary name, if it points to an existing file """
         orig, out = 0, b""
@@ -604,8 +614,7 @@ class TemporaryName(collections.abc.Hashable,
     
     def write(self, data):
         """ Write data to the temporary name using a context-managed handle """
-        assert self.exists or os.path.isdir(
-                              os.path.dirname(self._name))
+        assert self.exists or self.parent().exists
         bytestring = utf8_encode(data)
         with open(self._name, "xb") as handle:
             handle.write(bytestring)
@@ -621,16 +630,6 @@ class TemporaryName(collections.abc.Hashable,
         """
         self._destroy = False
         return self._name
-    
-    def parent(self):
-        """ Sugar for `os.path.abspath(os.path.join(self.name, os.pardir))`
-            which, if you are curious, gets you the parent directory of
-            the instances’ target filename, wrapped in a Directory
-            instance.
-        """
-        return self.directory(os.path.abspath(
-                              os.path.join(self.name,
-                                           os.pardir)))
     
     def close(self):
         """ Destroys any existing file at this instances’ file path. """
@@ -1040,6 +1039,8 @@ class Directory(collections.abc.Hashable,
            `os.fspath(…)`. Internally, this method uses `shutil.copy2(…)`
             to tell the filesystem to copy and rename each file in succession.
         """
+        if destination is None:
+            raise FilesystemError("“flatten(…)” destination path cannot be None")
         whereto = self.directory(pth=destination)
         if anyof(whereto.exists, os.path.isfile(whereto.name),
                                  os.path.islink(whereto.name)):
@@ -1087,6 +1088,8 @@ class Directory(collections.abc.Hashable,
            `os.fspath(…)`. Internally, this method uses `shutil.copytree(…)`
             to tell the filesystem what to copy where.
         """
+        if destination is None:
+            raise FilesystemError("“copy_all(…)” destination path cannot be None")
         whereto = self.directory(pth=destination)
         if anyof(whereto.exists, os.path.isfile(whereto.name),
                                  os.path.islink(whereto.name)):
@@ -1141,7 +1144,7 @@ class Directory(collections.abc.Hashable,
             or anything with an `__fspath__(…)` method. 
         """
         if destination is None:
-            raise FilesystemError("symlink destination cannot be None")
+            raise FilesystemError("“symlink(…)” destination path cannot be None")
         os.symlink(os.fspath(source or self.name),
                    os.fspath(destination),
                    target_is_directory=True)

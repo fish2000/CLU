@@ -125,6 +125,16 @@ class SlottedRepr(ReprWrapper, metaclass=Slotted):
                slots_for(self),
                     try_callables=False)
 
+class MappingViewRepr(ReprWrapper):
+    
+    """ A ReprWrapper class that simply returns the repr for a
+        “self._mapping” value – of which most MappingView types make use.
+    """
+    
+    def inner_repr(self):
+        """ Return the repr string for “self._mapping” """
+        return repr(self._mapping)
+
 class Descriptor(SlottedRepr):
     
     """ A simple, generic desciptor, wrapping one value, and storing its name """
@@ -210,7 +220,7 @@ class AppName(abc.ABC):
 __all__ = ('Slotted', 'NonSlotted',
            'Cloneable',
            'ReprWrapper',
-           'SlottedRepr',
+           'SlottedRepr', 'MappingViewRepr',
            'Descriptor', 'ValueDescriptor',
            'Prefix', 'AppName')
 

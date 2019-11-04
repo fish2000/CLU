@@ -9,7 +9,6 @@ import collections
 import collections.abc
 
 from clu.constants.consts import NoDefault
-# from clu.abstract import Slotted, Cloneable, ReprWrapper
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -17,16 +16,11 @@ export = exporter.decorator()
 
 # DICT VIEWS: OrderedMappingView and friends
 
-class MappingViewRepr(clu.abstract.ReprWrapper):
-    
-    def inner_repr(self):
-        return repr(self._mapping)
-
 @export
 class OrderedMappingView(collections.abc.MappingView,
                          collections.abc.Sequence,
                          collections.abc.Reversible,
-                         MappingViewRepr):
+                         clu.abstract.MappingViewRepr):
     
     """ A mapping view class implementing “collections.abc.Sequence”
         and “collections.abc.Reversible”
@@ -42,7 +36,7 @@ class OrderedMappingView(collections.abc.MappingView,
 class OrderedItemsView(collections.abc.ItemsView,
                        collections.abc.Sequence,
                        collections.abc.Reversible,
-                       MappingViewRepr):
+                       clu.abstract.MappingViewRepr):
     
     """ An items-view class implementing “collections.abc.Sequence”
         and “collections.abc.Reversible”
@@ -59,7 +53,7 @@ class OrderedItemsView(collections.abc.ItemsView,
 class OrderedKeysView(collections.abc.KeysView,
                       collections.abc.Sequence,
                       collections.abc.Reversible,
-                      MappingViewRepr):
+                      clu.abstract.MappingViewRepr):
     
     """ A keys-view class implementing “collections.abc.Sequence”
         and “collections.abc.Reversible”
@@ -75,7 +69,7 @@ class OrderedKeysView(collections.abc.KeysView,
 class OrderedValuesView(collections.abc.ValuesView,
                         collections.abc.Sequence,
                         collections.abc.Reversible,
-                        MappingViewRepr):
+                        clu.abstract.MappingViewRepr):
     
     """ A values-view class implementing “collections.abc.Sequence”
         and “collections.abc.Reversible”

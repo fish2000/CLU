@@ -40,26 +40,6 @@ class NonSlotted(abc.ABCMeta):
                                                            attributes,
                                                          **kwargs)
 
-class AppName(abc.ABC):
-    
-    __slots__ = tuple()
-    
-    @classmethod
-    def __init_subclass__(cls, appname=None, **kwargs):
-        """ Translate the “appname” class-keyword into an “appname” read-only
-            descriptor value
-        """
-        super(AppName, cls).__init_subclass__(**kwargs)
-        cls.appname = ValueDescriptor(appname)
-    
-    def __init__(self, *args, **kwargs):
-        """ Stub __init__(…) method, throwing a lookup error for subclasses
-            upon which the “appname” value is None
-        """
-        if type(self).appname is None:
-            raise LookupError("Cannot instantiate a base config class "
-                              "(appname is None)")
-
 class Cloneable(abc.ABC):
     
     """ An abstract class representing something “clonable.” A cloneable
@@ -182,11 +162,56 @@ class ValueDescriptor(Descriptor):
                isinstance(self.value, bytes) and self.value.decode(ENCODING) or \
                                             repr(self.value)
 
+class Prefix(Slotted):
+    
+    """ A metaclass to assign a “prefix” class property,
+        extracted from a “prefix” class keyword, to a new
+        slotted type. 
+    """
+    
+    @classmethod
+    def __prepare__(metacls, name, bases, prefix="/", **kwargs):
+        """ Remove the “prefix” class keyword before calling up """
+        return super(Prefix, metacls).__prepare__(name, bases, **kwargs)
+    
+    def __new__(metacls, name, bases, attributes, prefix="/", **kwargs):
+        """ Override for `Slotted.__new__(…)` setting up a
+            derived slotted class that pulls from a “prefix”
+            with the requisite methods defined for access.
+        """
+        if 'prefix' not in attributes:
+            attributes['prefix'] = ValueDescriptor(prefix)
+        
+        return super(Prefix, metacls).__new__(metacls, name,
+                                                       bases,
+                                                       attributes,
+                                                     **kwargs)
+
+class AppName(abc.ABC):
+    
+    __slots__ = tuple()
+    
+    @classmethod
+    def __init_subclass__(cls, appname=None, **kwargs):
+        """ Translate the “appname” class-keyword into an “appname” read-only
+            descriptor value
+        """
+        super(AppName, cls).__init_subclass__(**kwargs)
+        cls.appname = ValueDescriptor(appname)
+    
+    def __init__(self, *args, **kwargs):
+        """ Stub __init__(…) method, throwing a lookup error for subclasses
+            upon which the “appname” value is None
+        """
+        if type(self).appname is None:
+            raise LookupError("Cannot instantiate a base config class "
+                              "(appname is None)")
+
 __all__ = ('Slotted', 'NonSlotted',
-           'AppName',
            'Cloneable',
            'ReprWrapper',
            'SlottedRepr',
-           'Descriptor', 'ValueDescriptor')
+           'Descriptor', 'ValueDescriptor',
+           'Prefix', 'AppName')
 
 __dir__ = lambda: list(__all__)

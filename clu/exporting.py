@@ -18,7 +18,7 @@ iterchain = itertools.chain.from_iterable
 from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytuple # type: ignore
 from clu.constants.exceptions import ExportError, ExportWarning
 from clu.constants.polyfills import lru_cache # type: ignore
-from clu.abstract import Slotted, ValueDescriptor
+from clu.abstract import Slotted, ValueDescriptor, Prefix
 
 # Q.v. `search_by_id(…)` function sub.
 cache = lambda function: lru_cache(maxsize=128, typed=False)(function)
@@ -270,31 +270,6 @@ def path_to_dotpath(path, relative_to=None):
                         BadDotpathWarning, stacklevel=2)
     
     return dotpath
-
-class Prefix(Slotted):
-    
-    """ A metaclass to assign a “prefix” class property,
-        extracted from a “prefix” class keyword, to a new
-        slotted type. 
-    """
-    
-    @classmethod
-    def __prepare__(metacls, name, bases, prefix="/", **kwargs):
-        """ Remove the “prefix” class keyword before calling up """
-        return super(Prefix, metacls).__prepare__(name, bases, **kwargs)
-    
-    def __new__(metacls, name, bases, attributes, prefix="/", **kwargs):
-        """ Override for `Slotted.__new__(…)` setting up a
-            derived slotted class that pulls from a “prefix”
-            with the requisite methods defined for access.
-        """
-        if 'prefix' not in attributes:
-            attributes['prefix'] = ValueDescriptor(prefix)
-        
-        return super(Prefix, metacls).__new__(metacls, name,
-                                                       bases,
-                                                       attributes,
-                                                     **kwargs)
 
 # One-off private versions of “ismergeable” and “isstring” – NOT FOR EXPORT:
 ismergeable = lambda thing: isinstance(thing, collections.abc.Mapping)

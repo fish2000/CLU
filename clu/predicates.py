@@ -18,6 +18,7 @@ assigned = pytuple('doc', 'annotations')
 wrap = lambda function: wraps(function, assigned=assigned)
 
 negate = lambda function: wrap(function)(lambda *args, **kwargs: not function(*args, **kwargs))
+reverse = lambda function: wrap(function)(lambda *args, **kwargs: reversed(function(*args, **kwargs)))
 
 negate_doc = """
 ### … You use `negate(function)` thusly:
@@ -195,6 +196,7 @@ dunder_or   = lambda thing, atx: getpyattr(thing, atx, thing)
 mro         = lambda thing: getpyattr(typeof(thing), 'mro')
 unwrap      = lambda thing: dunder_or(thing, 'wrapped')
 origin      = lambda thing: dunder_or(typeof(thing), 'origin')
+rmro        = reverse(mro)
 
 isancestor  = lambda cls, ancestor=object: isclasstype(cls) and (ancestor in mro(cls))
 isorigin    = lambda cls, original=object: isclasstype(cls) and isancestor(origin(cls), typeof(original))
@@ -385,6 +387,12 @@ def union(*items):
     """ union(*items) → Return the set-union of the contents of all non-`None` arguments """
     return set().union(item for item in items if item is not None)
 
+# UTILITY ANCESTOR PREDICATES: search through attributes across the MRO of a given type –
+# q.v. “resolve” meta-predicate supra.:
+
+ancestral       = lambda atx, cls, default=tuple(): collator(resolve,            atx, *rmro(cls), default=default)
+ancestral_union = lambda atx, cls, default=tuple(): uniquify(iterchain(ancestral(atx,       cls,  default=default)))
+
 # UTILITY FUNCTIONS: helpers for builtin predicate functions over iterables:
 
 @export
@@ -418,6 +426,7 @@ def slots_for(cls):
 
 # MODULE EXPORTS:
 export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n" + negate_doc)
+export(reverse,         name='reverse',         doc="reverse(function) → Reverse an iterating function, returning the reverse of the iterable returned.")
 
 export(ismetaclass,     name='ismetaclass',     doc="ismetaclass(thing) → boolean predicate, True if thing is a metaclass, descending directly from `type`")
 export(isclass,         name='isclass',         doc="isclass(thing) → boolean predicate, True if thing is a class, descending from `object` but not `type`")
@@ -488,6 +497,7 @@ export(finditems,       name='finditems',       doc="finditems(itx, *mappings, d
 
 export(dunder_or,       name='dunder_or',       doc="dunder_or(thing, atx) → Like “getpyattr(…)” only with a default return value of `thing` itself")
 export(mro,             name='mro',             doc="mro(thing) → Return the method resolution order (née “MRO”) tuple for thing (using “type(thing)” for non-classtype operands)")
+export(rmro,            name='rmro',            doc="rmro(thing) → Return the reverse of the method resolution order (née “MRO”) tuple for thing (using “type(thing)” for non-classtype operands)")
 export(unwrap,          name='unwrap',          doc="unwrap(thing) → Return either `thing.__wrapped__` or `thing` for a given `thing`")
 export(origin,          name='origin',          doc="origin(thing) → Return either `typeof(thing).__origin__` or `typeof(thing)` for a given `thing`")
 export(isancestor,      name='isancestor',      doc="isancestor(thing, ancestor=object) → boolean predicate, True if `ancestor` is found in “mro(thing)”")
@@ -515,6 +525,9 @@ export(predicate_xor,   name='predicate_xor',   doc="predicate_xor(predicate, a,
 
 export(case_sort,       name='case_sort',       doc="case_sort(string) → Sorting predicate to sort UPPERCASE names first")
 export(isnotnone,       name='isnotnone',       doc="isnotnone(thing) → boolean predicate, return True if “thing” is not None")
+
+export(ancestral,       name='ancestral',       doc="ancestral(atx, cls[, default]) → shortcut for “attr_across(atx, *rmro(cls)[, default])”")
+export(ancestral_union, name='ancestral_union', doc="ancestral_union(atx, cls[, default]) → shortcut for “uniquify(iterchain(attr_across(atx, *mro(cls)[, default])))”")
 
 export(thing_has,       name='thing_has',       doc="thing_has(thing, attribute) → boolean predicate, True if `thing` has “attribute” (in either `__dict__` or `__slots__`)")
 export(class_has,       name='class_has',       doc="class_has(cls, attribute) → boolean predicate, True if `cls` is a class type and has “attribute” (in either `__dict__` or `__slots__`)")

@@ -10,7 +10,9 @@ import sys
 
 from clu.constants.consts import ENCODING, SINGLETON_TYPES
 from clu.constants.polyfills import lru_cache
-from clu.predicates import negate, ismetaclass, typeof, or_none, isenum, enumchoices, pyname
+from clu.predicates import (negate, ismetaclass, typeof,
+                            resolve, attr,
+                            isenum, enumchoices, uncallable, pyname)
 from clu.typology import isvalidpath, isnumeric, isbytes, isstring
 from clu.exporting import Exporter
 
@@ -29,6 +31,9 @@ def wrap_value(value):
     wrapper.__wrapped__ = value
     return wrapper
 
+# UN-EXPORTED (as of now) – q.v. “clu.config.fieldtypes” supra.:
+hoist = lambda thing: uncallable(thing) and wrap_value(thing) or thing
+
 none_function = wrap_value(None)
 true_function = wrap_value(True)
 
@@ -36,7 +41,7 @@ hexid = lambda thing: hex(id(thing))
 typenameof = lambda thing: pyname(typeof(thing))
 typename_hexid = lambda thing: (pyname(typeof(thing)), hex(id(thing)))
 
-def stringify_value(v):
+def strfield(v):
     """ Basic, simple, straightforward type-switch-based sub-repr """
     T = type(v)
     if isstring(T):
@@ -54,6 +59,55 @@ def stringify_value(v):
             return f"‘{typename}<{v.__name__}({choices}) @ {hex_id}>’"
         return repr(v)
     return f"‘{v!r}’"
+
+@export
+def strfields(instance, fields,
+                       *extras, try_callables=True,
+                      **attributes):
+    """ Stringify an object instance, using an iterable field list to
+        extract and render its values, and printing them along with the 
+        typename of the instance and its memory address -- yielding a
+        repr-style string of the format:
+        
+            “fieldname="val", otherfieldname="otherval"”
+        
+        The `strfields(…)` function is of use in `__str__()` and `__repr__()`
+        definitions, e.g. something like:
+            
+            def inner_repr(self):
+                return strfields(self, type(self).__slots__)
+            
+            def __repr__(self):
+                typename, hex_id = typename_hexid(self)
+                attr_string = self.inner_repr()
+                return f"{typename}({attr_string}) @ {hex_id}"
+        
+        Callable fields, by default, will be called with no arguments
+        to obtain their value. To supress this behavior – if you wish
+        to represent callable fields that require arguments – you can
+        pass the keyword-only “try_callables” flag as False:
+            
+            def inner_repr(self):
+                return strfields(self,
+                            type(self).__slots__,
+                            try_callables=False)
+    """
+    if fields is None:
+        fields = tuple(hoist(attr(instance, 'fields',
+                                            '__all__',
+                                            '__dir__',
+                                            '__slots__',
+                                            '__dict__.keys', default=tuple()))())
+    if all(len(param) < 1 for param in (fields, extras, attributes)):
+        return "¬"
+    attrs = dict(attributes)
+    for field in chain(fields, extras):
+        field_value = resolve(instance, field)
+        if try_callables and callable(field_value):
+            field_value = field_value()
+        if field_value:
+            attrs[field] = strfield(field_value)
+    return ", ".join(f'{k}={v}' for k, v in attrs.items()) or "…"
 
 @export
 def stringify(instance, fields,
@@ -82,17 +136,10 @@ def stringify(instance, fields,
                             type(self).__slots__,
                             try_callables=False)
     """
+    attr_string = strfields(instance, fields,
+                                     *extras, try_callables=try_callables,
+                                    **attributes)
     typename, hex_id = typename_hexid(instance)
-    if all(len(param) < 1 for param in (fields, extras, attributes)):
-        return f"{typename}(¬) @ {hex_id}"
-    attrs = dict(attributes)
-    for field in chain(fields, extras):
-        field_value = or_none(instance, field)
-        if try_callables and callable(field_value):
-            field_value = field_value()
-        if field_value:
-            attrs[field] = stringify_value(field_value)
-    attr_string = ", ".join(f'{k}={v}' for k, v in attrs.items()) or "…"
     return f"{typename}({attr_string}) @ {hex_id}"
 
 ex = os.path.extsep

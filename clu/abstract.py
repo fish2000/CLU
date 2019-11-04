@@ -40,25 +40,6 @@ class NonSlotted(abc.ABCMeta):
                                                            attributes,
                                                          **kwargs)
 
-class ValueDescriptor(object):
-    
-    __slots__ = ('value',)
-    
-    def __init__(self, value):
-        self.value = value
-    
-    def __get__(self, *args):
-        return self.value
-    
-    def __set__(self, instance, value):
-        pass
-    
-    def __repr__(self):
-        from clu.constants.consts import ENCODING
-        return isinstance(self.value, str)   and self.value or \
-               isinstance(self.value, bytes) and self.value.decode(ENCODING) or \
-                                            repr(self.value)
-
 class AppName(abc.ABC):
     
     __slots__ = tuple()
@@ -147,10 +128,65 @@ class ReprWrapper(abc.ABC):
         rpr = self.inner_repr()
         return f"{cnm}({rpr}) @ {hxa}"
 
+class SlottedRepr(ReprWrapper, metaclass=Slotted):
+    
+    """ A simple, default version of a ReprWrapper class that uses its
+        inheritance chain’s value for “__slots__” to build the repr
+        string for its instances
+    """
+    
+    def inner_repr(self):
+        """ Use the union of __slots__, defined across this classes’
+            inheritance chain, to build the instances’ repr string
+        """
+        from clu.predicates import slots_for
+        from clu.repr import strfields
+        return strfields(self,
+               slots_for(self),
+                    try_callables=False)
+
+class Descriptor(SlottedRepr):
+    
+    """ A simple, generic desciptor, wrapping one value, and storing its name """
+    
+    __slots__ = ('name', 'value')
+    
+    def __init__(self, value, name=None):
+        self.name = name or "«unknown»"
+        self.value = value
+    
+    def __get__(self, *args):
+        return self.value
+    
+    def __set__(self, instance, value):
+        pass
+    
+    def __set_name__(self, cls, name):
+        self.name = name
+    
+    def alternative_inner_repr(self):
+        from clu.repr import strfield
+        value = strfield(self.value)
+        return f"[name={self.name}, value={value}]"
+
+class ValueDescriptor(Descriptor):
+    
+    """ A descriptor whose repr-string tries to be a literal reflection
+        of its wrapped value
+    """
+    
+    def __repr__(self):
+        """ A custom repr for the ValueDescriptor’s literal value """
+        from clu.constants.consts import ENCODING
+        return isinstance(self.value, str)   and self.value or \
+               isinstance(self.value, bytes) and self.value.decode(ENCODING) or \
+                                            repr(self.value)
+
 __all__ = ('Slotted', 'NonSlotted',
-           'ValueDescriptor',
            'AppName',
            'Cloneable',
-           'ReprWrapper')
+           'ReprWrapper',
+           'SlottedRepr',
+           'Descriptor', 'ValueDescriptor')
 
 __dir__ = lambda: list(__all__)

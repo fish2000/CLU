@@ -16,7 +16,7 @@ class TestPredicates(object):
         #                           stattr_search, stattr_across)
         
         # Non-data descriptor wrapping a R/O value:
-        from clu.exporting import ValueDescriptor
+        from clu.abstract import ValueDescriptor
         
         # We have to use these irritating default environment values everywhere,
         # in case the testing environment is kertwanged:

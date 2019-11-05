@@ -239,5 +239,47 @@ class TestImporting(object):
             
             Registry.unregister(derived.appname, derived.qualname)
     
-    def test_SubModule_contextmanager(self):
-        pass
+    def test_SubModule_contextmanager_derived_import_statement(self):
+        from clu.importing import all_registered_modules
+        from clu.importing import SubModule
+        
+        before = all_registered_modules()
+        
+        with SubModule('derived_module0', __module__=__name__) as DerivedModule:
+            from clu.app import derived_module0 as derived
+            
+            assert type(derived) is DerivedModule
+            assert type(derived.exporter).__name__ == 'Exporter'
+            assert len(all_registered_modules()) == len(before) + 1
+        
+        after = all_registered_modules()
+        assert before == after
+    
+    def test_SubModule_contextmanager_derived_import_importlib(self):
+        from clu.importing import all_registered_modules
+        from clu.importing import SubModule
+        # from clu.predicates import mro
+        from clu.typology import subclasscheck
+        import importlib
+        
+        before = all_registered_modules()
+        
+        with SubModule('derived_module1', __module__=__name__) as DerivedModule:
+            derived = importlib.import_module('clu.app.derived_module1')
+            
+            assert type(derived) is DerivedModule
+            assert derived.__class__ is DerivedModule
+            assert isinstance(derived, DerivedModule)
+            assert subclasscheck(type(derived), DerivedModule)
+            
+            # print(type(DerivedModule))
+            # print(DerivedModule)
+            # print(type(derived))
+            # pprint(mro(derived))
+            
+            assert type(derived.exporter).__name__ == 'Exporter'
+            assert len(all_registered_modules()) == len(before) + 1
+        
+        after = all_registered_modules()
+        assert before == after
+        

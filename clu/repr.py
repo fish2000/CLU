@@ -122,11 +122,12 @@ def stringify(instance, fields,
     return f"{typename}({attr_string}) {INSTANCE_DELIMITER} {hex_id}"
 
 @export
-def chop_instance_repr(instance_repr):
+def chop_instance_repr(instance):
     """ Discard the the object-instance hex ID portion of
         an instance repr string
     """
-    return str(instance_repr).split(INSTANCE_DELIMITER).pop(0).strip()
+    instance_repr = isstring(instance) and instance or repr(instance)
+    return instance_repr.split(INSTANCE_DELIMITER).pop(0).strip()
 
 @export
 def compare_instance_reprs(repr0, *reprX):

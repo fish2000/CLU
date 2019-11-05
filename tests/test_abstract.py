@@ -202,8 +202,17 @@ class TestAbstractReprClasses(object):
         assert not compare_instance_reprs(i0, i2)
         assert not compare_instance_reprs(i0, i1, i2)
     
-    def test_repr_MappingViewRepr(self):
-        pass
+    def test_repr_MappingViewRepr(self, datadir):
+        from clu.repr import compare_instance_reprs
+        
+        keys = repr(datadir.keys())
+        values = repr(datadir.values())
+        items = repr(datadir.items())
+        
+        assert compare_instance_reprs(keys.replace('KeysView', 'ItemsView'), items)
+        assert compare_instance_reprs(values.replace('ValuesView', 'ItemsView'), items)
+        assert not compare_instance_reprs(keys, items)
+        assert not compare_instance_reprs(values, items)
 
 class TestAbstractDescriptors(object):
     

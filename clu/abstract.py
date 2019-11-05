@@ -33,7 +33,7 @@ class NonSlotted(abc.ABCMeta):
             derived un-slotted class.
         """
         if '__slots__' in attributes:
-            del attributes['__slots__']
+            attributes.pop('__slots__')
         
         return super(NonSlotted, metacls).__new__(metacls, name,
                                                            bases,

@@ -22,6 +22,7 @@ pytz
 readme-renderer
 requests
 scipy
+setproctitle
 tifffile
 twine
 yajl

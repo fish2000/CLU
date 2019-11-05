@@ -7,6 +7,245 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates module. """
     
+    def test_ancestral_and_ancestral_union(self):
+        from clu.predicates import ancestral_union
+        from clu.fs.filesystem import Directory, TemporaryDirectory
+        
+        fields = ('name', 'old', 'new', 'exists',
+                  'will_change', 'did_change', 'will_change_back', 'did_change_back')
+        
+        morefields = ('name', 'old', 'new', 'exists',
+                      'will_change', 'did_change', 'will_change_back', 'did_change_back',
+                      'destroy', 'prefix', 'suffix', 'parent')
+        
+        assert ancestral_union('fields', Directory) == fields
+        assert ancestral_union('fields', TemporaryDirectory) == morefields
+    
+    def test_union(self):
+        from clu.predicates import listify, union
+        
+        l0 = listify("yo", "dogg", "I", "heard", "you", "like", "dogg", "yo", "don't")
+        l1 = listify("yo", "dogg", "I", "heard", "you", "like", "repetitive", "sets")
+        lU = union(*l0, *l1)
+        lS = union(l0 + l1)
+        
+        assert lU == { "yo", "dogg", "I", "heard", "you", "don't", "like", "repetitive", "sets" }
+        assert lS == { "yo", "dogg", "I", "heard", "you", "don't", "like", "repetitive", "sets" }
+    
+    def test_negate(self):
+        from clu.predicates import negate
+        
+        def is_even(integer):
+            return integer % 2 == 0
+        
+        assert is_even(2)
+        assert is_even(66)
+        assert is_even(222)
+        assert is_even(6666)
+        assert not is_even(3)
+        assert not is_even(67)
+        assert not is_even(223)
+        assert not is_even(6667)
+        
+        is_odd = negate(is_even)
+        
+        assert not is_odd(2)
+        assert not is_odd(66)
+        assert not is_odd(222)
+        assert not is_odd(6666)
+        assert is_odd(3)
+        assert is_odd(67)
+        assert is_odd(223)
+        assert is_odd(6667)
+    
+    def test_reverse(self):
+        from clu.predicates import reverse, listify
+        
+        # Sample lists:
+        l0 = listify("yo", "dogg", "I", "heard", "you", "like", "ordered", "lists")
+        r0 = listify("lists", "ordered", "like", "you", "heard", "I", "dogg", "yo")
+        
+        # Reverse “listify(…)”:
+        backwards = reverse(listify)
+        # Ensure the reversed function returns a list:
+        backwardsify = lambda *items: list(backwards(item for item in items if item is not None))
+        
+        # Sample reversed lists:
+        l1 = backwardsify("yo", "dogg", "I", "heard", "you", "like", "ordered", "lists")
+        r1 = backwardsify("lists", "ordered", "like", "you", "heard", "I", "dogg", "yo")
+        
+        # Compare:
+        assert r0 == l1
+        assert l0 == r1
+    
+    def test_itervariadic_decorator(self):
+        from clu.predicates import reverse, itervariadic, listify
+        
+        l0 = listify("yo", "dogg", "I", "heard", "you", "like", "ordered", "lists")
+        r0 = listify("lists", "ordered", "like", "you", "heard", "I", "dogg", "yo")
+        
+        # Reverse “listify(…)”:
+        backwards = reverse(listify)
+        # Ensure the reversed function returns a list:
+        backwardslist = lambda *items: list(backwards(item for item in items if item is not None))
+        # Imbue the wrapped revered function with “itervariadic(¬)” powers:
+        backwardsify = itervariadic(backwardslist)
+        
+        # Sample reversed lists:
+        l1 = backwardsify("yo", "dogg", "I", "heard", "you", "like", "ordered", "lists")
+        r1 = backwardsify("lists", "ordered", "like", "you", "heard", "I", "dogg", "yo")
+        
+        # Sample reversed lists from iterables:
+        l2 = backwardsify(l0)
+        r2 = backwardsify(r0)
+        
+        # Compare reversed lists from lists:
+        assert r0 == l1
+        assert l0 == r1
+        
+        # Compare reversed lists from iterables:
+        assert l1 == l2
+        assert r1 == r2
+    
+    def test_mro_and_rmro(self):
+        from clu.predicates import mro, rmro
+        from clu.predicates import newtype
+        
+        A = newtype('A')
+        B = newtype('B', A)
+        C = newtype('C', B)
+        D = newtype('D', C)
+        
+        assert mro(D)           == (D, C, B, A, object)
+        assert tuple(rmro(D))   == (object, A, B, C, D)
+    
+    def test_unwrap(self):
+        from clu.predicates import unwrap
+        from clu.extending import doubledutch
+        
+        @doubledutch
+        def yodogg(x, y):
+            return None
+        
+        @yodogg.domain(int, int)
+        def yodogg(x, y):
+            return f"INTS: {x}, {y}"
+        
+        @yodogg.domain(str, str)
+        def yodogg(x, y):
+            return f"STRS: {x}, {y}"
+        
+        @yodogg.annotated
+        def yodogg(x: float, y: float):
+            return f"FLTS: {x}, {y}"
+        
+        assert yodogg(None, None) is None
+        assert yodogg(22, 333).startswith('INTS')
+        assert yodogg(22.22, 333.33).startswith('FLTS')
+        assert yodogg('one', 'two').startswith('STRS')
+        
+        assert unwrap(yodogg)(22, 33) is None
+        assert unwrap(yodogg)(22.22, 333.33) is None
+        assert unwrap(yodogg)('one', 'two') is None
+        
+        def not_wrapped():
+            return "NOT WRAPPED"
+        
+        assert not_wrapped() == unwrap(not_wrapped)()
+    
+    @pytest.mark.TODO
+    def test_origin(self):
+        # TODO: expand both this test, and what
+        # this predicate does – e.g. special-case for
+        # “typing._SpecialForm” or whatever the fuck
+        from clu.predicates import origin
+        import typing as tx
+        
+        assert origin(tx.Dict) is dict
+        assert origin(tx.Dict[str, tx.Any]) is dict
+        assert origin(dict) is dict
+        assert origin({}) is dict
+    
+    @pytest.mark.TODO
+    def test_isancestor_and_isorigin(self):
+        from clu.predicates import isancestor, isorigin
+        from clu.predicates import newtype
+        import typing as tx
+        
+        A = newtype('A')
+        B = newtype('B', A)
+        C = newtype('C', B)
+        D = newtype('D', C)
+        
+        assert isancestor(A) # defaults to “object”
+        assert isancestor(B) # defaults to “object”
+        assert isancestor(C) # defaults to “object”
+        assert isancestor(D) # defaults to “object”
+        
+        assert isancestor(B, A)
+        assert isancestor(C, B)
+        assert isancestor(D, C)
+        
+        assert isancestor(B, ancestor=A)
+        assert isancestor(C, ancestor=B)
+        assert isancestor(D, ancestor=C)
+        
+        # THIS DOES NOT QUITE WORK.
+        # TODO: make it work
+        # assert isorigin(tx.Dict,            original=dict)
+        # assert isorigin(dict,                 original=tx.Dict)
+        # assert isorigin(tx.Dict[str, str],  original=dict)
+        # assert isorigin(dict,               original=dict)
+        # assert isorigin({},                 original=dict)
+    
+    def test_newtype(self):
+        from clu.predicates import isclass, ismetaclass
+        from clu.predicates import newtype
+        import abc
+        
+        # equivalient to class Thingy(object): pass
+        Thingy = newtype('Thingy')
+        assert isclass(Thingy)
+        assert not ismetaclass(Thingy)
+        assert Thingy.__name__ == 'Thingy'
+        assert Thingy.__qualname__.endswith('Thingy')
+        
+        # equivalent to class MetaThingy(type): pass
+        MetaThingy = newtype('MetaThingy', type)
+        assert not isclass(MetaThingy)
+        assert ismetaclass(MetaThingy)
+        assert MetaThingy.__name__ == 'MetaThingy'
+        assert MetaThingy.__qualname__.endswith('MetaThingy')
+        
+        # equivalent to class DerivedThingy(Thingy): pass
+        DerivedThingy = newtype('DerivedThingy', Thingy)
+        assert isclass(DerivedThingy)
+        assert not ismetaclass(DerivedThingy)
+        assert DerivedThingy.__name__ == 'DerivedThingy'
+        assert DerivedThingy.__qualname__.endswith('DerivedThingy')
+        assert DerivedThingy.__mro__ == (DerivedThingy, Thingy, object)
+        
+        # equivalent to AbstractThingy(Thingy, abc.ABC): pass
+        AbstractThingy = newtype('AbstractThingy', Thingy, abc.ABC)
+        assert isclass(AbstractThingy)
+        assert not ismetaclass(AbstractThingy)
+        assert AbstractThingy.__name__ == 'AbstractThingy'
+        assert AbstractThingy.__qualname__.endswith('AbstractThingy')
+        assert AbstractThingy.__mro__ == (AbstractThingy, Thingy, abc.ABC, object)
+        
+        # equivalent to:
+        # class ThingyWithAttrs(Thingy):
+        #     yo = 'dogg',
+        #     iheard = 'you like attributes'
+        ThingyWithAttrs = newtype('ThingyWithAttrs', Thingy, yo='dogg', iheard='you like attributes')
+        assert isclass(ThingyWithAttrs)
+        assert not ismetaclass(ThingyWithAttrs)
+        assert ThingyWithAttrs.__name__ == 'ThingyWithAttrs'
+        assert ThingyWithAttrs.__qualname__.endswith('ThingyWithAttrs')
+        assert ThingyWithAttrs.__mro__ == (ThingyWithAttrs, Thingy, object)
+        assert ThingyWithAttrs.yo == 'dogg'
+        assert ThingyWithAttrs.iheard == 'you like attributes'
+    
     @pytest.mark.TODO
     def test_static_accessors(self, environment):
         from clu.predicates import isclasstype, pyattr

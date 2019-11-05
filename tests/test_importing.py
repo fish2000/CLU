@@ -238,3 +238,6 @@ class TestImporting(object):
         finally:
             
             Registry.unregister(derived.appname, derived.qualname)
+    
+    def test_SubModule_contextmanager(self):
+        pass

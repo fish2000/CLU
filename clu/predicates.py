@@ -195,7 +195,7 @@ dunder_or   = lambda thing, atx: getpyattr(thing, atx, thing)
 
 mro         = lambda thing: getpyattr(typeof(thing), 'mro')
 unwrap      = lambda thing: dunder_or(thing, 'wrapped')
-origin      = lambda thing: dunder_or(typeof(thing), 'origin')
+origin      = lambda thing: typeof(dunder_or(thing, 'origin'))
 rmro        = reverse(mro)
 
 isancestor  = lambda cls, ancestor=object: isclasstype(cls) and (ancestor in mro(cls))

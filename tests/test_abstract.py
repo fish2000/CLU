@@ -341,4 +341,3 @@ class TestAbstractDescriptors(object):
         # N.B. Dictish.hax is a ValueDescriptor instance:
         atts = ('yo', 'dogg', 'hax')
         assert stattrs(Dictish, *atts) != stattrs(Dictish(), *atts) == attrs(Dictish(), *atts)
-        

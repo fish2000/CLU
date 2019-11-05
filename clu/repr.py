@@ -18,6 +18,8 @@ hexid = lambda thing: hex(id(thing))
 typenameof = lambda thing: pyname(typeof(thing))
 typename_hexid = lambda thing: (pyname(typeof(thing)), hex(id(thing)))
 
+INSTANCE_DELIMITER = '@'
+
 def strfield(v):
     """ Basic, simple, straightforward type-switch-based sub-repr """
     T = type(v)
@@ -33,7 +35,7 @@ def strfield(v):
         if isenum(v):
             typename, hex_id = typename_hexid(v)
             choices = ", ".join(enumchoices(v))
-            return f"‘{typename}<{v.__name__}({choices}) @ {hex_id}>’"
+            return f"‘{typename}<{v.__name__}({choices}) {INSTANCE_DELIMITER} {hex_id}>’"
         return repr(v)
     return f"‘{v!r}’"
 
@@ -57,7 +59,7 @@ def strfields(instance, fields,
             def __repr__(self):
                 typename, hex_id = typename_hexid(self)
                 attr_string = self.inner_repr()
-                return f"{typename}({attr_string}) @ {hex_id}"
+                return f"{typename}({attr_string}) {INSTANCE_DELIMITER} {hex_id}"
         
         Callable fields, by default, will be called with no arguments
         to obtain their value. To supress this behavior – if you wish
@@ -117,7 +119,24 @@ def stringify(instance, fields,
                                      *extras, try_callables=try_callables,
                                     **attributes)
     typename, hex_id = typename_hexid(instance)
-    return f"{typename}({attr_string}) @ {hex_id}"
+    return f"{typename}({attr_string}) {INSTANCE_DELIMITER} {hex_id}"
+
+@export
+def chop_instance_repr(instance_repr):
+    """ Discard the the object-instance hex ID portion of
+        an instance repr string
+    """
+    return str(instance_repr).split(INSTANCE_DELIMITER).pop(0).strip()
+
+@export
+def compare_instance_reprs(repr0, *reprX):
+    """ Compare two or more instance reprs after discarding
+        the object-instance hex ID
+    """
+    assert len(reprX) > 0
+    crepr0 =  chop_instance_repr(repr0)
+    creprX = (chop_instance_repr(r) for r in reprX if r is not None)
+    return all((crepr0 == cr) for cr in creprX)
 
 export(hexid,                   name='hexid',               doc="hexid(thing) → Return the hex-ified representation of “thing”’s ID – Equivalent to “hex(id(thing))”")
 export(typenameof,              name='typenameof',          doc="typenameof(thing) → Return the string name of the type of “thing” – Equivalent to “pyname(typeof(thing))”, q.v. “clu.predicates”")

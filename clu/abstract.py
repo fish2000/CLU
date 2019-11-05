@@ -145,14 +145,15 @@ class Descriptor(SlottedRepr):
         self.name = name or "«unknown»"
         self.value = value
     
+    def __set_name__(self, cls, name):
+        self.name = name
+    
     def __get__(self, *args):
         return self.value
     
     def __set__(self, instance, value):
-        pass
-    
-    def __set_name__(self, cls, name):
-        self.name = name
+        if value != self.value:
+            raise ValueError("cannot alter {self.name} value")
     
     def alternative_inner_repr(self):
         from clu.repr import strfield

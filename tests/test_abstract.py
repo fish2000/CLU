@@ -202,7 +202,9 @@ class TestAbstractReprClasses(object):
         assert not compare_instance_reprs(i0, i2)
         assert not compare_instance_reprs(i0, i1, i2)
     
+    @pytest.mark.TODO
     def test_repr_MappingViewRepr(self, datadir):
+        # TODO: this test makes no sense – rewrite it
         from clu.repr import compare_instance_reprs
         
         keys = repr(datadir.keys())

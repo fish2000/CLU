@@ -54,7 +54,7 @@ class TestFsMisc(object):
         from collections import Counter
         
         data = dirname.subdirectory('data')
-        suffixes = ('jpg', 'png', 'toml')
+        suffixes = ('jpg', 'png', 'toml', None) # None → count everything!
         searchers = { suffix : suffix_searcher(suffix) for suffix in suffixes }
         counts = Counter({ suffix : 0 for suffix in suffixes })
         
@@ -66,7 +66,8 @@ class TestFsMisc(object):
             assert counts[suffix] == countfiles(data, suffix=suffix)
         
         # The LHS here can pick up random shit occasionally:
-        assert countfiles(data) >= sum(counts.values())
+        # assert countfiles(data) >= sum(counts.values())
+        assert countfiles(data) == counts[None]
     
     def test_swapext(self):
         from clu.fs.misc import swapext

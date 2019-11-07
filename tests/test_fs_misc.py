@@ -57,8 +57,10 @@ class TestFsMisc(object):
         tzip = temporaryname(prefix='test-fs-misc-filesize-',
                              suffix='zip')
         
+        # Create a large zipfile with that instance:
         fzip = datadir.zip_archive(tzip.name)
         
+        # Check the zipfile’s size attributes:
         assert tzip.exists
         assert tzip.filesize > 10000
         assert os.path.exists(tzip)
@@ -71,6 +73,16 @@ class TestFsMisc(object):
         assert filesize(tzip.name) == filesize(fzip)
         assert filesize(tzip.name) != -1
         assert filesize(fzip) != -1
+        
+        # Create a nonexistant TemporaryName instance:
+        nofile = temporaryname(prefix='test-fs-misc-filesize-',
+                               suffix='none')
+        
+        # Check the nonexistant files’ size attributes:
+        assert not nofile.exists
+        assert nofile.filesize == -1
+        assert not os.path.exists(nofile)
+        assert filesize(nofile.name) == -1
     
     def test_differentfile(self, datadir):
         pass

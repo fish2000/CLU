@@ -264,11 +264,30 @@ class LoaderBase(AppName, importlib.abc.Loader):
         return None
     
     def exec_module(self, module):
-        """ Execute a newly created module – this is a no-op for
-            class-based modules, as they have by definition already
-            been executed by the interpreter
+        """ Execute a newly created module.
+            
+            Since the code of class-based module has, by definition,
+            already been executed by the Python interpreter at this point,
+            we delegate this action to a user-provided “__execute__()”
+            instance method of the class-based module in question.
+            
+            The “__execute__()” method will be called with no arguments.
+            The class-based module instance will, at this point, have its
+            “appname” and “appspace” class attributes set and readable,
+            in addition to all of the contemporary module-instance attributes
+            documented in e.g. PEP 451 and friends.
+            
+            An “__execute__()” method shouldn’t return anything.
         """
-        pass
+        if not getattr(module, '_executed', False):
+            if hasattr(module, '__execute__'):
+                if callable(module.__execute__):
+                    try:
+                        module.__execute__()
+                    finally:
+                        module._executed = True
+                else:
+                    raise TypeError("__execute__() method not callable")
 
 @export
 class ArgumentSink(object):
@@ -392,7 +411,9 @@ class MetaModule(MetaRegistry):
         # Return the new module class:
         return cls
 
-DO_NOT_INCLUDE = { '__abstractmethods__', '_abc_impl', 'monomers' }
+DO_NOT_INCLUDE = { '__abstractmethods__',
+                   '__execute__',
+                   '_abc_impl', '_executed', 'monomers' }
 
 @export
 class ModuleBase(Package, Registry, metaclass=MetaModule):
@@ -442,6 +463,27 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         if self.prefix:
             qualified_name = dotpath_join(self.prefix, name)
         super(ModuleBase, self).__init__(qualified_name or name, doc)
+    
+    def __execute__(self):
+        """ The “__execute__()” class-based module instance method is called
+            when the module is quote-unquote “executed.” This is analagous
+            to the point at which a file-based modules’ code is actually run
+            by the Python interpreter; since a class-based modules’ code has,
+            by definition, already been executed once the class itself has
+            been initialized, this method hook is provided to execute custom
+            module code at that point in the class modules’ lifecycle.
+            
+            An “__execute__()” method should not accept any arguments or return
+            any values. The “self” instance it receives will be fully initialized
+            and include “appname”, “appspace”, ‘name’, ‘prefix’, ‘qualname’,
+            and other PEP-451-related module attributes.
+            
+            Currently, the base class implementation is a no-op – but should
+            class-based module authors write their own “__execute__()” methods,
+            they are advised to include a “super(…)” call within their own
+            implementations, as this is likely to change in the future.
+        """
+        pass
     
     @property
     def name(self):

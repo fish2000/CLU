@@ -5,6 +5,87 @@ from __future__ import print_function
 
 class TestImporting(object):
     
+    def test_module_export_within_execute(self):
+        from clu.importing import Module, Registry, DO_NOT_INCLUDE
+        from clu.exporting import Exporter
+        
+        try:
+        
+            class DerivedWithExecute(Module):
+                
+                """ I heard you like docstrings """
+                
+                yo = 'dogg'
+                
+                def iheard(self):
+                    return "I heard"
+                
+                def youlike(self):
+                    return "you like"
+                
+                def unexported(self):
+                    return "conditionally exporting things"
+                
+                def __execute__(self):
+                    """ Class-module execution hook code """
+                    cls = type(self)
+                    # export class-module functions:
+                    export = cls.exporter.decorator()
+                    export(self.yo,      name='yo')
+                    export(self.iheard,  name='iheard')
+                    export(self.youlike, name='youlike')
+                    # assert module attributes:
+                    assert cls.appname == 'clu'
+                    assert cls.appspace == 'app'
+                    assert cls.name == 'DerivedWithExecute'
+                    assert cls.prefix == 'clu.app'
+                    assert cls.qualname == 'clu.app.DerivedWithExecute'
+                    # calling up not technically necessary RN:
+                    super().__execute__()
+            
+            # Normally we’d just call the class “derived”, rather
+            # than “Derived” – in this case we need to differentiate
+            # betweeen the name of the defined class and the thing
+            # we imported within the same code block (normally they’d
+            # be in separate files):
+            from clu.app import DerivedWithExecute as derived
+            
+            assert type(derived) is DerivedWithExecute
+            assert repr(derived) == "<class-module ‘clu.app.DerivedWithExecute’ from “clu.app”>"
+            assert derived.yo == 'dogg'
+            
+            assert type(derived.exporter) is Exporter
+            assert len(derived.exporter) == len(dir(derived))
+            assert derived.exporter.dotpath == derived.qualname
+            
+            durr = dir(derived)
+            assert 'yo' in durr
+            assert 'iheard' in durr
+            assert 'youlike' in durr
+            assert 'unexported' not in durr
+            
+            for attname in dir(derived):
+                assert hasattr(derived, attname)
+            
+            for attname in DO_NOT_INCLUDE:
+                assert attname not in dir(derived)
+            
+            assert derived._executed
+            
+            assert derived.iheard() == 'I heard'
+            assert derived.youlike() == 'you like'
+            assert derived.unexported() == 'conditionally exporting things'
+            
+            from clu.app.DerivedWithExecute import yo, iheard, youlike
+            
+            assert yo == 'dogg'
+            assert iheard() == 'I heard'
+            assert youlike() == 'you like'
+        
+        finally:
+            
+            Registry.unregister(derived.appname, derived.qualname)
+    
     def test_basic_module(self):
         from clu.constants.consts import PROJECT_NAME
         from clu.naming import nameof

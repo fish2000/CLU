@@ -225,7 +225,7 @@ class TestPredicates(object):
         assert DerivedThingy.__qualname__.endswith('DerivedThingy')
         assert DerivedThingy.__mro__ == (DerivedThingy, Thingy, object)
         
-        # equivalent to AbstractThingy(Thingy, abc.ABC): pass
+        # equivalent to class AbstractThingy(Thingy, abc.ABC): pass
         AbstractThingy = newtype('AbstractThingy', Thingy, abc.ABC)
         assert isclass(AbstractThingy)
         assert not ismetaclass(AbstractThingy)

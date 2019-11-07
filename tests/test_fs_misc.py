@@ -49,7 +49,24 @@ class TestFsMisc(object):
         assert re_suffix(".JPG$") == "jpg$"
     
     def test_suffix_searcher(self, dirname):
-        pass
+        from clu.fs.misc import suffix_searcher
+        from clu.testing.utils import countfiles
+        from collections import Counter
+        
+        data = dirname.subdirectory('data')
+        suffixes = ('jpg', 'png', 'toml')
+        searchers = { suffix : suffix_searcher(suffix) for suffix in suffixes }
+        counts = Counter({ suffix : 0 for suffix in suffixes })
+        
+        for root, dirs, files in data.walk():
+            for suffix in suffixes:
+                counts[suffix] += len(tuple(filter(searchers[suffix], files)))
+        
+        for suffix in suffixes:
+            assert counts[suffix] == countfiles(data, suffix=suffix)
+        
+        # The LHS here can pick up random shit occasionally:
+        assert countfiles(data) >= sum(counts.values())
     
     def test_swapext(self):
         from clu.fs.misc import swapext

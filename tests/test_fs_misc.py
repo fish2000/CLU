@@ -123,9 +123,13 @@ class TestFsMisc(object):
                 assert differentfile(theother, somefile)
                 assert differentsize(theother, somefile)
                 assert not samesize(theother, somefile)
-    
-    def test_samesize(self, temporaryname):
-        pass
+        
+        yetanotherfile = temporaryname(prefix='test-fs-misc-differentfile-',
+                                       suffix='wat')
+        yetanotherfile.write(data)
+        assert samesize(somefile, yetanotherfile)
+        assert differentfile(somefile, yetanotherfile)
+        assert not differentsize(somefile, yetanotherfile)
     
     def test_u8bytes_and_u8str(self):
         pass

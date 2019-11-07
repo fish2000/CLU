@@ -139,6 +139,10 @@ def determine_name(thing, name=None, try_repr=False):
     # … or if called without a “thing”:
     if thing is None:
         return None
+    # Check for a function wrapper:
+    if callable(thing):
+        if callable(getattr(thing, '__wrapped__', None)):
+            return determine_name(thing.__wrapped__)
     # Check for telltale function-object attributes:
     code = None
     if hasattr(thing, '__code__'): # Python 3.x
@@ -147,9 +151,6 @@ def determine_name(thing, name=None, try_repr=False):
         code = thing.func_code
     # Use the function’s code object, if found…
     if code is not None:
-        # Check for a function wrapper:
-        if hasattr(thing, '__wrapped__'):
-            return determine_name(thing.__wrapped__)
         if hasattr(code, 'co_name') and \
        not hasattr(thing, '__lambda_name__'):
             name = code.co_name

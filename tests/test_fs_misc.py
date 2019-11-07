@@ -37,7 +37,16 @@ class TestFsMisc(object):
         assert yo('dogg yo')
     
     def test_re_suffix(self):
-        pass
+        from clu.fs.misc import re_suffix
+        
+        assert re_suffix(None) is None
+        assert re_suffix('') is None
+        assert re_suffix(".jpg") == "jpg$"
+        assert re_suffix("jpg") == "jpg$"
+        assert re_suffix(".jpg$") == "jpg$"
+        assert re_suffix(".JPG") == "jpg$"
+        assert re_suffix("JPG") == "jpg$"
+        assert re_suffix(".JPG$") == "jpg$"
     
     def test_suffix_searcher(self, datadir):
         pass

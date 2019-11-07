@@ -58,7 +58,7 @@ def re_suffix(string):
     """ Remove any “os.path.extsep” prefixing a string and ensure
         it ends with a “$” – to indicate a regular expression suffix.
     """
-    if string is None:
+    if not string:
         return None
     return rf"{string.lower().lstrip(ex).rstrip(dolla)}$"
 

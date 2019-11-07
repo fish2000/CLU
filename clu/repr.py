@@ -20,24 +20,24 @@ typename_hexid = lambda thing: (pyname(typeof(thing)), hex(id(thing)))
 
 INSTANCE_DELIMITER = '@'
 
-def strfield(v):
+def strfield(value):
     """ Basic, simple, straightforward type-switch-based sub-repr """
-    T = type(v)
+    T = type(value)
     if isstring(T):
-        return f"“{v}”"
+        return f"“{value}”"
     elif T in SINGLETON_TYPES:
-        return str(v)
+        return f"«{value!s}»"
     elif isnumeric(T):
-        return str(v)
+        return f"{value!s}"
     elif isbytes(T):
-        return f"“{v.decode(ENCODING)}”"
+        return strfield(value.decode(ENCODING))
     elif ismetaclass(T):
-        if isenum(v):
-            typename, hex_id = typename_hexid(v)
-            choices = ", ".join(enumchoices(v))
-            return f"‘{typename}<{v.__name__}({choices}) {INSTANCE_DELIMITER} {hex_id}>’"
-        return repr(v)
-    return f"‘{v!r}’"
+        if isenum(value):
+            typename, hex_id = typename_hexid(value)
+            choices = ", ".join(enumchoices(value))
+            return f"‘{typename}<({choices}) {INSTANCE_DELIMITER} {hex_id}>’"
+        return repr(value)
+    return f"‘{value!r}’"
 
 @export
 def strfields(instance, fields,

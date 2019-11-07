@@ -31,6 +31,8 @@ def re_matcher(string):
         regular-expression within any strings with which it is called,
         returning True when the regex matches from the beginning of the
         string, and False when it doesn’t.
+        
+        Results are cached, via “functools.lru_cache(…)”
     """
     if not string:
         return true_function
@@ -42,6 +44,8 @@ def re_searcher(string):
     """ Return a boolean function that will search for the given
         regular-expression within any strings with which it is called,
         returning True when the regex matches and False when it doesn’t.
+        
+        Results are cached, via “functools.lru_cache(…)”
         
         Useful in filter(…) calls and comprehensions, e.g.:
         
@@ -195,7 +199,7 @@ octalize = lambda integer: "0o%04o" % integer
 
 @onecache
 def current_umask():
-    """ Get the current umask value (cached on Python 3 and up). """
+    """ Get the current umask value. Results are cached, via “functools.lru_cache(…)” """
     mask = os.umask(0)
     os.umask(mask)
     return mask

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import os
 import pytest
 
 class TestFsMisc(object):
@@ -44,8 +45,32 @@ class TestFsMisc(object):
     def test_swapext(self):
         pass
     
-    def test_filesize(self, temporaryname):
-        pass
+    def test_filesize(self, datadir, temporaryname):
+        from clu.testing.utils import countfiles
+        from clu.fs.misc import filesize
+        
+        # Ensure the “datadir” fixture has something
+        # in it, of which we can make use:
+        assert countfiles(datadir) > 10
+        
+        # Use a TemporaryName instance for the zip archive:
+        tzip = temporaryname(prefix='test-fs-misc-filesize-',
+                             suffix='zip')
+        
+        fzip = datadir.zip_archive(tzip.name)
+        
+        assert tzip.exists
+        assert tzip.filesize > 10000
+        assert os.path.exists(tzip)
+        assert filesize(tzip.name) > 10000
+        
+        assert os.path.exists(fzip)
+        assert os.path.samefile(tzip, fzip)
+        assert filesize(fzip) > 10000
+        
+        assert filesize(tzip.name) == filesize(fzip)
+        assert filesize(tzip.name) != -1
+        assert filesize(fzip) != -1
     
     def test_differentfile(self, datadir):
         pass

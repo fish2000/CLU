@@ -147,18 +147,18 @@ class TestFsFilesystem(object):
             assert os.path.exists(f)
             assert os.path.basename(f) in destination
     
-    def test_zip_archive_temporaryname(self, datadir, temporaryname):
+    def test_zip_archive_temporaryname(self, dirname, temporaryname):
         from clu.testing.utils import countfiles
         
         # Ensure the “datadir” fixture has something
         # in it, of which we can make use:
-        assert countfiles(datadir) > 10
+        assert countfiles(dirname) > 10
         
         # Use a TemporaryName instance for the zip archive:
         tzip = temporaryname(prefix='test-zip-archive-',
                              suffix='zip')
         
-        fzip = datadir.zip_archive(tzip.name)
+        fzip = dirname.zip_archive(tzip.name)
         
         assert tzip.exists
         assert tzip.filesize > 10000
@@ -168,13 +168,13 @@ class TestFsFilesystem(object):
         assert os.path.exists(fzip)
         assert os.path.samefile(tzip, fzip)
     
-    def test_zip_archive(self, datadir):
+    def test_zip_archive(self, dirname):
         from clu.fs.filesystem import temporary
         from clu.testing.utils import countfiles
         
         # Ensure the “datadir” fixture has something
         # in it, of which we can make use:
-        assert countfiles(datadir) > 10
+        assert countfiles(dirname) > 10
         
         # Use a temporary file path for the zip archive:
         tzip = temporary(prefix='test-zip-archive-',
@@ -183,7 +183,7 @@ class TestFsFilesystem(object):
         
         try:
             # Create the zip archive:
-            fzip = datadir.zip_archive(tzip)
+            fzip = dirname.zip_archive(tzip)
             
             assert os.path.exists(tzip)
             assert os.lstat(tzip).st_size > 10000

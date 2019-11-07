@@ -48,7 +48,7 @@ class TestFsMisc(object):
         assert re_suffix("JPG") == "jpg$"
         assert re_suffix(".JPG$") == "jpg$"
     
-    def test_suffix_searcher(self, datadir):
+    def test_suffix_searcher(self, dirname):
         pass
     
     def test_swapext(self):
@@ -58,20 +58,20 @@ class TestFsMisc(object):
         assert swapext('/yo/dogg.obj', '.odb') == '/yo/dogg.odb'
         assert swapext('/yo/dogg', 'odb') == '/yo/dogg.odb'
     
-    def test_filesize(self, datadir, temporaryname):
+    def test_filesize(self, dirname, temporaryname):
         from clu.testing.utils import countfiles
         from clu.fs.misc import filesize
         
         # Ensure the “datadir” fixture has something
         # in it, of which we can make use:
-        assert countfiles(datadir) > 10
+        assert countfiles(dirname) > 10
         
         # Use a TemporaryName instance for the zip archive:
         tzip = temporaryname(prefix='test-fs-misc-filesize-',
                              suffix='zip')
         
         # Create a large zipfile with that instance:
-        fzip = datadir.zip_archive(tzip.name)
+        fzip = dirname.zip_archive(tzip.name)
         
         # Check the zipfile’s size attributes:
         assert tzip.exists
@@ -97,7 +97,7 @@ class TestFsMisc(object):
         assert not os.path.exists(nofile)
         assert filesize(nofile.name) == -1
     
-    def test_differentfile(self, datadir):
+    def test_differentfile(self, dirname):
         pass
     
     def test_samesize(self, temporaryname):

@@ -36,7 +36,7 @@ class TestRepr(object):
         assert strfield(3)              == "3"
         assert strfield(3.14)           == "3.14"
         assert strfield(complex(3, 4))  == "(3+4j)"
-        assert strfield(Decimal(3.14)).startswith("3.140000000000000124344978758017532527446746826171875")
+        assert strfield(Decimal(3.14)).startswith("3.1400000000000001243")
         
         assert strfield(Things).startswith("‘Things<(YO, DOGG, I, HEARD) @ ")
     

@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from functools import lru_cache
 
 import os
 import re
 import sys
 
 from clu.constants.consts import ENCODING
-from clu.constants.polyfills import lru_cache
 from clu.predicates import negate, true_function
 from clu.typology import isvalidpath, isnumeric, isstring
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
+
+cache = lambda function: export(lru_cache(maxsize=32)(function))
+onecache = lambda function: export(lru_cache(maxsize=1)(function))
 
 # OS UTILITIES: get the current users’ home directory
 
@@ -22,8 +25,7 @@ isinvalidpath = negate(isvalidpath)
 ex = os.path.extsep
 dolla = '$'
 
-@export
-@lru_cache(maxsize=32)
+@cache
 def re_matcher(string):
     """ Return a boolean function that will search for the given
         regular-expression within any strings with which it is called,
@@ -35,8 +37,7 @@ def re_matcher(string):
     match_function = re.compile(string, re.IGNORECASE).match
     return lambda searching: bool(match_function(searching))
 
-@export
-@lru_cache(maxsize=32)
+@cache
 def re_searcher(string):
     """ Return a boolean function that will search for the given
         regular-expression within any strings with which it is called,
@@ -192,8 +193,7 @@ def win32_longpath(path):
 
 octalize = lambda integer: "0o%04o" % integer
 
-@export
-@lru_cache(maxsize=1)
+@onecache
 def current_umask():
     """ Get the current umask value (cached on Python 3 and up). """
     mask = os.umask(0)

@@ -8,10 +8,32 @@ class TestFsMisc(object):
     """ Run the tests for the clu.fs.misc module. """
     
     def test_re_matcher(self):
-        pass
+        from clu.fs.misc import re_matcher
+        
+        always = re_matcher(None)
+        assert always()
+        assert always('yo')
+        assert always('yo dogg')
+        
+        yo = re_matcher('yo')
+        assert yo('yo')
+        assert yo('yo dogg')
+        assert not yo('dogg')
+        assert not yo('dogg yo')
     
     def test_re_searcher(self):
-        pass
+        from clu.fs.misc import re_searcher
+        
+        always = re_searcher(None)
+        assert always()
+        assert always('yo')
+        assert always('yo dogg')
+        
+        yo = re_searcher('yo')
+        assert yo('yo')
+        assert yo('yo dogg')
+        assert not yo('dogg')
+        assert yo('dogg yo')
     
     def test_re_suffix(self):
         pass

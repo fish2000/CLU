@@ -10,6 +10,11 @@ class TestFsMisc(object):
     
     """ Run the tests for the clu.fs.misc module. """
     
+    def test_gethomedir(self, environment):
+        from clu.fs.misc import gethomedir
+        if 'HOME' in environment:
+            assert gethomedir() == environment['HOME']
+    
     def test_re_matcher(self):
         from clu.fs.misc import re_matcher
         

@@ -63,16 +63,17 @@ class TestFsMisc(object):
         from clu.fs.misc import filesize, samesize
         from clu.constants.exceptions import FilesystemError
         
-        # Ensure the “datadir” fixture has something
+        # Ensure the “data” directory has something
         # in it, of which we can make use:
-        assert countfiles(dirname) > 10
+        data = dirname.subdirectory('data')
+        assert countfiles(data) > 10
         
         # Use a TemporaryName instance for the zip archive:
         tzip = temporaryname(prefix='test-fs-misc-filesize-',
                              suffix='zip')
         
         # Create a large zipfile with that instance:
-        fzip = dirname.zip_archive(tzip.name)
+        fzip = data.zip_archive(tzip.name)
         
         # Check the zipfile’s size attributes:
         assert tzip.exists
@@ -117,7 +118,7 @@ class TestFsMisc(object):
                                  suffix='wat')
         somefile.write(data)
         
-        for root, dirs, files in dirname.walk():
+        for root, dirs, files in dirname.subdirectory('data').walk():
             for someotherfile in files:
                 theother = os.path.join(root, someotherfile)
                 assert differentfile(theother, somefile)

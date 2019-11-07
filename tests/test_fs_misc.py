@@ -52,7 +52,11 @@ class TestFsMisc(object):
         pass
     
     def test_swapext(self):
-        pass
+        from clu.fs.misc import swapext
+        
+        assert swapext('/yo/dogg.obj', 'odb') == '/yo/dogg.odb'
+        assert swapext('/yo/dogg.obj', '.odb') == '/yo/dogg.odb'
+        assert swapext('/yo/dogg', 'odb') == '/yo/dogg.odb'
     
     def test_filesize(self, datadir, temporaryname):
         from clu.testing.utils import countfiles

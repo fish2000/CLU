@@ -151,7 +151,23 @@ class TestFsMisc(object):
         assert not differentsize(somefile, yetanotherfile)
     
     def test_u8bytes_and_u8str(self):
-        pass
+        from clu.fs.misc import u8bytes, u8str
+        from clu.predicates import tuplize
+        from itertools import chain
+        from decimal import Decimal
+        
+        iterchain = chain.from_iterable
+        
+        rstr = ("yo dogg", '')
+        byts = (b"YO DOGG!", b'')
+        buls = (True, False)
+        bnts = tuplize(None)
+        numb = (3, 3.14, complex(3, 4), Decimal(3.14))
+        each = (rstr, byts, buls, bnts, numb)
+        
+        for thing in iterchain(each):
+            assert type(u8bytes(thing)) is bytes
+            assert type(u8str(thing)) is str
     
     @pytest.mark.TODO
     def test_win32_longpath(self):

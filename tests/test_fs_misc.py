@@ -58,9 +58,10 @@ class TestFsMisc(object):
         assert swapext('/yo/dogg.obj', '.odb') == '/yo/dogg.odb'
         assert swapext('/yo/dogg', 'odb') == '/yo/dogg.odb'
     
-    def test_filesize(self, dirname, temporaryname):
+    def test_filesize_samesize(self, dirname, temporaryname):
         from clu.testing.utils import countfiles
-        from clu.fs.misc import filesize
+        from clu.fs.misc import filesize, samesize
+        from clu.constants.exceptions import FilesystemError
         
         # Ensure the “datadir” fixture has something
         # in it, of which we can make use:
@@ -81,6 +82,7 @@ class TestFsMisc(object):
         
         assert os.path.exists(fzip)
         assert os.path.samefile(tzip, fzip)
+        assert samesize(tzip, fzip)
         assert filesize(fzip) > 10000
         
         assert filesize(tzip.name) == filesize(fzip)
@@ -96,14 +98,33 @@ class TestFsMisc(object):
         assert nofile.filesize == -1
         assert not os.path.exists(nofile)
         assert filesize(nofile.name) == -1
+        
+        with pytest.raises(FilesystemError) as exc:
+            assert samesize(tzip, nofile)
+        assert "paths must both" in str(exc.value)
+        
+        with pytest.raises(FilesystemError) as exc:
+            assert samesize(fzip, nofile)
+        assert "paths must both" in str(exc.value)
     
-    def test_differentfile(self, dirname):
-        pass
+    def test_differentfile_differentsize_samesize(self, dirname, temporaryname):
+        from clu.fs.misc import differentfile, differentsize, samesize
+        
+        data = "YO DOGG!, " * 1000
+        data += "YO DOGG."
+        
+        somefile = temporaryname(prefix='test-fs-misc-differentfile-',
+                                 suffix='wat')
+        somefile.write(data)
+        
+        for root, dirs, files in dirname.walk():
+            for someotherfile in files:
+                theother = os.path.join(root, someotherfile)
+                assert differentfile(theother, somefile)
+                assert differentsize(theother, somefile)
+                assert not samesize(theother, somefile)
     
     def test_samesize(self, temporaryname):
-        pass
-    
-    def test_differentsize(self, temporaryname):
         pass
     
     def test_u8bytes_and_u8str(self):

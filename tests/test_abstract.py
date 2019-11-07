@@ -203,13 +203,14 @@ class TestAbstractReprClasses(object):
         assert not compare_instance_reprs(i0, i1, i2)
     
     @pytest.mark.TODO
-    def test_repr_MappingViewRepr(self, datadir):
+    def test_repr_MappingViewRepr(self, dirname):
         # TODO: this test makes no sense – rewrite it
         from clu.repr import compare_instance_reprs
+        data = dirname.subdirectory('data')
         
-        keys = repr(datadir.keys())
-        values = repr(datadir.values())
-        items = repr(datadir.items())
+        keys = repr(data.keys())
+        values = repr(data.values())
+        items = repr(data.items())
         
         assert compare_instance_reprs(keys.replace('KeysView', 'ItemsView'), items)
         assert compare_instance_reprs(values.replace('ValuesView', 'ItemsView'), items)

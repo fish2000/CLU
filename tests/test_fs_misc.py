@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+from clu.constants import consts
+
 import os
 import pytest
 
@@ -168,6 +170,17 @@ class TestFsMisc(object):
         for thing in iterchain(each):
             assert type(u8bytes(thing)) is bytes
             assert type(u8str(thing)) is str
+    
+    @pytest.mark.skipif(consts.PYPY, reason="Failure on PyPy")
+    def test_umask_values(self):
+        from clu.fs.filesystem import back_tick
+        from clu.fs.misc import octalize, current_umask
+        
+        # Do it a bunch of times to affirm the caching stuff works:
+        assert octalize(current_umask()) == "0o%s" % back_tick('umask')
+        assert octalize(current_umask()) == "0o%s" % back_tick('umask')
+        assert octalize(current_umask()) == "0o%s" % back_tick('umask')
+        assert octalize(current_umask()) == "0o%s" % back_tick('umask')
     
     @pytest.mark.TODO
     def test_win32_longpath(self):

@@ -4,11 +4,11 @@ from itertools import chain
 
 iterchain = chain.from_iterable
 
-from clu.constants.consts import ENCODING, SINGLETON_TYPES
+from clu.constants.consts import ENCODING
 from clu.predicates import (ismetaclass, typeof,
                             resolve, attr,
                             isenum, enumchoices, hoist, pyname)
-from clu.typology import isnumeric, isbytes, isstring
+from clu.typology import isnumeric, isbytes, isstring, issingleton
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -25,7 +25,7 @@ def strfield(value):
     T = type(value)
     if isstring(T):
         return f"“{value}”"
-    elif T in SINGLETON_TYPES:
+    elif issingleton(T):
         return f"«{value!s}»"
     elif isnumeric(T):
         return f"{value!s}"

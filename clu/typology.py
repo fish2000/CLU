@@ -11,7 +11,7 @@ import io
 import operator
 import os
 
-from clu.constants.consts import λ, φ # type: ignore
+from clu.constants.consts import λ, φ, SINGLETON_TYPES # type: ignore
 from clu.constants.polyfills import long, unicode, numpy
 from clu.constants.polyfills import Path # type: ignore
 from clu.abstract import Slotted
@@ -177,6 +177,7 @@ iscallable = lambda thing: haspyattr(thing, 'call') and nopyattr(thing, 'code')
 iscallabletype = lambda thing: isinstance(thing, callable_types) and nopyattr(thing, 'mro')
 issequence = lambda thing: isinstance(thing, collections.abc.Sequence)
 ishashable = lambda thing: isinstance(thing, collections.abc.Hashable)
+issingleton = lambda thing: subclasscheck(thing, SINGLETON_TYPES)
 
 # Helper predicates for composing sequence-based predicates:
 isxlist = lambda predicate, thinglist: issequence(thinglist) and predicate_all(predicate, thinglist)
@@ -205,6 +206,7 @@ iscallablelist = predicate_all(iscallable)
 iscallabletypelist = predicate_all(iscallabletype)
 issequencelist = predicate_all(issequence)
 ishashablelist = predicate_all(ishashable)
+issingletonlist = predicate_all(issingleton)
 
 # MODULE EXPORTS:
 export(samelength,      name='samelength',  doc="samelength(a, b) → boolean predicate, True if both `len(a)` and `len(b)` are defined and equal to each other")
@@ -285,8 +287,9 @@ export(λλ,              name='λλ',          doc="λλ(thing) → boolean pre
 export(iscallable,      name='iscallable',  doc="iscallable(thing) → boolean predicate, True if `thing` is a callable type (a class with a “__call__” method) or an instance of same\n\n"
                                                 "N.B. this predicate is *NOT* the same as the built-in “callable(…)” predicate")
 export(iscallabletype,  name='iscallabletype',  doc="iscallabletype(thing) → boolean predicate, True if `thing` is one of the predefined callable types (q.v. “clu.typology.callable_types” supra.)")
-export(ishashable,      name='ishashable',  doc="ishashable(thing) → boolean predicate, True if `thing` can be hashed, via the builtin `hash(…)` function")
 export(issequence,      name='issequence',  doc="issequence(thing) → boolean predicate, True if `thing` is a sequence type (e.g. a `tuple` or `list` type)")
+export(ishashable,      name='ishashable',  doc="ishashable(thing) → boolean predicate, True if `thing` can be hashed, via the builtin `hash(…)` function")
+export(issingleton,     name='issingleton', doc="issingleton(thing) → boolean predicate, True if `thing` is one of the “singleton” types: True, False, None, Ellipsis (aka “...”) or NotImplemented")
 
 export(isxlist,         name='isxlist',     doc="isxlist(predicate, thinglist) → boolean predicate, True if `thinglist` is a sequence of items, all of which match the predicate function")
 export(isxtypelist,     name='isxtypelist', doc="isxtypelist(predicate, thinglist) → boolean predicate, True if `thinglist` is a typelist, all types in which match the predicate function")
@@ -313,6 +316,7 @@ export(iscallablelist,  name='iscallablelist',  doc="iscallablelist(thinglist) �
 export(iscallabletypelist,  name='iscallabletypelist',  doc="iscallabletypelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of predefined callable types (q.v. “clu.typology.callable_types” supra.)")
 export(issequencelist,  name='issequencelist',  doc="issequencelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of sequence types")
 export(ishashablelist,  name='ishashablelist',  doc="ishashablelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of things that can be hashed, via the builtin `hash(…)` function")
+export(issingletonlist, name='issingletonlist', doc="issingletonlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of things that are amongst the “singleton” types: True, False, None, Ellipsis (aka “...”) or NotImplemented")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

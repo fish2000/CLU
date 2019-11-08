@@ -4,6 +4,7 @@ from functools import lru_cache, wraps
 from importlib.machinery import all_suffixes
 
 import abc
+import clu.abstract
 import collections
 import collections.abc
 import inspect
@@ -17,7 +18,6 @@ iterchain = itertools.chain.from_iterable
 
 from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytuple # type: ignore
 from clu.constants.exceptions import ExportError, ExportWarning
-from clu.abstract import Slotted, ValueDescriptor, Prefix
 
 # Q.v. `search_by_id(…)` function sub.
 cache = lambda function: lru_cache(maxsize=128, typed=False)(function)
@@ -279,7 +279,7 @@ isstring = lambda thing: isinstance(thing, str)
 classes = {}
 appnames = set()
 
-class Registry(abc.ABC, metaclass=Slotted):
+class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
     
     """ A class-registry mixin ancestor type suitable for use
         in the ExporterBase inheritance chain – it uses the
@@ -298,7 +298,7 @@ class Registry(abc.ABC, metaclass=Slotted):
         classes[appname] = cls
         super(Registry, cls).__init_subclass__(**kwargs) # type: ignore
         cls.instances = weakref.WeakValueDictionary()
-        cls.appname = ValueDescriptor(appname)
+        cls.appname = clu.abstract.ValueDescriptor(appname)
     
     @staticmethod
     def all_appnames():
@@ -365,7 +365,7 @@ class Registry(abc.ABC, metaclass=Slotted):
         """
         return search_modules(thing, *cls.all_modules())[0]
 
-class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=Prefix):
+class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=clu.abstract.Prefix):
     
     """ The base class for “clu.exporting.Exporter”. Override this
         class in your own project to use the CLU exporting mechanism –

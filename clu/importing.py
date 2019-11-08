@@ -8,6 +8,7 @@ cache = lambda function: lru_cache()(function)
 iterchain = chain.from_iterable
 
 import abc
+import clu.abstract
 import importlib
 import importlib.abc
 import importlib.machinery
@@ -24,7 +25,6 @@ except ImportError:
     importlib.metadata = _metadata
 
 from clu.constants.consts import PROJECT_NAME, QUALIFIER, NoDefault
-from clu.abstract import NonSlotted, ValueDescriptor, AppName
 from clu.predicates import attr, attr_search, mro, typeof, newtype, union
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.typespace import Namespace, types
@@ -38,7 +38,7 @@ export = exporter.decorator()
 # The module-subclass registry dictionary:
 monomers = DefaultDict(weakref.WeakValueDictionary)
 
-class MetaRegistry(NonSlotted):
+class MetaRegistry(clu.abstract.NonSlotted):
     
     """ A metaclass for the class-based-module registry, wrapping all
         access to the actual dict-of-dicts registry structure§ with
@@ -179,7 +179,7 @@ class Package(types.Module):
         return out
 
 @export
-class FinderBase(AppName, importlib.abc.MetaPathFinder):
+class FinderBase(clu.abstract.AppName, importlib.abc.MetaPathFinder):
     
     """ The base class for all class-based module finders.
         
@@ -231,7 +231,7 @@ class FinderBase(AppName, importlib.abc.MetaPathFinder):
                     for module in modules_for_appname(cls.appname))
 
 @export
-class LoaderBase(AppName, importlib.abc.Loader):
+class LoaderBase(clu.abstract.AppName, importlib.abc.Loader):
     
     """ The base class for all class-based module loaders.
         
@@ -443,7 +443,7 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
     appspace = None
     
     # Block access to the registry’s underlying data:
-    monomers = ValueDescriptor({})
+    monomers = clu.abstract.ValueDescriptor({})
     
     @classmethod
     def __init_subclass__(cls, appname=None, appspace=None, **kwargs):

@@ -10,7 +10,8 @@ class TestTypology(object):
     def test_metatypelists(self):
         from clu.typology import istypelist, ismetatypelist, makemetatypelist, maketypelist
         from clu.extending import Extensible
-        from clu.exporting import Slotted, Prefix, Registry, ExporterBase, Exporter
+        from clu.abstract import Slotted, Prefix
+        from clu.exporting import Registry, ExporterBase, Exporter
         
         things = ('', b'', Exporter(), ExporterBase, Prefix, Registry, Slotted, Extensible)
         

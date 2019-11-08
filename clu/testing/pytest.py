@@ -150,7 +150,7 @@ def temporaryname():
         def temporaryname_factory(suffix, prefix=prefix,
                                           parent=None):
             """ The TemporaryName clu.testing fixture-factory function """
-            # Enter the new TemoraryName instances’ context,
+            # Enter the new TemporaryName instances’ context,
             # and return that instance:
             return names.enter_context(TemporaryName(prefix=prefix,
                                                      suffix=suffix,

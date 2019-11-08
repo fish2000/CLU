@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from functools import wraps
+from functools import lru_cache, wraps
 from importlib.machinery import all_suffixes
 
 import abc
@@ -17,7 +17,6 @@ iterchain = itertools.chain.from_iterable
 
 from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytuple # type: ignore
 from clu.constants.exceptions import ExportError, ExportWarning
-from clu.constants.polyfills import lru_cache # type: ignore
 from clu.abstract import Slotted, ValueDescriptor, Prefix
 
 # Q.v. `search_by_id(…)` function sub.

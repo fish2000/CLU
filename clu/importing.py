@@ -288,6 +288,8 @@ class LoaderBase(clu.abstract.AppName, importlib.abc.Loader):
                         module._executed = True
                 else:
                     raise TypeError("__execute__() method not callable")
+            else:
+                module._executed = True
 
 @export
 class ArgumentSink(object):

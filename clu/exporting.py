@@ -365,7 +365,8 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
         """
         return search_modules(thing, *cls.all_modules())[0]
 
-class ExporterBase(collections.abc.MutableMapping, Registry, metaclass=clu.abstract.Prefix):
+class ExporterBase(collections.abc.MutableMapping,
+                   Registry, metaclass=clu.abstract.Prefix):
     
     """ The base class for “clu.exporting.Exporter”. Override this
         class in your own project to use the CLU exporting mechanism –

@@ -109,18 +109,20 @@ class TestExporting(object):
         assert Registry.unregister('yolocal') is Exporter
         assert 'yolocal' not in Registry.all_appnames()
     
-    @pytest.mark.filterwarnings("ignore::DeprecationWarning")
     def test_exporter_instance_registry(self, clumods):
-        from clu.constants.consts import BASEPATH
-        from clu.constants.data import MODNAMES
+        from clu.constants.consts import BASEPATH, PROJECT_NAME
+        from clu.fs.filesystem import Directory
         from clu.exporting import path_to_dotpath, Exporter
         
+        # Walk the importables:
+        submodules = Directory(BASEPATH).importables(PROJECT_NAME)
+        
         # Sanity-check the number of modules:
-        assert len(clumods) <= len(MODNAMES)
+        assert len(clumods) <= len(submodules)
         
         # Check the Exporter instance against the module instance:
         for modname, module in clumods.items():
-            assert modname in MODNAMES
+            assert modname in submodules
             assert Exporter[modname] # empty Exporter instances are Falsey
             assert Exporter[modname].path == module.__file__
             assert Exporter[modname].dotpath == path_to_dotpath(module.__file__,

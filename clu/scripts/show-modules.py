@@ -6,7 +6,6 @@ from collections import namedtuple as NamedTuple
 import importlib
 import pickle
 
-from clu.constants.data import MODNAMES
 from clu.fs.filesystem import Directory
 from clu.exporting import Exporter
 from clu.naming import nameof, moduleof
@@ -84,7 +83,7 @@ def compare_module_lookups_for_all_things():
                                     consts.PROJECT_NAME)
     modulenames = Exporter.modulenames()
     
-    assert len(clumodules) == len(modulenames) <= len(MODNAMES)
+    assert len(clumodules) == len(modulenames)
     
     for modulename in modulenames:
         exports = Exporter[modulename].exports()

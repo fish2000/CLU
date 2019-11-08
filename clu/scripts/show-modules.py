@@ -7,6 +7,7 @@ import importlib
 import pickle
 
 from clu.constants.data import MODNAMES
+from clu.fs.filesystem import Directory
 from clu.exporting import Exporter
 from clu.naming import nameof, moduleof
 from clu.constants import consts
@@ -35,11 +36,11 @@ def printout(name, value):
     itemvalue = gray.render(f" {value}")
     ansi.print_ansi(chevron + itemname + colon + itemvalue, color=nothing)
 
-def import_clu_modules(modnames=MODNAMES):
+def import_clu_modules(basepath, submodule):
     """ Import all exporter-equipped CLU modules. """
     modules = {}
     
-    for modname in modnames:
+    for modname in Directory(basepath).importables(submodule):
         module = importlib.import_module(modname)
         if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
             modules[modname] = module
@@ -79,7 +80,8 @@ def compare_module_lookups_for_all_things():
     mismatch_count = 0
     mismatches = []
     results = []
-    clumodules = import_clu_modules()
+    clumodules = import_clu_modules(consts.BASEPATH,
+                                    consts.PROJECT_NAME)
     modulenames = Exporter.modulenames()
     
     assert len(clumodules) == len(modulenames) <= len(MODNAMES)

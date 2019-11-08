@@ -21,13 +21,13 @@ from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.constants.polyfills import lru_cache, scandir, walk
 from clu.abstract import ValueDescriptor
 from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
-from clu.predicates import attr, allattrs, anyof
+from clu.predicates import attr, allattrs, anyof, uniquify
 from clu.repr import stringify
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
 from clu.fs.misc import suffix_searcher, swapext, u8str
-from clu.exporting import Exporter
+from clu.exporting import Exporter, path_to_dotpath
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -1150,6 +1150,29 @@ class Directory(collections.abc.Hashable,
                    os.fspath(destination),
                    target_is_directory=True)
         return self
+    
+    def importables(self, subdir, suffix='py',
+                                  source=None,
+                                  excludes=('-', '+', 'pytest', 'obsolete')):
+        """ List the importable file-based modules found within “subdir”,
+            matching the “suffix” string, and not matching any of the
+            “excludes” strings.
+        """
+        ex = '|'.join(re.escape(exclude) for exclude in excludes)
+        exclude = re.compile(f"(?P<XXX>{ex})", re.IGNORECASE)
+        excluder = lambda filename: not bool(exclude.search(filename))
+        searcher = suffix_searcher(suffix)
+        dotpaths = []
+        # Use a call to “os.walk(…)” directly to allow modification of
+        # the “dirs” list in-place:
+        for root, dirs, files in os.walk(self.subdirectory(subdir, source)):
+            dirs[:] = list(filter(excluder, dirs))
+            filenames = filter(excluder,
+                        filter(searcher, files))
+            dotpaths.extend(list(path_to_dotpath(os.path.join(root, filename),
+                                                 relative_to=self.name)
+                                                 for filename in filenames))
+        return uniquify(sorted(dotpaths))
     
     def close(self):
         """ Stub method -- always returns True: """

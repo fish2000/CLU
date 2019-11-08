@@ -139,11 +139,10 @@ def determine_name(thing, name=None, try_repr=False):
     if thing is None:
         return None
     # Check for a function wrapper:
-    if callable(thing):
-        # N.B. when the Walrus hits Python main this’ll be
-        # a good spot for one of those:
-        if callable(getattr(thing, '__wrapped__', None)):
-            return determine_name(thing.__wrapped__)
+    # N.B. when the Walrus hits Python main this’ll be
+    # a good spot for one of those:
+    if callable(getattr(thing, '__wrapped__', None)):
+        return determine_name(thing.__wrapped__)
     # Check for telltale function-object attributes:
     code = None
     if hasattr(thing, '__code__'): # Python 3.x

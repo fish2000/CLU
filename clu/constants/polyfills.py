@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from collections import Counter, OrderedDict
 from enum import Enum, EnumMeta, unique, _is_dunder as ispyname
 from functools import wraps
 
@@ -38,17 +37,6 @@ except (ImportError, SyntaxError):
 if PY3:
     unicode = str
     long = int
-
-try:
-    from collections.abc import (Mapping, MutableMapping,
-                                 Hashable as HashableABC,
-                                 Sequence as SequenceABC,
-                                 Sized as SizedABC)
-except (ImportError, SyntaxError):
-    from collections import (Mapping, MutableMapping,
-                             Hashable as HashableABC,
-                             Sequence as SequenceABC,
-                             Sized as SizedABC)
 
 try:
     from importlib.util import cache_from_source
@@ -91,13 +79,10 @@ try:
 except (ImportError, SyntaxError):
     pass
 
-__all__ = ('Counter', 'OrderedDict',
-           'Enum', 'EnumMeta', 'unique',
+__all__ = ('Enum', 'EnumMeta', 'unique',
            'ispyname', 'pytuple',
            'AutoType', 'auto',
            'unicode', 'long',
-           'Mapping', 'MutableMapping',
-           'HashableABC', 'SequenceABC', 'SizedABC',
            'cache_from_source',
            'lru_cache',
            'Path', 'scandir', 'walk',

@@ -2,6 +2,7 @@
 from __future__ import print_function
 from functools import lru_cache, wraps
 from importlib.machinery import all_suffixes
+from pathlib import Path
 
 import abc
 import clu.abstract
@@ -233,6 +234,9 @@ replaceable_endings  = tuple(f"{pre}{suf}" \
                                                   ending_suffixes))
 replaceable_endings += ending_suffixes
 
+# Derive the filesystem’s root path representation:
+root_path = Path(BASEPATH).absolute().root
+
 def path_to_dotpath(path, relative_to=None):
     """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
         to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
@@ -251,8 +255,8 @@ def path_to_dotpath(path, relative_to=None):
     
     # Relativize the path to either the “relative_to” arg
     # …or – if that’s not a thing – the filesystem root,
-    # and replace slashes with dots:
-    relpath = os.path.relpath(path, start=relative_to or "/")
+    # and replace path separators with dots:
+    relpath = os.path.relpath(path, start=relative_to or root_path)
     dotpath = relpath.replace(os.path.sep, QUALIFIER)
     
     # Trim off any remaining “.py” suffixes,
@@ -276,7 +280,8 @@ def path_to_dotpath(path, relative_to=None):
 ismergeable = lambda thing: isinstance(thing, collections.abc.Mapping)
 isstring = lambda thing: isinstance(thing, str)
 
-classes = {}
+# The actual exporter subclass registry datastructures:
+classes = weakref.WeakValueDictionary()
 appnames = set()
 
 class Registry(abc.ABC, metaclass=clu.abstract.Slotted):

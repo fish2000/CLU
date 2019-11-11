@@ -214,7 +214,7 @@ class FinderBase(clu.abstract.AppName, importlib.abc.MetaPathFinder):
     def invalidate_caches(cls):
         cls.loader.create_module.cache_clear()
         cls.cache.clear()
-        return super(FinderBase, cls).invalidate_caches(cls())
+        return None
     
     @classmethod
     def iter_modules(cls):

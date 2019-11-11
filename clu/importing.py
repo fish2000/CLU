@@ -478,7 +478,7 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
             An “__execute__()” method should not accept any arguments or return
             any values. The “self” instance it receives will be fully initialized
             and include “appname”, “appspace”, ‘name’, ‘prefix’, ‘qualname’,
-            and other PEP-451-related module attributes.
+            as well as all of the PEP-451-related module attributes.
             
             Currently, the base class implementation is a no-op – but should
             class-based module authors write their own “__execute__()” methods,

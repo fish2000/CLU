@@ -49,7 +49,6 @@ from clu.constants.polyfills import (Enum, EnumMeta, unique,
                                      Path, scandir, walk,
                                      reduce)
 
-from clu.constants.terminalsize import get_terminal_size
 from clu.compilation import (Macro, Macros,
                              CDBSubBase, CDBBase, CDBJsonFile)
 
@@ -307,7 +306,6 @@ __all__ = ('Image',
            'cache_from_source',
            'lru_cache',
            'Path', 'scandir', 'walk',
-           'get_terminal_size',
            'sanitize', 'sanitizers', 'utf8_encode', 'utf8_decode',
            'Macro', 'Macros',
            'CDBSubBase', 'CDBBase', 'CDBJsonFile',

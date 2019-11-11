@@ -347,7 +347,7 @@ def print_ansi_centered(text, color='',
     """ print_ansi_centered(…) → Print a string to the terminal, centered
                                  and bookended with asterisks """
     message = f" {text.strip()} "
-    asterisks = math.ceil((width / 2) - (len(message) / 2))
+    asterisks = math.floor((width / 2) - (len(message) / 2))
     
     aa = filler[0] * asterisks
     ab = filler[0] * (asterisks + ((width % 2) - (len(message) % 2)))

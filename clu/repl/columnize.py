@@ -21,8 +21,8 @@ def computed_displaywidth():
     try:
         width = int(os.environ['COLUMNS'])
     except (KeyError, ValueError):
-        from clu.constants.terminalsize import get_terminal_size
-        width, _ = get_terminal_size()
+        from clu.constants.consts import SEPARATOR_WIDTH
+        width = SEPARATOR_WIDTH
     return width or 80
 
 default_opts = {

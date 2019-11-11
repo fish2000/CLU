@@ -25,6 +25,9 @@ DEBUG = bool(int(os.environ.get('DEBUG', '0'), base=10))
 # Flag for deleting temporary files:
 DELETE_FLAG = getattr(os, 'O_TEMPORARY', 0)
 
+# Default terminal width:
+DEFAULT_TERMINAL_WIDTH = int(os.environ.get('COLUMNS', '100'), base=10)
+
 # A prefix to use when creating new modules programmatically:
 DYNAMIC_MODULE_PREFIX = sys.intern('__dynamic_modules__')
 
@@ -94,10 +97,12 @@ TEXTMATE = 'TM_PYTHON' in os.environ
 
 # For terminal-printing:
 if TEXTMATE:
-    SEPARATOR_WIDTH = 100
+    SEPARATOR_WIDTH = DEFAULT_TERMINAL_WIDTH
 else:
-    from .terminalsize import get_terminal_size
-    SEPARATOR_WIDTH = get_terminal_size(default=(100, 25))[0]
+    try:
+        SEPARATOR_WIDTH = os.get_terminal_size()[0]
+    except (IOError, OSError):
+        SEPARATOR_WIDTH = DEFAULT_TERMINAL_WIDTH
 
 # WTF HAX:
 TOKEN = sys.intern(' -')
@@ -130,6 +135,7 @@ __all__ = ('BASEPATH',
            'BUILTINS',
            'DEBUG',
            'DELETE_FLAG',
+           'DEFAULT_TERMINAL_WIDTH',
            'DYNAMIC_MODULE_PREFIX',
            'ENCODING',
            'FILE_ARGUMENT_NAMES',

@@ -82,6 +82,14 @@ def suffix_searcher(string):
     return re_searcher(re_suffix(string))
 
 @export
+def extension(path, dotted=False):
+    """ Return the extension – the file suffix – from a file pathname. """
+    out = os.path.splitext(u8str(path))[-1]
+    if dotted:
+        return out
+    return out.lstrip(ex)
+
+@export
 def swapext(path, new_extension):
     """ Swap the file extension of the path with a newly specified one –
         if no extension is present, the newly specified extension will be

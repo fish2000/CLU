@@ -1,6 +1,5 @@
 -r tox.txt
 Click
-Pillow
 asciiplotlib
 bpython
 bumpversion

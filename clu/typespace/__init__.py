@@ -4,7 +4,6 @@ from __future__ import print_function
 import array
 import collections
 import collections.abc
-import os
 import re
 
 from clu.constants.consts import (BASEPATH,
@@ -13,7 +12,7 @@ from clu.constants.consts import (BASEPATH,
 
 from clu.constants.polyfills import cache_from_source
 from clu.typespace.namespace import SimpleNamespace, Namespace
-from clu.exporting import Exporter
+from clu.exporting import Exporter, path_to_dotpath
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -48,8 +47,9 @@ setattr(types, 'MappingView',     collections.abc.MappingView)
 # Manually set `types.__file__` and related attributes:
 setattr(types, '__file__',        __file__)
 setattr(types, '__cached__',      cache_from_source(__file__))
-setattr(types, '__package__',     os.path.splitext(
-                                  os.path.basename(__file__))[0])
+setattr(types, '__package__',     path_to_dotpath(__file__,
+                                                  relative_to=BASEPATH))
+
 
 @export
 def modulize(name, namespace, docs=None,
@@ -57,7 +57,6 @@ def modulize(name, namespace, docs=None,
                            appname=PROJECT_NAME,
                        relative_to=BASEPATH):
     """ Convert a dictionary mapping into a legit Python module """
-    from clu.exporting import path_to_dotpath
     from clu.naming import dotpath_join
     from clu.predicates import nopyattr
     from clu.typology import ismapping

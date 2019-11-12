@@ -2,7 +2,7 @@
 from __future__ import print_function
 from functools import wraps
 
-from clu.constants.consts import (DEBUG, QUALIFIER,
+from clu.constants.consts import (QUALIFIER,
                                   SEPARATOR_WIDTH,
                                   TEXTMATE)
 from clu.exporting import Exporter
@@ -131,8 +131,6 @@ def stdpout():
 def __getattr__(key):
     """ Module __getattr__(…) patches the “pout” module on-demand """
     if key == 'pout':
-        if DEBUG:
-            print("» Simian-merging “pout”…")
         return stdpout()
     raise AttributeError(f"module {__name__} has no attribute {key}")
 

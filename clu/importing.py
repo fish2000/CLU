@@ -25,7 +25,7 @@ except ImportError:
     importlib.metadata = _metadata
 
 from clu.constants.consts import PROJECT_NAME, QUALIFIER, NoDefault
-from clu.predicates import attr, attr_search, mro, typeof, newtype, union
+from clu.predicates import attr, attr_search, mro, typeof, newtype
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.typespace import Namespace, types
 from clu.typology import isstring, subclasscheck
@@ -504,9 +504,9 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         cls = type(self)
         if hasattr(cls, 'exporter'):
             return cls.exporter.dir_function()()
-        names = union(cls.__dict__.keys(),
+        names = chain(cls.__dict__.keys(),
                       super(ModuleBase, self).__dir__())
-        return sorted(list(names - DO_NOT_INCLUDE))
+        return sorted(frozenset(names) - DO_NOT_INCLUDE)
 
 def installed_appnames():
     """ Return a set of the appnames for all installed finders

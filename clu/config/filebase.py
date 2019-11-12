@@ -13,7 +13,7 @@ from clu.constants.enums import System, SYSTEM
 from clu.config.abc import NamespacedMutableMapping
 from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import TypeLocker, TemporaryName, Directory
-from clu.fs.misc import filesize
+from clu.fs.misc import extension, filesize
 from clu.fs import pypath
 from clu.predicates import isiterable
 from clu.typology import isvalidpath
@@ -32,8 +32,9 @@ class FileName(AppName, metaclass=abc.ABCMeta):
         """
         super(FileName, cls).__init_subclass__(**kwargs)
         cls.filename = ValueDescriptor(filename)
-        cls.filesuffix = ValueDescriptor((filename is not None) and \
-                         os.path.splitext(filename)[1].lstrip(os.extsep) or None)
+        cls.filesuffix = ValueDescriptor((filename is not None) \
+                            and extension(filename) \
+                             or None)
     
     def __init__(self, *args, **kwargs):
         """ Stub __init__(…) method, throwing a lookup error for subclasses

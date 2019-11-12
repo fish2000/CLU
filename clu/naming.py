@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import importlib
+import importlib.machinery
+import inspect
+import pickle
+
 from clu.constants.consts import BASEPATH, DEBUG, QUALIFIER, NoDefault
 from clu.exporting import (path_to_dotpath, determine_name,
                                             search_for_name,
@@ -15,8 +20,6 @@ def determine_module(thing, name=None):
     """ Private module function to find the module of a thing,
         using “pickle.whichmodule(…)”
     """
-    import pickle
-    
     if name is not None:
         return name
     if thing is None:
@@ -106,6 +109,14 @@ def moduleof(thing, default=NoDefault):
 
 isbuiltin = lambda thing: moduleof(thing) == 'builtins'
 
+suffix = lambda filename: QUALIFIER in filename \
+            and filename.rpartition(QUALIFIER)[-1] \
+             or ''
+
+EXTENSION_SUFFIXES = tuple(suffix.lstrip(QUALIFIER) \
+                       for suffix \
+                        in importlib.machinery.EXTENSION_SUFFIXES)
+
 @export
 def isnativemodule(module):
     """ isnativemodule(thing) → boolean predicate, True if `module`
@@ -114,7 +125,6 @@ def isnativemodule(module):
         Q.v. this fine StackOverflow answer on this subject:
             https://stackoverflow.com/a/39304199/298171
     """
-    import importlib.machinery, inspect, os
     from clu.predicates import getpyattr
     from clu.typology import ismodule
     
@@ -128,17 +138,15 @@ def isnativemodule(module):
         return True
     
     # Step three: in leu of either of those indicators,
-    # check the module path:
-    pth = inspect.getfile(module)
-    ext = os.path.splitext(pth)[1]
-    return ext in importlib.machinery.EXTENSION_SUFFIXES
+    # check the module path’s file suffix:
+    ext = suffix(inspect.getfile(module))
+    return ext in EXTENSION_SUFFIXES
 
 @export
 def isnative(thing):
     """ isnative(thing) → boolean predicate, True if `thing`
         comes from a native-compiled (“extension”) module.
     """
-    import importlib
     module = moduleof(thing)
     if module == 'builtins':
         return False
@@ -181,16 +189,14 @@ def dotpath_split(dotpath):
     """
     if dotpath is None:
         return None, None
-    head = dotpath.split(QUALIFIER)[-1]
-    tail = dotpath.replace(f"{QUALIFIER}{head}", '')
-    return head, tail != head and tail or None
+    tail, _, head = str(dotpath).rpartition(QUALIFIER)
+    return head, tail or None
 
 @export
 def qualified_import(qualified):
     """ Import a qualified thing-name.
         e.g. 'instakit.processors.halftone.FloydSteinberg'
     """
-    import importlib
     if QUALIFIER not in qualified:
         raise ValueError(f"qualified name required (got {qualified})")
     head, tail = dotpath_split(qualified)
@@ -212,8 +218,8 @@ def qualified_name(thing):
     """ Get a qualified thing-name for a thing.
         e.g. 'instakit.processors.halftone.FloydSteinberg'
     """
-    mod_name, cls_name = qualified_name_tuple(thing)
-    qualname = dotpath_join(mod_name, cls_name)
+    module_name, thing_name = qualified_name_tuple(thing)
+    qualname = dotpath_join(module_name, thing_name)
     if DEBUG:
         print(f"Qualified Name: {qualname}")
     return qualname
@@ -279,6 +285,7 @@ def split_abbreviations(s):
     return tuple(abbreviations)
 
 export(isbuiltin,      name='isbuiltin',  doc="isbuiltin(thing) → boolean predicate, True if `thing` is a builtin function/method/class")
+export(suffix,         name='suffix',     doc="suffix(path) → return the suffix ≠ the file extension ≠ for a file pathname")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

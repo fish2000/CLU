@@ -348,9 +348,14 @@ def print_ansi_centered(text, color='',
                                  and bookended with asterisks """
     message = f" {text.strip()} "
     asterisks = math.floor((width / 2) - (len(message) / 2))
+    fill = filler[0]
     
-    aa = filler[0] * asterisks
-    ab = filler[0] * (asterisks + ((width % 2) - (len(message) % 2)))
+    aa = fill * asterisks
+    ab = fill * (asterisks + ((width % 2) - (len(message) % 2)))
+    
+    if len(f"{aa}{message}{ab}") < width:
+        aa += fill
+        ab += fill
     
     print_ansi(f"{aa}{message}{ab}", color=color)
 

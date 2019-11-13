@@ -1,6 +1,5 @@
 -r tox.txt
 Click
-asciiplotlib
 bpython
 bumpversion
 colorio
@@ -22,6 +21,8 @@ readme-renderer
 requests
 scipy
 setproctitle
+termplotlib
+termtables
 tifffile
 twine
 yajl

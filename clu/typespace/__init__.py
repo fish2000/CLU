@@ -66,8 +66,6 @@ def modulize(name, namespace, docs=None,
     # doesn’t already exist in `sys.modules`:
     if name is None:
         raise TypeError("Module name cannot be None")
-    if name in sys.modules:
-        raise LookupError(f"Module “{name}” already in sys.modules")
     if namespace is None:
         raise TypeError("Module namespace cannot be None")
     if not ismapping(namespace):
@@ -115,6 +113,10 @@ def modulize(name, namespace, docs=None,
                                       appname,
                                       name)
     
+    # Has this already been done with this name?
+    if qualified_name in sys.modules:
+        return sys.modules[qualified_name]
+    
     # Ensure we have a name and a package dotpath in our namespace:
     namespace.update({ '__name__' : name,
                    '__qualname__' : name,
@@ -132,7 +134,7 @@ def modulize(name, namespace, docs=None,
     # Once `sys.modules` has been thusly updated, the new module
     # can be imported with an “import «name»” statement, as with
     # any other available module:
-    sys.modules[name] = module
+    sys.modules[qualified_name] = module
     
     # Return our new module instance:
     return module

@@ -26,7 +26,7 @@ from clu.repr import stringify
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
-from clu.fs.misc import suffix_searcher, swapext, u8str
+from clu.fs.misc import re_searcher, suffix_searcher, swapext, u8str, extension
 from clu.exporting import Exporter, path_to_dotpath
 
 exporter = Exporter(path=__file__)
@@ -1173,6 +1173,30 @@ class Directory(collections.abc.Hashable,
                                                  relative_to=self.name)
                                                  for filename in filenames))
         return uniquify(sorted(dotpaths))
+    
+    def suffix_histogram(self, subdir=None,
+                               source=None,
+                               excludes=('~', '#', 'ds_store', '.git')):
+        """ Return a ‘collections.Counter’ filled with a histogram of the
+            file suffixes for all files found in the given subdirectory,
+            excluding anything matching any of the “excludes” strings
+        """
+        ex = '|'.join(re.escape(exclude) for exclude in excludes)
+        exclude = re.compile(f"(?P<XXX>{ex})", re.IGNORECASE)
+        excluder = lambda filename: not bool(exclude.search(filename))
+        searcher = re_searcher(re.escape(os.path.extsep))
+        suffixes = collections.Counter()
+        target = self.subdirectory(subdir or os.path.curdir, source)
+        # Use a call to “os.walk(…)” directly to allow modification of
+        # the “dirs” list in-place:
+        for root, dirs, files in os.walk(target):
+            dirs[:] = list(filter(excluder, dirs))
+            for ext in filter(None, 
+                       map(lambda filename: extension(filename).lower(),
+                       filter(excluder,
+                       filter(searcher, files)))):
+                suffixes[ext] += 1
+        return suffixes
     
     def close(self):
         """ Stub method -- always returns True: """

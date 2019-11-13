@@ -428,7 +428,7 @@ else:
     __all__ += ('colorio', 'colormath')
 
 try:
-    import pout
+    from clu.testing.utils import pout
 except (ImportError, SyntaxError):
     pass
 else:

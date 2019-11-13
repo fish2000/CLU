@@ -163,7 +163,7 @@ __dir__ = lambda: list(__all__)
 def print_all():
     """ Print out all of the constant variables defined in consts.py """
     # It’s not pretty – but actually it’s almost pretty, sort-of.
-    WIDTH = TEXTMATE and max(SEPARATOR_WIDTH, 125) or SEPARATOR_WIDTH
+    WIDTH = TEXTMATE and max(SEPARATOR_WIDTH, 100) or SEPARATOR_WIDTH
     
     print('*' * WIDTH)
     print(f"≠≠≠ CONSTS: (total {len(__all__)} defined)")

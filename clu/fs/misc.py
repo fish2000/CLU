@@ -7,7 +7,8 @@ import re
 import sys
 
 from clu.constants.consts import ENCODING
-from clu.predicates import negate, true_function, false_function
+from clu.predicates import (negate, true_function,
+                                   false_function, itervariadic)
 from clu.typology import isvalidpath, isnumeric, isstring
 from clu.exporting import Exporter
 
@@ -82,6 +83,7 @@ def suffix_searcher(string):
     return re_searcher(re_suffix(string))
 
 @export
+@itervariadic
 def re_excluder(*excludes):
     """ Return a boolean function that will search for any of the given
         strings (provided as variadic arguments) and return False whenever

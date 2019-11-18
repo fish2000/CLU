@@ -1159,7 +1159,7 @@ class Directory(collections.abc.Hashable,
             matching the “suffix” string, and not matching any of the
             “excludes” strings.
         """
-        excluder = re_excluder(*excludes)
+        excluder = re_excluder(excludes)
         searcher = suffix_searcher(suffix)
         dotpaths = []
         target = self.subdirectory(subdir, source)
@@ -1181,7 +1181,7 @@ class Directory(collections.abc.Hashable,
             file suffixes for all files found in the given subdirectory,
             excluding anything matching any of the “excludes” strings
         """
-        excluder = re_excluder(*excludes)
+        excluder = re_excluder(excludes)
         searcher = re_searcher(re.escape(os.path.extsep))
         suffixes = collections.Counter()
         target = self.subdirectory(subdir or os.path.curdir, source)

@@ -84,8 +84,7 @@ which.pathvar = PATH
 def back_tick(command,  as_str=True,
                        ret_err=False,
                      raise_err=None, **kwargs):
-    f""" Run command `command`, return stdout -- or (stdout, stderr) if `ret_err`.
-        Roughly equivalent to ``check_output`` in Python 2.7.
+    f""" Run command `command`, returning stdout – or (stdout, stderr) if `ret_err`.
         
         Parameters
         ----------
@@ -95,19 +94,19 @@ def back_tick(command,  as_str=True,
             ["ls", "-la"]).
         as_str : bool, optional
             Whether or not the values returned from ``proc.communicate()`` should
-            be unicode-decoded as bytestrings (using the specified encoding, which
-            defaults to Latin-1) before `back_tick(…)` returns. Default is True.
+            be unicode-decoded from bytestrings (using the specified encoding, which
+            defaults to “{ENCODING}”) to strings before `back_tick(…)` returns.
+            Default is True.
         ret_err : bool, optional
             If True, the return value is (stdout, stderr). If False, it is stdout.
             In either case `stdout` and `stderr` are strings containing output
             from the commands’ execution. Default is False.
         raise_err : None or bool, optional
-            If True, raise clu.fs.filesystem.ExecutionError when calling the
+            If True, raise a ‘clu.fs.filesystem.ExecutionError’ when calling the
                      function results in a non-zero return code.
             If None, it is set to True if `ret_err` is False,
                                   False if `ret_err` is True.
-            Default is None (exception-raising behavior depends on the `ret_err`
-            value).
+            Default is None (exception-raising depends on the value of `ret_err`).
         encoding : str, optional
             The name of the encoding to use when decoding the command output per
             the `as_str` value. Default is “{ENCODING}”.
@@ -119,7 +118,7 @@ def back_tick(command,  as_str=True,
             Default is False.
         timeout : int, optional
             Number of seconds to wait for the executed command to complete before
-            forcibly killing the subprocess. Default is 60.
+            forcibly killing its subprocess. Default is {DEFAULT_TIMEOUT} seconds.
         
         Returns
         -------
@@ -131,10 +130,8 @@ def back_tick(command,  as_str=True,
         
         Raises
         ------
-        A `clu.fs.filesystem.ExecutionError` will raise if the
-        executed command returns with any non-zero exit status, and `raise_err`
-        is set to True.
-        
+        A ‘clu.fs.filesystem.ExecutionError’ will raise if the executed command
+        returns with any non-zero exit status, and `raise_err` is set to True.
     """
     # Step 1: Prepare for battle:
     import subprocess, shlex
@@ -160,12 +157,12 @@ def back_tick(command,  as_str=True,
     try:
         output, errors = process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        process.kill()
+        process.terminate()
         output, errors = process.communicate(timeout=None)
     returncode = process.returncode
     # Step 3: Analyze the return code:
     if returncode is None:
-        process.terminate()
+        process.kill()
         raise ExecutionError(f'`{command_str}` terminated without exiting cleanly')
     if raise_err and returncode != 0:
         error_str = u8str(errors).strip()

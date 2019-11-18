@@ -26,7 +26,8 @@ from clu.repr import stringify
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
-from clu.fs.misc import re_searcher, suffix_searcher, swapext, u8str, extension
+from clu.fs.misc import re_searcher, suffix_searcher, re_excluder
+from clu.fs.misc import swapext, u8str, extension
 from clu.exporting import Exporter, path_to_dotpath
 
 exporter = Exporter(path=__file__)
@@ -1158,14 +1159,13 @@ class Directory(collections.abc.Hashable,
             matching the “suffix” string, and not matching any of the
             “excludes” strings.
         """
-        ex = '|'.join(re.escape(exclude) for exclude in excludes)
-        exclude = re.compile(f"(?P<XXX>{ex})", re.IGNORECASE)
-        excluder = lambda filename: not bool(exclude.search(filename))
+        excluder = re_excluder(*excludes)
         searcher = suffix_searcher(suffix)
         dotpaths = []
+        target = self.subdirectory(subdir, source)
         # Use a call to “os.walk(…)” directly to allow modification of
         # the “dirs” list in-place:
-        for root, dirs, files in os.walk(self.subdirectory(subdir, source)):
+        for root, dirs, files in os.walk(target):
             dirs[:] = list(filter(excluder, dirs))
             filenames = filter(excluder,
                         filter(searcher, files))
@@ -1181,9 +1181,7 @@ class Directory(collections.abc.Hashable,
             file suffixes for all files found in the given subdirectory,
             excluding anything matching any of the “excludes” strings
         """
-        ex = '|'.join(re.escape(exclude) for exclude in excludes)
-        exclude = re.compile(f"(?P<XXX>{ex})", re.IGNORECASE)
-        excluder = lambda filename: not bool(exclude.search(filename))
+        excluder = re_excluder(*excludes)
         searcher = re_searcher(re.escape(os.path.extsep))
         suffixes = collections.Counter()
         target = self.subdirectory(subdir or os.path.curdir, source)
@@ -1191,7 +1189,7 @@ class Directory(collections.abc.Hashable,
         # the “dirs” list in-place:
         for root, dirs, files in os.walk(target):
             dirs[:] = list(filter(excluder, dirs))
-            for ext in filter(None, 
+            for ext in filter(None,
                        map(lambda filename: extension(filename).lower(),
                        filter(excluder,
                        filter(searcher, files)))):

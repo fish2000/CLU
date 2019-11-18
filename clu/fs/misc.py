@@ -82,6 +82,16 @@ def suffix_searcher(string):
     return re_searcher(re_suffix(string))
 
 @export
+def re_excluder(*excludes):
+    """ Return a boolean function that will search for any of the given
+        strings (provided as variadic arguments) and return False whenever
+        any of them are found – True otherwise.
+    """
+    ex = '|'.join(re.escape(exclude) for exclude in excludes)
+    exclude_function = re.compile(f"(?P<XXX>{ex})", re.IGNORECASE).search
+    return lambda filename: not bool(exclude_function(filename))
+
+@export
 def extension(path, dotted=False):
     """ Return the extension – the file suffix – from a file pathname. """
     out = os.path.splitext(u8str(path))[-1]

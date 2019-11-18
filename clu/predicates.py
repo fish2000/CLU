@@ -232,6 +232,7 @@ def wrap_value(value):
 
 none_function   = predicate_nop = function_nop = wrap_value(None)
 true_function   = wrap_value(True)
+false_function  = wrap_value(False)
 
 uncallable      = negate(callable) # type: ignore
 hoist           = lambda thing: uncallable(thing) and wrap_value(thing) or thing
@@ -517,6 +518,7 @@ export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → bo
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns `None`")
 export(none_function,   name='none_function',   doc="none_function() → A function that always returns None")
 export(true_function,   name='true_function',   doc="true_function() → A function that always returns True")
+export(false_function,  name='false_function',  doc="false_function() → A function that always returns False")
 export(uncallable,      name='uncallable',      doc="uncallable(thing) → boolean predicate, shortcut for `not callable(thing)`")
 export(hoist,           name='hoist',           doc="hoist(thing) → if “thing” isn’t already callable, turn it into a lambda that returns it as a value (using “wrap_value(…)”).")
 export(pyname,          name='pyname',          doc="pyname(thing) → Return either `__qualname__` or `__name__` from a given `thing`")

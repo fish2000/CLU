@@ -7,7 +7,7 @@ import re
 import sys
 
 from clu.constants.consts import ENCODING
-from clu.predicates import negate, true_function
+from clu.predicates import negate, true_function, false_function
 from clu.typology import isvalidpath, isnumeric, isstring
 from clu.exporting import Exporter
 
@@ -87,6 +87,8 @@ def re_excluder(*excludes):
         strings (provided as variadic arguments) and return False whenever
         any of them are found – True otherwise.
     """
+    if len(excludes) < 1:
+        return false_function
     ex = '|'.join(re.escape(exclude) for exclude in excludes)
     exclude_function = re.compile(f"(?P<XXX>{ex})", re.IGNORECASE).search
     return lambda filename: not bool(exclude_function(filename))

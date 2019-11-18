@@ -353,7 +353,7 @@ def itervariadic(function):
     """ Wrap a variadic function – one with the signature “function(•args)” –
         in logic that allows it to be called with a single-argument iterable
         (“function(iterable)”) with the same effect.
-    
+        
         Screens out strings, bytes-y, and file-path-ish operands without
         iterating or expanding them.
     """

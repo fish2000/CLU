@@ -65,11 +65,6 @@ except (ImportError, SyntaxError):
         Path = None
 
 try:
-    from scandir import scandir, walk
-except ImportError:
-    from os import scandir, walk
-
-try:
     import numpy
 except (ImportError, SyntaxError):
     numpy = None
@@ -85,7 +80,7 @@ __all__ = ('Enum', 'EnumMeta', 'unique',
            'unicode', 'long',
            'cache_from_source',
            'lru_cache',
-           'Path', 'scandir', 'walk',
+           'Path',
            'numpy',
            'reduce')
 

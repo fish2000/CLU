@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from distutils.spawn import find_executable
+from functools import lru_cache, wraps
+from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
+
+cache = lambda function: lru_cache(maxsize=128, typed=True)(function)
 
 import abc
+import clu.abstract
 import collections
 import collections.abc
 import contextlib
@@ -11,15 +17,9 @@ import shutil
 import sys
 import weakref
 import zipfile
-    
-from distutils.spawn import find_executable
-from functools import wraps
-from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
 from clu.constants.consts import λ, DELETE_FLAG, ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
-from clu.constants.polyfills import lru_cache, scandir, walk
-from clu.abstract import ValueDescriptor
 from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
 from clu.predicates import attr, allattrs, anyof, uniquify
 from clu.repr import stringify
@@ -207,7 +207,7 @@ def rm_rf(path):
             os.unlink(path)
         elif os.path.isdir(path):
             subdirs = []
-            for root, dirs, files in walk(path, followlinks=True):
+            for root, dirs, files in os.walk(path, followlinks=True):
                 for tf in files:
                     os.unlink(os.path.join(root, tf))
                 subdirs.extend((os.path.join(root, td) for td in dirs))
@@ -288,7 +288,7 @@ class TypeLocker(abc.ABCMeta):
         """
         # Fill in the “types” attribute to prevent the metaclass’
         # registry dict from leaking into subtypes:
-        attributes['types']         = ValueDescriptor(tuple())
+        attributes['types']         = clu.abstract.ValueDescriptor(tuple())
         
         # Always replace the “directory” method anew:
         directory = lambda pth=None: metacls.types['Directory'](pth=pth)
@@ -333,8 +333,6 @@ class TemporaryFileWrapper(TemporaryFileWrapperBase,
     
     def __fspath__(self):
         return self.name
-
-cache = lru_cache(maxsize=128, typed=True)
 
 @cache
 def TemporaryNamedFile(temppath, mode='wb',
@@ -911,9 +909,10 @@ class Directory(collections.abc.Hashable,
             Specify an optional “suffix” parameter to filter the list by a
             particular file suffix (leading dots unnecessary but unharmful).
         """
-        return tuple(filter(suffix_searcher(suffix),
-                    (direntry.name for direntry in filter(non_dotfile_matcher,
-                                                  scandir(self.realpath(source))))))
+        with os.scandir(self.realpath(source)) as iterscan:
+            return tuple(filter(suffix_searcher(suffix),
+                        (direntry.name for direntry in filter(non_dotfile_matcher,
+                                                              iterscan))))
     
     def ls_la(self, suffix=None, source=None):
         """ List all files, including files whose name starts with a dot.
@@ -929,8 +928,9 @@ class Directory(collections.abc.Hashable,
             commands I ever learned, and it reads better than `ls_a()` which
             I think looks awkward and goofy.)
         """
-        return tuple(filter(suffix_searcher(suffix),
-                    (direntry.name for direntry in scandir(self.realpath(source)))))
+        with os.scandir(self.realpath(source)) as iterscan:
+            return tuple(filter(suffix_searcher(suffix),
+                        (direntry.name for direntry in iterscan)))
     
     def subpath(self, subpath, source=None, requisite=False):
         """ Returns the path to a subpath of the instances’ target path. """
@@ -966,14 +966,12 @@ class Directory(collections.abc.Hashable,
         return self
     
     def walk(self, followlinks=True):
-        """ Sugar for calling X.walk(self.name), where X is either
-            `scandir` (in the case of python 2.7) or `os` (for
-            python 3 and thereafter).
+        """ Sugar for calling os.walk(self.name)
             
             Note that the “followlinks” default here is True, whereas
             the underlying functions default to False for that argument.
         """
-        return walk(self.name, followlinks=followlinks)
+        return os.walk(self.name, followlinks=followlinks)
     
     def parent(self):
         """ Sugar for `os.path.abspath(os.path.join(self.name, os.pardir))`
@@ -1232,14 +1230,14 @@ class Directory(collections.abc.Hashable,
     
     def __iter__(self):
         out = self.exists \
-              and (k.name for k in scandir(
+              and (k.name for k in os.scandir(
                                    os.path.realpath(self.name))) \
                or iter(tuple())
         yield from out
     
     def __reversed__(self):
         out = self.exists \
-              and (k.name for k in reversed(scandir(
+              and (k.name for k in reversed(os.scandir(
                                    os.path.realpath(self.name)))) \
                or iter(tuple())
         yield from out

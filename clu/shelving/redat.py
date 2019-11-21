@@ -21,6 +21,12 @@ from clu.fs.filesystem import (which,
                                         Directory,
                                         Intermediate)
 
+from clu.exporting import Exporter
+
+exporter = Exporter(path=__file__)
+export = exporter.decorator()
+
+@export
 class RedisConf(contextlib.AbstractContextManager,
                 os.PathLike):
     
@@ -219,6 +225,7 @@ class RedisConf(contextlib.AbstractContextManager,
     def __str__(self):
         return self.assemble()
 
+@export
 class RedRun(contextlib.AbstractContextManager):
     
     PAUSE_SETUP = 1
@@ -312,6 +319,9 @@ class RedRun(contextlib.AbstractContextManager):
         temporary = self.config.is_temporary and "temporary" or "permanent"
         conflength = self.config.__len__()
         return f"{typename}<[PID #{pid}, {state}/{temporary}, {conflength} config entries]> @ {instance_id}"
+
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir()
 
 def test():
     with RedRun() as redrun:

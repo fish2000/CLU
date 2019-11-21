@@ -231,11 +231,8 @@ class RedRun(contextlib.AbstractContextManager):
     PAUSE_SETUP = 1
     PAUSE_TEARDOWN = 2
     
-    def __init__(self, source=None, directory=None, port=6379):
-        self.source = source
-        self.directory = directory
-        self.port = port
-        self.config = None
+    def __init__(self, config):
+        self.config = config
         self.client = None
         self.process = None
         self.active = False
@@ -268,9 +265,6 @@ class RedRun(contextlib.AbstractContextManager):
     
     def setup(self):
         if not self.active:
-            self.config = RedisConf(self.source,
-                                    self.directory,
-                                    self.port)
             self.config.setup()
             self.process = self.get_process()
             self.client = self.config.get_client()
@@ -285,8 +279,6 @@ class RedRun(contextlib.AbstractContextManager):
                 print("WARNING: PROCESS RETURNED NONE")
             print(f"RETVAL: {retval}")
             self.config.teardown()
-            self.config = None
-            self.client = None
             self.process = None
             self.active = False
     
@@ -336,7 +328,7 @@ def test():
     thisconf = thisdir.subpath('redis.conf', requisite=True)
     assert os.path.exists(thisconf)
     
-    with RedRun(source=thisconf) as redrun:
+    with RedRun(RedisConf(source=thisconf)) as redrun:
         print(repr(redrun))
         assert redrun.config.active
         assert redrun.active

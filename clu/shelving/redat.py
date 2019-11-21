@@ -316,8 +316,12 @@ class RedRun(contextlib.AbstractContextManager):
         instance_id = hex(id(self))
         pid = self.pid()
         state = self.active and "active" or "inactive"
-        temporary = self.config.is_temporary and "temporary" or "permanent"
-        conflength = self.config.__len__()
+        if self.active:
+            temporary = self.config.is_temporary and "temporary" or "permanent"
+            conflength = self.config.__len__()
+        else:
+            temporary = 'unconfigured'
+            conflength = 'zero'
         return f"{typename}<[PID #{pid}, {state}/{temporary}, {conflength} config entries]> @ {instance_id}"
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

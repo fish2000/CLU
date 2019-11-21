@@ -395,6 +395,9 @@ def test_context():
     assert not redrun.ping()
 
 def test():
+    global DO_IT_DOUG
+    DO_IT_DOUG = True
+    
     from clu.app import redprocess
     
     redconf = redprocess.get_config()

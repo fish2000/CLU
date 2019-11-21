@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-# from abc import abstractmethod as abstract
 
 import abc
+import clu.abstract
 import os
 import sys
 
 abstract = abc.abstractmethod
 
-from clu.abstract import ValueDescriptor, AppName
 from clu.constants.enums import System, SYSTEM
 from clu.config.abc import NamespacedMutableMapping
 from clu.fs.appdirectories import AppDirs
@@ -23,7 +22,7 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 @export
-class FileName(AppName, metaclass=abc.ABCMeta):
+class FileName(clu.abstract.AppName, metaclass=abc.ABCMeta):
     
     @classmethod
     def __init_subclass__(cls, filename=None, **kwargs):
@@ -31,10 +30,10 @@ class FileName(AppName, metaclass=abc.ABCMeta):
             read-only descriptor values
         """
         super(FileName, cls).__init_subclass__(**kwargs)
-        cls.filename = ValueDescriptor(filename)
-        cls.filesuffix = ValueDescriptor((filename is not None) \
-                            and extension(filename) \
-                             or None)
+        cls.filename = clu.abstract.ValueDescriptor(filename)
+        cls.filesuffix = clu.abstract.ValueDescriptor((filename is not None) \
+                                                      and extension(filename) \
+                                                       or None)
     
     def __init__(self, *args, **kwargs):
         """ Stub __init__(…) method, throwing a lookup error for subclasses

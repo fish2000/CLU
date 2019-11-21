@@ -331,7 +331,11 @@ def test():
     
     print("Starting Redis server…")
     
-    with RedRun() as redrun:
+    thisdir = Directory(os.path.dirname(__file__))
+    thisconf = thisdir.subpath('redis.conf', requisite=True)
+    assert os.path.exists(thisconf)
+    
+    with RedRun(source=thisconf) as redrun:
         print(repr(redrun))
         assert redrun.config.active
         assert redrun.active

@@ -7,14 +7,21 @@ def clumods():
     """ Import all CLU modules that use the “clu.exporting.Exporter”
         mechanism for listing and exporting their module contents
     """
-    from clu.fs.filesystem import Directory
     from clu.constants import consts
+    from clu.fs.filesystem import Directory
+    from clu.importing import all_registered_modules
     import importlib
     modules = {}
     
+    # Only include modules with an instance of “clu.exporting.Exporter”:
     for modname in Directory(consts.BASEPATH).importables(consts.PROJECT_NAME):
         module = importlib.import_module(modname)
-        # Only include modules with an instance of “clu.exporting.Exporter”:
+        if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
+            modules[modname] = module
+    
+    for clsmodule in all_registered_modules():
+        modname = clsmodule.qualname
+        module = importlib.import_module(modname)
         if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
             modules[modname] = module
     

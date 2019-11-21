@@ -111,23 +111,32 @@ class TestExporting(object):
     
     def test_exporter_instance_registry(self, clumods):
         from clu.constants.consts import BASEPATH, PROJECT_NAME
-        from clu.fs.filesystem import Directory
         from clu.exporting import path_to_dotpath, Exporter
+        from clu.fs.filesystem import Directory
+        from clu.importing import all_registered_modules, Module
+        from clu.predicates import haspyattr
         
         # Walk the importables:
         submodules = Directory(BASEPATH).importables(PROJECT_NAME)
+        clsmodules = tuple(clsmodule.qualname for clsmodule in all_registered_modules())
         
         # Sanity-check the number of modules:
-        assert len(clumods) <= len(submodules)
+        assert len(clumods) <= len(submodules) + len(clsmodules)
         
         # Check the Exporter instance against the module instance:
         for modname, module in clumods.items():
-            assert modname in submodules
+            assert (modname in submodules) or (modname in clsmodules)
             assert Exporter[modname] # empty Exporter instances are Falsey
-            assert Exporter[modname].path == module.__file__
-            assert Exporter[modname].dotpath == path_to_dotpath(module.__file__,
-                                                                relative_to=BASEPATH)
-            assert set(Exporter[modname].all_tuple()).issubset(module.__all__)
+            if haspyattr(module, 'file'):
+                # It’s a file-based module:
+                assert Exporter[modname].path == module.__file__
+                assert Exporter[modname].dotpath == path_to_dotpath(module.__file__,
+                                                                    relative_to=BASEPATH)
+            elif isinstance(module, Module):
+                # It’s a class-based module:
+                assert Exporter[modname].path is None
+                assert Exporter[modname].dotpath == module.qualname
+            assert set(Exporter[modname].all_tuple()).issubset(module.__dir__())
     
     def test_combine_real_world_exporters_2(self):
         from clu.predicates import exporter as exporter0

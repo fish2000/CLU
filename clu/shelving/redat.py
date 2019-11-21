@@ -149,7 +149,7 @@ class RedisConf(contextlib.AbstractContextManager,
     
     @property
     def path(self):
-        return resolve(self, 'file.name')
+        return resolve(self, 'file.name') or self.source
     
     @property
     def is_temporary(self):
@@ -179,6 +179,9 @@ class RedisConf(contextlib.AbstractContextManager,
                 self.rdir.close()
                 del self.rdir
             self.active = False
+    
+    def get_command(self):
+        return (which('redis-server'), self.path)
     
     def get_client(self):
         if not self.active:
@@ -237,16 +240,8 @@ class RedRun(contextlib.AbstractContextManager):
         self.process = None
         self.active = False
     
-    def get_command(self):
-        if self.active:
-            raise RuntimeError("RedRun instance active")
-        return (which('redis-server'),
-                os.fspath(self.config))
-    
     def get_process(self):
-        if self.active:
-            raise RuntimeError("RedRun instance active")
-        process = subprocess.Popen(self.get_command(),
+        process = subprocess.Popen(self.config.get_command(),
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL,
                                  shell=False)
@@ -254,8 +249,6 @@ class RedRun(contextlib.AbstractContextManager):
         return process
     
     def destroy_process(self, process):
-        if not self.active:
-            raise RuntimeError("RedRun instance inactive")
         process.terminate()
         time.sleep(type(self).PAUSE_TEARDOWN)
         if process.returncode is None:
@@ -265,7 +258,6 @@ class RedRun(contextlib.AbstractContextManager):
     
     def setup(self):
         if not self.active:
-            self.config.setup()
             self.process = self.get_process()
             self.client = self.config.get_client()
             self.active = True
@@ -278,7 +270,6 @@ class RedRun(contextlib.AbstractContextManager):
             if retval is None:
                 print("WARNING: PROCESS RETURNED NONE")
             print(f"RETVAL: {retval}")
-            self.config.teardown()
             self.process = None
             self.active = False
     
@@ -327,16 +318,22 @@ def test():
     thisdir = Directory(os.path.dirname(__file__))
     thisconf = thisdir.subpath('redis.conf', requisite=True)
     assert os.path.exists(thisconf)
+    redconf = RedisConf(source=thisconf)
+    # redconf.setup()
     
-    with RedRun(RedisConf(source=thisconf)) as redrun:
-        print(repr(redrun))
-        assert redrun.config.active
-        assert redrun.active
-        assert redrun.ping()
-        
-        print("Stopping Redis server…")
+    with redconf:
+        with RedRun(redconf) as redrun:
+            print(repr(redrun))
+            assert redrun.config.active
+            assert redrun.active
+            assert redrun.ping()
+            
+            print("Stopping Redis server…")
     
     print(repr(redrun))
+    print(repr(redconf))
+    
+    # redconf.teardown()
     
     # assert not redrun.config.active
     assert not redrun.active

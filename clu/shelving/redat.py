@@ -35,7 +35,7 @@ class RedisConf(contextlib.AbstractContextManager,
     """
     
     DEFAULT_SOURCE = '/usr/local/etc/redis.conf'
-    COMMENT_RE = re.compile("#+(?:[\s\S]*)$")
+    COMMENT_RE = re.compile(r"#+(?:[\s\S]*)$")
     
     @staticmethod
     def compose(iterable):

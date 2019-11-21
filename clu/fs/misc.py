@@ -90,8 +90,8 @@ def re_excluder(*excludes):
     """
     if len(excludes) < 1:
         return true_function
-    ex = '|'.join(re.escape(exclude) for exclude in excludes)
-    exclude_function = re.compile(f"(?P<XXX>{ex})", re.IGNORECASE).search
+    exclude_re = '|'.join(re.escape(exclude) for exclude in excludes)
+    exclude_function = re.compile(f"(?P<XXX>{exclude_re})", re.IGNORECASE).search
     return lambda filename: not bool(exclude_function(filename))
 
 @export

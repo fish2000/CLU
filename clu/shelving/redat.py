@@ -328,11 +328,18 @@ class RedRun(contextlib.AbstractContextManager):
 __all__, __dir__ = exporter.all_and_dir()
 
 def test():
+    
+    print("Starting Redis server…")
+    
     with RedRun() as redrun:
         print(repr(redrun))
         assert redrun.config.active
         assert redrun.active
         assert redrun.ping()
+        
+        print("Stopping Redis server…")
+    
+    print(repr(redrun))
     
     # assert not redrun.config.active
     assert not redrun.active

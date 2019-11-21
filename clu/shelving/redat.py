@@ -329,6 +329,10 @@ def test():
         assert redrun.config.active
         assert redrun.active
         assert redrun.ping()
+    
+    # assert not redrun.config.active
+    assert not redrun.active
+    assert not redrun.ping()
 
 if __name__ == '__main__':
     test()

@@ -8,7 +8,7 @@ import pickle
 
 from clu.fs.filesystem import Directory
 from clu.exporting import Exporter
-from clu.importing import all_registered_modules
+from clu.importing import modules_for_appname
 from clu.naming import nameof, moduleof
 from clu.constants import consts
 from clu.repl import ansi
@@ -45,8 +45,7 @@ def import_clu_modules(basepath, submodule):
         if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
             modules[modname] = module
     
-    for clsmodule in all_registered_modules():
-        modname = clsmodule.qualname
+    for modname in (clsmodule.qualname for clsmodule in modules_for_appname(submodule)):
         module = importlib.import_module(modname)
         if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
             modules[modname] = module

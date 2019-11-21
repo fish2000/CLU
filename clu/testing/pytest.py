@@ -9,7 +9,7 @@ def clumods():
     """
     from clu.constants import consts
     from clu.fs.filesystem import Directory
-    from clu.importing import all_registered_modules
+    from clu.importing import modules_for_appname
     import importlib
     modules = {}
     
@@ -19,8 +19,7 @@ def clumods():
         if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
             modules[modname] = module
     
-    for clsmodule in all_registered_modules():
-        modname = clsmodule.qualname
+    for modname in (clsmodule.qualname for clsmodule in modules_for_appname(consts.PROJECT_NAME)):
         module = importlib.import_module(modname)
         if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
             modules[modname] = module

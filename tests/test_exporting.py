@@ -113,12 +113,12 @@ class TestExporting(object):
         from clu.constants.consts import BASEPATH, PROJECT_NAME
         from clu.exporting import path_to_dotpath, Exporter
         from clu.fs.filesystem import Directory
-        from clu.importing import all_registered_modules, Module
+        from clu.importing import modules_for_appname, Module
         from clu.predicates import haspyattr
         
         # Walk the importables:
         submodules = Directory(BASEPATH).importables(PROJECT_NAME)
-        clsmodules = tuple(clsmodule.qualname for clsmodule in all_registered_modules())
+        clsmodules = tuple(clsmodule.qualname for clsmodule in modules_for_appname(PROJECT_NAME))
         
         # Sanity-check the number of modules:
         assert len(clumods) <= len(submodules) + len(clsmodules)

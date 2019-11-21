@@ -249,10 +249,12 @@ class RedRun(contextlib.AbstractContextManager):
     def get_process(self):
         if self.active:
             raise RuntimeError("RedRun instance active")
-        return subprocess.Popen(self.get_command(),
+        process = subprocess.Popen(self.get_command(),
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL,
                                  shell=False)
+        time.sleep(type(self).PAUSE_SETUP)
+        return process
     
     def destroy_process(self, process):
         if not self.active:
@@ -272,7 +274,6 @@ class RedRun(contextlib.AbstractContextManager):
             self.config.setup()
             self.process = self.get_process()
             self.client = self.config.get_client()
-            time.sleep(type(self).PAUSE_SETUP)
             self.active = True
         return self
     

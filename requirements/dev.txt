@@ -12,7 +12,6 @@ gfm
 imageio
 ipython
 jupyter
-multidict
 mypy>=0.720
 pythonpy
 pytype

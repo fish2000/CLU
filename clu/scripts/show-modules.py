@@ -2,15 +2,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import namedtuple as NamedTuple
+from itertools import chain
 
 import importlib
 import pickle
 
-from clu.fs.filesystem import Directory
+from clu.constants import consts
 from clu.exporting import Exporter
+from clu.fs.filesystem import Directory
 from clu.importing import modules_for_appname
 from clu.naming import nameof, moduleof
-from clu.constants import consts
 from clu.repl import ansi
 from clu.repl.columnize import columnize
 from ansicolors import (green, lightgreen, red, lightred,
@@ -36,16 +37,13 @@ def printout(name, value):
     itemvalue = gray.render(f" {value}")
     ansi.print_ansi(chevron + itemname + colon + itemvalue, color=nothing)
 
-def import_clu_modules(basepath, submodule):
+def import_clu_modules(basepath, appname):
     """ Import all exporter-equipped CLU modules. """
     modules = {}
     
-    for modname in Directory(basepath).importables(submodule):
-        module = importlib.import_module(modname)
-        if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
-            modules[modname] = module
-    
-    for modname in (clsmodule.qualname for clsmodule in modules_for_appname(submodule)):
+    for modname in chain(Directory(basepath).importables(appname),
+                        (clsmodule.qualname \
+                         for clsmodule in modules_for_appname(appname))):
         module = importlib.import_module(modname)
         if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
             modules[modname] = module
@@ -89,7 +87,7 @@ def compare_module_lookups_for_all_things():
                                     consts.PROJECT_NAME)
     modulenames = Exporter.modulenames()
     
-    assert len(clumodules) == len(modulenames)
+    assert len(clumodules) <= len(modulenames)
     
     for modulename in modulenames:
         exports = Exporter[modulename].exports()

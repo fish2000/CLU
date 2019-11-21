@@ -1,15 +1,14 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
-# from pprint import pprint
 
+import atexit
 import contextlib
-# import contextvars
-# import logging
+import logging
 import multidict
 import os
 import re
 import redis
-# import signal
+import signal
 import subprocess
 import time
 
@@ -21,10 +20,16 @@ from clu.fs.filesystem import (which,
                                         Directory,
                                         Intermediate)
 
+from clu.importing import Module
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
+
+DO_IT_DOUG = False
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(relativeCreated)6d %(threadName)s %(message)s')
 
 @export
 class RedisConf(contextlib.AbstractContextManager,
@@ -229,6 +234,60 @@ class RedisConf(contextlib.AbstractContextManager,
         return self.assemble()
 
 @export
+class redprocess(Module):
+    
+    @export
+    def get_config(self):
+        return getattr(self, 'config', None)
+    
+    def set_config(self, config):
+        self.config = config
+    
+    @export
+    def get_process(self):
+        return getattr(self, 'process', None)
+    
+    def set_process(self, process):
+        self.process = process
+    
+    def __execute__(self):
+        if DO_IT_DOUG:
+            logging.debug("Configuring Redis…")
+            thisdir = Directory(os.path.dirname(__file__))
+            thisconf = thisdir.subpath('redis.conf', requisite=True)
+            assert os.path.exists(thisconf)
+            
+            self.set_config(RedisConf(thisconf))
+            self.get_config().setup()
+            
+            logging.debug("Starting Redis server…")
+            process = subprocess.Popen(self.get_config().get_command(),
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL,
+                                     shell=False)
+            time.sleep(RedRun.PAUSE_SETUP)
+            self.set_process(process)
+            
+            def cleanup():
+                logging.debug("Entering cleanup…")
+                logging.debug("Stopping Redis server…")
+                process.terminate()
+                time.sleep(RedRun.PAUSE_TEARDOWN)
+                if process.returncode is None:
+                    process.kill()
+                    process.wait(timeout=RedRun.PAUSE_TEARDOWN)
+                retval = process.returncode
+                logging.debug(f"RETVAL: {retval}")
+                self.get_config().teardown()
+            
+            atexit.register(cleanup)
+            signal.signal(signal.SIGTERM, cleanup)
+            signal.signal(signal.SIGHUP,  cleanup)
+            signal.signal(signal.SIGINT,  cleanup)
+        
+        super().__execute__()
+
+@export
 class RedRun(contextlib.AbstractContextManager):
     
     PAUSE_SETUP = 1
@@ -258,7 +317,8 @@ class RedRun(contextlib.AbstractContextManager):
     
     def setup(self):
         if not self.active:
-            self.process = self.get_process()
+            from clu.app import redprocess
+            self.process = redprocess.get_process()
             self.client = self.config.get_client()
             self.active = True
         return self
@@ -266,10 +326,6 @@ class RedRun(contextlib.AbstractContextManager):
     def teardown(self):
         if self.active:
             self.client.close()
-            retval = self.destroy_process(self.process)
-            if retval is None:
-                print("WARNING: PROCESS RETURNED NONE")
-            print(f"RETVAL: {retval}")
             self.process = None
             self.active = False
     
@@ -311,9 +367,9 @@ class RedRun(contextlib.AbstractContextManager):
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
-def test():
+def test_context():
     
-    print("Starting Redis server…")
+    logging.debug("Starting Redis server…")
     
     thisdir = Directory(os.path.dirname(__file__))
     thisconf = thisdir.subpath('redis.conf', requisite=True)
@@ -323,21 +379,34 @@ def test():
     
     with redconf:
         with RedRun(redconf) as redrun:
-            print(repr(redrun))
+            logging.debug(repr(redrun))
             assert redrun.config.active
             assert redrun.active
             assert redrun.ping()
             
-            print("Stopping Redis server…")
+            logging.debug("Stopping Redis server…")
     
-    print(repr(redrun))
-    print(repr(redconf))
-    
+    logging.debug(repr(redrun))
+    logging.debug(repr(redconf))
     # redconf.teardown()
     
     # assert not redrun.config.active
     assert not redrun.active
     assert not redrun.ping()
+
+def test():
+    from clu.app import redprocess
+    
+    redconf = redprocess.get_config()
+    
+    with RedRun(redconf) as redrun:
+        logging.debug(repr(redrun))
+        assert redrun.config.active
+        assert redrun.active
+        assert redrun.ping()
+    
+    logging.debug(repr(redrun))
+    logging.debug(repr(redconf))
 
 if __name__ == '__main__':
     test()

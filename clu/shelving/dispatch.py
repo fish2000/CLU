@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import atexit
 import signal
+import sys
 
 from clu.config.abc import functional_and
 from clu.exporting import Exporter
@@ -90,6 +91,7 @@ def test():
         print("Entering xhandle0")
         sig = signal_for(signum)
         print(f"Received signal: {sig.name} ({sig.value})")
+        print(f"Is finalizing:", sys.is_finalizing())
         return True
     
     @exithandle
@@ -97,6 +99,7 @@ def test():
         print("Entering xhandle1")
         sig = signal_for(signum)
         print(f"Received signal: {sig.name} ({sig.value})")
+        print(f"Is finalizing:", sys.is_finalizing())
         return True
     
     # Won’t register an already-registered handle:
@@ -114,12 +117,98 @@ def test():
         print("Entering xhandleX")
         sig = signal_for(signum)
         print(f"Received signal: {sig.name} ({sig.value})")
+        print(f"Is finalizing:", sys.is_finalizing())
         return True
     
     assert len(exithandles) == 1
     print("About to exit function test()…")
     return 0
 
+def test_async():
+    """ YOU ARE DOING IT WRONG:
+        https://asyncio-wrong.herokuapp.com/#/8/9
+    """
+    from dataclasses import dataclass
+    import asyncio
+    import random
+    import string
+    import uuid
+    
+    @dataclass
+    class Message:
+        msg_id: str
+        inst_name: str
+    
+    async def publish(queue):
+        choices = string.ascii_lowercase + string.digits
+        while True:
+            host_id = ''.join(random.choices(choices, k=4))
+            msg = Message(
+                msg_id=str(uuid.uuid4()),
+                inst_name=f'cattle-{host_id}')
+            
+            await queue.put(msg)
+            print(f'Published {msg}')
+            
+            await asyncio.sleep(random.random())
+    
+    async def save(msg):
+        # unhelpful simulation of i/o work
+        await asyncio.sleep(random.random())
+        print(f'Saved {msg} into database')
+    
+    async def restart_host(msg):
+        # unhelpful simulation of i/o work
+        await asyncio.sleep(random.random())
+        print(f'Restarted {msg.inst_name}')
+    
+    async def consume(queue):
+        while True:
+            msg = await queue.get()
+            print(f'Pulled {msg}')
+            asyncio.create_task(save(msg))
+            asyncio.create_task(restart_host(msg))
+    
+    async def shutdown(signal, loop):
+        print(f"Received exit signal {signal.name}…")
+        tasks = [task \
+                 for task in asyncio.all_tasks() \
+                 if task is not asyncio.current_task()]
+        [task.cancel() for task in tasks]
+        await asyncio.gather(*tasks)
+        loop.stop()
+        print("Shutdown complete!")
+    
+    async def handle_exception(function, loop):
+        try:
+            return await function
+        except asyncio.CancelledError:
+            print('Coroutine cancelled')
+        # except Exception:
+        #     print('Caught exception')
+        # finally:
+        #     loop.stop()
+    
+    loop = asyncio.get_event_loop()
+    
+    for sig in signals:
+        loop.add_signal_handler(
+            sig, lambda sig=sig: asyncio.create_task(shutdown(sig, loop)))
+    
+    queue = asyncio.Queue()
+    publisher_coro = handle_exception(publish(queue), loop)
+    consumer_coro = handle_exception(consume(queue), loop)
+    
+    try:
+        loop.create_task(publisher_coro)
+        loop.create_task(consumer_coro)
+        loop.run_forever()
+    finally:
+        print("Cleaning up")
+        loop.stop()
+    
+    return 0
+
 if __name__ == '__main__':
-    import sys
-    sys.exit(test())
+    # sys.exit(test())
+    sys.exit(test_async())

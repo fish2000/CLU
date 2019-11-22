@@ -200,12 +200,14 @@ class RedisConf(clu.abstract.ManagedContext,
         return self
     
     def teardown(self):
+        zout = '/tmp/redis-artifacts.zip'
         if self.active:
+            if self.rdir:
+                self.rdir.zip_archive(zout)
             if self.file:
                 self.file.close()
                 del self.file
             if self.rdir:
-                # self.rdir.zip_archive('/tmp/redis-artifacts.zip')
                 self.rdir.close()
                 del self.rdir
             self.active = False

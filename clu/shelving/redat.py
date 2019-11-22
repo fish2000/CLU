@@ -200,10 +200,10 @@ class RedisConf(clu.abstract.ManagedContext,
         return self
     
     def teardown(self):
-        zout = '/tmp/redis-artifacts.zip'
         if self.active:
-            if self.rdir:
-                self.rdir.zip_archive(zout)
+            # zout = '/tmp/redis-artifacts.zip'
+            # if self.rdir:
+            #     self.rdir.zip_archive(zout)
             if self.file:
                 self.file.close()
                 del self.file
@@ -304,6 +304,19 @@ class redprocess(Module):
                 retval = process.returncode
                 logging.debug(f"RETVAL: {retval}")
                 return retval == 0
+            
+            @exithandle
+            def gratuitous(signum, frame=None):
+                logging.debug("Entering gratuitous exit handler…")
+                sig = signal_for(signum)
+                logging.debug(f"Received signal: {sig.name} ({sig.value})")
+                # r = self.get_config().get_client()
+                # keycount = len(r.keys())
+                # logging.debug(f"Redis client has {keycount} keys")
+                keycount = len(self.get_config().config.keys())
+                logging.debug(f"Redis config has {keycount} keys")
+                time.sleep(RedRun.PAUSE_TEARDOWN)
+                return True
             
             @exithandle
             def cleanup_config(signum, frame=None):
@@ -447,7 +460,8 @@ def test():
         try:
             redrun.process.wait()
         
-        except subprocess.TimeoutExpired:
+        except (KeyboardInterrupt,
+                subprocess.TimeoutExpired):
             logging.info("Commencing shutdown…")
             logging.debug(repr(redrun))
             logging.debug(repr(redconf))

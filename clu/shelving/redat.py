@@ -31,8 +31,13 @@ export = exporter.decorator()
 
 DO_IT_DOUG = False
 
+formats = ('%(relativeCreated)6d',
+           '%(threadName)s',
+          '[%(module)s', '»', '%(funcName)s]',
+           '%(message)s')
+
 logging.basicConfig(level=logging.DEBUG,
-                    format='%(relativeCreated)6d %(threadName)s [%(module)s » %(funcName)s] %(message)s')
+                    format=' '.join(formats))
 
 @export
 class RedisConf(clu.abstract.ManagedContext,

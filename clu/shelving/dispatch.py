@@ -84,7 +84,13 @@ def unregister_all():
     bindhandles()
 
 @export
+def nhandles():
+    """ Return the number of registered exit-handle functions """
+    return len(exithandles)
+
+@export
 def trigger(send=signal.SIGQUIT, frame=None):
+    """ Run and unregister all exit handle functions without exiting """
     if bindhandles.last is not None:
         handles = bindhandles.last.clone()
         unregister_all()
@@ -248,6 +254,6 @@ def test_async():
     return 0
 
 if __name__ == '__main__':
-    # sys.exit(test())
-    sys.exit(test_sync())
+    sys.exit(test())
+    # sys.exit(test_sync())
     # sys.exit(test_async())

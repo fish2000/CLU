@@ -12,12 +12,11 @@ import weakref
 from clu.constants.consts import DEBUG, NoDefault
 from clu.constants.polyfills import Path
 from clu.abstract import Slotted
-from clu.config.abc import NAMESPACE_SEP, FlatOrderedSet
+from clu.config.abc import NAMESPACE_SEP, functional_and, functional_set
 from clu.naming import nameof
 from clu.predicates import (negate, isclasstype,
                             getpyattr, always, no_op, attr,
-                            uncallable, hoist, tuplize, slots_for,
-                            isnotnone)
+                            uncallable, hoist, tuplize, slots_for)
 from clu.repr import stringify
 from clu.typology import (isderivative, ismapping,
                                         isnumber,
@@ -31,61 +30,6 @@ export = exporter.decorator()
 class ValidationError(Exception):
     """ An error occuring during field validation or configuration. """
     pass
-
-@export
-class functional_and(FlatOrderedSet,
-                     collections.abc.Callable):
-    
-    """ The “functional_and” FlatOrderedSet subclass is designed to hold
-        a sequence of functions. Instances of “functional_and” are callable –
-        calling “functional_and_instance(thing)” will apply each item held
-        by the instance to “thing”, returning True only if the instances’
-        functions all return a Truthy value. 
-    """
-    
-    def __init__(self, *functions):
-        """ Initialize a “functional_and” callable FlatOrderedSet with a list
-            of unary boolean functions.
-        """
-        super(functional_and, self).__init__(predicate=callable, *functions)
-    
-    def __call__(self, *args):
-        """ Apply each of the functions held by this “functional_and” instance;
-            True is returned if all of the functions return a Truthy value –
-            otherwise, False is returned.
-        """
-        return all(function(*args) \
-               for function in reversed(self) \
-                if function is not None)
-
-@export
-class functional_set(FlatOrderedSet,
-                     collections.abc.Callable):
-    
-    """ The “functional_set” FlatOrderedSet subclass is designed to hold
-        a sequence of functions. Instances of “functional_set” are callable –
-        calling “functional_set_instance(thing)” will successively apply
-        each function to either “thing” or the return value of the previous
-        function – finally returning the last return value when the sequence
-        of functions has been exhausted.
-    """
-    
-    def __init__(self, *functions):
-        """ Initialize a “functional_and” callable FlatOrderedSet with a list
-            of functions accepting a “thing” and returning something like it.
-        """
-        super(functional_set, self).__init__(predicate=callable, *functions)
-    
-    def __call__(self, thing):
-        """ Apply each of the functions held by this “functional_and” instance
-            successively to “thing”, replacing “thing” with the return value of
-            each function in turn, and finally returning the last return value
-            once the sequence of functions has been exhausted.
-        """
-        for function in reversed(tuple(filter(isnotnone, self))):
-            if function is not None:
-                thing = function(thing)
-        return thing
 
 @export
 class FieldBase(abc.ABC, metaclass=Slotted):

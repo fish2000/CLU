@@ -2,17 +2,18 @@
 from __future__ import print_function
 
 import abc
+import clu.abstract
 import collections
 import collections.abc
 import copy
 
 abstract = abc.abstractmethod
 
-from clu.abstract import Slotted, Cloneable, ReprWrapper
 from clu.constants.consts import DEBUG, NoDefault
 from clu.predicates import (isiterable, always, uncallable,
-                            isexpandable, iscontainer,
+                            isexpandable, iscontainer, isnotnone,
                             tuplize)
+
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -24,9 +25,9 @@ NAMESPACE_SEP = ':'
 class FlatOrderedSet(collections.abc.Set,
                      collections.abc.Sequence,
                      collections.abc.Reversible,
-                     collections.abc.Hashable, Cloneable,
-                                               ReprWrapper,
-                                               metaclass=Slotted):
+                     collections.abc.Hashable, clu.abstract.Cloneable,
+                                               clu.abstract.ReprWrapper,
+                                               metaclass=clu.abstract.Slotted):
     
     """ FlatOrderedSet is a structure designed to coalesce any nested
         elements with which it is initialized into a flat, ordered sequence
@@ -112,6 +113,61 @@ class FlatOrderedSet(collections.abc.Set,
     
     def inner_repr(self):
         return repr(self.things)
+
+@export
+class functional_and(FlatOrderedSet,
+                     collections.abc.Callable):
+    
+    """ The “functional_and” FlatOrderedSet subclass is designed to hold
+        a sequence of functions. Instances of “functional_and” are callable –
+        calling “functional_and_instance(thing)” will apply each item held
+        by the instance to “thing”, returning True only if the instances’
+        functions all return a Truthy value. 
+    """
+    
+    def __init__(self, *functions):
+        """ Initialize a “functional_and” callable FlatOrderedSet with a list
+            of unary boolean functions.
+        """
+        super(functional_and, self).__init__(predicate=callable, *functions)
+    
+    def __call__(self, *args):
+        """ Apply each of the functions held by this “functional_and” instance;
+            True is returned if all of the functions return a Truthy value –
+            otherwise, False is returned.
+        """
+        return all(function(*args) \
+               for function in reversed(self) \
+                if function is not None)
+
+@export
+class functional_set(FlatOrderedSet,
+                     collections.abc.Callable):
+    
+    """ The “functional_set” FlatOrderedSet subclass is designed to hold
+        a sequence of functions. Instances of “functional_set” are callable –
+        calling “functional_set_instance(thing)” will successively apply
+        each function to either “thing” or the return value of the previous
+        function – finally returning the last return value when the sequence
+        of functions has been exhausted.
+    """
+    
+    def __init__(self, *functions):
+        """ Initialize a “functional_and” callable FlatOrderedSet with a list
+            of functions accepting a “thing” and returning something like it.
+        """
+        super(functional_set, self).__init__(predicate=callable, *functions)
+    
+    def __call__(self, thing):
+        """ Apply each of the functions held by this “functional_and” instance
+            successively to “thing”, replacing “thing” with the return value of
+            each function in turn, and finally returning the last return value
+            once the sequence of functions has been exhausted.
+        """
+        for function in reversed(tuple(filter(isnotnone, self))):
+            if function is not None:
+                thing = function(thing)
+        return thing
 
 @export
 class NamespacedMutableMapping(collections.abc.MutableMapping,

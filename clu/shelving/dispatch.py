@@ -16,9 +16,10 @@ export = exporter.decorator()
 exithandles = []
 
 # The list of signals to which we’ll be listening:
-signals = (signal.SIGTERM,
-           signal.SIGHUP,
-           signal.SIGINT)
+signals = (signal.SIGHUP,
+           signal.SIGQUIT,
+           signal.SIGTERM,
+           signal.SIGWINCH)
 
 def wraphandler(function):
     """ Wrap a signal handler in a system-exit function """
@@ -40,7 +41,7 @@ def bindhandles():
     handles = functional_and(*exithandles)
     
     # Register the handle set with “atexit”:
-    atexit.register(handles, signal.SIGQUIT, None)
+    atexit.register(handles, signal.SIGSTOP, None)
     
     # Register the handle set with all specified signals:
     for sig in signals:
@@ -58,7 +59,7 @@ def signal_for(signum):
     for sig in signal.Signals:
         if sig.value == int(signum):
             return sig
-    return None
+    return signal.SIG_DFL
 
 @export
 def exithandle(function):
@@ -89,7 +90,7 @@ def nhandles():
     return len(exithandles)
 
 @export
-def trigger(send=signal.SIGQUIT, frame=None):
+def trigger(send=signal.SIGSTOP, frame=None):
     """ Run and unregister all exit handle functions without exiting """
     if bindhandles.last is not None:
         handles = bindhandles.last.clone()
@@ -104,8 +105,10 @@ def trigger(send=signal.SIGQUIT, frame=None):
     return False
 
 @export
-def shutdown(send=signal.SIGQUIT, frame=None):
+def shutdown(send=signal.SIGSTOP, frame=None):
     """ Run all exit handles, and commence an orderly shutdown """
+    if callable(bindhandles.last):
+        atexit.unregister(bindhandles.last)
     out = not trigger(send, frame)
     sys.exit(int(out))
 
@@ -154,8 +157,6 @@ def test_sync():
     out = test()
     while True:
         time.sleep(1)
-        # try:
-        # except KeyboardInterrupt:
     print('WAT')
     return out
 

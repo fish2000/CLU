@@ -2,6 +2,8 @@
 from __future__ import print_function
 
 import clu.abstract
+import collections
+import collections.abc
 import logging
 import multidict
 import os
@@ -41,6 +43,8 @@ logging.basicConfig(level=logging.DEBUG,
 
 @export
 class RedisConf(clu.abstract.ManagedContext,
+                collections.abc.MutableMapping,
+                collections.abc.Sized,
                 os.PathLike):
     
     """ Process Redis configuration-file options, and generate
@@ -296,6 +300,16 @@ class redprocess(Module):
             self.set_process(process)
             
             @exithandle
+            def gratuitous(signum, frame=None):
+                logging.debug("Entering gratuitous exit handler…")
+                sig = signal_for(signum)
+                logging.debug(f"Received signal: {sig.name} ({sig.value})")
+                keycount = len(self.get_config().config.keys())
+                logging.debug(f"Redis config has {keycount} keys")
+                time.sleep(RedRun.PAUSE_TEARDOWN)
+                return True
+            
+            @exithandle
             def cleanup_process(signum, frame=None):
                 logging.debug("Entering process cleanup…")
                 sig = signal_for(signum)
@@ -309,16 +323,6 @@ class redprocess(Module):
                 retval = process.returncode
                 logging.debug(f"RETVAL: {retval}")
                 return retval == 0
-            
-            @exithandle
-            def gratuitous(signum, frame=None):
-                logging.debug("Entering gratuitous exit handler…")
-                sig = signal_for(signum)
-                logging.debug(f"Received signal: {sig.name} ({sig.value})")
-                keycount = len(self.get_config().config.keys())
-                logging.debug(f"Redis config has {keycount} keys")
-                time.sleep(RedRun.PAUSE_TEARDOWN)
-                return True
             
             @exithandle
             def cleanup_config(signum, frame=None):
@@ -459,14 +463,20 @@ def test():
         redrun.client.flushdb()
         redrun.client.flushall()
         
-        try:
-            redrun.process.wait()
+        # try:
+        #     redrun.process.wait()
+        #
+        # except (KeyboardInterrupt,
+        #         subprocess.TimeoutExpired):
+        #     logging.info("Commencing shutdown…")
+        #     logging.debug(repr(redrun))
+        #     logging.debug(repr(redconf))
+        #     shutdown(signal.SIGTERM)
         
-        except (KeyboardInterrupt,
-                subprocess.TimeoutExpired):
+        try:
+            time.sleep(10)
+        except KeyboardInterrupt: # signal.SIGINT
             logging.info("Commencing shutdown…")
-            logging.debug(repr(redrun))
-            logging.debug(repr(redconf))
             shutdown(signal.SIGTERM)
     
     logging.debug(repr(redrun))

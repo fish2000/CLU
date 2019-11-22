@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from functools import wraps
 
 import atexit
 import signal
@@ -19,6 +20,15 @@ signals = (signal.SIGTERM,
            signal.SIGHUP,
            signal.SIGINT)
 
+def wraphandler(function):
+    """ Wrap a signal handler in a system-exit function """
+    @wraps(function)
+    def wrapper(*args):
+        atexit.unregister(function)
+        out = not function(*args)
+        sys.exit(int(out))
+    return wrapper
+
 def bindhandles():
     """ Freshly bind all exit handles listed in “clu.shelving.dispatch.exithandles” """
     # If there’s a handle set already registered with “atexit”,
@@ -34,7 +44,7 @@ def bindhandles():
     
     # Register the handle set with all specified signals:
     for sig in signals:
-        signal.signal(sig, handles)
+        signal.signal(sig, wraphandler(handles))
     
     # Stow the handle set instance for possible unregistration:
     bindhandles.last = handles
@@ -78,7 +88,13 @@ def trigger(send=signal.SIGQUIT, frame=None):
     if bindhandles.last is not None:
         handles = bindhandles.last.clone()
         unregister_all()
-        return handles(send, frame)
+        out = True
+        for handle in handles:
+            try:
+                out &= handle(send, frame)
+            except SystemExit:
+                pass
+        return out
     return False
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
@@ -91,7 +107,6 @@ def test():
         print("Entering xhandle0")
         sig = signal_for(signum)
         print(f"Received signal: {sig.name} ({sig.value})")
-        print(f"Is finalizing:", sys.is_finalizing())
         return True
     
     @exithandle
@@ -99,7 +114,6 @@ def test():
         print("Entering xhandle1")
         sig = signal_for(signum)
         print(f"Received signal: {sig.name} ({sig.value})")
-        print(f"Is finalizing:", sys.is_finalizing())
         return True
     
     # Won’t register an already-registered handle:
@@ -117,12 +131,21 @@ def test():
         print("Entering xhandleX")
         sig = signal_for(signum)
         print(f"Received signal: {sig.name} ({sig.value})")
-        print(f"Is finalizing:", sys.is_finalizing())
         return True
     
     assert len(exithandles) == 1
     print("About to exit function test()…")
     return 0
+
+def test_sync():
+    import time
+    out = test()
+    while True:
+        time.sleep(1)
+        # try:
+        # except KeyboardInterrupt:
+    print('WAT')
+    return out
 
 def test_async():
     """ YOU ARE DOING IT WRONG:
@@ -226,4 +249,5 @@ def test_async():
 
 if __name__ == '__main__':
     # sys.exit(test())
-    sys.exit(test_async())
+    sys.exit(test_sync())
+    # sys.exit(test_async())

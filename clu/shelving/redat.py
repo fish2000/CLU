@@ -1,8 +1,7 @@
 # -*- encoding: utf-8 -*-
 from __future__ import print_function
 
-import atexit
-import contextlib
+import clu.abstract
 import logging
 import multidict
 import os
@@ -14,6 +13,7 @@ import time
 
 from clu.constants.consts import NoDefault
 from clu.predicates import resolve, uniquify
+from clu.shelving.dispatch import exithandle
 from clu.fs.filesystem import (which,
                                TemporaryName,
                                TemporaryDirectory,
@@ -29,10 +29,10 @@ export = exporter.decorator()
 DO_IT_DOUG = False
 
 logging.basicConfig(level=logging.DEBUG,
-                    format='%(relativeCreated)6d %(threadName)s %(message)s')
+                    format='%(relativeCreated)6d %(threadName)s [%(module)s»%(funcName)s] %(message)s')
 
 @export
-class RedisConf(contextlib.AbstractContextManager,
+class RedisConf(clu.abstract.ManagedContext,
                 os.PathLike):
     
     """ Process Redis configuration-file options, and generate
@@ -194,15 +194,6 @@ class RedisConf(contextlib.AbstractContextManager,
         return redis.Redis(host=self.get_host(),
                            port=self.get_port())
     
-    def __enter__(self):
-        return self.setup()
-    
-    def __exit__(self, exc_type=None,
-                       exc_val=None,
-                       exc_tb=None):
-        self.teardown()
-        return exc_type is None
-    
     def __fspath__(self):
         return self.path
     
@@ -233,7 +224,6 @@ class RedisConf(contextlib.AbstractContextManager,
     def __str__(self):
         return self.assemble()
 
-@export
 class redprocess(Module):
     
     @export
@@ -249,6 +239,13 @@ class redprocess(Module):
     
     def set_process(self, process):
         self.process = process
+    
+    @staticmethod
+    def get_signal(signum):
+        for sig in signal.Signals:
+            if sig.value == int(signum):
+                return sig
+        return None
     
     def __execute__(self):
         if DO_IT_DOUG:
@@ -268,8 +265,23 @@ class redprocess(Module):
             time.sleep(RedRun.PAUSE_SETUP)
             self.set_process(process)
             
-            def cleanup():
-                logging.debug("Entering cleanup…")
+            @exithandle
+            def cleanup_config(signum, frame=None):
+                logging.debug("Entering config cleanup…")
+                sig = self.get_signal(signum)
+                logging.debug(f"Received signal: {sig.name} ({sig.value})")
+                logging.debug("Tearing down Redis config…")
+                config = self.get_config()
+                config.teardown()
+                retval = not config.active
+                logging.debug(f"RETVAL: {retval}")
+                return retval
+            
+            @exithandle
+            def cleanup_process(signum, frame=None):
+                logging.debug("Entering process cleanup…")
+                sig = self.get_signal(signum)
+                logging.debug(f"Received signal: {sig.name} ({sig.value})")
                 logging.debug("Stopping Redis server…")
                 process.terminate()
                 time.sleep(RedRun.PAUSE_TEARDOWN)
@@ -278,17 +290,12 @@ class redprocess(Module):
                     process.wait(timeout=RedRun.PAUSE_TEARDOWN)
                 retval = process.returncode
                 logging.debug(f"RETVAL: {retval}")
-                self.get_config().teardown()
-            
-            atexit.register(cleanup)
-            signal.signal(signal.SIGTERM, cleanup)
-            signal.signal(signal.SIGHUP,  cleanup)
-            signal.signal(signal.SIGINT,  cleanup)
+                return retval == 0
         
         super().__execute__()
 
 @export
-class RedRun(contextlib.AbstractContextManager):
+class RedRun(clu.abstract.ManagedContext):
     
     PAUSE_SETUP = 1
     PAUSE_TEARDOWN = 2
@@ -341,15 +348,6 @@ class RedRun(contextlib.AbstractContextManager):
             return self.client.ping()
         except redis.exceptions.ConnectionError:
             return False
-    
-    def __enter__(self):
-        return self.setup()
-    
-    def __exit__(self, exc_type=None,
-                       exc_val=None,
-                       exc_tb=None):
-        self.teardown()
-        return exc_type is None
     
     def __repr__(self):
         typename = type(self).__name__

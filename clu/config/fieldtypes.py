@@ -49,12 +49,12 @@ class functional_and(FlatOrderedSet,
         """
         super(functional_and, self).__init__(predicate=callable, *functions)
     
-    def __call__(self, thing):
+    def __call__(self, *args):
         """ Apply each of the functions held by this “functional_and” instance;
             True is returned if all of the functions return a Truthy value –
             otherwise, False is returned.
         """
-        return all(function(thing) \
+        return all(function(*args) \
                for function in reversed(self) \
                 if function is not None)
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import abc
+import contextlib
 
 abstract = abc.abstractmethod
 
@@ -218,11 +219,47 @@ class AppName(abc.ABC):
             raise LookupError("Cannot instantiate a base config class "
                               "(appname is None)")
 
+class ManagedContext(contextlib.AbstractContextManager,
+                     contextlib.AbstractAsyncContextManager):
+    
+    __slots__ = tuple()
+    
+    @abstract
+    def setup(self):
+        ...
+    
+    @abstract
+    def teardown(self):
+        ...
+    
+    def __enter__(self):
+        return self.setup()
+    
+    def __exit__(self, exc_type=None,
+                       exc_val=None,
+                       exc_tb=None):
+        self.teardown()
+        return exc_type is None
+    
+    async def __aenter__(self):
+        self.setup()
+        if hasattr(self, '__await__'):
+            if callable(self.__await__):
+                await self
+        return self
+    
+    async def __aexit__(self, exc_type=None,
+                              exc_val=None,
+                              exc_tb=None):
+        self.teardown()
+        return exc_type is None
+
 __all__ = ('Slotted', 'NonSlotted',
            'Cloneable',
            'ReprWrapper',
            'SlottedRepr', 'MappingViewRepr',
            'Descriptor', 'ValueDescriptor',
-           'Prefix', 'AppName')
+           'Prefix', 'AppName',
+           'ManagedContext')
 
 __dir__ = lambda: list(__all__)

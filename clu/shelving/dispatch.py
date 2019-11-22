@@ -128,64 +128,79 @@ def test_async():
     """ YOU ARE DOING IT WRONG:
         https://asyncio-wrong.herokuapp.com/#/8/9
     """
-    from dataclasses import dataclass
+    from dataclasses import dataclass, fields
+    
     import asyncio
+    import logging
     import random
     import string
     import uuid
     
-    @dataclass
+    from clu.repr import stringify
+    
+    formats = ('%(relativeCreated)6d',
+               '%(threadName)s',
+               '[%(module)s', '»',
+               '%(funcName)s]',
+               '%(message)s')
+    
+    logging.basicConfig(level=logging.DEBUG,
+                        format=' '.join(formats))
+    
+    @dataclass(repr=False)
     class Message:
         msg_id: str
         inst_name: str
+        
+        def __repr__(self):
+            return stringify(self, tuple(field.name \
+                                         for field in fields(self)))
     
     async def publish(queue):
         choices = string.ascii_lowercase + string.digits
         while True:
             host_id = ''.join(random.choices(choices, k=4))
             msg = Message(
-                msg_id=str(uuid.uuid4()),
-                inst_name=f'cattle-{host_id}')
-            
+                msg_id=str(uuid.uuid4()).split('-')[-1],
+                inst_name=f'dogg-{host_id}')
             await queue.put(msg)
-            print(f'Published {msg}')
-            
+            logging.debug(f'Published {msg}')
             await asyncio.sleep(random.random())
     
     async def save(msg):
         # unhelpful simulation of i/o work
         await asyncio.sleep(random.random())
-        print(f'Saved {msg} into database')
+        logging.debug(f'Saved {msg} into database')
     
     async def restart_host(msg):
         # unhelpful simulation of i/o work
         await asyncio.sleep(random.random())
-        print(f'Restarted {msg.inst_name}')
+        logging.debug(f'Restarted {msg.inst_name}')
     
     async def consume(queue):
         while True:
             msg = await queue.get()
-            print(f'Pulled {msg}')
+            logging.debug(f'Pulled {msg}')
             asyncio.create_task(save(msg))
             asyncio.create_task(restart_host(msg))
     
     async def shutdown(signal, loop):
-        print(f"Received exit signal {signal.name}…")
+        logging.debug(f"Received exit signal {signal.name}…")
         tasks = [task \
                  for task in asyncio.all_tasks() \
                  if task is not asyncio.current_task()]
         [task.cancel() for task in tasks]
         await asyncio.gather(*tasks)
         loop.stop()
-        print("Shutdown complete!")
+        logging.debug("Shutdown complete!")
     
-    async def handle_exception(function, loop):
+    async def handle_exception(coro, loop):
         try:
-            return await function
+            return await coro
         except asyncio.CancelledError:
-            print('Coroutine cancelled')
+            logging.debug('Coroutine cancelled')
         # except Exception:
-        #     print('Caught exception')
+        #     logging.debug('Caught exception')
         # finally:
         #     loop.stop()
     
@@ -204,7 +219,7 @@ def test_async():
         loop.create_task(consumer_coro)
         loop.run_forever()
     finally:
-        print("Cleaning up")
+        logging.debug("Cleaning up")
         loop.stop()
     
     return 0

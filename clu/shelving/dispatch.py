@@ -99,10 +99,14 @@ def test():
         print(f"Received signal: {sig.name} ({sig.value})")
         return True
     
-    print("Triggering…")
-    assert trigger()
+    # Won’t register an already-registered handle:
+    exithandle(xhandle1)
     
     global exithandles
+    assert len(exithandles) == 2
+    
+    print("Triggering…")
+    assert trigger()
     assert len(exithandles) == 0
     
     @exithandle
@@ -114,6 +118,8 @@ def test():
     
     assert len(exithandles) == 1
     print("About to exit function test()…")
+    return 0
 
 if __name__ == '__main__':
-    test()
+    import sys
+    sys.exit(test())

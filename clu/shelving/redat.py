@@ -7,13 +7,12 @@ import multidict
 import os
 import re
 import redis
-import signal
 import subprocess
 import time
 
 from clu.constants.consts import NoDefault
 from clu.predicates import resolve, uniquify
-from clu.shelving.dispatch import exithandle
+from clu.shelving.dispatch import signal_for, exithandle
 from clu.fs.filesystem import (which,
                                TemporaryName,
                                TemporaryDirectory,
@@ -240,13 +239,6 @@ class redprocess(Module):
     def set_process(self, process):
         self.process = process
     
-    @staticmethod
-    def get_signal(signum):
-        for sig in signal.Signals:
-            if sig.value == int(signum):
-                return sig
-        return None
-    
     def __execute__(self):
         if DO_IT_DOUG:
             logging.debug("Configuring Redis…")
@@ -268,7 +260,7 @@ class redprocess(Module):
             @exithandle
             def cleanup_process(signum, frame=None):
                 logging.debug("Entering process cleanup…")
-                sig = self.get_signal(signum)
+                sig = signal_for(signum)
                 logging.debug(f"Received signal: {sig.name} ({sig.value})")
                 logging.debug("Stopping Redis server…")
                 process.terminate()
@@ -283,7 +275,7 @@ class redprocess(Module):
             @exithandle
             def cleanup_config(signum, frame=None):
                 logging.debug("Entering config cleanup…")
-                sig = self.get_signal(signum)
+                sig = signal_for(signum)
                 logging.debug(f"Received signal: {sig.name} ({sig.value})")
                 logging.debug("Tearing down Redis config…")
                 config = self.get_config()

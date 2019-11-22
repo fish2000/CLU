@@ -61,7 +61,7 @@ def unregister(function):
 def unregister_all():
     """ Unregister *all* previously-registered exit handle functions """
     global exithandles
-    exithandles = []
+    exithandles[:] = list()
     bindhandles()
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

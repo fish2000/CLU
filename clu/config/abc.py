@@ -137,7 +137,7 @@ class functional_and(FlatOrderedSet,
             otherwise, False is returned.
         """
         return all(function(*args) \
-               for function in reversed(self) \
+               for function in self \
                 if function is not None)
 
 @export

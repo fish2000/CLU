@@ -29,7 +29,7 @@ export = exporter.decorator()
 DO_IT_DOUG = False
 
 logging.basicConfig(level=logging.DEBUG,
-                    format='%(relativeCreated)6d %(threadName)s [%(module)s»%(funcName)s] %(message)s')
+                    format='%(relativeCreated)6d %(threadName)s [%(module)s » %(funcName)s] %(message)s')
 
 @export
 class RedisConf(clu.abstract.ManagedContext,
@@ -266,18 +266,6 @@ class redprocess(Module):
             self.set_process(process)
             
             @exithandle
-            def cleanup_config(signum, frame=None):
-                logging.debug("Entering config cleanup…")
-                sig = self.get_signal(signum)
-                logging.debug(f"Received signal: {sig.name} ({sig.value})")
-                logging.debug("Tearing down Redis config…")
-                config = self.get_config()
-                config.teardown()
-                retval = not config.active
-                logging.debug(f"RETVAL: {retval}")
-                return retval
-            
-            @exithandle
             def cleanup_process(signum, frame=None):
                 logging.debug("Entering process cleanup…")
                 sig = self.get_signal(signum)
@@ -291,6 +279,18 @@ class redprocess(Module):
                 retval = process.returncode
                 logging.debug(f"RETVAL: {retval}")
                 return retval == 0
+            
+            @exithandle
+            def cleanup_config(signum, frame=None):
+                logging.debug("Entering config cleanup…")
+                sig = self.get_signal(signum)
+                logging.debug(f"Received signal: {sig.name} ({sig.value})")
+                logging.debug("Tearing down Redis config…")
+                config = self.get_config()
+                config.teardown()
+                retval = not config.active
+                logging.debug(f"RETVAL: {retval}")
+                return retval
         
         super().__execute__()
 

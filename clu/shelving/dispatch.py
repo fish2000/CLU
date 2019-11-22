@@ -103,6 +103,12 @@ def trigger(send=signal.SIGQUIT, frame=None):
         return out
     return False
 
+@export
+def shutdown(send=signal.SIGQUIT, frame=None):
+    """ Run all exit handles, and commence an orderly shutdown """
+    out = not trigger(send, frame)
+    sys.exit(int(out))
+
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 

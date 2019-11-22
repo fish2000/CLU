@@ -12,7 +12,11 @@ import time
 
 from clu.constants.consts import NoDefault
 from clu.predicates import resolve, uniquify
-from clu.shelving.dispatch import signal_for, exithandle
+
+from clu.shelving.dispatch import (signal_for,
+                                   exithandle,
+                                   shutdown)
+
 from clu.fs.filesystem import (which,
                                TemporaryName,
                                TemporaryDirectory,
@@ -98,7 +102,7 @@ class RedisConf(clu.abstract.ManagedContext,
         return default
     
     def set_boolean(self, key, value):
-        self.set(value and 'yes' or 'no')
+        self.set(key, value and 'yes' or 'no')
     
     def get_boolean(self, key):
         return self.get(key).lower().strip() == 'yes'
@@ -107,12 +111,32 @@ class RedisConf(clu.abstract.ManagedContext,
         return self.config.get('bind')[0]
     
     def set_port(self, port):
+        if port == 0:
+            self.set_unix_socket()
+            return
         rdir = self.get_dir()
-        self.set('port',    str(port))
-        self.set('pidfile', rdir.subpath(f"redis_{port}.pid"))
+        self.set('port',            str(port))
+        self.set('pidfile',         rdir.subpath(f"redis-tcp-{port}.pid"))
+        if 'unixsocket' in self:
+            del self['unixsocket']
+        if 'unixsocketperm' in self:
+            del self['unixsocketperm']
     
     def get_port(self):
         return int(self.get('port'), base=10)
+    
+    def set_unix_socket(self, perm=755):
+        rdir = self.get_dir()
+        self.set('port',            '0') # disable
+        self.set('pidfile',         rdir.subpath("redis-unixsocket.pid"))
+        self.set('unixsocket',      rdir.subpath("redis.sock"))
+        self.set('unixsocketperm',  f'{perm!s}') # this may be bad
+    
+    def get_unix_socket(self):
+        return self.get('unixsocket', None)
+    
+    def get_unix_socket_perm(self):
+        return int(self.get('unixsocketperm', '755'), base=10)
     
     def set_dir(self, directory):
         self.set('dir', os.fspath(directory))
@@ -168,6 +192,7 @@ class RedisConf(clu.abstract.ManagedContext,
                                  randomized=True)
             self.set_dir(rdir)
             self.set_port(self.port)
+            self.set_boolean('appendonly', True)
             conf.write(self.assemble())
             self.rdir = rdir
             self.file = conf
@@ -180,6 +205,7 @@ class RedisConf(clu.abstract.ManagedContext,
                 self.file.close()
                 del self.file
             if self.rdir:
+                # self.rdir.zip_archive('/tmp/redis-artifacts.zip')
                 self.rdir.close()
                 del self.rdir
             self.active = False
@@ -190,8 +216,13 @@ class RedisConf(clu.abstract.ManagedContext,
     def get_client(self):
         if not self.active:
             raise RuntimeError("RedisConf instance inactive")
-        return redis.Redis(host=self.get_host(),
-                           port=self.get_port())
+        opts = {}
+        if self.get_port() == 0:
+            opts['unix_socket_path'] = self.get_unix_socket()
+        else:
+            opts['host'] = self.get_host()
+            opts['port'] = self.get_port()
+        return redis.Redis(**opts)
     
     def __fspath__(self):
         return self.path
@@ -246,7 +277,7 @@ class redprocess(Module):
             thisconf = thisdir.subpath('redis.conf', requisite=True)
             assert os.path.exists(thisconf)
             
-            self.set_config(RedisConf(thisconf))
+            self.set_config(RedisConf(thisconf, port=0))
             self.get_config().setup()
             
             logging.debug("Starting Redis server…")
@@ -389,14 +420,36 @@ def test():
     DO_IT_DOUG = True
     
     from clu.app import redprocess
+    from clu.repl.ansi import print_separator
+    from clu.constants.data import GREEKOUT
+    import signal
     
     redconf = redprocess.get_config()
+    
+    print_separator()
+    print(str(redconf))
+    print_separator()
     
     with RedRun(redconf) as redrun:
         logging.debug(repr(redrun))
         assert redrun.config.active
         assert redrun.active
         assert redrun.ping()
+        
+        for key, greek in GREEKOUT.items():
+            redrun.client[key] = str(greek)
+        
+        redrun.client.flushdb()
+        redrun.client.flushall()
+        
+        try:
+            redrun.process.wait()
+        
+        except subprocess.TimeoutExpired:
+            logging.info("Commencing shutdown…")
+            logging.debug(repr(redrun))
+            logging.debug(repr(redconf))
+            shutdown(signal.SIGTERM)
     
     logging.debug(repr(redrun))
     logging.debug(repr(redconf))

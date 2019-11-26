@@ -101,7 +101,7 @@ class TestNaming(object):
     
     @pytest.mark.skipif(consts.PYPY, reason="Failure on PyPy")
     @pytest.mark.nondeterministic
-    def _test_qualified_name_constants(self):
+    def test_qualified_name_constants(self):
         """ » Checking “qualified_name(¬) on items from clu.constants …” """
         from clu.constants.consts import (BASEPATH, HOSTNAME, VERBOTEN, SCRIPT_PATH, TEST_PATH)
         from clu.naming import qualified_name

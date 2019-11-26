@@ -62,7 +62,7 @@ class MetaRegistry(clu.abstract.NonSlotted):
     
     @staticmethod
     def for_appname(appname):
-        """ Return the weak-value dictionary of classes for the qualified module name """
+        """ Return the weak-value dictionary of classes for the registered appname """
         if not appname:
             raise ValueError("appname required")
         if not isstring(appname):

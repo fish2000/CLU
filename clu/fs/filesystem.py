@@ -1157,7 +1157,7 @@ class Directory(collections.abc.Hashable,
         excluder = re_excluder(excludes)
         searcher = suffix_searcher(suffix)
         dotpaths = []
-        target = self.subdirectory(subdir, source)
+        target = self.subdirectory(subdir or os.path.curdir, source)
         # Use a call to “os.walk(…)” directly to allow modification of
         # the “dirs” list in-place:
         for root, dirs, files in os.walk(target):

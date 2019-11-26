@@ -62,7 +62,7 @@ class MetaRegistry(clu.abstract.NonSlotted):
     
     @staticmethod
     def for_appname(appname):
-        """ Return the module with the qualified registered module name """
+        """ Return the class for the qualified registered module name """
         if not appname:
             raise ValueError("appname required")
         if not isstring(appname):

@@ -40,11 +40,7 @@ from clu.constants.exceptions import (BadDotpathWarning,
 from clu.constants.polyfills import (Enum, EnumMeta, unique,
                                      ispyname,
                                      AutoType, auto,
-                                     unicode, long,
-                                     cache_from_source,
-                                     lru_cache,
-                                     Path, scandir, walk,
-                                     reduce)
+                                     Path, reduce)
 
 from clu.compilation import (Macro, Macros,
                              CDBSubBase, CDBBase, CDBJsonFile)
@@ -149,12 +145,13 @@ from clu.naming import (determine_module, nameof, moduleof,
 
 from clu.abstract import Cloneable, ReprWrapper
 
-from clu.config.abc import NAMESPACE_SEP, FlatOrderedSet, NamespacedMutableMapping
+from clu.config.abc import (NAMESPACE_SEP, FlatOrderedSet,
+                                           functional_and,
+                                           functional_set, NamespacedMutableMapping)
 from clu.config.base import Flat, Nested
 from clu.config.env import Env
 from clu.config.filebase import FileName, FileBase
 from clu.config.fieldtypes import ValidationError
-from clu.config.fieldtypes import functional_and, functional_set
 from clu.config.fieldtypes import FieldBase
 from clu.config.fieldtypes import fields
 from clu.config.settings import Schema
@@ -296,10 +293,7 @@ __all__ = ('Image',
            'Enum', 'EnumMeta', 'unique',
            'ispyname', 'pytuple',
            'AutoType', 'auto',
-           'unicode', 'long',
-           'cache_from_source',
-           'lru_cache',
-           'Path', 'scandir', 'walk',
+           'Path',
            'sanitize', 'sanitizers', 'utf8_encode', 'utf8_decode',
            'Macro', 'Macros',
            'CDBSubBase', 'CDBBase', 'CDBJsonFile',
@@ -434,6 +428,15 @@ except (ImportError, SyntaxError):
 else:
     # Extend `__all__`:
     __all__ += ('pout',)
+
+try:
+    from clu.shelving import dispatch
+    from clu.shelving.redat import RedisConf, RedRun
+except (ImportError, SyntaxError):
+    pass
+else:
+    # Extend `__all__`:
+    __all__ += ('dispatch', 'RedisConf', 'RedRun')
 
 try:
     import pytz

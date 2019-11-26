@@ -5,6 +5,8 @@ import contextlib
 
 abstract = abc.abstractmethod
 
+from clu.constants import consts
+
 class Slotted(abc.ABCMeta):
     
     """ A metaclass that ensures its classes, and all subclasses,
@@ -241,18 +243,20 @@ class ManagedContext(contextlib.AbstractContextManager,
         self.teardown()
         return exc_type is None
     
-    async def __aenter__(self):
-        self.setup()
-        if hasattr(self, '__await__'):
-            if callable(self.__await__):
-                await self
-        return self
-    
-    async def __aexit__(self, exc_type=None,
-                              exc_val=None,
-                              exc_tb=None):
-        self.teardown()
-        return exc_type is None
+    if consts.PYTHON_VERSION >= 3.6:
+        
+        async def __aenter__(self):
+            self.setup()
+            if hasattr(self, '__await__'):
+                if callable(self.__await__):
+                    await self
+            return self
+        
+        async def __aexit__(self, exc_type=None,
+                                  exc_val=None,
+                                  exc_tb=None):
+            self.teardown()
+            return exc_type is None
 
 __all__ = ('Slotted', 'NonSlotted',
            'Cloneable',

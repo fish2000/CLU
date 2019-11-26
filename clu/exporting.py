@@ -710,22 +710,22 @@ class Exporter(ExporterBase, prefix=BASEPATH, appname=PROJECT_NAME):
     pass
 
 exporter = Exporter(path=__file__)
-export = exporter.decorator()
 
-export(itermodule)
-export(moduleids)
-export(itermoduleids)
-export(search_by_id)
-export(search_for_name)
-export(search_for_module)
-export(search_modules)
-export(determine_name)
-export(path_to_dotpath)
-
-# NO DOCS ALLOWED:
-export(Registry)
-export(ExporterBase)
-export(Exporter) # hahaaaaa
+with exporter as export:
+    export(itermodule)
+    export(moduleids)
+    export(itermoduleids)
+    export(search_by_id)
+    export(search_for_name)
+    export(search_for_module)
+    export(search_modules)
+    export(determine_name)
+    export(path_to_dotpath)
+    
+    # NO DOCS ALLOWED:
+    export(Registry)
+    export(ExporterBase)
+    export(Exporter) # hahaaaaa
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

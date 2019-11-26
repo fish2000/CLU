@@ -221,8 +221,7 @@ class AppName(abc.ABC):
             raise LookupError("Cannot instantiate a base config class "
                               "(appname is None)")
 
-class ManagedContext(contextlib.AbstractContextManager,
-                     contextlib.AbstractAsyncContextManager):
+class ManagedContext(contextlib.AbstractContextManager):
     
     __slots__ = tuple()
     
@@ -242,8 +241,11 @@ class ManagedContext(contextlib.AbstractContextManager,
                        exc_tb=None):
         self.teardown()
         return exc_type is None
+
+if consts.PYTHON_VERSION >= 3.7:
     
-    if consts.PYTHON_VERSION >= 3.6:
+    class AsyncManagedContext(ManagedContext,
+                              contextlib.AbstractAsyncContextManager):
         
         async def __aenter__(self):
             self.setup()
@@ -258,12 +260,17 @@ class ManagedContext(contextlib.AbstractContextManager,
             self.teardown()
             return exc_type is None
 
+else:
+    
+    class AsyncManagedContext(ManagedContext):
+        pass
+
 __all__ = ('Slotted', 'NonSlotted',
            'Cloneable',
            'ReprWrapper',
            'SlottedRepr', 'MappingViewRepr',
            'Descriptor', 'ValueDescriptor',
            'Prefix', 'AppName',
-           'ManagedContext')
+           'ManagedContext', 'AsyncManagedContext')
 
 __dir__ = lambda: list(__all__)

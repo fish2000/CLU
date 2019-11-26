@@ -170,6 +170,31 @@ class TestAbstractABCs(object):
         with pytest.raises(LookupError) as exc:
             _ = AppConfigBase()
         assert "Cannot instantiate a base config" in str(exc.value)
+    
+    def test_abc_ManagedContext(self):
+        import contextlib
+        from clu.typology import (subclasscheck,
+                                  iscontextmanager,
+                                  isabstractcontextmanager)
+        
+        class Managed(clu.abstract.ManagedContext):
+            
+            def setup(self):
+                return self
+            
+            def teardown(self):
+                pass
+        
+        assert iscontextmanager(Managed)
+        assert isabstractcontextmanager(Managed)
+        assert subclasscheck(Managed, contextlib.AbstractContextManager)
+        assert issubclass(Managed, contextlib.AbstractContextManager)
+        
+        with Managed() as m:
+            assert iscontextmanager(m)
+            assert isabstractcontextmanager(m)
+            assert subclasscheck(m, Managed)
+            assert isinstance(m, Managed)
 
 class TestAbstractReprClasses(object):
     

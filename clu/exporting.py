@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from functools import lru_cache, wraps
+from functools import lru_cache
 from importlib.machinery import all_suffixes
 from pathlib import Path
 
@@ -8,6 +8,8 @@ import abc
 import clu.abstract
 import collections
 import collections.abc
+import contextlib
+import importlib
 import inspect
 import itertools
 import sys, os
@@ -17,8 +19,11 @@ import weakref
 chain = itertools.chain
 iterchain = itertools.chain.from_iterable
 
-from clu.constants.consts import λ, φ, BASEPATH, PROJECT_NAME, NoDefault, pytuple # type: ignore
-from clu.constants.exceptions import ExportError, ExportWarning
+from clu.constants.consts import (λ, φ, # type: ignore
+                                  BASEPATH, BUILTINS, PROJECT_NAME,
+                                  QUALIFIER,
+                                  NoDefault, pytuple)
+from clu.constants.exceptions import BadDotpathWarning, ExportError, ExportWarning
 
 # Q.v. `search_by_id(…)` function sub.
 cache = lambda function: lru_cache(maxsize=128, typed=False)(function)
@@ -28,8 +33,6 @@ def itermodule(module):
         contained in a given module (although it’ll probably work
         for classes and instances too – anything `dir()`-able.)
     """
-    from clu.constants.consts import BUILTINS
-    
     keys = tuple(key for key in sorted(dir(module)) \
                       if key not in BUILTINS)
     values = (getattr(module, key) for key in keys)
@@ -49,8 +52,6 @@ def itermoduleids(module):
         tuples for all things comntained in a given module – q.v.
         `itermodule(…)` implementation supra.
     """
-    from clu.constants.consts import BUILTINS
-    
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
     ids = (id(getattr(module, key)) for key in keys)
@@ -173,53 +174,6 @@ def determine_name(thing, name=None, try_repr=False):
     # up returning None:
     return search_for_name(thing)
 
-class rename(object):
-    
-    """ Function-rename decorator. Use like so:
-        
-            @rename(named='yodogg')
-            def YoDogg(*args):
-                ...
-        
-        … or:
-            
-            yodogg = lambda *args: ...
-            yodogg = rename()(yodogg) # awkward syntax, I know
-        
-    """
-    
-    def __init__(self, named=None,
-                        path=None,
-                     dotpath=None):
-        """ Initialize a @rename object decorator. All parameters are optional. """
-        self.named = named
-        self.dotpath = dotpath or path_to_dotpath(path,
-                                                  relative_to=BASEPATH)
-    
-    def assign_name(self, function, name=None):
-        """ Assign the function’s new name. Returns the mutated function. """
-        named = determine_name(function, name=name or self.named)
-        dname = getattr(function, '__name__')
-        if dname in (λ, φ):
-            if named in (λ, φ):
-                named = search_for_name(function)
-            if named is None:
-                raise NameError(str(id(function)))
-            function.__name__ = function.__qualname__ = named
-            function.__lambda_name__ = dname # To recall the lambda’s genesis
-            if dname == φ and self.dotpath is not None:
-                function.__module__ = str(self.dotpath) # Reset __module__ for phi-types
-        return function
-    
-    def __call__(self, f):
-        function = self.assign_name(f)
-        if not inspect.isfunction(function):
-            return function
-        @wraps(function)
-        def renamed(*args, **kwargs):
-            return function(*args, **kwargs)
-        return function
-
 # N.B. Items in the “replaceable_endings” tuple that
 # possibly contain other such items should appear
 # *before* the items that they contain, e.g.:
@@ -246,9 +200,6 @@ def path_to_dotpath(path, relative_to=None):
         dashes – I don’t quite know what to do about something
         like that besides warn, so erm. There you go.
     """
-    from clu.constants.consts import QUALIFIER
-    from clu.constants.exceptions import BadDotpathWarning
-    
     # Garbage in, garbage out:
     if path is None:
         return None
@@ -371,6 +322,7 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
         return search_modules(thing, *cls.all_modules())[0]
 
 class ExporterBase(collections.abc.MutableMapping,
+                   contextlib.AbstractContextManager,
                    Registry, metaclass=clu.abstract.Prefix):
     
     """ The base class for “clu.exporting.Exporter”. Override this
@@ -445,7 +397,6 @@ class ExporterBase(collections.abc.MutableMapping,
         """ Get a dict of actual modules corresponding to the
             currently registered Exporter instances
         """
-        import importlib
         modulenames = cls.modulenames()
         mods = []
         
@@ -659,8 +610,16 @@ class ExporterBase(collections.abc.MutableMapping,
         """
         return search_by_id.cache_info()
     
+    def __enter__(self):
+        return self.decorator()
+    
+    def __exit__(self, exc_type=None,
+                       exc_val=None,
+                       exc_tb=None):
+        return exc_type is None
+    
     def __iter__(self):
-        yield from iter(self.__exports__.keys())
+        yield from self.__exports__.keys()
     
     def __len__(self):
         return len(self.__exports__)
@@ -761,14 +720,12 @@ export(search_for_name)
 export(search_for_module)
 export(search_modules)
 export(determine_name)
-export(rename)
 export(path_to_dotpath)
-export(sysmods,         name='sysmods',         doc="sysmods() → shortcut for reversed(tuple(frozenset(sys.modules.values()))) …OK? I know. It’s not my finest work, but it works.")
 
 # NO DOCS ALLOWED:
 export(Registry)
 export(ExporterBase)
-export(Exporter)        # hahaaaaa
+export(Exporter) # hahaaaaa
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

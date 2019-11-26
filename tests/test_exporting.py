@@ -10,28 +10,9 @@ import pytest
 yo_dogg_lambda = lambda: print("Yo dogg.")
 i_heard_lambda = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
 
-yo_dogg_rename = lambda: print("Yo dogg.")
-i_heard_rename = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
-
 class TestExporting(object):
     
     """ Run the tests for the clu.exporting module. """
-    
-    def test_renamer(self):
-        from clu.exporting import rename
-        from clu.predicates import pyname
-        fake_dotpath = 'yodogg.iheard'
-        
-        renamer = rename(dotpath=fake_dotpath)
-        
-        # yo_dogg = lambda: print("Yo dogg.")
-        # i_heard = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
-        
-        yo_dogg = renamer(yo_dogg_rename)
-        i_heard = renamer(i_heard_rename)
-        
-        assert pyname(yo_dogg) == pyname(yo_dogg_rename) == 'yo_dogg_rename'
-        assert pyname(i_heard) == pyname(i_heard_rename) == 'i_heard_rename'
     
     def test_exporterbase_subclass_package(self, dirname):
         from clu.exporting import Registry
@@ -287,6 +268,40 @@ class TestExporting(object):
         assert 'yo_dogg_lambda' in test_dir()
         assert 'i_heard_lambda' in test_dir()
     
+    def test_exporter_context_manager_export_lambdas(self):
+        from clu.exporting import Exporter
+        from clu.naming import nameof
+        
+        exporter = Exporter()
+        
+        yo_dogg = lambda: print("Yo dogg.")
+        i_heard = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
+        
+        with exporter as export:
+            export(yo_dogg,     name='yo_dogg',         doc='yo_dogg() → Prints “Yo dogg.”')
+            export(i_heard,     name='i_heard',         doc='i_heard() → Prints “I heard you like …” with argument reprs')
+        
+        assert 'yo_dogg' in exporter
+        assert 'i_heard' in exporter
+        assert yo_dogg.__name__ == 'yo_dogg'
+        assert i_heard.__name__ == 'i_heard'
+        assert yo_dogg.__qualname__ == 'yo_dogg'
+        assert i_heard.__qualname__ == 'i_heard'
+        assert nameof(yo_dogg) == 'yo_dogg'
+        assert nameof(i_heard) == 'i_heard'
+        
+        assert 'yo_dogg() → Prints “Yo dogg.”' in yo_dogg.__doc__
+        assert 'i_heard() → Prints “I heard you like …” with argument reprs' in i_heard.__doc__
+        
+        test_all, test_dir = exporter.all_and_dir()
+        
+        assert len(test_all) == 2
+        assert len(test_dir()) == 2
+        assert 'yo_dogg' in test_all
+        assert 'i_heard' in test_all
+        assert 'yo_dogg' in test_dir()
+        assert 'i_heard' in test_dir()
+    
     def test_exporter_export_lambdas(self):
         from clu.exporting import Exporter
         from clu.naming import nameof
@@ -306,6 +321,40 @@ class TestExporting(object):
         assert i_heard.__name__ == 'i_heard'
         assert yo_dogg.__qualname__ == 'yo_dogg'
         assert i_heard.__qualname__ == 'i_heard'
+        assert nameof(yo_dogg) == 'yo_dogg'
+        assert nameof(i_heard) == 'i_heard'
+        
+        assert 'yo_dogg() → Prints “Yo dogg.”' in yo_dogg.__doc__
+        assert 'i_heard() → Prints “I heard you like …” with argument reprs' in i_heard.__doc__
+        
+        test_all, test_dir = exporter.all_and_dir()
+        
+        assert len(test_all) == 2
+        assert len(test_dir()) == 2
+        assert 'yo_dogg' in test_all
+        assert 'i_heard' in test_all
+        assert 'yo_dogg' in test_dir()
+        assert 'i_heard' in test_dir()
+    
+    def test_exporter_context_manager_export_functions(self):
+        from clu.exporting import Exporter
+        from clu.naming import nameof
+        
+        exporter = Exporter()
+        with exporter as export:
+            
+            @export
+            def yo_dogg():
+                """ yo_dogg() → Prints “Yo dogg.” """
+                print("Yo dogg.")
+            
+            @export
+            def i_heard(*wat):
+                """ i_heard() → Prints “I heard you like …” with argument reprs """
+                print("I heard you like %s" % ", ".join(repr(w) for w in wat))
+        
+        assert 'yo_dogg' in exporter
+        assert 'i_heard' in exporter
         assert nameof(yo_dogg) == 'yo_dogg'
         assert nameof(i_heard) == 'i_heard'
         

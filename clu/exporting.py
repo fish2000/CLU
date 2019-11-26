@@ -672,6 +672,7 @@ class ExporterBase(collections.abc.MutableMapping,
     def __dir__(self):
         return list(filter(lambda name: name not in ('all_appnames',
                                                      'all_modules',
+                                                     'has_appname',
                                                      'for_appname',
                                                      'unregister'),
                            super(ExporterBase, self).__dir__()))

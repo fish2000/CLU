@@ -53,16 +53,7 @@ def consts():
     from clu.constants import consts as consts_module
     yield consts_module
 
-@pytest.fixture(scope='package')
-def clumods():
-    """ Import all CLU modules that use the “clu.exporting.Exporter”
-        mechanism for listing and exporting their module contents
-    """
-    from clu.all import import_clu_modules
-    modules = import_clu_modules()
-    yield modules
-
-@pytest.fixture(scope='package')
+@pytest.fixture(scope='session')
 def greektext():
     """ Greek-text fixture: yield a dictionary with several lorem-ipsum-ish
         blocks of text.
@@ -79,6 +70,15 @@ def greektext():
     """
     from clu.constants.data import GREEKOUT
     yield dict(GREEKOUT)
+
+@pytest.fixture(scope='package')
+def clumods():
+    """ Import all CLU modules that use the “clu.exporting.Exporter”
+        mechanism for listing and exporting their module contents
+    """
+    from clu.all import import_clu_modules
+    modules = import_clu_modules()
+    yield modules
 
 @pytest.fixture(scope='package')
 def dirname(request):

@@ -36,6 +36,7 @@ class TestTypology(object):
         assert isslottedtype(DoubleDutchRegistry)
         assert isextensibletype(pairtype(int, int))
         assert isextensibletype(ΩΩ(str, str))
+        assert not isextensibletype(Exporter)
         assert not isextensibletype(DoubleDutchRegistry)
     
     def test_metaclasscheck_isabclist(self):

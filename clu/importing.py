@@ -411,7 +411,7 @@ class MetaModule(MetaRegistry):
         
         # If an appname is defined, try to install
         # an instance of the appropriate Exporter:
-        if cls.appname is not None and name != 'Module':
+        if cls.appname is not None and not name.endswith('Module'):
             if ExporterRegistry.has_appname(cls.appname):
                 ExporterClass = ExporterRegistry[cls.appname]
                 cls.exporter = ExporterClass(dotpath=cls.qualname)

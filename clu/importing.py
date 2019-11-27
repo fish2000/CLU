@@ -649,7 +649,7 @@ class ProxyModule(Module):
     def __execute__(self):
         # Create the internal “clu.dicts.ChainMap” subclass instance:
         self.__proxies__ = ChainModuleMap(*self.target_dicts)
-        self.__filters__ = self.target_lists
+        self.__filters__ = tuple(iterchain(self.target_lists))
         
         # Further unclutter the module namespace:
         delattr(self, 'target_dicts')
@@ -660,8 +660,8 @@ class ProxyModule(Module):
     
     def __dir__(self):
         cls = type(self)
-        names = chain(iterchain(self.__filters__),
-                                 cls.__dict__.keys())
+        names = chain(self.__filters__,
+                       cls.__dict__.keys())
         return sorted(frozenset(names) - DO_NOT_INCLUDE)
     
     def __getattr__(self, key):

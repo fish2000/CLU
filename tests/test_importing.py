@@ -19,6 +19,23 @@ class TestImporting(object):
             class PutativeProxyModule(Module):
                 
                 def __init__(self, name, *targets, doc=None):
+                    """ Initialize a proxy-module instance.
+                        
+                        The signature for initializing a proxy module is the same
+                        as that for a class-based module – the proxy module class
+                        derives directly from the application-specific class-based
+                        module definition – with the optional addition of zero-to-N
+                        “targets”.
+                        
+                        Each target so named can be either a mapping-ish type, or a
+                        module. The proxy module will then use the list of targets
+                        – considerate of order – to construct a “clu.dicts.ChainMap”
+                        instance that pulls, in turn, from the target list.
+                        
+                        Attribute lookup on the proxy module instance will follow
+                        along through the “ChainMap” instances’ internal stack of
+                        mappings.
+                    """
                     self.target_dicts = []
                     super(Module, self).__init__(name, doc=doc)
                     

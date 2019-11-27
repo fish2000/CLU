@@ -587,14 +587,18 @@ def add_targets(instance, *targets):
     """ Out-of-line, use-twice-and-destroy function for processing targets """
     if getattr(instance, 'target_dicts', None) is None:
         instance.target_dicts = []
+    if getattr(instance, 'target_lists', None) is None:
+        instance.target_lists = []
     for target in targets:
         if target is None:
             continue
         if ismodule(target):
             instance.target_dicts.append(target.__dict__)
+            instance.target_lists.append(dir(target))
             continue
         if ismapping(target):
             instance.target_dicts.append(target)
+            instance.target_lists.append(list(target.keys()))
             continue
 
 @export
@@ -623,6 +627,7 @@ class ProxyModule(Module):
         
         # Establish a base list of target dicts, and call up:
         self.target_dicts = []
+        self.target_lists = []
         super(ProxyModule, self).__init__(name, doc=doc)
         
         # Get a reference to the module class:
@@ -636,22 +641,24 @@ class ProxyModule(Module):
         # list attribute, if it exists:
         if hasattr(cls, 'targets'):
             add_targets(self, *cls.targets)
-            del cls.targets
+            delattr(cls, 'targets')
     
     def __execute__(self):
         # Create the internal “clu.dicts.ChainMap” subclass instance:
         self.__proxies__ = ChainModuleMap(*self.target_dicts)
+        self.__filters__ = self.target_lists
         
         # Further unclutter the module namespace:
-        del self.target_dicts
+        delattr(self, 'target_dicts')
+        delattr(self, 'target_lists')
         
         # Call up:
         super().__execute__()
     
     def __dir__(self):
         cls = type(self)
-        names = chain(self.__proxies__.keys(),
-                       cls.__dict__.keys())
+        names = chain(iterchain(self.__filters__),
+                                 cls.__dict__.keys())
         return sorted(frozenset(names) - DO_NOT_INCLUDE)
     
     def __getattr__(self, key):

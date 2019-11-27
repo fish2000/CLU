@@ -5,6 +5,41 @@ import pytest
 
 class TestImporting(object):
     
+    def test_proxy_module_for_reals(self, consts):
+        from clu.importing import ProxyModule, Registry
+        
+        overrides = dict(PROJECT_NAME='yodogg',
+                         PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
+                         BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
+        
+        try:
+            
+            class testing1_overridden_consts(ProxyModule):
+                targets = (overrides, consts)
+            
+            from clu.app import testing1_overridden_consts as overridden
+            
+            assert overridden.USER == consts.USER
+            assert overridden.BUILTINS == consts.BUILTINS
+            assert overridden.PROJECT_NAME == 'yodogg'
+            assert overridden.PROJECT_PATH.endswith('yodogg')
+            assert overridden.BASEPATH.endswith('yodogg')
+            
+            assert not hasattr(overridden, 'targets')
+            assert not hasattr(overridden, 'target_dicts')
+            
+            with pytest.raises(AttributeError) as exc:
+                assert overridden.YODOGG
+            assert "has no attribute" in str(exc.value)
+            
+            with pytest.raises(AttributeError) as exc:
+                assert overridden.add_targets
+            assert "has no attribute" in str(exc.value)
+        
+        finally:
+            Registry.unregister(testing1_overridden_consts.appname,
+                                testing1_overridden_consts.qualname)
+    
     def test_module_dict_proxy_idea(self, consts):
         from clu.dicts import ChainMap
         from clu.importing import Module, Registry
@@ -38,7 +73,7 @@ class TestImporting(object):
                     """
                     # Establish a base list of target dicts, and call up:
                     self.target_dicts = []
-                    super(Module, self).__init__(name, doc=doc)
+                    super(PutativeProxyModule, self).__init__(name, doc=doc)
                     
                     # Define inline target-processing function:
                     def add_targets(self, *targets):
@@ -90,13 +125,13 @@ class TestImporting(object):
                         typename = type(self).__name__
                         raise AttributeError(f"‘{typename}’ proxy module has no attribute ‘{key}’")
             
-            class testing_overridden_consts(PutativeProxyModule):
+            class testing0_overridden_consts(PutativeProxyModule):
                 # def __execute__(self):
                 #     self.add_targets(overrides, consts)
                 #     super().__execute__()
                 targets = (overrides, consts)
             
-            from clu.app import testing_overridden_consts as overridden
+            from clu.app import testing0_overridden_consts as overridden
             
             assert overridden.USER == consts.USER
             assert overridden.BUILTINS == consts.BUILTINS
@@ -117,7 +152,7 @@ class TestImporting(object):
         
         finally:
             for clsmod in (PutativeProxyModule,
-                           testing_overridden_consts):
+                           testing0_overridden_consts):
                 Registry.unregister(clsmod.appname,
                                     clsmod.qualname)
     

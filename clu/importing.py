@@ -9,6 +9,7 @@ iterchain = chain.from_iterable
 
 import abc
 import clu.abstract
+import clu.dicts
 import importlib
 import importlib.abc
 import importlib.machinery
@@ -24,13 +25,14 @@ except ImportError:
     import importlib_metadata as _metadata
     importlib.metadata = _metadata
 
-from clu.constants.consts import PROJECT_NAME, QUALIFIER, NoDefault
+from clu.constants.consts import BUILTINS, PROJECT_NAME, QUALIFIER, NoDefault
 from clu.extending import Extensible
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.predicates import attr, attr_search, mro, typeof, newtype
 from clu.typespace import Namespace, types
-from clu.typology import isstring, subclasscheck
+from clu.typology import ismodule, ismapping, isstring, subclasscheck
 from clu.exporting import Registry as ExporterRegistry
+from clu.exporting import itermodule
 from clu.exporting import ExporterBase, Exporter
 
 exporter = Exporter(path=__file__)
@@ -556,6 +558,108 @@ def initialize_types(appname, appspace='app'):
 Module, Finder, Loader = initialize_types(PROJECT_NAME)
 
 @export
+class ChainModuleMap(clu.dicts.ChainMap):
+    
+    """ Custom “clu.dicts.ChainMap” subclass, tailored for module dicts """
+    
+    def __iter__(self):
+        source = super().__iter__()
+        yield from filter(lambda item: item not in BUILTINS, source)
+    
+    def __missing__(self, key):
+        if key in self:
+            return 0
+        raise KeyError(key)
+    
+    def inner_repr(self):
+        from pprint import pformat
+        return pformat(dict(zip(self, (self[item] for item in self))))
+
+# Define out-of-line target-processing function:
+def add_targets(instance, *targets):
+    """ Out-of-line, use-twice-and-destroy function for processing targets """
+    if getattr(instance, 'target_dicts', None) is None:
+        instance.target_dicts = []
+    cls = type(instance)
+    for target in targets:
+        if target is None:
+            continue
+        if ismodule(target):
+            instance.target_dicts.append(target.__dict__)
+            if hasattr(target, 'exporter'):
+                cls.exporter.update(target.exporter)
+            else:
+                cls.exporter.update(itermodule(target))
+            continue
+        if ismapping(target):
+            instance.target_dicts.append(target)
+            continue
+
+@export
+class ProxyModule(Module):
+    
+    def __init__(self, name, *targets, doc=None):
+        """ Initialize a proxy-module instance.
+            
+            The signature for initializing a proxy module is the same
+            as that for a class-based module – the proxy module class
+            derives directly from the application-specific class-based
+            module definition – with the optional addition of zero-to-N
+            “targets”.
+            
+            Each target so named can be either a mapping-ish type, or a
+            module. The proxy module will then use the list of targets
+            – considerate of order – to construct a “clu.dicts.ChainMap”
+            instance that pulls, in turn, from the target list.
+            
+            Attribute lookup on the proxy module instance will follow
+            along through the “ChainMap” instances’ internal stack of
+            mappings.
+        """
+        # Establish a base list of target dicts, and call up:
+        self.target_dicts = []
+        super(ProxyModule, self).__init__(name, doc=doc)
+        
+        # Get a reference to the module class:
+        cls = type(self)
+        
+        # Process any targets with which this instance
+        # may have been constructed:
+        add_targets(self, *targets)
+        
+        # Process and strip off class-level “targets” 
+        # list attribute, if it exists:
+        if hasattr(cls, 'targets'):
+            add_targets(self, *cls.targets)
+            del cls.targets
+    
+    def __execute__(self):
+        # Create the internal “clu.dicts.ChainMap” subclass instance:
+        self.__proxies__ = ChainModuleMap(*self.target_dicts)
+        
+        # Call up:
+        super().__execute__()
+        
+        # Further unclutter the module namespace:
+        del self.target_dicts
+    
+    def __getattr__(self, key):
+        # N.B. AttributeError typenames (herein “ProxyModule”) must be
+        # somehow hardcoded – using “self.name” leads to an infinite
+        # recursion kertwang within “__getattr__(…)” – since “name”
+        # is a property that uses “nameof(self)” which invariably will
+        # attempt to get one or another nonexistant attributes from ‘self’.
+        try:
+            if not self.__dict__.get('_executed', False):
+                raise KeyError(key)
+            elif key in BUILTINS:
+                raise KeyError(key)
+            return self.__proxies__[key]
+        except KeyError:
+            typename = type(self).__name__
+            raise AttributeError(f"‘{typename}’ proxy module has no attribute ‘{key}’")
+
+@export
 class SubModule(object):
     
     """ A context manager that creates a temporary
@@ -763,6 +867,35 @@ def test():
         after = all_registered_modules()
         assert before == after
     
+    @inline
+    def test_seven():
+        from clu.constants import consts
+        
+        overrides = dict(PROJECT_NAME='yodogg',
+                         PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
+                         BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
+        
+        class testing_overridden_consts(ProxyModule):
+            targets = (overrides, consts)
+        
+        from clu.app import testing_overridden_consts as overridden
+        
+        assert overridden.USER == consts.USER
+        assert overridden.BUILTINS == consts.BUILTINS
+        assert overridden.PROJECT_NAME == 'yodogg'
+        assert overridden.PROJECT_PATH.endswith('yodogg')
+        assert overridden.BASEPATH.endswith('yodogg')
+        
+        assert not hasattr(overridden, 'targets')
+        assert not hasattr(overridden, 'target_dicts')
+        
+        # pout.v(overridden.exporter)
+        # pout.v(overridden)
+        pprint(overridden.__proxies__)
+        
+        # return tuple(overridden.exporter.exports())
+        return dir(overridden)
+    
     # Run all tests:
     test_one()
     test_two()
@@ -771,6 +904,7 @@ def test():
     test_four()
     test_five()
     test_six()
+    test_seven()
 
 if __name__ == '__main__':
     test()

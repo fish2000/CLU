@@ -248,7 +248,8 @@ class TestAbstractDescriptors(object):
     def test_descriptor_Descriptor(self):
         pass
     
-    def test_descriptor_ValueDescriptor(self, environment):
+    def test_descriptor_ValueDescriptor(self, environment, consts):
+        from clu.fs.misc import gethomedir
         from clu.predicates import isclasstype, pyattr
         from clu.predicates import attr, attrs, stattr, stattrs
         
@@ -257,8 +258,8 @@ class TestAbstractDescriptors(object):
         
         # We have to use these irritating default environment values everywhere,
         # in case the testing environment is kertwanged:
-        home = environment.get('HOME', '/tmp')
-        user = environment.get('USER', 'nobody')
+        home = environment.get('HOME', gethomedir())
+        user = environment.get('USER', consts.USER)
         
         # Non-data descriptor wrapping R/O access to a named environment variable,
         # a default value for that variable, and the variables’ name:
@@ -293,8 +294,8 @@ class TestAbstractDescriptors(object):
             __slots__ = ('yo', 'dogg', 'wtf')
             
             hax = ValueDescriptor('HAXXX')
-            HOME = EnvironmentName(default='/tmp')
-            USER = EnvironmentName(default='nobody')
+            HOME = EnvironmentName(default=gethomedir())
+            USER = EnvironmentName(default=consts.USER)
             
             def __init__(self):
                 self.yo: str = "YO"
@@ -308,8 +309,8 @@ class TestAbstractDescriptors(object):
             dogg: str = "DOGG"
             
             wtf = ValueDescriptor('WTFFF')
-            HOME = EnvironmentName(default='/tmp')
-            USER = EnvironmentName(default='nobody')
+            HOME = EnvironmentName(default=gethomedir())
+            USER = EnvironmentName(default=consts.USER)
             
             def __init__(self):
                 self.hax: str = "HAXXX"
@@ -346,18 +347,18 @@ class TestAbstractDescriptors(object):
         
         # Check statically obtained EnvironmentName instances,
         # from both Slotted and Dictish types and instances:
-        assert repr(stattr(Slotted,   'HOME')) == repr(EnvironmentName('HOME', default='/tmp'))
-        assert repr(stattr(Slotted(), 'HOME')) == repr(EnvironmentName('HOME', default='/tmp'))
-        assert repr(stattr(Slotted,   'USER')) == repr(EnvironmentName('USER', default='nobody'))
-        assert repr(stattr(Slotted(), 'USER')) == repr(EnvironmentName('USER', default='nobody'))
+        assert repr(stattr(Slotted,   'HOME')) == repr(EnvironmentName('HOME', default=gethomedir()))
+        assert repr(stattr(Slotted(), 'HOME')) == repr(EnvironmentName('HOME', default=gethomedir()))
+        assert repr(stattr(Slotted,   'USER')) == repr(EnvironmentName('USER', default=consts.USER))
+        assert repr(stattr(Slotted(), 'USER')) == repr(EnvironmentName('USER', default=consts.USER))
         assert repr(stattr(Slotted,   'HOME')) ==     "EnvironmentName<[HOME]>"
         assert repr(stattr(Slotted(), 'HOME')) ==     "EnvironmentName<[HOME]>"
         assert repr(stattr(Slotted,   'USER')) ==     "EnvironmentName<[USER]>"
         assert repr(stattr(Slotted(), 'USER')) ==     "EnvironmentName<[USER]>"
-        assert repr(stattr(Dictish,   'HOME')) == repr(EnvironmentName('HOME', default='/tmp'))
-        assert repr(stattr(Dictish(), 'HOME')) == repr(EnvironmentName('HOME', default='/tmp'))
-        assert repr(stattr(Dictish,   'USER')) == repr(EnvironmentName('USER', default='nobody'))
-        assert repr(stattr(Dictish(), 'USER')) == repr(EnvironmentName('USER', default='nobody'))
+        assert repr(stattr(Dictish,   'HOME')) == repr(EnvironmentName('HOME', default=gethomedir()))
+        assert repr(stattr(Dictish(), 'HOME')) == repr(EnvironmentName('HOME', default=gethomedir()))
+        assert repr(stattr(Dictish,   'USER')) == repr(EnvironmentName('USER', default=consts.USER))
+        assert repr(stattr(Dictish(), 'USER')) == repr(EnvironmentName('USER', default=consts.USER))
         assert repr(stattr(Dictish,   'HOME')) ==     "EnvironmentName<[HOME]>"
         assert repr(stattr(Dictish(), 'HOME')) ==     "EnvironmentName<[HOME]>"
         assert repr(stattr(Dictish,   'USER')) ==     "EnvironmentName<[USER]>"

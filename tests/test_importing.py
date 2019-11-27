@@ -36,9 +36,11 @@ class TestImporting(object):
                         along through the “ChainMap” instances’ internal stack of
                         mappings.
                     """
+                    # Establish a base list of target dicts, and call up:
                     self.target_dicts = []
                     super(Module, self).__init__(name, doc=doc)
                     
+                    # Define inline target-processing function:
                     def add_targets(self, *targets):
                         """ Inline use-twice-and-destroy function for processing targets """
                         if getattr(self, 'target_dicts', None) is None:
@@ -53,8 +55,12 @@ class TestImporting(object):
                                 self.target_dicts.append(target)
                                 continue
                     
+                    # Process any targets with which this instance
+                    # may have been constructed:
                     add_targets(self, *targets)
                     
+                    # Process and strip off class-level “targets” 
+                    # list attribute, if it exists:
                     cls = type(self)
                     if hasattr(cls, 'targets'):
                         add_targets(self, *cls.targets)
@@ -67,7 +73,7 @@ class TestImporting(object):
                     # Call up:
                     super().__execute__()
                     
-                    # Further unclutter the module namespace
+                    # Further unclutter the module namespace:
                     del self.target_dicts
                 
                 def __getattr__(self, key):
@@ -82,7 +88,7 @@ class TestImporting(object):
                         return self.__proxies__[key]
                     except KeyError:
                         typename = type(self).__name__
-                        raise AttributeError(f"'{typename}' object has no attribute '{key}'")
+                        raise AttributeError(f"‘{typename}’ proxy module has no attribute ‘{key}’")
             
             class testing_overridden_consts(PutativeProxyModule):
                 # def __execute__(self):

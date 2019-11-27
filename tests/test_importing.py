@@ -1,9 +1,83 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-# import pytest
+import pytest
 
 class TestImporting(object):
+    
+    def test_module_dict_proxy_idea(self, consts):
+        from clu.dicts import ChainMap
+        from clu.importing import Module, Registry
+        from clu.typology import ismodule, ismapping
+        
+        overrides = dict(PROJECT_NAME='yodogg',
+                         PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
+                         BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
+        
+        try:
+            
+            class PutativeProxyModule(Module):
+                
+                def add_targets(self, *targets):
+                    if getattr(self, 'target_dicts', None) is None:
+                        self.target_dicts = []
+                    for target in targets:
+                        if target is None:
+                            continue
+                        if ismodule(target):
+                            self.target_dicts.append(target.__dict__)
+                            continue
+                        if ismapping(target):
+                            self.target_dicts.append(target)
+                            continue
+                
+                def __init__(self, name, *targets, doc=None):
+                    self.target_dicts = []
+                    super(Module, self).__init__(name, doc=doc)
+                    self.add_targets(*targets)
+                    if hasattr(self, 'targets'):
+                        self.add_targets(*self.targets)
+                
+                def __execute__(self):
+                    self.__proxies__ = ChainMap(*self.target_dicts)
+                    super().__execute__()
+                
+                def __getattr__(self, key):
+                    # N.B. AttributeError typenames (herein “PutativeProxyModule”)
+                    # must be hardcoded – using “self.name” leads to an infinite
+                    # recursion kertwang within “__getattr__(…)” – since “name”
+                    # is a property that uses “nameof(self)” which invariably will
+                    # attempt to get one or another nonexistant attributes from ‘self’.
+                    if not '_executed' in self.__dict__:
+                        raise AttributeError(f"'PutativeProxyModule' object has no attribute '{key}'")
+                    try:
+                        return self.__proxies__[key]
+                    except KeyError:
+                        raise AttributeError(f"'PutativeProxyModule' object has no attribute '{key}'")
+            
+            class testing_overridden_consts(PutativeProxyModule):
+                # def __execute__(self):
+                #     self.add_targets(overrides, consts)
+                #     super().__execute__()
+                targets = (overrides, consts)
+            
+            from clu.app import testing_overridden_consts as overridden
+            
+            assert overridden.USER == consts.USER
+            assert overridden.BUILTINS == consts.BUILTINS
+            assert overridden.PROJECT_NAME == 'yodogg'
+            assert overridden.PROJECT_PATH.endswith('yodogg')
+            assert overridden.BASEPATH.endswith('yodogg')
+            
+            with pytest.raises(AttributeError) as exc:
+                assert overridden.YODOGG
+            assert "has no attribute" in str(exc.value)
+        
+        finally:
+            for clsmod in (PutativeProxyModule,
+                           testing_overridden_consts):
+                Registry.unregister(clsmod.appname,
+                                    clsmod.qualname)
     
     def test_module_export_within_execute(self):
         from clu.importing import Module, Registry, DO_NOT_INCLUDE
@@ -83,7 +157,6 @@ class TestImporting(object):
             assert youlike() == 'you like'
         
         finally:
-            
             Registry.unregister(derived.appname, derived.qualname)
     
     def test_basic_module(self, consts):
@@ -98,10 +171,6 @@ class TestImporting(object):
         assert nameof(m) == consts.PROJECT_NAME
         
         assert len(Registry.monomers) > 0
-        
-        # with pytest.raises(AttributeError) as exc:
-        #     assert len(m.monomers) == 0
-        # assert "has no attribute" in str(exc.value)
         assert len(m.monomers) == 0
     
     def test_derived_modules(self):
@@ -206,7 +275,6 @@ class TestImporting(object):
             assert iheard() == 'I heard you like'
         
         finally:
-            
             Registry.unregister(derived.appname, derived.qualname)
     
     def test_initialize_types(self, dirname):
@@ -247,7 +315,6 @@ class TestImporting(object):
             assert iheard() == 'I heard you like'
         
         finally:
-            
             from clu.importing import Registry
             Registry.unregister(derived.appname, derived.qualname)
     
@@ -315,7 +382,6 @@ class TestImporting(object):
             assert youlike() == 'you like'
         
         finally:
-            
             Registry.unregister(derived.appname, derived.qualname)
     
     def test_SubModule_contextmanager_derived_import_statement(self):
@@ -361,4 +427,3 @@ class TestImporting(object):
         
         after = all_registered_modules()
         assert before == after
-        

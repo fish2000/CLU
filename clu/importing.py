@@ -25,8 +25,9 @@ except ImportError:
     importlib.metadata = _metadata
 
 from clu.constants.consts import PROJECT_NAME, QUALIFIER, NoDefault
-from clu.predicates import attr, attr_search, mro, typeof, newtype
+from clu.extending import Extensible
 from clu.naming import nameof, dotpath_split, dotpath_join
+from clu.predicates import attr, attr_search, mro, typeof, newtype
 from clu.typespace import Namespace, types
 from clu.typology import isstring, subclasscheck
 from clu.exporting import Registry as ExporterRegistry
@@ -38,7 +39,7 @@ export = exporter.decorator()
 # The module-subclass registry dictionary:
 monomers = DefaultDict(weakref.WeakValueDictionary)
 
-class MetaRegistry(clu.abstract.NonSlotted):
+class MetaRegistry(Extensible):
     
     """ A metaclass for the class-based-module registry, wrapping all
         access to the actual dict-of-dicts registry structure§ with

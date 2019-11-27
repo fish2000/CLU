@@ -3,6 +3,9 @@ from __future__ import print_function
 from itertools import chain, product as dot_product
 from functools import update_wrapper
 
+import clu.abstract
+import collections
+import collections.abc
 import inspect
 import zict # type: ignore
 
@@ -18,7 +21,7 @@ export = exporter.decorator()
 EXCLUDE = pytuple('module', 'package', 'qualname')
 
 @export
-class Extensible(type):
+class Extensible(clu.abstract.NonSlotted):
     
     """ Two magic tricks for classes:
             
@@ -101,7 +104,9 @@ def pair(one, two):
 Ω = pair
 
 @export
-class DoubleDutchRegistry(object):
+class DoubleDutchRegistry(clu.abstract.SlottedRepr,
+                          collections.abc.MutableMapping,
+                          collections.abc.Sized):
     
     __slots__ = ('registry', 'cache')
     
@@ -129,10 +134,11 @@ class DoubleDutchRegistry(object):
     def __setitem__(self, clspair, value):
         self.cache[clspair] = value
     
-    def __repr__(self):
-        from clu.repr import typename_hexid
-        typename, hex_id = typename_hexid(self)
-        return f"{typename}{self.cache!r}(i={self.cache.i!r}, d={self.cache.d!r}) @ {hex_id}"
+    def __delitem__(self, clspair):
+        del self.cache[clspair]
+    
+    def __iter__(self):
+        yield from self.cache.keys()
 
 ASSIGNMENTS = pytuple('name', 'qualname', 'doc')
 UPDATES = tuple() # type: tuple
@@ -141,7 +147,7 @@ isempty = lambda param: attr(param, 'annotation', default=inspect._empty) is ins
 annotation = lambda param: isempty(param) and object or typeof(param.annotation)
 
 @export
-class DoubleDutchFunction(object):
+class DoubleDutchFunction(collections.abc.Callable):
     
     __slots__ = tuplize('registry') \
               + pytuple('wrapped', 'weakref') \

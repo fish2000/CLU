@@ -570,8 +570,8 @@ class ChainModuleMap(clu.dicts.ChainMap):
     """ Custom “clu.dicts.ChainMap” subclass, tailored for module dicts """
     
     def __iter__(self):
-        source = super().__iter__()
-        yield from filter(lambda item: item not in consts.BUILTINS, source)
+        yield from filter(lambda item: item not in consts.BUILTINS,
+                          super().__iter__())
     
     def __missing__(self, key):
         if key in self:
@@ -618,6 +618,9 @@ class ProxyModule(Module):
             along through the “ChainMap” instances’ internal stack of
             mappings.
         """
+        # in case of __dir__(…) access before execution:
+        self.__proxies__ = {}
+        
         # Establish a base list of target dicts, and call up:
         self.target_dicts = []
         super(ProxyModule, self).__init__(name, doc=doc)
@@ -647,7 +650,7 @@ class ProxyModule(Module):
     
     def __dir__(self):
         cls = type(self)
-        names = chain(self.__proxies__,
+        names = chain(self.__proxies__.keys(),
                        cls.__dict__.keys())
         return sorted(frozenset(names) - DO_NOT_INCLUDE)
     

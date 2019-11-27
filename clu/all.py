@@ -26,7 +26,9 @@ def import_all_modules(basepath, appname):
     importables = Directory(basepath).importables(appname)
     cls_modules = (clsmod.qualname for clsmod in modules_for_appname(appname))
     
-    # Only include modules with an instance of “clu.exporting.Exporter”:
+    # Only include modules whose “exporter” entry is an instance
+    # of a subclass of “clu.exporting.ExporterBase” whose class
+    # name is ‘Exporter’:
     for modname in chain(importables, cls_modules):
         module = import_module(modname)
         if typename(or_none(module, 'exporter')) == 'Exporter':

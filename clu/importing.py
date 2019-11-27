@@ -82,10 +82,12 @@ class MetaRegistry(Extensible):
         """ Unregister a previously-registered per-appname class from the registry """
         if Registry.has_appname(appname):
             if qualified_name in Registry.monomers[appname]:
-                importlib.invalidate_caches()
                 cls = Registry.monomers[appname].pop(qualified_name)
+                if qualified_name in sys.modules:
+                    del sys.modules[qualified_name]
                 if hasattr(cls, 'exporter'):
                     cls.exporter.unregister(qualified_name)
+                importlib.invalidate_caches()
                 return bool(cls)
         return False
 

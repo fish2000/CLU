@@ -19,8 +19,8 @@ def import_all_modules(basepath, appname):
     from clu.fs.filesystem import Directory
     from clu.importing import modules_for_appname
     from clu.predicates import or_none
-    from itertools import chain
     from importlib import import_module
+    from itertools import chain
     
     modules = {}
     importables = Directory(basepath).importables(appname)

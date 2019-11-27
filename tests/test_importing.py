@@ -18,33 +18,34 @@ class TestImporting(object):
             
             class PutativeProxyModule(Module):
                 
-                def add_targets(self, *targets):
-                    if getattr(self, 'target_dicts', None) is None:
-                        self.target_dicts = []
-                    for target in targets:
-                        if target is None:
-                            continue
-                        if ismodule(target):
-                            self.target_dicts.append(target.__dict__)
-                            continue
-                        if ismapping(target):
-                            self.target_dicts.append(target)
-                            continue
-                
                 def __init__(self, name, *targets, doc=None):
                     self.target_dicts = []
                     super(Module, self).__init__(name, doc=doc)
-                    self.add_targets(*targets)
+                    
+                    def add_targets(self, *targets):
+                        if getattr(self, 'target_dicts', None) is None:
+                            self.target_dicts = []
+                        for target in targets:
+                            if target is None:
+                                continue
+                            if ismodule(target):
+                                self.target_dicts.append(target.__dict__)
+                                continue
+                            if ismapping(target):
+                                self.target_dicts.append(target)
+                                continue
+                    
+                    add_targets(self, *targets)
+                    
                     cls = type(self)
                     if hasattr(cls, 'targets'):
-                        self.add_targets(*cls.targets)
+                        add_targets(self, *cls.targets)
                         del cls.targets
                 
                 def __execute__(self):
                     self.__proxies__ = ChainMap(*self.target_dicts)
                     super().__execute__()
                     del self.target_dicts
-                    del self.add_targets
                 
                 def __getattr__(self, key):
                     # N.B. AttributeError typenames (herein “PutativeProxyModule”)
@@ -78,6 +79,10 @@ class TestImporting(object):
             
             with pytest.raises(AttributeError) as exc:
                 assert overridden.YODOGG
+            assert "has no attribute" in str(exc.value)
+            
+            with pytest.raises(AttributeError) as exc:
+                assert overridden.add_targets
             assert "has no attribute" in str(exc.value)
         
         finally:

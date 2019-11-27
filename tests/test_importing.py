@@ -40,6 +40,7 @@ class TestImporting(object):
                     super(Module, self).__init__(name, doc=doc)
                     
                     def add_targets(self, *targets):
+                        """ Inline use-twice-and-destroy function for processing targets """
                         if getattr(self, 'target_dicts', None) is None:
                             self.target_dicts = []
                         for target in targets:
@@ -60,8 +61,13 @@ class TestImporting(object):
                         del cls.targets
                 
                 def __execute__(self):
+                    # Create the internal ChainMap instance:
                     self.__proxies__ = ChainMap(*self.target_dicts)
+                    
+                    # Call up:
                     super().__execute__()
+                    
+                    # Further unclutter the module namespace
                     del self.target_dicts
                 
                 def __getattr__(self, key):
@@ -70,9 +76,9 @@ class TestImporting(object):
                     # recursion kertwang within “__getattr__(…)” – since “name”
                     # is a property that uses “nameof(self)” which invariably will
                     # attempt to get one or another nonexistant attributes from ‘self’.
-                    if not '_executed' in self.__dict__:
-                        raise AttributeError(f"'PutativeProxyModule' object has no attribute '{key}'")
                     try:
+                        if not self.__dict__.get('_executed', False):
+                            raise KeyError(key)
                         return self.__proxies__[key]
                     except KeyError:
                         raise AttributeError(f"'PutativeProxyModule' object has no attribute '{key}'")

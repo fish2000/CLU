@@ -35,11 +35,14 @@ class TestImporting(object):
                     self.target_dicts = []
                     super(Module, self).__init__(name, doc=doc)
                     self.add_targets(*targets)
-                    if hasattr(self, 'targets'):
-                        self.add_targets(*self.targets)
+                    cls = type(self)
+                    if hasattr(cls, 'targets'):
+                        self.add_targets(*cls.targets)
+                        del cls.targets
                 
                 def __execute__(self):
                     self.__proxies__ = ChainMap(*self.target_dicts)
+                    del self.target_dicts
                     super().__execute__()
                 
                 def __getattr__(self, key):
@@ -68,6 +71,9 @@ class TestImporting(object):
             assert overridden.PROJECT_NAME == 'yodogg'
             assert overridden.PROJECT_PATH.endswith('yodogg')
             assert overridden.BASEPATH.endswith('yodogg')
+            
+            assert not hasattr(overridden, 'targets')
+            assert not hasattr(overridden, 'target_dicts')
             
             with pytest.raises(AttributeError) as exc:
                 assert overridden.YODOGG

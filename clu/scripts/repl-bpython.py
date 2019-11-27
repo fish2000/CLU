@@ -430,7 +430,7 @@ else:
     __all__ += ('pout',)
 
 try:
-    from clu.shelving import dispatch
+    from clu import dispatch
     from clu.shelving.redat import RedisConf, RedRun
 except (ImportError, SyntaxError):
     pass

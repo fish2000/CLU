@@ -192,7 +192,7 @@ class TestImporting(object):
         from clu.naming import nameof
         from clu.importing import Registry, Module
         
-        m = Module(name=consts.PROJECT_NAME)
+        m = Module(consts.PROJECT_NAME)
         assert m
         assert m.appname == consts.PROJECT_NAME
         assert m.appspace == 'app'
@@ -214,9 +214,9 @@ class TestImporting(object):
         class MyDerivedOther(MyOtherModule):
             pass
         
-        o = MyOtherModule(name="other")
-        d = MyDerivedModule(name="derived")
-        O = MyDerivedOther(name="derived-other")
+        o = MyOtherModule("other")
+        d = MyDerivedModule("derived")
+        O = MyDerivedOther("derived-other")
         
         assert o
         assert d
@@ -237,9 +237,9 @@ class TestImporting(object):
             def yodogg(self):
                 return "Yo Dogg"
         
-        o = ThisOtherModule(name="other")
-        d = ThisDerivedModule(name="derived")
-        O = ThisDerivedOther(name="derived-other")
+        o = ThisOtherModule("other")
+        d = ThisDerivedModule("derived")
+        O = ThisDerivedOther("derived-other")
         
         assert o.yodogg()
         assert not d.yodogg()

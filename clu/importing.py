@@ -259,7 +259,8 @@ class LoaderBase(clu.abstract.AppName, importlib.abc.Loader):
             if spec.name in Registry[cls.appname]:
                 modulename, _ = dotpath_split(spec.name)
                 ModuleClass = Registry[cls.appname][spec.name]
-                module = ModuleClass(modulename, inspect.getdoc(ModuleClass))
+                docstr = inspect.getdoc(ModuleClass)
+                module = ModuleClass(modulename, doc=docstr)
                 return module
             return self.package_module(spec.name)
         return None
@@ -610,7 +611,7 @@ def test():
     @inline
     def test_one():
         
-        m = Module(name=PROJECT_NAME)
+        m = Module(PROJECT_NAME)
         assert m
         assert m.appname == PROJECT_NAME
         assert m.appspace == 'app'
@@ -631,9 +632,9 @@ def test():
         class DerivedOther(OtherModule):
             pass
         
-        o = OtherModule(name="other")
-        d = DerivedModule(name="derived")
-        O = DerivedOther(name="derived-other")
+        o = OtherModule("other")
+        d = DerivedModule("derived")
+        O = DerivedOther("derived-other")
         
         assert o
         assert d
@@ -650,7 +651,7 @@ def test():
         pout.v(all_registered_appnames())
         pout.v(all_registered_modules())
         
-        m = Module(name=PROJECT_NAME)
+        m = Module(PROJECT_NAME)
         
         assert len(Registry.monomers) > 0
         try:

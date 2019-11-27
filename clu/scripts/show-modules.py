@@ -2,15 +2,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import namedtuple as NamedTuple
-from itertools import chain
 
-import importlib
 import pickle
 
+from clu.all import import_all_modules
 from clu.constants import consts
 from clu.exporting import Exporter
-from clu.fs.filesystem import Directory
-from clu.importing import modules_for_appname
 from clu.naming import nameof, moduleof
 from clu.repl import ansi
 from clu.repl.columnize import columnize
@@ -36,19 +33,6 @@ def printout(name, value):
     itemname = brightblue.render(" %25s " % name)
     itemvalue = gray.render(f" {value}")
     ansi.print_ansi(chevron + itemname + colon + itemvalue, color=nothing)
-
-def import_clu_modules(basepath, appname):
-    """ Import all exporter-equipped CLU modules. """
-    modules = {}
-    
-    for modname in chain(Directory(basepath).importables(appname),
-                        (clsmodule.qualname \
-                         for clsmodule in modules_for_appname(appname))):
-        module = importlib.import_module(modname)
-        if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
-            modules[modname] = module
-    
-    return modules
 
 Mismatch = NamedTuple('Mismatch', ('which',
                                    'determine',
@@ -83,7 +67,7 @@ def compare_module_lookups_for_all_things():
     mismatch_count = 0
     mismatches = []
     results = []
-    clumodules = import_clu_modules(consts.BASEPATH,
+    clumodules = import_all_modules(consts.BASEPATH,
                                     consts.PROJECT_NAME)
     modulenames = Exporter.modulenames()
     

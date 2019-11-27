@@ -50,21 +50,8 @@ def clumods():
     """ Import all CLU modules that use the “clu.exporting.Exporter”
         mechanism for listing and exporting their module contents
     """
-    from clu.constants import consts
-    from clu.fs.filesystem import Directory
-    from clu.importing import modules_for_appname
-    from itertools import chain
-    import importlib
-    modules = {}
-    
-    # Only include modules with an instance of “clu.exporting.Exporter”:
-    for modname in chain(Directory(consts.BASEPATH).importables(consts.PROJECT_NAME),
-                        (clsmodule.qualname \
-                         for clsmodule in modules_for_appname(consts.PROJECT_NAME))):
-        module = importlib.import_module(modname)
-        if type(getattr(module, 'exporter', None)).__name__ == 'Exporter':
-            modules[modname] = module
-    
+    from clu.all import import_clu_modules
+    modules = import_clu_modules()
     yield modules
 
 @pytest.fixture(scope='package')

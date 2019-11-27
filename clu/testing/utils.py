@@ -5,6 +5,7 @@ from functools import wraps
 from clu.constants.consts import (QUALIFIER,
                                   SEPARATOR_WIDTH,
                                   TEXTMATE)
+
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

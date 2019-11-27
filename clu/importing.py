@@ -28,11 +28,10 @@ except ImportError:
 from clu.constants import consts
 from clu.extending import Extensible
 from clu.naming import nameof, dotpath_split, dotpath_join
-from clu.predicates import attr, attr_search, mro, typeof, newtype
+from clu.predicates import attr, attr_search, mro
 from clu.typespace import Namespace, types
 from clu.typology import ismodule, ismapping, isstring, subclasscheck
 from clu.exporting import Registry as ExporterRegistry
-from clu.exporting import itermodule
 from clu.exporting import ExporterBase, Exporter
 
 NoDefault = consts.NoDefault
@@ -120,15 +119,19 @@ class Registry(abc.ABC, metaclass=MetaRegistry):
             then register it – store a weakref to it in the per-appname
             dictionary, indexed by the qualified name.
         """
+        # Call up:
+        super(Registry, cls).__init_subclass__(**kwargs)
+        
         # We were called with a class for which the values
         # of appname, appspace, and __name__ have been assigned:
         if cls.appname and cls.appspace and nameof(cls):
-            # Register if the names are good:
+            # Register this subclass if the names are good:
             if cls.qualname not in Registry.monomers[cls.appname]:
                 Registry.monomers[cls.appname][cls.qualname] = cls
-        
-        # Call up:
-        super(Registry, cls).__init_subclass__(**kwargs)
+            # Register the root class for this subclass,
+            # also name-wellness permitting:
+            # if cls.prefix not in Registry.monomers[cls.appname]:
+            #     Registry.monomers[cls.appname][cls.qualname] = ???
 
 @export
 class ModuleSpec(importlib.machinery.ModuleSpec):
@@ -582,16 +585,11 @@ def add_targets(instance, *targets):
     """ Out-of-line, use-twice-and-destroy function for processing targets """
     if getattr(instance, 'target_dicts', None) is None:
         instance.target_dicts = []
-    cls = type(instance)
     for target in targets:
         if target is None:
             continue
         if ismodule(target):
             instance.target_dicts.append(target.__dict__)
-            if hasattr(target, 'exporter'):
-                cls.exporter.update(target.exporter)
-            else:
-                cls.exporter.update(itermodule(target))
             continue
         if ismapping(target):
             instance.target_dicts.append(target)
@@ -645,6 +643,12 @@ class ProxyModule(Module):
         # Further unclutter the module namespace:
         del self.target_dicts
     
+    def __dir__(self):
+        cls = type(self)
+        names = chain(self.__proxies__,
+                       cls.__dict__.keys())
+        return sorted(frozenset(names) - DO_NOT_INCLUDE)
+    
     def __getattr__(self, key):
         # N.B. AttributeError typenames (herein “ProxyModule”) must be
         # somehow hardcoded – using “self.name” leads to an infinite
@@ -661,47 +665,6 @@ class ProxyModule(Module):
             typename = type(self).__name__
             raise AttributeError(f"‘{typename}’ proxy module has no attribute ‘{key}’")
 
-@export
-class SubModule(object):
-    
-    """ A context manager that creates a temporary
-        class-module subclass on enter, and unregisters
-        the temporary subclass on exit. Handy for testing.
-    """
-    
-    __slots__ = ('ModuleClass', 'ModuleSubclass', 'name', 'kwargs')
-    
-    def __init__(self, name='ModuleSubclass',
-                       ModuleClass=NoDefault,
-                     **kwargs):
-        """ Initializes a SubModule context manager with a given
-            module class (defaults to “clu.importing.Module”).
-        """
-        if not name:
-            raise TypeError("a name is required")
-        if ModuleClass in (None, NoDefault):
-            ModuleClass = Module
-        if not subclasscheck(ModuleClass, ModuleBase):
-            cls = typeof(ModuleClass)
-            raise TypeError(f"Module class must derive from “clu.importing.ModuleBase” "
-                            f"(class {cls.__qualname__} does not)")
-        self.ModuleClass = typeof(ModuleClass)
-        self.name = name
-        self.kwargs = kwargs
-    
-    def __enter__(self):
-        """ Create and return the temporary class-module subclass """
-        self.ModuleSubclass = newtype(self.name,
-                                      self.ModuleClass,
-                                    **self.kwargs)
-        return self.ModuleSubclass
-    
-    def __exit__(self, exc_type=None, exc_val=None, exc_tb=None):
-        """ Unregister the temporary class-module subclass """
-        Registry.unregister(self.ModuleSubclass.appname,
-                            self.ModuleSubclass.qualname)
-        return exc_type is None
-
 export(Module, name='Module')
 export(Finder, name='Finder')
 export(Loader, name='Loader')
@@ -713,6 +676,9 @@ def test():
     
     from clu.testing.utils import inline, pout
     from pprint import pprint
+    
+    # LEGACY:
+    SubModule = object()
     
     @inline
     def test_one():
@@ -833,14 +799,21 @@ def test():
         assert type(derived.exporter).__name__ == 'Exporter'
     
     @inline
-    def test_five():
-        
+    def test_five_LEGACY():
+        # XXX: SubModule is DEAD
         before = all_registered_modules()
         
-        with SubModule('derived_module0', __module__=__name__) as DerivedModule:
-            from clu.app import derived_module0 as derived
+        with SubModule('temp_module0', __module__=__name__) as TempModule:
+            from clu.app import temp_module0 as derived
             
-            assert type(derived) is DerivedModule
+            print(type(TempModule))
+            print(TempModule)
+            print(TempModule.qualname)
+            pprint(all_registered_modules())
+            print(all_registered_modules()[-1].qualname)
+            print(type(derived))
+            pprint(mro(derived))
+            assert type(derived) is TempModule
             assert type(derived.exporter).__name__ == 'Exporter'
             assert len(all_registered_modules()) == len(before) + 1
         
@@ -848,19 +821,19 @@ def test():
         assert before == after
     
     @inline
-    def test_six():
-        
+    def test_six_LEGACY():
+        # XXX: SubModule is DEAD
         before = all_registered_modules()
         
-        with SubModule('derived_module1', __module__=__name__) as DerivedModule:
+        with SubModule('temp_module1', __module__=__name__) as TempModule:
             derived = importlib.import_module('clu.app.derived_module1')
             
-            assert type(derived) is DerivedModule
-            assert derived.__class__ is DerivedModule
-            assert isinstance(derived, DerivedModule)
-            assert subclasscheck(type(derived), DerivedModule)
-            print(type(DerivedModule))
-            print(DerivedModule)
+            # assert type(derived) is TempModule
+            # assert derived.__class__ is TempModule
+            # assert isinstance(derived, TempModule)
+            # assert subclasscheck(type(derived), TempModule)
+            print(type(TempModule))
+            print(TempModule)
             print(type(derived))
             pprint(mro(derived))
             assert type(derived.exporter).__name__ == 'Exporter'
@@ -903,8 +876,8 @@ def test():
     test_three()
     three_and_a_half()
     test_four()
-    test_five()
-    test_six()
+    # test_five_LEGACY()
+    # test_six_LEGACY()
     test_seven()
 
 if __name__ == '__main__':

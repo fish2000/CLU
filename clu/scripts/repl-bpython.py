@@ -460,8 +460,6 @@ else:
     __all__ += ('abc', 'collectionsabc', 'asciiplotlib')
 
 try:
-    from clu.fs import appdirectories
-    from clu.fs.pypath import append_paths, remove_paths, remove_invalid_paths
     from clu.fs.filesystem import (DEFAULT_PREFIX, DEFAULT_TIMEOUT,
                                    ensure_path_is_valid,
                                    script_path, which, back_tick,
@@ -474,18 +472,18 @@ try:
     from clu.fs.misc import (gethomedir, isinvalidpath,
                              re_matcher, re_searcher,
                              re_suffix, suffix_searcher,
-                             swapext,
+                             re_excluder,
+                             extension, swapext,
                              differentfile,
                              filesize, samesize, differentsize)
+    from clu.fs import appdirectories, pypath
     from clu.repr import (hexid, typenameof, typename_hexid,
                           strfield, strfields, stringify)
 except (ImportError, SyntaxError):
     pass
 else:
     # Extend `__all__`:
-    __all__ += ('appdirectories',
-                'append_paths', 'remove_paths', 'remove_invalid_paths',
-                'DEFAULT_PREFIX', 'DEFAULT_TIMEOUT',
+    __all__ += ('DEFAULT_PREFIX', 'DEFAULT_TIMEOUT',
                 'ensure_path_is_valid',
                 'script_path', 'which', 'back_tick',
                 'rm_rf', 'temporary',
@@ -495,13 +493,15 @@ else:
                 'TemporaryDirectory', 'Intermediate',
                 'NamedTemporaryFile',
                 'gethomedir', 'isinvalidpath',
-                'strfield', 'strfields', 'stringify',
-                'hexid', 'typenameof', 'typename_hexid',
                 're_matcher', 're_searcher',
                 're_suffix', 'suffix_searcher',
-                'swapext',
+                're_excluder',
+                'extension', 'swapext',
                 'differentfile',
-                'filesize', 'samesize', 'differentsize')
+                'filesize', 'samesize', 'differentsize',
+                'appdirectories', 'pypath',
+                'hexid', 'typenameof', 'typename_hexid',
+                'strfield', 'strfields', 'stringify')
     D = Directory()
 
 try:
@@ -540,13 +540,9 @@ i = 666
 o = object()
 s = 'yo dogg'
 
-# Remove duplicate sys.paths:
-import site
-site.removeduppaths()
-
-# Remove invalid sys.paths:
-if 'remove_invalid_paths' in __all__:
-    remove_invalid_paths()
+# Remove duplicate and invalid sys.paths:
+if 'pypath' in __all__:
+    pypath.remove_invalid_paths()
 
 # Print the Python banner and/or warnings, messages, and other tripe:
 print_banner()

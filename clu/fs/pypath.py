@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import os
+import site
 import sys
 
 from clu.exporting import Exporter
@@ -10,17 +11,20 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 @export
-def append_paths(*putatives):
-    """ Mutate `sys.path` by appending one or more new paths -- all of which
+def add_paths(*putatives, prepend=False):
+    """ Mutate `sys.path` by adding one or more new paths -- all of which
         are checked for both nonexistence and presence within the existing
         `sys.path` list via inode lookup, and which those failing such checks
         are summarily excluded.
+        
+        Paths are added to `sys.path` by appending, unless “add_paths(…)”
+        is called with the keyword arg ‘prepend=True’.
     """
     out = {}
     if len(putatives) < 1:
         return out
     paths = frozenset(sys.path)
-    append_paths.oldpaths.append(tuple(sys.path))
+    add_paths.oldpaths.append(tuple(sys.path))
     for pth in (os.fspath(putative) for putative in putatives):
         if not os.path.exists(pth):
             out[pth] = False
@@ -32,12 +36,14 @@ def append_paths(*putatives):
             if os.path.samefile(p, pth):
                 out[pth] = False
                 continue
-        sys.path.append(pth)
+        if prepend:
+            sys.path.insert(0, pth)
+        else:
+            sys.path.append(pth)
         out[pth] = True
-        continue
     return out
 
-append_paths.oldpaths = []
+add_paths.oldpaths = []
 
 def mutate_syspath(container):
     """ Remove paths from `sys.path` that don’t match the input. """
@@ -85,6 +91,7 @@ def remove_invalid_paths():
         (according to “os.path.exists(…)”). Path removal, as with
         “remove_paths(…)”, is done atomically.
     """
+    site.removeduppaths()
     out = {}
     removals = set()
     paths = set(sys.path)
@@ -101,6 +108,14 @@ def remove_invalid_paths():
     return out
 
 remove_invalid_paths.oldpaths = []
+
+@export
+def enhance(*putatives):
+    """ Convenience function for calling “remove_invalid_paths(…)”
+        before calling “add_paths(•putatives)”
+    """
+    remove_invalid_paths()          # cleans “sys.path”
+    return add_paths(*putatives)    # extends “sys.path”
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

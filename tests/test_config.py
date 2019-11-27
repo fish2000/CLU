@@ -12,8 +12,7 @@ class TestConfig(object):
         # Ensure “sys.path” contains the “yodogg” package:
         prefix = dirname.subdirectory('yodogg')
         assert prefix.exists
-        pypath.remove_invalid_paths()  # cleans “sys.path”
-        pypath.append_paths(prefix)    # extends “sys.path”
+        pypath.enhance(prefix)
         
         from yodogg.config import Env
         from yodogg.config import MySchema
@@ -55,8 +54,7 @@ class TestConfig(object):
         # Ensure “sys.path” contains the “yodogg” package:
         prefix = dirname.subdirectory('yodogg')
         assert prefix.exists
-        pypath.remove_invalid_paths()  # cleans “sys.path”
-        pypath.append_paths(prefix)    # extends “sys.path”
+        pypath.enhance(prefix)
         
         from yodogg.config import MySchema
         

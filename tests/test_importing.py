@@ -216,8 +216,7 @@ class TestImporting(object):
         # Ensure “sys.path” contains the “yodogg” package:
         prefix = dirname.subdirectory('yodogg')
         assert prefix.exists
-        pypath.remove_invalid_paths()  # cleans “sys.path”
-        pypath.append_paths(prefix)    # extends “sys.path”
+        pypath.enhance(prefix)
         
         # Bring in the package-specific Module subclass
         from yodogg.config import Module

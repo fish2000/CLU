@@ -15,9 +15,9 @@ import time
 from clu.constants.consts import NoDefault
 from clu.predicates import resolve, uniquify
 
-from clu.shelving.dispatch import (signal_for,
-                                   exithandle,
-                                   shutdown)
+from clu.dispatch import (signal_for,
+                          exithandle,
+                          shutdown)
 
 from clu.fs.filesystem import (which,
                                TemporaryName,

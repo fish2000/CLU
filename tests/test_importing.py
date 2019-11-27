@@ -42,8 +42,9 @@ class TestImporting(object):
                 
                 def __execute__(self):
                     self.__proxies__ = ChainMap(*self.target_dicts)
-                    del self.target_dicts
                     super().__execute__()
+                    del self.target_dicts
+                    del self.add_targets
                 
                 def __getattr__(self, key):
                     # N.B. AttributeError typenames (herein “PutativeProxyModule”)

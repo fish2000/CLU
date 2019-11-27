@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+# Load the “pytester” built-in pytest plugin:
+pytest_plugins = 'pytester'
+
+# Import the main pytest API entry point:
 import pytest
 
 # enum.IntEnum of pytest’s exit status codes:

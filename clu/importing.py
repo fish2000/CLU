@@ -624,6 +624,7 @@ class ProxyModule(Module):
         """
         # in case of __dir__(…) access before execution:
         self.__proxies__ = {}
+        self.__filters__ = []
         
         # Establish a base list of target dicts, and call up:
         self.target_dicts = []

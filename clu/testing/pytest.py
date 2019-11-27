@@ -27,8 +27,7 @@ def pytest_sessionfinish(session, exitstatus):
     """
     from clu.constants import consts
     from clu.dispatch import exithandle
-    from clu.fs.filesystem import td
-    from shutil import rmtree
+    from clu.fs.filesystem import td, rm_rf
     
     # putative temporary directory:
     putative = td().subdirectory(f"pytest-of-{consts.USER}")
@@ -44,7 +43,7 @@ def pytest_sessionfinish(session, exitstatus):
             if putative.exists:
                 print()
                 print(f"REMOVING: {putative.name}")
-                rmtree(putative.name)
+                rm_rf(putative.name)
 
 @pytest.fixture(scope='package')
 def clumods():

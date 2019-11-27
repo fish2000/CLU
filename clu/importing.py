@@ -639,11 +639,11 @@ class ProxyModule(Module):
         # Create the internal “clu.dicts.ChainMap” subclass instance:
         self.__proxies__ = ChainModuleMap(*self.target_dicts)
         
-        # Call up:
-        super().__execute__()
-        
         # Further unclutter the module namespace:
         del self.target_dicts
+        
+        # Call up:
+        super().__execute__()
     
     def __dir__(self):
         cls = type(self)

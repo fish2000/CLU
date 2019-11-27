@@ -33,7 +33,7 @@ class TestTypology(object):
         from clu.exporting import Exporter
         
         assert isslottedtype(Exporter)
-        assert not isslottedtype(DoubleDutchRegistry) # has __slots__ but isn’t “slotted”
+        assert isslottedtype(DoubleDutchRegistry)
         assert isextensibletype(pairtype(int, int))
         assert isextensibletype(ΩΩ(str, str))
         assert not isextensibletype(DoubleDutchRegistry)

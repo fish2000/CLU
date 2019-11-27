@@ -72,12 +72,13 @@ def greektext():
     yield dict(GREEKOUT)
 
 @pytest.fixture(scope='package')
-def clumods():
+def clumods(consts):
     """ Import all CLU modules that use the “clu.exporting.Exporter”
         mechanism for listing and exporting their module contents
     """
-    from clu.all import import_clu_modules
-    modules = import_clu_modules()
+    from clu.all import import_all_modules
+    modules = import_all_modules(basepath=consts.BASEPATH,
+                                  appname=consts.PROJECT_NAME)
     yield modules
 
 @pytest.fixture(scope='package')

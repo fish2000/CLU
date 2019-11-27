@@ -33,14 +33,6 @@ export = exporter.decorator()
 
 DO_IT_DOUG = False
 
-formats = ('%(relativeCreated)6d',
-           '%(threadName)s',
-          '[%(module)s', '»', '%(funcName)s]',
-           '%(message)s')
-
-logging.basicConfig(level=logging.DEBUG,
-                    format=' '.join(formats))
-
 @export
 class RedisConf(clu.abstract.ManagedContext,
                 collections.abc.MutableMapping,
@@ -283,6 +275,16 @@ class redprocess(Module):
     
     def __execute__(self):
         if DO_IT_DOUG:
+            import logging
+            
+            formats = ('%(relativeCreated)6d',
+                       '%(threadName)s',
+                      '[%(module)s', '»', '%(funcName)s]',
+                       '%(message)s')
+            
+            logging.basicConfig(level=logging.DEBUG,
+                                format=' '.join(formats))
+            
             logging.debug("Configuring Redis…")
             thisdir = Directory(os.path.dirname(__file__))
             thisconf = thisdir.subpath('redis.conf', requisite=True)
@@ -444,6 +446,15 @@ def test():
     from clu.repl.ansi import print_separator
     from clu.constants.data import GREEKOUT
     import signal
+    import logging
+    
+    formats = ('%(relativeCreated)6d',
+               '%(threadName)s',
+              '[%(module)s', '»', '%(funcName)s]',
+               '%(message)s')
+    
+    logging.basicConfig(level=logging.DEBUG,
+                        format=' '.join(formats))
     
     redconf = redprocess.get_config()
     

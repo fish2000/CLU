@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import getpass
 import os
 import socket
-import sys
 import sysconfig
+import sys
 
 # pytuple shortcut lambda:
 pytuple = lambda *attrs: tuple(f'__{atx}__' for atx in attrs)
@@ -107,6 +108,9 @@ else:
 # WTF HAX:
 TOKEN = sys.intern(' -')
 
+# Username:
+USER = sys.intern(getpass.getuser())
+
 # Stuff we want to keep out of namespaces:
 VERBOTEN = pytuple('all', 'cached', 'loader', 'file', 'spec')
 VERBOTEN += BUILTINS
@@ -153,6 +157,7 @@ __all__ = ('BASEPATH',
            'SCRIPT_PATH', 'TEST_PATH',
            'TEXTMATE',
            'TOKEN',
+           'USER',
            'VERBOTEN',
            'XDG_RUNTIME_BASE', 'XDG_RUNTIME_DIR',
                                'XDG_RUNTIME_MODE',

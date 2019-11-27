@@ -207,13 +207,21 @@ def rm_rf(path):
             os.unlink(path)
         elif os.path.isdir(path):
             subdirs = []
-            for root, dirs, files in os.walk(path, followlinks=True):
+            for root, dirs, files in os.walk(path, followlinks=False):
                 for tf in files:
                     os.unlink(os.path.join(root, tf))
+                with os.scandir(root) as iterscan:
+                    for item in iterscan:
+                        if item.is_symlink():
+                            os.unlink(item.path)
                 subdirs.extend((os.path.join(root, td) for td in dirs))
             for subdir in reversed(subdirs):
                 os.rmdir(subdir)
-            os.rmdir(path)
+            for root, dirs, files in os.walk(path, followlinks=False,
+                                                   topdown=False):
+                for td in dirs:
+                    os.removedirs(os.path.join(root, td))
+            os.removedirs(path)
         return True
     except (OSError, IOError):
         pass

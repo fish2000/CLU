@@ -2,6 +2,46 @@
 
 import pytest
 
+# enum.IntEnum of pytest’s exit status codes:
+from _pytest.main import ExitCode
+
+# when not to bind the exit handler:
+no_delete_codes = (ExitCode.INTERNAL_ERROR,
+                   ExitCode.USAGE_ERROR,
+                   ExitCode.NO_TESTS_COLLECTED)
+
+@pytest.hookimpl(trylast=True)
+def pytest_sessionfinish(session, exitstatus):
+    """ Hook function to bind an exit handle – using “clu.dispatch”
+        via the ‘@exithandle’ decorator – that removes any remaining
+        temporary-file artifacts that may be hanging out in the
+        putative directory “$TMPDIR/pytest-of-$USER”.
+        
+        The exit handle function executes when the Python interpreter
+        either enters shutdown (via the “atexit” module) or receives
+        a terminating signal (via the “signal” module).
+    """
+    from clu.constants import consts
+    from clu.dispatch import exithandle
+    from clu.fs.filesystem import td
+    from shutil import rmtree
+    
+    # putative temporary directory:
+    putative = td().subdirectory(f"pytest-of-{consts.USER}")
+    
+    # check the exit status:
+    if exitstatus not in no_delete_codes:
+        # bind a remover function if the exit status is “natural” –
+        # i.e. no internal errors and tests ran normally (this can
+        # include occasions when tests fail):
+        @exithandle
+        def remover(signum, frame=None):
+            """ Exit handler for removing ‘pytest’ artifacts """
+            if putative.exists:
+                print()
+                print(f"REMOVING: {putative.name}")
+                rmtree(putative.name)
+
 @pytest.fixture(scope='package')
 def clumods():
     """ Import all CLU modules that use the “clu.exporting.Exporter”
@@ -72,9 +112,10 @@ def dirname(request):
 @pytest.fixture
 def datadir(dirname):
     """ Local version of pytest-datadir’s “datadir” fixture, reimplemented
-        using clu.fs.filesystem classes – ensuring that the temporary directory
-        will be deleted immediately after use – and performing the directory-copy
-        operations through instance methods (vs. raw calls to “shutil.copytree(…)”).
+        using clu.fs.filesystem classes – ensuring that the temporary
+        directory will be deleted immediately after use – and performing
+        its copy operations through instance methods (vs. the raw calls
+        to “shutil.copytree(…)” made by “datadir”).
     """
     from clu.fs.filesystem import TemporaryDirectory
     from clu.naming import moduleof, dotpath_join, dotpath_to_prefix

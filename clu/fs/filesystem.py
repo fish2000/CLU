@@ -312,6 +312,7 @@ class TypeLocker(abc.ABCMeta):
         return cls
 
 class TemporaryFileWrapper(TemporaryFileWrapperBase,
+                           collections.abc.Iterable,
                            contextlib.AbstractContextManager,
                            os.PathLike,
                            metaclass=TypeLocker):

@@ -1,1 +1,2 @@
-pytest_plugins = "clu.testing.pytest"
+pytest_plugins = ["clu.testing.pytest",
+                  'pytester']

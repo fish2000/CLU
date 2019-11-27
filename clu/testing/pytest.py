@@ -45,6 +45,14 @@ def pytest_sessionfinish(session, exitstatus):
                 print(f"REMOVING: {putative.name}")
                 rm_rf(putative.name)
 
+@pytest.fixture(scope='session')
+def consts():
+    """ Fixture providing access to the CLU constants module, which
+        you may know as “clu.constants.consts”
+    """
+    from clu.constants import consts as consts_module
+    yield consts_module
+
 @pytest.fixture(scope='package')
 def clumods():
     """ Import all CLU modules that use the “clu.exporting.Exporter”

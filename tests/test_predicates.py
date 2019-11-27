@@ -674,10 +674,9 @@ class TestPredicates(object):
         assert slots_for(Dictish)   == tuple()
         assert slots_for(Dictish()) == tuple()
     
-    def test_applyto(self):
+    def test_applyto(self, consts):
         """ » Checking “apply_to(…)” core function from clu.predicates … """
         from string import capwords
-        from clu.constants.consts import ENCODING, SINGLETON_TYPES
         from clu.predicates import apply_to, isclasstype, typeof, uniquify
         from clu.typology import (numeric_types, string_types, bytes_types,
                                   callable_types, array_types, path_types)
@@ -701,7 +700,7 @@ class TestPredicates(object):
         istypelist = apply_to(isclasstype, all)
         maketypelist = apply_to(typeof, uniquify)
         
-        assert istypelist(SINGLETON_TYPES)
+        assert istypelist(consts.SINGLETON_TYPES)
         assert istypelist(numeric_types)
         assert istypelist(string_types)
         assert istypelist(bytes_types)
@@ -721,7 +720,7 @@ class TestPredicates(object):
                         lambda total: all(total),
                         "yo", "dogg", "I", "heard", "you", "love", "apply_to")
         
-        s = lambda by: str(by, encoding=ENCODING)
+        s = lambda by: str(by, encoding=consts.ENCODING)
         r = "Yo Dogg I Heard You Love Apply_to"
         assert apply_to(lambda thing: isinstance(thing, string_types) and thing or s(thing),
                         lambda total: capwords(" ".join(total)),

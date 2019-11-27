@@ -89,16 +89,15 @@ class TestExporting(object):
         assert Registry.unregister('yolocal') is Exporter
         assert 'yolocal' not in Registry.all_appnames()
     
-    def test_exporter_instance_registry(self, clumods):
-        from clu.constants.consts import BASEPATH, PROJECT_NAME
+    def test_exporter_instance_registry(self, clumods, consts):
         from clu.exporting import path_to_dotpath, Exporter
         from clu.fs.filesystem import Directory
         from clu.importing import modules_for_appname, Module
         from clu.predicates import haspyattr
         
         # Walk the importables:
-        submodules = Directory(BASEPATH).importables(PROJECT_NAME)
-        clsmodules = tuple(clsmodule.qualname for clsmodule in modules_for_appname(PROJECT_NAME))
+        submodules = Directory(consts.BASEPATH).importables(consts.PROJECT_NAME)
+        clsmodules = tuple(clsmodule.qualname for clsmodule in modules_for_appname(consts.PROJECT_NAME))
         
         # Sanity-check the number of modules:
         assert len(clumods) <= len(submodules) + len(clsmodules)
@@ -111,7 +110,7 @@ class TestExporting(object):
                 # It’s a file-based module:
                 assert Exporter[modname].path == module.__file__
                 assert Exporter[modname].dotpath == path_to_dotpath(module.__file__,
-                                                                    relative_to=BASEPATH)
+                                                                    relative_to=consts.BASEPATH)
             elif isinstance(module, Module):
                 # It’s a class-based module:
                 assert Exporter[modname].path is None

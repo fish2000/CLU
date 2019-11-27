@@ -101,25 +101,24 @@ class TestNaming(object):
     
     @pytest.mark.skipif(consts.PYPY, reason="Failure on PyPy")
     @pytest.mark.nondeterministic
-    def test_qualified_name_constants(self):
+    def test_qualified_name_constants(self, consts):
         """ » Checking “qualified_name(¬) on items from clu.constants …” """
-        from clu.constants.consts import (BASEPATH, HOSTNAME, VERBOTEN, SCRIPT_PATH, TEST_PATH)
         from clu.naming import qualified_name
         
         names = ('BASEPATH', 'HOSTNAME', 'VERBOTEN', 'SCRIPT_PATH', 'TEST_PATH')
-        consts = (BASEPATH, HOSTNAME, VERBOTEN, SCRIPT_PATH, TEST_PATH)
+        constants = (getattr(consts, name) for name in names)
         
-        for name, const in zip(names, consts):
+        for name, const in zip(names, constants):
             qname = qualified_name(const)
             assert qname == f'clu.constants.consts.{name}'
         
         """ This commented-out bit fails because “clu.__title__” (defined in clu/__init__.py)
             is the same string – and interning makes them into the same object. """
-        # qname = qualified_name(PROJECT_NAME)
+        # qname = qualified_name(consts.PROJECT_NAME)
         # try:
         #     assert qname == 'clu.constants.consts.PROJECT_NAME'
         # except AssertionError:
-        #     raise Nondeterminism(f"Nondeterminism in qualified_name(PROJECT_NAME) → {qname}")
+        #     raise Nondeterminism(f"Nondeterminism in qualified_name(consts.PROJECT_NAME) → {qname}")
     
     def test_qualified_name_instances(self):
         """ » Checking “qualified_name(¬) on instances of objects …” """

@@ -88,14 +88,13 @@ class TestExtending(object):
         
         assert set(pairs) == set(products) # REALLY.
     
-    def test_extensible_metaclass(self, dirname):
-        from clu.constants.consts import PROJECT_NAME, TEST_PATH
+    def test_extensible_metaclass(self, dirname, consts):
         from clu.extending import Extensible
         import os
         
         class X(metaclass=Extensible):
             
-            appname = PROJECT_NAME
+            appname = consts.PROJECT_NAME
             filepath = os.getcwd()
             
             def __init__(self, name=None):
@@ -125,6 +124,6 @@ class TestExtending(object):
         
         assert ex.name == 'dogg'
         assert ux.name == 'yodogg'
-        assert ex.path == os.path.join(TEST_PATH, ex.appname)
-        assert ux.path == os.path.join(TEST_PATH, ux.appname)
+        assert ex.path == os.path.join(consts.TEST_PATH, ex.appname)
+        assert ux.path == os.path.join(consts.TEST_PATH, ux.appname)
         

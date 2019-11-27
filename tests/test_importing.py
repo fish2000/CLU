@@ -86,17 +86,16 @@ class TestImporting(object):
             
             Registry.unregister(derived.appname, derived.qualname)
     
-    def test_basic_module(self):
-        from clu.constants.consts import PROJECT_NAME
+    def test_basic_module(self, consts):
         from clu.naming import nameof
         from clu.importing import Registry, Module
         
-        m = Module(name=PROJECT_NAME)
+        m = Module(name=consts.PROJECT_NAME)
         assert m
-        assert m.appname == PROJECT_NAME
+        assert m.appname == consts.PROJECT_NAME
         assert m.appspace == 'app'
         assert m.__name__ == 'clu.app.clu'
-        assert nameof(m) == PROJECT_NAME
+        assert nameof(m) == consts.PROJECT_NAME
         
         assert len(Registry.monomers) > 0
         

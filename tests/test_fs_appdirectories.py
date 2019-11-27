@@ -299,8 +299,8 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
         assert str(appdirs) == repr(appdirs)
     
-    def test_DARWIN_yes_version_no_author(self, environment):
-        user = environment.get('USER', 'nobody')
+    def test_DARWIN_yes_version_no_author(self, environment, consts):
+        user = environment.get('USER', consts.USER)
         appname = type(self).appname
         appversion = type(self).appversion
         appdirs = AppDirs(appname, version=appversion,
@@ -333,8 +333,8 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
         assert str(appdirs) == repr(appdirs)
     
-    def test_DARWIN_yes_version_yes_author(self, environment):
-        user = environment.get('USER', 'nobody')
+    def test_DARWIN_yes_version_yes_author(self, environment, consts):
+        user = environment.get('USER', consts.USER)
         appname = type(self).appname
         appauthor = type(self).appauthor
         appversion = type(self).appversion
@@ -371,8 +371,8 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
         assert str(appdirs) == repr(appdirs)
     
-    def test_DARWIN_no_version_no_author(self, environment):
-        user = environment.get('USER', 'nobody')
+    def test_DARWIN_no_version_no_author(self, environment, consts):
+        user = environment.get('USER', consts.USER)
         appname = type(self).appname
         appdirs = AppDirs(appname, system=System.DARWIN)
         
@@ -402,8 +402,8 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
         assert str(appdirs) == repr(appdirs)
     
-    def test_DARWIN_no_version_yes_author(self, environment):
-        user = environment.get('USER', 'nobody')
+    def test_DARWIN_no_version_yes_author(self, environment, consts):
+        user = environment.get('USER', consts.USER)
         appname = type(self).appname
         appauthor = type(self).appauthor
         

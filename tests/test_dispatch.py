@@ -7,9 +7,7 @@ class TestDispatch(object):
     
     """ Run the tests for the “clu.dispatch” module """
     
-    def test_exithandle(self, testdir):
-        from clu.constants import consts
-        
+    def test_exithandle(self, testdir, consts):
         testdir.syspathinsert(consts.PROJECT_PATH)
         testdir.syspathinsert(consts.BASEPATH)
         testdir.makeconftest("""

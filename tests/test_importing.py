@@ -81,7 +81,8 @@ class TestImporting(object):
                             raise KeyError(key)
                         return self.__proxies__[key]
                     except KeyError:
-                        raise AttributeError(f"'PutativeProxyModule' object has no attribute '{key}'")
+                        typename = type(self).__name__
+                        raise AttributeError(f"'{typename}' object has no attribute '{key}'")
             
             class testing_overridden_consts(PutativeProxyModule):
                 # def __execute__(self):

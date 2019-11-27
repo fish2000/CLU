@@ -25,7 +25,7 @@ except ImportError:
     import importlib_metadata as _metadata
     importlib.metadata = _metadata
 
-from clu.constants.consts import BUILTINS, PROJECT_NAME, QUALIFIER, NoDefault
+from clu.constants import consts
 from clu.extending import Extensible
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.predicates import attr, attr_search, mro, typeof, newtype
@@ -34,6 +34,8 @@ from clu.typology import ismodule, ismapping, isstring, subclasscheck
 from clu.exporting import Registry as ExporterRegistry
 from clu.exporting import itermodule
 from clu.exporting import ExporterBase, Exporter
+
+NoDefault = consts.NoDefault
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -208,7 +210,7 @@ class FinderBase(clu.abstract.AppName, importlib.abc.MetaPathFinder):
         # with classes like 'str' …?!
         if fullname in cls.cache:
             return cls.cache[fullname]
-        if cls.appname == fullname.split(QUALIFIER).pop(0):
+        if cls.appname == fullname.split(consts.QUALIFIER).pop(0):
             out = cls.cache[fullname] = ModuleSpec(fullname, cls.loader)
             return out
         return None
@@ -555,7 +557,7 @@ def initialize_types(appname, appspace='app'):
     
     return Module, Finder, Loader
 
-Module, Finder, Loader = initialize_types(PROJECT_NAME)
+Module, Finder, Loader = initialize_types(consts.PROJECT_NAME)
 
 @export
 class ChainModuleMap(clu.dicts.ChainMap):
@@ -564,7 +566,7 @@ class ChainModuleMap(clu.dicts.ChainMap):
     
     def __iter__(self):
         source = super().__iter__()
-        yield from filter(lambda item: item not in BUILTINS, source)
+        yield from filter(lambda item: item not in consts.BUILTINS, source)
     
     def __missing__(self, key):
         if key in self:
@@ -652,7 +654,7 @@ class ProxyModule(Module):
         try:
             if not self.__dict__.get('_executed', False):
                 raise KeyError(key)
-            elif key in BUILTINS:
+            elif key in consts.BUILTINS:
                 raise KeyError(key)
             return self.__proxies__[key]
         except KeyError:
@@ -715,12 +717,12 @@ def test():
     @inline
     def test_one():
         
-        m = Module(PROJECT_NAME)
+        m = Module(consts.PROJECT_NAME)
         assert m
-        assert m.appname == PROJECT_NAME
+        assert m.appname == consts.PROJECT_NAME
         assert m.appspace == 'app'
         assert m.__name__ == 'clu.app.clu'
-        assert nameof(m) == PROJECT_NAME
+        assert nameof(m) == consts.PROJECT_NAME
         print(nameof(m))
         print(m.__name__)
     
@@ -755,7 +757,7 @@ def test():
         pout.v(all_registered_appnames())
         pout.v(all_registered_modules())
         
-        m = Module(PROJECT_NAME)
+        m = Module(consts.PROJECT_NAME)
         
         assert len(Registry.monomers) > 0
         try:
@@ -767,10 +769,10 @@ def test():
         
         pout.v(m.__dict__)
         
-        assert m.appname == PROJECT_NAME
+        assert m.appname == consts.PROJECT_NAME
         assert m.appspace == 'app'
         assert m.__name__ == 'clu.app.clu'
-        assert nameof(m) == PROJECT_NAME
+        assert nameof(m) == consts.PROJECT_NAME
         
         pout.v(mro(m))
     
@@ -869,7 +871,6 @@ def test():
     
     @inline
     def test_seven():
-        from clu.constants import consts
         
         overrides = dict(PROJECT_NAME='yodogg',
                          PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',

@@ -512,6 +512,7 @@ def installed_appnames():
     """ Return a set of the appnames for all installed finders
         that have one defined.
     """
+    # { finder.appname for finder in sys.meta_path if hasattr(finder, 'appname') }
     appnames = set()
     for finder in sys.meta_path:
         if hasattr(finder, 'appname'):

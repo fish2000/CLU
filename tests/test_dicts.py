@@ -34,19 +34,19 @@ class TestDicts(object):
         # Check keys from respective sub-maps:
         for key in ('yo', 'i', 'you', 'dict'):
             assert key in hey
-            assert hey.mapcontains(key) == dict_one
+            assert hey.mapcontaining(key) == dict_one
             assert hey.get(key) == dict_one.get(key)
         
         for key in ('config', 'yodata', 'yodogg',
                     '8ba.png', '3472236406_1fbf1a567d_o.jpg', 'shutterstock_90194617.jpg',
                     'IMG_20180505_205153567.jpg', '3471426989_aa8e83cac5_o.jpg'):
             assert key in hey
-            assert hey.mapcontains(key) == data
+            assert hey.mapcontaining(key) == data
             assert hey.get(key) == data.get(key)
         
         for key in ('SHELL', 'LESS', 'HOME', 'LANG'):
             assert key in hey
-            assert hey.mapcontains(key) == environment
+            assert hey.mapcontaining(key) == environment
             assert hey.get(key) == environment.get(key)
         
         # Check for KeyErrors on bad item access:
@@ -97,7 +97,7 @@ class TestDicts(object):
             assert key in tomeetyou
             assert key not in hey
             assert key not in beentrying
-            assert len(tomeetyou.mapcontains(key)) == 3
+            assert len(tomeetyou.mapcontaining(key)) == 3
             assert type(tomeetyou.get(key)) is str
         
         # CLONE » not via “clu.config.abc.Cloneable” …yet:

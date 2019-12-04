@@ -193,7 +193,7 @@ class ChainMap(collections.abc.MutableMapping,
         self.maps[0].clear()
         return self
     
-    def mapcontains(self, itx, default=NoDefault):
+    def mapcontaining(self, itx, default=NoDefault):
         from clu.predicates import finditem
         if default is NoDefault:
             return finditem(itx, *self.maps) or self.__missing__(itx)

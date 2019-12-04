@@ -802,13 +802,13 @@ class Directory(collections.abc.Hashable,
         """
         if self.targets_set:
             self.target = attr(self, 'new', 'old')
-            del self.old
-            del self.new
+            delattr(self, 'old')
+            delattr(self, 'new')
         if self.prepared:
-            del self.will_change
-            del self.will_change_back
-            del self.did_change
-            del self.did_change_back
+            delattr(self, 'will_change')
+            delattr(self, 'will_change_back')
+            delattr(self, 'did_change')
+            delattr(self, 'did_change_back')
         return self
     
     def ctx_set_targets(self, old=None):
@@ -837,7 +837,7 @@ class Directory(collections.abc.Hashable,
             return self
         setattr(self, 'old', old is not None and old or self.target)
         setattr(self, 'new', self.target)
-        del self.target
+        delattr(self, 'target')
         return self
     
     def ctx_prepare(self):

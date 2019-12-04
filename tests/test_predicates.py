@@ -36,7 +36,6 @@ class TestPredicates(object):
         assert try_items('yo', dict_one, dict_default) == "dogg"
         assert try_items('so', dict_one, dict_default) == "WTF" # DefaultDict factory value
     
-    
     def test_ancestral_and_ancestral_union(self):
         from clu.predicates import ancestral_union
         from clu.fs.filesystem import Directory, TemporaryDirectory

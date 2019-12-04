@@ -2,6 +2,7 @@
 from __future__ import print_function
 from functools import wraps
 
+import collections.abc
 import importlib
 import importlib.machinery
 import inspect
@@ -200,9 +201,12 @@ def qualified_import(qualified):
     """
     if QUALIFIER not in qualified:
         raise ValueError(f"qualified name required (got {qualified})")
-    head, tail = dotpath_split(qualified)
-    module = importlib.import_module(tail)
-    imported = getattr(module, head)
+    try:
+        imported = importlib.import_module(qualified)
+    except ModuleNotFoundError:
+        head, tail = dotpath_split(qualified)
+        module = importlib.import_module(tail)
+        imported = getattr(module, head)
     if DEBUG:
         print(f"Qualified Import: {qualified}")
     return imported
@@ -247,7 +251,7 @@ def path_to_prefix(path, sep='-', end='-', relative_to=BASEPATH):
                              end=end)
 
 @export
-class rename(object):
+class rename(collections.abc.Callable):
     
     """ Function-rename decorator. Use like so:
         

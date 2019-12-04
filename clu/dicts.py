@@ -118,7 +118,7 @@ class ChainMap(collections.abc.MutableMapping,
                 for map in d.maps:
                     if bool(map):
                         if map not in maps:
-                            maps.append(d)
+                            maps.append(map)
             else:
                 if d not in maps:
                     maps.append(d)
@@ -165,7 +165,7 @@ class ChainMap(collections.abc.MutableMapping,
         """
         # Equivalent to collections.ChainMap.new_child(…)
         cls = type(self)
-        if isinstance(map, cls):
+        if isinstance(map, (cls, collections.ChainMap)):
             return cls(*(m for m in map.maps if bool(m)), *self.maps)
         return cls(map or {}, *self.maps)
     

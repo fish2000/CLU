@@ -7,6 +7,36 @@ class TestPredicates(object):
     
     """ Run the tests for the clu.predicates module. """
     
+    def test_try_items_and_item_search(self):
+        from clu.predicates import try_items, item_search
+        from collections import defaultdict as DefaultDict
+        
+        dict_one = {
+            'yo'    : "dogg",
+            'i'     : "heard",
+            'you'   : "liked",
+            'dict'  : "chains" }
+        
+        dict_two = {
+            'so'    : "SOOOOO",
+            'yeah'  : "YEAH",
+            'what'  : "WHAAAAT",
+            'is'    : "ISSSSS",
+            'up'    : "UP?" }
+        
+        assert item_search('yo', dict_one, dict_two) == "dogg"
+        assert item_search('so', dict_one, dict_two) == "SOOOOO"
+        assert try_items('yo', dict_one, dict_two) == "dogg"
+        assert try_items('so', dict_one, dict_two) == "SOOOOO"
+        
+        dict_default = DefaultDict(lambda: "WTF")
+        
+        assert item_search('yo', dict_one, dict_default) == "dogg"
+        assert item_search('so', dict_one, dict_default) is None # “item_search(…)” default value
+        assert try_items('yo', dict_one, dict_default) == "dogg"
+        assert try_items('so', dict_one, dict_default) == "WTF" # DefaultDict factory value
+    
+    
     def test_ancestral_and_ancestral_union(self):
         from clu.predicates import ancestral_union
         from clu.fs.filesystem import Directory, TemporaryDirectory
@@ -168,9 +198,8 @@ class TestPredicates(object):
     
     @pytest.mark.TODO
     def test_isancestor_and_isorigin(self):
-        from clu.predicates import isancestor, isorigin
+        from clu.predicates import isancestor
         from clu.predicates import newtype
-        import typing as tx
         
         A = newtype('A')
         B = newtype('B', A)
@@ -192,6 +221,8 @@ class TestPredicates(object):
         
         # THIS DOES NOT QUITE WORK.
         # TODO: make it work
+        # from clu.predicates import isorigin
+        # import typing as tx
         # assert isorigin(tx.Dict,            original=dict)
         # assert isorigin(dict,                 original=tx.Dict)
         # assert isorigin(tx.Dict[str, str],  original=dict)

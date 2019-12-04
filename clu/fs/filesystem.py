@@ -1143,7 +1143,9 @@ class Directory(collections.abc.Hashable,
     
     def importables(self, subdir, suffix='py',
                                   source=None,
-                                  excludes=('-', '+', 'pytest', 'obsolete')):
+                                  excludes=('-', '+', 'pytest',
+                                                      'obsolete',
+                                                      'scripts')):
         """ List the importable file-based modules found within “subdir”,
             matching the “suffix” string, and not matching any of the
             “excludes” strings.

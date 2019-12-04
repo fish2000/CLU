@@ -68,7 +68,7 @@ from clu.importing import (Module, Finder, Loader,
                            ModuleBase, FinderBase, LoaderBase,
                            Package, ModuleSpec,
                            Registry as ClassModuleRegistry,
-                           ArgumentSink, SubModule)
+                           ArgumentSink)
 
 from clu.sanitizer import sanitize, sanitizers, utf8_encode, utf8_decode
 from clu.version import version_info
@@ -318,7 +318,7 @@ __all__ = ('Image',
            'ModuleBase', 'FinderBase', 'LoaderBase',
            'Package', 'ModuleSpec',
            'ClassModuleRegistry',
-           'ArgumentSink', 'SubModule',
+           'ArgumentSink',
            'negate', 'reverse',
            'ismetaclass', 'isclass', 'isclasstype',
            'metaclass', 'typeof',

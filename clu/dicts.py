@@ -106,11 +106,15 @@ class ChainMap(collections.abc.MutableMapping,
             
             The signature of “clu.dicts.ChainMap.__init__(…)” is functionally the
             same as as “clu.dicts.merge(…)” (q.v. definition sub.)
+            
+            Instances of either “clu.dicts.ChainMap” or its spiritual predecessor,
+            “collections.ChainMap”, will have their constituent dicts extracted
+            and individually appended to the new ChainMaps’ internal list.
         """
         extras = [dict(**overrides)]
         maps = [] # type: list
         for d in dicts:
-            if isinstance(d, type(self)):
+            if isinstance(d, (type(self), collections.ChainMap)):
                 for map in d.maps:
                     if bool(map):
                         if map not in maps:

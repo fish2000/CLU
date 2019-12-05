@@ -161,6 +161,7 @@ def get_ns(string):
     _, namespaces = unpack_ns(string)
     return concatenate(*namespaces)
 
+@export
 class FrozenKeyMapBase(collections.abc.Mapping,
                        collections.abc.Reversible):
     
@@ -199,6 +200,7 @@ class FrozenKeyMapBase(collections.abc.Mapping,
     def __bool__(self):
         return len(self) > 0
 
+@export
 class KeyMapBase(FrozenKeyMapBase):
     
     __slots__ = tuple()
@@ -211,6 +213,7 @@ class KeyMapBase(FrozenKeyMapBase):
     def __delitem__(self, nskey):
         ...
 
+@export
 class FrozenKeyMap(FrozenKeyMapBase):
     
     __slots__ = tuple()
@@ -264,6 +267,7 @@ class FrozenKeyMap(FrozenKeyMapBase):
             return self.submap(unprefixed=unprefixed).values()
         return KeyMapValuesView(self, *namespaces)
 
+@export
 class KeyMap(KeyMapBase,
              FrozenKeyMap,
              collections.abc.MutableMapping):
@@ -295,6 +299,7 @@ class KeyMap(KeyMapBase,
         for key, value in updates.items():
             self[key] = value
 
+@export
 class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
                                clu.abstract.Cloneable):
     
@@ -340,6 +345,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
     def clone(self, deep=False, memo=None):
         return type(self)(dictionary=copy.copy(self.dictionary))
 
+@export
 class Flat(FrozenFlat, KeyMap):
     
     def __setitem__(self, nskey, value):

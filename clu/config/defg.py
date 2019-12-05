@@ -163,9 +163,8 @@ def get_ns(string):
 
 @export
 class FrozenKeyMapBase(collections.abc.Mapping,
-                       collections.abc.Reversible):
-    
-    __slots__ = tuple()
+                       collections.abc.Reversible,
+                       metaclass=clu.abstract.Slotted):
     
     @abstract
     def namespaces(self):
@@ -201,9 +200,8 @@ class FrozenKeyMapBase(collections.abc.Mapping,
         return len(self) > 0
 
 @export
-class KeyMapBase(FrozenKeyMapBase):
-    
-    __slots__ = tuple()
+class KeyMapBase(FrozenKeyMapBase,
+                 collections.abc.MutableMapping):
     
     @abstract
     def __setitem__(self, nskey, value):
@@ -215,8 +213,6 @@ class KeyMapBase(FrozenKeyMapBase):
 
 @export
 class FrozenKeyMap(FrozenKeyMapBase):
-    
-    __slots__ = tuple()
     
     def get(self, key, *namespaces, default=NoDefault):
         """ Retrieve a (possibly namespaced) value for a given key.
@@ -280,11 +276,7 @@ class FrozenKeyMap(FrozenKeyMapBase):
                                        if NAMESPACE_SEP in key))
 
 @export
-class KeyMap(KeyMapBase,
-             FrozenKeyMap,
-             collections.abc.MutableMapping):
-    
-    __slots__ = tuple()
+class KeyMap(KeyMapBase, FrozenKeyMap):
     
     def set(self, key, value, *namespaces):
         """ Set a (possibly namespaced) value for a given key. """

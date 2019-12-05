@@ -266,6 +266,18 @@ class FrozenKeyMap(FrozenKeyMapBase):
         if unprefixed:
             return self.submap(unprefixed=unprefixed).values()
         return KeyMapValuesView(self, *namespaces)
+    
+    def namespaces(self):
+        """ Iterate over all of the namespaces defined in the mapping.
+            
+            This is the generic implementation. It depends on “__iter__(…)”
+            and uses “uniquify(…)” from ‘clu.predicates’, which some might
+            consider somewhat inefficient (q.v. “uniquify(…)” predicate
+            utility function supra.)
+        """
+        yield from sorted(uniquify(get_ns(key) \
+                                      for key in self \
+                                       if NAMESPACE_SEP in key))
 
 @export
 class KeyMap(KeyMapBase,
@@ -318,11 +330,6 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         out = cls()
         out.update(self.dictionary)
         return out
-    
-    def namespaces(self):
-        yield from sorted(uniquify(get_ns(key) \
-                                      for key in self \
-                                       if NAMESPACE_SEP in key))
     
     def __iter__(self):
         yield from self.dictionary
@@ -400,10 +407,10 @@ class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
             cls = Flat
         return cls(dictionary=dict(chain(plain_kvs, namespaced_kvs)))
     
-    def namespaces(self):
-        return tuple(sorted(frozenset(key \
-                                  for key, value in self.tree.items() \
-                                   if ismapping(value))))
+    # def namespaces(self):
+    #     return tuple(sorted(frozenset(key \
+    #                               for key, value in self.tree.items() \
+    #                                if ismapping(value))))
     
     def inner_repr(self):
         return repr(self.tree)

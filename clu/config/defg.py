@@ -14,6 +14,7 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, NoDefault
 from clu.predicates import isiterable, isexpandable, tuplize, uniquify
+from clu.typology import ismapping
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -35,7 +36,8 @@ def prefix_for(*namespaces):
     return out and f"{out}{NAMESPACE_SEP}" or out
 
 @export
-class NamespacedMappingView(collections.abc.Sized,
+class NamespacedMappingView(collections.abc.Sequence,
+                            collections.abc.Sized,
                             metaclass=clu.abstract.Slotted):
     
     __slots__ = ('mapping', 'namespaces', 'prefix')
@@ -51,6 +53,9 @@ class NamespacedMappingView(collections.abc.Sized,
         return len([key \
                 for key in self.mapping \
                  if key.startswith(self.prefix)])
+    
+    def __getitem__(self, idx):
+        return tuple(self)[idx]
     
     def __repr__(self):
         tn = typename(self)
@@ -269,9 +274,10 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
         return len(self) > 0
 
 @export
-class Flat(NamespacedMutableMapping,
-           clu.abstract.ReprWrapper,
-           clu.abstract.Cloneable):
+class Flat(NamespacedMutableMapping, clu.abstract.ReprWrapper,
+                                     clu.abstract.Cloneable):
+    
+    __slots__ = tuplize('dictionary')
     
     def __init__(self, dictionary=None, *args, **kwargs):
         try:
@@ -288,9 +294,9 @@ class Flat(NamespacedMutableMapping,
     #     return out
     
     def namespaces(self):
-        yield from uniquify(sorted([self.get_ns(key) \
-                                            for key in self \
-                                             if NAMESPACE_SEP in key]))
+        yield from sorted(uniquify(self.get_ns(key) \
+                                           for key in self \
+                                            if NAMESPACE_SEP in key))
     
     def __iter__(self):
         yield from self.dictionary
@@ -319,7 +325,115 @@ class Flat(NamespacedMutableMapping,
     def clone(self, deep=False, memo=None):
         return type(self)(dictionary=copy.copy(self.dictionary))
 
+def DefaultTree():
+    return collections.defaultdict(DefaultTree)
+
+def dictify(tree):
+    return { key : dictify(tree[key]) for key in tree }
+
+def mapwalk(mapping, pre=None):
+    """ Iteratively walk a nested mapping.
+        Based on https://stackoverflow.com/a/12507546/298171
+    """
+    pre = pre and pre[:] or []
+    if ismapping(mapping):
+        for key, value in mapping.items():
+            if ismapping(value):
+                for map in mapwalk(value, pre + [key]):
+                    yield map
+            elif isexpandable(value):
+                for item in value:
+                    for map in mapwalk(item, pre + [key]):
+                        yield map
+            else:
+                yield pre + [key, value]
+    else:
+        yield mapping
+
+@export
+class Nested(NamespacedMutableMapping, clu.abstract.ReprWrapper,
+                                       clu.abstract.Cloneable):
+    
+    def __init__(self, tree=None, *args, **kwargs):
+        try:
+            super(Nested, self).__init__(*args, **kwargs)
+        except TypeError:
+            super(Nested, self).__init__()
+        self.tree = tree or DefaultTree()
+    
+    def flatten(self, cls=None):
+        plain_kvs = ((key, value) for key, value in self.tree.items() if not ismapping(value))
+        namespaced_kvs = iterchain(((self.pack_ns(nskey, namespace), nsvalue) for nskey, nsvalue in value.items()) \
+                                                                              for namespace, value in self.tree.items() \
+                                                                               if ismapping(value))
+        if cls is None:
+            cls = Flat
+        return cls(dictionary=dict(chain(plain_kvs, namespaced_kvs)))
+    
+    def namespaces(self):
+        return tuple(sorted(frozenset(key \
+               for key, value in self.tree.items() \
+                if ismapping(value))))
+    
+    def inner_repr(self):
+        return repr(self.tree)
+    
+    def clone(self, deep=False, memo=None):
+        return type(self)(tree=copy.copy(self.tree))
+
 export(NAMESPACE_SEP, name='NAMESPACE_SEP')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
+
+def test():
+    
+    from clu.testing.utils import inline
+    from pprint import pprint
+    
+    nestedmaps = {'body': [{'declarations': [{'id': {'name': 'i', 'type': 'Identifier'},
+                                             'init': {'type': 'Literal', 'value': 2},
+                                             'type': 'VariableDeclarator'}],
+                           'kind': 'var',
+                           'type': 'VariableDeclaration'},
+                          {'declarations': [{'id': {'name': 'j', 'type': 'Identifier'},
+                                             'init': {'type': 'Literal', 'value': 4},
+                                             'type': 'VariableDeclarator'}],
+                           'kind': 'var',
+                           'type': 'VariableDeclaration'},
+                          {'declarations': [{'id': {'name': 'answer', 'type': 'Identifier'},
+                                             'init': {'left': {'name': 'i',
+                                                               'type': 'Identifier'},
+                                                      'operator': '*',
+                                                      'right': {'name': 'j',
+                                                                'type': 'Identifier'},
+                                                      'type': 'BinaryExpression'},
+                                             'type': 'VariableDeclarator'}],
+                           'kind': 'var',
+                           'type': 'VariableDeclaration'}],
+                 'type': 'Program'}
+    
+    @inline
+    def test_one():
+        dictderive = tuple(mapwalk(nestedmaps))
+        # return pformat(dictderive)
+        return dictderive
+    
+    @inline
+    def test_two():
+        for mappingpath in mapwalk(nestedmaps):
+            *namespaces, key, value = mappingpath
+            nskey = NamespacedMutableMapping.pack_ns(key, *namespaces)
+            print("NAMESPACES:", ", ".join(namespaces))
+            print("KEY:", key)
+            print("NSKEY:", nskey)
+            print("VALUE:", value)
+            print()
+    
+    pprint(nestedmaps)
+    
+    test_one()
+    test_two()
+
+if __name__ == '__main__':
+    test()

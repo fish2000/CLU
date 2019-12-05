@@ -161,10 +161,57 @@ def get_ns(string):
     _, namespaces = unpack_ns(string)
     return concatenate(*namespaces)
 
+class FrozenKeyMapBase(collections.abc.Mapping,
+                       collections.abc.Reversible):
+    
+    __slots__ = tuple()
+    
+    @abstract
+    def namespaces(self):
+        """ Iterate over all of the namespaces defined in the mapping. """
+        ...
+    
+    @abstract
+    def __iter__(self):
+        ...
+    
+    @abstract
+    def __reversed__(self):
+        ...
+    
+    @abstract
+    def __len__(self):
+        ...
+    
+    @abstract
+    def __contains__(self, nskey):
+        ...
+    
+    @abstract
+    def __getitem__(self, nskey):
+        ...
+    
+    def __missing__(self, nskey):
+        if DEBUG:
+            print(f"__missing__(…): {nskey}")
+        raise KeyError(nskey)
+    
+    def __bool__(self):
+        return len(self) > 0
 
-@export
-class NamespacedMutableMapping(collections.abc.MutableMapping,
-                               collections.abc.Reversible):
+class KeyMapBase(FrozenKeyMapBase):
+    
+    __slots__ = tuple()
+    
+    @abstract
+    def __setitem__(self, nskey, value):
+        ...
+    
+    @abstract
+    def __delitem__(self, nskey):
+        ...
+
+class FrozenKeyMap(FrozenKeyMapBase):
     
     __slots__ = tuple()
     
@@ -180,16 +227,6 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
         if nskey in self:
             return self[nskey]
         return default
-    
-    def set(self, key, value, *namespaces):
-        """ Set a (possibly namespaced) value for a given key. """
-        nskey = pack_ns(key, *namespaces)
-        self[nskey] = value
-    
-    def delete(self, key, *namespaces):
-        """ Delete a (possibly namespaced) value from the mapping. """
-        nskey = pack_ns(key, *namespaces)
-        del self[nskey]
     
     def submap(self, *namespaces, unprefixed=False):
         """ Return a standard dict containing only the namespaced items. """
@@ -226,6 +263,22 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
         if unprefixed:
             return self.submap(unprefixed=unprefixed).values()
         return KeyMapValuesView(self, *namespaces)
+
+class KeyMap(KeyMapBase,
+             FrozenKeyMap,
+             collections.abc.MutableMapping):
+    
+    __slots__ = tuple()
+    
+    def set(self, key, value, *namespaces):
+        """ Set a (possibly namespaced) value for a given key. """
+        nskey = pack_ns(key, *namespaces)
+        self[nskey] = value
+    
+    def delete(self, key, *namespaces):
+        """ Delete a (possibly namespaced) value from the mapping. """
+        nskey = pack_ns(key, *namespaces)
+        del self[nskey]
     
     def update(self, dictish=NoDefault, **updates):
         """ NamespacedMutableMapping.update([E, ]**F) -> None.
@@ -241,59 +294,17 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
                 self[key] = value
         for key, value in updates.items():
             self[key] = value
-    
-    @abstract
-    def namespaces(self):
-        """ Iterate over all of the namespaces defined in the mapping. """
-        ...
-    
-    @abstract
-    def __iter__(self):
-        ...
-    
-    @abstract
-    def __reversed__(self):
-        ...
-    
-    @abstract
-    def __len__(self):
-        ...
-    
-    @abstract
-    def __contains__(self, nskey):
-        ...
-    
-    @abstract
-    def __getitem__(self, nskey):
-        ...
-    
-    @abstract
-    def __setitem__(self, nskey, value):
-        ...
-    
-    @abstract
-    def __delitem__(self, nskey):
-        ...
-    
-    def __missing__(self, nskey):
-        if DEBUG:
-            print(f"__missing__(…): {nskey}")
-        raise KeyError(nskey)
-    
-    def __bool__(self):
-        return len(self) > 0
 
-@export
-class Flat(NamespacedMutableMapping, clu.abstract.ReprWrapper,
-                                     clu.abstract.Cloneable):
+class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
+                               clu.abstract.Cloneable):
     
     __slots__ = tuplize('dictionary')
     
     def __init__(self, dictionary=None, *args, **kwargs):
         try:
-            super(Flat, self).__init__(*args, **kwargs)
+            super(FrozenFlat, self).__init__(*args, **kwargs)
         except TypeError:
-            super(Flat, self).__init__()
+            super(FrozenFlat, self).__init__()
         self.dictionary = dict(dictionary or {})
     
     def nestify(self, cls=None):
@@ -323,17 +334,19 @@ class Flat(NamespacedMutableMapping, clu.abstract.ReprWrapper,
     def __getitem__(self, nskey):
         return self.dictionary[nskey]
     
-    def __setitem__(self, nskey, value):
-        self.dictionary[nskey] = value
-    
-    def __delitem__(self, nskey):
-        del self.dictionary[nskey]
-    
     def inner_repr(self):
         return repr(self.dictionary)
     
     def clone(self, deep=False, memo=None):
         return type(self)(dictionary=copy.copy(self.dictionary))
+
+class Flat(FrozenFlat, KeyMap):
+    
+    def __setitem__(self, nskey, value):
+        self.dictionary[nskey] = value
+    
+    def __delitem__(self, nskey):
+        del self.dictionary[nskey]
 
 def DefaultTree():
     return collections.defaultdict(DefaultTree)
@@ -362,8 +375,8 @@ def mapwalk(mapping, pre=None):
         yield mapping
 
 @export
-class Nested(NamespacedMutableMapping, clu.abstract.ReprWrapper,
-                                       clu.abstract.Cloneable):
+class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
+                           clu.abstract.Cloneable):
     
     def __init__(self, tree=None, *args, **kwargs):
         try:
@@ -427,7 +440,6 @@ def test():
     @inline
     def test_one():
         dictderive = tuple(mapwalk(nestedmaps))
-        # return pformat(dictderive)
         return dictderive
     
     @inline
@@ -441,10 +453,42 @@ def test():
             print("VALUE:", value)
             print()
     
+    @inline
+    def test_three():
+        flat_dict = {}
+        
+        for mappingpath in mapwalk(nestedmaps):
+            *namespaces, key, value = mappingpath
+            nskey = pack_ns(key, *namespaces)
+            flat_dict[nskey] = value
+        
+        print("FLAT DICTIONARY:")
+        pprint(flat_dict, indent=4)
+        print()
+        
+        flat = FrozenFlat(flat_dict)
+        
+        print("FLAT INSTANCE:")
+        pprint(flat)
+        print()
+        
+        print("FLAT KEYS:")
+        pprint(tuple(flat.keys()))
+        print()
+        
+        print("FLAT VALUES:")
+        pprint(tuple(flat.values()))
+        print()
+        
+        print("FLAT NAMESPACES:")
+        pprint(tuple(flat.namespaces()))
+        print()
+    
     pprint(nestedmaps)
     
     test_one()
     test_two()
+    test_three()
 
 if __name__ == '__main__':
     test()

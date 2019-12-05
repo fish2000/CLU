@@ -9,7 +9,7 @@ import contextlib
 import os
 import weakref
 
-from clu.constants.consts import DEBUG, NoDefault
+from clu.constants.consts import NoDefault
 from clu.constants.polyfills import Path
 from clu.abstract import Slotted
 from clu.config.abc import NAMESPACE_SEP, functional_and, functional_set
@@ -909,8 +909,6 @@ class NamespacedFieldManager(object):
 def __getattr__(key):
     """ Module __getattr__(…) instances the NamespacedFieldManager on-demand """
     if key == 'fields':
-        if DEBUG:
-            print("» Instancing NamespacedFieldManager…")
         return NamespacedFieldManager()
     raise AttributeError(f"module {__name__} has no attribute {key}")
 

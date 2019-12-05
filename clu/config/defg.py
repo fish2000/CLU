@@ -467,26 +467,63 @@ def test():
             nskey = pack_ns(key, *namespaces)
             flat_dict[nskey] = value
         
-        print("FLAT DICTIONARY:")
+        print(f"FLAT DICTIONARY (length={len(flat_dict)}):")
         pprint(flat_dict, indent=4)
         print()
         
         flat = FrozenFlat(flat_dict)
         
-        print("FLAT INSTANCE:")
+        print("FLAT FROZEN INSTANCE:")
         pprint(flat)
         print()
         
-        print("FLAT KEYS:")
-        pprint(tuple(flat.keys()))
+        keys = tuple(flat.keys())
+        print(f"FLAT KEYS (length={len(keys)}):")
+        pprint(keys)
         print()
         
-        print("FLAT VALUES:")
-        pprint(tuple(flat.values()))
+        values = tuple(flat.values())
+        print(f"FLAT VALUES (length={len(values)}):")
+        pprint(values)
         print()
         
-        print("FLAT NAMESPACES:")
-        pprint(tuple(flat.namespaces()))
+        namespaces = tuple(flat.namespaces())
+        print(f"FLAT NAMESPACES (length={len(namespaces)}):")
+        pprint(namespaces)
+        print()
+    
+    @inline
+    def test_three_point_five():
+        flat_dict = {}
+        
+        for mappingpath in mapwalk(nestedmaps):
+            *namespaces, key, value = mappingpath
+            nskey = pack_ns(key, *namespaces)
+            flat_dict[nskey] = value
+        
+        print(f"FLAT DICTIONARY (length={len(flat_dict)}):")
+        pprint(flat_dict, indent=4)
+        print()
+        
+        flat = Flat(flat_dict)
+        
+        print("FLAT MUTABLE INSTANCE:")
+        pprint(flat)
+        print()
+        
+        keys = tuple(flat.keys())
+        print(f"FLAT KEYS (length={len(keys)}):")
+        pprint(keys)
+        print()
+        
+        values = tuple(flat.values())
+        print(f"FLAT VALUES (length={len(values)}):")
+        pprint(values)
+        print()
+        
+        namespaces = tuple(flat.namespaces())
+        print(f"FLAT NAMESPACES (length={len(namespaces)}):")
+        pprint(namespaces)
         print()
     
     pprint(nestedmaps)
@@ -494,6 +531,7 @@ def test():
     test_one()
     test_two()
     test_three()
+    test_three_point_five()
 
 if __name__ == '__main__':
     test()

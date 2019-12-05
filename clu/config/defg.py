@@ -40,9 +40,9 @@ def strip_namespace(nskey):
     return nskey.rpartition(NAMESPACE_SEP)[-1]
 
 @export
-class NamespacedMappingView(collections.abc.Sequence,
-                            collections.abc.Sized,
-                            metaclass=clu.abstract.Slotted):
+class KeyMapViewBase(collections.abc.Sequence,
+                     collections.abc.Sized,
+                     metaclass=clu.abstract.Slotted):
     
     __slots__ = ('mapping', 'namespaces', 'prefix')
     
@@ -68,8 +68,8 @@ class NamespacedMappingView(collections.abc.Sequence,
         return f"{tn}{ns}({self.mapping!r})"
 
 @export
-class NamespacedKeysView(NamespacedMappingView,
-                         collections.abc.Set):
+class KeyMapKeysView(KeyMapViewBase,
+                     collections.abc.Set):
     
     @classmethod
     def _from_iterable(cls, iterable):
@@ -84,8 +84,8 @@ class NamespacedKeysView(NamespacedMappingView,
                  if nskey.startswith(self.prefix))
 
 @export
-class NamespacedItemsView(NamespacedMappingView,
-                          collections.abc.Set):
+class KeyMapItemsView(KeyMapViewBase,
+                      collections.abc.Set):
     
     @classmethod
     def _from_iterable(cls, iterable):
@@ -106,8 +106,8 @@ class NamespacedItemsView(NamespacedMappingView,
                   if nskey.startswith(self.prefix))
 
 @export
-class NamespacedValuesView(NamespacedMappingView,
-                           collections.abc.Collection):
+class KeyMapValuesView(KeyMapViewBase,
+                       collections.abc.Collection):
     
     def __contains__(self, value):
         submap = self.mapping.submap(*self.namespaces)
@@ -122,6 +122,45 @@ class NamespacedValuesView(NamespacedMappingView,
                              for nskey in self.mapping \
                               if nskey.startswith(self.prefix))
 
+# NAMESPACE-MANIPULATION FUNCTION API:
+
+def validate_ns(*namespaces):
+    """ Raise a ValueError if any of the given namespaces are invalid. """
+    for namespace in namespaces:
+        if not namespace.isidentifier():
+            raise ValueError(f"Invalid namespace: “{namespace}”")
+        if NAMESPACE_SEP in namespace:
+            raise ValueError(f"Namespace contains separator: “{namespace}”")
+
+def unpack_ns(string):
+    """ Unpack a namespaced key into a set of namespaces and a key name.
+        
+        To wit: if the namespaced key is “yo:dogg:i-heard”, calling “unpack_ns(…)”
+        on it will return the tuple ('i-heard', ('yo', 'dogg'));
+        
+        If the key is not namespaced (like e.g. “wat”) the “unpack_ns(…)”
+        call will return the tuple ('wat', tuple()).
+    """
+    *namespaces, value = string.split(NAMESPACE_SEP)
+    return value, tuple(namespaces)
+
+def pack_ns(value, *namespaces):
+    """ Pack a key and a set of (optional) namespaces into a namespaced key.
+        
+        To wit: if called as “pack_ns('i-heard, 'yo', 'dogg')” the return
+        value will be the string "yo:dogg:i-heard".
+        
+        If no namespaces are provided (like e.g. “pack_ns('wat')”)
+        the return value will be the string "wat".
+    """
+    itervalue = isexpandable(value) and value or tuplize(value)
+    return NAMESPACE_SEP.join(chain(namespaces, itervalue))
+
+def get_ns(string):
+    """ Get the namespace portion of a namespaced key as a packed string. """
+    _, namespaces = unpack_ns(string)
+    return concatenate(*namespaces)
+
 
 @export
 class NamespacedMutableMapping(collections.abc.MutableMapping,
@@ -129,54 +168,13 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
     
     __slots__ = tuple()
     
-    @staticmethod
-    def validate_ns(*namespaces):
-        """ Raise a ValueError if any of the given namespaces are invalid. """
-        for namespace in namespaces:
-            if not namespace.isidentifier():
-                raise ValueError(f"Invalid namespace: “{namespace}”")
-            if NAMESPACE_SEP in namespace:
-                raise ValueError(f"Namespace contains separator: “{namespace}”")
-    
-    @staticmethod
-    def unpack_ns(string):
-        """ Unpack a namespaced key into a set of namespaces and a key name.
-            
-            To wit: if the namespaced key is “yo:dogg:i-heard”, calling “unpack_ns(…)”
-            on it will return the tuple ('i-heard', ('yo', 'dogg'));
-            
-            If the key is not namespaced (like e.g. “wat”) the “unpack_ns(…)”
-            call will return the tuple ('wat', tuple()).
-        """
-        *namespaces, value = string.split(NAMESPACE_SEP)
-        return value, tuple(namespaces)
-    
-    @staticmethod
-    def pack_ns(value, *namespaces):
-        """ Pack a key and a set of (optional) namespaces into a namespaced key.
-            
-            To wit: if called as “pack_ns('i-heard, 'yo', 'dogg')” the return
-            value will be the string "yo:dogg:i-heard".
-            
-            If no namespaces are provided (like e.g. “pack_ns('wat')”)
-            the return value will be the string "wat".
-        """
-        itervalue = isexpandable(value) and value or tuplize(value)
-        return NAMESPACE_SEP.join(chain(namespaces, itervalue))
-    
-    @classmethod
-    def get_ns(cls, string):
-        """ Get the namespace portion of a namespaced key as a packed string. """
-        _, namespaces = cls.unpack_ns(string)
-        return concatenate(*namespaces)
-    
     def get(self, key, *namespaces, default=NoDefault):
         """ Retrieve a (possibly namespaced) value for a given key.
             
             An optional default value may be specified, to be returned
             if the key in question is not found in the mapping.
         """
-        nskey = self.pack_ns(key, *namespaces)
+        nskey = pack_ns(key, *namespaces)
         if default is NoDefault:
             return self[nskey]
         if nskey in self:
@@ -185,12 +183,12 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
     
     def set(self, key, value, *namespaces):
         """ Set a (possibly namespaced) value for a given key. """
-        nskey = self.pack_ns(key, *namespaces)
+        nskey = pack_ns(key, *namespaces)
         self[nskey] = value
     
     def delete(self, key, *namespaces):
         """ Delete a (possibly namespaced) value from the mapping. """
-        nskey = self.pack_ns(key, *namespaces)
+        nskey = pack_ns(key, *namespaces)
         del self[nskey]
     
     def submap(self, *namespaces, unprefixed=False):
@@ -209,7 +207,7 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
         """
         if unprefixed:
             return self.submap(unprefixed=unprefixed).keys()
-        return NamespacedKeysView(self, *namespaces)
+        return KeyMapKeysView(self, *namespaces)
     
     def items(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all key/value pairs in the
@@ -218,7 +216,7 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
         """
         if unprefixed:
             return self.submap(unprefixed=unprefixed).items()
-        return NamespacedItemsView(self, *namespaces)
+        return KeyMapItemsView(self, *namespaces)
     
     def values(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all values in the mapping,
@@ -227,7 +225,7 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
         """
         if unprefixed:
             return self.submap(unprefixed=unprefixed).values()
-        return NamespacedValuesView(self, *namespaces)
+        return KeyMapValuesView(self, *namespaces)
     
     def update(self, dictish=NoDefault, **updates):
         """ NamespacedMutableMapping.update([E, ]**F) -> None.
@@ -306,9 +304,9 @@ class Flat(NamespacedMutableMapping, clu.abstract.ReprWrapper,
         return out
     
     def namespaces(self):
-        yield from sorted(uniquify(self.get_ns(key) \
-                                           for key in self \
-                                            if NAMESPACE_SEP in key))
+        yield from sorted(uniquify(get_ns(key) \
+                                      for key in self \
+                                       if NAMESPACE_SEP in key))
     
     def __iter__(self):
         yield from self.dictionary
@@ -376,17 +374,17 @@ class Nested(NamespacedMutableMapping, clu.abstract.ReprWrapper,
     
     def flatten(self, cls=None):
         plain_kvs = ((key, value) for key, value in self.tree.items() if not ismapping(value))
-        namespaced_kvs = iterchain(((self.pack_ns(nskey, namespace), nsvalue) for nskey, nsvalue in value.items()) \
-                                                                              for namespace, value in self.tree.items() \
-                                                                               if ismapping(value))
+        namespaced_kvs = iterchain(((pack_ns(nskey, namespace), nsvalue) for nskey, nsvalue in value.items()) \
+                                                                         for namespace, value in self.tree.items() \
+                                                                          if ismapping(value))
         if cls is None:
             cls = Flat
         return cls(dictionary=dict(chain(plain_kvs, namespaced_kvs)))
     
     def namespaces(self):
         return tuple(sorted(frozenset(key \
-               for key, value in self.tree.items() \
-                if ismapping(value))))
+                                  for key, value in self.tree.items() \
+                                   if ismapping(value))))
     
     def inner_repr(self):
         return repr(self.tree)
@@ -436,7 +434,7 @@ def test():
     def test_two():
         for mappingpath in mapwalk(nestedmaps):
             *namespaces, key, value = mappingpath
-            nskey = NamespacedMutableMapping.pack_ns(key, *namespaces)
+            nskey = pack_ns(key, *namespaces)
             print("NAMESPACES:", ", ".join(namespaces))
             print("KEY:", key)
             print("NSKEY:", nskey)

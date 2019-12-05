@@ -408,10 +408,16 @@ class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
             cls = Flat
         return cls(dictionary=dict(chain(plain_kvs, namespaced_kvs)))
     
-    # def namespaces(self):
-    #     return tuple(sorted(frozenset(key \
-    #                               for key, value in self.tree.items() \
-    #                                if ismapping(value))))
+    def namespaces(self):
+        """ Iterate over all of the namespaces defined in the mapping. """
+        # N.B. Dunno if this is faster or more worth-it than
+        # the implementation upstream in  FrozenKeyMap…
+        out = []
+        for mappingpath in mapwalk(self.tree):
+            namespace = concatenate(*mappingpath[:-2])
+            if namespace:
+                out.append(namespace)
+        yield from sorted(uniquify(out))
     
     def __iter__(self):
         for mappingpath in mapwalk(self.tree):

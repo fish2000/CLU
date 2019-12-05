@@ -35,6 +35,10 @@ def prefix_for(*namespaces):
     out = concatenate(*namespaces)
     return out and f"{out}{NAMESPACE_SEP}" or out
 
+def strip_namespace(nskey):
+    """ Strip all namespace-related prefixing from a namespaced key """
+    return nskey.rpartition(NAMESPACE_SEP)[-1]
+
 @export
 class NamespacedMappingView(collections.abc.Sequence,
                             collections.abc.Sized,
@@ -189,32 +193,43 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
         nskey = self.pack_ns(key, *namespaces)
         del self[nskey]
     
-    def submap(self, *namespaces):
+    def submap(self, *namespaces, unprefixed=False):
         """ Return a standard dict containing only the namespaced items. """
+        if unprefixed:
+            return { nskey : self[nskey] for nskey in self if NAMESPACE_SEP not in nskey }
         prefix = prefix_for(*namespaces)
         if not prefix:
             return dict(self)
         return { nskey : self[nskey] for nskey in self if nskey.startswith(prefix) }
     
-    def keys(self, *namespaces):
+    def keys(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all keys in the mapping,
             or over only those keys in the mapping matching the specified
             namespace values.
         """
+        if unprefixed:
+            # return collections.abc.KeysView(self.submap(unprefixed=unprefixed))
+            return self.submap(unprefixed=unprefixed).keys()
         return NamespacedKeysView(self, *namespaces)
     
-    def items(self, *namespaces):
+    def items(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all key/value pairs in the
             mapping, or over only those key/value pairs in the mapping whose
             keys match the specified namespace values.
         """
+        if unprefixed:
+            # return collections.abc.ItemsView(self.submap(unprefixed=unprefixed))
+            return self.submap(unprefixed=unprefixed).items()
         return NamespacedItemsView(self, *namespaces)
     
-    def values(self, *namespaces):
+    def values(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all values in the mapping,
             or over only those values in the mapping whose keys match the
             specified namespace values.
         """
+        if unprefixed:
+            # return collections.abc.ValuesView(self.submap(unprefixed=unprefixed))
+            return self.submap(unprefixed=unprefixed).values()
         return NamespacedValuesView(self, *namespaces)
     
     def update(self, dictish=NoDefault, **updates):
@@ -331,6 +346,7 @@ def DefaultTree():
 def dictify(tree):
     return { key : dictify(tree[key]) for key in tree }
 
+@export
 def mapwalk(mapping, pre=None):
     """ Iteratively walk a nested mapping.
         Based on https://stackoverflow.com/a/12507546/298171

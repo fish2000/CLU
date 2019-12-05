@@ -173,6 +173,15 @@ class FrozenKeyMapBase(collections.abc.Mapping,
                        collections.abc.Reversible,
                        metaclass=clu.abstract.Slotted):
     
+    """ Abstract sub-base interface class for immutable namespaced mappings.
+        This is the root of the namespaced-mapping (née “KeyMap”) class tower.
+        
+        Don’t subclass this, it’s just a bunch of abstract dunder methods and
+        other stuff to pass the buck properly from the ‘collections.abc’ bases
+        on up to our own API. You, for your purposes, should employ “FrozenKeyMap”
+        (without the “Base”) – q.v. the class definition below, sub.
+    """
+    
     @abstract
     def namespaces(self):
         """ Iterate over all of the namespaces defined in the mapping. """
@@ -210,6 +219,12 @@ class FrozenKeyMapBase(collections.abc.Mapping,
 class KeyMapBase(FrozenKeyMapBase,
                  collections.abc.MutableMapping):
     
+    """ Abstract sub-base interface class for mutable namespaced mappings.
+        
+        Don’t subclass this anemic vestigial thing. You want “KeyMap” (sans
+        the “Base”) as your ancestor; see below.
+    """
+    
     @abstract
     def __setitem__(self, nskey, value):
         ...
@@ -220,6 +235,19 @@ class KeyMapBase(FrozenKeyMapBase,
 
 @export
 class FrozenKeyMap(FrozenKeyMapBase):
+    
+    """ The abstract base class for frozen – immutable once created – namespaced mappings,
+        also known as “FrozenKeyMaps”.
+        
+        Subclasses must implement a bunch of typical Python dunder methods like e.g.
+        ‘__iter__’, ‘__len__’ &c, plus a “namespaces()” method which takes no arguments
+        and then iterates in order over all the THATS RIGHT YOU GUESSED IT namespaces
+        contained in the KeyMap’s keys.
+        
+        Optionally one may override ‘__missing__’, which can be kind of interesting,
+        and ‘__bool__’ which generally is less so. Q.v. the “FrozenKeyMapBase” source
+        supra. for further deets, my doggie
+    """
     
     def get(self, key, *namespaces, default=NoDefault):
         """ Retrieve a (possibly namespaced) value for a given key.
@@ -285,6 +313,23 @@ class FrozenKeyMap(FrozenKeyMapBase):
 @export
 class KeyMap(KeyMapBase, FrozenKeyMap):
     
+    """ The abstract base class for mutable namespaced mappings (née “KeyMaps”).
+        
+        Subclasses must implement all the requisite Python dunder methods required by
+        the ancestor “FrozenKeyMap”, like e.g. ‘__iter__’, ‘__len__’ &c, plus also a
+        “namespaces()” method which takes no arguments and iterates in order over all
+        namespaces contained in the KeyMap’s keys.
+        
+        OK AND FURTHERMORE for mutability, you also need to do your own ‘__setattr__’
+        and ‘__delattr__’ (which maybe we’ll make that last one optional as delete
+        methods in Python are totally gauche and a sign of a sort of naïve vulgar
+        un-Pythonicism, I feel like).
+        
+        Optionally one may override ‘__missing__’, which can be kind of interesting,
+        and ‘__bool__’ which generally is less so. Q.v. the “FrozenKeyMapBase” source
+        supra. for further deets, my doggie
+    """
+    
     def set(self, key, value, *namespaces):
         """ Set a (possibly namespaced) value for a given key. """
         nskey = pack_ns(key, *namespaces)
@@ -314,6 +359,8 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
 class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
                                clu.abstract.Cloneable):
     
+    """ A concrete immutable – or frozen – KeyMap class with a flat internal topology. """
+    
     __slots__ = tuplize('dictionary')
     
     def __init__(self, dictionary=None, *args, **kwargs):
@@ -324,6 +371,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         self.dictionary = dict(dictionary or {})
     
     def nestify(self, cls=None):
+        """ Articulate a flattened KeyMap instance into one that is nested. """
         if cls is None:
             cls = Nested
         out = cls()
@@ -353,6 +401,8 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
 
 @export
 class Flat(FrozenFlat, KeyMap):
+    
+    """ A concrete mutable KeyMap class with a flat internal topology. """
     
     def __setitem__(self, nskey, value):
         self.dictionary[nskey] = value
@@ -390,6 +440,10 @@ def mapwalk(mapping, pre=None):
 class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
                            clu.abstract.Cloneable):
     
+    """ A concrete immutable – or frozen – KeyMap class with an articulated –
+        or, if you will, a nested – internal topology.
+    """
+    
     __slots__ = tuplize('tree')
     
     def __init__(self, tree=None, *args, **kwargs):
@@ -399,14 +453,17 @@ class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
             super(Nested, self).__init__()
         self.tree = tree or DefaultTree()
     
+    # def flatten(self, cls=None):
+    #     plain_kvs = ((key, value) for key, value in self.tree.items() if not ismapping(value))
+    #     namespaced_kvs = iterchain(((pack_ns(nskey, namespace), nsvalue) for nskey, nsvalue in value.items()) \
+    #                                                                      for namespace, value in self.tree.items() \
+    #                                                                       if ismapping(value))
+    #     if cls is None:
+    #         cls = Flat
+    #     return cls(dictionary=dict(chain(plain_kvs, namespaced_kvs)))
+    
     def flatten(self, cls=None):
-        plain_kvs = ((key, value) for key, value in self.tree.items() if not ismapping(value))
-        namespaced_kvs = iterchain(((pack_ns(nskey, namespace), nsvalue) for nskey, nsvalue in value.items()) \
-                                                                         for namespace, value in self.tree.items() \
-                                                                          if ismapping(value))
-        if cls is None:
-            cls = Flat
-        return cls(dictionary=dict(chain(plain_kvs, namespaced_kvs)))
+        pass
     
     def namespaces(self):
         """ Iterate over all of the namespaces defined in the mapping. """

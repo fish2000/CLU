@@ -8,7 +8,7 @@ import importlib.machinery
 import inspect
 import pickle
 
-from clu.constants.consts import λ, φ, BASEPATH, DEBUG, QUALIFIER, NoDefault
+from clu.constants.consts import λ, φ, BASEPATH, QUALIFIER, NoDefault
 from clu.exporting import (path_to_dotpath, determine_name,
                                             search_for_name,
                                             search_for_module)
@@ -207,8 +207,6 @@ def qualified_import(qualified):
         head, tail = dotpath_split(qualified)
         module = importlib.import_module(tail)
         imported = getattr(module, head)
-    if DEBUG:
-        print(f"Qualified Import: {qualified}")
     return imported
 
 @export
@@ -225,8 +223,6 @@ def qualified_name(thing):
     """
     module_name, thing_name = qualified_name_tuple(thing)
     qualname = dotpath_join(module_name, thing_name)
-    if DEBUG:
-        print(f"Qualified Name: {qualname}")
     return qualname
 
 @export

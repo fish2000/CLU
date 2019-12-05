@@ -410,8 +410,8 @@ class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     def namespaces(self):
         """ Iterate over all of the namespaces defined in the mapping. """
-        # N.B. Dunno if this is faster or more worth-it than
-        # the implementation upstream in  FrozenKeyMap…
+        # N.B. Dunno if this is faster or more worth-it than what one finds
+        # upstream in the implementation furnished by FrozenKeyMap…
         out = []
         for mappingpath in mapwalk(self.tree):
             namespace = concatenate(*mappingpath[:-2])

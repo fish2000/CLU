@@ -923,9 +923,8 @@ export(maybesequence,   name='maybesequence',   doc="maybesequence(thing) → �
 export(maybeset,        name='maybeset',        doc="maybeset(thing) → “maybe” boolean predicate, returning True for either None or an instance of “collections.abc.Set”")
 export(maybefieldbase,  name='maybefieldbase',  doc="maybefieldbase(thing) → “maybe” boolean predicate, returning True for either None or an instance of “clu.config.fieldtypes.FieldBase”")
 
-# Assign the modules’ `__all__` using the exporter:
-__all__ = exporter.all_tuple('fields')
-__dir__ = lambda: list(__all__)
+# Assign the modules’ `__all__` and `__dir__` using the exporter:
+__all__, __dir__ = exporter.all_and_dir('fields')
 
 def test():
     from pprint import pprint

@@ -208,7 +208,6 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
             namespace values.
         """
         if unprefixed:
-            # return collections.abc.KeysView(self.submap(unprefixed=unprefixed))
             return self.submap(unprefixed=unprefixed).keys()
         return NamespacedKeysView(self, *namespaces)
     
@@ -218,7 +217,6 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
             keys match the specified namespace values.
         """
         if unprefixed:
-            # return collections.abc.ItemsView(self.submap(unprefixed=unprefixed))
             return self.submap(unprefixed=unprefixed).items()
         return NamespacedItemsView(self, *namespaces)
     
@@ -228,7 +226,6 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
             specified namespace values.
         """
         if unprefixed:
-            # return collections.abc.ValuesView(self.submap(unprefixed=unprefixed))
             return self.submap(unprefixed=unprefixed).values()
         return NamespacedValuesView(self, *namespaces)
     

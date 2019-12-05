@@ -161,6 +161,13 @@ def get_ns(string):
     _, namespaces = unpack_ns(string)
     return concatenate(*namespaces)
 
+def compare_ns(iterone, itertwo):
+    """ Boolean predicate to compare a pair of namespace iterables, value-by-value """
+    for one, two in zip(iterone, itertwo):
+        if one != two and one is not two:
+            return False
+    return True
+
 @export
 class FrozenKeyMapBase(collections.abc.Mapping,
                        collections.abc.Reversible,
@@ -383,6 +390,8 @@ def mapwalk(mapping, pre=None):
 class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
                            clu.abstract.Cloneable):
     
+    __slots__ = tuplize('tree')
+    
     def __init__(self, tree=None, *args, **kwargs):
         try:
             super(Nested, self).__init__(*args, **kwargs)
@@ -403,6 +412,35 @@ class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
     #     return tuple(sorted(frozenset(key \
     #                               for key, value in self.tree.items() \
     #                                if ismapping(value))))
+    
+    def __iter__(self):
+        for mappingpath in mapwalk(self.tree):
+            *namespaces, key = mappingpath[:-1]
+            yield pack_ns(key, *namespaces)
+    
+    def __reversed__(self):
+        yield from reversed(tuple(self))
+    
+    def __len__(self):
+        return len(tuple(mapwalk(self.tree)))
+    
+    def __contains__(self, nskey):
+        key, namespaces = unpack_ns(nskey)
+        for mappingpath in mapwalk(self.tree):
+            *ns, k = mappingpath[:-1]
+            if (k == key or k is key):
+                if compare_ns(ns, namespaces):
+                    return True
+        return False
+    
+    def __getitem__(self, nskey):
+        key, namespaces = unpack_ns(nskey)
+        for mappingpath in mapwalk(self.tree):
+            *ns, k, value = mappingpath
+            if (k == key or k is key):
+                if compare_ns(ns, namespaces):
+                    return value
+        raise KeyError(nskey)
     
     def inner_repr(self):
         return repr(self.tree)
@@ -473,7 +511,7 @@ def test():
         
         flat = FrozenFlat(flat_dict)
         
-        print("FLAT FROZEN INSTANCE:")
+        print(f"FLAT FROZEN INSTANCE (length={len(flat)}):")
         pprint(flat)
         print()
         
@@ -507,7 +545,7 @@ def test():
         
         flat = Flat(flat_dict)
         
-        print("FLAT MUTABLE INSTANCE:")
+        print(f"FLAT MUTABLE INSTANCE (length={len(flat)}):")
         pprint(flat)
         print()
         
@@ -528,7 +566,40 @@ def test():
     
     @inline
     def test_four():
-        nested = Nested()
+        nested = Nested(tree=nestedmaps)
+        
+        for mappingpath in mapwalk(nested.tree):
+            *namespaces, key, value = mappingpath
+            nskey = pack_ns(key, *namespaces)
+            print("NAMESPACES:", ", ".join(namespaces))
+            print("KEY:", key)
+            print("NSKEY:", nskey)
+            print("VALUE:", value)
+            print()
+    
+    @inline
+    def test_four_point_seven_five():
+        nested = Nested(tree=nestedmaps)
+        
+        print(f"NESTED FROZEN INSTANCE (length={len(nested)}):")
+        pprint(nested)
+        print()
+        
+        keys = tuple(nested.keys())
+        print(f"NESTED KEYS (length={len(keys)}):")
+        pprint(keys)
+        print()
+        
+        values = tuple(nested.values())
+        print(f"NESTED VALUES (length={len(values)}):")
+        pprint(values)
+        print()
+        
+        namespaces = tuple(nested.namespaces())
+        print(f"NESTED NAMESPACES (length={len(namespaces)}):")
+        pprint(namespaces)
+        print()
+    
     
     pprint(nestedmaps)
     
@@ -537,6 +608,7 @@ def test():
     test_three()
     test_three_point_five()
     test_four()
+    test_four_point_seven_five()
 
 if __name__ == '__main__':
     test()

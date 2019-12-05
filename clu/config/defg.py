@@ -526,12 +526,17 @@ def test():
         pprint(namespaces)
         print()
     
+    @inline
+    def test_four():
+        nested = Nested()
+    
     pprint(nestedmaps)
     
     test_one()
     test_two()
     test_three()
     test_three_point_five()
+    test_four()
 
 if __name__ == '__main__':
     test()

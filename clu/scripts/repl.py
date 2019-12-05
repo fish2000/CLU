@@ -1,4 +1,29 @@
 # -*- encoding: utf-8 -*-
+
+"""
+repl.py – THE RUBRICK:
+
+1) Import all modules with an exporter, excluding those from a list
+    … e.g. equivalent to “import clu.exporting”, etc.
+
+2) Import modules without an exporter, including those from a list
+    … e.g. “clu.constants.consts” and friends
+
+3) Export everything from modules from (1) and (2)
+   into the global namespace
+
+4) Import additional modules (whether CLU, stdlib, or third-party)
+   and just leave the modules themselves hanging out in
+   the global namespace
+
+5) Deal with any nitpicks – e.g. “from pprint import pprint”,
+   “from clu.testing.utils import pout” and what have you
+
+6) PUSH IT REAL GOOD
+
+7) LOOK ON MY WORK, YE MIGHTY, AND MAYBE BE LIKE “I COULD USE THAT”
+
+"""
 from __future__ import print_function
 
 from clu.constants import consts

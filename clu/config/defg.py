@@ -286,12 +286,12 @@ class Flat(NamespacedMutableMapping, clu.abstract.ReprWrapper,
             super(Flat, self).__init__()
         self.dictionary = dict(dictionary or {})
     
-    # def nestify(self, cls=None):
-    #     if cls is None:
-    #         cls = Nested
-    #     out = cls()
-    #     out.update(self.dictionary)
-    #     return out
+    def nestify(self, cls=None):
+        if cls is None:
+            cls = Nested
+        out = cls()
+        out.update(self.dictionary)
+        return out
     
     def namespaces(self):
         yield from sorted(uniquify(self.get_ns(key) \

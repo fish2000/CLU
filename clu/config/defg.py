@@ -567,9 +567,8 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
         # upstream in the implementation furnished by FrozenKeyMap…
         out = []
         for *namespaces, key, value in self.mapwalk():
-            namespace = concatenate(*namespaces)
-            if namespace:
-                out.append(namespace)
+            if namespaces:
+                out.append(concatenate(*namespaces))
         yield from sorted(uniquify(out))
     
     def __iter__(self):

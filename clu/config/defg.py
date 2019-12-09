@@ -548,12 +548,16 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
             tree = getattr(tree.nestify(), 'tree')
         self.tree = tree or DefaultTree()
     
+    def mapwalk(self):
+        """ Iteratively walk the nested KeyMap’s tree of dicts. """
+        yield from mapwalk(self.tree)
+    
     def flatten(self, cls=None):
         """ Dearticulate an articulated KeyMap instance into one that is flat. """
         if cls is None:
             cls = Flat
         out = cls()
-        for mappingpath in mapwalk(self.tree):
+        for mappingpath in self.mapwalk():
             *namespaces, key, value = mappingpath
             out[pack_ns(key, *namespaces)] = value
         return out
@@ -563,23 +567,23 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
         # N.B. Dunno if this is faster or more worth-it than what one finds
         # upstream in the implementation furnished by FrozenKeyMap…
         out = []
-        for mappingpath in mapwalk(self.tree):
+        for mappingpath in self.mapwalk():
             namespace = concatenate(*mappingpath[:-2])
             if namespace:
                 out.append(namespace)
         yield from sorted(uniquify(out))
     
     def __iter__(self):
-        for mappingpath in mapwalk(self.tree):
+        for mappingpath in self.mapwalk():
             *namespaces, key = mappingpath[:-1]
             yield pack_ns(key, *namespaces)
     
     def __len__(self):
-        return len(tuple(mapwalk(self.tree)))
+        return len(tuple(self.mapwalk()))
     
     def __contains__(self, nskey):
         key, namespaces = unpack_ns(nskey)
-        for mappingpath in mapwalk(self.tree):
+        for mappingpath in self.mapwalk():
             *ns, k = mappingpath[:-1]
             if (k == key or k is key):
                 if compare_ns(ns, namespaces):
@@ -588,7 +592,7 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     def __getitem__(self, nskey):
         key, namespaces = unpack_ns(nskey)
-        for mappingpath in mapwalk(self.tree):
+        for mappingpath in self.mapwalk():
             *ns, k, value = mappingpath
             if (k == key or k is key):
                 if compare_ns(ns, namespaces):

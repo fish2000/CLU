@@ -557,8 +557,7 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
         if cls is None:
             cls = Flat
         out = cls()
-        for mappingpath in self.mapwalk():
-            *namespaces, key, value = mappingpath
+        for *namespaces, key, value in self.mapwalk():
             out[pack_ns(key, *namespaces)] = value
         return out
     
@@ -567,15 +566,14 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
         # N.B. Dunno if this is faster or more worth-it than what one finds
         # upstream in the implementation furnished by FrozenKeyMap…
         out = []
-        for mappingpath in self.mapwalk():
-            namespace = concatenate(*mappingpath[:-2])
+        for *namespaces, key, value in self.mapwalk():
+            namespace = concatenate(*namespaces)
             if namespace:
                 out.append(namespace)
         yield from sorted(uniquify(out))
     
     def __iter__(self):
-        for mappingpath in self.mapwalk():
-            *namespaces, key = mappingpath[:-1]
+        for *namespaces, key, value in self.mapwalk():
             yield pack_ns(key, *namespaces)
     
     def __len__(self):
@@ -583,8 +581,7 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     def __contains__(self, nskey):
         key, namespaces = unpack_ns(nskey)
-        for mappingpath in self.mapwalk():
-            *ns, k = mappingpath[:-1]
+        for *ns, k, value in self.mapwalk():
             if (k == key or k is key):
                 if compare_ns(ns, namespaces):
                     return True
@@ -592,8 +589,7 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     def __getitem__(self, nskey):
         key, namespaces = unpack_ns(nskey)
-        for mappingpath in self.mapwalk():
-            *ns, k, value = mappingpath
+        for *ns, k, value in self.mapwalk():
             if (k == key or k is key):
                 if compare_ns(ns, namespaces):
                     return value

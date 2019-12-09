@@ -404,9 +404,9 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
             for key in self.submap(unprefixed=unprefixed).keys():
                 del self[key]
             return None
-        prefix = prefix_for(*namespaces)
-        if not prefix:
+        if not namespaces:
             return super().clear()
+        prefix = prefix_for(*namespaces)
         for nskey in self:
             if nskey.startswith(prefix):
                 del self[nskey]

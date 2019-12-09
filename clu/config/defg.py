@@ -516,9 +516,9 @@ def mapwalk(mapping, pre=None):
         for key, value in mapping.items():
             if ismapping(value):
                 yield from mapwalk(value, pre + [key])
-            elif isexpandable(value):
-                for idx, item in enumerate(value):
-                    yield from mapwalk(item, pre + [key, str(idx)])
+            # elif isexpandable(value):
+            #     for idx, item in enumerate(value):
+            #         yield from mapwalk(item, pre + [key, str(idx)])
             else:
                 yield pre + [key, value]
     else:
@@ -558,7 +558,7 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
             cls = Flat
         out = cls()
         for *namespaces, key, value in self.mapwalk():
-            out[pack_ns(key, *namespaces)] = value
+            out.set(key, value, *namespaces)
         return out
     
     def namespaces(self):

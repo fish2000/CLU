@@ -378,6 +378,34 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         nskey = pack_ns(key, *namespaces)
         del self[nskey]
     
+    def pop(self, key, *namespaces, default=NoDefault):
+        """ Pop a (possibly namespaced) value off the mapping
+            and eitehr return it or a default if it doesn’t
+            exist – raising a KeyError if no default is given.
+        """
+        value = self.get(key, *namespaces, default=default)
+        try:
+            self.delete(key, *namespaces)
+        except KeyError:
+            pass
+        return value
+    
+    def clear(self, *namespaces, unprefixed=False):
+        """ Remove all items from the mapping – either in totality,
+            or only those matching a specific namespace.
+        """
+        if unprefixed:
+            for key in self.submap(unprefixed=unprefixed).keys():
+                del self[key]
+            return None
+        prefix = prefix_for(*namespaces)
+        if not prefix:
+            return super().clear()
+        for nskey in self:
+            if nskey.startswith(prefix):
+                del self[nskey]
+        return None
+    
     def update(self, dictish=NoDefault, **updates):
         """ NamespacedMutableMapping.update([E, ]**F) -> None.
             
@@ -402,6 +430,12 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
     __slots__ = tuplize('dictionary')
     
     def __init__(self, dictionary=None, *args, **kwargs):
+        """ Initialize a flat KeyMap instance from a target dictionary.
+            
+            The dictionary can contain normal key-value items as long as the
+            keys are strings; namespaces can be specified per-key as per the
+            output of ‘pack_ns(…)’ (q.v. function definition supra.)
+        """
         try:
             super(FrozenFlat, self).__init__(*args, **kwargs)
         except TypeError:
@@ -494,6 +528,9 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
     __slots__ = tuplize('tree')
     
     def __init__(self, tree=None, *args, **kwargs):
+        """ Initialize an articulated (née “nested”) KeyMap instance from a
+            target nested dictionary (or a “tree” of dicts).
+        """
         try:
             super(FrozenNested, self).__init__(*args, **kwargs)
         except TypeError:

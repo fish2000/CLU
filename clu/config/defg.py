@@ -391,10 +391,9 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
             exist – raising a KeyError if no default is given.
         """
         value = self.get(key, *namespaces, default=default)
-        try:
-            self.delete(key, *namespaces)
-        except KeyError:
-            pass
+        if value == default or value is default:
+            return value
+        self.delete(key, *namespaces)
         return value
     
     def clear(self, *namespaces, unprefixed=False):

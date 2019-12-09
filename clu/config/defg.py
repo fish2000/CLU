@@ -746,6 +746,13 @@ def test():
         print(f"FLAT NAMESPACES (length={len(namespaces)}):")
         pprint(namespaces)
         print()
+        
+        frozen_flat = flat.freeze()
+        assert frozen_flat == flat
+        
+        nested = flat.nestify()
+        flattened = nested.flatten()
+        assert flattened == flat
     
     @inline
     def test_four():
@@ -796,6 +803,36 @@ def test():
         pprint(namespaces)
         print()
     
+    @inline
+    def test_five():
+        nested = Nested(tree=nestedmaps)
+        
+        print(f"NESTED MUTABLE INSTANCE (length={len(nested)}):")
+        pprint(nested)
+        print()
+        
+        keys = tuple(nested.keys())
+        print(f"NESTED KEYS (length={len(keys)}):")
+        pprint(keys)
+        print()
+        
+        values = tuple(nested.values())
+        print(f"NESTED VALUES (length={len(values)}):")
+        pprint(values)
+        print()
+        
+        namespaces = tuple(nested.namespaces())
+        print(f"NESTED NAMESPACES (length={len(namespaces)}):")
+        pprint(namespaces)
+        print()
+        
+        frozen_nested = nested.freeze()
+        assert frozen_nested == nested
+        
+        flat = nested.flatten()
+        renested = flat.nestify()
+        assert renested == nested
+    
     
     pprint(nestedmaps)
     
@@ -806,6 +843,7 @@ def test():
     # test_four()
     # test_four_point_five()
     test_four_point_seven_five()
+    test_five()
 
 if __name__ == '__main__':
     test()

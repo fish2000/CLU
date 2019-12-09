@@ -511,14 +511,14 @@ def mapwalk(mapping, pre=None):
     """ Iteratively walk a nested mapping.
         Based on https://stackoverflow.com/a/12507546/298171
     """
+    # elif isexpandable(value):
+    #     for idx, item in enumerate(value):
+    #         yield from mapwalk(item, pre + [key, str(idx)])
     pre = pre and pre[:] or []
     if ismapping(mapping):
         for key, value in mapping.items():
             if ismapping(value):
                 yield from mapwalk(value, pre + [key])
-            # elif isexpandable(value):
-            #     for idx, item in enumerate(value):
-            #         yield from mapwalk(item, pre + [key, str(idx)])
             else:
                 yield pre + [key, value]
     else:

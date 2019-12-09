@@ -510,8 +510,8 @@ def mapwalk(mapping, pre=None):
             if ismapping(value):
                 yield from mapwalk(value, pre + [key])
             elif isexpandable(value):
-                for item in value:
-                    yield from mapwalk(item, pre + [key])
+                for idx, item in enumerate(value):
+                    yield from mapwalk(item, pre + [key, str(idx)])
             else:
                 yield pre + [key, value]
     else:

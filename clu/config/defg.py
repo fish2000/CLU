@@ -233,10 +233,6 @@ class FrozenKeyMapBase(collections.abc.Mapping,
         ...
     
     @abstract
-    def __reversed__(self):
-        ...
-    
-    @abstract
     def __len__(self):
         ...
     
@@ -247,6 +243,9 @@ class FrozenKeyMapBase(collections.abc.Mapping,
     @abstract
     def __getitem__(self, nskey):
         ...
+    
+    def __reversed__(self):
+        yield from reversed(tuple(self))
     
     def __missing__(self, nskey):
         if DEBUG:
@@ -574,9 +573,6 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
         for mappingpath in mapwalk(self.tree):
             *namespaces, key = mappingpath[:-1]
             yield pack_ns(key, *namespaces)
-    
-    def __reversed__(self):
-        yield from reversed(tuple(self))
     
     def __len__(self):
         return len(tuple(mapwalk(self.tree)))

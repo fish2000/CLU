@@ -32,8 +32,8 @@ def concatenate(*namespaces):
 
 def prefix_for(*namespaces):
     """ Return the prefix string for the given namespace(s) """
-    out = concatenate(*namespaces)
-    return out and f"{out}{NAMESPACE_SEP}" or out
+    ns = concatenate(*namespaces)
+    return ns and f"{ns}{NAMESPACE_SEP}" or ns
 
 def strip_namespace(nskey):
     """ Strip all namespace-related prefixing from a namespaced key """
@@ -76,9 +76,9 @@ class KeyMapViewBase(collections.abc.Sequence,
     def __len__(self):
         if not self.prefix:
             return len(self.mapping)
-        return len([key \
-                for key in self.mapping \
-                 if key.startswith(self.prefix)])
+        return len([nskey \
+                for nskey in self.mapping \
+                 if nskey.startswith(self.prefix)])
     
     def __getitem__(self, idx):
         return tuple(self)[idx]
@@ -173,7 +173,7 @@ def validate_ns(*namespaces):
         if NAMESPACE_SEP in namespace:
             raise ValueError(f"Namespace contains separator: “{namespace}”")
 
-def unpack_ns(string):
+def unpack_ns(nskey):
     """ Unpack a namespaced key into a set of namespaces and a key name.
         
         To wit: if the namespaced key is “yo:dogg:i-heard”, calling “unpack_ns(…)”
@@ -182,10 +182,10 @@ def unpack_ns(string):
         If the key is not namespaced (like e.g. “wat”) the “unpack_ns(…)”
         call will return the tuple ('wat', tuple()).
     """
-    *namespaces, value = string.split(NAMESPACE_SEP)
-    return value, tuple(namespaces)
+    *namespaces, key = nskey.split(NAMESPACE_SEP)
+    return key, tuple(namespaces)
 
-def pack_ns(value, *namespaces):
+def pack_ns(key, *namespaces):
     """ Pack a key and a set of (optional) namespaces into a namespaced key.
         
         To wit: if called as “pack_ns('i-heard, 'yo', 'dogg')” the return
@@ -194,12 +194,12 @@ def pack_ns(value, *namespaces):
         If no namespaces are provided (like e.g. “pack_ns('wat')”)
         the return value will be the string "wat".
     """
-    itervalue = isexpandable(value) and value or tuplize(value)
-    return NAMESPACE_SEP.join(chain(namespaces, itervalue))
+    iterkeyvalue = isexpandable(key) and key or tuplize(key)
+    return NAMESPACE_SEP.join(chain(namespaces, iterkeyvalue))
 
-def get_ns(string):
+def get_ns(nskey):
     """ Get the namespace portion of a namespaced key as a packed string. """
-    *namespaces, _ = string.split(NAMESPACE_SEP)
+    *namespaces, _ = nskey.split(NAMESPACE_SEP)
     return concatenate(*namespaces)
 
 def compare_ns(iterone, itertwo):
@@ -351,9 +351,9 @@ class FrozenKeyMap(FrozenKeyMapBase):
             consider somewhat inefficient (q.v. “uniquify(…)” predicate
             utility function supra.)
         """
-        yield from sorted(uniquify(get_ns(key) \
-                                      for key in self \
-                                       if NAMESPACE_SEP in key))
+        yield from sorted(uniquify(get_ns(nskey) \
+                                      for nskey in self \
+                                       if NAMESPACE_SEP in nskey))
 
 @export
 class KeyMap(KeyMapBase, FrozenKeyMap):

@@ -562,13 +562,11 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     def namespaces(self):
         """ Iterate over all of the namespaces defined in the mapping. """
-        # N.B. Dunno if this is faster or more worth-it than what one finds
-        # upstream in the implementation furnished by FrozenKeyMap…
-        out = []
+        out = set()
         for *namespaces, key, value in self.mapwalk():
             if namespaces:
-                out.append(concatenate(*namespaces))
-        yield from sorted(uniquify(out))
+                out.add(concatenate(*namespaces))
+        yield from sorted(out)
     
     def __iter__(self):
         for *namespaces, key, value in self.mapwalk():

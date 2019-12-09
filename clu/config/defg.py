@@ -311,9 +311,9 @@ class FrozenKeyMap(FrozenKeyMapBase):
         """ Return a standard dict containing only the namespaced items. """
         if unprefixed:
             return { nskey : self[nskey] for nskey in self if NAMESPACE_SEP not in nskey }
-        prefix = prefix_for(*namespaces)
-        if not prefix:
+        if not namespaces:
             return dict(self)
+        prefix = prefix_for(*namespaces)
         return { nskey : self[nskey] for nskey in self if nskey.startswith(prefix) }
     
     def keys(self, *namespaces, unprefixed=False):

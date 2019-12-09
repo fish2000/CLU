@@ -712,6 +712,10 @@ def test():
         print(f"FLAT NAMESPACES (length={len(namespaces)}):")
         pprint(namespaces)
         print()
+        
+        nested = Nested(flat)
+        assert nested.flatten() == flat
+        # assert nested == flat
     
     @inline
     def test_three_point_five():
@@ -802,6 +806,9 @@ def test():
         print(f"NESTED NAMESPACES (length={len(namespaces)}):")
         pprint(namespaces)
         print()
+        
+        flat = Flat(nested)
+        assert flat.nestify() == nested
     
     @inline
     def test_five():

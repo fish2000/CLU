@@ -83,6 +83,14 @@ class KeyMapViewBase(collections.abc.Sequence,
     def __getitem__(self, idx):
         return tuple(self)[idx]
     
+    @abstract
+    def __contains__(self, nskey):
+        ...
+    
+    @abstract
+    def __iter__(self):
+        ...
+    
     def __repr__(self):
         tn = typename(self)
         nslist = ', '.join(self.namespaces)

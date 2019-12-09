@@ -199,7 +199,7 @@ def pack_ns(value, *namespaces):
 
 def get_ns(string):
     """ Get the namespace portion of a namespaced key as a packed string. """
-    _, namespaces = unpack_ns(string)
+    *namespaces, _ = string.split(NAMESPACE_SEP)
     return concatenate(*namespaces)
 
 def compare_ns(iterone, itertwo):

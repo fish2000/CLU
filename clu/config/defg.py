@@ -44,12 +44,34 @@ class KeyMapViewBase(collections.abc.Sequence,
                      collections.abc.Sized,
                      metaclass=clu.abstract.Slotted):
     
+    """ The base class for KeyMap view classes.
+        
+        These view classes correspond to, but do not inherit directly from,
+        the descendants of “collections.abc.MappingView”. They have been
+        specially kitted out to deal with KeyMap namespaces: each instance
+        has a ‘mapping’ attribute referring to the parent KeyMap instance,
+        a ‘namespaces’ iterable attribute with the unconcatenated namespace
+        parts for which the instance was allocated, and a ‘prefix’ shortcut
+        attribute containing the concatenated namespace parts as a string
+        prefix.
+        
+        Each concrete subclass of KeyMapViewBase registers itself as a
+        “virtual subclass” of its corresponding ‘collections.abc’ view
+        class, like for good measure.
+    """
+    
     __slots__ = ('mapping', 'namespaces', 'prefix')
     
     def __init__(self, mapping, *namespaces):
+        """ Initialize a view on a KeyMap instance, for a given namespace """
         self.mapping = mapping
         self.namespaces = namespaces
         self.prefix = prefix_for(*namespaces)
+    
+    @property
+    def _mapping(self):
+        """ For compatibility with “collections.abc” stuff """
+        return self.mapping
     
     def __len__(self):
         if not self.prefix:
@@ -68,11 +90,15 @@ class KeyMapViewBase(collections.abc.Sequence,
         return f"{tn}{ns}({self.mapping!r})"
 
 @export
+@collections.abc.KeysView.register
 class KeyMapKeysView(KeyMapViewBase,
                      collections.abc.Set):
     
+    """ A KeyMap key view. """
+    
     @classmethod
     def _from_iterable(cls, iterable):
+        # Required by the “collections.abc.Set” API:
         return set(iterable)
     
     def __contains__(self, nskey):
@@ -84,11 +110,15 @@ class KeyMapKeysView(KeyMapViewBase,
                  if nskey.startswith(self.prefix))
 
 @export
+@collections.abc.ItemsView.register
 class KeyMapItemsView(KeyMapViewBase,
                       collections.abc.Set):
     
+    """ A KeyMap items view. """
+    
     @classmethod
     def _from_iterable(cls, iterable):
+        # Required by the “collections.abc.Set” API:
         return set(iterable)
     
     def __contains__(self, item):
@@ -106,8 +136,11 @@ class KeyMapItemsView(KeyMapViewBase,
                   if nskey.startswith(self.prefix))
 
 @export
+@collections.abc.ValuesView.register
 class KeyMapValuesView(KeyMapViewBase,
                        collections.abc.Collection):
+    
+    """ A KeyMap values view. """
     
     def __contains__(self, value):
         submap = self.mapping.submap(*self.namespaces)
@@ -224,6 +257,11 @@ class KeyMapBase(FrozenKeyMapBase,
         Don’t subclass this anemic vestigial thing. You want “KeyMap” (sans
         the “Base”) as your ancestor; see below.
     """
+    
+    @abstract
+    def freeze(self):
+        """ Return a “frozen” – or immutable – version of the KeyMap instance. """
+        ...
     
     @abstract
     def __setitem__(self, nskey, value):
@@ -368,10 +406,14 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
             super(FrozenFlat, self).__init__(*args, **kwargs)
         except TypeError:
             super(FrozenFlat, self).__init__()
+        if hasattr(dictionary, 'dictionary'):
+            dictionary = getattr(dictionary, 'dictionary')
+        elif hasattr(dictionary, 'flatten'):
+            dictionary = getattr(dictionary.flatten(), 'dictionary')
         self.dictionary = dict(dictionary or {})
     
     def nestify(self, cls=None):
-        """ Articulate a flattened KeyMap instance into one that is nested. """
+        """ Articulate a flattened KeyMap instance out into one that is nested. """
         if cls is None:
             cls = Nested
         out = cls()
@@ -397,12 +439,16 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         return repr(self.dictionary)
     
     def clone(self, deep=False, memo=None):
-        return type(self)(dictionary=copy.copy(self.dictionary))
+        copier = deep and copy.deepcopy or copy.copy
+        return type(self)(dictionary=copier(self.dictionary))
 
 @export
 class Flat(FrozenFlat, KeyMap):
     
     """ A concrete mutable KeyMap class with a flat internal topology. """
+    
+    def freeze(self):
+        return FrozenFlat(dictionary=copy.deepcopy(self.dictionary))
     
     def __setitem__(self, nskey, value):
         self.dictionary[nskey] = value
@@ -413,8 +459,11 @@ class Flat(FrozenFlat, KeyMap):
 def DefaultTree():
     return collections.defaultdict(DefaultTree)
 
+@export
 def dictify(tree):
-    return { key : dictify(tree[key]) for key in tree }
+    if ismapping(tree):
+        return { key : dictify(tree[key]) for key in tree }
+    return tree
 
 @export
 def mapwalk(mapping, pre=None):
@@ -425,20 +474,18 @@ def mapwalk(mapping, pre=None):
     if ismapping(mapping):
         for key, value in mapping.items():
             if ismapping(value):
-                for map in mapwalk(value, pre + [key]):
-                    yield map
+                yield from mapwalk(value, pre + [key])
             elif isexpandable(value):
                 for item in value:
-                    for map in mapwalk(item, pre + [key]):
-                        yield map
+                    yield from mapwalk(item, pre + [key])
             else:
                 yield pre + [key, value]
     else:
         yield mapping
 
 @export
-class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
-                           clu.abstract.Cloneable):
+class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
+                                 clu.abstract.Cloneable):
     
     """ A concrete immutable – or frozen – KeyMap class with an articulated –
         or, if you will, a nested – internal topology.
@@ -448,22 +495,24 @@ class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     def __init__(self, tree=None, *args, **kwargs):
         try:
-            super(Nested, self).__init__(*args, **kwargs)
+            super(FrozenNested, self).__init__(*args, **kwargs)
         except TypeError:
-            super(Nested, self).__init__()
+            super(FrozenNested, self).__init__()
+        if hasattr(tree, 'tree'):
+            tree = getattr(tree, 'tree')
+        elif hasattr(tree, 'nestify'):
+            tree = getattr(tree.nestify(), 'tree')
         self.tree = tree or DefaultTree()
     
-    # def flatten(self, cls=None):
-    #     plain_kvs = ((key, value) for key, value in self.tree.items() if not ismapping(value))
-    #     namespaced_kvs = iterchain(((pack_ns(nskey, namespace), nsvalue) for nskey, nsvalue in value.items()) \
-    #                                                                      for namespace, value in self.tree.items() \
-    #                                                                       if ismapping(value))
-    #     if cls is None:
-    #         cls = Flat
-    #     return cls(dictionary=dict(chain(plain_kvs, namespaced_kvs)))
-    
     def flatten(self, cls=None):
-        pass
+        """ Dearticulate an articulated KeyMap instance into one that is flat. """
+        if cls is None:
+            cls = Flat
+        out = cls()
+        for mappingpath in mapwalk(self.tree):
+            *namespaces, key, value = mappingpath
+            out[pack_ns(key, *namespaces)] = value
+        return out
     
     def namespaces(self):
         """ Iterate over all of the namespaces defined in the mapping. """
@@ -509,7 +558,41 @@ class Nested(FrozenKeyMap, clu.abstract.ReprWrapper,
         return repr(self.tree)
     
     def clone(self, deep=False, memo=None):
-        return type(self)(tree=copy.copy(self.tree))
+        copier = deep and copy.deepcopy or copy.copy
+        return type(self)(tree=copier(self.tree))
+
+@export
+class Nested(FrozenNested, KeyMap):
+    
+    """ A concrete mutable KeyMap class with an articulated (or nested)
+        internal topology.
+    """
+    
+    def freeze(self):
+        return FrozenNested(tree=copy.deepcopy(self.tree))
+    
+    def __setitem__(self, nskey, value):
+        key, namespaces = unpack_ns(nskey)
+        if not namespaces:
+            self.tree[key] = value
+        else:
+            d = self.tree
+            for namespace in namespaces:
+                try:
+                    d = d[namespace]
+                except KeyError:
+                    d = d[namespace] = type(d)()
+            d[key] = value
+    
+    def __delitem__(self, nskey):
+        key, namespaces = unpack_ns(nskey)
+        if not namespaces:
+            del self.tree[key]
+        else:
+            d = self.tree
+            for namespace in namespaces:
+                d = d[namespace]
+            del d[key]
 
 export(NAMESPACE_SEP, name='NAMESPACE_SEP')
 
@@ -629,6 +712,19 @@ def test():
     
     @inline
     def test_four():
+        nested = FrozenNested(tree=nestedmaps)
+        
+        for mappingpath in mapwalk(nested.tree):
+            *namespaces, key, value = mappingpath
+            nskey = pack_ns(key, *namespaces)
+            print("NAMESPACES:", ", ".join(namespaces))
+            print("KEY:", key)
+            print("NSKEY:", nskey)
+            print("VALUE:", value)
+            print()
+    
+    @inline
+    def test_four_point_five():
         nested = Nested(tree=nestedmaps)
         
         for mappingpath in mapwalk(nested.tree):
@@ -642,7 +738,7 @@ def test():
     
     @inline
     def test_four_point_seven_five():
-        nested = Nested(tree=nestedmaps)
+        nested = FrozenNested(tree=nestedmaps)
         
         print(f"NESTED FROZEN INSTANCE (length={len(nested)}):")
         pprint(nested)
@@ -670,7 +766,8 @@ def test():
     test_two()
     test_three()
     test_three_point_five()
-    test_four()
+    # test_four()
+    # test_four_point_five()
     test_four_point_seven_five()
 
 if __name__ == '__main__':

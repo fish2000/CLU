@@ -1017,8 +1017,8 @@ def test():
     # Run all inline tests:
     inline.test(vars(), 10)
     # inline.test(vars())
-    # test_five()
-    # test_six()
+    test_five()
+    test_six()
 
 if __name__ == '__main__':
     test()

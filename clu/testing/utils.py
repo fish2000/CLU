@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, ExitStack
 from functools import wraps
 
-import io
-import humanize
 import stopwatch
 import sys
 
@@ -38,6 +36,7 @@ asterisks = lambda filler='*': print(filler * WIDTH)
 printout = lambda name, value: print("» %25s : %s" % (name, value))
 
 def natural_millis(millis):
+    import humanize
     return humanize.naturaldelta(
            humanize.time.timedelta(milliseconds=millis))
 
@@ -72,11 +71,11 @@ def inline(function):
     def test_wrapper(*args, **kwargs):
         # Get stopwatch:
         watch = kwargs.pop('watch', None)
-        rootless = False
+        stack = ExitStack()
+        
         if watch is None:
-            rootless = True
             watch = stopwatch.StopWatch()
-            watch.start('root')
+            stack.enter_context(watch.timer('root'))
         
         # Print header:
         print()
@@ -88,14 +87,14 @@ def inline(function):
         with watch.timer(name):
             out = function(*args, **kwargs)
         
-        # If we’re rootless, end the root span:
-        if rootless:
-            watch.end('root')
-        
+        # Get the reported timer value *before* closing out
+        # the root stopwatch timer:
         timervals = item(watch._reported_values, name,
                                           f'run#{name}',
                                      f'root#run#{name}',
-                                      'root')
+                                         f'root#{name}',
+                                          'root')
+        stack.close()
         
         # Print the results and execution time:
         asterisks('-')
@@ -173,6 +172,8 @@ def test_inlines(mapping, exec_count=1):
     """ Run all functions marked @inline from “mapping”, using
         individual context timers for each function (via stopwatch)
     """
+    import io
+    
     watch = stopwatch.StopWatch()
     functions = []
     order = []

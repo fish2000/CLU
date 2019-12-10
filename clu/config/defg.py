@@ -13,18 +13,19 @@ import copy
 abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, NoDefault
-from clu.predicates import tuplize
+from clu.predicates import tuplize, listify
 from clu.typology import ismapping
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
+ENVIRONS_SEP = '_'
 NAMESPACE_SEP = ':'
 
 typename = lambda thing: type(thing).__name__
 
-def concatenate(*namespaces):
+def concatenate_ns(*namespaces):
     """ Return the given namespace(s), concatenated with the
         namespace separator.
     """
@@ -32,7 +33,7 @@ def concatenate(*namespaces):
 
 def prefix_for(*namespaces):
     """ Return the prefix string for the given namespace(s) """
-    ns = concatenate(*namespaces)
+    ns = concatenate_ns(*namespaces)
     return ns and f"{ns}{NAMESPACE_SEP}" or ns
 
 def strip_ns(nskey):
@@ -564,7 +565,7 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
         nss = set()
         for *namespaces, key, value in self.mapwalk():
             if namespaces:
-                nss.add(concatenate(*namespaces))
+                nss.add(concatenate_ns(*namespaces))
         yield from sorted(nss)
     
     def __iter__(self):
@@ -630,6 +631,45 @@ class Nested(FrozenNested, KeyMap):
                 d = d[namespace]
             del d[key]
 
+# ENVIRONMENT-VARIABLE MANIPULATION API:
+
+def concatenate_env(*namespaces):
+    return ENVIRONS_SEP.join(namespace.upper() for namespace in namespaces)
+
+def prefix_env(appname, *namespaces):
+    if not appname and not namespaces:
+        return ''
+    if not appname:
+        return concatenate_env(*namespaces) + ENVIRONS_SEP
+    if not namespaces:
+        return appname.upper() + ENVIRONS_SEP
+    return appname.upper() + ENVIRONS_SEP + concatenate_env(*namespaces) + ENVIRONS_SEP
+
+def pack_env(appname, key, *namespaces):
+    prefix = prefix_env(appname, *namespaces)
+    return f"{prefix}{key.upper()}"
+
+def unpack_env(envkey):
+    appname, *namespaces, key = envkey.lower().split(ENVIRONS_SEP)
+    return appname, key, tuple(namespaces)
+
+def nskey_from_env(envkey):
+    appname, *namespaces, key = envkey.lower().split(ENVIRONS_SEP)
+    return appname, pack_ns(key, *namespaces)
+
+def nskey_to_env(appname, nskey):
+    key, namespaces = unpack_ns(nskey)
+    return pack_env(appname, key, *namespaces)
+
+def envwalk(appname, mapping):
+    app_prefix = prefix_env(appname)
+    for envkey in (ek for ek in mapping if ek.startswith(app_prefix)):
+        value = mapping[envkey]
+        an, key, namespaces = unpack_env(envkey)
+        assert an == appname
+        yield listify(namespaces) + listify(key, value)
+
+export(ENVIRONS_SEP,  name='ENVIRONS_SEP')
 export(NAMESPACE_SEP, name='NAMESPACE_SEP')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
@@ -637,6 +677,7 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     
+    import os
     from clu.testing.utils import inline
     from pprint import pprint
     
@@ -840,7 +881,15 @@ def test():
         renested = flat.nestify()
         assert renested == nested
     
+    @inline
+    def test_six():
+        for *namespaces, key, value in envwalk('clu', os.environ.copy()):
+            print("NAMESPACES:", namespaces)
+            print("KEY:", f"«{key}»")
+            print("VALUE:", f"“{value}”")
+            print()
     
+    print()
     pprint(nestedmaps)
     
     test_one()
@@ -851,6 +900,11 @@ def test():
     # test_four_point_five()
     test_four_point_seven_five()
     test_five()
+    
+    print()
+    pprint(os.environ.copy())
+    
+    test_six()
 
 if __name__ == '__main__':
     test()

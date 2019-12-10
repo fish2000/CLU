@@ -78,7 +78,7 @@ class TestConfig(object):
         # assert schema.andalso       == "and: YoDoggApp"
     
     def test_nested_and_flat(self):
-        from clu.config.defg import Nested
+        from clu.config.base import Nested
         
         tree = {
             'yo'        : "dogg",
@@ -123,6 +123,66 @@ class TestConfig(object):
         assert flat.dictionary == dictionary
         
         renestified = flat.nestify()
+        
+        assert renestified.tree == tree
+        assert renestified == flat
+        assert flat == nested
+        assert renestified == nested
+    
+    def test_nested_and_flat_KeyMaps(self):
+        from clu.config.defg import Nested, KeyMapKeysView, KeyMapItemsView, KeyMapValuesView
+        
+        tree = {
+            'yo'        : "dogg",
+            'i_heard'   : "you like",
+            'nested'    : "dicts",
+            'so'        : "we put dicts in your dicts",
+            
+            'wat'       : { 'yo'        : "dogggggg",
+                            'yoyo'      : "dogggggggggg" },
+            
+            'nodogg'    : { 'yo'        : "dogggggg",
+                            'yoyo'      : "dogggggggggg" }
+        }
+        
+        dictionary = {
+            'i_heard'       : 'you like',
+            'nested'        : 'dicts',
+            'nodogg:yo'     : 'dogggggg',
+            'nodogg:yoyo'   : 'dogggggggggg',
+            'so'            : 'we put dicts in your dicts',
+            'wat:yo'        : 'dogggggg',
+            'wat:yoyo'      : 'dogggggggggg',
+            'yo'            : 'dogg'
+        }
+        
+        nested = Nested(tree=tree)
+        
+        assert tuple(nested.keys()) == ('yo', 'i_heard', 'nested', 'so',
+                                        'wat:yo', 'wat:yoyo', 'nodogg:yo', 'nodogg:yoyo')
+        assert tuple(nested.values()) == ('dogg', 'you like', 'dicts', 'we put dicts in your dicts',
+                                          'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
+        assert tuple(nested.namespaces()) == ('nodogg', 'wat')
+        
+        assert type(nested.keys()) is KeyMapKeysView
+        assert type(nested.values()) is KeyMapValuesView
+        assert type(nested.items()) is KeyMapItemsView
+        
+        flat = nested.flatten().freeze()
+        
+        assert tuple(flat.keys()) == ('yo', 'i_heard', 'nested', 'so',
+                                      'wat:yo', 'wat:yoyo', 'nodogg:yo', 'nodogg:yoyo')
+        assert tuple(flat.values()) == ('dogg', 'you like', 'dicts', 'we put dicts in your dicts',
+                                        'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
+        assert tuple(flat.namespaces()) == ('nodogg', 'wat')
+        
+        assert flat.dictionary == dictionary
+        
+        assert type(flat.keys()) is KeyMapKeysView
+        assert type(flat.values()) is KeyMapValuesView
+        assert type(flat.items()) is KeyMapItemsView
+        
+        renestified = flat.nestify().freeze()
         
         assert renestified.tree == tree
         assert renestified == flat

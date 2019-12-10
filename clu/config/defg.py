@@ -1022,6 +1022,7 @@ def test():
     # test_four_point_five()
     test_four_point_seven_five()
     test_five()
+    test_six()
     
     print()
     pprint(os.environ.copy())

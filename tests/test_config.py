@@ -264,9 +264,10 @@ class TestConfig(object):
         
         assert 'envtest0' not in env.namespaces()
     
-    def test_env_get_KeyMaps(self, environment):
-        from clu.config.defg import Environ as Env
-        env = Env()
+    def test_env_get_KeyMaps(self, environment, consts):
+        from clu.config.defg import Environ
+        env = Environ(environment=environment,
+                          appname=consts.PROJECT_NAME)
         
         try:
             environment['CLU_ENVTEST1_YODOGG']  = "Yo, Dogg –"
@@ -290,9 +291,10 @@ class TestConfig(object):
         
         assert 'envtest1' not in env.namespaces()
     
-    def test_env_set_KeyMaps(self, environment):
-        from clu.config.defg import Environ as Env
-        env = Env()
+    def test_env_set_KeyMaps(self, environment, consts):
+        from clu.config.defg import Environ
+        env = Environ(environment=environment,
+                          appname=consts.PROJECT_NAME)
         
         try:
             env['envtest0:yodogg']  = "Yo Dogg"

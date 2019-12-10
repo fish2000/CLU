@@ -205,7 +205,7 @@ def compare_ns(iterone, itertwo):
     for one, two in zip_longest(iterone,
                                 itertwo,
                                 fillvalue=NoDefault):
-        if one != two and one is not two:
+        if one != two:
             return False
     return True
 
@@ -577,7 +577,7 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
     def __contains__(self, nskey):
         key, namespaces = unpack_ns(nskey)
         for *ns, k, value in self.mapwalk():
-            if (k == key or k is key):
+            if k == key:
                 if compare_ns(ns, namespaces):
                     return True
         return False
@@ -585,7 +585,7 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
     def __getitem__(self, nskey):
         key, namespaces = unpack_ns(nskey)
         for *ns, k, value in self.mapwalk():
-            if (k == key or k is key):
+            if k == key:
                 if compare_ns(ns, namespaces):
                     return value
         raise KeyError(nskey)

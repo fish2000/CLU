@@ -347,10 +347,7 @@ class FrozenKeyMap(FrozenKeyMapBase):
             This is the generic implementation. It depends on “__iter__(…)”,
             as implemented by the concrete descendant.
         """
-        out = set()
-        for nskey in self:
-            if NAMESPACE_SEP in nskey:
-                out.add(get_ns(nskey))
+        out = { get_ns(nskey) for nskey in self if NAMESPACE_SEP in nskey }
         yield from sorted(out)
 
 @export

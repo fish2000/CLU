@@ -198,8 +198,7 @@ def pack_ns(key, *namespaces):
 
 def get_ns(nskey):
     """ Get the namespace portion of a namespaced key as a packed string. """
-    *namespaces, _ = nskey.split(NAMESPACE_SEP)
-    return concatenate(*namespaces)
+    return nskey.rpartition(NAMESPACE_SEP)[0]
 
 def compare_ns(iterone, itertwo):
     """ Boolean predicate to compare a pair of namespace iterables, value-by-value """

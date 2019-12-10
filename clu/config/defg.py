@@ -194,7 +194,7 @@ def pack_ns(key, *namespaces):
         If no namespaces are provided (like e.g. “pack_ns('wat')”)
         the return value will be the string "wat".
     """
-    return NAMESPACE_SEP.join(chain(namespaces, tuplize(key)))
+    return NAMESPACE_SEP.join(chain(namespaces, tuplize(key, expand=False)))
 
 def get_ns(nskey):
     """ Get the namespace portion of a namespaced key as a packed string. """

@@ -99,15 +99,18 @@ def inline(function):
         
         # Print the results and execution time:
         asterisks('-')
+        
         if out is not None:
             print("RESULTS:")
             pprint(out)
             asterisks('-')
+        
         if timervals:
             dt = str(timervals[0] * 0.001)
             dtout = dt[:(dt.find(consts.QUALIFIER) + 4)]
             ndtout = natural_millis(timervals[0])
             print(f"Test function “{name}(¬)” ran for about {ndtout} ({dtout}s)")
+        
         asterisks('=')
         
         # Return as per the decorated function:
@@ -216,13 +219,21 @@ def test_inlines(mapping, exec_count=1):
     # Cough up the final report data:
     print()
     count_text = f"{exec_count} times"
+    
+    # Some trivial english-ification:
     if exec_count == 1:
         count_text = "once"
     elif exec_count == 2:
         count_text = "twice"
+    
+    # Header:
     print(f"TIME TOTALS – ran {funcount} functions {count_text}")
+    
+    # Body:
     asterisks('=')
     print(out)
+    
+    # Footer:
     asterisks('≠')
 
 # One less import to forget about:

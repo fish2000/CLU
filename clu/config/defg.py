@@ -13,7 +13,7 @@ import copy
 abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, NoDefault
-from clu.predicates import isiterable, tuplize
+from clu.predicates import tuplize
 from clu.typology import ismapping
 from clu.exporting import Exporter
 
@@ -415,8 +415,6 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         if dictish is not NoDefault:
             if hasattr(dictish, 'items'):
                 dictish = dictish.items()
-            if not isiterable(dictish):
-                raise TypeError(f"{dictish!r} is not iterable")
             for key, value in dictish:
                 self[key] = value
         for key, value in updates.items():

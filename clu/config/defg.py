@@ -9,11 +9,12 @@ import clu.abstract
 import collections
 import collections.abc
 import copy
+import os
 
 abstract = abc.abstractmethod
 
-from clu.constants.consts import DEBUG, NoDefault
-from clu.predicates import tuplize, listify
+from clu.constants.consts import DEBUG, PROJECT_NAME, NoDefault
+from clu.predicates import attr, tuplize, listify
 from clu.typology import ismapping
 from clu.exporting import Exporter
 
@@ -209,6 +210,8 @@ def compare_ns(iterone, itertwo):
         if one != two:
             return False
     return True
+
+# SUB-BASE AND ABSTRACT BASE CLASSES:
 
 @export
 class FrozenKeyMapBase(collections.abc.Mapping,
@@ -423,6 +426,8 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         if updates:
             self.update(dictish=updates)
 
+# CONCRETE SUBCLASSES: FrozenFlat and Flat
+
 @export
 class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
                                clu.abstract.Cloneable):
@@ -494,10 +499,58 @@ class Flat(FrozenFlat, KeyMap):
     def __delitem__(self, nskey):
         del self.dictionary[nskey]
 
+# INTERIM ABSTRACT BASE: NamespaceWalker
+
+@export
+class NamespaceWalker(FrozenKeyMap):
+    
+    @abstract
+    def walk(self):
+        ...
+    
+    def flatten(self, cls=None):
+        """ Dearticulate an articulated KeyMap instance into one that is flat. """
+        if cls is None:
+            cls = Flat
+        out = cls()
+        for *namespaces, key, value in self.walk():
+            out.set(key, value, *namespaces)
+        return out
+    
+    def namespaces(self):
+        """ Iterate over all of the namespaces defined in the mapping. """
+        nss = set()
+        for *namespaces, key, value in self.walk():
+            if namespaces:
+                nss.add(concatenate_ns(*namespaces))
+        yield from sorted(nss)
+    
+    def __iter__(self):
+        for *namespaces, key, value in self.walk():
+            yield pack_ns(key, *namespaces)
+    
+    def __len__(self):
+        return len(tuple(self.walk()))
+    
+    def __contains__(self, nskey):
+        key, namespaces = unpack_ns(nskey)
+        for *ns, k, value in self.walk():
+            if k == key:
+                if compare_ns(ns, namespaces):
+                    return True
+        return False
+    
+    def __getitem__(self, nskey):
+        key, namespaces = unpack_ns(nskey)
+        for *ns, k, value in self.walk():
+            if k == key:
+                if compare_ns(ns, namespaces):
+                    return value
+        raise KeyError(nskey)
+
 def DefaultTree():
     return collections.defaultdict(DefaultTree)
 
-@export
 def dictify(tree):
     if ismapping(tree):
         return { key : dictify(tree[key]) for key in tree }
@@ -521,9 +574,11 @@ def mapwalk(mapping, pre=None):
     else:
         yield mapping
 
+# CONCRETE SUBCLASSES: FrozenNested and Nested
+
 @export
-class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
-                                 clu.abstract.Cloneable):
+class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
+                                    clu.abstract.Cloneable):
     
     """ A concrete immutable – or frozen – KeyMap class with an articulated –
         or, if you will, a nested – internal topology.
@@ -547,49 +602,9 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
         if updates:
             self.tree.update(**updates)
     
-    def mapwalk(self):
+    def walk(self):
         """ Iteratively walk the nested KeyMap’s tree of dicts. """
         yield from mapwalk(self.tree)
-    
-    def flatten(self, cls=None):
-        """ Dearticulate an articulated KeyMap instance into one that is flat. """
-        if cls is None:
-            cls = Flat
-        out = cls()
-        for *namespaces, key, value in self.mapwalk():
-            out.set(key, value, *namespaces)
-        return out
-    
-    def namespaces(self):
-        """ Iterate over all of the namespaces defined in the mapping. """
-        nss = set()
-        for *namespaces, key, value in self.mapwalk():
-            if namespaces:
-                nss.add(concatenate_ns(*namespaces))
-        yield from sorted(nss)
-    
-    def __iter__(self):
-        for *namespaces, key, value in self.mapwalk():
-            yield pack_ns(key, *namespaces)
-    
-    def __len__(self):
-        return len(tuple(self.mapwalk()))
-    
-    def __contains__(self, nskey):
-        key, namespaces = unpack_ns(nskey)
-        for *ns, k, value in self.mapwalk():
-            if k == key:
-                if compare_ns(ns, namespaces):
-                    return True
-        return False
-    
-    def __getitem__(self, nskey):
-        key, namespaces = unpack_ns(nskey)
-        for *ns, k, value in self.mapwalk():
-            if k == key:
-                if compare_ns(ns, namespaces):
-                    return value
-        raise KeyError(nskey)
     
     def inner_repr(self):
         return repr(self.tree)
@@ -634,9 +649,11 @@ class Nested(FrozenNested, KeyMap):
 # ENVIRONMENT-VARIABLE MANIPULATION API:
 
 def concatenate_env(*namespaces):
+    """ Concatenate and UPPERCASE namespaces, per environment variables. """
     return ENVIRONS_SEP.join(namespace.upper() for namespace in namespaces)
 
 def prefix_env(appname, *namespaces):
+    """ Deduce the environment-variable prefix for an appname and namespaces. """
     if not appname and not namespaces:
         return ''
     if not appname:
@@ -646,28 +663,121 @@ def prefix_env(appname, *namespaces):
     return appname.upper() + ENVIRONS_SEP + concatenate_env(*namespaces) + ENVIRONS_SEP
 
 def pack_env(appname, key, *namespaces):
+    """ Pack an appname, a key name, and optional namespaces per the environment
+        variable naming scheme.
+    """
     prefix = prefix_env(appname, *namespaces)
     return f"{prefix}{key.upper()}"
 
 def unpack_env(envkey):
+    """ Unpack the appname, possible namespaces, and the key from an environment
+        variable key name.
+    """
     appname, *namespaces, key = envkey.lower().split(ENVIRONS_SEP)
     return appname, key, tuple(namespaces)
 
 def nskey_from_env(envkey):
+    """ Repack an environment-variable key name as a packed namespace key. """
     appname, *namespaces, key = envkey.lower().split(ENVIRONS_SEP)
     return appname, pack_ns(key, *namespaces)
 
 def nskey_to_env(appname, nskey):
+    """ Repack a packed namespace key, with a given appname, as an environment
+        variable key name.
+    """
     key, namespaces = unpack_ns(nskey)
     return pack_env(appname, key, *namespaces)
 
 def envwalk(appname, mapping):
+    """ Iteratively walk an environment-variable mapping, selecting
+        only the variables prefixed for the given appname, and convert
+        environment-variable-packed namespaced key-value pairs into
+        the format expected for a “walk(…)” function.
+    """
     app_prefix = prefix_env(appname)
     for envkey in (ek for ek in mapping if ek.startswith(app_prefix)):
-        value = mapping[envkey]
         an, key, namespaces = unpack_env(envkey)
         assert an == appname
-        yield listify(namespaces) + listify(key, value)
+        yield listify(namespaces) + listify(key, mapping[envkey])
+
+# CONCRETE SUBCLASSES: FrozenEnviron and Environ
+
+@export
+class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
+                                     clu.abstract.Cloneable):
+    
+    """ A concrete immutable – or frozen – KeyMap class wrapping a
+        frozen copy of an environment-variable dictionary.
+    """
+    
+    __slots__ = ('environment', 'appname')
+    
+    def __init__(self, environment=None, appname=None, *args, **updates):
+        """ Initialize a FrozenKeyMap instance wrapping an environment-variable
+            dictionary from a target dictionary, with a supplied appname.
+        """
+        try:
+            super(FrozenEnviron, self).__init__(*args, **updates)
+        except TypeError:
+            super(FrozenEnviron, self).__init__()
+        if hasattr(environment, 'environment'):
+            environment = getattr(environment, 'environment')
+        elif hasattr(environment, 'dictionary'):
+            environment = getattr(environment, 'dictionary')
+        # elif hasattr(environment, 'nestify'):
+        #     environment = attr(environment.nestify(), 'environment', 'tree')
+        elif hasattr(environment, 'flatten'):
+            environment = attr(environment.flatten(), 'environment', 'dictionary')
+        self.environment = environment or os.environ.copy()
+        self.appname = appname or PROJECT_NAME
+        if updates:
+            self.tree.update(**updates)
+    
+    def walk(self):
+        """ Iteratively walk the environment access dict. """
+        yield from envwalk(self.appname,
+                           self.environment)
+    
+    def inner_repr(self):
+        """ Return some readable meta-information about this instance """
+        namespaces = tuple(self.namespaces())
+        prefix = prefix_env(self.appname)
+        nslength = len(namespaces)
+        keys = len(self.keys())
+        return f"[prefix=“{prefix}*”, namespaces={nslength}, keys={keys}]"
+    
+    def clone(self, deep=False, memo=None):
+        copier = deep and copy.deepcopy or copy.copy
+        return type(self)(tree=copier(self.tree))
+
+@export
+class Environ(FrozenEnviron, KeyMap):
+    
+    def __init__(self, environment=None, appname=None, *args, **updates):
+        """ Initialize a KeyMap instance wrapping an environment-variable
+            dictionary from a target dictionary, with a supplied appname.
+        """
+        if environment is None:
+            environment = os.environ
+        try:
+            super(Environ, self).__init__(environment=environment,
+                                              appname=appname,
+                                             *args, **updates)
+        except TypeError:
+            super(Environ, self).__init__(environment=environment,
+                                              appname=appname)
+    
+    def freeze(self):
+        return FrozenEnviron(environment=self.environment.copy(),
+                                 appname=self.appname)
+    
+    def __setitem__(self, nskey, value):
+        envkey = nskey_to_env(self.appname, nskey)
+        self.environment[envkey] = value
+    
+    def __delitem__(self, nskey):
+        envkey = nskey_to_env(self.appname, nskey)
+        del self.environment[envkey]
 
 export(ENVIRONS_SEP,  name='ENVIRONS_SEP')
 export(NAMESPACE_SEP, name='NAMESPACE_SEP')
@@ -677,7 +787,6 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     
-    import os
     from clu.testing.utils import inline
     from pprint import pprint
     

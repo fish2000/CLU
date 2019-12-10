@@ -264,6 +264,58 @@ class TestConfig(object):
         
         assert 'envtest0' not in env.namespaces()
     
+    def test_env_get_KeyMaps(self, environment):
+        from clu.config.defg import Environ as Env
+        env = Env()
+        
+        try:
+            environment['CLU_ENVTEST1_YODOGG']  = "Yo, Dogg –"
+            environment['CLU_ENVTEST1_IHEARD']  = "… I Heard"
+            environment['CLU_ENVTEST1_YOULIKE'] = "You Like Environment Variables."
+            
+            assert env['envtest1:yodogg']  == "Yo, Dogg –"
+            assert env['envtest1:iheard']  == "… I Heard"
+            assert env['envtest1:youlike'] == "You Like Environment Variables."
+            
+            assert 'envtest1' in env.namespaces()
+        
+        finally:
+            del environment['CLU_ENVTEST1_YODOGG']
+            del environment['CLU_ENVTEST1_IHEARD']
+            del environment['CLU_ENVTEST1_YOULIKE']
+        
+        assert 'envtest1:yodogg'  not in env
+        assert 'envtest1:iheard'  not in env
+        assert 'envtest1:youlike' not in env
+        
+        assert 'envtest1' not in env.namespaces()
+    
+    def test_env_set_KeyMaps(self, environment):
+        from clu.config.defg import Environ as Env
+        env = Env()
+        
+        try:
+            env['envtest0:yodogg']  = "Yo Dogg"
+            env['envtest0:iheard']  = "I Heard"
+            env['envtest0:youlike'] = "You Like Environment Variables"
+            
+            assert environment['CLU_ENVTEST0_YODOGG']  == "Yo Dogg"
+            assert environment['CLU_ENVTEST0_IHEARD']  == "I Heard"
+            assert environment['CLU_ENVTEST0_YOULIKE'] == "You Like Environment Variables"
+            
+            assert 'envtest0' in env.namespaces()
+        
+        finally:
+            del env['envtest0:yodogg']
+            del env['envtest0:iheard']
+            del env['envtest0:youlike']
+        
+        assert 'CLU_ENVTEST0_YODOGG'  not in environment
+        assert 'CLU_ENVTEST0_IHEARD'  not in environment
+        assert 'CLU_ENVTEST0_YOULIKE' not in environment
+        
+        assert 'envtest0' not in env.namespaces()
+    
     def test_toml_and_file_direct(self, dirname):
         from clu.config.formats import TomlFile
         

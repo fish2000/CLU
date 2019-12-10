@@ -487,10 +487,6 @@ def test():
         
         # YOU CAN’T HANDLE THE “NoneType”:
         # print("» PLIST:")
-        # print()
-        # print(instance.to_plist())
-        # print()
-        # print_separator()
         
         print("» TOML:")
         print()
@@ -500,9 +496,6 @@ def test():
         
         # print("» YAML:")
         # print()
-        # print(instance.to_yaml())
-        # print()
-        # print_separator()
         
         print("» __repr__(…):")
         print()
@@ -514,7 +507,6 @@ def test():
         print()
         pprint(instance.namespaces())
         print()
-        # print_separator()
     
     @inline
     def test_two():
@@ -536,11 +528,7 @@ def test():
         print()
         
         # YOU CAN’T HANDLE THE “NoneType”:
-        # print_separator()
         # print("» PLIST:")
-        # print()
-        # print(instance0.to_plist())
-        # print()
         
         print_separator()
         print("» TOML:")

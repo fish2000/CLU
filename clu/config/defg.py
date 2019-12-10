@@ -1014,21 +1014,11 @@ def test():
     print()
     pprint(nestedmaps)
     
-    # test_one()
-    # test_two()
-    # test_three()
-    # test_three_point_five()
-    # test_four()
-    # test_four_point_five()
-    # test_four_point_seven_five()
+    # Run all inline tests:
+    inline.test(vars(), 10)
+    # inline.test(vars())
     # test_five()
     # test_six()
-    # test_inlines(vars())
-    inline.test(vars(), 100)
-    # inline.test(vars())
-    
-    # print()
-    # pprint(os.environ.copy())
 
 if __name__ == '__main__':
     test()

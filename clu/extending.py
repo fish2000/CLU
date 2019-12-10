@@ -235,17 +235,13 @@ def test():
         pair = []
         product = []
         
-        # pout.v((tup, tup))
         for tup in ω(FOSet, NaMutMap):
             pair.append(tuple(str(el) for el in tup))
         
         for itp in dot_product(FOSet.__mro__, NaMutMap.__mro__):
             product.append(tuple(str(el) for el in itp))
         
-        # for t0, t1 in zip(pair, product):
-        #     pout.v(t0, t1)
-        
-        pout.v(pair[:10], product[:10])
+        # pout.v(pair[:10], product[:10])
         
         sorter = lambda t: ''.join(iterchain(t))
         retros = lambda t: ''.join(reversed(list(iterchain(t))))
@@ -289,7 +285,7 @@ def test():
         
         assert Ω('yo', 'dogg').pack() == "yo:dogg"
     
-    @inline
+    # @inline
     def test_four():
         print()
         
@@ -326,11 +322,7 @@ def test():
         print("REGISTRY »", repr(yodogg.registry))
     
     # Run aggregate inline tests:
-    test_one()
-    test_two()
-    test_three()
-    test_four()
-    test_five()
+    inline.test(vars(), 100)
 
 if __name__ == '__main__':
     test()

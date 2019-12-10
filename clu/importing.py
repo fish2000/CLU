@@ -692,9 +692,6 @@ def test():
     from clu.testing.utils import inline, pout
     from pprint import pprint
     
-    # LEGACY:
-    SubModule = object()
-    
     @inline
     def test_one():
         
@@ -731,10 +728,6 @@ def test():
     def test_three():
         assert pout
         
-        # registry = dict(Registry.monomers)
-        # pout.v(registry)
-        # pout.v(Module.__dict__)
-        
         pout.v(all_registered_appnames())
         pout.v(all_registered_modules())
         
@@ -767,11 +760,9 @@ def test():
             pass
         
         spec = finder.find_spec('clu.app.FindMe', [])
-        # pout.v(spec.__dict__)
         assert spec.name == 'clu.app.FindMe'
         
         module = finder.loader.create_module(spec)
-        # pout.v(module)
         assert type(module) is FindMe
         
         pout.v(mro(finder))
@@ -800,11 +791,6 @@ def test():
         assert type(derived) is Derived
         assert derived.yo == 'dogg'
         
-        # print(derived.__spec__)
-        # pout.v(dict(derived.__dict__))
-        # pout.v(derived.__spec__)
-        # pout.v(derived.__dict__.keys())
-        
         for attname in dir(derived):
             assert hasattr(derived, attname)
         
@@ -813,52 +799,8 @@ def test():
         
         assert type(derived.exporter).__name__ == 'Exporter'
     
-    # @inline
-    def test_five_LEGACY():
-        # XXX: SubModule is DEAD
-        before = all_registered_modules()
-        
-        with SubModule('temp_module0', __module__=__name__) as TempModule:
-            from clu.app import temp_module0 as derived
-            
-            print(type(TempModule))
-            print(TempModule)
-            print(TempModule.qualname)
-            pprint(all_registered_modules())
-            print(all_registered_modules()[-1].qualname)
-            print(type(derived))
-            pprint(mro(derived))
-            assert type(derived) is TempModule
-            assert type(derived.exporter).__name__ == 'Exporter'
-            assert len(all_registered_modules()) == len(before) + 1
-        
-        after = all_registered_modules()
-        assert before == after
-    
-    # @inline
-    def test_six_LEGACY():
-        # XXX: SubModule is DEAD
-        before = all_registered_modules()
-        
-        with SubModule('temp_module1', __module__=__name__) as TempModule:
-            derived = importlib.import_module('clu.app.derived_module1')
-            
-            # assert type(derived) is TempModule
-            # assert derived.__class__ is TempModule
-            # assert isinstance(derived, TempModule)
-            # assert subclasscheck(type(derived), TempModule)
-            print(type(TempModule))
-            print(TempModule)
-            print(type(derived))
-            pprint(mro(derived))
-            assert type(derived.exporter).__name__ == 'Exporter'
-            assert len(all_registered_modules()) == len(before) + 1
-        
-        after = all_registered_modules()
-        assert before == after
-    
     @inline
-    def test_seven():
+    def test_five():
         
         overrides = dict(PROJECT_NAME='yodogg',
                          PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
@@ -878,7 +820,6 @@ def test():
         assert not hasattr(overridden, 'targets')
         assert not hasattr(overridden, 'target_dicts')
         
-        # pout.v(overridden.exporter)
         # pout.v(overridden)
         pprint(overridden.__proxies__)
         
@@ -886,15 +827,6 @@ def test():
         return dir(overridden)
     
     # Run all tests:
-    # test_one()
-    # test_two()
-    # test_three()
-    # three_and_a_half()
-    # test_four()
-    # # test_five_LEGACY()
-    # # test_six_LEGACY()
-    # test_seven()
-    # test_inlines(vars())
     inline.test(vars())
 
 if __name__ == '__main__':

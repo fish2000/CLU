@@ -94,7 +94,8 @@ def inline(function):
         
         timervals = item(watch._reported_values, name,
                                           f'run#{name}',
-                                     f'root#run#{name}')
+                                     f'root#run#{name}',
+                                      'root')
         
         # Print the results and execution time:
         asterisks('-')
@@ -174,6 +175,7 @@ def test_inlines(mapping, exec_count=1):
     """
     watch = stopwatch.StopWatch()
     functions = []
+    order = []
     
     # Root timer for everything:
     with watch.timer('root'):
@@ -182,6 +184,7 @@ def test_inlines(mapping, exec_count=1):
             for key, value in mapping.items():
                 if getattr(value, '__test__', False):
                     functions.append((key, value))
+                    order.append(key)
         
         with watch.timer('run'):
             

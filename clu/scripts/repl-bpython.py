@@ -146,10 +146,11 @@ from clu.naming import (determine_module, nameof, moduleof,
 
 from clu.abstract import Cloneable, ReprWrapper
 
-from clu.config.abc import (NAMESPACE_SEP, FlatOrderedSet,
-                                           functional_and,
-                                           functional_set, NamespacedMutableMapping)
-from clu.config.base import Flat, Nested
+# from clu.config.base import Flat, Nested
+from clu.config.abc import FlatOrderedSet, functional_and, functional_set
+from clu.config.defg import (NAMESPACE_SEP, FrozenKeyMap, KeyMap, FrozenFlat, Flat,
+                                                                  FrozenNested, Nested)
+
 from clu.config.env import Env
 from clu.config.filebase import FileName, FileBase
 from clu.config.fieldtypes import ValidationError
@@ -385,7 +386,9 @@ __all__ = ('Image',
            'qualified_import', 'qualified_name_tuple', 'qualified_name',
            'dotpath_to_prefix', 'path_to_prefix',
            'split_abbreviations',
-           'NAMESPACE_SEP', 'Cloneable', 'ReprWrapper', 'FlatOrderedSet', 'NamespacedMutableMapping',
+           'NAMESPACE_SEP', 'Cloneable', 'ReprWrapper', 'FlatOrderedSet',
+           'FrozenKeyMap', 'KeyMap',
+           'FrozenFlat', 'FrozenNested',
            'Flat', 'Nested',
            'Env', 'FileName', 'FileBase',
            'ValidationError', 'hoist',

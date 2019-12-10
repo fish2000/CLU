@@ -52,11 +52,16 @@ star_export(consts, namespace=globals())
 # star_export(namespace, namespace=globals())
 
 starmods = ('clu.repl',
+            'clu.config.defg',
             'clu.dicts', 'clu.enums', 'clu.exporting', 'clu.extending',
             'clu.importing', 'clu.naming', 'clu.predicates', 'clu.typology',
             'clu.fs.filesystem', 'clu.fs.misc')
 
-mods = ('clu.all', 'clu.dispatch', 'clu.sanitizer', 'clu.fs.pypath',
+mods = ('clu.all',
+        'clu.config.base',
+        'clu.config.env',
+        'clu.config.settings',
+        'clu.dispatch', 'clu.sanitizer', 'clu.fs.pypath',
         'clu.typespace.types')
 
 for starmod in starmods:

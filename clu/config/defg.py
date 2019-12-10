@@ -417,8 +417,8 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
                 dictish = dictish.items()
             for key, value in dictish:
                 self[key] = value
-        for key, value in updates.items():
-            self[key] = value
+        if updates:
+            self.update(dictish=updates)
 
 @export
 class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,

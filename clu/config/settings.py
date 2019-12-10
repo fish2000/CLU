@@ -578,8 +578,8 @@ def test():
         pprint(instance0.namespaces())
         print()
     
-    test_one()
-    test_two()
+    # Run all inline tests:
+    inline.test(vars())
 
 if __name__ == '__main__':
     test()

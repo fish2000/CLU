@@ -813,7 +813,7 @@ def test():
         
         assert type(derived.exporter).__name__ == 'Exporter'
     
-    @inline
+    # @inline
     def test_five_LEGACY():
         # XXX: SubModule is DEAD
         before = all_registered_modules()
@@ -835,7 +835,7 @@ def test():
         after = all_registered_modules()
         assert before == after
     
-    @inline
+    # @inline
     def test_six_LEGACY():
         # XXX: SubModule is DEAD
         before = all_registered_modules()
@@ -886,14 +886,16 @@ def test():
         return dir(overridden)
     
     # Run all tests:
-    test_one()
-    test_two()
-    test_three()
-    three_and_a_half()
-    test_four()
-    # test_five_LEGACY()
-    # test_six_LEGACY()
-    test_seven()
+    # test_one()
+    # test_two()
+    # test_three()
+    # three_and_a_half()
+    # test_four()
+    # # test_five_LEGACY()
+    # # test_six_LEGACY()
+    # test_seven()
+    # test_inlines(vars())
+    inline.test(vars())
 
 if __name__ == '__main__':
     test()

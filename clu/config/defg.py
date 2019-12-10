@@ -880,7 +880,7 @@ def test():
         assert nested == flat
     
     @inline
-    def test_three_point_five():
+    def test_three_pt_five():
         flat_dict = {}
         
         for mappingpath in mapwalk(nestedmaps):
@@ -934,7 +934,7 @@ def test():
             print()
     
     @inline
-    def test_four_point_five():
+    def test_four_pt_five():
         nested = Nested(tree=nestedmaps)
         
         for mappingpath in mapwalk(nested.tree):
@@ -947,7 +947,7 @@ def test():
             print()
     
     @inline
-    def test_four_point_seven_five():
+    def test_four_pt_seven():
         nested = FrozenNested(tree=nestedmaps)
         
         print(f"NESTED FROZEN INSTANCE (length={len(nested)}):")
@@ -1014,20 +1014,21 @@ def test():
     print()
     pprint(nestedmaps)
     
-    test_one()
-    test_two()
-    test_three()
-    test_three_point_five()
+    # test_one()
+    # test_two()
+    # test_three()
+    # test_three_point_five()
     # test_four()
     # test_four_point_five()
-    test_four_point_seven_five()
-    test_five()
-    test_six()
+    # test_four_point_seven_five()
+    # test_five()
+    # test_six()
+    # test_inlines(vars())
+    inline.test(vars(), 100)
+    # inline.test(vars())
     
-    print()
-    pprint(os.environ.copy())
-    
-    test_six()
+    # print()
+    # pprint(os.environ.copy())
 
 if __name__ == '__main__':
     test()

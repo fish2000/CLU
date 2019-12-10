@@ -344,8 +344,9 @@ def test():
             
         finally:
             os.environ = stash # type: ignore
-        
-    test_one()
+    
+    # Run all inline tests:
+    inline.test(vars())
 
 if __name__ == '__main__':
     test()

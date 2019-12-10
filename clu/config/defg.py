@@ -743,8 +743,8 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
         namespaces = tuple(self.namespaces())
         prefix = prefix_env(self.appname)
         nslength = len(namespaces)
-        keys = len(self.keys())
-        return f"[prefix=“{prefix}*”, namespaces={nslength}, keys={keys}]"
+        keyslength = len(self.keys())
+        return f"[prefix=“{prefix}*”, namespaces={nslength}, keys={keyslength}]"
     
     def clone(self, deep=False, memo=None):
         copier = deep and copy.deepcopy or copy.copy

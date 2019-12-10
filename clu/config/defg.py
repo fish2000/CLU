@@ -13,7 +13,7 @@ import copy
 abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, NoDefault
-from clu.predicates import isiterable, tuplize, uniquify
+from clu.predicates import isiterable, tuplize
 from clu.typology import ismapping
 from clu.exporting import Exporter
 
@@ -344,14 +344,14 @@ class FrozenKeyMap(FrozenKeyMapBase):
     def namespaces(self):
         """ Iterate over all of the namespaces defined in the mapping.
             
-            This is the generic implementation. It depends on “__iter__(…)”
-            and uses “uniquify(…)” from ‘clu.predicates’, which some might
-            consider somewhat inefficient (q.v. “uniquify(…)” predicate
-            utility function supra.)
+            This is the generic implementation. It depends on “__iter__(…)”,
+            as implemented by the concrete descendant.
         """
-        yield from sorted(uniquify(get_ns(nskey) \
-                                      for nskey in self \
-                                       if NAMESPACE_SEP in nskey))
+        out = set()
+        for nskey in self:
+            if NAMESPACE_SEP in nskey:
+                out.add(get_ns(nskey))
+        yield from sorted(out)
 
 @export
 class KeyMap(KeyMapBase, FrozenKeyMap):

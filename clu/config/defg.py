@@ -740,9 +740,8 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
     
     def inner_repr(self):
         """ Return some readable meta-information about this instance """
-        namespaces = tuple(self.namespaces())
         prefix = prefix_env(self.appname)
-        nslength = len(namespaces)
+        nslength = len(tuple(self.namespaces()))
         keyslength = len(self.keys())
         return f"[prefix=“{prefix}*”, namespaces={nslength}, keys={keyslength}]"
     

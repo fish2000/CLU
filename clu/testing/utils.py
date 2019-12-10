@@ -6,10 +6,7 @@ from functools import wraps
 import stopwatch
 import sys
 
-from clu.constants.consts import (QUALIFIER,
-                                  SEPARATOR_WIDTH,
-                                  TEXTMATE)
-
+from clu.constants import consts
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -31,7 +28,9 @@ def countfiles(target, suffix=None):
         count += len(tuple(filter(searcher, files)))
     return count
 
-WIDTH = TEXTMATE and max(SEPARATOR_WIDTH, 100) or SEPARATOR_WIDTH
+WIDTH = consts.TEXTMATE and max(consts.SEPARATOR_WIDTH, 100) \
+                             or consts.SEPARATOR_WIDTH
+
 asterisks = lambda filler='*': print(filler * WIDTH)
 printout = lambda name, value: print("» %25s : %s" % (name, value))
 
@@ -106,7 +105,7 @@ def inline(function):
             asterisks('-')
         if timervals:
             dt = str(timervals[0] * 0.001)
-            dtout = dt[:(dt.find(QUALIFIER) + 4)]
+            dtout = dt[:(dt.find(consts.QUALIFIER) + 4)]
             ndtout = natural_millis(timervals[0])
             print(f"Test function “{name}(¬)” ran for about {ndtout} ({dtout}s)")
         asterisks('=')
@@ -122,7 +121,7 @@ def inline(function):
 
 @export
 def format_report(aggregated_report, show_buckets=False):
-    """ Returns a pretty printed string of reported values """
+    """ Pretty-prints the data from a StopWatch aggregated report """
     # Copypasta-ed from the ‘stopwatch’ source –
     # N.B. This function is a total dog’s breakfast for reals
     values = aggregated_report.aggregated_values
@@ -222,9 +221,9 @@ def test_inlines(mapping, exec_count=1):
     elif exec_count == 2:
         count_text = "twice"
     print(f"TIME TOTALS – ran {funcount} functions {count_text}")
-    asterisks('•')
+    asterisks('=')
     print(out)
-    asterisks('•')
+    asterisks('≠')
 
 # One less import to forget about:
 inline.test = test_inlines

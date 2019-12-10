@@ -35,7 +35,7 @@ def prefix_for(*namespaces):
     ns = concatenate(*namespaces)
     return ns and f"{ns}{NAMESPACE_SEP}" or ns
 
-def strip_namespace(nskey):
+def strip_ns(nskey):
     """ Strip all namespace-related prefixing from a namespaced key """
     return nskey.rpartition(NAMESPACE_SEP)[-1]
 

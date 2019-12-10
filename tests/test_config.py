@@ -78,7 +78,7 @@ class TestConfig(object):
         # assert schema.andalso       == "and: YoDoggApp"
     
     def test_nested_and_flat(self):
-        from clu.config.base import Nested
+        from clu.config.defg import Nested
         
         tree = {
             'yo'        : "dogg",
@@ -221,7 +221,7 @@ class TestConfig(object):
         assert toml_file.filesuffix == 'toml'
         assert toml_file.filepath.endswith(toml_file.filesuffix)
         
-        assert toml_file.namespaces() == ('debugging', 'userinfo')
+        assert tuple(toml_file.namespaces()) == ('debugging', 'userinfo')
         assert toml_file['project'] == 'clu'
         assert toml_file['description'] is not None
         assert toml_file['description_content_type'] == 'text/markdown'
@@ -235,7 +235,7 @@ class TestConfig(object):
         
         flat = toml_file.flatten()
         
-        assert flat.namespaces() == ('debugging', 'userinfo')
+        assert tuple(flat.namespaces()) == ('debugging', 'userinfo')
         assert flat['project'] == 'clu'
         assert flat['description'] is not None
         assert flat['description_content_type'] == 'text/markdown'
@@ -270,7 +270,7 @@ class TestConfig(object):
         assert toml_file.filesuffix == 'toml'
         assert toml_file.filepath.endswith(toml_file.filesuffix)
         
-        assert toml_file.namespaces() == ('debugging', 'userinfo')
+        assert tuple(toml_file.namespaces()) == ('debugging', 'userinfo')
         assert toml_file['project'] == 'clu'
         assert toml_file['description'] is not None
         assert toml_file['description_content_type'] == 'text/markdown'
@@ -284,7 +284,7 @@ class TestConfig(object):
         
         flat = toml_file.flatten()
         
-        assert flat.namespaces() == ('debugging', 'userinfo')
+        assert tuple(flat.namespaces()) == ('debugging', 'userinfo')
         assert flat['project'] == 'clu'
         assert flat['description'] is not None
         assert flat['description_content_type'] == 'text/markdown'

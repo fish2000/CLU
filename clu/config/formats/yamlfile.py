@@ -4,7 +4,7 @@ from __future__ import print_function
 import yaml
 
 from clu.constants.consts import PROJECT_NAME
-from clu.config.base import Nested
+from clu.config.defg import FrozenNested
 from clu.config.filebase import FileBase
 from clu.exporting import Exporter
 
@@ -17,7 +17,7 @@ options = { 'default_flow_style' : True,
                         'indent' : 4 }
 
 @export
-class YamlFileBase(FileBase, Nested):
+class YamlFileBase(FileBase, FrozenNested):
     
     """ The base class for “clu.config.yamlfile.YamlFile”. Override this
         class in your own project to use YAML file data in your Schema

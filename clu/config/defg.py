@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from itertools import chain
+from itertools import chain, zip_longest
 
 iterchain = chain.from_iterable
 
@@ -202,7 +202,9 @@ def get_ns(nskey):
 
 def compare_ns(iterone, itertwo):
     """ Boolean predicate to compare a pair of namespace iterables, value-by-value """
-    for one, two in zip(iterone, itertwo):
+    for one, two in zip_longest(iterone,
+                                itertwo,
+                                fillvalue=NoDefault):
         if one != two and one is not two:
             return False
     return True
@@ -712,7 +714,7 @@ def test():
         
         nested = Nested(flat)
         assert nested.flatten() == flat
-        # assert nested == flat
+        assert nested == flat
     
     @inline
     def test_three_point_five():
@@ -806,6 +808,7 @@ def test():
         
         flat = Flat(nested)
         assert flat.nestify() == nested
+        assert flat == nested
     
     @inline
     def test_five():

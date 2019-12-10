@@ -35,7 +35,9 @@ WIDTH = TEXTMATE and max(SEPARATOR_WIDTH, 100) or SEPARATOR_WIDTH
 asterisks = lambda filler='*': print(filler * WIDTH)
 printout = lambda name, value: print("» %25s : %s" % (name, value))
 
+@export
 def natural_millis(millis):
+    """ Convert a quantity of milliseconds to an English expression """
     import humanize
     return humanize.naturaldelta(
            humanize.time.timedelta(milliseconds=millis))
@@ -88,7 +90,7 @@ def inline(function):
             out = function(*args, **kwargs)
         
         # Get the reported timer value *before* closing out
-        # the root stopwatch timer:
+        # the root stopwatch timer
         timervals = item(watch._reported_values, name,
                                           f'run#{name}',
                                      f'root#run#{name}',
@@ -118,9 +120,11 @@ def inline(function):
     # Return the test wrapper function:
     return test_wrapper
 
+@export
 def format_report(aggregated_report, show_buckets=False):
     """ Returns a pretty printed string of reported values """
-    # Copypasta-ed from the ‘stopwatch’ source:
+    # Copypasta-ed from the ‘stopwatch’ source –
+    # N.B. This function is a total dog’s breakfast for reals
     values = aggregated_report.aggregated_values
     root_tr_data = aggregated_report.root_timer_data
     
@@ -181,17 +185,23 @@ def test_inlines(mapping, exec_count=1):
     # Root timer for everything:
     with watch.timer('root'):
         
+        # Timer for setup operations:
         with watch.timer('collect'):
             for key, value in mapping.items():
                 if getattr(value, '__test__', False):
                     functions.append((key, value))
                     order.append(key)
         
+        # Main timer for execution times:
         with watch.timer('run'):
             
+            # Call functions once:
             for name, function in functions:
                 function(watch=watch)
             
+            # Call them twice through «adnauseumn» –
+            # Redirecting `stdout` so we only get the
+            # verbose output once:
             if exec_count - 1 > 0:
                 iosink = io.StringIO()
                 with redirect_stdout(iosink):
@@ -199,12 +209,12 @@ def test_inlines(mapping, exec_count=1):
                         for name, function in functions:
                             function(watch=watch)
                         iosink.truncate(0)
-    
+    # REPORT IN:
     report = watch.get_last_aggregated_report()
     funcount = len(functions)
     out = format_report(report)
     
-    # Cough up the final report:
+    # Cough up the final report data:
     print()
     count_text = f"{exec_count} times"
     if exec_count == 1:

@@ -4,7 +4,7 @@ from contextlib import redirect_stdout, ExitStack
 from functools import wraps
 
 import stopwatch
-import sys
+import sys, os
 
 from clu.constants import consts
 from clu.exporting import Exporter
@@ -287,3 +287,92 @@ def __getattr__(key):
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir('pout')
+
+def test():
+    
+    # Normally, we’d be like, “from clu.testing.utils import inline”
+    # …like, right about say here:
+    # from pprint import pprint
+    from clu.fs import pypath
+    pout = stdpout()
+    
+    # @inline
+    def test_zero():
+        pout.v(os.environ)
+    
+    @inline
+    def test_one():
+        """ Busywork, mark I. """
+        # Fuck around with the “yodogg” app’s environment overrides:
+        from clu.fs.filesystem import Directory
+        
+        prefix0 = Directory(consts.TEST_PATH).subdirectory('yodogg')
+        assert prefix0.exists
+        pypath.enhance(prefix0)
+        
+        prefix1 = Directory(consts.TEST_PATH).subdirectory('yodogg').subdirectory('yodogg')
+        assert prefix1.exists
+        pypath.enhance(prefix1)
+        
+        # pprint(sys.path)
+        # print()
+        
+        from yodogg.config import Env
+        from clu.config.defg import Environ
+        
+        env0 = Env()
+        envy = Environ(appname=Env.appname)
+        
+        # pprint(envy.flatten())
+        # print()
+        
+        for key in env0.keys():
+            print(f"» [old] ENVIRONMENT KEY: {key}")
+            assert envy[key] == env0[key]
+        
+        for key in envy.keys():
+            print(f"» [new] ENVIRONMENT KEY: {key}")
+            assert envy[key] == env0[key]
+        
+        pypath.remove_paths(prefix0, prefix1)
+    
+    @inline
+    def test_two():
+        """ Busywork, mark II. """
+        # Fuck around with the CLU app’s environment overrides:
+        # from clu.fs.filesystem import Directory
+        from clu.config.env import Env
+        from clu.config.defg import Environ
+        
+        env0 = Env()
+        envy = Environ(appname=Env.appname)
+        
+        # pprint(envy.flatten())
+        # print()
+        
+        for key in env0.keys():
+            print(f"» [old] ENVIRONMENT KEY: {key}")
+            assert envy[key] == env0[key]
+        
+        print()
+        
+        for key in envy.keys():
+            print(f"» [new] ENVIRONMENT KEY: {key}")
+            assert envy[key] == env0[key]
+        
+        print()
+    
+    @inline
+    def test_three():
+        """ Busywork, mark III. """
+        pass
+    
+    @inline
+    def test_four():
+        """ Busywork, mark IV. """
+        pass
+    
+    inline.test(vars())
+
+if __name__ == '__main__':
+    test()

@@ -428,7 +428,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     __slots__ = tuplize('dictionary')
     
-    def __init__(self, dictionary=None, *args, **kwargs):
+    def __init__(self, dictionary=None, *args, **updates):
         """ Initialize a flat KeyMap instance from a target dictionary.
             
             The dictionary can contain normal key-value items as long as the
@@ -436,7 +436,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
             output of ‘pack_ns(…)’ (q.v. function definition supra.)
         """
         try:
-            super(FrozenFlat, self).__init__(*args, **kwargs)
+            super(FrozenFlat, self).__init__(*args, **updates)
         except TypeError:
             super(FrozenFlat, self).__init__()
         if hasattr(dictionary, 'dictionary'):
@@ -444,6 +444,8 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         elif hasattr(dictionary, 'flatten'):
             dictionary = getattr(dictionary.flatten(), 'dictionary')
         self.dictionary = dict(dictionary or {})
+        if updates:
+            self.dictionary.update(**updates)
     
     def nestify(self, cls=None):
         """ Articulate a flattened KeyMap instance out into one that is nested. """
@@ -526,12 +528,12 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     __slots__ = tuplize('tree')
     
-    def __init__(self, tree=None, *args, **kwargs):
+    def __init__(self, tree=None, *args, **updates):
         """ Initialize an articulated (née “nested”) KeyMap instance from a
             target nested dictionary (or a “tree” of dicts).
         """
         try:
-            super(FrozenNested, self).__init__(*args, **kwargs)
+            super(FrozenNested, self).__init__(*args, **updates)
         except TypeError:
             super(FrozenNested, self).__init__()
         if hasattr(tree, 'tree'):
@@ -539,6 +541,8 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
         elif hasattr(tree, 'nestify'):
             tree = getattr(tree.nestify(), 'tree')
         self.tree = tree or DefaultTree()
+        if updates:
+            self.tree.update(**updates)
     
     def mapwalk(self):
         """ Iteratively walk the nested KeyMap’s tree of dicts. """

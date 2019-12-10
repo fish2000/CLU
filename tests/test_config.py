@@ -4,130 +4,7 @@ from __future__ import print_function
 import os
 import pytest
 
-class TestConfig(object):
-    
-    def test_package_schema_subclasses_Env(self, dirname, environment):
-        from clu.fs import pypath
-        
-        # Ensure “sys.path” contains the “yodogg” package:
-        prefix = dirname.subdirectory('yodogg')
-        assert prefix.exists
-        pypath.enhance(prefix)
-        
-        from yodogg.config import Env
-        from yodogg.config import MySchema
-        
-        schema = MySchema()
-        env = Env()
-        
-        assert 'YODOGG_TITLE' not in environment
-        assert 'YODOGG_VERSION' not in environment
-        assert 'YODOGG_APPVERSION' not in environment
-        
-        assert 'YODOGG_METADATA_RELEASEDATE' not in environment
-        assert 'YODOGG_METADATA_AUTHOR' not in environment
-        assert 'YODOGG_METADATA_COPYRIGHT' not in environment
-        
-        assert 'YODOGG_YODOGG_IHEARD' not in environment
-        assert 'YODOGG_YODOGG_YOULIKE' not in environment
-        assert 'YODOGG_YODOGG_ANDALSO' not in environment
-        
-        env.update(schema.nestify(stringify=False))
-        
-        assert environment['YODOGG_TITLE'] == "YoDoggApp"
-        assert environment['YODOGG_VERSION'] == "1"
-        assert environment['YODOGG_APPVERSION'] == "0.1"
-        
-        assert environment['YODOGG_METADATA_RELEASEDATE']
-        assert environment['YODOGG_METADATA_AUTHOR'] == "Alexander Böhn"
-        assert 'YODOGG_METADATA_CONSIDERATIONS' not in environment
-        assert environment['YODOGG_METADATA_COPYRIGHT']
-        
-        assert environment['YODOGG_YODOGG_IHEARD'] == "…I heard"
-        assert environment['YODOGG_YODOGG_YOULIKE'] == "you like:"
-        # assert environment['YODOGG_YODOGG_ANDALSO'] == "and: YoDoggApp"
-    
-    def test_package_schema(self, dirname):
-        from datetime import datetime
-        from clu.fs import pypath
-        
-        # Ensure “sys.path” contains the “yodogg” package:
-        prefix = dirname.subdirectory('yodogg')
-        assert prefix.exists
-        pypath.enhance(prefix)
-        
-        from yodogg.config import MySchema
-        
-        schema = MySchema()
-        
-        assert schema.title         == "YoDoggApp"
-        assert schema.version       == 1.0
-        assert schema.appversion    == 0.1
-        
-        # NAMESPACE: metadata
-        assert schema.releasedate        < datetime.utcnow()
-        assert schema.author            == "Alexander Böhn"
-        assert schema.considerations    is None
-        assert "Alexander Böhn"         in schema.copyright
-        assert "©"                      in schema.copyright
-        assert schema.copyright.startswith("YoDoggApp")
-        
-        # NAMESPACE: yodogg
-        # assert schema.yodogg.iheard        == "…I heard"
-        assert schema.youlike       == "you like:"
-        # assert schema.andalso       == "and: YoDoggApp"
-    
-    def test_nested_and_flat(self):
-        from clu.config.base import Nested
-        
-        tree = {
-            'yo'        : "dogg",
-            'i_heard'   : "you like",
-            'nested'    : "dicts",
-            'so'        : "we put dicts in your dicts",
-            
-            'wat'       : { 'yo'        : "dogggggg",
-                            'yoyo'      : "dogggggggggg" },
-            
-            'nodogg'    : { 'yo'        : "dogggggg",
-                            'yoyo'      : "dogggggggggg" }
-        }
-        
-        dictionary = {
-            'i_heard'       : 'you like',
-            'nested'        : 'dicts',
-            'nodogg:yo'     : 'dogggggg',
-            'nodogg:yoyo'   : 'dogggggggggg',
-            'so'            : 'we put dicts in your dicts',
-            'wat:yo'        : 'dogggggg',
-            'wat:yoyo'      : 'dogggggggggg',
-            'yo'            : 'dogg'
-        }
-        
-        nested = Nested(tree=tree)
-        
-        assert tuple(nested.keys()) == ('yo', 'i_heard', 'nested', 'so',
-                                        'wat:yo', 'wat:yoyo', 'nodogg:yo', 'nodogg:yoyo')
-        assert tuple(nested.values()) == ('dogg', 'you like', 'dicts', 'we put dicts in your dicts',
-                                          'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
-        assert tuple(nested.namespaces()) == ('nodogg', 'wat')
-        
-        flat = nested.flatten()
-        
-        assert tuple(flat.keys()) == ('yo', 'i_heard', 'nested', 'so',
-                                      'wat:yo', 'wat:yoyo', 'nodogg:yo', 'nodogg:yoyo')
-        assert tuple(flat.values()) == ('dogg', 'you like', 'dicts', 'we put dicts in your dicts',
-                                        'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
-        assert tuple(flat.namespaces()) == ('nodogg', 'wat')
-        
-        assert flat.dictionary == dictionary
-        
-        renestified = flat.nestify()
-        
-        assert renestified.tree == tree
-        assert renestified == flat
-        assert flat == nested
-        assert renestified == nested
+class TestConfigKeyMaps(object):
     
     def test_nested_and_flat_KeyMaps(self):
         from clu.config.defg import Nested, KeyMapKeysView, KeyMapItemsView, KeyMapValuesView
@@ -188,81 +65,6 @@ class TestConfig(object):
         assert renestified == flat
         assert flat == nested
         assert renestified == nested
-    
-    def test_FlatOrderedSet(self):
-        from clu.config.abc import FlatOrderedSet
-        
-        stuff = FlatOrderedSet(None, "a", "b", FlatOrderedSet("c", None, "a", "d"))
-        summary = FlatOrderedSet("a", "b", "c", "d")
-        
-        assert stuff.things == summary.things
-        assert stuff == summary
-        assert not stuff.isdisjoint(summary)
-    
-    def test_NamespacedFieldManager_module_getattr_instancing(self):
-        from clu.config.fieldtypes import fields as fields0
-        from clu.config.fieldtypes import fields as fields1
-        
-        # Ensure each import of “fields” is instanced anew:
-        assert id(fields0) != id(fields1)
-        
-        # Ensure the module __getattr__ raises for other keys:
-        with pytest.raises(ImportError) as exc:
-            from clu.config.fieldtypes import yodogg
-            del yodogg
-        assert "cannot import name" in str(exc.value)
-    
-    def test_env_get(self, environment):
-        from clu.config.env import Env
-        env = Env()
-        
-        try:
-            environment['CLU_ENVTEST1_YODOGG']  = "Yo, Dogg –"
-            environment['CLU_ENVTEST1_IHEARD']  = "… I Heard"
-            environment['CLU_ENVTEST1_YOULIKE'] = "You Like Environment Variables."
-            
-            assert env['envtest1:yodogg']  == "Yo, Dogg –"
-            assert env['envtest1:iheard']  == "… I Heard"
-            assert env['envtest1:youlike'] == "You Like Environment Variables."
-            
-            assert 'envtest1' in env.namespaces()
-        
-        finally:
-            del environment['CLU_ENVTEST1_YODOGG']
-            del environment['CLU_ENVTEST1_IHEARD']
-            del environment['CLU_ENVTEST1_YOULIKE']
-        
-        assert 'envtest1:yodogg'  not in env
-        assert 'envtest1:iheard'  not in env
-        assert 'envtest1:youlike' not in env
-        
-        assert 'envtest1' not in env.namespaces()
-    
-    def test_env_set(self, environment):
-        from clu.config.env import Env
-        env = Env()
-        
-        try:
-            env['envtest0:yodogg']  = "Yo Dogg"
-            env['envtest0:iheard']  = "I Heard"
-            env['envtest0:youlike'] = "You Like Environment Variables"
-            
-            assert environment['CLU_ENVTEST0_YODOGG']  == "Yo Dogg"
-            assert environment['CLU_ENVTEST0_IHEARD']  == "I Heard"
-            assert environment['CLU_ENVTEST0_YOULIKE'] == "You Like Environment Variables"
-            
-            assert 'envtest0' in env.namespaces()
-        
-        finally:
-            del env['envtest0:yodogg']
-            del env['envtest0:iheard']
-            del env['envtest0:youlike']
-        
-        assert 'CLU_ENVTEST0_YODOGG'  not in environment
-        assert 'CLU_ENVTEST0_IHEARD'  not in environment
-        assert 'CLU_ENVTEST0_YOULIKE' not in environment
-        
-        assert 'envtest0' not in env.namespaces()
     
     def test_env_get_KeyMaps(self, environment, consts):
         from clu.config.defg import Environ
@@ -423,3 +225,203 @@ class TestConfig(object):
         with pytest.raises(FileNotFoundError) as exc:
             TomlFile.find_file(filename='NO-DOGG.toml', extra_user_dirs=tuplize(cfgs))
         assert "config file NO-DOGG.toml" in str(exc.value)
+
+class TestConfig(object):
+    
+    def test_package_schema_subclasses_Env(self, dirname, environment):
+        from clu.fs import pypath
+        
+        # Ensure “sys.path” contains the “yodogg” package:
+        prefix = dirname.subdirectory('yodogg')
+        assert prefix.exists
+        pypath.enhance(prefix)
+        
+        from yodogg.config import Env
+        from yodogg.config import MySchema
+        
+        schema = MySchema()
+        env = Env()
+        
+        assert 'YODOGG_TITLE' not in environment
+        assert 'YODOGG_VERSION' not in environment
+        assert 'YODOGG_APPVERSION' not in environment
+        
+        assert 'YODOGG_METADATA_RELEASEDATE' not in environment
+        assert 'YODOGG_METADATA_AUTHOR' not in environment
+        assert 'YODOGG_METADATA_COPYRIGHT' not in environment
+        
+        assert 'YODOGG_YODOGG_IHEARD' not in environment
+        assert 'YODOGG_YODOGG_YOULIKE' not in environment
+        assert 'YODOGG_YODOGG_ANDALSO' not in environment
+        
+        env.update(schema.nestify(stringify=False))
+        
+        assert environment['YODOGG_TITLE'] == "YoDoggApp"
+        assert environment['YODOGG_VERSION'] == "1"
+        assert environment['YODOGG_APPVERSION'] == "0.1"
+        
+        assert environment['YODOGG_METADATA_RELEASEDATE']
+        assert environment['YODOGG_METADATA_AUTHOR'] == "Alexander Böhn"
+        assert 'YODOGG_METADATA_CONSIDERATIONS' not in environment
+        assert environment['YODOGG_METADATA_COPYRIGHT']
+        
+        assert environment['YODOGG_YODOGG_IHEARD'] == "…I heard"
+        assert environment['YODOGG_YODOGG_YOULIKE'] == "you like:"
+        # assert environment['YODOGG_YODOGG_ANDALSO'] == "and: YoDoggApp"
+    
+    def test_package_schema(self, dirname):
+        from datetime import datetime
+        from clu.fs import pypath
+        
+        # Ensure “sys.path” contains the “yodogg” package:
+        prefix = dirname.subdirectory('yodogg')
+        assert prefix.exists
+        pypath.enhance(prefix)
+        
+        from yodogg.config import MySchema
+        
+        schema = MySchema()
+        
+        assert schema.title         == "YoDoggApp"
+        assert schema.version       == 1.0
+        assert schema.appversion    == 0.1
+        
+        # NAMESPACE: metadata
+        assert schema.releasedate        < datetime.utcnow()
+        assert schema.author            == "Alexander Böhn"
+        assert schema.considerations    is None
+        assert "Alexander Böhn"         in schema.copyright
+        assert "©"                      in schema.copyright
+        assert schema.copyright.startswith("YoDoggApp")
+        
+        # NAMESPACE: yodogg
+        # assert schema.yodogg.iheard        == "…I heard"
+        assert schema.youlike       == "you like:"
+        # assert schema.andalso       == "and: YoDoggApp"
+    
+    def test_nested_and_flat(self):
+        from clu.config.base import Nested
+        
+        tree = {
+            'yo'        : "dogg",
+            'i_heard'   : "you like",
+            'nested'    : "dicts",
+            'so'        : "we put dicts in your dicts",
+            
+            'wat'       : { 'yo'        : "dogggggg",
+                            'yoyo'      : "dogggggggggg" },
+            
+            'nodogg'    : { 'yo'        : "dogggggg",
+                            'yoyo'      : "dogggggggggg" }
+        }
+        
+        dictionary = {
+            'i_heard'       : 'you like',
+            'nested'        : 'dicts',
+            'nodogg:yo'     : 'dogggggg',
+            'nodogg:yoyo'   : 'dogggggggggg',
+            'so'            : 'we put dicts in your dicts',
+            'wat:yo'        : 'dogggggg',
+            'wat:yoyo'      : 'dogggggggggg',
+            'yo'            : 'dogg'
+        }
+        
+        nested = Nested(tree=tree)
+        
+        assert tuple(nested.keys()) == ('yo', 'i_heard', 'nested', 'so',
+                                        'wat:yo', 'wat:yoyo', 'nodogg:yo', 'nodogg:yoyo')
+        assert tuple(nested.values()) == ('dogg', 'you like', 'dicts', 'we put dicts in your dicts',
+                                          'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
+        assert tuple(nested.namespaces()) == ('nodogg', 'wat')
+        
+        flat = nested.flatten()
+        
+        assert tuple(flat.keys()) == ('yo', 'i_heard', 'nested', 'so',
+                                      'wat:yo', 'wat:yoyo', 'nodogg:yo', 'nodogg:yoyo')
+        assert tuple(flat.values()) == ('dogg', 'you like', 'dicts', 'we put dicts in your dicts',
+                                        'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
+        assert tuple(flat.namespaces()) == ('nodogg', 'wat')
+        
+        assert flat.dictionary == dictionary
+        
+        renestified = flat.nestify()
+        
+        assert renestified.tree == tree
+        assert renestified == flat
+        assert flat == nested
+        assert renestified == nested
+        
+    def test_FlatOrderedSet(self):
+        from clu.config.abc import FlatOrderedSet
+        
+        stuff = FlatOrderedSet(None, "a", "b", FlatOrderedSet("c", None, "a", "d"))
+        summary = FlatOrderedSet("a", "b", "c", "d")
+        
+        assert stuff.things == summary.things
+        assert stuff == summary
+        assert not stuff.isdisjoint(summary)
+    
+    def test_NamespacedFieldManager_module_getattr_instancing(self):
+        from clu.config.fieldtypes import fields as fields0
+        from clu.config.fieldtypes import fields as fields1
+        
+        # Ensure each import of “fields” is instanced anew:
+        assert id(fields0) != id(fields1)
+        
+        # Ensure the module __getattr__ raises for other keys:
+        with pytest.raises(ImportError) as exc:
+            from clu.config.fieldtypes import yodogg
+            del yodogg
+        assert "cannot import name" in str(exc.value)
+    
+    def test_env_get(self, environment):
+        from clu.config.env import Env
+        env = Env()
+        
+        try:
+            environment['CLU_ENVTEST1_YODOGG']  = "Yo, Dogg –"
+            environment['CLU_ENVTEST1_IHEARD']  = "… I Heard"
+            environment['CLU_ENVTEST1_YOULIKE'] = "You Like Environment Variables."
+            
+            assert env['envtest1:yodogg']  == "Yo, Dogg –"
+            assert env['envtest1:iheard']  == "… I Heard"
+            assert env['envtest1:youlike'] == "You Like Environment Variables."
+            
+            assert 'envtest1' in env.namespaces()
+        
+        finally:
+            del environment['CLU_ENVTEST1_YODOGG']
+            del environment['CLU_ENVTEST1_IHEARD']
+            del environment['CLU_ENVTEST1_YOULIKE']
+        
+        assert 'envtest1:yodogg'  not in env
+        assert 'envtest1:iheard'  not in env
+        assert 'envtest1:youlike' not in env
+        
+        assert 'envtest1' not in env.namespaces()
+    
+    def test_env_set(self, environment):
+        from clu.config.env import Env
+        env = Env()
+        
+        try:
+            env['envtest0:yodogg']  = "Yo Dogg"
+            env['envtest0:iheard']  = "I Heard"
+            env['envtest0:youlike'] = "You Like Environment Variables"
+            
+            assert environment['CLU_ENVTEST0_YODOGG']  == "Yo Dogg"
+            assert environment['CLU_ENVTEST0_IHEARD']  == "I Heard"
+            assert environment['CLU_ENVTEST0_YOULIKE'] == "You Like Environment Variables"
+            
+            assert 'envtest0' in env.namespaces()
+        
+        finally:
+            del env['envtest0:yodogg']
+            del env['envtest0:iheard']
+            del env['envtest0:youlike']
+        
+        assert 'CLU_ENVTEST0_YODOGG'  not in environment
+        assert 'CLU_ENVTEST0_IHEARD'  not in environment
+        assert 'CLU_ENVTEST0_YOULIKE' not in environment
+        
+        assert 'envtest0' not in env.namespaces()

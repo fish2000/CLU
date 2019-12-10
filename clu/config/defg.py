@@ -448,9 +448,9 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         except TypeError:
             super(FrozenFlat, self).__init__()
         if hasattr(dictionary, 'dictionary'):
-            dictionary = getattr(dictionary, 'dictionary')
+            dictionary = attr(dictionary, 'dictionary')
         elif hasattr(dictionary, 'flatten'):
-            dictionary = getattr(dictionary.flatten(), 'dictionary')
+            dictionary = attr(dictionary.flatten(), 'dictionary')
         self.dictionary = dict(dictionary or {})
         if updates:
             self.dictionary.update(**updates)
@@ -595,9 +595,9 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
         except TypeError:
             super(FrozenNested, self).__init__()
         if hasattr(tree, 'tree'):
-            tree = getattr(tree, 'tree')
+            tree = attr(tree, 'tree')
         elif hasattr(tree, 'nestify'):
-            tree = getattr(tree.nestify(), 'tree')
+            tree = attr(tree.nestify(), 'tree')
         self.tree = tree or DefaultTree()
         if updates:
             self.tree.update(**updates)
@@ -653,7 +653,20 @@ def concatenate_env(*namespaces):
     return ENVIRONS_SEP.join(namespace.upper() for namespace in namespaces)
 
 def prefix_env(appname, *namespaces):
-    """ Deduce the environment-variable prefix for an appname and namespaces. """
+    """ Determine the environment-variable prefix based on a given
+        set of namespaces and the provided “appname” value. Like e.g.,
+        for an appname of “YoDogg” and a namespace value of “iheard”,
+        the environment variable prefix would work out such that
+        a variable with a key value of “youlike” would look like this:
+            
+            YODOGG_IHEARD_YOULIKE
+                                 
+            ^^^^^^ ^^^^^^ ^^^^^^^
+               |      |      |
+               |      |      +––––– mapping key (uppercased)
+               |      +–––––––––––– namespaces (uppercased, one value)
+               +––––––––––––––––––– app name (uppercased)
+    """
     if not appname and not namespaces:
         return ''
     if not appname:
@@ -663,8 +676,20 @@ def prefix_env(appname, *namespaces):
     return appname.upper() + ENVIRONS_SEP + concatenate_env(*namespaces) + ENVIRONS_SEP
 
 def pack_env(appname, key, *namespaces):
-    """ Pack an appname, a key name, and optional namespaces per the environment
-        variable naming scheme.
+    """ Transform a mapping key, along with optional “namespaces”
+        values and the provided “appname” value, into an environment-
+        variable name. Like e.g., for an appname of “YoDogg” and
+        a namespace value of “iheard”, the environment variable
+        prefix would work out such that a variable with a key value
+        of “youlike” would look like this:
+            
+            YODOGG_IHEARD_YOULIKE
+                                 
+            ^^^^^^ ^^^^^^ ^^^^^^^
+               |      |      |
+               |      |      +––––– mapping key (uppercased)
+               |      +–––––––––––– namespaces (uppercased, one value)
+               +––––––––––––––––––– app name (uppercased)
     """
     prefix = prefix_env(appname, *namespaces)
     return f"{prefix}{key.upper()}"
@@ -720,18 +745,10 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
             super(FrozenEnviron, self).__init__(*args, **updates)
         except TypeError:
             super(FrozenEnviron, self).__init__()
-        if hasattr(environment, 'environment'):
-            environment = getattr(environment, 'environment')
-        elif hasattr(environment, 'dictionary'):
-            environment = getattr(environment, 'dictionary')
-        # elif hasattr(environment, 'nestify'):
-        #     environment = attr(environment.nestify(), 'environment', 'tree')
-        elif hasattr(environment, 'flatten'):
-            environment = attr(environment.flatten(), 'environment', 'dictionary')
         self.environment = environment or os.environ.copy()
         self.appname = appname or PROJECT_NAME
         if updates:
-            self.tree.update(**updates)
+            self.environment.update(**updates)
     
     def walk(self):
         """ Iteratively walk the environment access dict. """

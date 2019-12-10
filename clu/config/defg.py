@@ -347,8 +347,8 @@ class FrozenKeyMap(FrozenKeyMapBase):
             This is the generic implementation. It depends on “__iter__(…)”,
             as implemented by the concrete descendant.
         """
-        out = { get_ns(nskey) for nskey in self if NAMESPACE_SEP in nskey }
-        yield from sorted(out)
+        nss = { get_ns(nskey) for nskey in self if NAMESPACE_SEP in nskey }
+        yield from sorted(nss)
 
 @export
 class KeyMap(KeyMapBase, FrozenKeyMap):
@@ -557,11 +557,11 @@ class FrozenNested(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     def namespaces(self):
         """ Iterate over all of the namespaces defined in the mapping. """
-        out = set()
+        nss = set()
         for *namespaces, key, value in self.mapwalk():
             if namespaces:
-                out.add(concatenate(*namespaces))
-        yield from sorted(out)
+                nss.add(concatenate(*namespaces))
+        yield from sorted(nss)
     
     def __iter__(self):
         for *namespaces, key, value in self.mapwalk():

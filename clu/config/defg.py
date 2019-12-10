@@ -13,7 +13,7 @@ import copy
 abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, NoDefault
-from clu.predicates import isiterable, isexpandable, tuplize, uniquify
+from clu.predicates import isiterable, tuplize, uniquify
 from clu.typology import ismapping
 from clu.exporting import Exporter
 
@@ -194,8 +194,7 @@ def pack_ns(key, *namespaces):
         If no namespaces are provided (like e.g. “pack_ns('wat')”)
         the return value will be the string "wat".
     """
-    iterkeyvalue = isexpandable(key) and key or tuplize(key)
-    return NAMESPACE_SEP.join(chain(namespaces, iterkeyvalue))
+    return NAMESPACE_SEP.join(chain(namespaces, tuplize(key)))
 
 def get_ns(nskey):
     """ Get the namespace portion of a namespaced key as a packed string. """

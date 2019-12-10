@@ -755,9 +755,9 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
     def inner_repr(self):
         """ Return some readable meta-information about this instance """
         prefix = prefix_env(self.appname)
-        nslength = len(tuple(self.namespaces()))
-        keyslength = len(self.keys())
-        return f"[prefix=“{prefix}*”, namespaces={nslength}, keys={keyslength}]"
+        nscount = len(tuple(self.namespaces()))
+        keycount = len(self.keys())
+        return f"[prefix=“{prefix}*”, namespaces={nscount}, keys={keycount}]"
     
     def clone(self, deep=False, memo=None):
         copier = deep and copy.deepcopy or copy.copy

@@ -353,12 +353,10 @@ def test():
         from clu.fs.filesystem import Directory
         
         prefix0 = Directory(consts.TEST_PATH).subdirectory('yodogg')
-        assert prefix0.exists
-        pypath.enhance(prefix0)
-        
         prefix1 = prefix0.subdirectory('yodogg')
+        assert prefix0.exists
         assert prefix1.exists
-        pypath.enhance(prefix1)
+        pypath.enhance(prefix0, prefix1)
         
         # pprint(sys.path)
         # print()

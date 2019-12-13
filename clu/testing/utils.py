@@ -234,6 +234,7 @@ class InlineTester(collections.abc.Set,
                             for function in self.test_functions:
                                 function()
                             iosink.truncate(0)
+        
         # REPORT IN:
         report = self.watch.get_last_aggregated_report()
         funcount = len(self.test_functions)

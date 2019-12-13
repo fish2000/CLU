@@ -3,6 +3,7 @@ from __future__ import print_function
 from functools import wraps
 
 import collections.abc
+import clu.abstract
 import stopwatch
 import sys, os
 
@@ -93,7 +94,11 @@ def format_report(aggregated_report, show_buckets=False):
     return "\n".join(buf)
 
 @export
-class InlineTester(collections.abc.Callable):
+class InlineTester(collections.abc.Set,
+                   collections.abc.Sequence,
+                   collections.abc.Callable,
+                   clu.abstract.ReprWrapper,
+                   metaclass=clu.abstract.Slotted):
     
     """ Function decorator for an individual inline test. Example usage:
             
@@ -128,8 +133,8 @@ class InlineTester(collections.abc.Callable):
     
     __slots__ = ('test_functions', 'watch', '__weakref__')
     
-    def __init__(self):
-        self.test_functions = []
+    def __init__(self, iterable=None):
+        self.test_functions = list(iterable or [])
         self.watch = None
     
     def __call__(self, function):
@@ -256,6 +261,24 @@ class InlineTester(collections.abc.Callable):
         
         # Clear the stopwatch instance:
         self.watch = None
+    
+    def __len__(self):
+        return len(self.test_functions)
+    
+    def __iter__(self):
+        yield from self.test_functions
+    
+    def __getitem__(self, idx):
+        return self.test_functions[idx]
+    
+    def __contains__(self, value):
+        return value in self.test_functions
+    
+    def __bool__(self):
+        return len(self.test_functions) > 0
+    
+    def inner_repr(self):
+        return repr(self.test_functions)
 
 @export
 def stdpout():

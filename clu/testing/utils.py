@@ -109,15 +109,21 @@ class InlineTester(collections.abc.Callable):
                 def test_two():
                     # ...
             
-            inline.test()
+            inline.test() # ‡
             
             if __name__ == '__main__':
                 test()
         
-        † this `import` statement specifically instances and returns a
+        † This `import` statement specifically instances and returns a
           new copy of the InlineTester class, as the “@inline” decorator,
           allowing the instance to guarantee its uniqueness in each modules’
-          main inline test function, as per this example
+          main inline test function, as per this example.
+        
+        ‡ Optionally you can call this method with an integer, in order to
+          run your test functions that many times over, instead of just once.
+          …If you do so, any output produced by the functions will be printed
+          only on the first go-around, and will be discarded on all subsequent
+          executions. 
     """
     
     __slots__ = ('test_functions', 'watch', '__weakref__')

@@ -133,9 +133,15 @@ class InlineTester(collections.abc.Set,
     
     __slots__ = ('test_functions', 'watch', '__weakref__')
     
+    def __new__(cls, iterable=None):
+        instance = super().__new__(cls)
+        instance.test_functions = []
+        instance.watch = None
+        return instance
+    
     def __init__(self, iterable=None):
-        self.test_functions = list(iterable or [])
-        self.watch = None
+        if iterable is not None:
+            self.test_functions.extend(iterable)
     
     def __call__(self, function):
         """ Decorate a testing function, marking it as an inline test. """

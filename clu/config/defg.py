@@ -710,6 +710,7 @@ def nskey_to_env(appname, nskey):
     key, namespaces = unpack_ns(nskey)
     return pack_env(appname, key, *namespaces)
 
+@export
 def envwalk(appname, mapping):
     """ Iteratively walk an environment-variable mapping, selecting
         only the variables prefixed for the given appname, and convert

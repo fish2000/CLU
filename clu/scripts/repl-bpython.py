@@ -426,12 +426,12 @@ else:
     __all__ += ('colorio', 'colormath')
 
 try:
-    from clu.testing.utils import pout
+    from clu.testing.utils import pout, inline
 except (ImportError, SyntaxError):
     pass
 else:
     # Extend `__all__`:
-    __all__ += ('pout',)
+    __all__ += ('pout', 'inline')
 
 try:
     from clu import dispatch

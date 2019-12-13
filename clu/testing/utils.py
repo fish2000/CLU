@@ -100,7 +100,7 @@ class InlineTester(collections.abc.Set,
                    clu.abstract.ReprWrapper,
                    metaclass=clu.abstract.Slotted):
     
-    """ Function decorator for an individual inline test. Example usage:
+    """ Function decorator for marking and running inline tests. Example usage:
             
             def test():
                 

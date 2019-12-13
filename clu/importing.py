@@ -827,7 +827,7 @@ def test():
         return dir(overridden)
     
     # Run all tests:
-    inline.test(vars())
+    inline.test()
 
 if __name__ == '__main__':
     test()

@@ -567,7 +567,7 @@ def test():
         print()
     
     # Run all inline tests:
-    inline.test(vars())
+    inline.test()
 
 if __name__ == '__main__':
     test()

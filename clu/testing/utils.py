@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from contextlib import redirect_stdout, ExitStack
 from functools import wraps
 
+import collections.abc
 import stopwatch
 import sys, os
 
@@ -42,89 +42,8 @@ def natural_millis(millis):
            humanize.time.timedelta(milliseconds=millis))
 
 @export
-def inline(function):
-    """ Function decorator for an individual inline test. Example usage:
-            
-            def test():
-                
-                @inline
-                def test_one():
-                    # ...
-                
-                @inline
-                def test_two():
-                    # ...
-            
-            test_one()
-            test_two()
-            
-            if __name__ == '__main__':
-                test()
-    """
-    from clu.naming import nameof
-    from clu.predicates import item
-    from pprint import pprint
-    
-    # Get the name of the decorated function:
-    name = nameof(function, default='<unnamed>')
-    
-    @wraps(function)
-    def test_wrapper(*args, **kwargs):
-        # Get stopwatch:
-        watch = kwargs.pop('watch', None)
-        stack = ExitStack()
-        
-        if watch is None:
-            watch = stopwatch.StopWatch()
-            stack.enter_context(watch.timer('root'))
-        
-        # Print header:
-        print()
-        print(f"TESTING: “{name}”")
-        asterisks('-')
-        print()
-        
-        # Run the wrapped function, timing it:
-        with watch.timer(name):
-            out = function(*args, **kwargs)
-        
-        # Get the reported timer value *before* closing out
-        # the root stopwatch timer
-        timervals = item(watch._reported_values, name,
-                                          f'run#{name}',
-                                     f'root#run#{name}',
-                                         f'root#{name}',
-                                          'root')
-        stack.close()
-        
-        # Print the results and execution time:
-        asterisks('-')
-        
-        if out is not None:
-            print("RESULTS:")
-            pprint(out)
-            asterisks('-')
-        
-        if timervals:
-            dt = str(timervals[0] * 0.001)
-            dtout = dt[:(dt.find(consts.QUALIFIER) + 4)]
-            ndtout = natural_millis(timervals[0])
-            print(f"Test function “{name}(¬)” ran for about {ndtout} ({dtout}s)")
-        
-        asterisks('=')
-        
-        # Return as per the decorated function:
-        return out
-    
-    # mark the wrapper as an inline test function:
-    test_wrapper.__test__ = True
-    
-    # Return the test wrapper function:
-    return test_wrapper
-
-@export
 def format_report(aggregated_report, show_buckets=False):
-    """ Pretty-prints the data from a StopWatch aggregated report """
+    """ Pretty-prints the data from a dbx-stopwatch aggregated report """
     # Copypasta-ed from the ‘stopwatch’ source –
     # N.B. This function is a total dog’s breakfast for reals
     values = aggregated_report.aggregated_values
@@ -174,70 +93,163 @@ def format_report(aggregated_report, show_buckets=False):
     return "\n".join(buf)
 
 @export
-def test_inlines(mapping, exec_count=1):
-    """ Run all functions marked @inline from “mapping”, using
-        individual context timers for each function (via stopwatch)
+class InlineTester(collections.abc.Callable):
+    
+    """ Function decorator for an individual inline test. Example usage:
+            
+            def test():
+                
+                from clu.testing.utils import inline # †
+                
+                @inline
+                def test_one():
+                    # ...
+                
+                @inline
+                def test_two():
+                    # ...
+            
+            inline.test()
+            
+            if __name__ == '__main__':
+                test()
+        
+        † this `import` statement specifically instances and returns a
+          new copy of the InlineTester class, as the “@inline” decorator,
+          allowing the instance to guarantee its uniqueness in each modules’
+          main inline test function, as per this example
     """
-    import io
     
-    watch = stopwatch.StopWatch()
-    functions = []
-    order = []
+    __slots__ = ('test_functions', 'watch', '__weakref__')
     
-    # Root timer for everything:
-    with watch.timer('root'):
+    def __init__(self):
+        self.test_functions = []
+        self.watch = None
+    
+    def __call__(self, function):
+        """ Decorate a testing function, marking it as an inline test. """
+        from clu.naming import nameof
+        from clu.predicates import or_none, item
+        from contextlib import ExitStack
+        from pprint import pprint
         
-        # Timer for setup operations:
-        with watch.timer('collect'):
-            for key, value in mapping.items():
-                if getattr(value, '__test__', False):
-                    functions.append((key, value))
-                    order.append(key)
+        # Get the name of the decorated function:
+        name = nameof(function, default='<unnamed>')
         
-        # Main timer for execution times:
-        with watch.timer('run'):
+        @wraps(function)
+        def test_wrapper(*args, **kwargs):
+            # Get a stopwatch instance:
+            watch = or_none(self, 'watch')
+            stack = ExitStack()
+            if watch is None:
+                watch = stopwatch.StopWatch()
+                stack.enter_context(watch.timer('root'))
             
-            # Call functions once:
-            for name, function in functions:
-                function(watch=watch)
+            # Print header:
+            print()
+            print(f"RUNNING TEST FUNCTION: “{name}(¬)”")
+            asterisks('-')
+            print()
             
-            # Call them twice through «adnauseumn» –
-            # Redirecting `stdout` so we only get the
-            # verbose output once:
-            if exec_count - 1 > 0:
-                iosink = io.StringIO()
-                with redirect_stdout(iosink):
-                    for idx in range(exec_count-1):
-                        for name, function in functions:
-                            function(watch=watch)
-                        iosink.truncate(0)
-    # REPORT IN:
-    report = watch.get_last_aggregated_report()
-    funcount = len(functions)
-    out = format_report(report)
+            # Run the wrapped function, timing it:
+            with watch.timer(name):
+                out = function(*args, **kwargs)
+            
+            # Get the reported timer value *before* closing out
+            # the root-level stopwatch timer:
+            timervals = item(watch._reported_values, name,
+                                             f'root#{name}',
+                                              f'run#{name}',
+                                         f'root#run#{name}',
+                                          'root')
+            stack.close()
+            
+            # Print the results and execution time:
+            asterisks('-')
+            
+            if out is not None:
+                print("RESULTS:")
+                pprint(out)
+                asterisks('-')
+            
+            if timervals:
+                dt = str(timervals[0] * 0.001)
+                dtout = dt[:(dt.find(consts.QUALIFIER) + 4)]
+                ndtout = natural_millis(timervals[0])
+                print(f"Test function “{name}(¬)” ran for about {ndtout} ({dtout}s)")
+            
+            asterisks('=')
+            
+            # Return as per the decorated function:
+            return out
+        
+        # Add the wrapper to the internal test function list:
+        self.test_functions.append(test_wrapper)
+        
+        # Mark the wrapper as an inline test function:
+        test_wrapper.__test__ = True
+        
+        # Return the test wrapper function:
+        return test_wrapper
     
-    # Cough up the final report data:
-    print()
-    count_text = f"{exec_count} times"
-    
-    # Some trivial english-ification:
-    if exec_count == 1:
-        count_text = "once"
-    elif exec_count == 2:
-        count_text = "twice"
-    
-    # Header:
-    print(f"TIME TOTALS – ran {funcount} functions {count_text}")
-    
-    # Body:
-    asterisks('=')
-    print(out)
-    
-    # Footer:
-    asterisks('≠')
-
-# One less import to forget about:
-inline.test = test_inlines
+    def test(self, exec_count=1):
+        """ Run all functions marked as @inline within the modules’ main
+            inline test function, using individual context timers for each
+            test function call (provided by dbx-stopwatch).
+        """
+        from contextlib import redirect_stdout
+        import io
+        
+        # Initialize the stopwatch:
+        self.watch = stopwatch.StopWatch()
+        
+        # Root timer for everything:
+        with self.watch.timer('root'):
+            
+            # Main timer for execution times:
+            with self.watch.timer('run'):
+                
+                # Call functions once:
+                for function in self.test_functions:
+                    function()
+                
+                # Call them twice through «adnauseumn» –
+                # Redirecting `stdout` so we only get the
+                # verbose output once:
+                if exec_count - 1 > 0:
+                    iosink = io.StringIO()
+                    with redirect_stdout(iosink):
+                        for idx in range(exec_count-1):
+                            for function in self.test_functions:
+                                function()
+                            iosink.truncate(0)
+        # REPORT IN:
+        report = self.watch.get_last_aggregated_report()
+        funcount = len(self.test_functions)
+        out = format_report(report)
+        
+        # Cough up the final report data:
+        print()
+        count_text = f"{exec_count} times"
+        
+        # Some trivial english-ification:
+        if exec_count == 1:
+            count_text = "once"
+        elif exec_count == 2:
+            count_text = "twice"
+        
+        # Header:
+        print(f"TIME TOTALS – ran {funcount} functions {count_text}")
+        
+        # Body:
+        asterisks('=')
+        print(out)
+        
+        # Footer:
+        asterisks('≠')
+        
+        # Clear the stopwatch instance:
+        self.watch = None
 
 @export
 def stdpout():
@@ -280,13 +292,17 @@ def stdpout():
     return pout
 
 def __getattr__(key):
-    """ Module __getattr__(…) patches the “pout” module on-demand """
+    """ Module __getattr__(…) patches the “pout” module on-demand, and
+        also live-instances the “@inline” decorator from “InlineTester”
+    """
     if key == 'pout':
         return stdpout()
+    elif key == 'inline':
+        return InlineTester()
     raise AttributeError(f"module {__name__} has no attribute {key}")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
-__all__, __dir__ = exporter.all_and_dir('pout')
+__all__, __dir__ = exporter.all_and_dir('pout', 'inline')
 
 def test():
     
@@ -294,6 +310,7 @@ def test():
     # …like, right about say here:
     # from pprint import pprint
     from clu.fs import pypath
+    inline = InlineTester()
     pout = stdpout()
     
     # @inline
@@ -310,7 +327,7 @@ def test():
         assert prefix0.exists
         pypath.enhance(prefix0)
         
-        prefix1 = Directory(consts.TEST_PATH).subdirectory('yodogg').subdirectory('yodogg')
+        prefix1 = prefix0.subdirectory('yodogg')
         assert prefix1.exists
         pypath.enhance(prefix1)
         
@@ -372,7 +389,7 @@ def test():
         """ Busywork, mark IV. """
         pass
     
-    inline.test(vars())
+    inline.test(100)
 
 if __name__ == '__main__':
     test()

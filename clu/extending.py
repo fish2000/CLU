@@ -322,7 +322,7 @@ def test():
         print("REGISTRY »", repr(yodogg.registry))
     
     # Run aggregate inline tests:
-    inline.test(vars(), 100)
+    inline.test(100)
 
 if __name__ == '__main__':
     test()

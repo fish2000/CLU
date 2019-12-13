@@ -1015,10 +1015,10 @@ def test():
     pprint(nestedmaps)
     
     # Run all inline tests:
-    inline.test(vars(), 100)
-    # inline.test(vars())
-    # test_five()
-    # test_six()
+    inline.test(100)
+    # inline.test()
+    test_five()
+    test_six()
 
 if __name__ == '__main__':
     test()

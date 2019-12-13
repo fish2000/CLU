@@ -120,7 +120,7 @@ class InlineTester(collections.abc.Set,
                 test()
         
         † This `import` statement specifically instances and returns a
-          new copy of the InlineTester class, as the “@inline” decorator,
+          new copy of the “InlineTester” class, as the “@inline” decorator,
           allowing the instance to guarantee its uniqueness in each modules’
           main inline test function, as per this example.
         

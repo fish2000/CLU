@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from itertools import count
 
 import abc
 import argparse
@@ -40,6 +41,17 @@ export = exporter.decorator()
 samelength = lambda a, b: haslength(a) and haslength(b) and operator.eq(len(a), len(b))
 differentlength = lambda a, b: haslength(a) and haslength(b) and operator.ne(len(a), len(b))
 isunique = lambda thing: isiterable(thing) and samelength(tuple(thing), frozenset(thing))
+
+@export
+def iterlen(iterable):
+    """ iterlen(iterable) → Return the number of items in “iterable.”
+        
+        This will consume the iterable – be careful with it!
+    """
+    # Stolen from “more-itertools”: http://bit.ly/2LUZqCx
+    counter = count()
+    collections.deque(zip(iterable, counter), maxlen=0)
+    return next(counter)
 
 istypelist = predicate_all(isclasstype)
 ismetatypelist = predicate_all(ismetaclass)

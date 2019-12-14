@@ -7,6 +7,11 @@ class TestTypology(object):
     
     """ Run the tests for the clu.typology module. """
     
+    def test_iterlen(self):
+        # Stolen from “more-itertools”: http://bit.ly/2LUZqCx
+        from clu.typology import iterlen
+        assert iterlen(x for x in range(1000000) if x % 3 == 0) == 333334
+    
     def test_metatypelists(self):
         from clu.typology import istypelist, ismetatypelist, makemetatypelist, maketypelist
         from clu.extending import Extensible

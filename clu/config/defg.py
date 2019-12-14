@@ -15,7 +15,7 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, PROJECT_NAME, NoDefault
 from clu.predicates import attr, tuplize, listify
-from clu.typology import ismapping
+from clu.typology import iterlen, ismapping
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -530,7 +530,7 @@ class NamespaceWalker(FrozenKeyMap):
             yield pack_ns(key, *namespaces)
     
     def __len__(self):
-        return len(tuple(self.walk()))
+        return iterlen(self.walk())
     
     def __contains__(self, nskey):
         key, namespaces = unpack_ns(nskey)
@@ -756,7 +756,7 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
     def inner_repr(self):
         """ Return some readable meta-information about this instance """
         prefix = prefix_env(self.appname)
-        nscount = len(tuple(self.namespaces()))
+        nscount = iterlen(self.namespaces())
         keycount = len(self.keys())
         return f"[prefix=“{prefix}*”, namespaces={nscount}, keys={keycount}]"
     

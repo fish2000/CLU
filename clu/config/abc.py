@@ -14,6 +14,7 @@ from clu.predicates import (isiterable, always, uncallable,
                             isexpandable, iscontainer, isnotnone,
                             tuplize)
 
+from clu.typology import iterlen
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -282,7 +283,7 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
         yield from reversed(self.keys())
     
     def __len__(self):
-        return len(list(self.keys()))
+        return iterlen(self.keys())
     
     def __contains__(self, key):
         ns, string = self.unpack_ns(key)

@@ -7,6 +7,7 @@ from clu.abstract import Slotted, AppName, Cloneable, ReprWrapper
 from clu.constants.consts import PROJECT_NAME, NoDefault
 from clu.config.abc import NAMESPACE_SEP, NamespacedMutableMapping
 from clu.predicates import tuplize
+from clu.typology import iterlen
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -157,7 +158,7 @@ class EnvBase(NamespacedMutableMapping, AppName,
         """ Return some readable meta-information about this instance """
         prefix = type(self).prefix(namespace=None)
         namespaces = len(self.namespaces())
-        keys = len(list(self.keys()))
+        keys = iterlen(self.keys())
         return f"[prefix=“{prefix}*”, namespaces={namespaces}, keys={keys}]"
     
     def clone(self, *args, **kwargs):

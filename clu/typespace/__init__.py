@@ -50,7 +50,6 @@ setattr(types, '__cached__',      cache_from_source(__file__))
 setattr(types, '__package__',     path_to_dotpath(__file__,
                                                   relative_to=BASEPATH))
 
-
 @export
 def modulize(name, namespace, docs=None,
                               path=None,

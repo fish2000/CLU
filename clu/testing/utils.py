@@ -22,11 +22,11 @@ def countfiles(target, suffix=None):
         matching a specific suffix.
     """
     from clu.fs.misc import suffix_searcher
-    import os
+    from clu.typology import iterlen
     count = 0
     searcher = suffix_searcher(suffix)
     for root, dirs, files in os.walk(os.fspath(target)):
-        count += len(tuple(filter(searcher, files)))
+        count += iterlen(filter(searcher, files))
     return count
 
 WIDTH = consts.TEXTMATE and max(consts.SEPARATOR_WIDTH, 100) \
@@ -146,7 +146,7 @@ class InlineTester(collections.abc.Set,
     def __call__(self, function):
         """ Decorate a testing function, marking it as an inline test. """
         from clu.naming import nameof
-        from clu.predicates import or_none, item
+        from clu.predicates import getitem, item
         from contextlib import ExitStack
         from pprint import pprint
         
@@ -156,7 +156,8 @@ class InlineTester(collections.abc.Set,
         @wraps(function)
         def test_wrapper(*args, **kwargs):
             # Get a stopwatch instance:
-            watch = or_none(self, 'watch')
+            watch = getattr(self, 'watch',
+                    getitem(kwargs, 'watch'))
             stack = ExitStack()
             if watch is None:
                 watch = stopwatch.StopWatch()

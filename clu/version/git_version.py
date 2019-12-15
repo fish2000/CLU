@@ -42,6 +42,7 @@ def test():
     
     from clu.testing.utils import inline
     from clu.fs.filesystem import td
+    from clu.version import version_info
     
     @inline
     def test_one():
@@ -52,9 +53,11 @@ def test():
     @inline
     def test_two():
         """ Get the Git version tags """
+        version = version_info.to_string()
+        
         vtags0 = git_version_tags()
         assert vtags0 is not None
-        assert vtags0.startswith('v')
+        assert vtags0.startswith(f'v{version}')
         
         vtags1 = git_version_tags(directory=td())
         assert vtags1 is None

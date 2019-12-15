@@ -1027,7 +1027,7 @@ class Environ(FrozenEnviron, KeyMap, contextlib.AbstractContextManager):
                 self.environment.clear()
             finally:
                 self.environment.update(self.stash)
-                self.stash = None
+        self.stash = None
         return exc_type is None
 
 export(ENVIRONS_SEP,  name='ENVIRONS_SEP')

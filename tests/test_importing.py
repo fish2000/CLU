@@ -27,6 +27,7 @@ class TestImporting(object):
             
             assert not hasattr(overridden, 'targets')
             assert not hasattr(overridden, 'target_dicts')
+            assert hasattr(overridden, '_targets')
             
             with pytest.raises(AttributeError) as exc:
                 assert overridden.YODOGG

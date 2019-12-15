@@ -74,6 +74,9 @@ test: check pytest
 
 test-all: check tox
 
+version:
+	python -m clu
+
 .PHONY: clean distclean rebuild
 .PHONY: dist upload bigupload
 .PHONY: clean-pyc clean-cython
@@ -81,5 +84,4 @@ test-all: check tox
 
 .PHONY: cython sdist wheel twine-upload bump bigbump
 
-.PHONY: check pytest tox test test-all
-
+.PHONY: check pytest tox test test-all version

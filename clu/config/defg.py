@@ -879,6 +879,14 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
         yield from envwalk(self.appname,
                            self.environment)
     
+    def __contains__(self, nskey):
+        envkey = nskey_to_env(self.appname, nskey)
+        return envkey in self.environment
+    
+    def __getitem__(self, nskey):
+        envkey = nskey_to_env(self.appname, nskey)
+        return self.environment[envkey]
+    
     def inner_repr(self):
         """ Return some readable meta-information about this instance """
         prefix = prefix_env(self.appname)

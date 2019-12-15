@@ -8,12 +8,15 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
+GIT_STATUS = 'git status'
+GIT_TAGS = 'git describe --tags'
+
 @export
 def are_we_gitted(directory=None):
     """ Check if we’re in a Git repo """
     with Directory(pth=directory):
         try:
-            back_tick('git status')
+            back_tick(GIT_STATUS)
         except ExecutionError:
             return False
         else:
@@ -22,10 +25,13 @@ def are_we_gitted(directory=None):
 @export
 def git_version_tags(directory=None):
     """ Get the Git version tags """
-    if are_we_gitted(directory=directory):
-        with Directory(pth=directory):
-            return back_tick('git describe --tags')
-    return None
+    if not are_we_gitted(directory=directory):
+        return None
+    with Directory(pth=directory):
+        try:
+            return back_tick(GIT_TAGS)
+        except ExecutionError:
+            return None
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

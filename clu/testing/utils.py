@@ -43,7 +43,8 @@ def natural_millis(millis):
            humanize.time.timedelta(milliseconds=millis))
 
 @export
-def format_report(aggregated_report, show_buckets=False):
+def format_report(aggregated_report, show_buckets=False,
+                                     show_annotations=False):
     """ Pretty-prints the data from a dbx-stopwatch aggregated report """
     # Copypasta-ed from the ‘stopwatch’ source –
     # N.B. This function is a total dog’s breakfast for reals
@@ -61,7 +62,7 @@ def format_report(aggregated_report, show_buckets=False):
     
     root_time = root_time_ms / root_count
     
-    buf = [
+    entries = [
         " %s %sx  %.24s [%6.3fs] %.f%%" % (root.ljust(24), "   1",
                                              natural_millis(root_time).ljust(12),
                                                             root_time * 0.001,
@@ -72,14 +73,16 @@ def format_report(aggregated_report, show_buckets=False):
         
         delta_ms, count, bucket = values[log_name]
         depth = log_name[len(root):].count("#")
+        
         if show_buckets:
             bucket_name = f"«{bucket.name}» " if bucket else ""
-            normal_name = log_name[log_name.rfind("#") + 1:]
+            normal_name = log_name.rpartition('#')[-1]
             short_name = f"{bucket_name}{normal_name}"
         else:
-            short_name = log_name[log_name.rfind("#") + 1:]
+            # short_name = log_name[log_name.rfind("#") + 1:]
+            short_name = log_name.rpartition('#')[-1]
         
-        buf.append("%s %s %sx  %.24s [%6.3fs] %.f%%" % (
+        entries.append("%s %s %sx  %.24s [%6.3fs] %.f%%" % (
             "  " * depth, short_name.ljust(24 - (depth*2)),
                           str(count).rjust(4),
                           natural_millis(delta_ms).ljust(12),
@@ -87,11 +90,12 @@ def format_report(aggregated_report, show_buckets=False):
             delta_ms / root_time_ms * 100.0,
         ))
     
-    annotations = sorted(ann.key for ann in root_tr_data.trace_annotations)
-    if annotations:
-        buf.append("Annotations: %s" % (', '.join(annotations)))
+    if show_annotations:
+        annotations = sorted(ann.key for ann in root_tr_data.trace_annotations)
+        if annotations:
+            entries.append("Annotations: %s" % (', '.join(annotations)))
     
-    return "\n".join(buf)
+    return "\n".join(entries)
 
 @export
 class InlineTester(collections.abc.Set,
@@ -212,10 +216,14 @@ class InlineTester(collections.abc.Set,
                     asterisks('-')
                 
                 if timervals:
-                    dt = str(timervals[0] * 0.001)
-                    dtout = dt[:(dt.find(consts.QUALIFIER) + 4)]
+                    # print("TIMERVALS:")
+                    # pprint(timervals, indent=4)
+                    # asterisks('-')
+                    
+                    dt = timervals[0] * 0.001
+                    dtout = "%6.3f" % dt
                     ndtout = natural_millis(timervals[0])
-                    print(f"Test function “{name}(¬)” ran for about {ndtout} ({dtout}s)")
+                    print(f"Test function “{name}(¬)” ran in about {ndtout} –{dtout}s")
                 
                 asterisks('=')
             
@@ -262,6 +270,7 @@ class InlineTester(collections.abc.Set,
                             for function in self.test_functions:
                                 function()
                             iosink.truncate(0)
+                    iosink.close()
         
         # REPORT IN:
         report = self.watch.get_last_aggregated_report()

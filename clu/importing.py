@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import defaultdict as DefaultDict
+from dataclasses import dataclass, field, fields
 from functools import lru_cache
 from itertools import chain
 
@@ -16,6 +17,7 @@ import importlib.machinery
 import inspect
 import pkgutil
 import sys
+import typing as tx
 import weakref
 import zict
 
@@ -29,6 +31,7 @@ from clu.constants import consts
 from clu.extending import Extensible
 from clu.naming import nameof, dotpath_split, dotpath_join
 from clu.predicates import anyattrs, attr, attr_search, mro
+from clu.repr import stringify
 from clu.typespace import Namespace, types
 from clu.typology import ismodule, ismapping, isstring, subclasscheck
 from clu.exporting import Registry as ExporterRegistry
@@ -355,7 +358,7 @@ class MetaModule(MetaRegistry):
     
     @property
     def prefix(cls):
-        if any(field is None for field in (cls.appname, cls.appspace)):
+        if any(attrib is None for attrib in (cls.appname, cls.appspace)):
             if cls.appname:
                 return cls.appname
             if cls.appspace:
@@ -519,6 +522,42 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
                       super(ModuleBase, self).__dir__())
         return sorted(frozenset(names) - DO_NOT_INCLUDE)
 
+class PolymerType(dict):
+    
+    def store(self, appname, loader, finder, **modules):
+        self[appname] = PerApp(loader=loader,
+                               finder=finder,
+                              modules=modules,
+                              appname=appname)
+        return self[appname]
+    
+    def add_module(self, appname, appspace, module):
+        if not appspace:
+            raise ValueError("an appspace is required")
+        if not module:
+            raise ValueError("a module is required")
+        if not self.get(appname, None):
+            raise ValueError(f"no PerApp instance for appname: {appname}")
+        self[appname].modules.update({ appspace : module })
+        return self[appname]
+
+polymers = PolymerType()
+
+@dataclass(repr=False)
+class PerApp:
+    
+    loader:     Extensible
+    finder:     Extensible
+    modules:    tx.Dict[str, MetaModule]    = field(default_factory=dict)
+    appname:    str                         = field(default_factory=str)
+    
+    def __repr__(self):
+        return stringify(self,
+                    type(self).field_names,
+                         try_callables=False)
+
+PerApp.field_names = tuple(field.name for field in fields(PerApp))
+
 def installed_appnames():
     """ Return a set of the appnames for all installed finders
         that have one defined.
@@ -529,6 +568,31 @@ def installed_appnames():
         if hasattr(finder, 'appname'):
             appnames.add(finder.appname)
     return appnames
+
+def initialize_new_types(appname, appspace):
+    """ Private helper for “initialize_types(…)” """
+    
+    class Loader(LoaderBase, appname=appname):
+        pass
+    
+    class Finder(FinderBase, appname=appname):
+        __loader__ = Loader
+        loader = Loader()
+    
+    class Module(ModuleBase, appname=appname,
+                             appspace=appspace):
+        __loader__ = Finder.loader
+    
+    return Module, Finder, Loader
+
+def initialize_module(appname, appspace, loader):
+    """ Private helper for “initialize_types(…)” """
+    
+    class Module(ModuleBase, appname=appname,
+                             appspace=appspace):
+        __loader__ = loader
+    
+    return Module
 
 @export
 def initialize_types(appname, appspace='app'):
@@ -546,17 +610,26 @@ def initialize_types(appname, appspace='app'):
         to subclass Module to create your class-modules, or b) import
         the ‘Module’ class from elsewhere and subclass it subsequently.
     """
+    try:
+        perapp = polymers[appname]
     
-    class Loader(LoaderBase, appname=appname):
-        pass
+    except KeyError:
+        Module, Finder, Loader = initialize_new_types(appname, appspace)
+        polymers.store(appname, loader=Loader,
+                                finder=Finder,
+                        **{ appspace : Module })
     
-    class Finder(FinderBase, appname=appname):
-        __loader__ = Loader
-        loader = Loader()
-    
-    class Module(ModuleBase, appname=appname,
-                             appspace=appspace):
-        __loader__ = Finder.loader
+    else:
+        Loader = perapp.loader
+        Finder = perapp.finder
+        Module = perapp.modules.get(appspace, None)
+        
+        if Module is None:
+            Module = initialize_module(appname, appspace, perapp.finder.loader)
+            # perapp.modules[appspace] = Module
+            polymers.add_module(appname=appname,
+                               appspace=appspace,
+                                 module=Module)
     
     if appname not in installed_appnames():
         sys.meta_path.append(Finder)
@@ -887,6 +960,31 @@ def test():
         
         # return tuple(overridden.exporter.exports())
         return dir(overridden)
+    
+    @inline
+    def test_six():
+        """ AppClasses dataclass check """
+        pprint(dict(polymers), indent=4)
+        
+        Module0, Finder0, Loader0 = initialize_types(consts.PROJECT_NAME)
+        
+        assert Finder is Finder0
+        assert Loader is Loader0
+        assert Module is Module0
+        assert Finder0.__loader__ is Loader0
+        assert isinstance(Module0.__loader__, Loader0)
+        assert isinstance(Finder0.loader, Loader0)
+        
+        Module1, Finder1, Loader1 = initialize_types(consts.PROJECT_NAME, appspace='apps')
+        
+        assert Finder is Finder1
+        assert Loader is Loader1
+        assert Module is not Module1 # DIFFERENT!!!
+        assert Finder1.__loader__ is Loader1
+        assert isinstance(Module1.__loader__, Loader1)
+        assert isinstance(Finder1.loader, Loader1)
+    
+    print("PYTHON:", sys.executable)
     
     # Run all tests:
     inline.test()

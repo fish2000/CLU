@@ -727,6 +727,14 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
         """ Iteratively walk the nested KeyMap’s tree of dicts. """
         yield from mapwalk(self.tree)
     
+    def submap(self, *namespaces, unprefixed=False):
+        """ Return a standard dict containing only the namespaced items. """
+        if unprefixed:
+            return { key : value for key, value in self.tree.items() if not ismapping(value) }
+        if not namespaces:
+            return dict(self)
+        return super().submap(*namespaces)
+    
     def inner_repr(self):
         return repr(self.tree)
     

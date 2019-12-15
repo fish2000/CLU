@@ -146,7 +146,8 @@ class InlineTester(collections.abc.Set,
     def __call__(self, function):
         """ Decorate a testing function, marking it as an inline test. """
         from clu.naming import nameof
-        from clu.predicates import getitem, item
+        from clu.predicates import item
+        from clu.typology import isstring
         from contextlib import ExitStack
         from inspect import getdoc
         from pprint import pprint
@@ -162,7 +163,7 @@ class InlineTester(collections.abc.Set,
             
             # Get a stopwatch instance:
             watch = getattr(self, 'watch',
-                    getitem(kwargs, 'watch'))
+                    kwargs.pop('watch', None))
             stack = ExitStack()
             
             if watch is None:
@@ -207,7 +208,7 @@ class InlineTester(collections.abc.Set,
                 
                 if out is not None:
                     print("RESULTS:")
-                    pprint(out)
+                    pprint(isstring(out) and { 'string' : f"{out!s}" } or out, indent=4)
                     asterisks('-')
                 
                 if timervals:

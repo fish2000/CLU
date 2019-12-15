@@ -350,6 +350,10 @@ def test():
     inline = InlineTester()
     pout = stdpout()
     
+    def getdatadir():
+        from clu.fs.filesystem import Directory
+        return Directory(consts.TEST_PATH).subdirectory('data')
+    
     # @inline
     def test_zero():
         pout.v(os.environ)
@@ -423,6 +427,33 @@ def test():
     def test_four():
         """ Busywork, mark IV. """
         pass
+    
+    @inline
+    def test_five_countfiles():
+        from clu.typology import isvalidpathlist
+        from clu.fs.filesystem import TemporaryDirectory
+        
+        prefix = 'test-five-countfiles-'
+        datadir = getdatadir()
+        
+        with TemporaryDirectory(prefix=prefix,
+                                change=False) as temporarydir:
+            
+            target = temporarydir.subdirectory('yodogg')
+            destination, files = datadir.flatten(target)
+            assert target == destination
+            assert isvalidpathlist(files)
+            
+            assert countfiles(datadir) \
+                == countfiles(target) \
+                == countfiles(destination) \
+                == len(files)
+            
+            for f in files:
+                assert os.path.exists(f)
+                assert os.path.basename(f) in destination
+        
+        assert not temporarydir.exists
     
     inline.test(100)
 

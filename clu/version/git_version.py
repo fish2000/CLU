@@ -2,14 +2,16 @@
 from __future__ import print_function
 
 from clu.constants.exceptions import ExecutionError
-from clu.fs.filesystem import Directory, back_tick
+from clu.fs.filesystem import Directory, which, back_tick
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-GIT_STATUS = 'git status'
-GIT_TAGS = 'git describe --tags'
+git = which('git')
+
+GIT_STATUS = f'{git} status'
+GIT_TAGS = f'{git} describe --tags'
 
 @export
 def are_we_gitted(directory=None):

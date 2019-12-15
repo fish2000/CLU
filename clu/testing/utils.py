@@ -148,6 +148,7 @@ class InlineTester(collections.abc.Set,
         from clu.naming import nameof
         from clu.predicates import getitem, item
         from contextlib import ExitStack
+        from inspect import getdoc
         from pprint import pprint
         
         # Get the name of the decorated function:
@@ -155,48 +156,67 @@ class InlineTester(collections.abc.Set,
         
         @wraps(function)
         def test_wrapper(*args, **kwargs):
+            
+            # Get verbosity:
+            verbose = kwargs.pop('verbose', False)
+            
             # Get a stopwatch instance:
             watch = getattr(self, 'watch',
                     getitem(kwargs, 'watch'))
             stack = ExitStack()
+            
             if watch is None:
                 watch = stopwatch.StopWatch()
                 stack.enter_context(watch.timer('root'))
             
-            # Print header:
-            print()
-            print(f"RUNNING TEST FUNCTION: “{name}(¬)”")
-            asterisks('-')
-            print()
+            if verbose:
+                # Get docstring, if one exists:
+                doc = getdoc(function)
+                if doc:
+                    title = doc.splitlines().pop(0).strip()
+                    title = f"“{title}”"
+                elif doc is None:
+                    title = "«untitled»"
+                
+                # Print header:
+                print()
+                print(f"RUNNING TEST FUNCTION: `{name}(¬)` – {title}")
+                asterisks('-')
+                print()
             
             # Run the wrapped function, timing it:
             with watch.timer(name):
                 out = function(*args, **kwargs)
             
-            # Get the reported timer value *before* closing out
-            # the root-level stopwatch timer:
-            timervals = item(watch._reported_values, name,
-                                             f'root#{name}',
-                                              f'run#{name}',
-                                         f'root#run#{name}',
-                                          'root')
+            if verbose:
+                # Get the reported timer value *before* closing out
+                # the root-level stopwatch timer:
+                timervals = item(watch._reported_values, name,
+                                                 f'root#{name}',
+                                                  f'run#{name}',
+                                             f'root#run#{name}',
+                                              'root')
+            
+            # Close the context stack,
+            # regardless of verbosity:
             stack.close()
             
-            # Print the results and execution time:
-            asterisks('-')
-            
-            if out is not None:
-                print("RESULTS:")
-                pprint(out)
+            if verbose:
+                # Print the results and execution time:
                 asterisks('-')
-            
-            if timervals:
-                dt = str(timervals[0] * 0.001)
-                dtout = dt[:(dt.find(consts.QUALIFIER) + 4)]
-                ndtout = natural_millis(timervals[0])
-                print(f"Test function “{name}(¬)” ran for about {ndtout} ({dtout}s)")
-            
-            asterisks('=')
+                
+                if out is not None:
+                    print("RESULTS:")
+                    pprint(out)
+                    asterisks('-')
+                
+                if timervals:
+                    dt = str(timervals[0] * 0.001)
+                    dtout = dt[:(dt.find(consts.QUALIFIER) + 4)]
+                    ndtout = natural_millis(timervals[0])
+                    print(f"Test function “{name}(¬)” ran for about {ndtout} ({dtout}s)")
+                
+                asterisks('=')
             
             # Return as per the decorated function:
             return out
@@ -229,7 +249,7 @@ class InlineTester(collections.abc.Set,
                 
                 # Call functions once:
                 for function in self.test_functions:
-                    function()
+                    function(verbose=True)
                 
                 # Call them twice through «adnauseumn» –
                 # Redirecting `stdout` so we only get the

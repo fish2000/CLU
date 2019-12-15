@@ -533,7 +533,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     __slots__ = tuplize('dictionary')
     
-    def __init__(self, dictionary=None, *args, **updates):
+    def __init__(self, dictionary=None, **updates):
         """ Initialize a flat KeyMap instance from a target dictionary.
             
             The dictionary can contain normal key-value items as long as the
@@ -541,7 +541,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
             output of ‘pack_ns(…)’ (q.v. function definition supra.)
         """
         try:
-            super(FrozenFlat, self).__init__(*args, **updates)
+            super(FrozenFlat, self).__init__(**updates)
         except TypeError:
             super(FrozenFlat, self).__init__()
         if hasattr(dictionary, 'dictionary'):
@@ -601,8 +601,51 @@ class Flat(FrozenFlat, KeyMap):
 @export
 class NamespaceWalker(FrozenKeyMap):
     
+    """ A NamespaceWalker type implements a “walk(…)” method for iterating
+        over namespaced key-value items.
+        
+        In return for furnishing this one method, NamespaceWalkers receive
+        implementations for “__iter__()”, “__len__()”, “__contains__(…)”,
+        and “__getitem__(…)”, plus optimized view-types returned from their
+        “keys(…)”, “items(…)” and “values(…)” calls, a “flatten(…)” method,
+        and an optimized version of the “namespaces()” method, ALL FREE!!
+        
+        For KeyMap types whose backend mechanics are well-suited to being
+        “walked” (as it were) this is a remarkably good deal, would you not
+        agree??
+        
+        See the docstring for “NamespaceWalker.walk(…)” for details. The
+        original “walk(…)” output format and model implementation were 
+        derived from this StackOverflow answer:
+        
+            • https://stackoverflow.com/a/12507546/298171
+    """
+    
     @abstract
     def walk(self):
+        """ The “walk(…)” method backs all other “NamespaceWalker” methods.
+            
+            Concrete subclasses must implement “walk(…)” such that it iterates
+            over all items in a given instance, yielding them in a form like:
+            
+                for *namespaces, key, value in self.walk():
+                    # …
+            
+            … So an item with no namespaces would yield “['key', 'value']”,
+            but one with three would yield “['do', 're', 'me', 'key', 'value']”.
+            
+            See the “mapwalk(…)” and “envwalk(…)” function implementations,
+            for practical examples of how this can work. “mapwalk(…)” iterates
+            over nested dictionaries-of-dictionaries, and “envwalk(…)” transforms
+            the values in an environment dictionary (like ‘os.environ’) into the
+            above namespaced-key-value format, as noted.
+            
+            N.B. Implementors may wish to write their own less-näive versions of
+            “__contains__(…)” and “__getitem__(…)” in their subclasses, depending
+            on how such subclasses work internally – in many cases, implementing
+            these methods using domain-specific logic will be faster and/or less
+            pathological than doing so using only “walk(…)”.
+        """
         ...
     
     def flatten(self, cls=None):
@@ -672,10 +715,12 @@ class NamespaceWalker(FrozenKeyMap):
                     return value
         raise KeyError(nskey)
 
-def DefaultTree():
-    return collections.defaultdict(DefaultTree)
+def DefaultTree(*args, **kwargs):
+    """ Initialize a recursive DefaultDict pseudo-tree. """
+    return collections.defaultdict(DefaultTree, *args, **kwargs)
 
 def dictify(tree):
+    """ Recursively convert a nested mapping to standard dicts. """
     if ismapping(tree):
         return { key : dictify(tree[key]) for key in tree }
     return tree
@@ -707,19 +752,19 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
     
     __slots__ = tuplize('tree')
     
-    def __init__(self, tree=None, *args, **updates):
+    def __init__(self, tree=None, **updates):
         """ Initialize an articulated (née “nested”) KeyMap instance from a
             target nested dictionary (or a “tree” of dicts).
         """
         try:
-            super(FrozenNested, self).__init__(*args, **updates)
+            super(FrozenNested, self).__init__(**updates)
         except TypeError:
             super(FrozenNested, self).__init__()
         if hasattr(tree, 'tree'):
             tree = attr(tree, 'tree')
         elif hasattr(tree, 'nestify'):
             tree = attr(tree.nestify(), 'tree')
-        self.tree = tree or DefaultTree()
+        self.tree = DefaultTree(tree or {})
         if updates:
             self.tree.update(**updates)
     
@@ -729,8 +774,11 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
     
     def submap(self, *namespaces, unprefixed=False):
         """ Return a standard dict containing only the namespaced items. """
+        # The “unprefixed” codepath is optimized here, the rest
+        # delegates up to the ancestor implementation:
         if unprefixed:
-            return { key : value for key, value in self.tree.items() if not ismapping(value) }
+            return { key : value for key, value in self.tree.items() \
+                                  if not ismapping(value) }
         if not namespaces:
             return dict(self)
         return super().submap(*namespaces)
@@ -766,14 +814,17 @@ class Nested(FrozenNested, KeyMap):
             d[key] = value
     
     def __delitem__(self, nskey):
-        key, namespaces = unpack_ns(nskey)
-        if not namespaces:
-            del self.tree[key]
+        if nskey in self:
+            key, namespaces = unpack_ns(nskey)
+            if not namespaces:
+                del self.tree[key]
+            else:
+                d = self.tree
+                for namespace in namespaces:
+                    d = d[namespace]
+                del d[key]
         else:
-            d = self.tree
-            for namespace in namespaces:
-                d = d[namespace]
-            del d[key]
+            raise KeyError(nskey)
 
 # ENVIRONMENT-VARIABLE MANIPULATION API:
 
@@ -867,12 +918,12 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
     
     __slots__ = ('environment', 'appname')
     
-    def __init__(self, environment=None, appname=None, *args, **updates):
+    def __init__(self, environment=None, appname=None, **updates):
         """ Initialize a FrozenKeyMap instance wrapping an environment-variable
             dictionary from a target dictionary, with a supplied appname.
         """
         try:
-            super(FrozenEnviron, self).__init__(*args, **updates)
+            super(FrozenEnviron, self).__init__(**updates)
         except TypeError:
             super(FrozenEnviron, self).__init__()
         self.environment = environment or os.environ.copy()
@@ -907,7 +958,7 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
 @export
 class Environ(FrozenEnviron, KeyMap):
     
-    def __init__(self, environment=None, appname=None, *args, **updates):
+    def __init__(self, environment=None, appname=None, **updates):
         """ Initialize a KeyMap instance wrapping an environment-variable
             dictionary from a target dictionary, with a supplied appname.
         """
@@ -916,7 +967,7 @@ class Environ(FrozenEnviron, KeyMap):
         try:
             super(Environ, self).__init__(environment=environment,
                                               appname=appname,
-                                             *args, **updates)
+                                                    **updates)
         except TypeError:
             super(Environ, self).__init__(environment=environment,
                                               appname=appname)

@@ -932,7 +932,7 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
             self.environment.update(**updates)
     
     def walk(self):
-        """ Iteratively walk the environment access dict. """
+        """ Iteratively walk the backend environment access dictionary. """
         yield from envwalk(self.appname,
                            self.environment)
     
@@ -943,6 +943,19 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
     def __getitem__(self, nskey):
         envkey = nskey_to_env(self.appname, nskey)
         return self.environment[envkey]
+    
+    def hasenv(self, envkey):
+        """ Query the backend environment dictionary for a key. """
+        return envkey in self.environment
+    
+    def getenv(self, envkey, default=NoDefault):
+        """ Retrieve a key directly from the backend environment. """
+        if default is NoDefault:
+            return self.environment[envkey]
+        try:
+            return self.environment[envkey]
+        except KeyError:
+            return default
     
     def inner_repr(self):
         """ Return some readable meta-information about this instance """
@@ -982,6 +995,14 @@ class Environ(FrozenEnviron, KeyMap):
     
     def __delitem__(self, nskey):
         envkey = nskey_to_env(self.appname, nskey)
+        del self.environment[envkey]
+    
+    def setenv(self, envkey, value):
+        """ Set the value for a key directly in the backend environment. """
+        self.environment[envkey] = value
+    
+    def unsetenv(self, envkey):
+        """ Delete a key directly from the backend environment """
         del self.environment[envkey]
 
 export(ENVIRONS_SEP,  name='ENVIRONS_SEP')

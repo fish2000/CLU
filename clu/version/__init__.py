@@ -107,7 +107,8 @@ class VersionInfo(VersionAncestor):
                      r'(?P<minor>[\d‽]+)'       \
                      r'(?:\.(?P<patch>[\d‽]+)'  \
                      r'(?:\-(?P<pre>[\w‽]+)'    \
-                     r'(?:\+(?P<build>[\d‽]+))?)?)?')
+                     r'(?:[\+\-](?P<build>[0-9a-z]+))?)?)?',
+          re.IGNORECASE)
     
     @classmethod
     def from_string(cls, version_string):
@@ -187,7 +188,7 @@ class VersionInfo(VersionAncestor):
                                                         intify(minor),
                                                         intify(patch),
                                                         strify(pre),
-                                                               build)
+                                                        strify(build))
         return instance
     
     def __str__(self):

@@ -180,8 +180,49 @@ class KeyMapValuesView(KeyMapViewBase,
                               if nskey.startswith(self.prefix))
 
 @export
+class NamespaceWalkerViewBase(KeyMapViewBase):
+    
+    """ A view abstract base class tailored to NamespaceWalker types;
+        specifically, it overrides “__len__(…)” to better utilize
+        the underlying mapping types’ “walk(…)” method.
+    """
+    
+    def __len__(self):
+        if not self.prefix:
+            return iterlen(self.mapping.walk())
+        count = 0
+        for *namespaces, key, value in self.mapping.walk():
+            if startswith_ns(namespaces, self.namespaces):
+                count += 1
+        return count
+
+@export
+@collections.abc.KeysView.register
+class NamespaceWalkerKeysView(NamespaceWalkerViewBase,
+                              collections.abc.Set):
+    
+    """ A keys view specifically tailored to NamespaceWalker types. """
+    
+    @classmethod
+    def _from_iterable(cls, iterable):
+        # Required by the “collections.abc.Set” API:
+        return set(iterable)
+    
+    def __contains__(self, nskey):
+        for *namespaces, key, value in self.mapping.walk():
+            if nskey.startswith(self.prefix):
+                if startswith_ns(namespaces, self.namespaces):
+                    return True
+        return False
+    
+    def __iter__(self):
+        for *namespaces, key, value in self.mapping.walk():
+            if startswith_ns(namespaces, self.namespaces):
+                yield pack_ns(key, *namespaces)
+
+@export
 @collections.abc.ItemsView.register
-class NamespaceWalkerItemsView(KeyMapViewBase,
+class NamespaceWalkerItemsView(NamespaceWalkerViewBase,
                                collections.abc.Set):
     
     """ An items view specifically tailored to NamespaceWalker types. """
@@ -207,7 +248,7 @@ class NamespaceWalkerItemsView(KeyMapViewBase,
 
 @export
 @collections.abc.ValuesView.register
-class NamespaceWalkerValuesView(KeyMapViewBase,
+class NamespaceWalkerValuesView(NamespaceWalkerViewBase,
                                 collections.abc.Collection):
     
     """ A values view specifically tailored to NamespaceWalker types. """
@@ -583,6 +624,15 @@ class NamespaceWalker(FrozenKeyMap):
             if namespaces:
                 nss.add(concatenate_ns(*namespaces))
         yield from sorted(nss)
+    
+    def keys(self, *namespaces, unprefixed=False):
+        """ Return a namespaced view over either all keys in the mapping,
+            or over only those keys in the mapping matching the specified
+            namespace values.
+        """
+        if unprefixed:
+            return self.submap(unprefixed=unprefixed).keys()
+        return NamespaceWalkerKeysView(self, *namespaces)
     
     def items(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all key/value pairs in the
@@ -1095,8 +1145,8 @@ def test():
     # Run all inline tests:
     inline.test(100)
     # inline.test()
-    test_five()
-    test_six()
+    # test_five()
+    # test_six()
 
 if __name__ == '__main__':
     test()

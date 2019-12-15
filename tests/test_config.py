@@ -9,7 +9,8 @@ class TestConfigKeyMaps(object):
     def test_nested_and_flat_KeyMaps(self):
         from clu.config.defg import (Nested, KeyMapKeysView,
                                              KeyMapItemsView,
-                                             KeyMapValuesView, NamespaceWalkerItemsView,
+                                             KeyMapValuesView, NamespaceWalkerKeysView,
+                                                               NamespaceWalkerItemsView,
                                                                NamespaceWalkerValuesView)
         
         tree = {
@@ -44,7 +45,7 @@ class TestConfigKeyMaps(object):
                                           'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
         assert tuple(nested.namespaces()) == ('nodogg', 'wat')
         
-        assert type(nested.keys()) is KeyMapKeysView
+        assert type(nested.keys()) is NamespaceWalkerKeysView
         assert type(nested.values()) is NamespaceWalkerValuesView
         assert type(nested.items()) is NamespaceWalkerItemsView
         

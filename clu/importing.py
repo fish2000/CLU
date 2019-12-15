@@ -982,6 +982,15 @@ def test():
         assert Finder1.__loader__ is Loader1
         assert isinstance(Module1.__loader__, Loader1)
         assert isinstance(Finder1.loader, Loader1)
+        
+        from clu.apps import Module as apps_module # Note how this is the things’ actual name,
+                                                   # “Module”, and not just what we called it,
+                                                   # «Module1» …ooof.
+        
+        # assert type(apps_module) is Module1
+        print("MODULETYPE:", type(apps_module))
+        print("MONOMERS:")
+        pprint(dict(monomers['clu']))
     
     print("PYTHON:", sys.executable)
     

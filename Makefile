@@ -75,7 +75,7 @@ test: check pytest
 test-all: check tox
 
 version:
-	python -m clu
+	python -m clu.version
 
 .PHONY: clean distclean rebuild
 .PHONY: dist upload bigupload

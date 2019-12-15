@@ -41,19 +41,17 @@ def strip_ns(nskey):
     """ Strip all namespace-related prefixing from a namespaced key """
     return nskey.rpartition(NAMESPACE_SEP)[-1]
 
-def startswith_ns(longer, putative):
+def startswith_ns(putative, prefix):
     """ Boolean predicate to compare a pair of namespace iterables,
-        returning True if one starts with the other (regardless of
-        which starts with which, despite the argument names).
+        returning True if the first starts with the second.
         
         Do not confuse this with the helper function “compare_ns(…)”,
         defined below, which returns False if the namespace iterables
         in question aren’t exactly alike.
     """
-    for one, two in zip(putative, longer):
-        if one != two:
-            return False
-    return True
+    putative_ns = concatenate_ns(*putative)
+    prefix_ns = concatenate_ns(*prefix)
+    return putative_ns.startswith(prefix_ns)
 
 @export
 class KeyMapViewBase(collections.abc.Sequence,
@@ -209,8 +207,8 @@ class NamespaceWalkerKeysView(NamespaceWalkerViewBase,
     
     def __contains__(self, nskey):
         for *namespaces, key, value in self.mapping.walk():
-            if nskey.startswith(self.prefix):
-                if startswith_ns(namespaces, self.namespaces):
+            if startswith_ns(namespaces, self.namespaces):
+                if nskey == pack_ns(key, *namespaces):
                     return True
         return False
     
@@ -235,8 +233,8 @@ class NamespaceWalkerItemsView(NamespaceWalkerViewBase,
         nskey, putative = item
         for *namespaces, key, value in self.mapping.walk():
             if putative is value or putative == value:
-                if nskey.startswith(self.prefix):
-                    if startswith_ns(namespaces, self.namespaces):
+                if startswith_ns(namespaces, self.namespaces):
+                    if nskey == pack_ns(key, *namespaces):
                         return True
         return False
     

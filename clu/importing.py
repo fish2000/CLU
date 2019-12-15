@@ -28,7 +28,7 @@ except ImportError:
 from clu.constants import consts
 from clu.extending import Extensible
 from clu.naming import nameof, dotpath_split, dotpath_join
-from clu.predicates import attr, attr_search, mro
+from clu.predicates import anyattrs, attr, attr_search, mro
 from clu.typespace import Namespace, types
 from clu.typology import ismodule, ismapping, isstring, subclasscheck
 from clu.exporting import Registry as ExporterRegistry
@@ -691,10 +691,14 @@ class ProxyModule(Module):
         cls = type(self)
         
         # Process and strip off a class-level “targets”
-        # list attribute, if such a thing exists:
-        if hasattr(cls, 'targets'):
-            add_targets(self, *cls.targets)
-            delattr(cls, 'targets')
+        # list attribute – if such a thing exists – and
+        # then sequester the “targets” attribute behind an
+        # underscore, if necessary:
+        if anyattrs(cls, 'targets', '_targets'):
+            add_targets(self, *attr(cls, 'targets', '_targets'))
+            if hasattr(cls, 'targets'):
+                setattr(cls, '_targets', attr(cls, 'targets', '_targets'))
+                delattr(cls, 'targets')
     
     def __execute__(self):
         # Create the internal “clu.dicts.ChainMap” subclass instance:
@@ -875,6 +879,7 @@ def test():
         
         assert not hasattr(overridden, 'targets')
         assert not hasattr(overridden, 'target_dicts')
+        assert hasattr(overridden, '_targets')
         
         # pout.v(overridden)
         pprint(overridden.__proxies__)

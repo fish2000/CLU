@@ -10,6 +10,7 @@ export = exporter.decorator()
 
 @export
 def are_we_gitted(directory=None):
+    """ Check if we’re in a Git repo """
     with Directory(pth=directory):
         try:
             back_tick('git status')
@@ -20,6 +21,7 @@ def are_we_gitted(directory=None):
 
 @export
 def git_version_tags(directory=None):
+    """ Get the Git version tags """
     if are_we_gitted(directory=directory):
         return back_tick('git describe --tags')
     return None

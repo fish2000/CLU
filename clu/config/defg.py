@@ -190,11 +190,10 @@ class NamespaceWalkerViewBase(KeyMapViewBase):
     def __len__(self):
         if not self.prefix:
             return iterlen(self.mapping.walk())
-        count = 0
-        for *namespaces, key, value in self.mapping.walk():
-            if startswith_ns(namespaces, self.namespaces):
-                count += 1
-        return count
+        return iterlen(concatenate_ns(*namespaces) \
+                                  for *namespaces, _, _ in self.mapping.walk() \
+                                   if startswith_ns(namespaces,
+                                               self.namespaces))
 
 @export
 @collections.abc.KeysView.register

@@ -626,7 +626,6 @@ def initialize_types(appname, appspace='app'):
         
         if Module is None:
             Module = initialize_module(appname, appspace, perapp.finder.loader)
-            # perapp.modules[appspace] = Module
             polymers.add_module(appname=appname,
                                appspace=appspace,
                                  module=Module)

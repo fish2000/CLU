@@ -107,7 +107,7 @@ class VersionInfo(VersionAncestor):
                      r'(?P<minor>[\d‽]+)'       \
                      r'(?:\.(?P<patch>[\d‽]+)'  \
                      r'(?:\-(?P<pre>[\w‽]+)'    \
-                     r'(?:[\+\-](?P<build>g?[0-9a-f]+))?)?)?',
+                     r'(?:[\+\-](?P<build>g?[0-9a-f‽]+))?)?)?',
           re.IGNORECASE)
     
     @classmethod

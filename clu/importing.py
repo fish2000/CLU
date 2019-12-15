@@ -604,6 +604,68 @@ def add_targets(instance, *targets):
 @export
 class ProxyModule(Module):
     
+    """ A ProxyModule is a specific type of module: one that wraps one or
+        more other things and surfaces their attributes, as if they are all
+        one big unified module.
+        
+        In this case, “things” can be either modules or mappings. Internally,
+        the ProxyModule uses a bespoke ChainMap subclass to keep these modules
+        and/or mappings in line, and to access them idempotently, with a
+        deterministic ordering, and generally in a way that doesn’t surprise
+        or scare anybody.
+        
+        Here’s a basic example of a ProxyModule definition:
+        
+            overrides = dict(…)
+            from yodogg.app import base_module
+            from yodogg.utils import misc as second_module
+            
+            class myproxy(ProxyModule):
+                targets = (overrides, base_module,
+                                    second_module)
+        
+        … which after defining that, you’d use it like so – assuming your app
+        is called “yodogg” with a default “app” appspace (see “ModuleBase” for
+        more on these terms):
+        
+            from yodogg.app import myproxy
+            myproxy.attrib # searches overrides, base_module and second_module
+                           # in sequence, looking for the 'attrib' value
+            dir(myproxy)   # returns a list of the union of available stuff,
+                           # across the proxy modules’ targets
+        
+        … you can, in the modules’ definition, include other stuff besides the
+        class-level “targets” tuple; other elements added to the proxy will
+        behave like elements of any other class-based module.
+    """
+    
+    def __new__(cls, name, *targets, doc=None):
+        """ Allocate a new tabula-rasa proxy-module instance.
+            
+            Adds any targets passed in when the constructor was called –
+            which that should be like never, except maybe under testing
+            or somesuch – for the most part, ProxyModule targets’ll be
+            specified as a class-level tuple attribute.
+            
+            See the main class docstring for the deets.
+        """
+        
+        # Call up, creating the instance:
+        instance = super(ProxyModule, cls).__new__(cls)
+        
+        # Fill in empty “slots”:
+        instance.__proxies__ = {}
+        instance.__filters__ = []
+        instance.target_dicts = []
+        instance.target_lists = []
+        
+        # Process any targets with which this instance
+        # may have been constructed:
+        add_targets(instance, *targets)
+        
+        # Return the new instance:
+        return instance
+    
     def __init__(self, name, *targets, doc=None):
         """ Initialize a proxy-module instance.
             
@@ -622,26 +684,14 @@ class ProxyModule(Module):
             along through the “ChainMap” instances’ internal stack of
             mappings.
         """
-        # in case of __dir__(…) access before execution:
-        if not hasattr(self, '__proxies__'):
-            self.__proxies__ = {}
-        if not hasattr(self, '__filters__'):
-            self.__filters__ = []
-        
-        # Establish a base list of target dicts, and call up:
-        self.target_dicts = []
-        self.target_lists = []
+        # Super-initialize:
         super(ProxyModule, self).__init__(name, doc=doc)
         
         # Get a reference to the module class:
         cls = type(self)
         
-        # Process any targets with which this instance
-        # may have been constructed:
-        add_targets(self, *targets)
-        
-        # Process and strip off class-level “targets” 
-        # list attribute, if it exists:
+        # Process and strip off a class-level “targets”
+        # list attribute, if such a thing exists:
         if hasattr(cls, 'targets'):
             add_targets(self, *cls.targets)
             delattr(cls, 'targets')
@@ -759,11 +809,17 @@ def test():
         class FindMe(Module):
             pass
         
-        spec = finder.find_spec('clu.app.FindMe', [])
-        assert spec.name == 'clu.app.FindMe'
+        spec0 = finder.find_spec('clu.app.FindMe', [])
+        assert spec0.name == 'clu.app.FindMe'
         
-        module = finder.loader.create_module(spec)
-        assert type(module) is FindMe
+        module0 = finder.loader.create_module(spec0)
+        assert type(module0) is FindMe
+        
+        module1 = finder.loader.create_module(spec0)
+        assert type(module1) is FindMe
+        
+        spec1 = finder.find_spec('clu.app.FindMe', [])
+        assert spec1.name == 'clu.app.FindMe'
         
         pout.v(mro(finder))
     

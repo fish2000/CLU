@@ -41,6 +41,12 @@ def strip_ns(nskey):
     """ Strip all namespace-related prefixing from a namespaced key """
     return nskey.rpartition(NAMESPACE_SEP)[-1]
 
+def startswith_ns(longer, putative):
+    for one, two in zip(putative, longer):
+        if one != two:
+            return False
+    return True
+
 @export
 class KeyMapViewBase(collections.abc.Sequence,
                      collections.abc.Sized,
@@ -164,6 +170,51 @@ class KeyMapValuesView(KeyMapViewBase,
         yield from (self.mapping[nskey] \
                              for nskey in self.mapping \
                               if nskey.startswith(self.prefix))
+
+@export
+@collections.abc.ItemsView.register
+class NamespaceWalkerItemsView(KeyMapViewBase,
+                               collections.abc.Set):
+    
+    """ An items view specifically tailored to NamespaceWalker types. """
+    
+    @classmethod
+    def _from_iterable(cls, iterable):
+        # Required by the “collections.abc.Set” API:
+        return set(iterable)
+    
+    def __contains__(self, item):
+        nskey, putative = item
+        for *namespaces, key, value in self.mapping.walk():
+            if putative is value or putative == value:
+                if nskey.startswith(self.prefix):
+                    if startswith_ns(namespaces, self.namespaces):
+                        return True
+        return False
+    
+    def __iter__(self):
+        for *namespaces, key, value in self.mapping.walk():
+            if startswith_ns(namespaces, self.namespaces):
+                yield (pack_ns(key, *namespaces), value)
+
+@export
+@collections.abc.ValuesView.register
+class NamespaceWalkerValuesView(KeyMapViewBase,
+                                collections.abc.Collection):
+    
+    """ A values view specifically tailored to NamespaceWalker types. """
+    
+    def __contains__(self, putative):
+        for *namespaces, key, value in self.mapping.walk():
+            if putative is value or putative == value:
+                if startswith_ns(namespaces, self.namespaces):
+                    return True
+        return False
+    
+    def __iter__(self):
+        for *namespaces, key, value in self.mapping.walk():
+            if startswith_ns(namespaces, self.namespaces):
+                yield value
 
 # NAMESPACE-MANIPULATION FUNCTION API:
 
@@ -524,6 +575,24 @@ class NamespaceWalker(FrozenKeyMap):
             if namespaces:
                 nss.add(concatenate_ns(*namespaces))
         yield from sorted(nss)
+    
+    def items(self, *namespaces, unprefixed=False):
+        """ Return a namespaced view over either all key/value pairs in the
+            mapping, or over only those key/value pairs in the mapping whose
+            keys match the specified namespace values.
+        """
+        if unprefixed:
+            return self.submap(unprefixed=unprefixed).items()
+        return NamespaceWalkerItemsView(self, *namespaces)
+    
+    def values(self, *namespaces, unprefixed=False):
+        """ Return a namespaced view over either all values in the mapping,
+            or over only those values in the mapping whose keys match the
+            specified namespace values.
+        """
+        if unprefixed:
+            return self.submap(unprefixed=unprefixed).values()
+        return NamespaceWalkerValuesView(self, *namespaces)
     
     def __iter__(self):
         for *namespaces, key, value in self.walk():

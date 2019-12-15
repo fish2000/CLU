@@ -7,7 +7,10 @@ import pytest
 class TestConfigKeyMaps(object):
     
     def test_nested_and_flat_KeyMaps(self):
-        from clu.config.defg import Nested, KeyMapKeysView, KeyMapItemsView, KeyMapValuesView
+        from clu.config.defg import (Nested, KeyMapKeysView,
+                                             KeyMapItemsView,
+                                             KeyMapValuesView, NamespaceWalkerItemsView,
+                                                               NamespaceWalkerValuesView)
         
         tree = {
             'yo'        : "dogg",
@@ -42,8 +45,8 @@ class TestConfigKeyMaps(object):
         assert tuple(nested.namespaces()) == ('nodogg', 'wat')
         
         assert type(nested.keys()) is KeyMapKeysView
-        assert type(nested.values()) is KeyMapValuesView
-        assert type(nested.items()) is KeyMapItemsView
+        assert type(nested.values()) is NamespaceWalkerValuesView
+        assert type(nested.items()) is NamespaceWalkerItemsView
         
         flat = nested.flatten().freeze()
         

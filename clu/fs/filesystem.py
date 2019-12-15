@@ -21,7 +21,7 @@ import zipfile
 from clu.constants.consts import λ, DELETE_FLAG, ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
-from clu.predicates import attr, allattrs, anyof, uniquify
+from clu.predicates import attr, allattrs, isexpandable, anyof, uniquify
 from clu.repr import stringify
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
@@ -139,12 +139,13 @@ def back_tick(command,  as_str=True,
     timeout =  int(kwargs.pop('timeout',  DEFAULT_TIMEOUT))
     encoding = str(kwargs.pop('encoding', ENCODING))
     raise_err = raise_err is not None and raise_err or bool(not ret_err)
-    issequence = isinstance(command, (list, tuple))
-    command_str = issequence and " ".join(command) or u8str(command).strip()
+    commandseq = isexpandable(command)
+    command_str = commandseq and " ".join(command) or u8str(command).strip()
     directory = 'directory' in kwargs and os.fspath(kwargs.pop('directory')) or None
+    textmode = as_str and encoding or False
     # Step 2: DO IT DOUG:
-    if not issequence:
-        command = shlex.split(command)
+    if not commandseq:
+        command = shlex.split(command, posix=True)
     if verbose:
         print("EXECUTING:", file=sys.stdout)
         print(f"`{command_str}`",
@@ -153,6 +154,7 @@ def back_tick(command,  as_str=True,
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE,
                                            cwd=directory,
+                                          text=textmode,
                                          shell=False)
     try:
         output, errors = process.communicate(timeout=timeout)
@@ -186,12 +188,10 @@ def back_tick(command,  as_str=True,
             print("ERRORS:",                            file=sys.stderr)
             print(f"`{error_str}`",                     file=sys.stderr)
             print("",                                   file=sys.stderr)
-    output = output.strip()
     if ret_err:
-        errors = errors.strip()
-        return (as_str and output.decode(encoding) or output), \
-               (as_str and errors.decode(encoding) or errors)
-    return (as_str and output.decode(encoding) or output)
+        return (output.strip(),
+                errors.strip())
+    return output.strip()
 
 @export
 def rm_rf(path):

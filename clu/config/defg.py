@@ -957,6 +957,10 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
         except KeyError:
             return default
     
+    def envkeys(self):
+        """ Get a view on the dictionary keys from the backend environment. """
+        return self.environment.keys()
+    
     def inner_repr(self):
         """ Return some readable meta-information about this instance """
         prefix = prefix_env(self.appname)
@@ -1063,31 +1067,7 @@ def test():
             nskey = pack_ns(key, *namespaces)
             flat_dict[nskey] = value
         
-        print(f"FLAT DICTIONARY (length={len(flat_dict)}):")
-        pprint(flat_dict, indent=4)
-        print()
-        
         flat = FrozenFlat(flat_dict)
-        
-        print(f"FLAT FROZEN INSTANCE (length={len(flat)}):")
-        pprint(flat)
-        print()
-        
-        keys = tuple(flat.keys())
-        print(f"FLAT KEYS (length={len(keys)}):")
-        pprint(keys)
-        print()
-        
-        values = tuple(flat.values())
-        print(f"FLAT VALUES (length={len(values)}):")
-        pprint(values)
-        print()
-        
-        namespaces = tuple(flat.namespaces())
-        print(f"FLAT NAMESPACES (length={len(namespaces)}):")
-        pprint(namespaces)
-        print()
-        
         nested = Nested(flat)
         assert nested.flatten() == flat
         assert nested == flat
@@ -1101,31 +1081,7 @@ def test():
             nskey = pack_ns(key, *namespaces)
             flat_dict[nskey] = value
         
-        print(f"FLAT DICTIONARY (length={len(flat_dict)}):")
-        pprint(flat_dict, indent=4)
-        print()
-        
         flat = Flat(flat_dict)
-        
-        print(f"FLAT MUTABLE INSTANCE (length={len(flat)}):")
-        pprint(flat)
-        print()
-        
-        keys = tuple(flat.keys())
-        print(f"FLAT KEYS (length={len(keys)}):")
-        pprint(keys)
-        print()
-        
-        values = tuple(flat.values())
-        print(f"FLAT VALUES (length={len(values)}):")
-        pprint(values)
-        print()
-        
-        namespaces = tuple(flat.namespaces())
-        print(f"FLAT NAMESPACES (length={len(namespaces)}):")
-        pprint(namespaces)
-        print()
-        
         frozen_flat = flat.freeze()
         assert frozen_flat == flat
         
@@ -1140,11 +1096,7 @@ def test():
         for mappingpath in mapwalk(nested.tree):
             *namespaces, key, value = mappingpath
             nskey = pack_ns(key, *namespaces)
-            print("NAMESPACES:", ", ".join(namespaces))
-            print("KEY:", key)
-            print("NSKEY:", nskey)
-            print("VALUE:", value)
-            print()
+            assert nskey in nested
     
     @inline
     def test_four_pt_five():
@@ -1153,35 +1105,11 @@ def test():
         for mappingpath in mapwalk(nested.tree):
             *namespaces, key, value = mappingpath
             nskey = pack_ns(key, *namespaces)
-            print("NAMESPACES:", ", ".join(namespaces))
-            print("KEY:", key)
-            print("NSKEY:", nskey)
-            print("VALUE:", value)
-            print()
+            assert nskey in nested
     
     @inline
     def test_four_pt_seven():
         nested = FrozenNested(tree=nestedmaps)
-        
-        print(f"NESTED FROZEN INSTANCE (length={len(nested)}):")
-        pprint(nested)
-        print()
-        
-        keys = tuple(nested.keys())
-        print(f"NESTED KEYS (length={len(keys)}):")
-        pprint(keys)
-        print()
-        
-        values = tuple(nested.values())
-        print(f"NESTED VALUES (length={len(values)}):")
-        pprint(values)
-        print()
-        
-        namespaces = tuple(nested.namespaces())
-        print(f"NESTED NAMESPACES (length={len(namespaces)}):")
-        pprint(namespaces)
-        print()
-        
         flat = Flat(nested)
         assert flat.nestify() == nested
         assert flat == nested
@@ -1189,26 +1117,6 @@ def test():
     @inline
     def test_five():
         nested = Nested(tree=nestedmaps)
-        
-        print(f"NESTED MUTABLE INSTANCE (length={len(nested)}):")
-        pprint(nested)
-        print()
-        
-        keys = tuple(nested.keys())
-        print(f"NESTED KEYS (length={len(keys)}):")
-        pprint(keys)
-        print()
-        
-        values = tuple(nested.values())
-        print(f"NESTED VALUES (length={len(values)}):")
-        pprint(values)
-        print()
-        
-        namespaces = tuple(nested.namespaces())
-        print(f"NESTED NAMESPACES (length={len(namespaces)}):")
-        pprint(namespaces)
-        print()
-        
         frozen_nested = nested.freeze()
         assert frozen_nested == nested
         
@@ -1218,20 +1126,29 @@ def test():
     
     @inline
     def test_six():
+        env = FrozenEnviron()
+        
         for *namespaces, key, value in envwalk('clu', os.environ.copy()):
-            print("NAMESPACES:", namespaces)
-            print("KEY:", f"«{key}»")
-            print("VALUE:", f"“{value}”")
-            print()
+            nskey = pack_ns(key, *namespaces)
+            assert nskey in env
+    
+    @inline
+    def test_seven():
+        env = Environ()
+        nenv = env.flatten().nestify()
+        wat = Environ(environment={ nskey_to_env('clu', nskey) : value \
+                                    for nskey, value \
+                                     in nenv.flatten().items() })
+        assert env == wat
+        assert env.flatten() == nenv
+        assert len(env.envkeys()) >= len(env)
+        assert len(wat.envkeys()) == len(wat)
     
     print()
     pprint(nestedmaps)
     
     # Run all inline tests:
     inline.test(100)
-    # inline.test()
-    # test_five()
-    # test_six()
 
 if __name__ == '__main__':
     test()

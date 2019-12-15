@@ -8,6 +8,7 @@ import abc
 import clu.abstract
 import collections
 import collections.abc
+import contextlib
 import copy
 import os
 
@@ -973,7 +974,7 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
         return type(self)(tree=copier(self.tree))
 
 @export
-class Environ(FrozenEnviron, KeyMap):
+class Environ(FrozenEnviron, KeyMap, contextlib.AbstractContextManager):
     
     __slots__ = tuplize('stash')
     
@@ -1179,6 +1180,19 @@ def test():
         for key in env.envkeys():
             assert env.hasenv(key)
             assert env.getenv(key) == os.getenv(key)
+        
+        # N.B. It looks like the “os.{get,put,unset}env(…)” functions
+        # don’t really fucking work the way they should:
+        try:
+            before = len(env)
+            os.environ['CLU_CTX_YODOGG'] = 'I heard you are frozen'
+            assert len(env) == before
+            assert not env.hasenv('CLU_CTX_YODOGG')
+            assert os.getenv('CLU_CTX_YODOGG') == 'I heard you are frozen'
+            # print("CLU_CTX_YODOGG:", os.getenv('CLU_CTX_YODOGG'))
+        finally:
+            # os.unsetenv('CLU_CTX_YODOGG')
+            del os.environ['CLU_CTX_YODOGG']
     
     @inline
     def test_nine():
@@ -1190,6 +1204,7 @@ def test():
             env.set('yodogg', 'I heard you like managed context', 'ctx')
             assert env.getenv('CLU_CTX_YODOGG') == 'I heard you like managed context'
             assert os.getenv('CLU_CTX_YODOGG') == 'I heard you like managed context'
+            assert len(os.environ) == before + 1
         
         # Why can we still access the thing in unmanaged scope???
         assert env.stash is None

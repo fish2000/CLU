@@ -975,6 +975,8 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
 @export
 class Environ(FrozenEnviron, KeyMap):
     
+    __slots__ = tuplize('stash')
+    
     def __init__(self, environment=None, appname=None, **updates):
         """ Initialize a KeyMap instance wrapping an environment-variable
             dictionary from a target dictionary, with a supplied appname.
@@ -988,6 +990,7 @@ class Environ(FrozenEnviron, KeyMap):
         except TypeError:
             super(Environ, self).__init__(environment=environment,
                                               appname=appname)
+        self.stash = None
     
     def freeze(self):
         return FrozenEnviron(environment=self.environment.copy(),
@@ -1008,6 +1011,20 @@ class Environ(FrozenEnviron, KeyMap):
     def unsetenv(self, envkey):
         """ Delete a key directly from the backend environment """
         del self.environment[envkey]
+    
+    def __enter__(self):
+        self.stash = self.environment.copy()
+        return self
+    
+    def __exit__(self, exc_type=None,
+                       exc_val=None,
+                       exc_tb=None):
+        try:
+            self.environment.clear()
+        finally:
+            self.environment.update(self.stash)
+            self.stash = None
+        return exc_type is None
 
 export(ENVIRONS_SEP,  name='ENVIRONS_SEP')
 export(NAMESPACE_SEP, name='NAMESPACE_SEP')
@@ -1153,6 +1170,32 @@ def test():
         assert env.flatten() == nenv
         assert len(env.envkeys()) >= len(env)
         assert len(wat.envkeys()) == len(wat)
+    
+    @inline
+    def test_eight():
+        """ FrozenEnviron low-level API """
+        env = FrozenEnviron()
+        
+        for key in env.envkeys():
+            assert env.hasenv(key)
+            assert env.getenv(key) == os.getenv(key)
+    
+    @inline
+    def test_nine():
+        """ Environ (mutable) context-manager API """
+        before = len(os.environ)
+        assert os.getenv('CLU_CTX_YODOGG') is None
+        
+        with Environ() as env:
+            env.set('yodogg', 'I heard you like managed context', 'ctx')
+            assert env.getenv('CLU_CTX_YODOGG') == 'I heard you like managed context'
+            assert os.getenv('CLU_CTX_YODOGG') == 'I heard you like managed context'
+        
+        # Why can we still access the thing in unmanaged scope???
+        assert env.stash is None
+        
+        assert os.getenv('CLU_CTX_YODOGG') is None
+        assert len(os.environ) == before
     
     print()
     pprint(nestedmaps)

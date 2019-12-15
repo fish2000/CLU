@@ -1108,14 +1108,14 @@ def test():
             assert nskey in nested
     
     @inline
-    def test_four_pt_seven():
+    def test_five():
         nested = FrozenNested(tree=nestedmaps)
         flat = Flat(nested)
         assert flat.nestify() == nested
         assert flat == nested
     
     @inline
-    def test_five():
+    def test_five_pt_five():
         nested = Nested(tree=nestedmaps)
         frozen_nested = nested.freeze()
         assert frozen_nested == nested

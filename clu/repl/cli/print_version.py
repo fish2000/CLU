@@ -4,10 +4,11 @@ from __future__ import print_function
 
 def print_version_command():
     """ Print a simple string with CLU’s current semantic version tag """
+    from clu.constants import consts
     from clu.version import version_info, VersionInfo
     from clu.version.git_version import git_version_tags
     
-    version = VersionInfo(git_version_tags() or version_info)
+    version = VersionInfo(git_version_tags(consts.BASEPATH) or version_info)
     semantic = f"{version.major}.{version.minor}.{version.patch}"
     
     if version.pre:

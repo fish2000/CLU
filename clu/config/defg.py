@@ -42,6 +42,14 @@ def strip_ns(nskey):
     return nskey.rpartition(NAMESPACE_SEP)[-1]
 
 def startswith_ns(longer, putative):
+    """ Boolean predicate to compare a pair of namespace iterables,
+        returning True if one starts with the other (regardless of
+        which starts with which, despite the argument names).
+        
+        Do not confuse this with the helper function “compare_ns(…)”,
+        defined below, which returns False if the namespace iterables
+        in question aren’t exactly alike.
+    """
     for one, two in zip(putative, longer):
         if one != two:
             return False

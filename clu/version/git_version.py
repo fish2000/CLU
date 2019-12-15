@@ -2,7 +2,7 @@
 from __future__ import print_function
 
 from clu.constants.exceptions import ExecutionError
-from clu.fs.filesystem import Directory, back_tick, td
+from clu.fs.filesystem import Directory, back_tick
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -23,7 +23,8 @@ def are_we_gitted(directory=None):
 def git_version_tags(directory=None):
     """ Get the Git version tags """
     if are_we_gitted(directory=directory):
-        return back_tick('git describe --tags')
+        with Directory(pth=directory):
+            return back_tick('git describe --tags')
     return None
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
@@ -32,6 +33,7 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
+    from clu.fs.filesystem import td
     
     @inline
     def test_one():

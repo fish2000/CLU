@@ -987,8 +987,12 @@ def test():
                                                    # “Module”, and not just what we called it,
                                                    # «Module1» …ooof.
         
-        # assert type(apps_module) is Module1
+        assert type(apps_module) is Module1
+        
+        print()
         print("MODULETYPE:", type(apps_module))
+        
+        print()
         print("MONOMERS:")
         pprint(dict(monomers['clu']))
     

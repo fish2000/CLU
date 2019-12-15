@@ -1195,7 +1195,7 @@ def test():
             del os.environ['CLU_CTX_YODOGG']
     
     @inline
-    def test_nine():
+    def test_eight_pt_five():
         """ Environ (mutable) context-manager API """
         before = len(os.environ)
         assert os.getenv('CLU_CTX_YODOGG') is None

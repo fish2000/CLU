@@ -551,6 +551,7 @@ def initialize_types(appname, appspace='app'):
         pass
     
     class Finder(FinderBase, appname=appname):
+        __loader__ = Loader
         loader = Loader()
     
     class Module(ModuleBase, appname=appname,

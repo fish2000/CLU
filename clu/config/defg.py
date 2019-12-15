@@ -11,6 +11,7 @@ import collections.abc
 import contextlib
 import copy
 import os
+import weakref
 
 abstract = abc.abstractmethod
 
@@ -534,6 +535,10 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     __slots__ = tuplize('dictionary')
     
+    @classmethod
+    def base_type(cls):
+        return dict
+    
     def __init__(self, dictionary=None, **updates):
         """ Initialize a flat KeyMap instance from a target dictionary.
             
@@ -549,7 +554,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
             dictionary = attr(dictionary, 'dictionary')
         elif hasattr(dictionary, 'flatten'):
             dictionary = attr(dictionary.flatten(), 'dictionary')
-        self.dictionary = dict(dictionary or {})
+        self.dictionary = type(self).base_type()(dictionary or {})
         if updates:
             self.dictionary.update(**updates)
     
@@ -596,6 +601,25 @@ class Flat(FrozenFlat, KeyMap):
     
     def __delitem__(self, nskey):
         del self.dictionary[nskey]
+
+@export
+class WeakFrozenFlat(FrozenFlat):
+    
+    """ …honestly, can you say you’ve ever seen a more pathetic typename? """
+    
+    @classmethod
+    def base_type(cls):
+        return weakref.WeakValueDictionary
+
+@export
+class WeakFlat(Flat, FrozenFlat):
+    
+    @classmethod
+    def base_type(cls):
+        return weakref.WeakValueDictionary
+    
+    def freeze(self):
+        return WeakFrozenFlat(dictionary=self.dictionary)
 
 # INTERIM ABSTRACT BASE: NamespaceWalker
 
@@ -1225,6 +1249,32 @@ def test():
         
         assert os.getenv('CLU_CTX_YODOGG') is None
         assert len(os.environ) == before
+    
+    @inline
+    def test_nine():
+        """ WeakFrozenFlat subtype """
+        flat_dict = {}
+        
+        for mappingpath in mapwalk(nestedmaps()):
+            *namespaces, key, value = mappingpath
+            nskey = pack_ns(key, *namespaces)
+            flat_dict[nskey] = value
+        
+        flat = Flat(flat_dict)
+        frozen_flat = flat.freeze()
+        assert frozen_flat == flat
+        
+        weak_flat = WeakFlat(flat_dict)
+        print("DICTIONARY TYPE:", typename(weak_flat.dictionary))
+        pprint(weak_flat.dictionary)
+        
+        # weak_frozen_flat = weak_flat.freeze()
+        # assert weak_flat == weak_frozen_flat
+        
+        # nested = flat.nestify()
+        # flattened = nested.flatten()
+        # assert flattened == flat
+        
     
     print()
     pprint(nestedmaps)

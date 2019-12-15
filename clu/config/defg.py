@@ -1044,11 +1044,13 @@ def test():
     
     @inline
     def test_one():
+        """ Simple “mapwalk(…)” content """
         dictderive = tuple(mapwalk(nestedmaps))
         return dictderive
     
     @inline
     def test_two():
+        """ Verbose “mapwalk(…)” content check """
         for mappingpath in mapwalk(nestedmaps):
             *namespaces, key, value = mappingpath
             nskey = pack_ns(key, *namespaces)
@@ -1060,6 +1062,7 @@ def test():
     
     @inline
     def test_three():
+        """ FrozenFlat and Nested equivalence """
         flat_dict = {}
         
         for mappingpath in mapwalk(nestedmaps):
@@ -1074,6 +1077,7 @@ def test():
     
     @inline
     def test_three_pt_five():
+        """ Flat, FrozenFlat and Nested equivalence """
         flat_dict = {}
         
         for mappingpath in mapwalk(nestedmaps):
@@ -1091,6 +1095,7 @@ def test():
     
     @inline
     def test_four():
+        """ FrozenNested contains namespaced key """
         nested = FrozenNested(tree=nestedmaps)
         
         for mappingpath in mapwalk(nested.tree):
@@ -1100,6 +1105,7 @@ def test():
     
     @inline
     def test_four_pt_five():
+        """ Nested (mutable) contains namespaced key """
         nested = Nested(tree=nestedmaps)
         
         for mappingpath in mapwalk(nested.tree):
@@ -1109,6 +1115,7 @@ def test():
     
     @inline
     def test_five():
+        """ FrozenNested and Flat roundtrip commutativity """
         nested = FrozenNested(tree=nestedmaps)
         flat = Flat(nested)
         assert flat.nestify() == nested
@@ -1116,6 +1123,7 @@ def test():
     
     @inline
     def test_five_pt_five():
+        """ Nested (mutable) and FrozenNested roundtrip commutativity """
         nested = Nested(tree=nestedmaps)
         frozen_nested = nested.freeze()
         assert frozen_nested == nested
@@ -1126,6 +1134,7 @@ def test():
     
     @inline
     def test_six():
+        """ FrozenEnviron and “envwalk(…)” namespaced-key check """
         env = FrozenEnviron()
         
         for *namespaces, key, value in envwalk('clu', os.environ.copy()):
@@ -1134,6 +1143,7 @@ def test():
     
     @inline
     def test_seven():
+        """ Environ with “os.environ” and custom-dict backends """
         env = Environ()
         nenv = env.flatten().nestify()
         wat = Environ(environment={ nskey_to_env('clu', nskey) : value \

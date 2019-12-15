@@ -1033,12 +1033,9 @@ export(NAMESPACE_SEP, name='NAMESPACE_SEP')
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
-def test():
-    
-    from clu.testing.utils import inline
-    from pprint import pprint
-    
-    nestedmaps = {'body': {'declare_i': {'id': {'name': 'i', 'type': 'Identifier'},
+def nestedmaps():
+    """ Private nested-dictionary pseudo-fixture """
+    return {'body':   {'declare_i': {'id': {'name': 'i', 'type': 'Identifier'},
                                             'init': {'type': 'Literal', 'value': 2},
                                             'type': 'VariableDeclarator'},
                            'kind': 'var',
@@ -1058,18 +1055,32 @@ def test():
                                             'type': 'VariableDeclarator'},
                            'kind': 'var',
                            'type': 'VariableDeclaration'},
-                 'type': 'Program'}
+            'type':     'Program'}
+
+def flatdict():
+    """ Private flat-dictionary pseudo-fixture """
+    out = {}
+    for mappingpath in mapwalk(nestedmaps()):
+        *namespaces, key, value = mappingpath
+        nskey = pack_ns(key, *namespaces)
+        out[nskey] = value
+    return out
+
+def test():
+    
+    from clu.testing.utils import inline
+    from pprint import pprint
     
     @inline
     def test_one():
         """ Simple “mapwalk(…)” content """
-        dictderive = tuple(mapwalk(nestedmaps))
+        dictderive = tuple(mapwalk(nestedmaps()))
         return dictderive
     
     @inline
     def test_two():
         """ Verbose “mapwalk(…)” content check """
-        for mappingpath in mapwalk(nestedmaps):
+        for mappingpath in mapwalk(nestedmaps()):
             *namespaces, key, value = mappingpath
             nskey = pack_ns(key, *namespaces)
             print("NAMESPACES:", ", ".join(namespaces))
@@ -1083,7 +1094,7 @@ def test():
         """ FrozenFlat and Nested equivalence """
         flat_dict = {}
         
-        for mappingpath in mapwalk(nestedmaps):
+        for mappingpath in mapwalk(nestedmaps()):
             *namespaces, key, value = mappingpath
             nskey = pack_ns(key, *namespaces)
             flat_dict[nskey] = value
@@ -1098,7 +1109,7 @@ def test():
         """ Flat, FrozenFlat and Nested equivalence """
         flat_dict = {}
         
-        for mappingpath in mapwalk(nestedmaps):
+        for mappingpath in mapwalk(nestedmaps()):
             *namespaces, key, value = mappingpath
             nskey = pack_ns(key, *namespaces)
             flat_dict[nskey] = value
@@ -1114,7 +1125,7 @@ def test():
     @inline
     def test_four():
         """ FrozenNested contains namespaced key """
-        nested = FrozenNested(tree=nestedmaps)
+        nested = FrozenNested(tree=nestedmaps())
         
         for mappingpath in mapwalk(nested.tree):
             *namespaces, key, value = mappingpath
@@ -1124,7 +1135,7 @@ def test():
     @inline
     def test_four_pt_five():
         """ Nested (mutable) contains namespaced key """
-        nested = Nested(tree=nestedmaps)
+        nested = Nested(tree=nestedmaps())
         
         for mappingpath in mapwalk(nested.tree):
             *namespaces, key, value = mappingpath
@@ -1134,7 +1145,7 @@ def test():
     @inline
     def test_five():
         """ FrozenNested and Flat roundtrip commutativity """
-        nested = FrozenNested(tree=nestedmaps)
+        nested = FrozenNested(tree=nestedmaps())
         flat = Flat(nested)
         assert flat.nestify() == nested
         assert flat == nested
@@ -1142,7 +1153,7 @@ def test():
     @inline
     def test_five_pt_five():
         """ Nested (mutable) and FrozenNested roundtrip commutativity """
-        nested = Nested(tree=nestedmaps)
+        nested = Nested(tree=nestedmaps())
         frozen_nested = nested.freeze()
         assert frozen_nested == nested
         

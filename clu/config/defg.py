@@ -928,9 +928,9 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
         except TypeError:
             super(FrozenEnviron, self).__init__()
         self.appname = appname or PROJECT_NAME
-        self.environment = environment is not None \
-                       and environment \
-                        or os.environ.copy()
+        self.environment = environment is None \
+                       and os.environ.copy() \
+                        or environment
         if updates:
             self.environment.update(**updates)
     

@@ -553,21 +553,29 @@ class PerApp:
     
     def __repr__(self):
         return stringify(self,
-                    type(self).field_names,
+                    type(self).fields,
                          try_callables=False)
 
-PerApp.field_names = tuple(field.name for field in fields(PerApp))
+PerApp.fields = tuple(field.name for field in fields(PerApp))
 
 def installed_appnames():
     """ Return a set of the appnames for all installed finders
         that have one defined.
     """
-    # { finder.appname for finder in sys.meta_path if hasattr(finder, 'appname') }
     appnames = set()
     for finder in sys.meta_path:
         if hasattr(finder, 'appname'):
             appnames.add(finder.appname)
     return appnames
+
+def initialize_module(appname, appspace, loader):
+    """ Private helper for “initialize_types(…)” """
+    
+    class Module(ModuleBase, appname=appname,
+                             appspace=appspace):
+        __loader__ = loader
+    
+    return Module
 
 def initialize_new_types(appname, appspace):
     """ Private helper for “initialize_types(…)” """
@@ -579,20 +587,11 @@ def initialize_new_types(appname, appspace):
         __loader__ = Loader
         loader = Loader()
     
-    class Module(ModuleBase, appname=appname,
-                             appspace=appspace):
-        __loader__ = Finder.loader
+    Module = initialize_module(appname,
+                               appspace,
+                               Finder.loader)
     
     return Module, Finder, Loader
-
-def initialize_module(appname, appspace, loader):
-    """ Private helper for “initialize_types(…)” """
-    
-    class Module(ModuleBase, appname=appname,
-                             appspace=appspace):
-        __loader__ = loader
-    
-    return Module
 
 @export
 def initialize_types(appname, appspace='app'):

@@ -523,6 +523,21 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
                       super(ModuleBase, self).__dir__())
         return sorted(frozenset(names) - DO_NOT_INCLUDE)
 
+@reprless
+class PerApp:
+    
+    loader:     Extensible
+    finder:     Extensible
+    modules:    tx.Dict[str, MetaModule]    = field(default_factory=dict)
+    appname:    str                         = field(default_factory=str)
+    
+    def __repr__(self):
+        return stringify(self,
+                    type(self).fields,
+                         try_callables=False)
+
+PerApp.fields = tuple(field.name for field in fields(PerApp))
+
 class PolymerType(dict):
     
     def store(self, appname, loader, finder, **modules):
@@ -543,21 +558,6 @@ class PolymerType(dict):
         return self[appname]
 
 polymers = PolymerType()
-
-@reprless
-class PerApp:
-    
-    loader:     Extensible
-    finder:     Extensible
-    modules:    tx.Dict[str, MetaModule]    = field(default_factory=dict)
-    appname:    str                         = field(default_factory=str)
-    
-    def __repr__(self):
-        return stringify(self,
-                    type(self).fields,
-                         try_callables=False)
-
-PerApp.fields = tuple(field.name for field in fields(PerApp))
 
 def installed_appnames():
     """ Return a set of the appnames for all installed finders

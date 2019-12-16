@@ -7,6 +7,7 @@ from itertools import chain
 
 cache = lambda function: lru_cache()(function)
 iterchain = chain.from_iterable
+reprless = dataclass(repr=False)
 
 import abc
 import clu.abstract
@@ -543,7 +544,7 @@ class PolymerType(dict):
 
 polymers = PolymerType()
 
-@dataclass(repr=False)
+@reprless
 class PerApp:
     
     loader:     Extensible

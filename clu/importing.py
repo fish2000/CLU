@@ -526,10 +526,10 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
 @reprless
 class PerApp:
     
-    loader:     Extensible
-    finder:     Extensible
-    modules:    tx.Mapping[str, MetaModule] = field(default_factory=dict)
-    appname:    str                         = field(default_factory=str)
+    loader:  Extensible
+    finder:  Extensible
+    modules: tx.Mapping[str, MetaModule] = field(default_factory=dict)
+    appname: str                         = field(default_factory=str)
     
     def __repr__(self):
         return stringify(self,

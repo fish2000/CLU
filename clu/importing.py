@@ -528,7 +528,7 @@ class PerApp:
     
     loader:     Extensible
     finder:     Extensible
-    modules:    tx.Dict[str, MetaModule]    = field(default_factory=dict)
+    modules:    tx.Mapping[str, MetaModule] = field(default_factory=dict)
     appname:    str                         = field(default_factory=str)
     
     def __repr__(self):

@@ -397,7 +397,7 @@ tables==3.5.2
 tablib==0.13.0
 tbb==2019.0
 tensorboard==1.15.0
-tensorflow==1.14.0
+tensorflow==1.15.0
 tensorflow-estimator==1.15.0
 tensorflow-probability==0.7.0
 termcolor==1.1.0

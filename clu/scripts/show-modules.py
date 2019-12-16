@@ -38,19 +38,19 @@ Mismatch = NamedTuple('Mismatch', ('which',
                                    'determine',
                                    'modulename',
                                    'thingname',
-                                   'idx'), module=__file__)
+                                   'idx'))
 
 Mismatches = NamedTuple('Mismatches', ('total',
                                        'mismatch_records',
-                                       'failure_rate'), module=__file__)
+                                       'failure_rate'))
 
 Result = NamedTuple('Result', ('modulename',
                                'thingnames',
-                               'idx'), module=__file__)
+                               'idx'))
 
 Results = NamedTuple('Results', ('total',
                                  'modulenames',
-                                 'result_records'), module=__file__)
+                                 'result_records'))
 
 def compare_module_lookups_for_all_things():
     """ Iterate through each exported item, for each exported module,

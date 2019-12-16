@@ -713,12 +713,14 @@ def add_targets(instance, *targets):
         if target is None:
             continue
         if ismodule(target):
-            instance.target_dicts.append(target.__dict__)
-            instance.target_lists.append(dir(target))
+            if target.__dict__ not in instance.target_dicts:
+                instance.target_dicts.append(target.__dict__)
+                instance.target_lists.append(dir(target))
             continue
         if ismapping(target):
-            instance.target_dicts.append(target)
-            instance.target_lists.append(list(target.keys()))
+            if target not in instance.target_dicts:
+                instance.target_dicts.append(target)
+                instance.target_lists.append(list(target.keys()))
             continue
 
 @export

@@ -30,7 +30,7 @@ except ImportError:
 
 from clu.constants import consts
 from clu.extending import Extensible
-from clu.naming import nameof, dotpath_split, dotpath_join
+from clu.naming import nameof, moduleof, dotpath_split, dotpath_join, qualified_name
 from clu.predicates import anyattrs, attr, attr_search, mro
 from clu.repr import stringify
 from clu.typespace import Namespace, types
@@ -80,6 +80,14 @@ class MetaRegistry(Extensible):
     def __getitem__(cls, key):
         """ Allows lookup of an app name through subscripting the Registry class """
         return Registry.for_appname(key)
+    
+    def __repr__(cls):
+        """ Type repr definition for class-based modules and ancestors """
+        qualname = getattr(cls, 'qualname', None)
+        if not qualname:
+            module = moduleof(cls)
+            return f"<class-module ancestor type “{module}.{cls.__name__}”>"
+        return f"<class-module “{cls.qualname}”>"
     
     @staticmethod
     def unregister(appname, qualified_name):
@@ -192,8 +200,23 @@ class Package(types.Module):
         out += ">"
         return out
 
+class MetaTypeRepr(abc.ABCMeta):
+    
+    """ At the time of writing, type-specific “__repr__(…)” definitions
+        require the use of a metaclass – soooooooo…
+    """
+    
+    def __repr__(cls):
+        qualname = qualified_name(cls)
+        appname = getattr(cls, 'appname', None)
+        if appname is None:
+            return f"<class “{qualname}”>"
+        return f"<class “{qualname}” from “{appname}”>"
+
 @export
-class FinderBase(clu.abstract.AppName, importlib.abc.MetaPathFinder):
+class FinderBase(clu.abstract.AppName,
+                 importlib.abc.MetaPathFinder,
+                 metaclass=MetaTypeRepr):
     
     """ The base class for all class-based module finders.
         
@@ -245,7 +268,9 @@ class FinderBase(clu.abstract.AppName, importlib.abc.MetaPathFinder):
                     for module in modules_for_appname(cls.appname))
 
 @export
-class LoaderBase(clu.abstract.AppName, importlib.abc.Loader):
+class LoaderBase(clu.abstract.AppName,
+                 importlib.abc.Loader,
+                 metaclass=MetaTypeRepr):
     
     """ The base class for all class-based module loaders.
         
@@ -526,6 +551,13 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
 @reprless
 class PerApp:
     
+    """ Dataclass representing an “app”, as per the notion of
+        an “appname”, and the related subtypes pertaining to
+        said app: a Finder, a Loader, and one or more Modules
+        (each of the latter of which possessing a distinct
+        “appspace” label).
+    """
+    
     loader:  Extensible
     finder:  Extensible
     modules: tx.Mapping[str, MetaModule] = field(default_factory=dict)
@@ -536,11 +568,21 @@ class PerApp:
                     type(self).fields,
                          try_callables=False)
 
+# Sort this out once (when the module loads) instead of each
+# and every fuckling time a PerApp instance is to get repr’d:
 PerApp.fields = tuple(field.name for field in fields(PerApp))
 
 class PolymerType(dict):
     
+    """ One-off custom ‘dict’ subclass for indexing the per-app
+        registry of class-module-related subtypes – the specific
+        Finder, Loader, and Module(s) related to any given app
+    """
+    
     def store(self, appname, loader, finder, **modules):
+        """ Create and store a ‘PerApp’ record in the PolymerType
+            dictionary index.
+        """
         self[appname] = PerApp(loader=loader,
                                finder=finder,
                               modules=modules,
@@ -548,6 +590,10 @@ class PolymerType(dict):
         return self[appname]
     
     def add_module(self, appname, appspace, module):
+        """ Add a “clu.importing.ModuleBase” subtype to a given
+            ‘PerApp’ record already existent in the PolymerType
+            dictionary index.
+        """
         if not appspace:
             raise ValueError("an appspace is required")
         if not module:
@@ -557,6 +603,7 @@ class PolymerType(dict):
         self[appname].modules.update({ appspace : module })
         return self[appname]
 
+# The per-appname subtype registry dictionary:
 polymers = PolymerType()
 
 def installed_appnames():
@@ -722,11 +769,10 @@ class ProxyModule(Module):
             
             See the main class docstring for the deets.
         """
-        
         # Call up, creating the instance:
         instance = super(ProxyModule, cls).__new__(cls)
         
-        # Fill in empty “slots”:
+        # Fill in our “slots” with empty structs:
         instance.__proxies__ = {}
         instance.__filters__ = []
         instance.target_dicts = []
@@ -765,16 +811,20 @@ class ProxyModule(Module):
         
         # Process and strip off a class-level “targets”
         # list attribute – if such a thing exists – and
-        # then sequester the “targets” attribute behind an
-        # underscore, if necessary:
+        # then sequester said “targets” attribute behind
+        # an underscore, if necessary:
         if anyattrs(cls, 'targets', '_targets'):
             add_targets(self, *attr(cls, 'targets', '_targets'))
             if hasattr(cls, 'targets'):
+                # This type of defensive programming is necessary due to
+                # how module “__init__(…)” methods are nondeterministically
+                # subject to being called more than once:
                 setattr(cls, '_targets', attr(cls, 'targets', '_targets'))
                 delattr(cls, 'targets')
     
     def __execute__(self):
-        # Create the internal “clu.dicts.ChainMap” subclass instance:
+        # Create the internal “clu.dicts.ChainMap” subclass instance,
+        # and pre-combine any “__dir__”-value lists we may be using:
         self.__proxies__ = ChainModuleMap(*self.target_dicts)
         self.__filters__ = tuple(iterchain(self.target_lists))
         
@@ -799,13 +849,13 @@ class ProxyModule(Module):
         # attempt to get one or another nonexistant attributes from ‘self’.
         try:
             if not self.__dict__.get('_executed', False):
-                raise KeyError(key)
+                raise KeyError(f"Access attempt on uninitialized proxy module: {key}")
             elif key in consts.BUILTINS:
-                raise KeyError(key)
+                raise KeyError(f"No builtin access on proxy modules: {key}")
             return self.__proxies__[key]
-        except KeyError:
+        except KeyError as exc:
             typename = type(self).__name__
-            raise AttributeError(f"‘{typename}’ proxy module has no attribute ‘{key}’")
+            raise AttributeError(f"‘{typename}’ access failure for {key}: «{exc!s}»")
 
 export(Module, name='Module')
 export(Finder, name='Finder')
@@ -821,6 +871,7 @@ def test():
     
     @inline
     def test_one():
+        """ Class-module basics """
         
         m = Module(consts.PROJECT_NAME)
         assert m
@@ -833,6 +884,7 @@ def test():
     
     @inline
     def test_two():
+        """ Class-module subtype basics """
         
         class OtherModule(ModuleBase):
             pass
@@ -853,6 +905,7 @@ def test():
     
     @inline
     def test_three():
+        """ Class-module registry basics """
         assert pout
         
         pout.v(all_registered_appnames())
@@ -879,6 +932,7 @@ def test():
     
     @inline
     def three_and_a_half():
+        """ System import hooks, specs and finders """
         finder = Finder()
         assert type(finder.loader) is Loader
         assert type(finder) in sys.meta_path
@@ -902,6 +956,7 @@ def test():
     
     @inline
     def test_four():
+        """ Class-module subclass properties, methods, and exporting """
         
         class Derived(Module):
             
@@ -934,6 +989,7 @@ def test():
     
     @inline
     def test_five():
+        """ Proxy-module properties and value resolution """
         
         overrides = dict(PROJECT_NAME='yodogg',
                          PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
@@ -990,7 +1046,7 @@ def test():
         assert type(apps_module) is Module1
         
         print()
-        print("MODULETYPE:", type(apps_module))
+        print("MODULETYPE:", type(apps_module), "–", repr(apps_module))
         
         print()
         print("MONOMERS:")

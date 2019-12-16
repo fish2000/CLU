@@ -31,11 +31,11 @@ class TestImporting(object):
             
             with pytest.raises(AttributeError) as exc:
                 assert overridden.YODOGG
-            assert "has no attribute" in str(exc.value)
+            assert "access failure" in str(exc.value)
             
             with pytest.raises(AttributeError) as exc:
                 assert overridden.add_targets
-            assert "has no attribute" in str(exc.value)
+            assert "access failure" in str(exc.value)
         
         finally:
             Registry.unregister(overridden.appname,

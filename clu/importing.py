@@ -569,7 +569,7 @@ class PerApp:
                          try_callables=False)
 
 # Sort this out once (when the module loads) instead of each
-# and every fuckling time a PerApp instance is to get repr’d:
+# and every fucking time a PerApp instance is to get repr’d:
 PerApp.fields = tuple(field.name for field in fields(PerApp))
 
 class PolymerType(dict):

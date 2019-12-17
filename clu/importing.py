@@ -1016,7 +1016,7 @@ def test():
         pout.v(mro(m))
     
     @inline
-    def three_and_a_half():
+    def test_three_point_five():
         """ System import hooks, specs and finders """
         finder = Finder()
         assert type(finder.loader) is Loader
@@ -1102,7 +1102,7 @@ def test():
         return dir(overridden)
     
     @inline
-    def test_five_and_a_half():
+    def test_five_point_five():
         """ Proxy-module fallback callable check """
         
         overrides = dict(PROJECT_NAME='yodogg',

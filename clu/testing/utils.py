@@ -63,7 +63,7 @@ def format_report(aggregated_report, show_buckets=False,
     root_time = root_time_ms / root_count
     
     entries = [
-        " %s %sx  %.24s [%6.3fs] %.f%%" % (root.ljust(24), "   1",
+        " %s %sx  %.24s [%6.3fs] %.f%%" % (root.ljust(26), "   1",
                                              natural_millis(root_time).ljust(12),
                                                             root_time * 0.001,
                                                             100),
@@ -83,7 +83,7 @@ def format_report(aggregated_report, show_buckets=False,
             short_name = log_name.rpartition('#')[-1]
         
         entries.append("%s %s %sx  %.24s [%6.3fs] %.f%%" % (
-            "  " * depth, short_name.ljust(24 - (depth*2)),
+            "  " * depth, short_name.ljust(26 - (depth*2)),
                           str(count).rjust(4),
                           natural_millis(delta_ms).ljust(12),
             delta_ms * 0.001,

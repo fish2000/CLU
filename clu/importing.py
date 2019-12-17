@@ -1069,6 +1069,42 @@ def test():
         return dir(overridden)
     
     @inline
+    def test_five_and_a_half():
+        """ Proxy-module fallback callable check """
+        
+        overrides = dict(PROJECT_NAME='yodogg',
+                         PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
+                         BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
+        
+        def fallback_function(key):
+            if key.isupper():
+                return f"NO DOGG: {key}"
+            raise KeyError(key)
+        
+        class testing_overridden_consts_fallback(ProxyModule):
+            targets = (overrides, consts, fallback_function)
+        
+        from clu.app import testing_overridden_consts_fallback as overridden
+        
+        assert overridden.USER == consts.USER
+        assert overridden.BUILTINS == consts.BUILTINS
+        assert overridden.PROJECT_NAME == 'yodogg'
+        assert overridden.PROJECT_PATH.endswith('yodogg')
+        assert overridden.BASEPATH.endswith('yodogg')
+        
+        assert overridden.NOATTR == "NO DOGG: NOATTR"   # uppercase: triggers fallback
+        
+        assert not hasattr(overridden, 'targets')       # lowercase: fallback raises KeyError
+        assert not hasattr(overridden, 'target_dicts')  # lowercase: fallback raises KeyError
+        assert hasattr(overridden, '_targets')          # attribute found normally
+        
+        # pout.v(overridden)
+        pprint(overridden.__proxies__)
+        
+        # return tuple(overridden.exporter.exports())
+        return dir(overridden)
+    
+    @inline
     def test_six():
         """ PerApp dataclass check """
         pprint(dict(polymers), indent=4)

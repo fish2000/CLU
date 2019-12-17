@@ -563,6 +563,10 @@ class PerApp:
     modules: tx.Mapping[str, MetaModule] = field(default_factory=dict)
     appname: str                         = field(default_factory=str)
     
+    def appspaces(self):
+        """ Return a tuple with this app’s defined appspaces """
+        return tuple(self.modules.keys())
+    
     def __repr__(self):
         return stringify(self,
                     type(self).fields,
@@ -1134,6 +1138,8 @@ def test():
     @inline
     def test_six():
         """ PerApp dataclass check """
+        
+        print("POLYMERS:")
         pprint(dict(polymers), indent=4)
         
         Module0, Finder0, Loader0 = initialize_types(consts.PROJECT_NAME)
@@ -1159,6 +1165,10 @@ def test():
                                                    # «Module1» …ooof.
         
         assert type(apps_module) is Module1
+        
+        print()
+        print("CLU APPSPACES:")
+        pprint(polymers['clu'].appspaces())
         
         print()
         print("MODULETYPE:", type(apps_module), "–", repr(apps_module))

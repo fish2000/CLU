@@ -604,6 +604,8 @@ class PolymerType(dict):
             raise ValueError("a module is required")
         if not self.get(appname, None):
             raise ValueError(f"no PerApp instance for appname: {appname}")
+        if appspace in self[appname].appspaces():
+            raise NameError(f"module already exists in “{appname}” for appspace: {appspace}")
         self[appname].modules.update({ appspace : module })
         return self[appname]
 

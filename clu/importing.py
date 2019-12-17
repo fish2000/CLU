@@ -1070,7 +1070,7 @@ def test():
     
     @inline
     def test_six():
-        """ AppClasses dataclass check """
+        """ PerApp dataclass check """
         pprint(dict(polymers), indent=4)
         
         Module0, Finder0, Loader0 = initialize_types(consts.PROJECT_NAME)

@@ -728,18 +728,38 @@ class ChainModuleMap(clu.dicts.ChainMap):
         from pprint import pformat
         return pformat(dict(zip(self, (self[item] for item in self))))
 
-# Define out-of-line target-processing function:
+# Define an out-of-line target-processing function:
 def add_targets(instance, *targets):
     """ Out-of-line, use-twice-and-destroy function for processing targets """
+    
+    # Ensure the necessary lists have been established on the proxy:
     if getattr(instance, 'target_dicts', None) is None:
         instance.target_dicts = []
     if getattr(instance, 'target_lists', None) is None:
         instance.target_lists = []
     if getattr(instance, 'target_funcs', None) is None:
         instance.target_funcs = []
+    
+    # Iterate over targets, acting accordingly:
     for target in targets:
         if target is None:
             continue
+        
+        # Extract and flatten any proxy sub-module contents:
+        if isinstance(target, ProxyModule):
+            for mapping in target.__proxies__.maps:
+                if mapping not in instance.target_dicts:
+                    instance.target_dicts.append(mapping)
+            for name in target.__filters__:
+                if name not in instance.target_lists:
+                    instance.target_lists.append(name)
+            for function in target.__proxies__.fallbacks:
+                if function not in instance.target_funcs:
+                    instance.target_funcs.append(function)
+            continue
+        
+        # Use the module’s “__dict__”, “dir(…)” output,
+        # and “__getattr__(…)” function (if any):
         if ismodule(target):
             if target.__dict__ not in instance.target_dicts:
                 instance.target_dicts.append(target.__dict__)
@@ -748,6 +768,9 @@ def add_targets(instance, *targets):
                 if target.__getattr__ not in instance.target_funcs:
                     instance.target_funcs.append(target.__getattr__)
             continue
+        
+        # Use the mapping itself, a listification of its keys,
+        # and “__missing__(…)” method (if any):
         if ismapping(target):
             if target not in instance.target_dicts:
                 instance.target_dicts.append(target)
@@ -756,6 +779,8 @@ def add_targets(instance, *targets):
                 if target.__missing__ not in instance.target_funcs:
                     instance.target_funcs.append(target.__missing__)
             continue
+        
+        # Simply stow any callables as fallback functions:
         if callable(target):
             if target not in instance.target_funcs:
                 instance.target_funcs.append(target)
@@ -844,10 +869,12 @@ class ProxyModule(Module):
             module definition – with the optional addition of zero-to-N
             “targets”.
             
-            Each target so named can be either a mapping-ish type, or a
-            module. The proxy module will then use the list of targets
-            – considerate of order – to construct a “clu.dicts.ChainMap”
-            instance that pulls, in turn, from the target list.
+            Each target so named can be either a mapping-ish type, a
+            module, or a callable. The proxy module will then use the
+            list of targets – considerate of order – to construct a
+            custom “clu.dicts.ChainMap” instance that pulls, in turn,
+            from the target list (and falling back to results from any
+            callable targets after exhausting said list).
             
             Attribute lookup on the proxy module instance will follow
             along through the “ChainMap” instances’ internal stack of

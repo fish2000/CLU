@@ -687,12 +687,26 @@ Module, Finder, Loader = initialize_types(consts.PROJECT_NAME)
 @export
 class ChainModuleMap(clu.dicts.ChainMap):
     
-    """ Custom “clu.dicts.ChainMap” subclass, tailored for module dicts """
+    """ Custom “clu.dicts.ChainMap” subclass, tailored for module dicts.
+        
+        In addition to the arguments accepted by its ancestor, one may
+        pass in a sequence of functions as a keyword argument “fallbacks”.
+        Each of these functions should accept exactly one argument –
+        a mapping key string – and either return something for it, or
+        raise either an AttributeError or a KeyError.
+        
+        … This is meant to allow one to pass in one or more module-level
+        “__getattr__(…)” functions, “Mapping.__missing__(…)” methods, or
+        similar callables – the ChainModuleMap “__missing__(…)” method
+        itself will attempt to invoke these functions in order, should
+        it be called upon (hence the name “fallbacks”).
+    """
+    
     __slots__ = tuplize('fallbacks')
     
-    def __init__(self, *dicts, fallbacks=tuple(), **overrides):
+    def __init__(self, *dicts, fallbacks=None, **overrides):
         super().__init__(*dicts, **overrides)
-        self.fallbacks = fallbacks
+        self.fallbacks = fallbacks or tuple()
     
     def __iter__(self):
         yield from filter(lambda item: item not in consts.BUILTINS,
@@ -754,21 +768,26 @@ class ProxyModule(Module):
         more other things and surfaces their attributes, as if they are all
         one big unified module.
         
-        In this case, “things” can be either modules or mappings. Internally,
-        the ProxyModule uses a bespoke ChainMap subclass to keep these modules
-        and/or mappings in line, and to access them idempotently, with a
-        deterministic ordering, and generally in a way that doesn’t surprise
-        or scare anybody.
+        In this case, “things” can be modules, mappings, or callables – the
+        ProxyModule employs a bespoke ChainMap subclass to keep these varied
+        targets in order, for idempotent access with deterministic ordering,
+        like in a way that ought not surprise or scare anybody.
+        
+        Callable targets are fallbacks – they are invoked by the “__missing__”
+        method of the internal ChainMap, when attribute lookup across all of
+        the module and mapping proxy targets is exhaustively unsuccessful.
         
         Here’s a basic example of a ProxyModule definition:
         
             overrides = dict(…)
             from yodogg.app import base_module
             from yodogg.utils import misc as second_module
+            from yodogg.utils.functions import default_factory
             
             class myproxy(ProxyModule):
                 targets = (overrides, base_module,
-                                    second_module)
+                                    second_module,
+                                  default_factory)
         
         … which after defining that, you’d use it like so – assuming your app
         is called “yodogg” with a default “app” appspace (see “ModuleBase” for
@@ -779,6 +798,10 @@ class ProxyModule(Module):
                            # in sequence, looking for the 'attrib' value
             dir(myproxy)   # returns a list of the union of available stuff,
                            # across the proxy modules’ targets
+            myproxy.NOATTR # unknown attributes will be forwarded to each
+                           # module-level “__getattr__(…)” function, dictionary
+                           # “__missing__(…)” method, or callable target found,
+                           # in turn, if the attribute search proves exhaustive
         
         … you can, in the modules’ definition, include other stuff besides the
         class-level “targets” tuple; other elements added to the proxy will
@@ -799,8 +822,8 @@ class ProxyModule(Module):
         instance = super(ProxyModule, cls).__new__(cls)
         
         # Fill in our “slots” with empty structs:
-        instance.__proxies__ = {}
         instance.__filters__ = []
+        instance.__proxies__ = {}
         instance.target_dicts = []
         instance.target_lists = []
         instance.target_funcs = []
@@ -852,9 +875,9 @@ class ProxyModule(Module):
     def __execute__(self):
         # Create the internal “clu.dicts.ChainMap” subclass instance,
         # and pre-combine any “__dir__”-value lists we may be using:
+        self.__filters__ = tuple(iterchain(self.target_lists))
         self.__proxies__ = ChainModuleMap(*self.target_dicts,
                         fallbacks=tuplize(*self.target_funcs))
-        self.__filters__ = tuple(iterchain(self.target_lists))
         
         # Further unclutter the module namespace:
         delattr(self, 'target_dicts')

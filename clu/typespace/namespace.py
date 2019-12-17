@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from reprlib import Repr
 
 import re
+import clu.abstract
 import collections.abc
+import contextlib
 
-from clu.constants.consts import SEPARATOR_WIDTH, pytuple, NoDefault
-from clu.abstract import Slotted
-from clu.predicates import ismergeable
+from clu.constants.consts import pytuple, NoDefault
+from clu.constants.polyfills import ispyname
 from clu.dicts import merge_two, asdict
-from clu.naming import nameof
+from clu.predicates import ismergeable, isnamespace
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -17,12 +19,54 @@ export = exporter.decorator()
 # NAMESPACES: SimpleNamespace and Namespace
 
 @export
+class NamespaceRepr(Repr):
+    
+    """ Custom Repr-izer for SimpleNamespace and Namespace mappings,
+        which can recursively self-contain.
+        
+        q.v. cpython docs, http://bit.ly/2r1GQ4l supra.
+    """
+    
+    def subrepr(self, thing, level):
+        if isnamespace(thing):
+            return self.repr1(thing, level - 1)
+        else:
+            return repr(thing)
+    
+    def primerepr(self, obj, level):
+        if len(obj) == 0:
+            return "{}"
+        elif len(obj) == 1:
+            item = tuple("{!s} : {!s}".format(key, self.subrepr(obj.__dict__[key], level)) for key in obj)[0]
+            return f"{{ {item} }}"
+        items = ("{!s} : {!s}".format(key, self.subrepr(obj.__dict__[key], level)) for key in sorted(obj))
+        ts = "    " * (int(self.maxlevel - level) + 1)
+        ls = "    " * (int(self.maxlevel - level) + 0)
+        total = (f",\n{ts}").join(items)
+        return f"{{ \n{ts}{total}\n{ls}}}"
+    
+    def repr_SimpleNamespace(self, obj, level):
+        return self.primerepr(obj, level)
+    
+    def repr_Namespace(self, obj, level):
+        return self.primerepr(obj, level)
+
+reprizer = NamespaceRepr()
+reprizer.maxlevel = 10
+reprizer.maxstring = 120
+reprizer.maxother = 120
+nsrepr = reprizer.repr
+
+@export
 class SimpleNamespace(collections.abc.Hashable,
                       collections.abc.Iterable,
-                      metaclass=Slotted):
+                      clu.abstract.ReprWrapper,
+                      metaclass=clu.abstract.Slotted):
     
     """ Implementation courtesy this SO answer:
         • https://stackoverflow.com/a/37161391/298171
+        
+        Additionally, SimpleNamespace furnishes an `__dir__(…)` method.
     """
     
     __slots__ = pytuple('dict', 'weakref')
@@ -35,10 +79,8 @@ class SimpleNamespace(collections.abc.Hashable,
     def __iter__(self):
         yield from self.__dict__
     
-    def __repr__(self):
-        items = ("{}={!r}".format(key, self.__dict__[key]) for key in sorted(self))
-        return "{}({}) @ {}".format(nameof(type(self)),
-                         ",\n".join(items),  id(self))
+    def inner_repr(self):
+        return nsrepr(self)
     
     def __eq__(self, other):
         return self.__dict__ == asdict(other)
@@ -49,10 +91,15 @@ class SimpleNamespace(collections.abc.Hashable,
     def __hash__(self):
         return hash(tuple(self.__dict__.keys()) +
                     tuple(self.__dict__.values()))
+    
+    def __dir__(self):
+        """ Get a list with all the stringified keys in the namespace. """
+        return [str(key) for key in sorted(self)]
 
 @export
 class Namespace(SimpleNamespace,
-                collections.abc.MutableMapping):
+                collections.abc.MutableMapping,
+                contextlib.AbstractContextManager):
     
     """ Namespace adds the `get(…)`, `__len__()`, `__contains__(…)`, `__getitem__(…)`,
         `__setitem__(…)`, `__add__(…)`, and `__bool__()` methods to its ancestor class
@@ -60,8 +107,6 @@ class Namespace(SimpleNamespace,
         
         Since it implements a `get(…)` method, Namespace instances can be passed
         to `merge(…)` – q.v. `merge(…)` function definition supra.
-        
-        Additionally, Namespace furnishes an `__all__` property implementation.
     """
     winnower = re.compile(r"\{(?:\s+)(?P<stuff>.+)")
     
@@ -86,11 +131,13 @@ class Namespace(SimpleNamespace,
         self.__dict__.update(dictish, **updates)
     
     def __getattr__(self, key):
-        if key not in self:
+        # Called when “key” is missing from ‘self.__dict__’ –
+        # provided “key” isn’t dunderized!…
+        if not ispyname(key):
             subnamespace = type(self)()
             self.__dict__[key] = subnamespace
             return subnamespace
-        raise KeyError(key)
+        raise AttributeError(key)
     
     def __enter__(self):
         return self
@@ -99,19 +146,6 @@ class Namespace(SimpleNamespace,
                        exc_val=None,
                        exc_tb=None):
         return exc_type is None
-    
-    @property
-    def __all__(self):
-        """ Get a list with all the stringified keys in the namespace. """
-        return list(str(key) for key in sorted(self))
-    
-    def __repr__(self):
-        from pprint import pformat
-        return "{}({}) @ {}".format(nameof(type(self)),
-                                    self.winnower.sub(r'{\g<stuff>',
-                                              pformat(self.__dict__,
-                                                      width=SEPARATOR_WIDTH)),
-                                                      id(self))
     
     def __len__(self):
         return len(self.__dict__)
@@ -158,6 +192,9 @@ class Namespace(SimpleNamespace,
     
     def __bool__(self):
         return bool(self.__dict__)
+    
+    def inner_repr(self):
+        return nsrepr(self)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -182,8 +219,8 @@ def test():
         ROOT.yo.dogg = "yo dogg"
         ROOT.yo.wat = "¡WAT!"
         
-        # print("ROOT NAMESPACE:")
-        # print(ROOT)
+        print("ROOT NAMESPACE:")
+        print(ROOT)
         
         assert ROOT.other.additional        == "«additional»"
         assert ROOT.other.considerations    == "…"
@@ -194,7 +231,7 @@ def test():
             assert ns.additional            == "«additional»"
             assert ns.considerations        == "…"
         
-        return ROOT
+        # return ROOT
     
     inline.test()
 

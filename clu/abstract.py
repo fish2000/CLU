@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from reprlib import recursive_repr
+
 import abc
 import contextlib
 
 abstract = abc.abstractmethod
+recursive = recursive_repr(fillvalue="…")
 
 from clu.constants import consts
 
@@ -104,6 +107,7 @@ class ReprWrapper(abc.ABC):
         """ Return a repr string for instances of this class """
         ...
     
+    @recursive
     def __repr__(self):
         """ This classes’ object instances’ unique string representation """
         from clu.repr import typename_hexid

@@ -7,7 +7,9 @@ iterchain = chain.from_iterable
 from clu.constants.consts import ENCODING
 from clu.predicates import (ismetaclass, typeof,
                             resolve, attr,
-                            isenum, enumchoices, hoist, pyname)
+                            isenum, enumchoices, hoist,
+                            pyname, isnamespace)
+
 from clu.typology import isnumeric, isbytes, isstring, issingleton
 from clu.exporting import Exporter
 
@@ -22,8 +24,11 @@ INSTANCE_DELIMITER = '@'
 
 def strfield(value):
     """ Basic, simple, straightforward type-switch-based sub-repr """
+    from clu.typespace.namespace import nsrepr
     T = type(value)
-    if isstring(T):
+    if isnamespace(value):
+        return nsrepr(value)
+    elif isstring(T):
         return f"“{value}”"
     elif issingleton(T):
         return f"«{value!s}»"

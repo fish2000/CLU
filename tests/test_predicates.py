@@ -611,17 +611,9 @@ class TestPredicates(object):
     
     def test_slot_aware_attribute_checkers(self):
         """ » Checking “thing/class/slotted/dictish” lambdas from clu.predicates … """
-        from clu.typespace import Namespace, SimpleNamespace
         from clu.predicates import (thing_has, class_has,
                                     isslotted, isdictish, isslotdicty,
                                     slots_for)
-        
-        assert isslotted(Namespace())
-        assert isslotted(SimpleNamespace())
-        assert isdictish(Namespace())
-        assert isdictish(SimpleNamespace())
-        assert isslotdicty(Namespace())
-        assert isslotdicty(SimpleNamespace())
         
         class Slotted(object):
             __slots__ = ('yo', 'dogg', 'wtf')

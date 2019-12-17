@@ -31,7 +31,7 @@ except ImportError:
 from clu.constants import consts
 from clu.extending import Extensible
 from clu.naming import nameof, moduleof, dotpath_split, dotpath_join, qualified_name
-from clu.predicates import anyattrs, attr, attr_search, mro
+from clu.predicates import anyattrs, attr, attr_search, mro, tuplize
 from clu.repr import stringify
 from clu.typespace import Namespace, types
 from clu.typology import ismodule, ismapping, isstring, subclasscheck
@@ -688,12 +688,24 @@ Module, Finder, Loader = initialize_types(consts.PROJECT_NAME)
 class ChainModuleMap(clu.dicts.ChainMap):
     
     """ Custom “clu.dicts.ChainMap” subclass, tailored for module dicts """
+    __slots__ = tuplize('fallbacks')
+    
+    def __init__(self, *dicts, fallbacks=tuple(), **overrides):
+        super().__init__(*dicts, **overrides)
+        self.fallbacks = fallbacks
     
     def __iter__(self):
         yield from filter(lambda item: item not in consts.BUILTINS,
                           super().__iter__())
     
     def __missing__(self, key):
+        # “self.fallbacks” should be populated with any module-level
+        # “__getattr__(…)” functions, as extracted from targets:
+        for fallback in self.fallbacks:
+            try:
+                return fallback(key)
+            except (AttributeError, KeyError):
+                continue
         if key in self:
             return 0
         raise KeyError(key)
@@ -709,6 +721,8 @@ def add_targets(instance, *targets):
         instance.target_dicts = []
     if getattr(instance, 'target_lists', None) is None:
         instance.target_lists = []
+    if getattr(instance, 'target_funcs', None) is None:
+        instance.target_funcs = []
     for target in targets:
         if target is None:
             continue
@@ -716,11 +730,21 @@ def add_targets(instance, *targets):
             if target.__dict__ not in instance.target_dicts:
                 instance.target_dicts.append(target.__dict__)
                 instance.target_lists.append(dir(target))
+            if hasattr(target, '__getattr__'):
+                if target.__getattr__ not in instance.target_funcs:
+                    instance.target_funcs.append(target.__getattr__)
             continue
         if ismapping(target):
             if target not in instance.target_dicts:
                 instance.target_dicts.append(target)
                 instance.target_lists.append(list(target.keys()))
+            if hasattr(target, '__missing__'):
+                if target.__missing__ not in instance.target_funcs:
+                    instance.target_funcs.append(target.__missing__)
+            continue
+        if callable(target):
+            if target not in instance.target_funcs:
+                instance.target_funcs.append(target)
             continue
 
 @export
@@ -779,6 +803,7 @@ class ProxyModule(Module):
         instance.__filters__ = []
         instance.target_dicts = []
         instance.target_lists = []
+        instance.target_funcs = []
         
         # Process any targets with which this instance
         # may have been constructed:
@@ -827,12 +852,14 @@ class ProxyModule(Module):
     def __execute__(self):
         # Create the internal “clu.dicts.ChainMap” subclass instance,
         # and pre-combine any “__dir__”-value lists we may be using:
-        self.__proxies__ = ChainModuleMap(*self.target_dicts)
+        self.__proxies__ = ChainModuleMap(*self.target_dicts,
+                        fallbacks=tuplize(*self.target_funcs))
         self.__filters__ = tuple(iterchain(self.target_lists))
         
         # Further unclutter the module namespace:
         delattr(self, 'target_dicts')
         delattr(self, 'target_lists')
+        delattr(self, 'target_funcs')
         
         # Call up:
         super().__execute__()

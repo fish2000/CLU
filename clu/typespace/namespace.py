@@ -24,6 +24,7 @@ class SimpleNamespace(collections.abc.Hashable,
     """ Implementation courtesy this SO answer:
         • https://stackoverflow.com/a/37161391/298171
     """
+    
     __slots__ = pytuple('dict', 'weakref')
     
     def __init__(self, *args, **kwargs):
@@ -83,6 +84,21 @@ class Namespace(SimpleNamespace,
             q.v. `dict.update(…)` docstring supra.
         """
         self.__dict__.update(dictish, **updates)
+    
+    def __getattr__(self, key):
+        if key not in self:
+            subnamespace = type(self)()
+            self[key] = subnamespace
+            return subnamespace
+        raise KeyError(key)
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type=None,
+                       exc_val=None,
+                       exc_tb=None):
+        return exc_type is None
     
     @property
     def __all__(self):
@@ -145,3 +161,42 @@ class Namespace(SimpleNamespace,
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
+
+def test():
+    
+    from clu.testing.utils import inline
+    
+    @inline
+    def test_one():
+        """ Implicit recursive namespaces """
+        ROOT = Namespace()
+        
+        ROOT.title = "«title»"
+        ROOT.count = 666
+        ROOT.idx = 0
+        
+        with ROOT.other as ns:
+            ns.additional = "«additional»"
+            ns.considerations = "…"
+        
+        ROOT.yo.dogg = "yo dogg"
+        ROOT.yo.wat = "¡WAT!"
+        
+        # print("ROOT NAMESPACE:")
+        # print(ROOT)
+        
+        assert ROOT.other.additional        == "«additional»"
+        assert ROOT.other.considerations    == "…"
+        assert ROOT.yo.dogg                 == "yo dogg"
+        assert ROOT.yo.wat                  == "¡WAT!"
+        
+        with ROOT.other as ns:
+            assert ns.additional            == "«additional»"
+            assert ns.considerations        == "…"
+        
+        return ROOT
+    
+    inline.test()
+
+if __name__ == '__main__':
+    test()

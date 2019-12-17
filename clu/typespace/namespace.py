@@ -88,7 +88,7 @@ class Namespace(SimpleNamespace,
     def __getattr__(self, key):
         if key not in self:
             subnamespace = type(self)()
-            self[key] = subnamespace
+            self.__dict__[key] = subnamespace
             return subnamespace
         raise KeyError(key)
     

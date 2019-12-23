@@ -31,7 +31,7 @@ except ImportError:
 from clu.constants import consts
 from clu.extending import Extensible
 from clu.naming import nameof, moduleof, dotpath_split, dotpath_join, qualified_name
-from clu.predicates import anyattrs, attr, attr_search, mro, tuplize
+from clu.predicates import anyattrs, attr, attr_search, item_search, mro, tuplize
 from clu.repr import stringify
 from clu.typespace import Namespace, types
 from clu.typology import ismodule, ismapping, isstring, subclasscheck
@@ -718,9 +718,18 @@ class ChainModuleMap(clu.dicts.ChainMap):
         yield from filter(lambda item: item not in consts.BUILTINS,
                           super().__iter__())
     
+    def __getitem__(self, key):
+        # Use “item_search(…)” in order to only trigger a constituent
+        # maps’ “__missing__(…)” method within our own “__missing__(…)”
+        # function call:
+        return item_search(key, *self.maps, default=None) \
+            or self.__missing__(key)
+    
     def __missing__(self, key):
         # “self.fallbacks” should be populated with any module-level
-        # “__getattr__(…)” functions, as extracted from targets:
+        # “__getattr__(…)” functions, mapping “__missing__(…)” instance-
+        # member methods, as extracted from targets – or custom callables
+        # with identical signatures and exception-raising characteristics:
         for fallback in self.fallbacks:
             try:
                 return fallback(key)

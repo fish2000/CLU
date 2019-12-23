@@ -5,6 +5,7 @@ from reprlib import Repr
 import clu.abstract
 import collections.abc
 import contextlib
+import re
 
 from clu.constants.consts import pytuple, NoDefault
 from clu.constants.polyfills import ispyname
@@ -16,6 +17,8 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 # NAMESPACES: bespoke “reprlib” recursion-friendly repr-helper:
+
+whitespace = re.compile(r'\s+')
 
 @export
 class NamespaceRepr(Repr):
@@ -64,9 +67,13 @@ class NamespaceRepr(Repr):
     
     def repr_Namespace(self, thing, level):
         return self.primerepr(thing, level)
+    
+    def shortrepr(self, thing):
+        return whitespace.subn(' ', self.repr(thing))[0]
 
 reprizer = NamespaceRepr()
 nsrepr = reprizer.repr
+nsshortrepr = reprizer.shortrepr
 
 # NAMESPACES: SimpleNamespace and Namespace
 
@@ -204,6 +211,12 @@ class Namespace(SimpleNamespace,
     
     def __bool__(self):
         return bool(self.__dict__)
+
+with exporter as export:
+    
+    export(reprizer,    name='reprizer')
+    export(nsrepr,      name='nsrepr')
+    export(nsshortrepr, name='nsshortrepr')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

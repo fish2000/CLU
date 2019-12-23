@@ -77,6 +77,12 @@ test-all: check tox
 version:
 	python -m clu.version
 
+consts:
+	DEBUG=1 PYTHONPATH="." ./clu/scripts/show-consts.py
+
+modules:
+	DEBUG=1 PYTHONPATH="." ./clu/scripts/show-modules.py
+
 .PHONY: clean distclean rebuild
 .PHONY: dist upload bigupload
 .PHONY: clean-pyc clean-cython
@@ -84,4 +90,4 @@ version:
 
 .PHONY: cython sdist wheel twine-upload bump bigbump
 
-.PHONY: check pytest tox test test-all version
+.PHONY: check pytest tox test test-all version consts modules

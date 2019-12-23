@@ -18,7 +18,8 @@ export = exporter.decorator()
 
 # NAMESPACES: bespoke “reprlib” recursion-friendly repr-helper:
 
-whitespace = re.compile(r'\s+')
+WHITESPACE = re.compile(r'\s+')
+STRINGPAIR = "{!s} : {!s}"
 
 @export
 class NamespaceRepr(Repr):
@@ -53,9 +54,10 @@ class NamespaceRepr(Repr):
         if len(thing) == 0:
             return "{}"
         elif len(thing) == 1:
-            item = tuple("{!s} : {!s}".format(key, self.subrepr(thing.__dict__[key], level)) for key in thing)[0]
+            key = tuple(thing.keys())[0]
+            item = STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level))
             return f"{{ {item} }}"
-        items = ("{!s} : {!s}".format(key, self.subrepr(thing.__dict__[key], level)) for key in sorted(thing))
+        items = (STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level)) for key in sorted(thing))
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
         total = (f",\n{ts}").join(items)
@@ -68,7 +70,13 @@ class NamespaceRepr(Repr):
         return self.primerepr(thing, level)
     
     def shortrepr(self, thing):
-        return whitespace.subn(' ', self.repr(thing))[0]
+        return WHITESPACE.sub(' ', self.repr(thing))
+    
+    def fullrepr(self, thing, short=False):
+        from clu.repr import fullrepr as fullstringrepr
+        if short:
+            return fullstringrepr(thing, self.shortrepr(thing))
+        return fullstringrepr(thing, self.repr(thing))
 
 reprizer = NamespaceRepr()
 nsrepr = reprizer.repr

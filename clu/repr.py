@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from itertools import chain
+from reprlib import recursive_repr
 
 iterchain = chain.from_iterable
+recursive = recursive_repr(fillvalue="…")
 
 from clu.constants import consts
 from clu.predicates import (ismetaclass, typeof,
@@ -25,6 +27,7 @@ typename_hexid = lambda thing: (pyname(typeof(thing)), hex(id(thing)))
 
 INSTANCE_DELIMITER = '@'
 
+@recursive
 def strfield(value):
     """ Basic, simple, straightforward type-switch-based sub-repr """
     from clu.typespace.namespace import nsrepr
@@ -103,6 +106,25 @@ def strfields(instance, fields,
     return ", ".join(f'{k}={v}' for k, v in attrs.items()) or "…"
 
 @export
+def fullrepr(instance, string):
+    """ Return a “full-repr” string for an instance and a given string.
+        
+        For example, in the case of the following repr-stle string:
+        
+            TypeName(fieldname="val", otherfieldname="otherval") @ 0x0FE
+        
+        …the parameter “string” is the portion if the full-repr string
+        that reads:
+        
+            “fieldname="val", otherfieldname="otherval"”
+        
+        … whereas the ‘TypeName’ and hex-ID portions are derived from
+        the “instance” parameter.
+    """
+    typename, hex_id = typename_hexid(instance)
+    return f"{typename}({string}) {INSTANCE_DELIMITER} {hex_id}"
+
+@export
 def stringify(instance, fields,
                        *extras, try_callables=True,
                       **attributes):
@@ -132,8 +154,7 @@ def stringify(instance, fields,
     attr_string = strfields(instance, fields,
                                      *extras, try_callables=try_callables,
                                     **attributes)
-    typename, hex_id = typename_hexid(instance)
-    return f"{typename}({attr_string}) {INSTANCE_DELIMITER} {hex_id}"
+    return fullrepr(instance, attr_string)
 
 @export
 def chop_instance_repr(instance):
@@ -141,7 +162,7 @@ def chop_instance_repr(instance):
         an instance repr string
     """
     instance_repr = isstring(instance) and instance or repr(instance)
-    return instance_repr.split(INSTANCE_DELIMITER).pop(0).strip()
+    return instance_repr.rsplit(INSTANCE_DELIMITER).pop(0).strip()
 
 @export
 def compare_instance_reprs(repr0, *reprX):

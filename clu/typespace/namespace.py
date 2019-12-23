@@ -47,8 +47,7 @@ class NamespaceRepr(Repr):
     def subrepr(self, thing, level):
         if isnamespace(thing):
             return self.repr1(thing, level - 1)
-        else:
-            return repr(thing)
+        return repr(thing)
     
     def primerepr(self, thing, level):
         if len(thing) == 0:

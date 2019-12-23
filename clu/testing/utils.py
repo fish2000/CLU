@@ -208,12 +208,12 @@ class InlineTester(collections.abc.Set,
             
             if verbose:
                 # Print the results and execution time:
-                asterisks('-')
+                asterisks('~')
                 
                 if out is not None:
                     print("RESULTS:")
                     pprint(isstring(out) and { 'string' : f"{out!s}" } or out, indent=4)
-                    asterisks('-')
+                    asterisks('~')
                 
                 if timervals:
                     # print("TIMERVALS:")
@@ -291,7 +291,7 @@ class InlineTester(collections.abc.Set,
         print(f"TIME TOTALS – ran {funcount} functions {count_text}")
         
         # Body:
-        asterisks('=')
+        asterisks('≈')
         print(out)
         
         # Footer:

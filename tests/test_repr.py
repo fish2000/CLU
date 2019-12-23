@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+find_hex_id = lambda function: repr(function).split()[-1].rstrip('>')
+
+test_lambda = lambda: 'yo dogg'
+test_hex_id = find_hex_id(test_lambda)
+
 class TestRepr(object):
     
     """ Run the tests for the clu.repr module. """
@@ -8,6 +13,7 @@ class TestRepr(object):
     def test_strfield(self):
         # from clu.constants.consts import SINGLETON_TYPES
         from clu.repr import strfield
+        from clu.typespace.namespace import Namespace
         from decimal import Decimal
         from enum import Enum, unique
         
@@ -16,6 +22,10 @@ class TestRepr(object):
         # sngl = (True, False, None, ..., NotImplemented)
         # numb = (3, 3.14, complex(3, 4), Decimal(3.14))
         # each = (rstr, byts, buls, bnts, numb)
+        dic = { 'yo' : 'dogg' }
+        ns = Namespace(yo='dogg')
+        l = ['yo', 'dogg']
+        t = ('yo', 'dogg')
         
         @unique
         class Things(Enum):
@@ -27,6 +37,10 @@ class TestRepr(object):
         
         assert strfield(rstr)           == "“yo dogg”"
         assert strfield(byts)           == "“YO DOGG!”"
+        assert strfield(dic)            == '{ yo=dogg }'
+        assert strfield(ns)             == "{ yo : 'dogg' }"
+        assert strfield(l)              == '[ “yo”, “dogg” ]'
+        assert strfield(t)              == '[ “yo”, “dogg” ]'
         assert strfield(True)           == "«True»"
         assert strfield(False)          == "«False»"
         assert strfield(None)           == "«None»"
@@ -36,8 +50,8 @@ class TestRepr(object):
         assert strfield(3)              == "3"
         assert strfield(3.14)           == "3.14"
         assert strfield(complex(3, 4))  == "(3+4j)"
-        assert strfield(Decimal(3.14)).startswith("3.1400000000000001243")
         
+        assert strfield(Decimal(3.14)).startswith("3.1400000000000001243")
         assert strfield(Things).startswith("‘Things<(YO, DOGG, I, HEARD) @ ")
     
     def test_chop_instance_repr(self, dirname):
@@ -115,4 +129,20 @@ class TestRepr(object):
         assert chop_instance_repr(t0) == "Thingy(yo=“YO”, dogg=“DOGG”, iheard=“IHEARD”, youlike=“YOULIKE”)"
     
     def test_repr_lambdas(self):
-        pass
+        from clu.constants.consts import λ
+        from clu.exporting import Exporter
+        
+        test_lambda_qualname = lambda: 'yo dogg'
+        test_hex_id_qualname = find_hex_id(test_lambda_qualname)
+        
+        assert repr(test_lambda) == f"<function {λ} at {test_hex_id}>"
+        assert repr(test_lambda_qualname) == f"<function TestRepr.test_repr_lambdas.<locals>.{λ} at {test_hex_id_qualname}>"
+        
+        exporter = Exporter()
+        export = exporter.decorator()
+        
+        export(test_lambda)                         # renames using determined name of lambda
+        export(test_lambda_qualname, 'yo_dogg')     # renames using provided string name
+        
+        assert repr(test_lambda) == f"<function test_lambda at {test_hex_id}>"
+        assert repr(test_lambda_qualname) == f"<function yo_dogg at {test_hex_id_qualname}>"

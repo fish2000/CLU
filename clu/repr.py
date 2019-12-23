@@ -4,13 +4,16 @@ from itertools import chain
 
 iterchain = chain.from_iterable
 
-from clu.constants.consts import ENCODING
+from clu.constants import consts
 from clu.predicates import (ismetaclass, typeof,
                             resolve, attr,
                             isenum, enumchoices, hoist,
                             pyname, isnamespace)
 
-from clu.typology import isnumeric, isbytes, isstring, issingleton
+from clu.typology import (isnumeric, isbytes, isstring,
+                          ismapping, issequence,
+                          issingleton)
+
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -26,7 +29,7 @@ def strfield(value):
     """ Basic, simple, straightforward type-switch-based sub-repr """
     from clu.typespace.namespace import nsrepr
     T = type(value)
-    if isnamespace(value):
+    if isnamespace(T):
         return nsrepr(value)
     elif isstring(T):
         return f"“{value}”"
@@ -35,7 +38,13 @@ def strfield(value):
     elif isnumeric(T):
         return f"{value!s}"
     elif isbytes(T):
-        return strfield(value.decode(ENCODING))
+        return strfield(value.decode(consts.ENCODING))
+    elif issequence(T):
+        contents = ", ".join(strfield(item) for item in value)
+        return f"[ {contents} ]"
+    elif ismapping(T):
+        contents = strfields(None, tuple(), try_callables=False, **value)
+        return f"{{ {contents} }}"
     elif ismetaclass(T):
         if isenum(value):
             typename, hex_id = typename_hexid(value)

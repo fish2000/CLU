@@ -2,7 +2,6 @@
 from __future__ import print_function
 from reprlib import Repr
 
-import re
 import clu.abstract
 import collections.abc
 import contextlib
@@ -16,7 +15,7 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-# NAMESPACES: SimpleNamespace and Namespace
+# NAMESPACES: bespoke “reprlib” recursion-friendly repr-helper:
 
 @export
 class NamespaceRepr(Repr):
@@ -27,35 +26,49 @@ class NamespaceRepr(Repr):
         q.v. cpython docs, http://bit.ly/2r1GQ4l supra.
     """
     
+    def __init__(self, *args, maxlevel=10,
+                              maxstring=120,
+                              maxother=120,
+                            **kwargs):
+        """ Initialize a NamespaceRepr, with default params for ‘maxlevel’,
+            ‘maxstring’, and ‘maxother’.
+        """
+        try:
+            super().__init__(*args, **kwargs)
+        except TypeError:
+            super().__init__()
+        self.maxlevel = maxlevel
+        self.maxstring = maxstring
+        self.maxother = maxother
+    
     def subrepr(self, thing, level):
         if isnamespace(thing):
             return self.repr1(thing, level - 1)
         else:
             return repr(thing)
     
-    def primerepr(self, obj, level):
-        if len(obj) == 0:
+    def primerepr(self, thing, level):
+        if len(thing) == 0:
             return "{}"
-        elif len(obj) == 1:
-            item = tuple("{!s} : {!s}".format(key, self.subrepr(obj.__dict__[key], level)) for key in obj)[0]
+        elif len(thing) == 1:
+            item = tuple("{!s} : {!s}".format(key, self.subrepr(thing.__dict__[key], level)) for key in thing)[0]
             return f"{{ {item} }}"
-        items = ("{!s} : {!s}".format(key, self.subrepr(obj.__dict__[key], level)) for key in sorted(obj))
+        items = ("{!s} : {!s}".format(key, self.subrepr(thing.__dict__[key], level)) for key in sorted(thing))
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
         total = (f",\n{ts}").join(items)
         return f"{{ \n{ts}{total}\n{ls}}}"
     
-    def repr_SimpleNamespace(self, obj, level):
-        return self.primerepr(obj, level)
+    def repr_SimpleNamespace(self, thing, level):
+        return self.primerepr(thing, level)
     
-    def repr_Namespace(self, obj, level):
-        return self.primerepr(obj, level)
+    def repr_Namespace(self, thing, level):
+        return self.primerepr(thing, level)
 
 reprizer = NamespaceRepr()
-reprizer.maxlevel = 10
-reprizer.maxstring = 120
-reprizer.maxother = 120
 nsrepr = reprizer.repr
+
+# NAMESPACES: SimpleNamespace and Namespace
 
 @export
 class SimpleNamespace(collections.abc.Hashable,
@@ -94,7 +107,7 @@ class SimpleNamespace(collections.abc.Hashable,
     
     def __dir__(self):
         """ Get a list with all the stringified keys in the namespace. """
-        return [str(key) for key in sorted(self)]
+        return [str(key) for key in sorted(self) if key not in ('inner_repr', 'get', 'pop', 'update')]
 
 @export
 class Namespace(SimpleNamespace,
@@ -108,7 +121,6 @@ class Namespace(SimpleNamespace,
         Since it implements a `get(…)` method, Namespace instances can be passed
         to `merge(…)` – q.v. `merge(…)` function definition supra.
     """
-    winnower = re.compile(r"\{(?:\s+)(?P<stuff>.+)")
     
     def get(self, key, default=NoDefault):
         """ Return the value for key if key is in the namespace, else default. """
@@ -192,9 +204,6 @@ class Namespace(SimpleNamespace,
     
     def __bool__(self):
         return bool(self.__dict__)
-    
-    def inner_repr(self):
-        return nsrepr(self)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -219,8 +228,8 @@ def test():
         ROOT.yo.dogg = "yo dogg"
         ROOT.yo.wat = "¡WAT!"
         
-        print("ROOT NAMESPACE:")
-        print(ROOT)
+        # print("ROOT NAMESPACE:")
+        # print(ROOT)
         
         assert ROOT.other.additional        == "«additional»"
         assert ROOT.other.considerations    == "…"
@@ -231,7 +240,7 @@ def test():
             assert ns.additional            == "«additional»"
             assert ns.considerations        == "…"
         
-        # return ROOT
+        return ROOT
     
     inline.test()
 

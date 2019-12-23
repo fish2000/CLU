@@ -82,8 +82,8 @@ class EnvBase(NamespacedMutableMapping, AppName,
         """
         string = key.lstrip(cls.appname.upper() + PREFIX_SEP)
         if PREFIX_SEP not in string:
-            return string.lower()
-        return NAMESPACE_SEP.join(string.lower().split(PREFIX_SEP, 1))
+            return string.casefold()
+        return NAMESPACE_SEP.join(string.casefold().split(PREFIX_SEP, 1))
     
     def __init__(self, *args, **kwargs):
         """ Initialize the environment-variable mapping interface.
@@ -151,7 +151,7 @@ class EnvBase(NamespacedMutableMapping, AppName,
         """
         prefix = type(self).prefix(namespace=None)
         envkeys = (key.lstrip(prefix) for key in self.environment.keys() if key.startswith(prefix))
-        prefixes = frozenset(key.lower().split(PREFIX_SEP, 1)[0] for key in envkeys if PREFIX_SEP in key)
+        prefixes = frozenset(key.casefold().split(PREFIX_SEP, 1)[0] for key in envkeys if PREFIX_SEP in key)
         return tuple(sorted(prefixes))
     
     def inner_repr(self):

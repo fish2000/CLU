@@ -879,12 +879,12 @@ def unpack_env(envkey):
     """ Unpack the appname, possible namespaces, and the key from an environment
         variable key name.
     """
-    appname, *namespaces, key = envkey.lower().split(ENVIRONS_SEP)
+    appname, *namespaces, key = envkey.casefold().split(ENVIRONS_SEP)
     return appname, key, tuple(namespaces)
 
 def nskey_from_env(envkey):
     """ Repack an environment-variable key name as a packed namespace key. """
-    appname, *namespaces, key = envkey.lower().split(ENVIRONS_SEP)
+    appname, *namespaces, key = envkey.casefold().split(ENVIRONS_SEP)
     return appname, pack_ns(key, *namespaces)
 
 def nskey_to_env(appname, nskey):

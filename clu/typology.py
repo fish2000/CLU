@@ -187,8 +187,8 @@ isfunction = ΛΛ = lambda thing: isinstance(thing, Λ) and nopyattr(thing, 'mro
 islambda = λλ = lambda thing: pyattr(thing, 'lambda_name', 'name', 'qualname') in (λ, φ)
 iscallable = lambda thing: haspyattr(thing, 'call') and nopyattr(thing, 'code')
 iscallabletype = lambda thing: isinstance(thing, callable_types) and nopyattr(thing, 'mro')
-issequence = lambda thing: isinstance(thing, collections.abc.Sequence)
-ishashable = lambda thing: isinstance(thing, collections.abc.Hashable)
+issequence = lambda thing: subclasscheck(thing, collections.abc.Sequence)
+ishashable = lambda thing: subclasscheck(thing, collections.abc.Hashable)
 issingleton = lambda thing: subclasscheck(thing, SINGLETON_TYPES)
 
 # Helper predicates for composing sequence-based predicates:

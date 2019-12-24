@@ -6,6 +6,7 @@ import clu.abstract
 import collections.abc
 import contextlib
 import re
+import sys
 
 from clu.constants.consts import pytuple, NoDefault
 from clu.constants.polyfills import ispyname
@@ -267,7 +268,7 @@ def test():
         
         return ROOT
     
-    inline.test(100)
+    return inline.test(100)
 
 if __name__ == '__main__':
-    test()
+    sys.exit(test())

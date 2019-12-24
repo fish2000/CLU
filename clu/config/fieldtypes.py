@@ -7,6 +7,7 @@ import abc
 import collections.abc
 import contextlib
 import os
+import sys
 import weakref
 
 from clu.constants.consts import NoDefault
@@ -997,7 +998,7 @@ def test():
         print()
     
     # Run all tests:
-    inline.test(100)
+    return inline.test(100)
 
 if __name__ == '__main__':
-    test()
+    sys.exit(test())

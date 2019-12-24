@@ -46,7 +46,7 @@ def strfield(value):
         contents = ", ".join(strfield(item) for item in value)
         return f"[ {contents} ]"
     elif ismapping(T):
-        contents = strfields(None, tuple(), try_callables=False, **value)
+        contents = ", ".join(f"{k!s}={v!s}" for k, v in value.items())
         return f"{{ {contents} }}"
     elif ismetaclass(T):
         if isenum(value):

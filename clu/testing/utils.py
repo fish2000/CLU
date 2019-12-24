@@ -412,9 +412,6 @@ class InlineTester(collections.abc.Set,
         funcount = len(self.test_functions)
         diacount = len(self.diagnostics)
         
-        # Set up arguments for forwarding:
-        # args = []
-        
         # Initialize the stopwatch:
         self.watch = stopwatch.StopWatch()
         
@@ -489,6 +486,9 @@ class InlineTester(collections.abc.Set,
         
         # Clear the stopwatch instance:
         self.watch = None
+        
+        # Return successfully:
+        return os.EX_OK
     
     def __len__(self):
         return len(self.test_functions)
@@ -681,7 +681,7 @@ def test():
         for envline in format_environment():
             print(envline)
     
-    inline.test(100)
+    return inline.test(100)
 
 if __name__ == '__main__':
-    test()
+    sys.exit(test())

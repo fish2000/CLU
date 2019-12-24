@@ -1273,7 +1273,7 @@ def test():
             print(f"{string}")
     
     # Run all tests:
-    inline.test(100)
+    return inline.test(100)
 
 if __name__ == '__main__':
-    test()
+    sys.exit(test())

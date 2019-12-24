@@ -7,6 +7,7 @@ iterchain = chain.from_iterable
 import clu.abstract
 import collections
 import collections.abc
+import sys
 
 from clu.constants.consts import NoDefault
 from clu.exporting import Exporter
@@ -352,7 +353,7 @@ def test():
             os.environ = stash # type: ignore
     
     # Run all inline tests:
-    inline.test(10)
+    return inline.test(10)
 
 if __name__ == '__main__':
-    test()
+    sys.exit(test())

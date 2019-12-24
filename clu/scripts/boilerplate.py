@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from __future__ import print_function
-import sys, os
-
-boilerplate = '''
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import sys
@@ -38,12 +32,3 @@ def test():
 
 if __name__ == '__main__':
     sys.exit(test())
-'''.lstrip()
-
-def boilerplate_command(function=print):
-    """ Write out the boilerplate code for a CLU python module file """
-    function(boilerplate)
-    return os.EX_OK
-
-if __name__ == '__main__':
-    sys.exit(boilerplate_command())

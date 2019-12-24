@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import abc
 import os
+import sys
 
 abstract = abc.abstractmethod
 
@@ -569,7 +570,7 @@ def test():
         print()
     
     # Run all inline tests:
-    inline.test(10)
+    return inline.test(10)
 
 if __name__ == '__main__':
-    test()
+    sys.exit(test())

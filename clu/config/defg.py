@@ -11,6 +11,7 @@ import collections.abc
 import contextlib
 import copy
 import os
+import sys
 
 abstract = abc.abstractmethod
 
@@ -1247,7 +1248,7 @@ def test():
             print(envline)
     
     # Run all inline tests:
-    inline.test(100)
+    return inline.test(100)
 
 if __name__ == '__main__':
-    test()
+    sys.exit(test())

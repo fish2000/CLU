@@ -7,6 +7,7 @@ import clu.abstract
 import collections
 import collections.abc
 import inspect
+import sys
 import zict # type: ignore
 
 iterchain = chain.from_iterable
@@ -322,7 +323,7 @@ def test():
         print("REGISTRY »", repr(yodogg.registry))
     
     # Run aggregate inline tests:
-    inline.test(100)
+    return inline.test(100)
 
 if __name__ == '__main__':
-    test()
+    sys.exit(test())

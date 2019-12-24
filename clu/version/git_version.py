@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+import sys
 
 from clu.constants.exceptions import ExecutionError
 from clu.fs.filesystem import Directory, which, back_tick
@@ -64,7 +65,7 @@ def test():
         
         return vtags0
     
-    inline.test(10)
+    return inline.test(10)
 
 if __name__ == '__main__':
-    test()
+    sys.exit(test())

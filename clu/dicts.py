@@ -277,7 +277,8 @@ def test():
     from clu.constants.data import XDGS
     from clu.fs.filesystem import Directory
     from clu.predicates import try_items
-    from clu.testing.utils import pout, inline
+    from clu.testing.utils import inline
+    from pprint import pprint
     import os
     
     dirname = Directory(TEST_PATH)
@@ -305,7 +306,9 @@ def test():
             chain0 = ChainMap(dict_one, data, env)
             
             # pout.v(sorted(env.keys()))
-            pout.v(sorted(chain0.keys()))
+            # pout.v(sorted(chain0.keys()))
+            pprint(sorted(chain0.keys()))
+            print()
             
             # First: shallow clone
             chain1 = chain0.clone()
@@ -340,13 +343,15 @@ def test():
             assert chain0 == chainX
             assert chainX == chain1
             
-            pout.v(sorted(chainX.keys()))
+            # pout.v(sorted(chainX.keys()))
+            pprint(sorted(chainX.keys()))
+            print()
             
         finally:
             os.environ = stash # type: ignore
     
     # Run all inline tests:
-    inline.test()
+    inline.test(10)
 
 if __name__ == '__main__':
     test()

@@ -927,63 +927,77 @@ export(maybefieldbase,  name='maybefieldbase',  doc="maybefieldbase(thing) → �
 __all__, __dir__ = exporter.all_and_dir('fields')
 
 def test():
-    from pprint import pprint
+    
+    from clu.testing.utils import inline
     from clu.config.base import Nested
+    from pprint import pprint
     import os
     
-    yodogg_file = '/tmp/yodogg.txt'
-    
-    class SampleContext(object):
+    @inline
+    def test_one():
+        """ Proof-of-concept class/with-statement checks """
         
-        with open(yodogg_file, 'w') as write_handle:
-            write_handle.write("Yo dogg.")
-            write_handle.flush()
+        yodogg_file = '/tmp/yodogg.txt'
         
-        with open(yodogg_file, 'r') as read_handle:
-            contextualized = read_handle.read()
-    
-    sampctx = SampleContext()
-    print("» SAMPLE:")
-    print(sampctx.contextualized)
-    print()
-    
-    os.unlink(yodogg_file)
-    
-    fields = NamespacedFieldManager()
-    
-    class Context(object):
-        
-        __fields__ = Nested()
-        
-        yo = fields.String("«yo»")
-        dogg = fields.String("«yo»")
-        
-        print("NAMESPACE [0]:", fields.namespace)
-        
-        with fields.ns("iheard"):
+        class SampleContext(object):
             
-            yodogg = fields.String()
-            youlike = fields.String()
+            with open(yodogg_file, 'w') as write_handle:
+                write_handle.write("Yo dogg.")
+                write_handle.flush()
             
-            print("NAMESPACE [1]:", fields.namespace)
+            with open(yodogg_file, 'r') as read_handle:
+                contextualized = read_handle.read()
         
-        print("NAMESPACE [0]:", fields.namespace)
+        try:
+            sampctx = SampleContext()
+            print("» SAMPLE:")
+            print(sampctx.contextualized)
+            print()
         
-        with fields.ns("so"):
+        finally:
+            os.unlink(yodogg_file)
+    
+    @inline
+    def test_two():
+        """ NamespacedFieldManager context-management check """
+        
+        fields = NamespacedFieldManager()
+        
+        class Context(object):
             
-            weput = fields.Int(0)
-            some = fields.UInt(0)
+            __fields__ = Nested()
             
-            print("NAMESPACE [1]:", fields.namespace)
+            yo = fields.String("«yo»")
+            dogg = fields.String("«yo»")
+            
+            print("NAMESPACE [0]:", fields.namespace)
+            
+            with fields.ns("iheard"):
+                
+                yodogg = fields.String()
+                youlike = fields.String()
+                
+                print("NAMESPACE [1]:", fields.namespace)
+            
+            print("NAMESPACE [0]:", fields.namespace)
+            
+            with fields.ns("so"):
+                
+                weput = fields.Int(0)
+                some = fields.UInt(0)
+                
+                print("NAMESPACE [1]:", fields.namespace)
+            
+            print("NAMESPACE [0]:", fields.namespace)
         
-        print("NAMESPACE [0]:", fields.namespace)
+        ctx = Context()
+        
+        print("» CONTEXTUALIZED:")
+        pprint(ctx.__fields__)
+        print()
     
-    ctx = Context()
-    print("» CONTEXTUALIZED:")
-    pprint(ctx.__fields__)
-    print()
-    
-    
+    # Run all tests:
+    inline.test(100)
 
 if __name__ == '__main__':
     test()

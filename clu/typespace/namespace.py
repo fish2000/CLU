@@ -219,7 +219,10 @@ class Namespace(SimpleNamespace,
     def __bool__(self):
         return bool(self.__dict__)
 
-isnamespace = lambda thing: isinstance(thing, (SimpleNamespace, Namespace))
+@export
+def isnamespace(thing):
+    from clu.typology import subclasscheck
+    return subclasscheck(thing, (SimpleNamespace, Namespace))
 
 with exporter as export:
     

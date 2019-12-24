@@ -960,7 +960,7 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     
-    from clu.testing.utils import inline, pout
+    from clu.testing.utils import inline
     from pprint import pprint
     
     @inline
@@ -1000,10 +1000,13 @@ def test():
     @inline
     def test_three():
         """ Class-module registry basics """
-        assert pout
+        # pout.v(all_registered_appnames())
+        # pout.v(all_registered_modules())
+        print("all_registered_appnames():")
+        pprint(all_registered_appnames())
         
-        pout.v(all_registered_appnames())
-        pout.v(all_registered_modules())
+        print("all_registered_modules():")
+        pprint(all_registered_modules())
         
         m = Module(consts.PROJECT_NAME)
         
@@ -1015,14 +1018,18 @@ def test():
         else:
             pass
         
-        pout.v(m.__dict__)
+        # pout.v(m.__dict__)
+        print("m.__dict__:")
+        pprint(m.__dict__)
         
         assert m.appname == consts.PROJECT_NAME
         assert m.appspace == 'app'
         assert m.__name__ == 'clu.app.clu'
         assert nameof(m) == consts.PROJECT_NAME
         
-        pout.v(mro(m))
+        # pout.v(mro(m))
+        print("mro(m):")
+        pprint(mro(m))
     
     @inline
     def test_three_point_five():
@@ -1046,7 +1053,8 @@ def test():
         spec1 = finder.find_spec('clu.app.FindMe', [])
         assert spec1.name == 'clu.app.FindMe'
         
-        pout.v(mro(finder))
+        # pout.v(mro(finder))
+        pprint(mro(finder))
     
     @inline
     def test_four():
@@ -1076,8 +1084,13 @@ def test():
         for attname in dir(derived):
             assert hasattr(derived, attname)
         
-        pout.v(dir(derived))
-        pout.v(derived.exporter.exports())
+        # pout.v(dir(derived))
+        # pout.v(derived.exporter.exports())
+        print("dir(derived):")
+        pprint(dir(derived))
+        
+        print("derived.exporter.exports():")
+        pprint(derived.exporter.exports())
         
         assert type(derived.exporter).__name__ == 'Exporter'
     

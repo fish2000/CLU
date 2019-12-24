@@ -434,6 +434,8 @@ def test():
             youlike = fields.String("you like:")
             andalso = fields.Tuple(value=fields.String("«also»", allow_none=False))
     
+    MySchema.wat = fields.String('HAX')
+    
     @inline
     def test_one():
         

@@ -1036,43 +1036,50 @@ export(NAMESPACE_SEP, name='NAMESPACE_SEP')
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
-def nestedmaps():
-    """ Private nested-dictionary pseudo-fixture """
-    return {'body':   {'declare_i': {'id': {'name': 'i', 'type': 'Identifier'},
-                                            'init': {'type': 'Literal', 'value': 2},
-                                            'type': 'VariableDeclarator'},
-                           'kind': 'var',
-                           'type': 'VariableDeclaration',
-                           'declare_j': {'id': {'name': 'j', 'type': 'Identifier'},
-                                            'init': {'type': 'Literal', 'value': 4},
-                                            'type': 'VariableDeclarator'},
-                           'kind': 'var',
-                           'type': 'VariableDeclaration',
-                           'declare_answer': {'id': {'name': 'answer', 'type': 'Identifier'},
-                                            'init': {'left': {'name': 'i',
-                                                              'type': 'Identifier'},
-                                                     'operator': '*',
-                                                     'right': {'name': 'j',
-                                                               'type': 'Identifier'},
-                                                     'type': 'BinaryExpression'},
-                                            'type': 'VariableDeclarator'},
-                           'kind': 'var',
-                           'type': 'VariableDeclaration'},
-            'type':     'Program'}
-
-def flatdict():
-    """ Private flat-dictionary pseudo-fixture """
-    out = {}
-    for mappingpath in mapwalk(nestedmaps()):
-        *namespaces, key, value = mappingpath
-        nskey = pack_ns(key, *namespaces)
-        out[nskey] = value
-    return out
-
 def test():
     
-    from clu.testing.utils import inline
+    from clu.testing.utils import inline, format_environment
     from pprint import pprint
+    
+    @inline.fixture
+    def nestedmaps():
+        """ Private nested-dictionary pseudo-fixture """
+        return {'body':   {'declare_i': {'id': {'name': 'i', 'type': 'Identifier'},
+                                                'init': {'type': 'Literal', 'value': 2},
+                                                'type': 'VariableDeclarator'},
+                               'kind': 'var',
+                               'type': 'VariableDeclaration',
+                               'declare_j': {'id': {'name': 'j', 'type': 'Identifier'},
+                                                'init': {'type': 'Literal', 'value': 4},
+                                                'type': 'VariableDeclarator'},
+                               'kind': 'var',
+                               'type': 'VariableDeclaration',
+                               'declare_answer': {'id': {'name': 'answer', 'type': 'Identifier'},
+                                                'init': {'left': {'name': 'i',
+                                                                  'type': 'Identifier'},
+                                                         'operator': '*',
+                                                         'right': {'name': 'j',
+                                                                   'type': 'Identifier'},
+                                                         'type': 'BinaryExpression'},
+                                                'type': 'VariableDeclarator'},
+                               'kind': 'var',
+                               'type': 'VariableDeclaration'},
+                'type':     'Program'}
+    
+    @inline.fixture
+    def flatdict():
+        """ Private flat-dictionary pseudo-fixture """
+        out = {}
+        for mappingpath in mapwalk(nestedmaps()):
+            *namespaces, key, value = mappingpath
+            nskey = pack_ns(key, *namespaces)
+            out[nskey] = value
+        return out
+    
+    @inline.precheck
+    def show_nestedmaps():
+        print("Nested maps fixture output:")
+        pprint(nestedmaps())
     
     @inline
     def test_one():
@@ -1162,7 +1169,7 @@ def test():
     
     @inline
     def test_five_pt_five():
-        """ Nested (mutable) and FrozenNested roundtrip commutativity """
+        """ Nested (mutable) and FrozenNested commutativity """
         nested = Nested(tree=nestedmaps())
         frozen_nested = nested.freeze()
         assert frozen_nested == nested
@@ -1234,9 +1241,10 @@ def test():
         assert len(os.environ) == before
     
     @inline.diagnostic
-    def show_nestedmaps():
-        print()
-        pprint(nestedmaps)
+    def show_environment():
+        """ Show environment variables """
+        for envline in format_environment():
+            print(envline)
     
     # Run all inline tests:
     inline.test(100)

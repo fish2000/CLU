@@ -973,27 +973,10 @@ def test():
     from clu.testing.utils import inline
     from pprint import pprint, pformat
     
-    @inline.diagnostic
+    @inline.precheck
     def show_python_executable():
         """ Show the path to the current Python executable """
         print("PYTHON:", sys.executable)
-    
-    @inline.diagnostic
-    def show_monomers():
-        """ Show all ‘monomers’ – per-app registered Module subclasses """
-        appnames = all_registered_appnames()
-        appcount = len(appnames)
-        plural = (appcount == 1) and "app" or "apps" 
-        print(f"MONOMERS ({appcount} {plural} total):")
-        
-        for appname in appnames:
-            monos = dict(monomers[appname])
-            monocount = len(monos)
-            monoplural = (monocount == 1) and "monomer" or "monomers"
-            string = pformat(monos, indent=4)
-            print()
-            print(f"    «{appname}» ({monocount} {monoplural}):")
-            print(f"{string}")
     
     @inline
     def test_one():
@@ -1268,6 +1251,23 @@ def test():
         # print()
         # print("SPEC CACHE:")
         # pprint(FinderBase.specs)
+    
+    @inline.diagnostic
+    def show_monomers():
+        """ Show all registered Module subclasses """
+        appnames = all_registered_appnames()
+        appcount = len(appnames)
+        plural = (appcount == 1) and "app" or "apps" 
+        print(f"MONOMERS ({appcount} {plural} total):")
+        
+        for appname in appnames:
+            monos = dict(monomers[appname])
+            monocount = len(monos)
+            monoplural = (monocount == 1) and "monomer" or "monomers"
+            string = pformat(monos, indent=4)
+            print()
+            print(f"    «{appname}» ({monocount} {monoplural}):")
+            print(f"{string}")
     
     # Run all tests:
     inline.test(100)

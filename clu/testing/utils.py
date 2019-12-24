@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from functools import wraps
+from functools import wraps, lru_cache
 
 import collections.abc
 import clu.abstract
+import os
 import stopwatch
-import sys, os
+import pprint
+import re
+import sys
 import textwrap
 
 from clu.constants import consts
@@ -99,7 +102,8 @@ def format_report(aggregated_report, show_buckets=False,
     return "\n".join(entries)
 
 @export
-def gettitle(function):
+def get_title(function):
+    """ Harvest a title string from a functions’ doctext """
     from inspect import getdoc
     
     # Get docstring, if one exists:
@@ -111,6 +115,47 @@ def gettitle(function):
         title = "«untitled»"
     
     return title
+
+def multiple(number):
+    """ Is it singular or plural…??!?! """
+    if number == 1:
+        return ''
+    return 's'
+
+@export
+def format_environment(environment=None):
+    """ Format environment variables """
+    # Default to “os.environ” when None is passed –
+    # this keeps mutables out of the call signature:
+    if environment is None:
+        environment = os.environ
+    
+    most = max(len(key) for key in environment.keys()) + 2
+    printer = pprint.PrettyPrinter(indent=(most + 6), width=WIDTH)
+    wrapper = textwrap.TextWrapper(initial_indent='',
+                                subsequent_indent=' ' * (most + 5),
+                                 break_long_words=False,
+                                 break_on_hyphens=False,
+                                      placeholder='…',
+                                        max_lines=8,
+                                            width=WIDTH - most)
+    
+    out = []
+    pformat = lambda thing: format_environment.outdenter.sub(r"\g<bracket>",
+                                                 printer.pformat(thing))
+    
+    for key, value in environment.items():
+        jkey = str(key).ljust(most)
+        begin = f"» {jkey} : "
+        if key.endswith('PATH') and ':' in value:
+            wvalue = pformat(value.split(':'))
+        else:
+            wvalue = wrapper.fill(value)
+        out.append(f"{begin}{wvalue}")
+    
+    return out
+
+format_environment.outdenter = re.compile(r'^(?P<bracket>[\[\{\(])\s+')
 
 @export
 class InlineTester(collections.abc.Set,
@@ -125,6 +170,10 @@ class InlineTester(collections.abc.Set,
                 
                 from clu.testing.utils import inline # †
                 
+                @inline.precheck
+                def before_everything_else():
+                   # ...
+                
                 @inline
                 def test_one():
                     # ...
@@ -132,6 +181,10 @@ class InlineTester(collections.abc.Set,
                 @inline
                 def test_two():
                     # ...
+                
+                @inline.diagnostic
+                def apres_testing():
+                   # ...
             
             inline.test() # ‡
             
@@ -147,16 +200,21 @@ class InlineTester(collections.abc.Set,
           run your test functions that many times over, instead of just once.
           …If you do so, any output produced by the functions will be printed
           only on the first go-around, and will be discarded on all subsequent
-          executions. 
+          executions. In any case, this number doesn’t apply to the execution
+          of “precheck” and “diagnostic” functions – they are always each run
+          exactly once, before or after (respectively) the main test functions
+          are run.
     """
     
-    __slots__ = ('prechecks',
+    __slots__ = ('fixtures',
+                 'prechecks',
                  'test_functions',
                  'diagnostics',
                  'watch', '__weakref__')
     
     def __new__(cls, iterable=None):
         instance = super().__new__(cls)
+        instance.fixtures = {}
         instance.prechecks = []
         instance.test_functions = []
         instance.diagnostics = []
@@ -200,11 +258,11 @@ class InlineTester(collections.abc.Set,
                 stack.enter_context(watch.timer('root'))
             
             if verbose:
-                title = gettitle(function)
+                title = get_title(function)
                 
                 # Print header:
                 print()
-                print(f"RUNNING {groupname.upper()} #{idx+1}: `{name}(¬)` – {title}")
+                print(f"§ RUNNING {groupname.upper()} #{idx+1}: `{name}(¬)` – {title}")
                 asterisks('-')
                 print()
             
@@ -232,7 +290,7 @@ class InlineTester(collections.abc.Set,
                 asterisks('~')
                 
                 if out is not None:
-                    print("RESULTS:")
+                    print("» RESULTS:")
                     pprint(isstring(out) and { 'string' : f"{out!s}" } or out, indent=4)
                     asterisks('~')
                 
@@ -240,7 +298,7 @@ class InlineTester(collections.abc.Set,
                     dt = timervals[0] * 0.001
                     dtout = "%6.3f" % dt
                     ndtout = natural_millis(timervals[0])
-                    print(f"Test function “{name}(¬)” ran in about {ndtout} –{dtout}s")
+                    print(f"→ {groupname.capitalize()} function “{name}(¬)” ran in about {ndtout} –{dtout}s")
                     
                 asterisks('=')
             
@@ -251,14 +309,14 @@ class InlineTester(collections.abc.Set,
     
     def __call__(self, function):
         """ Decorate a testing function, marking it as an inline test. """
-        test_wrapper = self.wrap(function, group='execute',
-                                           groupname='test')
+        wrapper = self.wrap(function, group='execute',
+                                      groupname='test')
         
         # Add the wrapper to the internal test function list:
-        self.test_functions.append(test_wrapper)
+        self.test_functions.append(wrapper)
         
         # Return the test wrapper function:
-        return test_wrapper
+        return wrapper
     
     @property
     def precheck(self):
@@ -271,14 +329,14 @@ class InlineTester(collections.abc.Set,
             ahead of the main test run.
         """
         def decoration(function):
-            precheck_wrapper = self.wrap(function, group='checking',
-                                                   groupname='pre-check')
+            wrapper = self.wrap(function, group='check',
+                                          groupname='pre-check')
             
             # Add the wrapper to the internal precheck function list:
-            self.prechecks.append(precheck_wrapper)
+            self.prechecks.append(wrapper)
             
-            # Return self in leu of the function:
-            return self
+            # Return the wrapper, in leu of the function:
+            return wrapper
         
         # Return the decoration function as the property value:
         return decoration
@@ -293,29 +351,44 @@ class InlineTester(collections.abc.Set,
             informational shit; hence the name “diagnostics”.
         """
         def decoration(function):
-            diagnostic_wrapper = self.wrap(function, group='postexec',
-                                                     groupname='diagnostic')
+            wrapper = self.wrap(function, group='postexec',
+                                          groupname='diagnostic')
             
             # Add the wrapper to the internal diagnostic list:
-            self.diagnostics.append(diagnostic_wrapper)
+            self.diagnostics.append(wrapper)
             
-            # Return self in leu of the function:
-            return self
+            # Return the wrapper, in leu of the function:
+            return wrapper
         
         # Return the decoration function as the property value:
         return decoration
     
     @property
-    def pre_post(self):
+    def runtwice(self):
         """ Decorate a function as both a precheck and a diagnostic. """
         def decoration(function):
-            begin_wrapper = self.wrap(function, group='checking',
+            begin_wrapper = self.wrap(function, group='check',
                                                 groupname='pre-check')
             end_wrapper = self.wrap(function, group='postexec',
                                               groupname='diagnostic')
             self.prechecks.insert(0, begin_wrapper)
             self.diagnostics.insert(0, end_wrapper)
-            return self
+            return function
+        return decoration
+    
+    @property
+    def fixture(self):
+        """ Decorate a function as a fixture, memoizing its output. """
+        from clu.naming import nameof
+        
+        def decoration(function):
+            name = nameof(function)
+            
+            if name is None:
+                raise ValueError("couldn’t determine a name for fixture function: {function!r}")
+            
+            self.fixtures[name] = wrapper = lru_cache(maxsize=16, typed=False)(function)
+            return wrapper
         return decoration
     
     def test(self, exec_count=1):
@@ -339,7 +412,7 @@ class InlineTester(collections.abc.Set,
             
             # Run preflight checks:
             if precount > 0:
-                with self.watch.timer('checking'):
+                with self.watch.timer('check'):
                     
                     # Call preflight checks each exactly once:
                     for idx, precheck in enumerate(self.prechecks):
@@ -387,9 +460,10 @@ class InlineTester(collections.abc.Set,
             count_text = "twice"
         
         # Header:
-        print(f"TIME TOTALS "
-              f"– ran {funcount} tests {count_text} "
-              f"– {precount} prechecks, {diacount} diagnostics")
+        print(f"⌀ TIME TOTALS "
+              f"– ran {funcount} test{multiple(funcount)} {count_text} "
+              f"– {precount} precheck{multiple(precount)}"
+              f", {diacount} diagnostic{multiple(diacount)}")
         
         # Body:
         asterisks('≈')
@@ -480,7 +554,8 @@ def test():
     from clu.fs import pypath
     inline = InlineTester()
     
-    def getdatadir():
+    @inline.fixture
+    def get_data_dir():
         from clu.fs.filesystem import Directory
         return Directory(consts.TEST_PATH).subdirectory('data')
     
@@ -564,7 +639,7 @@ def test():
         from clu.fs.filesystem import TemporaryDirectory
         
         prefix = 'test-five-countfiles-'
-        datadir = getdatadir()
+        datadir = get_data_dir()
         
         with TemporaryDirectory(prefix=prefix,
                                 change=False) as temporarydir:
@@ -587,22 +662,9 @@ def test():
     
     @inline.diagnostic
     def show_environment():
-        """ Display environment variables """
-        
-        most = max(len(key) for key in os.environ.keys()) + 2
-        wrapper = textwrap.TextWrapper(initial_indent='',
-                                    subsequent_indent=' ' * (most + 5),
-                                     break_long_words=False,
-                                     break_on_hyphens=False,
-                                          placeholder='…',
-                                            max_lines=8,
-                                                width=WIDTH - most)
-        
-        for key, value in os.environ.items():
-            jkey = str(key).rjust(most)
-            begin = f"» {jkey} : "
-            wvalue = wrapper.fill(value)
-            print(f"{begin}{wvalue}")
+        """ Show environment variables """
+        for envline in format_environment():
+            print(envline)
     
     inline.test(100)
 

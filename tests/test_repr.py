@@ -135,8 +135,12 @@ class TestRepr(object):
         test_lambda_qualname = lambda: 'yo dogg'
         test_hex_id_qualname = find_hex_id(test_lambda_qualname)
         
+        test_classname = type(self).__name__
+        test_funcname = self.test_repr_lambdas.__func__.__name__
+        test_qualname = f"{test_classname}.{test_funcname}.<locals>"
+        
         assert repr(test_lambda) == f"<function {λ} at {test_hex_id}>"
-        assert repr(test_lambda_qualname) == f"<function TestRepr.test_repr_lambdas.<locals>.{λ} at {test_hex_id_qualname}>"
+        assert repr(test_lambda_qualname) == f"<function {test_qualname}.{λ} at {test_hex_id_qualname}>"
         
         exporter = Exporter()
         export = exporter.decorator()

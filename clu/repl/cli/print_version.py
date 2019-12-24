@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-def print_version_command():
-    """ Print a simple string with CLU’s current semantic version tag """
+import os
+import sys
+
+def version_string():
+    """ Format a simple string with CLU’s current semantic version tag """
     from clu.constants import consts
     from clu.version import version_info, VersionInfo
     from clu.version.git_version import git_version_tags
@@ -19,11 +22,20 @@ def print_version_command():
     else:
         semantic += " [release]"
     
+    return semantic
+
+def print_version_command():
+    """ Print the semantic version string, formatted neatly, ensconced
+        in ancilliary human-readable copyright information
+    """
+    semantic = version_string()
     copyright = f"CLU version {semantic} © 2010-2032 Alexander Böhn"
     
+    # print it:
     print(copyright)
-    return 0
+    
+    # Return nice-nice for my POSI(X)ES:
+    return os.EX_OK
 
 if __name__ == '__main__':
-    import sys
     sys.exit(print_version_command())

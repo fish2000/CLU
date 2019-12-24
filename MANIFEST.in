@@ -2,12 +2,14 @@ exclude *.pyc *~ *.so .DS_Store
 
 include .bumpversion.cfg
 include .editorconfig
+include .gitchangelog.rc
 include .gitignore
 include .landscape.yml
 include .travis.yml
 include appveyor.yml
 
 include ABOUT.md
+include CHANGELOG.md
 include CODE_OF_CONDUCT.md
 include COPYING.md
 include LICENSE.txt

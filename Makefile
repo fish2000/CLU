@@ -83,6 +83,12 @@ consts:
 modules:
 	DEBUG=1 PYTHONPATH="." ./clu/scripts/show-modules.py
 
+remove-changelog:
+	rm -f CHANGELOG.md
+
+changelog: remove-changelog
+	gitchangelog > CHANGELOG.md
+
 .PHONY: clean distclean rebuild
 .PHONY: dist upload bigupload
 .PHONY: clean-pyc clean-cython

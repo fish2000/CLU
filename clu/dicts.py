@@ -292,6 +292,7 @@ def test():
         'you'   : "liked",
         'dict'  : "chains" }
     
+    @inline.fixture
     def environment():
         for key in XDGS:
             if key in os.environ:

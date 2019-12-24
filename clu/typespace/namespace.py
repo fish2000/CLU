@@ -10,7 +10,7 @@ import re
 from clu.constants.consts import pytuple, NoDefault
 from clu.constants.polyfills import ispyname
 from clu.dicts import merge_two, asdict
-from clu.predicates import ismergeable, isnamespace
+from clu.predicates import ismergeable
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -218,6 +218,8 @@ class Namespace(SimpleNamespace,
     
     def __bool__(self):
         return bool(self.__dict__)
+
+isnamespace = lambda thing: isinstance(thing, (SimpleNamespace, Namespace))
 
 with exporter as export:
     

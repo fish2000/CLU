@@ -10,7 +10,7 @@ from clu.constants import consts
 from clu.predicates import (ismetaclass, typeof,
                             resolve, attr,
                             isenum, enumchoices, hoist,
-                            pyname, isnamespace)
+                            pyname)
 
 from clu.typology import (isnumeric, isbytes, isstring,
                           ismapping, issequence,
@@ -30,7 +30,7 @@ INSTANCE_DELIMITER = '@'
 @recursive
 def strfield(value):
     """ Basic, simple, straightforward type-switch-based sub-repr """
-    from clu.typespace.namespace import nsrepr
+    from clu.typespace.namespace import nsrepr, isnamespace
     T = type(value)
     if isnamespace(T):
         return nsrepr(value)

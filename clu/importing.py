@@ -1237,8 +1237,6 @@ def test():
             print()
             print(f"    «{specname}»")
             print(f"{string}")
-        
-        print()
     
     @inline.diagnostic
     def show_monomers():
@@ -1256,8 +1254,6 @@ def test():
             print()
             print(f"    «{appname}» ({monocount} {monoplural}):")
             print(f"{string}")
-        
-        print()
     
     @inline.diagnostic
     def show_polymers():
@@ -1275,8 +1271,6 @@ def test():
             print()
             print(f"    «{appname}» ({modcount} {modplural}):")
             print(f"{string}")
-        
-        print()
     
     # Run all tests:
     inline.test(100)

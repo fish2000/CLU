@@ -225,7 +225,7 @@ class InlineTester(collections.abc.Set,
         if iterable is not None:
             self.test_functions.extend(iterable)
     
-    def wrap(self, function, group='execute', groupname='test'):
+    def wrap(self, function, group='execute', groupname='test', newline=False):
         """ Wrap an inline function with timing, banner-printing,
             and all sorts of other useful bookkeeping code used
             internally by the inline testing harness.
@@ -272,6 +272,10 @@ class InlineTester(collections.abc.Set,
             with watch.timer(label_timer):
                 out = function(*args, **kwargs)
             
+            # If we asked for it, we’ll get it:
+            if newline:
+                print()
+            
             if verbose:
                 # Get the reported timer value *before* closing out
                 # the root-level stopwatch timer:
@@ -310,7 +314,8 @@ class InlineTester(collections.abc.Set,
     def __call__(self, function):
         """ Decorate a testing function, marking it as an inline test. """
         wrapper = self.wrap(function, group='execute',
-                                      groupname='test')
+                                      groupname='test',
+                                      newline=False)
         
         # Add the wrapper to the internal test function list:
         self.test_functions.append(wrapper)
@@ -330,7 +335,8 @@ class InlineTester(collections.abc.Set,
         """
         def decoration(function):
             wrapper = self.wrap(function, group='check',
-                                          groupname='pre-check')
+                                          groupname='pre-check',
+                                          newline=True)
             
             # Add the wrapper to the internal precheck function list:
             self.prechecks.append(wrapper)
@@ -352,7 +358,8 @@ class InlineTester(collections.abc.Set,
         """
         def decoration(function):
             wrapper = self.wrap(function, group='postexec',
-                                          groupname='diagnostic')
+                                          groupname='diagnostic',
+                                          newline=True)
             
             # Add the wrapper to the internal diagnostic list:
             self.diagnostics.append(wrapper)
@@ -368,9 +375,13 @@ class InlineTester(collections.abc.Set,
         """ Decorate a function as both a precheck and a diagnostic. """
         def decoration(function):
             begin_wrapper = self.wrap(function, group='check',
-                                                groupname='pre-check')
+                                                groupname='pre-check',
+                                                newline=True)
+            
             end_wrapper = self.wrap(function, group='postexec',
-                                              groupname='diagnostic')
+                                              groupname='diagnostic',
+                                              newline=True)
+            
             self.prechecks.insert(0, begin_wrapper)
             self.diagnostics.insert(0, end_wrapper)
             return function
@@ -461,6 +472,10 @@ class InlineTester(collections.abc.Set,
             count_text = "once"
         elif exec_count == 2:
             count_text = "twice"
+        elif exec_count == 3:
+            count_text = "thrice"
+        elif exec_count == 100:
+            count_text = "a hundred times"
         
         # Header:
         print(f"⌀ TIME TOTALS "

@@ -140,7 +140,6 @@ def format_environment(environment=None):
                                         max_lines=8,
                                             width=WIDTH - most)
     
-    out = []
     pformat = lambda thing: format_environment.outdenter.sub(r"\g<bracket>",
                                                  printer.pformat(thing))
     
@@ -151,9 +150,7 @@ def format_environment(environment=None):
             wvalue = pformat(value.split(':'))
         else:
             wvalue = wrapper.fill(value)
-        out.append(f"{begin}{wvalue}")
-    
-    return out
+        yield f"{begin}{wvalue}"
 
 format_environment.outdenter = re.compile(r'^(?P<bracket>[\[\{\(])\s+')
 

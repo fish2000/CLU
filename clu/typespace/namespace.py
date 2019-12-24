@@ -58,7 +58,7 @@ class NamespaceRepr(Repr):
             key = tuple(thing.keys())[0]
             item = STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level))
             return f"{{ {item} }}"
-        items = (STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level)) for key in sorted(thing))
+        items = (STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level)) for key in thing.keys())
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
         total = (f",\n{ts}").join(items)
@@ -100,9 +100,12 @@ class SimpleNamespace(collections.abc.Hashable,
     __slots__ = pytuple('dict', 'weakref')
     
     def __init__(self, *args, **kwargs):
-        for arg in args:
-            self.__dict__.update(asdict(arg))
-        self.__dict__.update(kwargs)
+        for mapping in (asdict(arg) for arg in args):
+            if ismergeable(mapping):
+                for key, value in mapping.items():
+                    self.__dict__[key] = value
+        for key, value in kwargs.items():
+            self.__dict__[key] = value
     
     def __iter__(self):
         yield from self.__dict__
@@ -122,7 +125,7 @@ class SimpleNamespace(collections.abc.Hashable,
     
     def __dir__(self):
         """ Get a list with all the stringified keys in the namespace. """
-        return [str(key) for key in sorted(self) if key not in ('inner_repr', 'get', 'pop', 'update')]
+        return [str(key) for key in self.keys() if key not in ('inner_repr', 'get', 'pop', 'update')]
 
 @export
 class Namespace(SimpleNamespace,
@@ -254,8 +257,8 @@ def test():
         ROOT.yo.dogg = "yo dogg"
         ROOT.yo.wat = "¡WAT!"
         
-        # print("ROOT NAMESPACE:")
-        # print(ROOT)
+        print("ROOT NAMESPACE:")
+        print(ROOT)
         
         assert ROOT.other.additional        == "«additional»"
         assert ROOT.other.considerations    == "…"

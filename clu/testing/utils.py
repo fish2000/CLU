@@ -391,7 +391,7 @@ class InlineTester(collections.abc.Set,
             return wrapper
         return decoration
     
-    def test(self, exec_count=1):
+    def test(self, exec_count=1, *args):
         """ Run all functions marked as @inline within the modules’ main
             inline test function, using individual context timers for each
             test function call (provided by dbx-stopwatch).
@@ -403,6 +403,9 @@ class InlineTester(collections.abc.Set,
         precount = len(self.prechecks)
         funcount = len(self.test_functions)
         diacount = len(self.diagnostics)
+        
+        # Set up arguments for forwarding:
+        # args = []
         
         # Initialize the stopwatch:
         self.watch = stopwatch.StopWatch()
@@ -416,14 +419,14 @@ class InlineTester(collections.abc.Set,
                     
                     # Call preflight checks each exactly once:
                     for idx, precheck in enumerate(self.prechecks):
-                        precheck(verbose=True, idx=idx, max=precount)
+                        precheck(*args, verbose=True, idx=idx, max=precount)
             
             # Main timer for execution times:
             with self.watch.timer('execute'):
                 
                 # Call testing functions once, initially:
                 for idx, function in enumerate(self.test_functions):
-                    function(verbose=True, idx=idx, max=funcount)
+                    function(*args, verbose=True, idx=idx, max=funcount)
                 
                 # Call them twice through «adnauseumn» –
                 # Redirecting `stdout` so we only get the
@@ -433,7 +436,7 @@ class InlineTester(collections.abc.Set,
                     with redirect_stdout(iosink):
                         for edx in range(exec_count-1):
                             for idx, function in enumerate(self.test_functions):
-                                function(idx=idx, max=funcount)
+                                function(*args, idx=idx, max=funcount)
                             iosink.truncate(0)
                     iosink.close()
             
@@ -443,7 +446,7 @@ class InlineTester(collections.abc.Set,
                     
                     # Call diagnostics each exactly once:
                     for idx, diagnostic in enumerate(self.diagnostics):
-                        diagnostic(verbose=True, idx=idx, max=diacount)
+                        diagnostic(*args, verbose=True, idx=idx, max=diacount)
         
         # REPORT IN:
         report = self.watch.get_last_aggregated_report()

@@ -63,7 +63,7 @@ def format_report(aggregated_report, show_buckets=False,
     root_time = root_time_ms / root_count
     
     entries = [
-        " %s %sx  %.24s [%6.3fs] %.f%%" % (root.ljust(26), "   1",
+        " %s %sx  %.24s [%6.3fs] %.f%%" % (root.ljust(32), "   1",
                                              natural_millis(root_time).ljust(12),
                                                             root_time * 0.001,
                                                             100),
@@ -83,7 +83,7 @@ def format_report(aggregated_report, show_buckets=False,
             short_name = log_name.rpartition('#')[-1]
         
         entries.append("%s %s %sx  %.24s [%6.3fs] %.f%%" % (
-            "  " * depth, short_name.ljust(26 - (depth*2)),
+            "  " * depth, short_name.ljust(32 - (depth*2)),
                           str(count).rjust(4),
                           natural_millis(delta_ms).ljust(12),
             delta_ms * 0.001,
@@ -161,6 +161,9 @@ class InlineTester(collections.abc.Set,
         
         @wraps(function)
         def test_wrapper(*args, **kwargs):
+            # Get index:
+            idx = int(kwargs.pop('idx', 0))
+            max = int(kwargs.pop('max', 0))
             
             # Get verbosity:
             verbose = kwargs.pop('verbose', False)
@@ -185,12 +188,13 @@ class InlineTester(collections.abc.Set,
                 
                 # Print header:
                 print()
-                print(f"RUNNING TEST FUNCTION: `{name}(¬)` – {title}")
+                print(f"RUNNING TEST FUNCTION #{idx+1}: `{name}(¬)` – {title}")
                 asterisks('-')
                 print()
             
             # Run the wrapped function, timing it:
-            with watch.timer(name):
+            label_idx = f"{idx+1}".zfill(len(f"{max}"))
+            with watch.timer(f"{label_idx} – {name}"):
                 out = function(*args, **kwargs)
             
             if verbose:
@@ -243,6 +247,9 @@ class InlineTester(collections.abc.Set,
         from contextlib import redirect_stdout
         import io
         
+        # Count the test functions:
+        funcount = len(self.test_functions)
+        
         # Initialize the stopwatch:
         self.watch = stopwatch.StopWatch()
         
@@ -253,8 +260,8 @@ class InlineTester(collections.abc.Set,
             with self.watch.timer('run'):
                 
                 # Call functions once:
-                for function in self.test_functions:
-                    function(verbose=True)
+                for idx, function in enumerate(self.test_functions):
+                    function(verbose=True, idx=idx, max=funcount)
                 
                 # Call them twice through «adnauseumn» –
                 # Redirecting `stdout` so we only get the
@@ -262,15 +269,14 @@ class InlineTester(collections.abc.Set,
                 if exec_count - 1 > 0:
                     iosink = io.StringIO()
                     with redirect_stdout(iosink):
-                        for idx in range(exec_count-1):
-                            for function in self.test_functions:
-                                function()
+                        for edx in range(exec_count-1):
+                            for idx, function in enumerate(self.test_functions):
+                                function(idx=idx, max=funcount)
                             iosink.truncate(0)
                     iosink.close()
         
         # REPORT IN:
         report = self.watch.get_last_aggregated_report()
-        funcount = len(self.test_functions)
         out = format_report(report)
         
         # Cough up the final report data:

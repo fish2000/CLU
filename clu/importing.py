@@ -1091,6 +1091,7 @@ def test():
         from clu.app import Derived as derived
         
         # assert type(derived) is Derived
+        assert isinstance(derived, Module)
         assert derived.yo == 'dogg'
         
         for attname in dir(derived):

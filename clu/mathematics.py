@@ -24,7 +24,7 @@ if numpy is None:
 # Some numpy types are found in subpackages, like e.g. `numpy.ma.core.MaskedArray`;
 # … this predicate function cuts through that nonsense by only looking at the 
 # start of the deduced module string:
-isnumpything = lambda thing: moduleof(thing).lower().startswith('numpy')
+isnumpything = lambda thing: moduleof(thing).casefold().startswith('numpy')
 isnumpytype = lambda cls: isclasstype(cls) and isnumpything(cls)
 
 isnumpythinglist = lambda thinglist: isxlist(isnumpything, thinglist)

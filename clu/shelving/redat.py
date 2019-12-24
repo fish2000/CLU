@@ -106,7 +106,7 @@ class RedisConf(clu.abstract.ManagedContext,
         self.set(key, value and 'yes' or 'no')
     
     def get_boolean(self, key):
-        return self.get(key).lower().strip() == 'yes'
+        return self.get(key).casefold().strip() == 'yes'
     
     def get_host(self):
         return self.config.get('bind')[0]

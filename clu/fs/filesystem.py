@@ -460,7 +460,7 @@ class TemporaryName(collections.abc.Hashable,
                                               randomized=randomized)
         
         # Initialize the rest of the TemporaryName instance values:
-        self._mode = mode.lower()
+        self._mode = mode.casefold()
         self._destroy = True
         self._parent = parent
         self.prefix = prefix
@@ -1107,7 +1107,7 @@ class Directory(collections.abc.Hashable,
             raise FilesystemError("zip-archive destination path cannot be None")
         zpth = os.fspath(destination)
         zsuf = type(self).zip_suffix
-        if not zpth.lower().endswith(zsuf):
+        if not zpth.casefold().endswith(zsuf):
             zpth = swapext(zpth, zsuf)
         if not compression_mode:
             compression_mode = zipfile.ZIP_DEFLATED
@@ -1181,7 +1181,7 @@ class Directory(collections.abc.Hashable,
         for root, dirs, files in os.walk(target):
             dirs[:] = list(filter(excluder, dirs))
             for ext in filter(None,
-                       map(lambda filename: extension(filename).lower(),
+                       map(lambda filename: extension(filename).casefold(),
                        filter(excluder,
                        filter(searcher, files)))):
                 suffixes[ext] += 1

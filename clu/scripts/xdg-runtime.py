@@ -22,7 +22,7 @@ SYMLINK = XDG_RUNTIME_DIR
 CURRENT = os.path.split(SYMLINK)[1]
 
 def name_xdg_runtime_dir(namebase=SSID):
-    return f'{HOSTNAME.lower()}-{namebase.lower()}'
+    return f'{HOSTNAME.casefold()}-{namebase.casefold()}'
 
 def make_xdg_runtime_dir(directory, mode=XDG_RUNTIME_MODE):
     runtime_dir = directory.subdirectory(name_xdg_runtime_dir())
@@ -33,7 +33,7 @@ def make_xdg_runtime_dir(directory, mode=XDG_RUNTIME_MODE):
 
 def enumerate_dirs(directory):
     return (pth for pth in iter(directory) \
-                 if pth.startswith(f"{HOSTNAME.lower()}-"))
+                 if pth.startswith(f"{HOSTNAME.casefold()}-"))
 
 def create_symlink(directory, runtime_dir):
     if CURRENT in directory:

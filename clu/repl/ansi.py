@@ -118,20 +118,20 @@ class ANSI(AliasingEnumMeta):
     def for_name(cls, name):
         """ Get an enum member or alias member by name """
         # Lower-ize the name:
-        lowerstring = name.lower()
+        lowerstring = name.casefold()
         # Check cache and return if found:
         if lowerstring in cls.cache:
             return cls.cache[lowerstring]
         # Walk through standard ANSI names first:
         for ansi in cls:
-            if ansi.name.lower() == lowerstring:
+            if ansi.name.casefold() == lowerstring:
                 # If a match is found on an unaliased name,
                 # simply cache and return:
                 cls.cache[lowerstring] = ansi
                 return ansi
         # Try aliased ANSI names second:
         for aka, ansialias in cls.__aliases__.items():
-            if aka.lower() == lowerstring:
+            if aka.casefold() == lowerstring:
                 # Once a match is found, trace it back
                 # to the original value before caching
                 # and returning:

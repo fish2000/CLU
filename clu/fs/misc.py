@@ -65,7 +65,7 @@ def re_suffix(string):
     """
     if not string:
         return None
-    return rf"{string.lower().lstrip(ex).rstrip(dolla)}$"
+    return rf"{string.casefold().lstrip(ex).rstrip(dolla)}$"
 
 @export
 def suffix_searcher(string):

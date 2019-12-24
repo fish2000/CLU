@@ -31,7 +31,7 @@ class System(Enum):
     def from_string(cls, string):
         """ Retrieve a System value by name (case-insensitively) """
         for system in cls:
-            if system.sys_name == string.lower():
+            if system.sys_name == string.casefold():
                 return system
         raise ValueError(f"System not found: {string}")
     
@@ -71,7 +71,7 @@ class System(Enum):
     @property
     def sys_name(self):
         """ A given System value’s name, lowercased """
-        return self.to_string().lower()
+        return self.to_string().casefold()
 
 @unique
 class CSIDL(Enum):

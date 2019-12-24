@@ -236,7 +236,7 @@ def dotpath_to_prefix(dotpath, sep='-', end='-'):
         raise ValueError(f"“sep” and “end” must be non-None (sep={sep}, end={end})")
     if not dotpath:
         raise ValueError(f"“dotpath” cannot be None or zero-length (dotpath={dotpath})")
-    return dotpath.lower().replace(QUALIFIER, sep) + end
+    return dotpath.casefold().replace(QUALIFIER, sep) + end
 
 @export
 def path_to_prefix(path, sep='-', end='-', relative_to=BASEPATH):

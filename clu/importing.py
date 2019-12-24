@@ -331,9 +331,6 @@ class LoaderBase(clu.abstract.AppName,
             else:
                 module._executed = True
     
-    def inner_repr(self):
-        pass
-    
     def __repr__(self):
         qualname = qualified_name(self)
         appname = getattr(self, 'appname', None)
@@ -975,7 +972,7 @@ def test():
     
     @inline.precheck
     def show_python_executable():
-        """ Show the path to the current Python executable """
+        """ Show the Python executable """
         print("PYTHON:", sys.executable)
     
     @inline
@@ -988,8 +985,6 @@ def test():
         assert m.appspace == 'app'
         assert m.__name__ == 'clu.app.clu'
         assert nameof(m) == consts.PROJECT_NAME
-        print(nameof(m))
-        print(m.__name__)
     
     @inline
     def test_two():
@@ -1015,17 +1010,19 @@ def test():
     @inline
     def test_three():
         """ Class-module registry basics """
-        # pout.v(all_registered_appnames())
-        # pout.v(all_registered_modules())
+        
         print("all_registered_appnames():")
         pprint(all_registered_appnames())
+        print()
         
         print("all_registered_modules():")
         pprint(all_registered_modules())
+        print()
         
         m = Module(consts.PROJECT_NAME)
         
         assert len(Registry.monomers) > 0
+        
         try:
             assert len(m.monomers) == 0
         except AttributeError:
@@ -1034,8 +1031,8 @@ def test():
             pass
         
         # pout.v(m.__dict__)
-        print("m.__dict__:")
-        pprint(m.__dict__)
+        # print("m.__dict__:")
+        # pprint(m.__dict__)
         
         assert m.appname == consts.PROJECT_NAME
         assert m.appspace == 'app'
@@ -1045,6 +1042,7 @@ def test():
         # pout.v(mro(m))
         print("mro(m):")
         pprint(mro(m))
+        print()
     
     @inline
     def test_three_point_five():
@@ -1061,17 +1059,14 @@ def test():
         
         module0 = finder.loader.create_module(spec0)
         # assert type(module0) is FindMe
-        assert module0
+        assert isinstance(module0, Module)
         
         module1 = finder.loader.create_module(spec0)
         # assert type(module1) is FindMe
-        assert module1
+        assert isinstance(module1, Module)
         
         spec1 = finder.find_spec('clu.app.FindMe', [])
         assert spec1.name == 'clu.app.FindMe'
-        
-        # pout.v(mro(finder))
-        pprint(mro(finder))
     
     @inline
     def test_four():
@@ -1101,13 +1096,13 @@ def test():
         for attname in dir(derived):
             assert hasattr(derived, attname)
         
-        # pout.v(dir(derived))
-        # pout.v(derived.exporter.exports())
         print("dir(derived):")
         pprint(dir(derived))
+        print()
         
         print("derived.exporter.exports():")
         pprint(derived.exporter.exports())
+        print()
         
         assert type(derived.exporter).__name__ == 'Exporter'
     
@@ -1133,12 +1128,6 @@ def test():
         assert not hasattr(overridden, 'targets')
         assert not hasattr(overridden, 'target_dicts')
         assert hasattr(overridden, '_targets')
-        
-        # pout.v(overridden)
-        # pprint(overridden.__proxies__)
-        
-        # return tuple(overridden.exporter.exports())
-        return dir(overridden)
     
     @inline
     def test_five_point_five():
@@ -1169,12 +1158,6 @@ def test():
         assert not hasattr(overridden, 'targets')       # lowercase: fallback raises KeyError
         assert not hasattr(overridden, 'target_dicts')  # lowercase: fallback raises KeyError
         assert hasattr(overridden, '_targets')          # attribute found normally
-        
-        # pout.v(overridden)
-        # pprint(overridden.__proxies__)
-        
-        # return tuple(overridden.exporter.exports())
-        return dir(overridden)
     
     @inline
     def test_six():
@@ -1204,23 +1187,14 @@ def test():
         
         assert type(aux_module) is Module1
         
-        print()
-        print("MODULETYPE:", type(aux_module), "–", repr(aux_module))
+        # print()
+        # print("AUX MODULE TYPE:", type(aux_module))
+        # print("AUX MODULE REPR:", repr(aux_module))
+        # print()
     
     @inline
     def test_six_point_five():
-        """ “PerApp” dataclass check """
-        
-        # print("POLYMERS:")
-        # pprint(dict(polymers), indent=4)
-        #
-        # print()
-        # print("CLU APPSPACES:")
-        # pprint(polymers['clu'].appspaces())
-        #
-        # print()
-        # print("CLU MONOMERS:")
-        # pprint(dict(monomers['clu']))
+        """ “PerApp” dataclass and module cache check """
         
         appnames = all_registered_appnames()
         # appcount = len(appnames)
@@ -1247,17 +1221,30 @@ def test():
             for module_base in per_app.modules.values():
                 assert module_base.qualname in FinderBase.specs
                 assert module_base.qualname in FinderBase.cache
+    
+    @inline.diagnostic
+    def show_spec_cache():
+        speccount = len(FinderBase.specs)
+        plural = (speccount == 1) and "spec" or "specs"
         
-        # print()
-        # print("SPEC CACHE:")
-        # pprint(FinderBase.specs)
+        print(f"SPEC CACHE ({speccount} {plural} total):")
+        # pprint(FinderBase.specs, indent=4)
+        
+        for specname in sorted(FinderBase.specs.keys()):
+            spec = FinderBase.specs[specname]
+            string = pformat(spec.__dict__, indent=4)
+            print()
+            print(f"    «{specname}»")
+            print(f"{string}")
+        
+        print()
     
     @inline.diagnostic
     def show_monomers():
         """ Show all registered Module subclasses """
         appnames = all_registered_appnames()
         appcount = len(appnames)
-        plural = (appcount == 1) and "app" or "apps" 
+        plural = (appcount == 1) and "app" or "apps"
         print(f"MONOMERS ({appcount} {plural} total):")
         
         for appname in appnames:
@@ -1268,6 +1255,27 @@ def test():
             print()
             print(f"    «{appname}» ({monocount} {monoplural}):")
             print(f"{string}")
+        
+        print()
+    
+    @inline.diagnostic
+    def show_polymers():
+        """ Show per-app class-module-related subclasses """
+        appnames = all_registered_appnames()
+        appcount = len(appnames)
+        plural = (appcount == 1) and "app" or "apps"
+        print(f"POLYMERS ({appcount} {plural} total):")
+        
+        for appname in appnames:
+            perapp = polymers[appname]
+            modcount = len(perapp.modules)
+            modplural = (modcount == 1) and "module" or "modules"
+            string = pformat(perapp.__dict__, indent=4)
+            print()
+            print(f"    «{appname}» ({modcount} {modplural}):")
+            print(f"{string}")
+        
+        print()
     
     # Run all tests:
     inline.test(100)

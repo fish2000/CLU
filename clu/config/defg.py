@@ -902,7 +902,7 @@ def envwalk(appname, mapping):
         the format expected for a “walk(…)” function.
     """
     app_prefix = prefix_env(appname)
-    for envkey in (ek for ek in mapping if ek.startswith(app_prefix)):
+    for envkey in (ek for ek in mapping.keys() if ek.startswith(app_prefix)):
         an, key, namespaces = unpack_env(envkey)
         assert an == appname
         yield listify(namespaces) + listify(key, mapping[envkey])

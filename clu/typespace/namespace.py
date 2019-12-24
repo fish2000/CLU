@@ -267,7 +267,7 @@ def test():
         
         return ROOT
     
-    inline.test()
+    inline.test(100)
 
 if __name__ == '__main__':
     test()

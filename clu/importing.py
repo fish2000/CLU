@@ -330,6 +330,16 @@ class LoaderBase(clu.abstract.AppName,
                     raise TypeError("__execute__() method not callable")
             else:
                 module._executed = True
+    
+    def inner_repr(self):
+        pass
+    
+    def __repr__(self):
+        qualname = qualified_name(self)
+        appname = getattr(self, 'appname', None)
+        if appname is None:
+            return f"<loader “{qualname}”>"
+        return f"<loader “{qualname}” from “{appname}”>"
 
 @export
 class ArgumentSink(object):
@@ -961,7 +971,29 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
-    from pprint import pprint
+    from pprint import pprint, pformat
+    
+    @inline.diagnostic
+    def show_python_executable():
+        """ Show the path to the current Python executable """
+        print("PYTHON:", sys.executable)
+    
+    @inline.diagnostic
+    def show_monomers():
+        """ Show all ‘monomers’ – per-app registered Module subclasses """
+        appnames = all_registered_appnames()
+        appcount = len(appnames)
+        plural = (appcount == 1) and "app" or "apps" 
+        print(f"MONOMERS ({appcount} {plural} total):")
+        
+        for appname in appnames:
+            monos = dict(monomers[appname])
+            monocount = len(monos)
+            monoplural = (monocount == 1) and "monomer" or "monomers"
+            string = pformat(monos, indent=4)
+            print()
+            print(f"    «{appname}» ({monocount} {monoplural}):")
+            print(f"{string}")
     
     @inline
     def test_one():
@@ -1045,10 +1077,12 @@ def test():
         assert spec0.name == 'clu.app.FindMe'
         
         module0 = finder.loader.create_module(spec0)
-        assert type(module0) is FindMe
+        # assert type(module0) is FindMe
+        assert module0
         
         module1 = finder.loader.create_module(spec0)
-        assert type(module1) is FindMe
+        # assert type(module1) is FindMe
+        assert module1
         
         spec1 = finder.find_spec('clu.app.FindMe', [])
         assert spec1.name == 'clu.app.FindMe'
@@ -1078,7 +1112,7 @@ def test():
         
         from clu.app import Derived as derived
         
-        assert type(derived) is Derived
+        # assert type(derived) is Derived
         assert derived.yo == 'dogg'
         
         for attname in dir(derived):
@@ -1102,10 +1136,10 @@ def test():
                          PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
                          BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
         
-        class testing_overridden_consts(ProxyModule):
+        class TestOverrideConstsProxy(ProxyModule):
             targets = (overrides, consts)
         
-        from clu.app import testing_overridden_consts as overridden
+        from clu.app import TestOverrideConstsProxy as overridden
         
         assert overridden.USER == consts.USER
         assert overridden.BUILTINS == consts.BUILTINS
@@ -1118,7 +1152,7 @@ def test():
         assert hasattr(overridden, '_targets')
         
         # pout.v(overridden)
-        pprint(overridden.__proxies__)
+        # pprint(overridden.__proxies__)
         
         # return tuple(overridden.exporter.exports())
         return dir(overridden)
@@ -1136,10 +1170,10 @@ def test():
                 return f"NO DOGG: {key}"
             raise KeyError(key)
         
-        class testing_overridden_consts_fallback(ProxyModule):
+        class TestOverrideConstsFallbackProxy(ProxyModule):
             targets = (overrides, consts, fallback_function)
         
-        from clu.app import testing_overridden_consts_fallback as overridden
+        from clu.app import TestOverrideConstsFallbackProxy as overridden
         
         assert overridden.USER == consts.USER
         assert overridden.BUILTINS == consts.BUILTINS
@@ -1154,17 +1188,14 @@ def test():
         assert hasattr(overridden, '_targets')          # attribute found normally
         
         # pout.v(overridden)
-        pprint(overridden.__proxies__)
+        # pprint(overridden.__proxies__)
         
         # return tuple(overridden.exporter.exports())
         return dir(overridden)
     
     @inline
     def test_six():
-        """ PerApp dataclass check """
-        
-        print("POLYMERS:")
-        pprint(dict(polymers), indent=4)
+        """ Polymer-type caching and “initialize_types(…)” checks """
         
         Module0, Finder0, Loader0 = initialize_types(consts.PROJECT_NAME)
         
@@ -1175,7 +1206,7 @@ def test():
         assert isinstance(Module0.__loader__, Loader0)
         assert isinstance(Finder0.loader, Loader0)
         
-        Module1, Finder1, Loader1 = initialize_types(consts.PROJECT_NAME, appspace='apps')
+        Module1, Finder1, Loader1 = initialize_types(consts.PROJECT_NAME, appspace='aux')
         
         assert Finder is Finder1
         assert Loader is Loader1
@@ -1184,27 +1215,62 @@ def test():
         assert isinstance(Module1.__loader__, Loader1)
         assert isinstance(Finder1.loader, Loader1)
         
-        from clu.apps import Module as apps_module # Note how this is the things’ actual name,
-                                                   # “Module”, and not just what we called it,
-                                                   # «Module1» …ooof.
+        from clu.aux import Module as aux_module # Note how this is the things’ actual name,
+                                                 # “Module”, and not just what we called it,
+                                                 # «Module1» …ooof.
         
-        assert type(apps_module) is Module1
-        
-        print()
-        print("CLU APPSPACES:")
-        pprint(polymers['clu'].appspaces())
+        assert type(aux_module) is Module1
         
         print()
-        print("MODULETYPE:", type(apps_module), "–", repr(apps_module))
-        
-        print()
-        print("MONOMERS:")
-        pprint(dict(monomers['clu']))
+        print("MODULETYPE:", type(aux_module), "–", repr(aux_module))
     
-    print("PYTHON:", sys.executable)
+    @inline
+    def test_six_point_five():
+        """ “PerApp” dataclass check """
+        
+        # print("POLYMERS:")
+        # pprint(dict(polymers), indent=4)
+        #
+        # print()
+        # print("CLU APPSPACES:")
+        # pprint(polymers['clu'].appspaces())
+        #
+        # print()
+        # print("CLU MONOMERS:")
+        # pprint(dict(monomers['clu']))
+        
+        appnames = all_registered_appnames()
+        # appcount = len(appnames)
+        
+        for appname in appnames:
+            
+            assert appname in polymers
+            assert appname in monomers
+            
+            per_app = polymers[appname]
+            modules = monomers[appname]
+            
+            for appspace, module_base in per_app.modules.items():
+                assert module_base.qualname in modules
+                assert module_base.qualname.startswith(dotpath_join(appname, appspace))
+            
+            for module_info in per_app.finder.iter_modules():
+                module_spec = per_app.finder.find_spec(module_info.name, [])
+                assert module_info.name in modules
+                assert module_spec.name == module_info.name
+                assert modules[module_info.name].qualname.startswith(module_spec.origin)
+            
+            # This will fail unless we try it after the “find_spec(…)” business above:
+            for module_base in per_app.modules.values():
+                assert module_base.qualname in FinderBase.specs
+                assert module_base.qualname in FinderBase.cache
+        
+        # print()
+        # print("SPEC CACHE:")
+        # pprint(FinderBase.specs)
     
     # Run all tests:
-    inline.test()
+    inline.test(100)
 
 if __name__ == '__main__':
     test()

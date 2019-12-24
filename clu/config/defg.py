@@ -1233,8 +1233,10 @@ def test():
         assert os.getenv('CLU_CTX_YODOGG') is None
         assert len(os.environ) == before
     
-    print()
-    pprint(nestedmaps)
+    @inline.diagnostic
+    def show_nestedmaps():
+        print()
+        pprint(nestedmaps)
     
     # Run all inline tests:
     inline.test(100)

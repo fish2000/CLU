@@ -6,6 +6,7 @@ import collections.abc
 import clu.abstract
 import stopwatch
 import sys, os
+import textwrap
 
 from clu.constants import consts
 from clu.exporting import Exporter
@@ -98,6 +99,20 @@ def format_report(aggregated_report, show_buckets=False,
     return "\n".join(entries)
 
 @export
+def gettitle(function):
+    from inspect import getdoc
+    
+    # Get docstring, if one exists:
+    doc = getdoc(function)
+    if doc:
+        title = doc.splitlines().pop(0).strip()
+        title = f"“{title}”"
+    else:
+        title = "«untitled»"
+    
+    return title
+
+@export
 class InlineTester(collections.abc.Set,
                    collections.abc.Sequence,
                    collections.abc.Callable,
@@ -135,11 +150,16 @@ class InlineTester(collections.abc.Set,
           executions. 
     """
     
-    __slots__ = ('test_functions', 'watch', '__weakref__')
+    __slots__ = ('prechecks',
+                 'test_functions',
+                 'diagnostics',
+                 'watch', '__weakref__')
     
     def __new__(cls, iterable=None):
         instance = super().__new__(cls)
+        instance.prechecks = []
         instance.test_functions = []
+        instance.diagnostics = []
         instance.watch = None
         return instance
     
@@ -147,20 +167,22 @@ class InlineTester(collections.abc.Set,
         if iterable is not None:
             self.test_functions.extend(iterable)
     
-    def __call__(self, function):
-        """ Decorate a testing function, marking it as an inline test. """
+    def wrap(self, function, group='execute', groupname='test'):
+        """ Wrap an inline function with timing, banner-printing,
+            and all sorts of other useful bookkeeping code used
+            internally by the inline testing harness.
+        """
         from clu.naming import nameof
         from clu.predicates import item
         from clu.typology import isstring
         from contextlib import ExitStack
-        from inspect import getdoc
         from pprint import pprint
         
         # Get the name of the decorated function:
         name = nameof(function, default='<unnamed>')
         
         @wraps(function)
-        def test_wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs):
             # Get index:
             idx = int(kwargs.pop('idx', 0))
             max = int(kwargs.pop('max', 0))
@@ -178,33 +200,28 @@ class InlineTester(collections.abc.Set,
                 stack.enter_context(watch.timer('root'))
             
             if verbose:
-                # Get docstring, if one exists:
-                doc = getdoc(function)
-                if doc:
-                    title = doc.splitlines().pop(0).strip()
-                    title = f"“{title}”"
-                else:
-                    title = "«untitled»"
+                title = gettitle(function)
                 
                 # Print header:
                 print()
-                print(f"RUNNING TEST FUNCTION #{idx+1}: `{name}(¬)` – {title}")
+                print(f"RUNNING {groupname.upper()} #{idx+1}: `{name}(¬)` – {title}")
                 asterisks('-')
                 print()
             
             # Run the wrapped function, timing it:
             label_idx = f"{idx+1}".zfill(len(f"{max}"))
-            with watch.timer(f"{label_idx} – {name}"):
+            label_timer = f"{label_idx} – {name}"
+            with watch.timer(label_timer):
                 out = function(*args, **kwargs)
             
             if verbose:
                 # Get the reported timer value *before* closing out
                 # the root-level stopwatch timer:
-                timervals = item(watch._reported_values, name,
-                                                 f'root#{name}',
-                                                  f'run#{name}',
-                                             f'root#run#{name}',
-                                              'root')
+                timervals = item(watch._reported_values, label_timer,
+                                                 f'root#{label_timer}',
+                                              f'{group}#{label_timer}',
+                                         f'root#{group}#{label_timer}',
+                                          'root')
             
             # Close the context stack,
             # regardless of verbosity:
@@ -224,20 +241,82 @@ class InlineTester(collections.abc.Set,
                     dtout = "%6.3f" % dt
                     ndtout = natural_millis(timervals[0])
                     print(f"Test function “{name}(¬)” ran in about {ndtout} –{dtout}s")
-                
+                    
                 asterisks('=')
             
             # Return as per the decorated function:
             return out
         
+        return wrapper
+    
+    def __call__(self, function):
+        """ Decorate a testing function, marking it as an inline test. """
+        test_wrapper = self.wrap(function, group='execute',
+                                           groupname='test')
+        
         # Add the wrapper to the internal test function list:
         self.test_functions.append(test_wrapper)
         
-        # Mark the wrapper as an inline test function:
-        test_wrapper.__test__ = True
-        
         # Return the test wrapper function:
         return test_wrapper
+    
+    @property
+    def precheck(self):
+        """ Decorate a preflight-check function.
+            
+            Preflight-check functions (née just “prechecks”) each run exactly
+            once, prior to the main test-execution run. They are always run
+            in “verbose” mode. They can be used to print out initial conditions
+            for assessment, or to set up elements of the testing environment
+            ahead of the main test run.
+        """
+        def decoration(function):
+            precheck_wrapper = self.wrap(function, group='checking',
+                                                   groupname='pre-check')
+            
+            # Add the wrapper to the internal precheck function list:
+            self.prechecks.append(precheck_wrapper)
+            
+            # Return self in leu of the function:
+            return self
+        
+        # Return the decoration function as the property value:
+        return decoration
+    
+    @property
+    def diagnostic(self):
+        """ Decorate a diagnostic function.
+            
+            Diagnostic functions (née just “diagnostics”) each run exactly
+            once, after the main test-execution run. They are always run
+            in “verbose” mode – their purpose is to print out a bunch of
+            informational shit; hence the name “diagnostics”.
+        """
+        def decoration(function):
+            diagnostic_wrapper = self.wrap(function, group='postexec',
+                                                     groupname='diagnostic')
+            
+            # Add the wrapper to the internal diagnostic list:
+            self.diagnostics.append(diagnostic_wrapper)
+            
+            # Return self in leu of the function:
+            return self
+        
+        # Return the decoration function as the property value:
+        return decoration
+    
+    @property
+    def pre_post(self):
+        """ Decorate a function as both a precheck and a diagnostic. """
+        def decoration(function):
+            begin_wrapper = self.wrap(function, group='checking',
+                                                groupname='pre-check')
+            end_wrapper = self.wrap(function, group='postexec',
+                                              groupname='diagnostic')
+            self.prechecks.insert(0, begin_wrapper)
+            self.diagnostics.insert(0, end_wrapper)
+            return self
+        return decoration
     
     def test(self, exec_count=1):
         """ Run all functions marked as @inline within the modules’ main
@@ -248,7 +327,9 @@ class InlineTester(collections.abc.Set,
         import io
         
         # Count the test functions:
+        precount = len(self.prechecks)
         funcount = len(self.test_functions)
+        diacount = len(self.diagnostics)
         
         # Initialize the stopwatch:
         self.watch = stopwatch.StopWatch()
@@ -256,10 +337,18 @@ class InlineTester(collections.abc.Set,
         # Root timer for everything:
         with self.watch.timer('root'):
             
+            # Run preflight checks:
+            if precount > 0:
+                with self.watch.timer('checking'):
+                    
+                    # Call preflight checks each exactly once:
+                    for idx, precheck in enumerate(self.prechecks):
+                        precheck(verbose=True, idx=idx, max=precount)
+            
             # Main timer for execution times:
-            with self.watch.timer('run'):
+            with self.watch.timer('execute'):
                 
-                # Call functions once:
+                # Call testing functions once, initially:
                 for idx, function in enumerate(self.test_functions):
                     function(verbose=True, idx=idx, max=funcount)
                 
@@ -274,6 +363,14 @@ class InlineTester(collections.abc.Set,
                                 function(idx=idx, max=funcount)
                             iosink.truncate(0)
                     iosink.close()
+            
+            # Run diagnostics:
+            if diacount > 0:
+                with self.watch.timer('postexec'):
+                    
+                    # Call diagnostics each exactly once:
+                    for idx, diagnostic in enumerate(self.diagnostics):
+                        diagnostic(verbose=True, idx=idx, max=diacount)
         
         # REPORT IN:
         report = self.watch.get_last_aggregated_report()
@@ -290,7 +387,9 @@ class InlineTester(collections.abc.Set,
             count_text = "twice"
         
         # Header:
-        print(f"TIME TOTALS – ran {funcount} functions {count_text}")
+        print(f"TIME TOTALS "
+              f"– ran {funcount} tests {count_text} "
+              f"– {precount} prechecks, {diacount} diagnostics")
         
         # Body:
         asterisks('≈')
@@ -377,18 +476,17 @@ def test():
     
     # Normally, we’d be like, “from clu.testing.utils import inline”
     # …like, right about say here:
-    # from pprint import pprint
+    # pout = stdpout()
     from clu.fs import pypath
     inline = InlineTester()
-    pout = stdpout()
     
     def getdatadir():
         from clu.fs.filesystem import Directory
         return Directory(consts.TEST_PATH).subdirectory('data')
     
-    # @inline
-    def test_zero():
-        pout.v(os.environ)
+    @inline.precheck
+    def show_python():
+        print("PYTHON EXECUTABLE:", sys.executable)
     
     @inline
     def test_one():
@@ -486,6 +584,25 @@ def test():
                 assert os.path.basename(f) in destination
         
         assert not temporarydir.exists
+    
+    @inline.diagnostic
+    def show_environment():
+        """ Display environment variables """
+        
+        most = max(len(key) for key in os.environ.keys()) + 2
+        wrapper = textwrap.TextWrapper(initial_indent='',
+                                    subsequent_indent=' ' * (most + 5),
+                                     break_long_words=False,
+                                     break_on_hyphens=False,
+                                          placeholder='…',
+                                            max_lines=8,
+                                                width=WIDTH - most)
+        
+        for key, value in os.environ.items():
+            jkey = str(key).rjust(most)
+            begin = f"» {jkey} : "
+            wvalue = wrapper.fill(value)
+            print(f"{begin}{wvalue}")
     
     inline.test(100)
 

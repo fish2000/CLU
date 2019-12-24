@@ -180,7 +180,7 @@ class InlineTester(collections.abc.Set,
                 if doc:
                     title = doc.splitlines().pop(0).strip()
                     title = f"“{title}”"
-                elif doc is None:
+                else:
                     title = "«untitled»"
                 
                 # Print header:
@@ -216,10 +216,6 @@ class InlineTester(collections.abc.Set,
                     asterisks('~')
                 
                 if timervals:
-                    # print("TIMERVALS:")
-                    # pprint(timervals, indent=4)
-                    # asterisks('-')
-                    
                     dt = timervals[0] * 0.001
                     dtout = "%6.3f" % dt
                     ndtout = natural_millis(timervals[0])

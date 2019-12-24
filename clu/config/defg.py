@@ -1102,9 +1102,12 @@ def test():
             nskey = pack_ns(key, *namespaces)
             flat_dict[nskey] = value
         
+        assert flat_dict == flatdict()
+        
         flat = FrozenFlat(flat_dict)
         nested = Nested(flat)
         assert nested.flatten() == flat
+        assert nested.flatten().dictionary == flatdict()
         assert nested == flat
     
     @inline
@@ -1117,13 +1120,17 @@ def test():
             nskey = pack_ns(key, *namespaces)
             flat_dict[nskey] = value
         
+        assert flat_dict == flatdict()
+        
         flat = Flat(flat_dict)
         frozen_flat = flat.freeze()
         assert frozen_flat == flat
+        assert frozen_flat.dictionary == flatdict()
         
         nested = flat.nestify()
         flattened = nested.flatten()
         assert flattened == flat
+        assert flattened.dictionary == flatdict()
     
     @inline
     def test_four():

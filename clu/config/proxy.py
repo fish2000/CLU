@@ -77,7 +77,7 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
         return type(self)(self.keymap())
 
 @export
-class KeyMapProxy(KeyMap):
+class KeyMapProxy(KeyMapView, KeyMap):
     
     def __init__(self, keymap):
         if not isinstance(keymap, KeyMap):

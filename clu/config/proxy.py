@@ -86,8 +86,6 @@ class KeyMapProxy(KeyMap):
     
     @selfcheck
     def freeze(self):
-        # if not bool(self):
-        #     raise ValueError("KeyMapView referent is dead")
         return KeyMapView(self.keymap())
     
     @selfcheck

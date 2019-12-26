@@ -1032,16 +1032,11 @@ def test():
         else:
             pass
         
-        # pout.v(m.__dict__)
-        # print("m.__dict__:")
-        # pprint(m.__dict__)
-        
         assert m.appname == consts.PROJECT_NAME
         assert m.appspace == 'app'
         assert m.__name__ == 'clu.app.clu'
         assert nameof(m) == consts.PROJECT_NAME
         
-        # pout.v(mro(m))
         print("mro(m):")
         pprint(mro(m))
         print()
@@ -1060,11 +1055,9 @@ def test():
         assert spec0.name == 'clu.app.FindMe'
         
         module0 = finder.loader.create_module(spec0)
-        # assert type(module0) is FindMe
         assert isinstance(module0, Module)
         
         module1 = finder.loader.create_module(spec0)
-        # assert type(module1) is FindMe
         assert isinstance(module1, Module)
         
         spec1 = finder.find_spec('clu.app.FindMe', [])
@@ -1092,7 +1085,6 @@ def test():
         
         from clu.app import Derived as derived
         
-        # assert type(derived) is Derived
         assert isinstance(derived, Module)
         assert derived.yo == 'dogg'
         
@@ -1108,6 +1100,8 @@ def test():
         print()
         
         assert type(derived.exporter).__name__ == 'Exporter'
+        
+        Registry.unregister('clu', derived.qualname)
     
     @inline
     def test_five():
@@ -1189,18 +1183,12 @@ def test():
                                                  # «Module1» …ooof.
         
         assert type(aux_module) is Module1
-        
-        # print()
-        # print("AUX MODULE TYPE:", type(aux_module))
-        # print("AUX MODULE REPR:", repr(aux_module))
-        # print()
     
     @inline
     def test_six_point_five():
         """ “PerApp” dataclass and module cache check """
         
         appnames = all_registered_appnames()
-        # appcount = len(appnames)
         
         for appname in appnames:
             
@@ -1231,7 +1219,6 @@ def test():
         plural = (speccount == 1) and "spec" or "specs"
         
         print(f"SPEC CACHE ({speccount} {plural} total):")
-        # pprint(FinderBase.specs, indent=4)
         
         for specname in sorted(FinderBase.specs.keys()):
             spec = FinderBase.specs[specname]

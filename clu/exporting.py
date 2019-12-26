@@ -339,15 +339,22 @@ class ExporterBase(collections.abc.MutableMapping,
     __slots__ = pytuple('exports', 'weakref') + ('path', 'dotpath')
     
     def __new__(cls, *args, path=None, dotpath=None, **kwargs):
+        
+        putative = path_to_dotpath(path,
+                   relative_to=cls.prefix) or dotpath
+        
+        if putative is not None:
+            if putative in cls.instances:
+                return cls.instances[putative]
+        
         try:
-            instance = super(ExporterBase, cls).__new__(cls, *args, **kwargs) # type: ignore
+            instance = super().__new__(cls, *args, **kwargs) # type: ignore
         except TypeError:
-            instance = super(ExporterBase, cls).__new__(cls)
+            instance = super().__new__(cls)
         
         instance.__exports__ = {}
         instance.path = path
-        instance.dotpath = path_to_dotpath(path,
-             relative_to=cls.prefix) or dotpath
+        instance.dotpath = putative
         
         if instance.dotpath is not None:
             cls.instances[instance.dotpath] = instance
@@ -505,14 +512,12 @@ class ExporterBase(collections.abc.MutableMapping,
                 export(dogg_heard_index,    name="dogg_heard_index")
             
         """
-        # No explict name was passed -- try to determine one:
+        # Try to determine the thing’s name – deferring to anything passed:
         named = determine_name(thing, name=name)
         
         # Double-check our determined name and item before stowing:
         if named is None:
             raise ExportError("can’t export an unnamed thing")
-        if named in self.__exports__:
-            raise ExportError(f"can’t re-export name “{named}”")
         if thing is self.__exports__:
             raise ExportError("can’t export the __exports__ dict directly")
         if thing is self:

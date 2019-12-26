@@ -83,12 +83,11 @@ def format_report(aggregated_report, show_buckets=False,
             normal_name = log_name.rpartition('#')[-1]
             short_name = f"{bucket_name}{normal_name}"
         else:
-            # short_name = log_name[log_name.rfind("#") + 1:]
             short_name = log_name.rpartition('#')[-1]
         
         entries.append("%s %s %sx  %.24s [%6.3fs] %.f%%" % (
             "  " * depth, short_name.ljust(32 - (depth*2)),
-                          str(count).rjust(4),
+                          f"{count}".rjust(4),
                           natural_millis(delta_ms).ljust(12),
             delta_ms * 0.001,
             delta_ms / root_time_ms * 100.0,
@@ -144,7 +143,7 @@ def format_environment(environment=None):
                                                  printer.pformat(thing))
     
     for key, value in environment.items():
-        jkey = str(key).ljust(most)
+        jkey = f"{key}".ljust(most)
         begin = f"» {jkey} : "
         if key.endswith('PATH') and ':' in value:
             wvalue = pformat(value.split(':'))

@@ -221,7 +221,7 @@ class InlineTester(collections.abc.Set,
         if iterable is not None:
             self.test_functions.extend(iterable)
     
-    def wrap(self, function, group='execute', groupname='test', newline=False):
+    def wrap(self, function, group='main', groupname='test', newline=False):
         """ Wrap an inline function with timing, banner-printing,
             and all sorts of other useful bookkeeping code used
             internally by the inline testing harness.
@@ -269,7 +269,7 @@ class InlineTester(collections.abc.Set,
                 out = function(*args, **kwargs)
             
             # If we asked for it, we’ll get it:
-            if newline:
+            if newline and verbose:
                 print()
             
             if verbose:
@@ -309,7 +309,7 @@ class InlineTester(collections.abc.Set,
     
     def __call__(self, function):
         """ Decorate a testing function, marking it as an inline test. """
-        wrapper = self.wrap(function, group='execute',
+        wrapper = self.wrap(function, group='main',
                                       groupname='test',
                                       newline=False)
         
@@ -426,7 +426,7 @@ class InlineTester(collections.abc.Set,
                         precheck(*args, verbose=True, idx=idx, max=precount)
             
             # Main timer for execution times:
-            with self.watch.timer('execute'):
+            with self.watch.timer('main'):
                 
                 # Call testing functions once, initially:
                 for idx, function in enumerate(self.test_functions):

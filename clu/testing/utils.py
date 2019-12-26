@@ -5,7 +5,6 @@ from functools import wraps, lru_cache
 import collections.abc
 import clu.abstract
 import os
-import stopwatch
 import pprint
 import re
 import sys
@@ -230,7 +229,7 @@ class InlineTester(collections.abc.Set,
         from clu.predicates import item
         from clu.typology import isstring
         from contextlib import ExitStack
-        from pprint import pprint
+        import stopwatch
         
         # Get the name of the decorated function:
         name = nameof(function, default='<unnamed>')
@@ -291,7 +290,7 @@ class InlineTester(collections.abc.Set,
                 
                 if out is not None:
                     print("» RESULTS:")
-                    pprint(isstring(out) and { 'string' : f"{out!s}" } or out, indent=4)
+                    pprint.pprint(isstring(out) and { 'string' : f"{out!s}" } or out, indent=4)
                     asterisks('~')
                 
                 if timervals:
@@ -404,6 +403,7 @@ class InlineTester(collections.abc.Set,
             test function call (provided by dbx-stopwatch).
         """
         from contextlib import redirect_stdout
+        import stopwatch
         import io
         
         # Count the test functions:
@@ -564,7 +564,6 @@ def test():
     
     # Normally, we’d be like, “from clu.testing.utils import inline”
     # …like, right about say here:
-    # pout = stdpout()
     from clu.fs import pypath
     inline = InlineTester()
     
@@ -589,17 +588,11 @@ def test():
         assert prefix1.exists
         pypath.enhance(prefix0, prefix1)
         
-        # pprint(sys.path)
-        # print()
-        
         from yodogg.config import Env
         from clu.config.defg import Environ
         
         env0 = Env()
         envy = Environ(appname=Env.appname)
-        
-        # pprint(envy.flatten())
-        # print()
         
         for key in env0.keys():
             print(f"» [old] ENVIRONMENT KEY: {key}")
@@ -615,15 +608,11 @@ def test():
     def test_two():
         """ Busywork, mark II. """
         # Fuck around with the CLU app’s environment overrides:
-        # from clu.fs.filesystem import Directory
         from clu.config.env import Env
         from clu.config.defg import Environ
         
         env0 = Env()
         envy = Environ(appname=Env.appname)
-        
-        # pprint(envy.flatten())
-        # print()
         
         for key in env0.keys():
             print(f"» [old] ENVIRONMENT KEY: {key}")
@@ -649,6 +638,7 @@ def test():
     
     @inline
     def test_five_countfiles():
+        """ Check for “clu.testing.utils.countfiles” """
         from clu.typology import isvalidpathlist
         from clu.fs.filesystem import TemporaryDirectory
         

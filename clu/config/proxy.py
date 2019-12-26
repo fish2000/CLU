@@ -45,7 +45,7 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
     def __init__(self, keymap):
         if not keymap:
             raise ValueError("A valid keymap is required")
-        basetype = type(self).basetype
+        basetype = type(self).get_basetype()
         if not isinstance(keymap, basetype):
             qualname = qualified_name(basetype)
             raise TypeError(f"A descendant of “{qualname}” is required")

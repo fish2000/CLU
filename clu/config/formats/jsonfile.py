@@ -4,7 +4,8 @@ from __future__ import print_function
 import json
 
 from clu.constants.consts import PROJECT_NAME
-from clu.config.defg import Nested
+# from clu.config.defg import FrozenNested
+from clu.config.base import Nested
 from clu.config.filebase import FileBase
 from clu.exporting import Exporter
 

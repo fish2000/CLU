@@ -4,7 +4,8 @@ from __future__ import print_function
 import pickle
 
 from clu.constants.consts import PROJECT_NAME
-from clu.config.defg import FrozenNested
+# from clu.config.defg import FrozenNested
+from clu.config.base import Nested
 from clu.config.filebase import FileBase
 from clu.exporting import Exporter
 
@@ -14,7 +15,7 @@ export = exporter.decorator()
 options = { 'protocol' : -1 }
 
 @export
-class PickleFileBase(FileBase, FrozenNested):
+class PickleFileBase(FileBase, Nested):
     
     """ The base class for “clu.config.picklefile.PickleFile”. Override this
         class in your own project to use pickle file data in your Schema

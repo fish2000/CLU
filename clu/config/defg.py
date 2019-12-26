@@ -76,7 +76,8 @@ class KeyMapViewBase(collections.abc.Sequence,
         class, like for good measure.
     """
     
-    __slots__ = ('mapping', 'namespaces', 'prefix')
+    __slots__ = pytuple('weakref') \
+              + tuplize('mapping', 'namespaces', 'prefix')
     
     def __init__(self, mapping, *namespaces):
         """ Initialize a view on a KeyMap instance, for a given namespace """

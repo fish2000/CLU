@@ -4,7 +4,8 @@ from __future__ import print_function
 import toml
 
 from clu.constants.consts import PROJECT_NAME
-from clu.config.defg import FrozenNested
+# from clu.config.defg import FrozenNested
+from clu.config.base import Nested
 from clu.config.filebase import FileBase
 from clu.exporting import Exporter
 
@@ -12,7 +13,7 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 @export
-class TomlFileBase(FileBase, FrozenNested):
+class TomlFileBase(FileBase, Nested):
     
     """ The base class for “clu.config.tomlfile.TomlFile”. Override this
         class in your own project to use TOML file data in your Schema

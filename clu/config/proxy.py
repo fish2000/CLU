@@ -31,11 +31,9 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     __slots__ = tuplize('keymap')
     
-    basetype = FrozenKeyMap
-    
     @classmethod
     def get_basetype(cls):
-        return cls.basetype
+        return getattr(cls, 'basetype', FrozenKeyMap)
     
     def __new__(cls, keymap):
         instance = super().__new__(cls)

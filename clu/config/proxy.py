@@ -134,11 +134,6 @@ def test():
                                'type': 'VariableDeclaration'},
                 'type':     'Program'}
     
-    @inline.precheck
-    def show_nestedmaps_fixture():
-        """ Pretty-print the “nestedmaps()” fixture """
-        pprint(nestedmaps(), indent=4)
-    
     @inline.fixture
     def flatdict():
         """ Private flat-dictionary pseudo-fixture """
@@ -148,6 +143,11 @@ def test():
             nskey = pack_ns(key, *namespaces)
             out[nskey] = value
         return out
+    
+    @inline.precheck
+    def show_nestedmaps_fixture():
+        """ Pretty-print the “nestedmaps()” fixture """
+        pprint(nestedmaps(), indent=4)
     
     @inline
     def test_one():

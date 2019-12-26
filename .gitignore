@@ -1,8 +1,8 @@
 __pycache__/
 *.pyc
+*.pyo
 *.orig
 .DS_Store
-.tm_properties
 *~
 \#*\#
 Icon*
@@ -13,6 +13,7 @@ dump.rdb
 *.dmg
 *.dylib
 *.jar
+*.zip
 a.out
 
 *.egg-info/
@@ -20,10 +21,15 @@ build/
 dist/
 sdist/
 
+.cache/
+.config/
 .hypothesis/
 .pytest_cache/
 .tox/
+
+.env
 .envrc
+.tm_properties
 
 tmtags
 tmtagsHistory

@@ -82,7 +82,6 @@ ignore_regexps = [
     r'^$',  ## ignore commits with empty messages
 ]
 
-
 ## ``section_regexps`` is a list of 2-tuples associating a string label and a
 ## list of regexp
 ##
@@ -107,6 +106,9 @@ section_regexps = [
      ]),
     ('Add', [
         r'^[aA]dd\s*',
+     ]),
+    ('Minutiae', [
+        r'^[mM]inutiae\s*',
      ]),
     ('Other', None ## Match all lines
      ),

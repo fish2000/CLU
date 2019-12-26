@@ -183,10 +183,10 @@ class InlineTester(collections.abc.Set,
                 def apres_testing():
                    # ...
             
-            inline.test() # ‡
+            return inline.test() # ‡
             
             if __name__ == '__main__':
-                test()
+                sys.exit(test())
         
         † This `import` statement specifically instances and returns a
           new copy of the “InlineTester” class, as the “@inline” decorator,

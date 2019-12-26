@@ -150,6 +150,7 @@ from clu.abstract import Cloneable, ReprWrapper
 from clu.config.abc import FlatOrderedSet, functional_and, functional_set
 from clu.config.defg import (NAMESPACE_SEP, FrozenKeyMap, KeyMap, FrozenFlat, Flat,
                                                                   FrozenNested, Nested)
+from clu.config.proxy import KeyMapView, KeyMapProxy
 
 from clu.config.env import Env
 from clu.config.filebase import FileName, FileBase
@@ -169,13 +170,14 @@ from pprint import pprint, pformat
 import sys, os, re
 import argparse
 import collections
-import colorama
 import contextlib
 import copy
 import datetime
 import decimal
 import functools
+import importlib
 import inspect
+import io
 import itertools
 import math
 import operator
@@ -184,8 +186,7 @@ import requests
 import shutil
 import six
 import sysconfig
-import termcolor
-import xerox
+import weakref
 
 from clu.mathematics import (σ, Σ,
                              isdtype, isnumpything,
@@ -232,13 +233,14 @@ __all__ = ('Image',
            'appdirectories',
            'argparse',
            'collections',
-           'colorama',
            'contextlib',
            'copy',
            'datetime',
            'decimal',
            'functools',
+           'importlib',
            'inspect',
+           'io',
            'itertools',
            'math',
            'operator',
@@ -248,9 +250,8 @@ __all__ = ('Image',
            'shutil',
            'six',
            'sysconfig',
-           'termcolor',
            'types',
-           'xerox',
+           'weakref',
            'print_banner',
            'GREEK_STRINGS', 'GREEK_DEFS', 'GREEK_PHONETICS',
                                           'GREEK_STRINGDICT',
@@ -389,6 +390,7 @@ __all__ = ('Image',
            'NAMESPACE_SEP', 'Cloneable', 'ReprWrapper', 'FlatOrderedSet',
            'FrozenKeyMap', 'KeyMap',
            'FrozenFlat', 'FrozenNested',
+           'KeyMapView', 'KeyMapProxy',
            'Flat', 'Nested',
            'Env', 'FileName', 'FileBase',
            'ValidationError', 'hoist',
@@ -417,6 +419,15 @@ else:
     __all__ += ('numpy', 'scipy')
 
 try:
+    import colorama
+    import termcolor
+except (ImportError, SyntaxError):
+    pass
+else:
+    # Extend `__all__`:
+    __all__ += ('colorama', 'termcolor')
+
+try:
     import colorio
     import colormath
 except (ImportError, SyntaxError):
@@ -424,6 +435,15 @@ except (ImportError, SyntaxError):
 else:
     # Extend `__all__`:
     __all__ += ('colorio', 'colormath')
+
+try:
+    import xerox
+    import zict
+except (ImportError, SyntaxError):
+    pass
+else:
+    # Extend `__all__`:
+    __all__ += ('xerox', 'zict')
 
 try:
     from clu.testing.utils import pout, inline

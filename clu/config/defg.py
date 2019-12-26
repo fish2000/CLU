@@ -325,6 +325,7 @@ class FrozenKeyMapBase(collections.abc.Mapping,
         on up to our own API. You, for your purposes, should employ “FrozenKeyMap”
         (without the “Base”) – q.v. the class definition below, sub.
     """
+    __slots__ = pytuple('weakref')
     
     @abstract
     def namespaces(self):
@@ -396,7 +397,6 @@ class FrozenKeyMap(FrozenKeyMapBase):
         and ‘__bool__’ which generally is less so. Q.v. the “FrozenKeyMapBase” source
         supra. for further deets, my doggie
     """
-    __slots__ = pytuple('weakref')
     
     def get(self, key, *namespaces, default=NoDefault):
         """ Retrieve a (possibly namespaced) value for a given key.

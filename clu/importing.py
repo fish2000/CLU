@@ -354,12 +354,14 @@ class ArgumentSink(object):
     """
     __slots__ = ('args', 'kwargs')
     
-    def __init__(self, *args, **kwargs):
-        """ Initialize an ArgumentSink, with arbitrary positional
+    def __new__(cls, *args, **kwargs):
+        """ Create a new ArgumentSink, with arbitrary positional
             and/or keyword arguments
         """
-        self.args = args
-        self.kwargs = kwargs
+        instance = object.__new__(cls)
+        instance.args = args
+        instance.kwargs = kwargs
+        return instance
     
     def __call__(self, function):
         """ Apply the sinks’ arguments to a function – or, indeed,

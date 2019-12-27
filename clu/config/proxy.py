@@ -149,6 +149,9 @@ def test():
         pprint(nestedmaps(), indent=4)
     
     def test_one_fn(keymap_type, proxy_type, fixture_fn):
+        """ Metafunction test generator for KeyMap proxy types:
+            • generate tests for proxy/view type basic functionality
+        """
         def test_fn():
             """ %s vs. %s """ % (proxy_type.__name__,
                                 keymap_type.__name__)
@@ -190,6 +193,9 @@ def test():
     def test_two_fn(keymap_type, proxy_type0, fixture_fn,
                                               proxy_type1=None,
                                               proxy_type2=None):
+        """ Metafunction test generator for KeyMap proxy types:
+            • generate tests for views-of-views and weakref integrity
+        """
         if not proxy_type1:
             proxy_type1 = proxy_type0
         
@@ -230,6 +236,7 @@ def test():
         
         return test_fn
     
+    # Add inline test functions using the metafunction test generators:
     inline.add_function(test_one_fn(FrozenFlat, KeyMapView,  flatdict),   'test_one')
     inline.add_function(test_two_fn(FrozenFlat, KeyMapView,  flatdict),   'test_two')
     inline.add_function(test_one_fn(Flat,       KeyMapView,  flatdict),   'test_three')
@@ -239,7 +246,8 @@ def test():
     inline.add_function(test_one_fn(Nested,     KeyMapView,  nestedmaps), 'test_five')
     inline.add_function(test_one_fn(Nested,     KeyMapProxy, nestedmaps), 'test_five_point_five')
     
-    return inline.test(50)
+    # Run all test functions:
+    return inline.test(100)
 
 if __name__ == '__main__':
     sys.exit(test())

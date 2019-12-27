@@ -58,11 +58,14 @@ class NamespaceRepr(Repr):
             key = tuple(thing.keys())[0]
             item = STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level))
             return f"{{ {item} }}"
-        items = (STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level)) for key in thing.keys())
+        items = (STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level)) for key in thing)
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
         total = (f",\n{ts}").join(items)
         return f"{{ \n{ts}{total}\n{ls}}}"
+    
+    def repr_BaseNamespace(self, thing, level):
+        return self.primerepr(thing, level)
     
     def repr_SimpleNamespace(self, thing, level):
         return self.primerepr(thing, level)
@@ -86,16 +89,11 @@ nsshortrepr = reprizer.shortrepr
 # NAMESPACES: SimpleNamespace and Namespace
 
 @export
-class SimpleNamespace(collections.abc.Hashable,
-                      collections.abc.Iterable,
-                      clu.abstract.ReprWrapper,
-                      metaclass=clu.abstract.Slotted):
+class BaseNamespace(collections.abc.Set,
+                    collections.abc.Collection,
+                    metaclass=clu.abstract.Slotted):
     
-    """ Implementation courtesy this SO answer:
-        • https://stackoverflow.com/a/37161391/298171
-        
-        Additionally, SimpleNamespace furnishes an `__dir__(…)` method.
-    """
+    """ The abstract base for SimpleNamespace and Namespace. """
     
     __slots__ = pytuple('dict', 'weakref')
     
@@ -107,11 +105,14 @@ class SimpleNamespace(collections.abc.Hashable,
         for key, value in kwargs.items():
             self.__dict__[key] = value
     
+    def __len__(self):
+        return len(self.__dict__)
+    
     def __iter__(self):
         yield from self.__dict__
     
-    def inner_repr(self):
-        return nsrepr(self)
+    def __contains__(self, key):
+        return key in self.__dict__
     
     def __eq__(self, other):
         return self.__dict__ == asdict(other)
@@ -119,22 +120,38 @@ class SimpleNamespace(collections.abc.Hashable,
     def __ne__(self, other):
         return self.__dict__ != asdict(other)
     
+    def __dir__(self):
+        """ Get a list with all the stringified keys in the namespace. """
+        return [str(key) for key in self if key not in ('get', 'pop', 'update')]
+    
+    def __repr__(self):
+        return reprizer.fullrepr(self)
+    
+    def __bool__(self):
+        return bool(self.__dict__)
+
+@export
+class SimpleNamespace(BaseNamespace,
+                      collections.abc.Hashable):
+    
+    """ Implementation courtesy this SO answer:
+        • https://stackoverflow.com/a/37161391/298171
+        
+        Additionally, SimpleNamespace furnishes an `__dir__(…)` method.
+    """
+    
     def __hash__(self):
         return hash(tuple(self.__dict__.keys()) +
                     tuple(self.__dict__.values()))
-    
-    def __dir__(self):
-        """ Get a list with all the stringified keys in the namespace. """
-        return [str(key) for key in self.keys() if key not in ('inner_repr', 'get', 'pop', 'update')]
 
 @export
-class Namespace(SimpleNamespace,
+class Namespace(BaseNamespace,
                 collections.abc.MutableMapping,
                 contextlib.AbstractContextManager):
     
     """ Namespace adds the `get(…)`, `__len__()`, `__contains__(…)`, `__getitem__(…)`,
-        `__setitem__(…)`, `__add__(…)`, and `__bool__()` methods to its ancestor class
-        implementation SimpleNamespace.
+        `__setitem__(…)`, and `__add__(…)` methods to its ancestor class
+        implementation BaseNamespace.
         
         Since it implements a `get(…)` method, Namespace instances can be passed
         to `merge(…)` – q.v. `merge(…)` function definition supra.
@@ -177,12 +194,6 @@ class Namespace(SimpleNamespace,
                        exc_tb=None):
         return exc_type is None
     
-    def __len__(self):
-        return len(self.__dict__)
-    
-    def __contains__(self, key):
-        return key in self.__dict__
-    
     def __getitem__(self, key):
         return self.__dict__.__getitem__(key)
     
@@ -210,23 +221,13 @@ class Namespace(SimpleNamespace,
             return NotImplemented
         self.__dict__.update(asdict(operand))
         return self
-    
-    def __or__(self, operand):
-        return self.__add__(operand)
-    
-    def __ror__(self, operand):
-        return self.__radd__(operand)
-    
-    def __ior__(self, operand):
-        return self.__iadd__(operand)
-    
-    def __bool__(self):
-        return bool(self.__dict__)
 
 @export
 def isnamespace(thing):
     from clu.typology import subclasscheck
-    return subclasscheck(thing, (SimpleNamespace, Namespace))
+    return subclasscheck(thing, (BaseNamespace,
+                               SimpleNamespace,
+                                     Namespace))
 
 with exporter as export:
     

@@ -45,6 +45,8 @@ def natural_millis(millis):
     return humanize.naturaldelta(
            humanize.time.timedelta(milliseconds=millis))
 
+MOST = 38
+
 @export
 def format_report(aggregated_report, show_buckets=False,
                                      show_annotations=False):
@@ -66,7 +68,7 @@ def format_report(aggregated_report, show_buckets=False,
     root_time = root_time_ms / root_count
     
     entries = [
-        " %s %sx  %.24s [%6.3fs] %.f%%" % (root.ljust(32), "   1",
+        " %s %sx  %.24s [%6.3fs] %.f%%" % (root.ljust(MOST), "   1",
                                              natural_millis(root_time).ljust(12),
                                                             root_time * 0.001,
                                                             100),
@@ -85,7 +87,7 @@ def format_report(aggregated_report, show_buckets=False,
             short_name = log_name.rpartition('#')[-1]
         
         entries.append("%s %s %sx  %.24s [%6.3fs] %.f%%" % (
-            "  " * depth, short_name.ljust(32 - (depth*2)),
+            "  " * depth, short_name.ljust(MOST - (depth*2)),
                           f"{count}".rjust(4),
                           natural_millis(delta_ms).ljust(12),
             delta_ms * 0.001,
@@ -425,6 +427,7 @@ class InlineTester(collections.abc.Set,
         precount = len(self.prechecks)
         funcount = len(self.test_functions)
         diacount = len(self.diagnostics)
+        most = max(precount, funcount, diacount)
         
         # Initialize the stopwatch:
         self.watch = stopwatch.StopWatch()
@@ -438,14 +441,14 @@ class InlineTester(collections.abc.Set,
                     
                     # Call preflight checks each exactly once:
                     for idx, precheck in enumerate(self.prechecks):
-                        precheck(*args, verbose=True, idx=idx, max=precount)
+                        precheck(*args, verbose=True, idx=idx, max=most)
             
             # Main timer for execution times:
             with self.watch.timer('main'):
                 
                 # Call testing functions once, initially:
                 for idx, function in enumerate(self.test_functions):
-                    function(*args, verbose=True, idx=idx, max=funcount)
+                    function(*args, verbose=True, idx=idx, max=most)
                 
                 # Call them twice through «adnauseumn» –
                 # Redirecting `stdout` so we only get the
@@ -455,7 +458,7 @@ class InlineTester(collections.abc.Set,
                     with redirect_stdout(iosink):
                         for edx in range(exec_count-1):
                             for idx, function in enumerate(self.test_functions):
-                                function(*args, idx=idx, max=funcount)
+                                function(*args, idx=idx, max=most)
                             iosink.truncate(0)
                     iosink.close()
             
@@ -465,7 +468,7 @@ class InlineTester(collections.abc.Set,
                     
                     # Call diagnostics each exactly once:
                     for idx, diagnostic in enumerate(self.diagnostics):
-                        diagnostic(*args, verbose=True, idx=idx, max=diacount)
+                        diagnostic(*args, verbose=True, idx=idx, max=most)
         
         # REPORT IN:
         report = self.watch.get_last_aggregated_report()

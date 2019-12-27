@@ -153,10 +153,18 @@ class ChainMap(collections.abc.MutableMapping,
         from clu.predicates import getitem
         return getitem(self, key, default=default)
     
+    @property
+    def top(self):
+        return self.maps[0]
+    
+    @property
+    def rest(self):
+        return self.maps[1:]
+    
     def shift(self):
         """ Create and return a new ChainMap instance from “maps[1:]” """
         # Equivalent to collections.ChainMap.parents:
-        return type(self)(*self.maps[1:])
+        return type(self)(*self.rest)
     
     def unshift(self, map=None):
         """ Create and return a new ChainMap with a new map followed
@@ -171,27 +179,27 @@ class ChainMap(collections.abc.MutableMapping,
         return cls(map or {}, *self.maps)
     
     def __setitem__(self, key, value):
-        self.maps[0][key] = value
+        self.top[key] = value
     
     def __delitem__(self, key):
         try:
-            del self.maps[0][key]
+            del self.top[key]
         except KeyError:
-            raise KeyError(f'Key not found in the first mapping: {key!r}')
+            raise KeyError(f'Key not found in the topmost mapping: {key!r}')
     
     def popitem(self):
         try:
-            return self.maps[0].popitem()
+            return self.top.popitem()
         except KeyError:
-            raise KeyError('No keys found in the first mapping')
+            raise KeyError('No keys found in the topmost mapping')
     
     def pop(self, key, default=NoDefault):
         if default is NoDefault:
-            return self.maps[0].pop(key)
-        return self.maps[0].pop(key, default)
+            return self.top.pop(key)
+        return self.top.pop(key, default)
     
     def clear(self):
-        self.maps[0].clear()
+        self.top.clear()
         return self
     
     def mapcontaining(self, itx, default=NoDefault):
@@ -206,11 +214,11 @@ class ChainMap(collections.abc.MutableMapping,
     def clone(self, deep=False, memo=None):
         cls = type(self)
         if not deep:
-            return cls(self.maps[0].copy(),
-                      *self.maps[1:])
+            return cls(self.top.copy(),
+                      *self.rest)
         from copy import deepcopy
-        return cls(deepcopy(self.maps[0]),
-                 *(deepcopy(map) for map in self.maps[1:]))
+        return cls(deepcopy(self.top),
+                 *(deepcopy(map) for map in self.rest))
     
     def inner_repr(self):
         from pprint import pformat
@@ -278,82 +286,116 @@ def test():
     from clu.constants.data import XDGS
     from clu.fs.filesystem import Directory
     from clu.predicates import try_items
-    from clu.testing.utils import inline
-    from pprint import pprint
+    from clu.testing.utils import inline, format_environment
+    # from pprint import pprint
     import os
     
-    dirname = Directory(TEST_PATH)
-    data = dirname.subdirectory('data')
-    stash = os.environ.copy()
+    stash = {}
     
-    # Arbitrary:
-    dict_one = {
-        'yo'    : "dogg",
-        'i'     : "heard",
-        'you'   : "liked",
-        'dict'  : "chains" }
+    @inline.fixture
+    def dict_arbitrary():
+        """ Return an arbitrary flat dictionary """
+        return {
+            'yo'    : "dogg",
+            'i'     : "heard",
+            'you'   : "liked",
+            'dict'  : "chains"
+        }
+    
+    @inline.fixture
+    def fsdata():
+        """ Return the path to testing data """
+        return Directory(TEST_PATH).subdirectory('data')
     
     @inline.fixture
     def environment():
+        """ Return the environment access dict """
         for key in XDGS:
             if key in os.environ:
                 del os.environ[key]
         return os.environ
     
+    @inline.precheck
+    def stash_environment():
+        """ Stash environment state before testing """
+        nonlocal stash
+        stash = os.environ.copy()
+    
     @inline
     def test_one():
-        try:
-            env = environment()
+        """ Shallow clone membership check """
+        chain0 = ChainMap(dict_arbitrary(),
+                                  fsdata(),
+                             environment())
+        
+        chain1 = chain0.clone()
+        assert len(chain0) == len(chain1)
+        
+        for key in chain0.keys():
+            assert key in chain0
+            assert key in chain1
             
-            chain0 = ChainMap(dict_one, data, env)
+            # N.B. SLOW AS FUCK:
+            # assert key in chain0.flatten()
             
-            # pout.v(sorted(env.keys()))
-            # pout.v(sorted(chain0.keys()))
-            pprint(sorted(chain0.keys()))
-            print()
-            
-            # First: shallow clone
-            chain1 = chain0.clone()
-            assert len(chain0) == len(chain1)
-            for key in chain0.keys():
-                assert key in chain0
-                assert key in chain0.flatten()
-                assert key in chain1
-                assert key in chain1.flatten()
-                assert try_items(key, *chain0.maps, default=None) is not None
-                assert try_items(key, *chain1.maps, default=None) is not None
-                assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
-                assert try_items(key, *chain0.maps, default=None) == chain0[key]
-                assert try_items(key, *chain0.maps, default=None) == chain1[key]
-            
-            # Next: deep clone
-            chainX = chain0.clone(deep=True)
-            assert len(chain0) == len(chainX)
-            for key in chain0.keys():
-                assert key in chain0
-                assert key in chain0.flatten()
-                assert key in chainX
-                assert key in chainX.flatten()
-                assert try_items(key, *chain0.maps, default=None) is not None
-                assert try_items(key, *chainX.maps, default=None) is not None
-                assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
-                assert try_items(key, *chain0.maps, default=None) == chain0[key]
-                assert try_items(key, *chain0.maps, default=None) == chainX[key]
-            
-            assert chain0 == ChainMap(dict_one, data, env)
-            assert chain0 == chain1
-            assert chain0 == chainX
-            assert chainX == chain1
-            
-            # pout.v(sorted(chainX.keys()))
-            pprint(sorted(chainX.keys()))
-            print()
-            
-        finally:
-            os.environ = stash # type: ignore
+            assert try_items(key, *chain0.maps, default=None) is not None
+            assert try_items(key, *chain1.maps, default=None) is not None
+            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
+            assert try_items(key, *chain0.maps, default=None) == chain0[key]
+            assert try_items(key, *chain0.maps, default=None) == chain1[key]
     
-    # Run all inline tests:
-    return inline.test(10)
+    @inline
+    def test_two():
+        """ Deep clone membership check """
+        chain0 = ChainMap(dict_arbitrary(),
+                                  fsdata(),
+                             environment())
+        
+        chainX = chain0.clone(deep=True)
+        assert len(chain0) == len(chainX)
+        
+        for key in chain0.keys():
+            assert key in chain0
+            assert key in chainX
+            
+            # N.B. SLOW AS FUCK:
+            # assert key in chain0.flatten()
+            
+            assert try_items(key, *chain0.maps, default=None) is not None
+            assert try_items(key, *chainX.maps, default=None) is not None
+            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
+            assert try_items(key, *chain0.maps, default=None) == chain0[key]
+            assert try_items(key, *chain0.maps, default=None) == chainX[key]
+    
+    @inline
+    def test_three():
+        """ Equality comparisons across the board """
+        chain0 = ChainMap(dict_arbitrary(),
+                                  fsdata(),
+                             environment())
+        chain1 = chain0.clone()
+        chainX = chain0.clone(deep=True)
+        
+        assert chain0 == ChainMap(dict_arbitrary(),
+                                          fsdata(),
+                                     environment())
+        assert chain0 == chain1
+        assert chain0 == chainX
+        assert chainX == chain1
+    
+    @inline.diagnostic
+    def restore_environment():
+        """ Restore environment from stashed values """
+        os.environ = stash
+    
+    @inline.diagnostic
+    def show_environment():
+        """ Show environment variables """
+        for envline in format_environment():
+            print(envline)
+    
+    # Run all inline tests, return POSIX status
+    return inline.test(100)
 
 if __name__ == '__main__':
     sys.exit(test())

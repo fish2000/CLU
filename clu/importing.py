@@ -1101,7 +1101,8 @@ def test():
         
         assert type(derived.exporter).__name__ == 'Exporter'
         
-        Registry.unregister('clu', derived.qualname)
+        Registry.unregister(derived.appname,
+                            derived.qualname)
     
     @inline
     def test_five():

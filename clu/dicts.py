@@ -143,18 +143,8 @@ class ChainMap(collections.abc.MutableMapping,
         from clu.predicates import try_items
         return try_items(key, *self.maps, default=None) or self.__missing__(key)
     
-    def getitem_search(self, key):
-        from clu.predicates import item_search
-        return item_search(key, *self.maps, default=None) or self.__missing__(key)
-    
     def __len__(self):
-        return len(frozenset(iterchain(self.maps)))
-    
-    def key_combine_len_impl(self):
-        keys = set()
-        for map in self.maps:
-            keys |= map.keys()
-        return len(keys)
+        return len(set(iterchain(self.maps)))
     
     def __bool__(self):
         return any(self.maps)
@@ -256,12 +246,6 @@ class ChainMap(collections.abc.MutableMapping,
     def flatten(self):
         """ Dearticulate the ChainMap instances’ internal map stack
             into a new, single, flat dictionary instance.
-        """
-        return merge(*reversed(self.maps))
-    
-    def flatten_fast(self):
-        """ Dearticulate the ChainMap instances’ internal map stack
-            into a new, single, flat dictionary instance… ONLY FASTER
         """
         return merge_fast(*reversed(self.maps))
     
@@ -414,11 +398,11 @@ def test():
             assert key in chain1
             
             # N.B. SLOW AS FUCK:
-            # assert key in chain0.flatten()
+            assert key in chain0.flatten()
             
             assert try_items(key, *chain0.maps, default=None) is not None
             assert try_items(key, *chain1.maps, default=None) is not None
-            # assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
+            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
             assert try_items(key, *chain0.maps, default=None) == chain0[key]
             assert try_items(key, *chain0.maps, default=None) == chain1[key]
     
@@ -431,22 +415,19 @@ def test():
         
         chain1 = chain0.clone()
         assert len(chain0) == len(chain1)
-        # assert chain0.key_combine_len_impl() == chain1.key_combine_len_impl()
         
         for key in chain0.keys():
             assert key in chain0
             assert key in chain1
             
             # N.B. SLOW AS FUCK:
-            # assert key in chain0.flatten_fast()
+            assert key in chain0.flatten()
             
             assert try_items(key, *chain0.maps, default=None) is not None
             assert try_items(key, *chain1.maps, default=None) is not None
-            # assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
-            # assert try_items(key, *chain0.maps, default=None) == chain0[key]
-            # assert try_items(key, *chain0.maps, default=None) == chain1[key]
-            assert try_items(key, *chain0.maps, default=None) == chain0.getitem_search(key)
-            assert try_items(key, *chain0.maps, default=None) == chain1.getitem_search(key)
+            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
+            assert try_items(key, *chain0.maps, default=None) == chain0[key]
+            assert try_items(key, *chain0.maps, default=None) == chain1[key]
     
     @inline
     def test_two():
@@ -463,11 +444,11 @@ def test():
             assert key in chainX
             
             # N.B. SLOW AS FUCK:
-            # assert key in chain0.flatten()
+            assert key in chain0.flatten()
             
             assert try_items(key, *chain0.maps, default=None) is not None
             assert try_items(key, *chainX.maps, default=None) is not None
-            # assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
+            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
             assert try_items(key, *chain0.maps, default=None) == chain0[key]
             assert try_items(key, *chain0.maps, default=None) == chainX[key]
     
@@ -480,22 +461,19 @@ def test():
         
         chainX = chain0.clone(deep=True)
         assert len(chain0) == len(chainX)
-        # assert chain0.key_combine_len_impl() == chainX.key_combine_len_impl()
         
         for key in chain0.keys():
             assert key in chain0
             assert key in chainX
             
             # N.B. SLOW AS FUCK:
-            # assert key in chain0.flatten_fast()
+            assert key in chain0.flatten()
             
             assert try_items(key, *chain0.maps, default=None) is not None
             assert try_items(key, *chainX.maps, default=None) is not None
-            # assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
-            # assert try_items(key, *chain0.maps, default=None) == chain0[key]
-            # assert try_items(key, *chain0.maps, default=None) == chainX[key]
-            assert try_items(key, *chain0.maps, default=None) == chain0.getitem_search(key)
-            assert try_items(key, *chain0.maps, default=None) == chainX.getitem_search(key)
+            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
+            assert try_items(key, *chain0.maps, default=None) == chain0[key]
+            assert try_items(key, *chain0.maps, default=None) == chainX[key]
     
     @inline
     def test_three():

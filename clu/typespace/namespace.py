@@ -99,9 +99,8 @@ class BaseNamespace(collections.abc.Set,
     
     def __init__(self, *args, **kwargs):
         for mapping in (asdict(arg) for arg in args):
-            if ismergeable(mapping):
-                for key, value in mapping.items():
-                    self.__dict__[key] = value
+            for key, value in mapping.items():
+                self.__dict__[key] = value
         for key, value in kwargs.items():
             self.__dict__[key] = value
     
@@ -137,7 +136,7 @@ class SimpleNamespace(BaseNamespace,
     """ Implementation courtesy this SO answer:
         • https://stackoverflow.com/a/37161391/298171
         
-        Additionally, SimpleNamespace furnishes an `__dir__(…)` method.
+        Additionally, SimpleNamespace furnishes an `__hash__(…)` method.
     """
     
     def __hash__(self):
@@ -242,6 +241,20 @@ def test():
     
     from clu.testing.utils import inline
     
+    @inline.fixture
+    def flat_dict():
+        return {
+            'yo'        : "dogg",
+            'i_heard'   : "you like",
+            'nested'    : "dicts",
+            'so'        : "we put dicts in your dicts"
+        }
+    
+    @inline.fixture
+    def shorty_repr():
+        return "SimpleNamespace({ yo : 'dogg', i_heard : 'you like', " \
+               "nested : 'dicts', so : 'we put dicts in your dicts' })"
+    
     @inline
     def test_one():
         """ Implicit recursive namespaces """
@@ -258,9 +271,6 @@ def test():
         ROOT.yo.dogg = "yo dogg"
         ROOT.yo.wat = "¡WAT!"
         
-        print("ROOT NAMESPACE:")
-        print(ROOT)
-        
         assert ROOT.other.additional        == "«additional»"
         assert ROOT.other.considerations    == "…"
         assert ROOT.yo.dogg                 == "yo dogg"
@@ -271,6 +281,15 @@ def test():
             assert ns.considerations        == "…"
         
         return ROOT
+    
+    @inline
+    def test_two():
+        """ SimpleNamespace sanity checks """
+        from clu.repr import chop_instance_repr
+        
+        sn = SimpleNamespace(flat_dict())
+        assert dir(sn) == ['i_heard', 'nested', 'so', 'yo']
+        assert chop_instance_repr(reprizer.fullrepr(sn, short=True)) == shorty_repr()
     
     return inline.test(100)
 

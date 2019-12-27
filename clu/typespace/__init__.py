@@ -4,6 +4,7 @@ from __future__ import print_function
 import array
 import collections
 import collections.abc
+import weakref
 import re
 
 from clu.constants.consts import (BASEPATH,
@@ -43,6 +44,11 @@ setattr(types, 'Array',           array.ArrayType)
 
 # Add the collections.abc.MappingView base type:
 setattr(types, 'MappingView',     collections.abc.MappingView)
+
+# Add weakref builtin types:
+setattr(types, 'Reference',       weakref.ReferenceType)
+setattr(types, 'Proxy',           weakref.ProxyType)
+setattr(types, 'CallableProxy',   weakref.CallableProxyType)
 
 # Manually set `types.__file__` and related attributes:
 setattr(types, '__file__',        __file__)

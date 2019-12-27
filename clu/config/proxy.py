@@ -133,7 +133,6 @@ def test():
     from clu.testing.utils import inline
     from clu.config.defg import mapwalk, pack_ns, unpack_ns
     from clu.config.defg import FrozenFlat, Flat, Nested
-    from clu.naming import nameof
     from pprint import pprint
     
     @inline.fixture
@@ -279,10 +278,9 @@ def test():
     @inline.diagnostic
     def show_fixture_cache_stats():
         """ Show the per-fixture-function cache stats """
-        fixtures = (flatdict, nestedmaps)
-        total = len(fixtures)
-        for idx, fixture in enumerate(fixtures):
-            name = nameof(fixture)
+        total = len(inline.fixtures)
+        for idx, name in enumerate(inline.fixtures.keys()):
+            fixture = inline.fixtures[name]
             print(f"FUNCTION CACHE INFO: {name} ({idx+1} of {total})")
             print(fixture.cache_info())
             print()

@@ -112,7 +112,8 @@ from clu.predicates import (negate, reverse,
                             allof, anyof, noneof,
                             slots_for)
 
-from clu.typespace import SimpleNamespace, Namespace, types, modulize
+from clu.typespace import types, modulize
+from clu.typespace.namespace import NamespaceRepr, SimpleNamespace, Namespace, isnamespace
 
 from clu.typology import (samelength, differentlength, isunique,
                           istypelist, ismetatypelist, maketypelist, makemetatypelist,
@@ -150,6 +151,7 @@ from clu.abstract import Cloneable, ReprWrapper
 from clu.config.abc import FlatOrderedSet, functional_and, functional_set
 from clu.config.defg import (NAMESPACE_SEP, FrozenKeyMap, KeyMap, FrozenFlat, Flat,
                                                                   FrozenNested, Nested)
+from clu.config.defg import nestedmaps, flatdict
 from clu.config.proxy import KeyMapView, KeyMapProxy
 
 from clu.config.env import Env
@@ -359,7 +361,8 @@ __all__ = ('Image',
            'tuplize', 'uniquify', 'listify', 'union',
            'ancestral', 'ancestral_union',
            'allof', 'anyof', 'noneof',
-           'SimpleNamespace', 'Namespace', 'types', 'modulize',
+           'types', 'modulize',
+           'NamespaceRepr', 'SimpleNamespace', 'Namespace', 'isnamespace',
            'samelength', 'differentlength', 'isunique',
            'istypelist', 'ismetatypelist', 'maketypelist', 'makemetatypelist',
            'isderivative', 'subclasscheck', 'metaclasscheck', 'graceful_issubclass',
@@ -561,6 +564,16 @@ f = 0.666
 i = 666
 o = object()
 s = 'yo dogg'
+
+sns = SimpleNamespace(yo='dogg', iheard='youlike')
+ns = Namespace(yo='dogg', iheard='youlike')
+
+flat = Flat(flatdict())
+nest = Nested(nestedmaps())
+fview = KeyMapView(flat)
+fprox = KeyMapProxy(flat)
+nview = KeyMapView(nest)
+nprox = KeyMapProxy(nest)
 
 # Remove duplicate and invalid sys.paths:
 if 'pypath' in __all__:

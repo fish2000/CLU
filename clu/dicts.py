@@ -602,15 +602,15 @@ def test():
         print(repr(chain0))
         print()
         
-        print("REPR»CHAIN1:")
-        print()
-        print(repr(chain1))
-        print()
+        # print("REPR»CHAIN1:")
+        # print()
+        # print(repr(chain1))
+        # print()
         
-        print("REPR»CHAINX:")
-        print()
-        print(repr(chainX))
-        print()
+        # print("REPR»CHAINX:")
+        # print()
+        # print(repr(chainX))
+        # print()
     
     @inline
     def test_four_experimental():
@@ -623,6 +623,24 @@ def test():
         print()
         print(repr(chainN))
         print()
+    
+    @inline
+    def test_five():
+        """ Compatibility checks with “collections.ChainMap” """
+        from clu.config.defg import flatdict, Flat
+        
+        chain0 = ChainMap(dict_arbitrary(), Flat(flatdict()))
+        chainO = collections.ChainMap(dict_arbitrary(), Flat(flatdict()))
+        
+        assert len(chain0) == len(chainO)
+        
+        for key in chain0.keys():
+            assert chain0[key] == chainO[key]
+        
+        chainZ = ChainMap(chainO)
+        
+        assert chainZ == chain0
+        assert chainZ == chainO
     
     @inline.diagnostic
     def restore_environment():

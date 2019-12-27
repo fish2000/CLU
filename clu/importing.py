@@ -152,18 +152,16 @@ class ModuleSpec(importlib.machinery.ModuleSpec):
     
     """ A local “importlib.machinery.ModuleSpec” subclass
         that conveniently deals with setting the “origin”
-        attribute, and identifies all of its instances as
-        package modules.
+        attribute.
     """
     
     def __init__(self, name, loader):
         """ Initialize a new ModuleSpec, with a qualified (dotted)
             path string, and a module loader instance (both of which
-            are required).
+            are required arguments).
         """
         _, packagename = dotpath_split(name)
-        super(ModuleSpec, self).__init__(name,
-                                         loader,
+        super(ModuleSpec, self).__init__(name, loader,
                                          origin=packagename)
     
     def __hash__(self):
@@ -224,8 +222,13 @@ class FinderBase(clu.abstract.AppName,
         “initialize_types(…)” sub. to easily set these up for
         your own app.
         
-        The method “FinderBase.find_spec(…)” caches returned
-        instances of “ModuleSpec” using a ‘zict.LRU’ buffer.
+        The class method “FinderBase.find_spec(…)” caches its
+        returned instances of “ModuleSpec” using a ‘zict.LRU’
+        buffer, which is shared across all of the installed
+        “FinderBase” subclasses – meaning that if a spec has
+        been cached for one installed app via this mechanism,
+        it will be found by the first Finder subclass that
+        shows up in “sys.meta_path” to field a query for it (!)
     """
     
     specs = {}
@@ -233,12 +236,10 @@ class FinderBase(clu.abstract.AppName,
     
     @classmethod
     def find_spec(cls, fullname, path=None, target=None):
-        # N.B. this shouldn’t technically be a class method,
-        # but making it so fixed a bizarre bug where importing
-        # from the class-based module using the machinery of
-        # “from appname.appspace.xxx import xxx” would fail
-        # when the method was called unbound-method-style
-        # with classes like 'str' …?!
+        """ Return a ModuleSpec for a qualified module name –
+            creating an instance anew if necessary, and returning
+            an existing one from the cache if available.
+        """
         if fullname in cls.cache:
             return cls.cache[fullname]
         if cls.appname == fullname.split(consts.QUALIFIER).pop(0):
@@ -248,6 +249,11 @@ class FinderBase(clu.abstract.AppName,
     
     @classmethod
     def invalidate_caches(cls):
+        """ Clear both the Finder’s internal ModuleSpec instance
+            cache, and its associated Loader instances’ memoization
+            cache for the “create_module(…)” method (q.v. method
+            implementation sub.)
+        """
         cls.loader.create_module.cache_clear()
         cls.cache.clear()
         return None

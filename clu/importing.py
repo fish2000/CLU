@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import defaultdict as DefaultDict
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass as dataclass_fn, field, fields
 from functools import lru_cache
 from itertools import chain
 
 cache = lambda function: lru_cache()(function)
 iterchain = chain.from_iterable
-reprless = dataclass(repr=False)
+dataclass = dataclass_fn(repr=False)
 
 import abc
 import clu.abstract
@@ -555,7 +555,7 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
                       super(ModuleBase, self).__dir__())
         return sorted(frozenset(names) - DO_NOT_INCLUDE)
 
-@reprless
+@dataclass
 class PerApp:
     
     """ Dataclass representing an “app”, as per the notion of

@@ -252,9 +252,6 @@ iscontainer     = lambda thing: isiterable(thing) and \
                             not isnormative(thing) and \
                             not isclasstype(thing)
 
-# HACKITTY HACK HACK HAAAAAAAACK:
-isnamespace     = lambda thing: typeof(thing).__name__.endswith('Namespace')
-
 # This is the equivalent of a lambda types’ built-in __repr__ function:
 lambda_repr     = lambda instance, default=λ: "<function %s at 0x%0x>" % (pyname(instance) or default,
                                                                               id(instance))
@@ -530,7 +527,6 @@ export(pymodule,        name='pymodule',        doc="pymodule(thing) → Return 
 export(isexpandable,    name='isexpandable',    doc="isexpandable(thing) → boolean predicate, True if `thing` can be `*expanded`")
 export(isnormative,     name='isnormative',     doc="isnormative(thing) → boolean predicate, True if `thing` is a string-like or bytes-like iterable")
 export(iscontainer,     name='iscontainer',     doc="iscontainer(thing) → boolean predicate, True if `thing` is iterable and not “normative” (q.v. `isnormative(…)` supra.)")
-export(isnamespace,     name='isnamespace',     doc="isnamespace(thing) → boolean predicate, True if the name of the type of “thing” ends with the string “Namespace” (hacky, I know – but functional!)")
 
 export(lambda_repr,     name='lambda_repr',     doc="lambda_repr(instance) → Equivalent to the built-in `__repr__(…)` method of a lambda function")
 

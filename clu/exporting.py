@@ -544,8 +544,9 @@ class ExporterBase(collections.abc.MutableMapping,
         # types that lack mutable __dict__ internals (or at least
         # a settable __doc__ slot or established attribute).
         if doc is not None:
+            target = getattr(thing, '__func__', thing)
             try:
-                thing.__doc__ = inspect.cleandoc(doc)
+                target.__doc__ = inspect.cleandoc(doc)
             except (AttributeError, TypeError):
                 typename = determine_name(type(thing))
                 warnings.warn(type(self).messages['docstr'] % (named, typename),

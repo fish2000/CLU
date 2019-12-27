@@ -25,8 +25,8 @@ STRINGPAIR = "{!s} : {!s}"
 @export
 class NamespaceRepr(Repr):
     
-    """ Custom Repr-izer for SimpleNamespace and Namespace mappings,
-        which can recursively self-contain.
+    """ Custom Repr-izer for SimpleNamespace and Namespace
+        mappings, which can recursively self-contain.
         
         q.v. cpython docs, http://bit.ly/2r1GQ4l supra.
     """
@@ -35,8 +35,8 @@ class NamespaceRepr(Repr):
                               maxstring=120,
                               maxother=120,
                             **kwargs):
-        """ Initialize a NamespaceRepr, with default params for ‘maxlevel’,
-            ‘maxstring’, and ‘maxother’.
+        """ Initialize a NamespaceRepr, with default params
+            for ‘maxlevel’, ‘maxstring’, and ‘maxother’.
         """
         try:
             super().__init__(*args, **kwargs)
@@ -47,11 +47,15 @@ class NamespaceRepr(Repr):
         self.maxother = maxother
     
     def subrepr(self, thing, level):
+        """ An internal “core” repr helper method. """
         if isnamespace(thing):
             return self.repr1(thing, level - 1)
         return repr(thing)
     
     def primerepr(self, thing, level):
+        """ The internal method for “core” repr production
+            of all namespace descendant types.
+        """
         if len(thing) == 0:
             return "{}"
         elif len(thing) == 1:
@@ -65,18 +69,38 @@ class NamespaceRepr(Repr):
         return f"{{ \n{ts}{total}\n{ls}}}"
     
     def repr_BaseNamespace(self, thing, level):
+        """ Return the “core” repr for a specific instance of
+            “clu.typespace.namespace.BaseNamespace” – just the
+            stringification of the key-value pairs, without
+            the typename or instance-id adornment.
+        """
         return self.primerepr(thing, level)
     
     def repr_SimpleNamespace(self, thing, level):
+        """ Return the “core” repr for a specific instance of
+            “clu.typespace.namespace.SimpleNamespace” – just
+            the stringification of the key-value pairs, without
+            the typename or instance-id adornment.
+        """
         return self.primerepr(thing, level)
     
     def repr_Namespace(self, thing, level):
+        """ Return the “core” repr for a specific instance of
+            “clu.typespace.namespace.Namespace” – just the
+            stringification of the key-value pairs, without
+            the typename or instance-id adornment.
+        """
         return self.primerepr(thing, level)
     
     def shortrepr(self, thing):
+        """ Return the “short” repr of a namespace instance –
+            all whitespace will be condensed to single spaces
+            without newlines.
+        """
         return WHITESPACE.sub(' ', self.repr(thing))
     
     def fullrepr(self, thing, short=False):
+        """ Return the “full” repr of a namespace instance. """
         from clu.repr import fullrepr as fullstringrepr
         if short:
             return fullstringrepr(thing, self.shortrepr(thing))
@@ -98,6 +122,13 @@ class BaseNamespace(collections.abc.Set,
     __slots__ = pytuple('dict', 'weakref')
     
     def __init__(self, *args, **kwargs):
+        """ Initialize a new namespace instance.
+            
+            One may optionally pass in any number of instances
+            of mapping-ish types, to be merged with the namespace.
+            
+            Any loose keyword arguments will also be merged in.
+        """
         for mapping in (asdict(arg) for arg in args):
             for key, value in mapping.items():
                 self.__dict__[key] = value
@@ -223,6 +254,12 @@ class Namespace(BaseNamespace,
 
 @export
 def isnamespace(thing):
+    """ isnamespace(thing) → boolean predicate,
+        True if the name of the type of “thing”
+        is amongst those of the quote-unquote
+        “Namespace tower”, as defined in the
+        module “clu.typespace.namespace”
+    """
     from clu.typology import subclasscheck
     return subclasscheck(thing, (BaseNamespace,
                                SimpleNamespace,
@@ -231,8 +268,8 @@ def isnamespace(thing):
 with exporter as export:
     
     export(reprizer,    name='reprizer')
-    export(nsrepr,      name='nsrepr')
     export(nsshortrepr, name='nsshortrepr')
+    export(nsrepr,      name='nsrepr',          doc="Return the “core” repr for any descendant namespace type.")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

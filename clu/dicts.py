@@ -272,7 +272,12 @@ def merge_fast_two(one, two):
         Based on this extremely beloved SO answer:
             https://stackoverflow.com/a/26853961/298171
     """
-    return { **one, **two }
+    # N.B. the dict-expanded operands appear here in the opposite order
+    # from their positions in the function signature due to the way keys
+    # take precedence in this sort of expression – this is detailed further
+    # in the SO post – but the upshot is that this is the functional
+    # equivalent to the “merge_two(…)” function, below.
+    return { **two, **one }
 
 @export
 def merge_fast(*dicts, **overrides):

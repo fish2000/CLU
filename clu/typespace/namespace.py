@@ -10,7 +10,7 @@ import sys
 
 from clu.constants.consts import pytuple, NoDefault
 from clu.constants.polyfills import ispyname
-from clu.dicts import merge_two, asdict
+from clu.dicts import merge_fast_two, asdict
 from clu.predicates import ismergeable
 from clu.exporting import Exporter
 
@@ -237,13 +237,13 @@ class Namespace(BaseNamespace,
         # On add, old values are not overwritten
         if not ismergeable(operand):
             return NotImplemented
-        return merge_two(self, operand, cls=type(self))
+        return type(self)(merge_fast_two(self, operand))
     
     def __radd__(self, operand):
         # On reverse-add, old values are overwritten
         if not ismergeable(operand):
             return NotImplemented
-        return merge_two(operand, self, cls=type(self))
+        return type(self)(merge_fast_two(operand, self))
     
     def __iadd__(self, operand):
         # On in-place add, old values are updated and replaced

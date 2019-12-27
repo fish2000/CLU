@@ -164,7 +164,7 @@ from clu.config.formats import JsonFile, PickleFile, TomlFile, YamlFile
 
 from clu.csv import pad_csv
 from clu.dicts import OrderedMappingView, OrderedItemsView, OrderedKeysView, OrderedValuesView
-from clu.dicts import ChainMap, merge_two, merge_as, merge, asdict
+from clu.dicts import ChainMap, merge_fast_two, merge_fast, merge_two, merge_as, merge, asdict
 
 # Add miscellaneous necessities:
 from PIL import Image
@@ -402,7 +402,7 @@ __all__ = ('Image',
            'Schema', 'JsonFile', 'PickleFile', 'TomlFile', 'YamlFile',
            'pad_csv',
            'OrderedMappingView', 'OrderedItemsView', 'OrderedKeysView', 'OrderedValuesView',
-           'ChainMap', 'merge_two', 'merge_as', 'merge', 'asdict',
+           'ChainMap', 'merge_fast_two', 'merge_fast', 'merge_two', 'merge_as', 'merge', 'asdict',
            'DUNDER', 'SUNDER', 'alias', 'AliasingEnumMeta', 'AliasingEnum',
            'print_separator', 'evict_announcer',
            'print_ansi', 'print_ansi_centered',

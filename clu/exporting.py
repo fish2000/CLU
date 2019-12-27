@@ -644,17 +644,17 @@ class ExporterBase(collections.abc.MutableMapping,
     
     def __add__(self, operand):
         # On add, old values are not overwritten
-        from clu.dicts import merge_two
+        from clu.dicts import merge_fast_two
         if not ismergeable(operand):
             return NotImplemented
-        return merge_two(self, operand, cls=type(self))
+        return type(self)(merge_fast_two(self, operand))
     
     def __radd__(self, operand):
         # On reverse-add, old values are overwritten
-        from clu.dicts import merge_two
+        from clu.dicts import merge_fast_two
         if not ismergeable(operand):
             return NotImplemented
-        return merge_two(operand, self, cls=type(self))
+        return type(self)(merge_fast_two(operand, self))
     
     def __iadd__(self, operand):
         # On in-place add, old values are updated and replaced

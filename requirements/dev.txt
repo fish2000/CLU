@@ -8,11 +8,13 @@ cython
 flake8
 flake8-bugbear
 gfm
+gitchangelog>=3.0.0
 # instakit
 imageio
 ipython
 jupyter
 mypy>=0.720
+pystache>=0.5.0
 pythonpy
 pytype
 pytz

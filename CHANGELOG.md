@@ -1,9 +1,127 @@
 # Changelog
 
 
-## 0.5.4-4+gb9aebd8 [SNAPSHOT]
+## 0.5.6-8+g4f32aa7 [SNAPSHOT]
+
+### Add
+
+* Added “fast” ‘flatten(¬)’ implementation, about 400% speedier – ... good but not stellar. [Alexander Böhn]
 
 ### Other
+
+* Parity-check ‘twixt “clu.dicts.ChainMap” and “collections.ChainMap” ... surprisingly, without any extracurricular coaxing on my part,     “__eq__(…)” works butter-smooth between both types, as does     constructing a CLU ChainMap from a standard-library instance     (although the opposite path remains unhiked for now, gah) [Alexander Böhn]
+
+* OK this really isn’t bad, for a quick ‘n’ dirty bespoke-repr jalopy ... It needs it some special-casin’ kinda love but hey, it looks     reasonably legible and non-shitty pretty much right out of the     gates. What gates? The gates, I dunno. It was behind some gates     and now those gates are open, dogg, I have no idea actually OK?     OK anyway. [Alexander Böhn]
+
+* Plugged in the faster “clu.dicts.merge*()” functions as warranted. [Alexander Böhn]
+
+* Got rid of all the ineffective method reimplementations. [Alexander Böhn]
+
+* Appears the “try_items(…)” predicate handily beats “item_search(…)” ... THE MORE YOU KNOW™ [Alexander Böhn]
+
+* Tried a different “__len__()” implementation: it’s exactly the same ... speedwise at least. It’s more explicit, but also uglier (if you     were to ask me, which you most certainly did not, but hey –     c’est la guerre, no?) [Alexander Böhn]
+
+* Made the inline testsuite for “clu.dicts” into a real actual thing ... and the verdict is, “clu.dicts.ChainMap.flatten()” is horribly     inefficient but everything else is totally rad doggie. [Alexander Böhn]
+
+
+## v0.5.6 (2019-12-27)
+
+### Add
+
+* Added weakref types to the typespace, and SimpleNamespace inline tests. [Alexander Böhn]
+
+* Added the fixture-cache-stats diagnostic to “clu.config.defg” [Alexander Böhn]
+
+* Added a diagnostic to print a report on the fixture cache stats. [Alexander Böhn]
+
+* Added metafunction capabilities to “clu.testing.utils.InlineTester” [Alexander Böhn]
+
+* Added unit tests for the boilerplate generation command. [Alexander Böhn]
+
+### Minutiae
+
+* Minutiae. [Alexander Böhn]
+
+### Other
+
+* Bump version: 0.5.5 → 0.5.6. [Alexander Böhn]
+
+* Spicing up the bpython REPL with more datastructure samples ... pre-made and ready-to-eat!! [Alexander Böhn]
+
+* Miniscule change in “clu.exporting” allows method docstring mutation ... !!! ... also, there are a bunch of docstring mutations in the namespace     module ... aaaaaand the removal of that wack and horrible hacked-up     “isnamespace(…)” predicate from “clu.predicates” – there is a     real, non-hacky version in “clu.typespace.namespace” from here     on out, ok? OK!! [Alexander Böhn]
+
+* Docstring edits in “clu.importing” [Alexander Böhn]
+
+* Dropped gratuitous “list(…)” from “Directory.importables(…)” innards. [Alexander Böhn]
+
+* Changelog requirements include install requirements. [Alexander Böhn]
+
+* Whitespace. [Alexander Böhn]
+
+* Fixed SimpleNamespace.__dir__(…)” and “SimpleNamespace.__repr__(…)” ... wbich were apparently broken?… WHOOOOOPS. [Alexander Böhn]
+
+* Clarified the in-use syntax of our intermediate dataclass decorator. [Alexander Böhn]
+
+* ModuleSpec instances are no longer considered packages by default. [Alexander Böhn]
+
+* Fixing the report-format sizing… YET ONCE AGAIN. [Alexander Böhn]
+
+* Gratuitous further simplification. [Alexander Böhn]
+
+* Using the “clu.testing.utils.InlineTester” fixture dictionary ... instead of hardcoding, fuck yeah dogg. [Alexander Böhn]
+
+* Slight performance gain made via pass-through-ing of some methods ... specifically the “keys(…)”, “items(…)” and “values(…)” methods;     this is likely due to those having fallen back to the default     implementations prior to the explicit pass-through, which meant     that “clu.config.defg.Nested” proxies were using the classes     for key/items/values views that did not take advantage of any     of the “NamespaceWalker” machinery. [Alexander Böhn]
+
+* Changed the internal weakref field name from “keymap” to “referent” ... which the former was both weirdly syntactically repetetive and     amiguously confusing; the latter says what it actually is and     isn’t the name of any other things already in use in general. [Alexander Böhn]
+
+* Got rid of reasonable-looking but completely stupid clone() impl ... which would have created a weakref to a temporary, essentially ... UGH. [Alexander Böhn]
+
+* Fixed generated docstrings on returned test functions ... FYI, docstrings with format components are, like, undefined     behavior it looks like…?! [Alexander Böhn]
+
+* Docstrings ‘n’ notes for the proxy-related inline metafunctions. [Alexander Böhn]
+
+* Slightly less class-level clutter. [Alexander Böhn]
+
+* Actually using the class method I just added. [Alexander Böhn]
+
+* Truly a miniscule rearrangement of things. [Alexander Böhn]
+
+* Many more inline tests for “clu.config.proxy” types. [Alexander Böhn]
+
+* Made the “ExporterBase” use its instance registry as a cache ... so, like, “ExporterBase.__new__(…)” returns existing instances     for dotpaths matching the invocation arguments. [Alexander Böhn]
+
+* Minute updates to the bpython REPL script. [Alexander Böhn]
+
+* I can’t believe I forgot to inherit Proxy from View, uggggh. [Alexander Böhn]
+
+* Reverted the use of newer “KeyMap” classes in “FileBase” ancestors ... this was causing base-class layout conflicts when “__weakref__”     slot members were added to the abstract bases at the root of     the KeyMap class tower. I left the KeyMap imports in, commented     out – when I get rid of all the old namespaced-mapping shit     in favor of the all-new hottness this will be such a non-issue     you will forget having even read this commit note, doggie, yeah. [Alexander Böhn]
+
+* Moved “__weakref__” slot declaration down to “FrozenKeyMapBase” [Alexander Böhn]
+
+* Initial inline tests for “KeyMapView” and “KeyMapProxy” [Alexander Böhn]
+
+* You know, sometimes, resource allocation *is* initialization. [Alexander Böhn]
+
+* Minor cleanup in “clu.testing.utils” [Alexander Böhn]
+
+* Minor renames in “clu.testing.utils” [Alexander Böhn]
+
+* Killed dead code. [Alexander Böhn]
+
+* I ❤️ fstrings. [Alexander Böhn]
+
+* Updated the “clu.testing.utils.InlineTester” docstring ... now the code sample illustrates returning POSIX status values. [Alexander Böhn]
+
+* Changelog and git-ignore tweaks. [Alexander Böhn]
+
+
+## v0.5.5 (2019-12-24)
+
+### Other
+
+* Bump version: 0.5.4 → 0.5.5. [Alexander Böhn]
+
+* Integrating “gitchangelog” and taking it for a trial run. [Alexander Böhn]
 
 * A fine Commit #1,000 as any: preservation of namespace insert-order ... happy order-of-magnitude-aversary, my dear CLU, and salud! [Alexander Böhn]
 
@@ -25,6 +143,10 @@
 * Added inline test for “clu.importing.ProxyModule” fallbacks. [Alexander Böhn]
 
 * Addressing automated GitHub security alert. [Alexander Böhn]
+
+### Minutiae
+
+* Minutiae. [Alexander Böhn]
 
 ### Other
 
@@ -83,8 +205,6 @@
 * Don’t trigger “__missing__(…)” during “ChainModuleMap” item access. [Alexander Böhn]
 
 * Even more repr-related refactors. [Alexander Böhn]
-
-* Minutiae. [Alexander Böhn]
 
 * Miscellaneous repr-related tweaks and updates. [Alexander Böhn]
 
@@ -222,6 +342,10 @@
 
 * Added note about executing test functions multiple times. [Alexander Böhn]
 
+### Minutiae
+
+* Minutiae. [Alexander Böhn]
+
 ### Other
 
 * Bump version: 0.5.1 → 0.5.2. [Alexander Böhn]
@@ -253,8 +377,6 @@
 * Gratuitous logic simplification in inline-testing’s inline tests. [Alexander Böhn]
 
 * Updating the primary “@inline” docstring. [Alexander Böhn]
-
-* Minutiae. [Alexander Böhn]
 
 * Revised the @inline test decorator mechanism ... to wit: it is now implemented as a class that is instanced     automatically via module ‘__getattr__(…)’ each time it is     requested for import ... this makes managing the stopwatch instances and the decorated     functions, as instance attributes, way way easier ... plus it eliminates the need for the clunky “vars()” argument     to all the “inline.test()” calls ... a few other revisions were made during these changes (most     notably the elimination of the “collection phase” in the main     stopwatch report – but that was kind of stupid anyway) [Alexander Böhn]
 
@@ -698,11 +820,13 @@
 
 * Adding one-liner “conftest.py” to load the pytest plugin module ... this re-enables running pytest just as ‘pytest’ – instead of     having to be all like ‘python -m pytest -p clu.testing.pytest’     via make each and every time. [Alexander Böhn]
 
+### Minutiae
+
+* Minutiae. [Alexander Böhn]
+
 ### Other
 
 * Bump version: 0.4.2 → 0.4.3. [Alexander Böhn]
-
-* Minutiae. [Alexander Böhn]
 
 * I keep thinking I fixed “clu.repl.ansi.print_ansi_centered(¬)…” ... and then it turns out there is yet another corner-case causing     it to be off by one or two filler characters in some situation     or another – likely one brought about by the last “fix” – but     I really do think I’ve nailed it this time, famous last words,     OK we shall see now won’t we doggie yeah. [Alexander Böhn]
 
@@ -781,6 +905,10 @@
 * Added “clu.importing.SubModule” context-manager ... for creating temporary class-module subtypes, suitable for     testing, among other things ... includes an inline test and a support predicate “newtype(…)” [Alexander Böhn]
 
 * Added “clu.predicates.union(…)” as a shortcut for “set().union(…)” [Alexander Böhn]
+
+### Minutiae
+
+* Minutiae. [Alexander Böhn]
 
 ### Other
 
@@ -869,8 +997,6 @@
 * Ensure module.qualname uses module.name (not ModuleClass.name) [Alexander Böhn]
 
 * Per-app Finder subclasses are added based on installed appnames ... as opposed to previously, wherein it was depending on identity     hashes of class objects, which was fundamentally flawed as each     call to “initialize_types(…)” would always install a new Finder     subclass regardless of the appname used. [Alexander Böhn]
-
-* Minutiae. [Alexander Böhn]
 
 * Killed dead code. [Alexander Böhn]
 
@@ -1211,6 +1337,10 @@
 
 * Added new field types and spruced up the existing ones ... also began adding the new configuration schema stuff to the     demo “yodogg” project found in tests/. [Alexander Böhn]
 
+### Minutiae
+
+* Minutiae. [Alexander Böhn]
+
 ### Other
 
 * Bump version: 0.3.1 → 0.3.2. [Alexander Böhn]
@@ -1232,8 +1362,6 @@
 * Moved file-format-related config stuff into “clu.config.formats” [Alexander Böhn]
 
 * I feel docstring, oh so docstring – [Alexander Böhn]
-
-* Minutiae. [Alexander Böhn]
 
 * Docstrings for “clu.config.settings.Schema” [Alexander Böhn]
 
@@ -1274,6 +1402,10 @@
 
 * Adding “clu.exporting.Exporter” to “clu.repl.columnize” [Alexander Böhn]
 
+### Minutiae
+
+* Minutiae in the “show-modules.py” script. [Alexander Böhn]
+
 ### Other
 
 * Bump version: 0.3.0 → 0.3.1. [Alexander Böhn]
@@ -1281,8 +1413,6 @@
 * Some tox.ini adjustments. [Alexander Böhn]
 
 * Raising when calling “flatten(…)” on a nonexistant Directory. [Alexander Böhn]
-
-* Minutiae in the “show-modules.py” script. [Alexander Böhn]
 
 * Confirming the new script directory location in the testsuite. [Alexander Böhn]
 
@@ -1331,6 +1461,10 @@
 
 * Added a “temporaryname” fixture-factory function to “clu.testing” [Alexander Böhn]
 
+### Minutiae
+
+* Minutiae. [Alexander Böhn]
+
 ### Other
 
 * Bump version: 0.2.8 → 0.2.9. [Alexander Böhn]
@@ -1372,8 +1506,6 @@
 * Un-exporting two module constants in “clu.enums” [Alexander Böhn]
 
 * Un-exporting two module constants in “clu.fs.filesystem” ... get that comparison failure rate down doggie. [Alexander Böhn]
-
-* Minutiae. [Alexander Böhn]
 
 * Generalizing “clu.fs.misc.suffix_searcher(…)” [Alexander Böhn]
 
@@ -1722,6 +1854,10 @@
       shit but for __python__ __reserved__ __names__, and “items(…)”
       of course is for getting items, like out of dicts and whatnot.
 
+### Minutiae
+
+* Minutiae. [Alexander Böhn]
+
 ### Other
 
 * Bump version: 0.1.6 → 0.1.7. [Alexander Böhn]
@@ -1778,8 +1914,6 @@
 * Moved the huge greek-text dict to new module “clu.constants.data” ... Which OK yeah I know “data” is a lame-ass name for a module or     anything like that – technically they *all* contain data so it     is not that descriptive – but I wanted a catch-all junk-drawer     module, and so. Yes! [Alexander Böhn]
 
 * Removed dangling import. [Alexander Böhn]
-
-* Minutiae. [Alexander Böhn]
 
 * Trying package scope for the “dirname” fixture ... the latest pytest docs call package-scope “experimental” – so     that’s what this is: like that time you drunkenly made out with     your sophomore-year roommate and then never really talked about     it afterward for like twenty years, I am “experimenting”. [Alexander Böhn]
 
@@ -2143,6 +2277,10 @@
 
 * Added __init__.py to scripts. [Alexander Böhn]
 
+### Minutiae
+
+* Minutiae. [Alexander Böhn]
+
 ### Other
 
 * Bump version: 0.1.1 → 0.1.2. [Alexander Böhn]
@@ -2168,8 +2306,6 @@
 * Using clu.exporting in clu.repl.enums. [Alexander Böhn]
 
 * Getting System enum from fully-qualified module path. [Alexander Böhn]
-
-* Minutiae. [Alexander Böhn]
 
 * Got rid of crappy old unused memoization tools in clu.fs.msic. [Alexander Böhn]
 
@@ -2330,6 +2466,12 @@
 
 * Added a bunch of basic project stuff ... .gitignore, .bumpversion.cfg; ... ABOUT.md, README.md, CODE_OF_CONDUCT.md ... __init__.py files in clu/ and test/ ... __version__.py and semantic-versioning code in version.py ... basic setup.py boilerplate. [Alexander Böhn]
 
+### Minutiae
+
+* Minutiae II. [Alexander Böhn]
+
+* Minutiae. [Alexander Böhn]
+
 ### Other
 
 * Bump version: 0.1.0 → 0.1.1. [Alexander Böhn]
@@ -2378,8 +2520,6 @@
 
 * Peppering in __all__ and __dir__ joyously and mirthfully ... also you wouldn’t know it but between this commit and the last     one I completely replumbed all the .envrc and .direnvrc shit     on my entire computer – apparently “loading” a source file in     the direnv world (which up until recently I thought was a nice     world that was good to live in) does *not* export bash aliases,     functions, or anything else up to a certain point. ... So I hacked around that – but that was fine, no problem, a     complete and total breeze compared to this bizarre bullshit     nonsensical PYTHONPATH-related REPL freakout I was having prior     to all that. I ended up using the `virtualenv --verbose --clear`     command, which if you didn’t know, that second option flag is     literally described like e.g. “blow away the entire virtualenv     and start over from scratch” or something like that – after     doing that and then blindly monkeying around with PATH-y stuff     a while afterwards, I got my shit to work… that shit in this     case would be the “replenv” stuff, upon which the whole CLU     project is literally based. Blech. Anyway you can’t see any     of that, because why would I check that nonsense into source     control?? It’s not as if I am about to absently save right over     all that irritatingly hard work and break it all again, only to     find myself in a sea of inscrutable nonfunctionality, sans the     ol’ reliable `git bisect` or anything else, hah. Yeah! [Alexander Böhn]
 
-* Minutiae II. [Alexander Böhn]
-
 * Sorted out a ton of stuff w/r/t modes and permissions. [Alexander Böhn]
 
 * Git-ignoring .tm_properties. [Alexander Böhn]
@@ -2389,8 +2529,6 @@
 * Fixed CSDIL enum’s __index__(…) method. [Alexander Böhn]
 
 * ANSI metaclass name-lookup method now considers aliases. [Alexander Böhn]
-
-* Minutiae. [Alexander Böhn]
 
 * ZERO-COST ENUM MEMBER ALIASING, MOTHERFUCKERS. [Alexander Böhn]
 

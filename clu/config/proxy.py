@@ -80,16 +80,6 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     def clone(self, deep=False, memo=None):
         return type(self)(self.keymap())
-    
-    def _clone(self, deep=False, memo=None):
-        cls = type(self)
-        referent = self.keymap()
-        if not referent:
-            typename = cls.__name__
-            raise ValueError(f"{typename} referent is dead")
-        if not deep:
-            return cls(referent)
-        return cls(referent.clone(deep=True))
 
 @export
 class KeyMapProxy(KeyMapView, KeyMap):

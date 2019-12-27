@@ -318,6 +318,21 @@ class InlineTester(collections.abc.Set,
         # Return the test wrapper function:
         return wrapper
     
+    def add_function(self, function, name=None):
+        """ Explictly add a testing function to use as an inline test.
+            Optionally, a name may be specified.
+        """
+        from clu.exporting import determine_name
+        
+        # Stash the old name before assigning the new one:
+        if name is not None:
+            dname = determine_name(function)
+            function.__name__ = function.__qualname__ = name
+            function.__function_name__ = dname
+        
+        # Wrap and return:
+        return self.__call__(function)
+    
     @property
     def precheck(self):
         """ Decorate a preflight-check function.

@@ -285,14 +285,14 @@ class rename(collections.abc.Callable):
                 function.__module__ = str(self.dotpath) # Reset __module__ for phi-types
         return function
     
-    def __call__(self, f):
-        function = self.assign_name(f)
-        if not inspect.isfunction(function):
-            return function
-        @wraps(function)
+    def __call__(self, thing):
+        putative = self.assign_name(thing)
+        if not inspect.isfunction(putative):
+            return putative
+        @wraps(putative)
         def renamed(*args, **kwargs):
-            return function(*args, **kwargs)
-        return function
+            return putative(*args, **kwargs)
+        return renamed
 
 @export
 def split_abbreviations(s):

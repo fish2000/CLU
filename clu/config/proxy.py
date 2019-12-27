@@ -105,6 +105,7 @@ def test():
     
     from clu.testing.utils import inline
     from clu.config.defg import mapwalk, pack_ns, unpack_ns
+    from clu.config.defg import FrozenFlat, Flat, Nested
     from pprint import pprint
     
     @inline.fixture
@@ -147,246 +148,96 @@ def test():
         """ Pretty-print the “nestedmaps()” fixture """
         pprint(nestedmaps(), indent=4)
     
-    @inline
-    def test_one():
-        """ KeyMapView vs. FrozenFlat """
-        from clu.config.defg import FrozenFlat
+    def test_one_fn(keymap_type, proxy_type, fixture_fn):
+        def test_fn():
+            """ %s vs. %s """ % (proxy_type.__name__,
+                                keymap_type.__name__)
+            
+            kmap = keymap_type(fixture_fn())
+            prox = proxy_type(kmap)
+            
+            assert kmap == prox
+            assert len(kmap) == len(prox)
+            
+            for ns0, ns1 in zip(kmap.namespaces(), prox.namespaces()):
+                assert ns0 == ns1
+            
+            for iter0, iter1 in zip(kmap, prox):
+                assert iter0 == iter1
+                assert iter0 in kmap
+                assert iter0 in prox
+                assert iter1 in kmap
+                assert iter1 in prox
+            
+            for keys0, keys1 in zip(kmap.keys(), prox.keys()):
+                assert keys0 == keys1
+                key0, ns0 = unpack_ns(keys0)
+                key1, ns1 = unpack_ns(keys1)
+                assert kmap.get(key0, *ns0) == prox.get(key1, *ns1)
+                assert kmap.get(key1, *ns1) == prox.get(key0, *ns0)
+            
+            for items0, items1 in zip(kmap.items(), prox.items()):
+                key0, val0 = items0
+                key1, val1 = items1
+                assert key0 == key1
+                assert val0 == val1
+            
+            for val0, val1 in zip(kmap.values(), prox.values()):
+                assert val0 == val1
         
-        flat = FrozenFlat(flatdict())
-        view = KeyMapView(flat)
-        
-        assert flat == view
-        assert len(flat) == len(view)
-        
-        for ns0, ns1 in zip(flat.namespaces(), view.namespaces()):
-            assert ns0 == ns1
-        
-        for iter0, iter1 in zip(flat, view):
-            assert iter0 == iter1
-            assert iter0 in flat
-            assert iter0 in view
-            assert iter1 in flat
-            assert iter1 in view
-        
-        for keys0, keys1 in zip(flat.keys(), view.keys()):
-            assert keys0 == keys1
-            key0, ns0 = unpack_ns(keys0)
-            key1, ns1 = unpack_ns(keys1)
-            assert flat.get(key0, *ns0) == view.get(key1, *ns1)
-            assert flat.get(key1, *ns1) == view.get(key0, *ns0)
-        
-        for items0, items1 in zip(flat.items(), view.items()):
-            key0, val0 = items0
-            key1, val1 = items1
-            assert key0 == key1
-            assert val0 == val1
-        
-        for val0, val1 in zip(flat.values(), view.values()):
-            assert val0 == val1
+        return test_fn
     
-    @inline
-    def test_two():
-        """ KeyMapView of KeyMapView """
-        from clu.config.defg import FrozenFlat
+    def test_two_fn(keymap_type, proxy_type0, fixture_fn,
+                                              proxy_type1=None,
+                                              proxy_type2=None):
+        if not proxy_type1:
+            proxy_type1 = proxy_type0
         
-        flat = FrozenFlat(flatdict())
-        view0 = KeyMapView(flat)
-        view1 = KeyMapView(view0)
+        def test_fn():
+            """ %s of %s (&c.) """ % (proxy_type0.__name__,
+                                      proxy_type1.__name__)
+            
+            nonlocal proxy_type2
+            
+            kmap = keymap_type(fixture_fn())
+            prox0 = proxy_type0(kmap)
+            prox1 = proxy_type1(prox0)
+            
+            if not proxy_type2:
+                if hasattr(kmap, 'freeze'):
+                    proxy_type2 = kmap.freeze
+                else:
+                    proxy_type2 = lambda: proxy_type0(kmap)
+            
+            assert kmap == prox0
+            assert kmap == prox1
+            assert prox0 == prox1
+            
+            assert prox0.keymap() == prox1.keymap()
+            assert prox0.keymap == prox1.keymap
+            assert bool(prox0)
+            assert bool(prox1)
+            
+            assert weakref.getweakrefcount(kmap) > 0 # this isn’t 2 somehow
+            
+            prox2 = proxy_type2()
+            assert kmap == prox2
+            assert prox0 == prox2
+            assert prox1 == prox2
+            assert bool(prox2)
+            
+            assert weakref.getweakrefcount(kmap) > 0 # this isn’t 2 somehow
         
-        assert flat == view0
-        assert flat == view1
-        assert view0 == view1
-        
-        assert view0.keymap() == view1.keymap()
-        assert view0.keymap == view1.keymap
-        assert bool(view0)
-        assert bool(view1)
-        
-        assert weakref.getweakrefcount(flat) > 0 # this isn’t 2 somehow
-        
-        view2 = KeyMapView(flat)
-        assert flat == view2
-        assert view0 == view2
-        assert view1 == view2
-        assert bool(view2)
-        
-        assert weakref.getweakrefcount(flat) > 0 # this isn’t 2 somehow
+        return test_fn
     
-    @inline
-    def test_three():
-        """ KeyMapView vs. Flat """
-        from clu.config.defg import Flat
-        
-        flat = Flat(flatdict())
-        view = KeyMapView(flat)
-        
-        assert flat == view
-        assert len(flat) == len(view)
-        
-        for ns0, ns1 in zip(flat.namespaces(), view.namespaces()):
-            assert ns0 == ns1
-        
-        for iter0, iter1 in zip(flat, view):
-            assert iter0 == iter1
-            assert iter0 in flat
-            assert iter0 in view
-            assert iter1 in flat
-            assert iter1 in view
-        
-        for keys0, keys1 in zip(flat.keys(), view.keys()):
-            assert keys0 == keys1
-            key0, ns0 = unpack_ns(keys0)
-            key1, ns1 = unpack_ns(keys1)
-            assert flat.get(key0, *ns0) == view.get(key1, *ns1)
-            assert flat.get(key1, *ns1) == view.get(key0, *ns0)
-        
-        for items0, items1 in zip(flat.items(), view.items()):
-            key0, val0 = items0
-            key1, val1 = items1
-            assert key0 == key1
-            assert val0 == val1
-        
-        for val0, val1 in zip(flat.values(), view.values()):
-            assert val0 == val1
-    
-    @inline
-    def test_three_point_five():
-        """ KeyMapProxy vs. Flat """
-        from clu.config.defg import Flat
-        
-        flat = Flat(flatdict())
-        prox = KeyMapProxy(flat)
-        
-        assert flat == prox
-        assert len(flat) == len(prox)
-        
-        for ns0, ns1 in zip(flat.namespaces(), prox.namespaces()):
-            assert ns0 == ns1
-        
-        for iter0, iter1 in zip(flat, prox):
-            assert iter0 == iter1
-            assert iter0 in flat
-            assert iter0 in prox
-            assert iter1 in flat
-            assert iter1 in prox
-        
-        for keys0, keys1 in zip(flat.keys(), prox.keys()):
-            assert keys0 == keys1
-            key0, ns0 = unpack_ns(keys0)
-            key1, ns1 = unpack_ns(keys1)
-            assert flat.get(key0, *ns0) == prox.get(key1, *ns1)
-            assert flat.get(key1, *ns1) == prox.get(key0, *ns0)
-        
-        for items0, items1 in zip(flat.items(), prox.items()):
-            key0, val0 = items0
-            key1, val1 = items1
-            assert key0 == key1
-            assert val0 == val1
-        
-        for val0, val1 in zip(flat.values(), prox.values()):
-            assert val0 == val1
-    
-    @inline
-    def test_four():
-        """ KeyMapView of KeyMapProxy (and soforth) """
-        from clu.config.defg import Flat
-        
-        flat = Flat(flatdict())
-        prox = KeyMapProxy(flat)
-        view = KeyMapView(prox)
-        
-        assert flat == view
-        assert flat == prox
-        assert view == prox
-        
-        assert view.keymap() == prox.keymap()
-        assert view.keymap == prox.keymap
-        assert bool(view)
-        assert bool(prox)
-        
-        assert weakref.getweakrefcount(flat) > 0 # this isn’t 2 somehow
-        
-        proxview = prox.freeze()
-        assert flat == proxview
-        assert view == proxview
-        assert prox == proxview
-        assert bool(proxview)
-        
-        assert weakref.getweakrefcount(flat) > 0 # this isn’t 2 somehow
-    
-    @inline
-    def test_five():
-        """ KeyMapView vs. Nested """
-        from clu.config.defg import Nested
-        
-        nest = Nested(nestedmaps())
-        view = KeyMapView(nest)
-        
-        assert nest == view
-        assert len(nest) == len(view)
-        
-        for ns0, ns1 in zip(nest.namespaces(), view.namespaces()):
-            assert ns0 == ns1
-        
-        for iter0, iter1 in zip(nest, view):
-            assert iter0 == iter1
-            assert iter0 in nest
-            assert iter0 in view
-            assert iter1 in nest
-            assert iter1 in view
-        
-        for keys0, keys1 in zip(nest.keys(), view.keys()):
-            assert keys0 == keys1
-            key0, ns0 = unpack_ns(keys0)
-            key1, ns1 = unpack_ns(keys1)
-            assert nest.get(key0, *ns0) == view.get(key1, *ns1)
-            assert nest.get(key1, *ns1) == view.get(key0, *ns0)
-        
-        for items0, items1 in zip(nest.items(), view.items()):
-            key0, val0 = items0
-            key1, val1 = items1
-            assert key0 == key1
-            assert val0 == val1
-        
-        for val0, val1 in zip(nest.values(), view.values()):
-            assert val0 == val1
-    
-    @inline
-    def test_five_point_five():
-        """ KeyMapProxy vs. Nested """
-        from clu.config.defg import Nested
-        
-        nest = Nested(nestedmaps())
-        prox = KeyMapProxy(nest)
-        
-        assert nest == prox
-        assert len(nest) == len(prox)
-        
-        for ns0, ns1 in zip(nest.namespaces(), prox.namespaces()):
-            assert ns0 == ns1
-        
-        for iter0, iter1 in zip(nest, prox):
-            assert iter0 == iter1
-            assert iter0 in nest
-            assert iter0 in prox
-            assert iter1 in nest
-            assert iter1 in prox
-        
-        for keys0, keys1 in zip(nest.keys(), prox.keys()):
-            assert keys0 == keys1
-            key0, ns0 = unpack_ns(keys0)
-            key1, ns1 = unpack_ns(keys1)
-            assert nest.get(key0, *ns0) == prox.get(key1, *ns1)
-            assert nest.get(key1, *ns1) == prox.get(key0, *ns0)
-        
-        for items0, items1 in zip(nest.items(), prox.items()):
-            key0, val0 = items0
-            key1, val1 = items1
-            assert key0 == key1
-            assert val0 == val1
-        
-        for val0, val1 in zip(nest.values(), prox.values()):
-            assert val0 == val1
+    inline.add_function(test_one_fn(FrozenFlat, KeyMapView,  flatdict),   'test_one')
+    inline.add_function(test_two_fn(FrozenFlat, KeyMapView,  flatdict),   'test_two')
+    inline.add_function(test_one_fn(Flat,       KeyMapView,  flatdict),   'test_three')
+    inline.add_function(test_one_fn(Flat,       KeyMapProxy, flatdict),   'test_three_point_five')
+    inline.add_function(test_two_fn(Flat,       KeyMapProxy, flatdict,
+                                                KeyMapView),              'test_four')
+    inline.add_function(test_one_fn(Nested,     KeyMapView,  nestedmaps), 'test_five')
+    inline.add_function(test_one_fn(Nested,     KeyMapProxy, nestedmaps), 'test_five_point_five')
     
     return inline.test(50)
 

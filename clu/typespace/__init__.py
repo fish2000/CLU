@@ -36,25 +36,25 @@ for typename in dir(thetypes):
         setattr(types, typename, getattr(thetypes, typename))
 
 # Substitute our own SimpleNamespace class, instead of the provided version:
-setattr(types, 'SimpleNamespace', SimpleNamespace)
-setattr(types, 'Namespace',       Namespace)
+setattr(types, 'SimpleNamespace',   SimpleNamespace)
+setattr(types, 'Namespace',         Namespace)
 
 # Add the array.ArrayType base type as “Array”:
-setattr(types, 'Array',           array.ArrayType)
+setattr(types, 'Array',             array.ArrayType)
 
 # Add the collections.abc.MappingView base type:
-setattr(types, 'MappingView',     collections.abc.MappingView)
+setattr(types, 'MappingView',       collections.abc.MappingView)
 
 # Add weakref builtin types:
-setattr(types, 'Reference',       weakref.ReferenceType)
-setattr(types, 'Proxy',           weakref.ProxyType)
-setattr(types, 'CallableProxy',   weakref.CallableProxyType)
+setattr(types, 'Reference',         weakref.ReferenceType)
+setattr(types, 'Proxy',             weakref.ProxyType)
+setattr(types, 'CallableProxy',     weakref.CallableProxyType)
 
 # Manually set `types.__file__` and related attributes:
-setattr(types, '__file__',        __file__)
-setattr(types, '__cached__',      cache_from_source(__file__))
-setattr(types, '__package__',     path_to_dotpath(__file__,
-                                                  relative_to=BASEPATH))
+setattr(types, '__file__',          __file__)
+setattr(types, '__cached__',        cache_from_source(__file__))
+setattr(types, '__package__',       path_to_dotpath(__file__,
+                                                    relative_to=BASEPATH))
 
 @export
 def modulize(name, namespace, docs=None,

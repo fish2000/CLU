@@ -164,8 +164,7 @@ class ModuleSpec(importlib.machinery.ModuleSpec):
         _, packagename = dotpath_split(name)
         super(ModuleSpec, self).__init__(name,
                                          loader,
-                                         origin=packagename,
-                                         is_package=True)
+                                         origin=packagename)
     
     def __hash__(self):
         return hash(self.loader) \
@@ -262,10 +261,9 @@ class FinderBase(clu.abstract.AppName,
             § q.v. boxed notation sub., Python documentation,
               https://docs.python.org/3/library/pkgutil.html#pkgutil.iter_modules
         """
-        yield from (pkgutil.ModuleInfo(cls,
-                                       module.qualname,
-                                       ispkg=True) \
-                    for module in modules_for_appname(cls.appname))
+        yield from (pkgutil.ModuleInfo(cls, module.qualname, ispkg=False) \
+                                        for module \
+                                         in modules_for_appname(cls.appname))
 
 @export
 class LoaderBase(clu.abstract.AppName,
@@ -1101,8 +1099,8 @@ def test():
         
         assert type(derived.exporter).__name__ == 'Exporter'
         
-        Registry.unregister(derived.appname,
-                            derived.qualname)
+        # Registry.unregister(derived.appname,
+        #                     derived.qualname)
     
     @inline
     def test_five():
@@ -1224,9 +1222,15 @@ def test():
         for specname in sorted(FinderBase.specs.keys()):
             spec = FinderBase.specs[specname]
             string = pformat(spec.__dict__, indent=4)
+            cached = getattr(spec, 'cached', None)
+            hasloc = getattr(spec, 'has_location', None)
+            parent = getattr(spec, 'parent', None)
             print()
             print(f"    «{specname}»")
             print(f"{string}")
+            print(f"    +      cached: {cached}")
+            print(f"    +has_location: {hasloc}")
+            print(f"    +      parent: {parent}")
     
     @inline.diagnostic
     def show_monomers():

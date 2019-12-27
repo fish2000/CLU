@@ -3,12 +3,13 @@ from __future__ import print_function
 from functools import wraps
 
 import clu.abstract
+import contextlib
 import weakref
 import sys
 
 from clu.config.defg import FrozenKeyMap, KeyMap
 from clu.naming import qualified_name
-from clu.predicates import tuplize
+from clu.predicates import typeof, tuplize
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -27,7 +28,8 @@ def selfcheck(function):
 
 @export
 class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
-                               clu.abstract.Cloneable):
+                               clu.abstract.Cloneable,
+                               contextlib.AbstractContextManager):
     
     __slots__ = tuplize('referent')
     
@@ -53,6 +55,10 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
             self.referent = weakref.ref(referent)
     
     @selfcheck
+    def get_reftype(self):
+        return typeof(self.referent())
+    
+    @selfcheck
     def namespaces(self):
         yield from self.referent().namespaces()
     
@@ -71,6 +77,27 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
     @selfcheck
     def __getitem__(self, nskey):
         return self.referent().__getitem__(nskey)
+    
+    @selfcheck
+    def keys(self, *namespaces, unprefixed=False):
+        return self.referent().keys(*namespaces, unprefixed=False)
+    
+    @selfcheck
+    def items(self, *namespaces, unprefixed=False):
+        return self.referent().items(*namespaces, unprefixed=False)
+    
+    @selfcheck
+    def values(self, *namespaces, unprefixed=False):
+        return self.referent().values(*namespaces, unprefixed=False)
+    
+    @selfcheck
+    def __enter__(self):
+        return self.referent()
+    
+    def __exit__(self, exc_type=None,
+                       exc_val=None,
+                       exc_tb=None):
+        return exc_type is None
     
     def __bool__(self):
         return self.referent() is not None

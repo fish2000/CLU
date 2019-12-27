@@ -211,6 +211,9 @@ class ChainMap(collections.abc.MutableMapping,
     def flatten(self):
         return merge(*reversed(self.maps))
     
+    def flatten_fast(self):
+        return merge_fast(*reversed(self.maps))
+    
     def clone(self, deep=False, memo=None):
         cls = type(self)
         if not deep:
@@ -227,8 +230,31 @@ class ChainMap(collections.abc.MutableMapping,
 # DICT FUNCTIONS: dictionary-merging
 
 @export
+def merge_fast_two(one, two):
+    """ Merge two dictionaries performantly into an instance of “dict”.
+        
+        Based on this extremely beloved SO answer:
+            https://stackoverflow.com/a/26853961/298171
+    """
+    return { **one, **two }
+
+@export
+def merge_fast(*dicts, **overrides):
+    """ Merge all dictionary arguments into a new instance of “dict”.
+        passing all additional keyword arguments as an additional dict instance.
+        
+        Based on this extremely beloved SO answer:
+            https://stackoverflow.com/a/26853961/298171
+    """
+    merged = { **overrides }
+    for d in dicts:
+        merged = { **merged, **d }
+    return merged
+
+@export
 def merge_two(one, two, cls=dict):
-    """ Merge two dictionaries into an instance of the specified class
+    """ Merge two dictionaries into an instance of the specified class.
+        
         Based on this docopt example source: https://git.io/fjCZ6
     """
     from clu.predicates import typeof, item_search
@@ -323,7 +349,7 @@ def test():
     
     @inline
     def test_one():
-        """ Shallow clone membership check """
+        """ Shallow clone membership check, slow flatten """
         chain0 = ChainMap(dict_arbitrary(),
                                   fsdata(),
                              environment())
@@ -336,7 +362,30 @@ def test():
             assert key in chain1
             
             # N.B. SLOW AS FUCK:
-            # assert key in chain0.flatten()
+            assert key in chain0.flatten()
+            
+            assert try_items(key, *chain0.maps, default=None) is not None
+            assert try_items(key, *chain1.maps, default=None) is not None
+            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
+            assert try_items(key, *chain0.maps, default=None) == chain0[key]
+            assert try_items(key, *chain0.maps, default=None) == chain1[key]
+    
+    @inline
+    def test_one_point_five():
+        """ Shallow clone membership check, fast flatten """
+        chain0 = ChainMap(dict_arbitrary(),
+                                  fsdata(),
+                             environment())
+        
+        chain1 = chain0.clone()
+        assert len(chain0) == len(chain1)
+        
+        for key in chain0.keys():
+            assert key in chain0
+            assert key in chain1
+            
+            # N.B. SLOW AS FUCK:
+            assert key in chain0.flatten_fast()
             
             assert try_items(key, *chain0.maps, default=None) is not None
             assert try_items(key, *chain1.maps, default=None) is not None
@@ -346,7 +395,7 @@ def test():
     
     @inline
     def test_two():
-        """ Deep clone membership check """
+        """ Deep clone membership check, slow flatten """
         chain0 = ChainMap(dict_arbitrary(),
                                   fsdata(),
                              environment())
@@ -359,7 +408,30 @@ def test():
             assert key in chainX
             
             # N.B. SLOW AS FUCK:
-            # assert key in chain0.flatten()
+            assert key in chain0.flatten()
+            
+            assert try_items(key, *chain0.maps, default=None) is not None
+            assert try_items(key, *chainX.maps, default=None) is not None
+            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
+            assert try_items(key, *chain0.maps, default=None) == chain0[key]
+            assert try_items(key, *chain0.maps, default=None) == chainX[key]
+    
+    @inline
+    def test_two_point_five():
+        """ Deep clone membership check, fast flatten """
+        chain0 = ChainMap(dict_arbitrary(),
+                                  fsdata(),
+                             environment())
+        
+        chainX = chain0.clone(deep=True)
+        assert len(chain0) == len(chainX)
+        
+        for key in chain0.keys():
+            assert key in chain0
+            assert key in chainX
+            
+            # N.B. SLOW AS FUCK:
+            assert key in chain0.flatten_fast()
             
             assert try_items(key, *chain0.maps, default=None) is not None
             assert try_items(key, *chainX.maps, default=None) is not None

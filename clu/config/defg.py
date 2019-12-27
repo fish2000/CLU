@@ -1250,6 +1250,16 @@ def test():
         for envline in format_environment():
             print(envline)
     
+    @inline.diagnostic
+    def show_fixture_cache_stats():
+        """ Show the per-fixture-function cache stats """
+        total = len(inline.fixtures)
+        for idx, name in enumerate(inline.fixtures.keys()):
+            if idx > 0:
+                print()
+            print(f"FUNCTION CACHE INFO: {name} ({idx+1} of {total})")
+            print(inline.fixtures[name].cache_info())
+    
     # Run all inline tests:
     return inline.test(100)
 

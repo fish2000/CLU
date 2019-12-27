@@ -116,6 +116,7 @@ def get_title(function):
     
     return title
 
+@export
 def multiple(number):
     """ Is it singular or plural…??!?! """
     if number == 1:

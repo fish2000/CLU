@@ -59,7 +59,7 @@ class NamespaceRepr(Repr):
         if len(thing) == 0:
             return "{}"
         elif len(thing) == 1:
-            key = tuple(thing.keys())[0]
+            key = tuple(thing)[0]
             item = STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level))
             return f"{{ {item} }}"
         items = (STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level)) for key in thing)

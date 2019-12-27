@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from itertools import chain
+from reprlib import Repr
 
 iterchain = chain.from_iterable
 
 import clu.abstract
 import collections
 import collections.abc
+import re
 import sys
 
 from clu.constants.consts import NoDefault
@@ -83,12 +85,92 @@ class OrderedValuesView(collections.abc.ValuesView,
     def __getitem__(self, idx):
         return tuple(self)[idx]
 
+# CHAINMAP: custom reprlib.Repr subclass
+
+WHITESPACE = re.compile(r'\s+')
+STRINGPAIR = "{!s} : {!s}"
+
+typename = lambda thing: type(thing).__name__
+
+@export
+class ChainRepr(Repr):
+    
+    """ Custom Repr-izer for “clu.dicts.ChainMap” composite
+        mappings, which can recursively self-contain, and not
+        infinitely recurse all over the living-room floor.
+        
+        q.v. cpython docs, http://bit.ly/2r1GQ4l supra.
+    """
+    
+    def __init__(self, *args, maxlevel=10,
+                              maxstring=120,
+                              maxother=120,
+                            **kwargs):
+        """ Initialize a ChainRepr, with default params
+            for ‘maxlevel’, ‘maxstring’, and ‘maxother’.
+        """
+        try:
+            super().__init__(*args, **kwargs)
+        except TypeError:
+            super().__init__()
+        self.maxlevel = maxlevel
+        self.maxstring = maxstring
+        self.maxother = maxother
+    
+    def subrepr(self, thing, level):
+        """ An internal “core” repr helper method. """
+        from clu.typology import ismapping
+        if ischainmap(thing) or ismapping(thing):
+            return self.repr1(thing, level - 1)
+        return repr(thing)
+    
+    def primerepr(self, mapping, level):
+        """ The internal method for “core” repr production
+            of all ChainMaps, and related descendant types.
+        """
+        if len(mapping) == 0:
+            return "{}"
+        elif len(mapping) == 1:
+            key = tuple(mapping.keys())[0]
+            item = STRINGPAIR.format(key, self.subrepr(mapping[key], level))
+            return f"{{ {item} }}"
+        items = (STRINGPAIR.format(key, self.subrepr(mapping[key], level)) for key in mapping.keys())
+        ts = "    " * (int(self.maxlevel - level) + 1)
+        ls = "    " * (int(self.maxlevel - level) + 0)
+        total = (f",\n{ts}").join(items)
+        return f"{{ \n{ts}{total}\n{ls}}}"
+    
+    def toprepr(self, chainmap, level):
+        """ The “top-level” ChainMap-specific repr method –
+            this will parse through the individual mappings
+            that comprise the ChainMap instance, and dispatch
+            sub-repr method calls accordingly.
+        """
+        from clu.naming import qualified_name
+        from clu.typology import iterlen
+        from clu.testing.utils import multiple
+        
+        tn = typename(chainmap)
+        mapcount = iterlen(chainmap.mapchain())
+        keycount = len(chainmap.keys())
+        items = (STRINGPAIR.format(qualified_name(type(mapping)), self.primerepr(mapping, level - 1)) for mapping in chainmap.mapchain())
+        ts = "    " * (int(self.maxlevel - level) + 1)
+        ls = "    " * (int(self.maxlevel - level) + 0)
+        total = (f",\n{ts}").join(items)
+        return f"{tn} «{mapcount} map{multiple(mapcount)}, {keycount} key{multiple(keycount)}» [\n{ts}{total}\n{ls}]"
+    
+    def repr_ChainMap(self, chainmap, level):
+        # Handles both “clu.dict.ChainMap” and “collections.ChainMap”
+        return self.toprepr(chainmap, level)
+
+reprizer = ChainRepr()
+cmrepr = reprizer.repr
+
 # CHAINMAP: a reimplementation
 
 @export
 class ChainMap(collections.abc.MutableMapping,
                clu.abstract.Cloneable,
-               clu.abstract.ReprWrapper,
                metaclass=clu.abstract.Slotted):
     
     __slots__ = ('maps', '__weakref__')
@@ -155,6 +237,9 @@ class ChainMap(collections.abc.MutableMapping,
     def __iter__(self):
         yield from merge_fast(*reversed(self.maps))
     
+    def __repr__(self):
+        return cmrepr(self)
+    
     def get(self, key, default=NoDefault):
         """ Return the value for “key” if it is in any of the mappings
             in the ChainMap, else “default”.
@@ -166,6 +251,9 @@ class ChainMap(collections.abc.MutableMapping,
             return self[key]
         from clu.predicates import getitem
         return getitem(self, key, default=default)
+    
+    def mapchain(self):
+        yield from self.maps
     
     @property
     def top(self):
@@ -258,10 +346,22 @@ class ChainMap(collections.abc.MutableMapping,
                            *self.rest)
         return cls(deepcopy(self.top),
                  *(deepcopy(map) for map in self.rest))
-    
-    def inner_repr(self):
-        from pprint import pformat
-        return pformat(self.maps)
+
+@export
+def ischainmap(thing):
+    """ ischainmap(thing) → boolean predicate, True if the
+        type of “thing” is a ChainMap or a descendant of same –
+        either a “clu.dicts.ChainMap”, a “collections.ChainMap”;
+        anything will do… if this was the last time, then you should
+        tell us what to do.
+        
+        I was afraid I guess, now I can’t think no more – I was so
+        concentrated on keeping things together; I’ve learned to
+        focus on. I didn’t want to disappoint. Now I miss everybody,
+        is it still light outside?
+    """
+    from clu.typology import subclasscheck
+    return subclasscheck(thing, (ChainMap, collections.ChainMap))
 
 # DICT FUNCTIONS: dictionary-merging
 
@@ -349,6 +449,7 @@ def asdict(thing):
 __all__, __dir__ = exporter.all_and_dir()
 
 def test():
+    
     from clu.constants.consts import TEST_PATH
     from clu.constants.data import XDGS
     from clu.fs.filesystem import Directory
@@ -483,18 +584,45 @@ def test():
     @inline
     def test_three():
         """ Equality comparisons across the board """
+        from clu.config.defg import flatdict, Flat
+        
         chain0 = ChainMap(dict_arbitrary(),
-                                  fsdata(),
-                             environment())
+                           Flat(flatdict()))
         chain1 = chain0.clone()
         chainX = chain0.clone(deep=True)
         
         assert chain0 == ChainMap(dict_arbitrary(),
-                                          fsdata(),
-                                     environment())
+                                   Flat(flatdict()))
         assert chain0 == chain1
         assert chain0 == chainX
         assert chainX == chain1
+        
+        print("REPR»CHAIN0:")
+        print()
+        print(repr(chain0))
+        print()
+        
+        print("REPR»CHAIN1:")
+        print()
+        print(repr(chain1))
+        print()
+        
+        print("REPR»CHAINX:")
+        print()
+        print(repr(chainX))
+        print()
+    
+    @inline
+    def test_four_experimental():
+        """ Nested map source for ChainMap """
+        from clu.config.defg import nestedmaps
+        
+        chainN = ChainMap(nestedmaps())
+        
+        print("REPR»CHAINÑ:")
+        print()
+        print(repr(chainN))
+        print()
     
     @inline.diagnostic
     def restore_environment():

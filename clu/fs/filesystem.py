@@ -1160,9 +1160,9 @@ class Directory(collections.abc.Hashable,
             dirs[:] = list(filter(excluder, dirs))
             filenames = filter(excluder,
                         filter(searcher, files))
-            dotpaths.extend(list(path_to_dotpath(os.path.join(root, filename),
-                                                 relative_to=self.name)
-                                                 for filename in filenames))
+            dotpaths.extend(path_to_dotpath(os.path.join(root, filename),
+                                            relative_to=self.name)
+                            for filename in filenames)
         return uniquify(sorted(dotpaths))
     
     def suffix_histogram(self, subdir=None,

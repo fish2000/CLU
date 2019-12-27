@@ -153,9 +153,6 @@ def test():
             • generate tests for proxy/view type basic functionality
         """
         def test_fn():
-            """ %s vs. %s """ % (proxy_type.__name__,
-                                keymap_type.__name__)
-            
             kmap = keymap_type(fixture_fn())
             prox = proxy_type(kmap)
             
@@ -188,6 +185,9 @@ def test():
             for val0, val1 in zip(kmap.values(), prox.values()):
                 assert val0 == val1
         
+        test_fn.__doc__ = """ %s vs. %s """ % (proxy_type.__name__,
+                                              keymap_type.__name__)
+        
         return test_fn
     
     def test_two_fn(keymap_type, proxy_type0, fixture_fn,
@@ -200,9 +200,6 @@ def test():
             proxy_type1 = proxy_type0
         
         def test_fn():
-            """ %s of %s (&c.) """ % (proxy_type0.__name__,
-                                      proxy_type1.__name__)
-            
             nonlocal proxy_type2
             
             kmap = keymap_type(fixture_fn())
@@ -234,6 +231,9 @@ def test():
             
             assert weakref.getweakrefcount(kmap) > 0 # this isn’t 2 somehow
         
+        test_fn.__doc__ = """ %s of %s (&c.) """ % (proxy_type0.__name__,
+                                                    proxy_type1.__name__)
+        
         return test_fn
     
     # Add inline test functions using the metafunction test generators:
@@ -243,6 +243,8 @@ def test():
     inline.add_function(test_one_fn(Flat,       KeyMapProxy, flatdict),   'test_three_point_five')
     inline.add_function(test_two_fn(Flat,       KeyMapProxy, flatdict,
                                                 KeyMapView),              'test_four')
+    
+    # N.B. These two take FUCKING FOREVER to run:
     inline.add_function(test_one_fn(Nested,     KeyMapView,  nestedmaps), 'test_five')
     inline.add_function(test_one_fn(Nested,     KeyMapProxy, nestedmaps), 'test_five_point_five')
     

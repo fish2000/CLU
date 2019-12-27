@@ -29,7 +29,7 @@ def selfcheck(function):
 class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
                                clu.abstract.Cloneable):
     
-    __slots__ = tuplize('keymap')
+    __slots__ = tuplize('referent')
     
     @classmethod
     def get_basetype(cls):
@@ -37,49 +37,49 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     def __new__(cls, keymap):
         instance = super().__new__(cls)
-        instance.keymap = lambda: None
+        instance.referent = lambda: None
         return instance
     
-    def __init__(self, keymap):
-        if not keymap:
-            raise ValueError("A valid keymap is required")
+    def __init__(self, referent):
+        if not referent:
+            raise ValueError("A valid keymap referent is required")
         basetype = type(self).get_basetype()
-        if not isinstance(keymap, basetype):
+        if not isinstance(referent, basetype):
             qualname = qualified_name(basetype)
             raise TypeError(f"A descendant of “{qualname}” is required")
-        if type(getattr(keymap, 'keymap', None)) is weakref.ReferenceType:
-            self.keymap = weakref.ref(keymap.keymap())
+        if type(getattr(referent, 'referent', None)) is weakref.ReferenceType:
+            self.referent = weakref.ref(referent.referent())
         else:
-            self.keymap = weakref.ref(keymap)
+            self.referent = weakref.ref(referent)
     
     @selfcheck
     def namespaces(self):
-        yield from self.keymap().namespaces()
+        yield from self.referent().namespaces()
     
     @selfcheck
     def __iter__(self):
-        yield from self.keymap().keys()
+        yield from self.referent().keys()
     
     @selfcheck
     def __len__(self):
-        return self.keymap().__len__()
+        return self.referent().__len__()
     
     @selfcheck
     def __contains__(self, nskey):
-        return self.keymap().__contains__(nskey)
+        return self.referent().__contains__(nskey)
     
     @selfcheck
     def __getitem__(self, nskey):
-        return self.keymap().__getitem__(nskey)
+        return self.referent().__getitem__(nskey)
     
     def __bool__(self):
-        return self.keymap() is not None
+        return self.referent() is not None
     
     def inner_repr(self):
-        return repr(self.keymap())
+        return repr(self.referent())
     
     def clone(self, deep=False, memo=None):
-        return type(self)(self.keymap())
+        return type(self)(self.referent())
 
 @export
 class KeyMapProxy(KeyMapView, KeyMap):
@@ -88,15 +88,15 @@ class KeyMapProxy(KeyMapView, KeyMap):
     
     @selfcheck
     def freeze(self):
-        return KeyMapView(self.keymap())
+        return KeyMapView(self.referent())
     
     @selfcheck
     def __setitem__(self, nskey, value):
-        self.keymap().__setitem__(nskey, value)
+        self.referent().__setitem__(nskey, value)
     
     @selfcheck
     def __delitem__(self, nskey):
-        self.keymap().__delitem__(nskey)
+        self.referent().__delitem__(nskey)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -216,8 +216,8 @@ def test():
             assert kmap == prox1
             assert prox0 == prox1
             
-            assert prox0.keymap() == prox1.keymap()
-            assert prox0.keymap == prox1.keymap
+            assert prox0.referent() == prox1.referent()
+            assert prox0.referent == prox1.referent
             assert bool(prox0)
             assert bool(prox1)
             

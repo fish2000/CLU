@@ -12,7 +12,7 @@ import zict # type: ignore
 
 iterchain = chain.from_iterable
 
-from clu.constants.consts import pytuple
+from clu.constants.consts import pytuple, PYPY
 from clu.predicates import typeof, tuplize, attr
 from clu.exporting import Exporter
 
@@ -141,7 +141,7 @@ class DoubleDutchRegistry(clu.abstract.SlottedRepr,
     def __iter__(self):
         yield from self.cache.keys()
 
-ASSIGNMENTS = pytuple('name', 'qualname', 'doc')
+ASSIGNMENTS = PYPY and pytuple('doc') or pytuple('name', 'qualname', 'doc')
 UPDATES = tuple() # type: tuple
 
 isempty = lambda param: attr(param, 'annotation', default=inspect._empty) is inspect._empty

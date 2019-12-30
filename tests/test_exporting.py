@@ -44,6 +44,7 @@ class TestExporting(object):
     
     def test_exporterbase_subclass(self, dirname):
         from clu.exporting import ExporterBase, Registry
+        from clu.typology import iterlen
         import os
         
         prefix = dirname.subdirectory('yodogg')
@@ -70,7 +71,7 @@ class TestExporting(object):
         assert exporter.dotpath == 'yodogg.iheard'
         assert 'clu' in Registry.all_appnames()
         assert 'yolocal' in Registry.all_appnames()
-        assert len(Exporter.modulenames()) == 1
+        assert iterlen(Exporter.modulenames()) == 1
         assert len(exporter) == 1
         assert exporter['youlike'] is youlike
         assert Exporter['yodogg.iheard'] is exporter
@@ -81,7 +82,7 @@ class TestExporting(object):
         
         # UNREGISTRATION » instance:
         assert Exporter.unregister('yodogg.iheard') is exporter
-        assert len(Exporter.modulenames()) == 0
+        assert iterlen(Exporter.modulenames()) == 0
         assert 'yodogg.iheard' not in Exporter.modulenames()
         assert 'yodogg.iheard' not in Exporter.instances
         

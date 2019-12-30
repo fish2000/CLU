@@ -224,11 +224,8 @@ class TestNaming(object):
         
         total = 0
         mismatches = 0
-        modulenames = Exporter.modulenames()
         
-        assert len(clumods) <= len(modulenames)
-        
-        for modulename in modulenames:
+        for modulename in Exporter.modulenames():
             exports = Exporter[modulename].exports()
             total += len(exports)
             for name, thing in exports.items():

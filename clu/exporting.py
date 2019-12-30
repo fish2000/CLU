@@ -397,7 +397,7 @@ class ExporterBase(collections.abc.MutableMapping,
         """ Get a sorted list of module names – the keys to the Exporter
             instance registry – that are currently available
         """
-        return sorted(cls.instances.keys())
+        yield from sorted(cls.instances.keys())
     
     @classmethod
     def modules(cls):

@@ -89,7 +89,7 @@ graceful_issubclass = subclasscheck
 # TYPELISTS: manual assemblages of types, used for predicate testing
 # and other similar stuff.
 
-numeric_types = uniquify(bool, int, long, float, complex, decimal.Decimal)
+numeric_types = tuple(uniquify(bool, int, long, float, complex, decimal.Decimal))
 array_types = (types.Array, bytearray, memoryview) # type: tuple
 array_types += attrs(numpy, 'ndarray',
                             'matrix',
@@ -103,7 +103,7 @@ scalar_types = frozenset(getattr(numpy, 'ScalarType',
 try:
     from six import string_types
 except (ImportError, SyntaxError):
-    string_types = uniquify(str, unicode)
+    string_types = tuple(uniquify(str, unicode))
 
 bytes_types = (bytes, bytearray)
 path_classes = tuplize(argparse.FileType, or_none(os, 'PathLike'), Path) # Path may be “None” in disguise

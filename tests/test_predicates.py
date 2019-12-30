@@ -584,14 +584,16 @@ class TestPredicates(object):
     def test_utility_helpers_for_builtin_containers(self):
         """ » Checking “tuplize/uniquify/listify” functions from clu.predicates … """
         from clu.predicates import tuplize, uniquify, listify
+        from clu.typology import iterlen
+        from clu.typespace import types
         
         t = tuplize("yo", "dogg", "I", "heard", "you", "like", "tuples")
         assert type(t) is tuple
         assert len(t) == 7
         
         u = uniquify("yo", "dogg", "I", "heard", "you", "like", "dogg", "yo")
-        assert type(u) is tuple
-        assert len(u) == 6
+        assert type(u) is types.Generator
+        assert iterlen(u) == 6
         
         l = listify("yo", "dogg", "I", "heard", "you", "like", "mutable", "lists")
         assert type(l) is list
@@ -602,8 +604,8 @@ class TestPredicates(object):
         assert len(et) == 0
         
         eu = uniquify()
-        assert type(eu) is tuple
-        assert len(eu) == 0
+        assert type(eu) is types.Generator
+        assert iterlen(eu) == 0
         
         el = listify()
         assert type(el) is list

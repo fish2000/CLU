@@ -1164,7 +1164,7 @@ class Directory(collections.abc.Hashable,
             dotpaths.extend(path_to_dotpath(os.path.join(root, filename),
                                             relative_to=self.name)
                             for filename in filenames)
-        return uniquify(sorted(dotpaths))
+        return sorted(uniquify(dotpaths))
     
     def suffix_histogram(self, subdir=None,
                                source=None,

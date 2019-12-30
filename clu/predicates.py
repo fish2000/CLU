@@ -376,14 +376,12 @@ def tuplize(*items):
 @export
 @itervariadic
 def uniquify(*items):
-    """ uniquify(*items) → Return a tuple with a unique set of all non-`None` arguments """
+    """ uniquify(*items) → Return a generator yielding a unique set of all non-`None` arguments """
     seen = set() # type: set
-    stuff = []
     for item in filter(isnotnone, items):
         if item not in seen:
             seen.add(item)
-            stuff.append(item)
-    return tuple(stuff)
+            yield item
 
 @export
 @itervariadic
@@ -400,8 +398,8 @@ def union(*items):
 # UTILITY ANCESTOR PREDICATES: search through attributes across the MRO of a given type –
 # q.v. “resolve” meta-predicate supra.:
 
-ancestral       = lambda atx, cls, default=tuple(): collator(resolve,            atx, *rmro(cls), default=default)
-ancestral_union = lambda atx, cls, default=tuple(): uniquify(iterchain(ancestral(atx,       cls,  default=default)))
+ancestral       = lambda atx, cls, default=tuple():       collator(resolve,            atx, *rmro(cls), default=default)
+ancestral_union = lambda atx, cls, default=tuple(): tuple(uniquify(iterchain(ancestral(atx,       cls,  default=default))))
 
 # UTILITY FUNCTIONS: helpers for builtin predicate functions over iterables:
 

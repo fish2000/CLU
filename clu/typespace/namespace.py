@@ -5,10 +5,9 @@ from reprlib import Repr
 import clu.abstract
 import collections.abc
 import contextlib
-import re
 import sys
 
-from clu.constants.consts import pytuple, NoDefault
+from clu.constants.consts import STRINGPAIR, WHITESPACE, pytuple, NoDefault
 from clu.constants.polyfills import ispyname
 from clu.dicts import merge_fast_two, asdict
 from clu.predicates import ismergeable
@@ -18,9 +17,6 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 # NAMESPACES: bespoke “reprlib” recursion-friendly repr-helper:
-
-WHITESPACE = re.compile(r'\s+')
-STRINGPAIR = "{!s} : {!s}"
 
 @export
 class NamespaceRepr(Repr):

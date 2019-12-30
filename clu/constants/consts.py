@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import getpass
 import os
+import re
 import socket
 import sysconfig
 import sys
@@ -87,6 +88,9 @@ NotImplementedType = type(NotImplemented)
 
 SINGLETON_TYPES = (bool, NoneType, EllipsisType, NotImplementedType)
 
+# String used in custom repr implementations:
+STRINGPAIR = sys.intern("{!s} : {!s}")
+
 # Path to the script directory:
 SCRIPT_PATH = sys.intern(os.path.join(BASEPATH, 'clu', 'scripts'))
 
@@ -115,6 +119,9 @@ USER = sys.intern(getpass.getuser())
 VERBOTEN = pytuple('all', 'cached', 'loader', 'file', 'spec')
 VERBOTEN += BUILTINS
 VERBOTEN += ('Namespace', 'SimpleNamespace')
+
+# Regex for picking up whitespace:
+WHITESPACE = re.compile(r'\s+')
 
 # XDG_RUNTIME_DIR support:
 basedir = "/usr/local/var/run/xdg"
@@ -154,11 +161,13 @@ __all__ = ('BASEPATH',
            'QUALIFIER',
            'SEPARATOR_WIDTH',
            'SINGLETON_TYPES',
+           'STRINGPAIR',
            'SCRIPT_PATH', 'TEST_PATH',
            'TEXTMATE',
            'TOKEN',
            'USER',
            'VERBOTEN',
+           'WHITESPACE',
            'XDG_RUNTIME_BASE', 'XDG_RUNTIME_DIR',
                                'XDG_RUNTIME_MODE',
            'pytuple', 'NoDefault')

@@ -8,10 +8,9 @@ iterchain = chain.from_iterable
 import clu.abstract
 import collections
 import collections.abc
-import re
 import sys
 
-from clu.constants.consts import NoDefault
+from clu.constants.consts import STRINGPAIR, NoDefault
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -86,9 +85,6 @@ class OrderedValuesView(collections.abc.ValuesView,
         return tuple(self)[idx]
 
 # CHAINMAP: custom reprlib.Repr subclass
-
-WHITESPACE = re.compile(r'\s+')
-STRINGPAIR = "{!s} : {!s}"
 
 typename = lambda thing: type(thing).__name__
 

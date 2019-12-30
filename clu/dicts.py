@@ -147,13 +147,12 @@ class ChainRepr(Repr):
             sub-repr method calls accordingly.
         """
         from clu.naming import qualified_name
-        from clu.typology import iterlen
         from clu.testing.utils import multiple
         
         tn = typename(chainmap)
-        mapcount = iterlen(chainmap.mapchain())
+        mapcount = len(chainmap.maps)
         keycount = len(chainmap.keys())
-        items = (STRINGPAIR.format(qualified_name(type(mapping)), self.primerepr(mapping, level - 1)) for mapping in chainmap.mapchain())
+        items = (STRINGPAIR.format(qualified_name(type(mapping)), self.primerepr(mapping, level - 1)) for mapping in chainmap.maps)
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
         total = (f",\n{ts}").join(items)
@@ -580,6 +579,10 @@ def test():
         
         assert chainZ == chain0
         assert chainZ == chainO
+        
+        repr_instance = ChainRepr()
+        
+        assert repr_instance.repr(chain0) == repr_instance.repr(chainO)
     
     @inline.diagnostic
     def restore_environment():

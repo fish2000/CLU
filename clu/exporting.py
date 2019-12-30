@@ -404,7 +404,7 @@ class ExporterBase(collections.abc.MutableMapping,
         """ Get a dict of actual modules corresponding to the
             currently registered Exporter instances
         """
-        modulenames = cls.modulenames()
+        modulenames = tuple(cls.modulenames())
         mods = []
         
         for modulename in modulenames:

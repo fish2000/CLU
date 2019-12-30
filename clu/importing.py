@@ -105,20 +105,18 @@ class MetaRegistry(Extensible):
 
 @export
 def all_registered_appnames():
-    """ Return a tuple of strings, listing all registered app names """
-    return tuple(sorted(Registry.monomers.keys()))
+    """ Return a generator of strings listing all registered app names """
+    yield from sorted(Registry.monomers.keys())
 
 @export
 def all_registered_modules():
-    """ Return a tuple filled with instances of all registered class-based modules """
-    return tuple(iterchain(modules.values() for modules in Registry.monomers.values()))
+    """ Return a generator over the instances of all registered class-based modules """
+    yield from (iterchain(modules.values() for modules in Registry.monomers.values()))
 
 @export
 def modules_for_appname(appname):
-    """ Return a tuple filled with instances of an apps’ registered class-based modules """
-    if appname not in Registry.monomers:
-        return tuple()
-    return tuple(Registry.monomers[appname].values())
+    """ Return a generator over the instances of an apps’ registered class-based modules """
+    yield from Registry.monomers.get(appname, {}).values()
 
 @export
 class Registry(abc.ABC, metaclass=MetaRegistry):
@@ -577,8 +575,8 @@ class PerApp:
     appname: str                         = field(default_factory=str)
     
     def appspaces(self):
-        """ Return a tuple with this app’s defined appspaces """
-        return tuple(self.modules.keys())
+        """ Return a generator over this app’s defined appspaces """
+        yield from self.modules.keys()
     
     def __repr__(self):
         return stringify(self,
@@ -1018,11 +1016,11 @@ def test():
         """ Class-module registry basics """
         
         print("all_registered_appnames():")
-        pprint(all_registered_appnames())
+        pprint(tuple(all_registered_appnames()))
         print()
         
         print("all_registered_modules():")
-        pprint(all_registered_modules())
+        pprint(tuple(all_registered_modules()))
         print()
         
         m = Module(consts.PROJECT_NAME)
@@ -1193,9 +1191,7 @@ def test():
     def test_six_point_five():
         """ “PerApp” dataclass and module cache check """
         
-        appnames = all_registered_appnames()
-        
-        for appname in appnames:
+        for appname in all_registered_appnames():
             
             assert appname in polymers
             assert appname in monomers
@@ -1241,7 +1237,7 @@ def test():
     @inline.diagnostic
     def show_monomers():
         """ Show all registered Module subclasses """
-        appnames = all_registered_appnames()
+        appnames = tuple(all_registered_appnames())
         appcount = len(appnames)
         plural = (appcount == 1) and "app" or "apps"
         print(f"MONOMERS ({appcount} {plural} total):")
@@ -1258,7 +1254,7 @@ def test():
     @inline.diagnostic
     def show_polymers():
         """ Show per-app class-module-related subclasses """
-        appnames = all_registered_appnames()
+        appnames = tuple(all_registered_appnames())
         appcount = len(appnames)
         plural = (appcount == 1) and "app" or "apps"
         print(f"POLYMERS ({appcount} {plural} total):")

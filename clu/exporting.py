@@ -33,7 +33,7 @@ def itermodule(module):
         contained in a given module (although it’ll probably work
         for classes and instances too – anything `dir()`-able.)
     """
-    keys = tuple(key for key in sorted(dir(module)) \
+    keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
     values = (getattr(module, key) for key in keys)
     return zip(keys, values)

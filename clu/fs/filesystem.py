@@ -686,6 +686,7 @@ class Directory(collections.abc.Hashable,
                 collections.abc.Reversible,
                 collections.abc.Mapping,
                 collections.abc.Sized,
+                clu.abstract.Cloneable,
                 contextlib.AbstractContextManager,
                 os.PathLike,
                 metaclass=TypeLocker):
@@ -1206,6 +1207,9 @@ class Directory(collections.abc.Hashable,
     @wraps(dict.values)
     def values(self):
         return OrderedValuesView(self)
+    
+    def clone(self, deep=False, memo=None):
+        return self.directory(self.name)
     
     def __repr__(self):
         return self.to_string()

@@ -11,6 +11,8 @@ from clu.exporting import Exporter
 from clu.naming import nameof, moduleof
 from clu.repl import ansi
 from clu.repl.columnize import columnize
+from clu.typology import iterlen
+
 from ansicolors import (green, lightgreen, red, lightred,
                         cyan, dimcyan, lightcyan, dimlightcyan,
                         gray, dimgray,
@@ -69,9 +71,7 @@ def compare_module_lookups_for_all_things():
     results = []
     clumodules = import_all_modules(consts.BASEPATH,
                                     consts.PROJECT_NAME)
-    modulenames = Exporter.modulenames()
-    
-    assert len(clumodules) <= len(modulenames)
+    modulenames = tuple(Exporter.modulenames())
     
     for modulename in modulenames:
         exports = Exporter[modulename].exports()
@@ -94,6 +94,7 @@ def compare_module_lookups_for_all_things():
     # In practice the failure rate seemed to be around 7.65 %
     failure_rate = 100 * (float(mismatch_count) / float(total))
     # assert failure_rate < 8.0 # percent
+    # assert len(clumodules) >= iterlen(Exporter.modulenames())
     
     return Results(idx, modulenames, tuple(results)), \
            Mismatches(total,         tuple(mismatches),

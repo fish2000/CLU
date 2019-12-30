@@ -258,8 +258,8 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
     
     @staticmethod
     def all_appnames():
-        """ Return a tuple of all registered appnames """
-        return sorted(appnames)
+        """ Return a generator over all currently registered appnames """
+        yield from sorted(appnames)
     
     @staticmethod
     def for_appname(appname):
@@ -394,23 +394,19 @@ class ExporterBase(collections.abc.MutableMapping,
     
     @classmethod
     def modulenames(cls):
-        """ Get a sorted list of module names – the keys to the Exporter
-            instance registry – that are currently available
+        """ Get a generator yielding from a sorted list of module names
+            – keys to the Exporter instance registry – currently available
         """
         yield from sorted(cls.instances.keys())
     
     @classmethod
     def modules(cls):
-        """ Get a dict of actual modules corresponding to the
+        """ Get a dictionary of actual modules corresponding to the
             currently registered Exporter instances
         """
-        modulenames = tuple(cls.modulenames())
-        mods = []
-        
-        for modulename in modulenames:
-            mods.append(importlib.import_module(modulename))
-        
-        return dict(zip(modulenames, mods))
+        return { modulename : importlib.import_module(modulename) \
+                                                  for modulename \
+                                               in cls.modulenames() }
     
     @classmethod
     def nameof(cls, thing):

@@ -455,7 +455,6 @@ def test():
     from clu.fs.filesystem import Directory
     from clu.predicates import try_items
     from clu.testing.utils import inline, format_environment
-    # from pprint import pprint
     import os
     
     stash = {}
@@ -551,16 +550,6 @@ def test():
         print()
         print(repr(chain0))
         print()
-        
-        # print("REPR»CHAIN1:")
-        # print()
-        # print(repr(chain1))
-        # print()
-        
-        # print("REPR»CHAINX:")
-        # print()
-        # print(repr(chainX))
-        # print()
     
     @inline
     def test_four_experimental():

@@ -134,7 +134,8 @@ class ChainRepr(Repr):
             key = tuple(mapping.keys())[0]
             item = STRINGPAIR.format(key, self.subrepr(mapping[key], level))
             return f"{{ {item} }}"
-        items = (STRINGPAIR.format(key, self.subrepr(mapping[key], level)) for key in mapping.keys())
+        items = (STRINGPAIR.format(key, self.subrepr(mapping[key], level)) \
+                               for key in mapping.keys())
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
         total = (f",\n{ts}").join(items)
@@ -152,11 +153,15 @@ class ChainRepr(Repr):
         tn = typename(chainmap)
         mapcount = len(chainmap.maps)
         keycount = len(chainmap.keys())
-        items = (STRINGPAIR.format(qualified_name(type(mapping)), self.primerepr(mapping, level - 1)) for mapping in chainmap.maps)
+        items = (STRINGPAIR.format(qualified_name(type(mapping)),
+                                   self.primerepr(mapping, level - 1)) \
+                                   for mapping in chainmap.maps)
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
         total = (f",\n{ts}").join(items)
-        return f"{tn} «{mapcount} map{multiple(mapcount)}, {keycount} key{multiple(keycount)}» [\n{ts}{total}\n{ls}]"
+        return f"{tn} «{mapcount} map{multiple(mapcount)}, " \
+                     f"{keycount} key{multiple(keycount)}» " \
+                     f"[\n{ts}{total}\n{ls}]"
     
     def repr_ChainMap(self, chainmap, level):
         # Handles both “clu.dict.ChainMap” and “collections.ChainMap”

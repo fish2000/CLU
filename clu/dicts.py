@@ -491,7 +491,7 @@ def test():
     
     @inline
     def test_one():
-        """ Shallow clone membership check, slow flatten """
+        """ Shallow clone membership check """
         chain0 = ChainMap(dict_arbitrary(),
                                   fsdata(),
                              environment())
@@ -506,38 +506,13 @@ def test():
             # N.B. SLOW AS FUCK:
             assert key in chain0.flatten()
             
-            assert try_items(key, *chain0.maps, default=None) is not None
-            assert try_items(key, *chain1.maps, default=None) is not None
-            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
-            assert try_items(key, *chain0.maps, default=None) == chain0[key]
-            assert try_items(key, *chain0.maps, default=None) == chain1[key]
-    
-    @inline
-    def test_one_point_five():
-        """ Shallow clone membership check, fast flatten """
-        chain0 = ChainMap(dict_arbitrary(),
-                                  fsdata(),
-                             environment())
-        
-        chain1 = chain0.clone()
-        assert len(chain0) == len(chain1)
-        
-        for key in chain0.keys():
-            assert key in chain0
-            assert key in chain1
-            
-            # N.B. SLOW AS FUCK:
-            assert key in chain0.flatten()
-            
-            assert try_items(key, *chain0.maps, default=None) is not None
-            assert try_items(key, *chain1.maps, default=None) is not None
             assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
             assert try_items(key, *chain0.maps, default=None) == chain0[key]
             assert try_items(key, *chain0.maps, default=None) == chain1[key]
     
     @inline
     def test_two():
-        """ Deep clone membership check, slow flatten """
+        """ Deep clone membership check """
         chain0 = ChainMap(dict_arbitrary(),
                                   fsdata(),
                              environment())
@@ -552,35 +527,10 @@ def test():
             # N.B. SLOW AS FUCK:
             assert key in chain0.flatten()
             
-            assert try_items(key, *chain0.maps, default=None) is not None
-            assert try_items(key, *chainX.maps, default=None) is not None
             assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
             assert try_items(key, *chain0.maps, default=None) == chain0[key]
             assert try_items(key, *chain0.maps, default=None) == chainX[key]
-    
-    @inline
-    def test_two_point_five():
-        """ Deep clone membership check, fast flatten """
-        chain0 = ChainMap(dict_arbitrary(),
-                                  fsdata(),
-                             environment())
-        
-        chainX = chain0.clone(deep=True)
-        assert len(chain0) == len(chainX)
-        
-        for key in chain0.keys():
-            assert key in chain0
-            assert key in chainX
-            
-            # N.B. SLOW AS FUCK:
-            assert key in chain0.flatten()
-            
-            assert try_items(key, *chain0.maps, default=None) is not None
-            assert try_items(key, *chainX.maps, default=None) is not None
-            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
-            assert try_items(key, *chain0.maps, default=None) == chain0[key]
-            assert try_items(key, *chain0.maps, default=None) == chainX[key]
-    
+
     @inline
     def test_three():
         """ Equality comparisons across the board """

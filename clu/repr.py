@@ -30,13 +30,13 @@ INSTANCE_DELIMITER = '@'
 @recursive
 def strfield(value):
     """ Basic, simple, straightforward type-switch-based sub-repr """
-    from clu.typespace.namespace import nsrepr, isnamespace
-    from clu.dicts import cmrepr, ischainmap
+    from clu.typespace.namespace import nsshortrepr, isnamespace
+    from clu.dicts import cmshortrepr, ischainmap
     T = type(value)
     if isnamespace(T):
-        return nsrepr(value)
+        return nsshortrepr(value)
     elif ischainmap(T):
-        return cmrepr(value)
+        return cmshortrepr(value)
     elif isstring(T):
         return f"“{value}”"
     elif issingleton(T):

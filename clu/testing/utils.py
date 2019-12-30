@@ -4,10 +4,9 @@ from functools import wraps, lru_cache
 
 import collections.abc
 import clu.abstract
-import os
+import sys, os, re
+
 import pprint
-import re
-import sys
 import textwrap
 
 from clu.constants import consts

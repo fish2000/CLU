@@ -1010,6 +1010,8 @@ def test():
         assert o
         assert d
         assert O
+        
+        # from clu.app import DerivedModule as dd
     
     @inline
     def test_three():
@@ -1057,10 +1059,10 @@ def test():
         assert spec0.name == 'clu.app.FindMe'
         
         module0 = finder.loader.create_module(spec0)
-        assert isinstance(module0, Module)
+        assert isinstance(module0, (FindMe, Module))
         
         module1 = finder.loader.create_module(spec0)
-        assert isinstance(module1, Module)
+        assert isinstance(module1, (FindMe, Module))
         
         spec1 = finder.find_spec('clu.app.FindMe', [])
         assert spec1.name == 'clu.app.FindMe'

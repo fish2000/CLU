@@ -10,7 +10,7 @@ import collections
 import collections.abc
 import sys
 
-from clu.constants.consts import STRINGPAIR, NoDefault
+from clu.constants.consts import STRINGPAIR, WHITESPACE, NoDefault
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -162,9 +162,17 @@ class ChainRepr(Repr):
     def repr_ChainMap(self, chainmap, level):
         # Handles both “clu.dict.ChainMap” and “collections.ChainMap”
         return self.toprepr(chainmap, level)
+    
+    def shortrepr(self, thing):
+        """ Return the “short” repr of a chainmap instance –
+            all whitespace will be condensed to single spaces
+            without newlines.
+        """
+        return WHITESPACE.sub(' ', self.repr(thing))
 
 reprizer = ChainRepr()
 cmrepr = reprizer.repr
+cmshortrepr = reprizer.shortrepr
 
 # CHAINMAP: a reimplementation
 
@@ -444,6 +452,12 @@ def asdict(thing):
     if ismapping(thing):
         return dict(thing)
     return dict(thing)
+
+with exporter as export:
+    
+    export(reprizer,    name='reprizer')
+    export(cmshortrepr, name='cmshortrepr')
+    export(cmrepr,      name='cmrepr',          doc="Return the “core” repr for any descendant ChainMap type.")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

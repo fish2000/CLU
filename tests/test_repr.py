@@ -14,8 +14,10 @@ class TestRepr(object):
         # from clu.constants.consts import SINGLETON_TYPES
         from clu.repr import strfield
         from clu.typespace.namespace import Namespace
+        from clu.dicts import ChainMap
         from decimal import Decimal
         from enum import Enum, unique
+        import collections
         
         rstr = "yo dogg"
         byts = b"YO DOGG!"
@@ -24,6 +26,8 @@ class TestRepr(object):
         # each = (rstr, byts, buls, bnts, numb)
         dic = { 'yo' : 'dogg' }
         ns = Namespace(yo='dogg')
+        cmap = ChainMap(dic)
+        smap = collections.ChainMap(dic)
         l = ['yo', 'dogg']
         t = ('yo', 'dogg')
         
@@ -39,6 +43,8 @@ class TestRepr(object):
         assert strfield(byts)           == "“YO DOGG!”"
         assert strfield(dic)            == '{ yo=dogg }'
         assert strfield(ns)             == "{ yo : 'dogg' }"
+        assert strfield(cmap)           == "ChainMap «1 map, 1 key» [\n    builtins.dict : { yo : 'dogg' }\n]"
+        assert strfield(smap)           == "ChainMap «1 map, 1 key» [\n    builtins.dict : { yo : 'dogg' }\n]"
         assert strfield(l)              == '[ “yo”, “dogg” ]'
         assert strfield(t)              == '[ “yo”, “dogg” ]'
         assert strfield(True)           == "«True»"

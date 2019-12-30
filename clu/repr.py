@@ -31,9 +31,12 @@ INSTANCE_DELIMITER = '@'
 def strfield(value):
     """ Basic, simple, straightforward type-switch-based sub-repr """
     from clu.typespace.namespace import nsrepr, isnamespace
+    from clu.dicts import cmrepr, ischainmap
     T = type(value)
     if isnamespace(T):
         return nsrepr(value)
+    elif ischainmap(T):
+        return cmrepr(value)
     elif isstring(T):
         return f"“{value}”"
     elif issingleton(T):

@@ -36,7 +36,7 @@ def itermodule(module):
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
     values = (getattr(module, key) for key in keys)
-    return zip(keys, values)
+    yield from zip(keys, values)
 
 def moduleids(module):
     """ Get a dictionary of `(name, thing)` tuples from a module,
@@ -55,7 +55,7 @@ def itermoduleids(module):
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
     ids = (id(getattr(module, key)) for key in keys)
-    return zip(keys, ids)
+    yield from zip(keys, ids)
 
 # This goes against all logic and reason, but it fucking seems
 # to fix the problem of constants, etc showing up erroneously

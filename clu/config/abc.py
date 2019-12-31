@@ -361,6 +361,8 @@ class NamespaceWalker(FrozenKeyMap):
                     return value
         raise KeyError(nskey)
 
+# NON-KEYMAP ABC STRUCTURES: FlatOrderedSet
+
 @export
 class FlatOrderedSet(collections.abc.Set,
                      collections.abc.Sequence,
@@ -453,6 +455,8 @@ class FlatOrderedSet(collections.abc.Set,
     
     def inner_repr(self):
         return repr(self.things)
+
+# CONCRETE CALLABLE SUBTYPES: functional_and, functional_set
 
 @export
 class functional_and(FlatOrderedSet,

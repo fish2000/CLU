@@ -155,7 +155,7 @@ from clu.config.defg import FrozenFlat, Flat, FrozenNested, Nested
 from clu.config.defg import nestedmaps, flatdict
 from clu.config.proxy import KeyMapView, KeyMapProxy
 
-from clu.config.env import Env
+from clu.config.base import Env
 from clu.config.filebase import FileName, FileBase
 from clu.config.fieldtypes import ValidationError
 from clu.config.fieldtypes import FieldBase

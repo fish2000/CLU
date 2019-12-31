@@ -59,7 +59,6 @@ starmods = ('clu.repl',
 
 mods = ('clu.all',
         'clu.config.base',
-        'clu.config.env',
         'clu.config.settings',
         'clu.dispatch', 'clu.sanitizer', 'clu.fs.pypath',
         'clu.typespace.types')

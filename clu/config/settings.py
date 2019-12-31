@@ -2,19 +2,20 @@
 from __future__ import print_function
 
 import abc
+import clu.abstract
 import os
 import sys
 
 abstract = abc.abstractmethod
 
 from clu.constants.consts import ENCODING, PYTHON_VERSION
-from clu.abstract import Slotted
 from clu.config.base import Flat, Nested
 from clu.config.fieldtypes import FieldBase
 from clu.predicates import (haspyattr, getpyattr,
                             stattr, pyattrs,
                             always, no_op,
                             iscontainer, slots_for)
+
 from clu.repr import stringify
 from clu.typology import differentlength, ismapping, isstring
 from clu.exporting import Exporter
@@ -60,7 +61,7 @@ class Nestifier(abc.ABC):
         """
         return self.nestify(instance=self, **kwargs).tree
 
-class Namespace(FieldBase, Nestifier, metaclass=Slotted):
+class Namespace(FieldBase, Nestifier, metaclass=clu.abstract.Slotted):
     
     __slots__ = ('namespaced_dict',
                  'namespace',
@@ -409,6 +410,7 @@ class Schema(Nestifier, metaclass=MetaSchema):
 __all__, __dir__ = exporter.all_and_dir()
 
 def test():
+    
     from clu.config.fieldtypes import fields
     from clu.config.formats import JsonFile
     from clu.fs.filesystem import TemporaryName

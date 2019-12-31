@@ -630,7 +630,7 @@ def test():
     def test_two():
         """ Busywork, mark II. """
         # Fuck around with the CLU app’s environment overrides:
-        from clu.config.env import Env
+        from clu.config.base import Env
         from clu.config.defg import Environ
         
         env0 = Env()

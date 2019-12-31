@@ -382,7 +382,7 @@ class TestConfig(object):
         assert "cannot import name" in str(exc.value)
     
     def test_env_get(self, environment):
-        from clu.config.env import Env
+        from clu.config.base import Env
         
         env = Env()
         
@@ -409,7 +409,7 @@ class TestConfig(object):
         assert 'envtest1' not in env.namespaces()
     
     def test_env_set(self, environment):
-        from clu.config.env import Env
+        from clu.config.base import Env
         
         env = Env()
         

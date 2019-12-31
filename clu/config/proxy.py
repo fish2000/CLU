@@ -273,8 +273,8 @@ def test():
                                                 KeyMapView),              'test_four')
     
     # N.B. These two take FUCKING FOREVER to run:
-    inline.add_function(test_one_fn(Nested,     KeyMapView,  nestedmaps), 'test_five')
-    inline.add_function(test_one_fn(Nested,     KeyMapProxy, nestedmaps), 'test_five_point_five')
+    # inline.add_function(test_one_fn(Nested,     KeyMapView,  nestedmaps), 'test_five')
+    # inline.add_function(test_one_fn(Nested,     KeyMapProxy, nestedmaps), 'test_five_point_five')
     
     @inline.diagnostic
     def show_fixture_cache_stats():

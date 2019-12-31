@@ -102,4 +102,4 @@ changelog: remove-changelog
 
 .PHONY: cython sdist wheel twine-upload bump bigbump
 
-.PHONY: check pytest tox test test-all version consts modules
+.PHONY: check pytest tox test test-all version consts-old modules-old consts modules

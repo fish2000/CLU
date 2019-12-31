@@ -123,11 +123,11 @@ def modules_for_appname(appname):
     # when e.g. the monomer cache resizes during iteration, due to
     # garbage collection nullifying one or more of the weakrefs that
     # comprise said cache.
-    modules = Registry.monomers.get(appname, {}).values()
+    modules = Registry.monomers.get(appname, {})
     try:
-        yield from modules
+        yield from modules.values()
     except RuntimeError:
-        yield from modules
+        yield from modules.values()
 
 @export
 class Registry(abc.ABC, metaclass=MetaRegistry):

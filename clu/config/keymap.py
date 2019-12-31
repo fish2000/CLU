@@ -4,7 +4,6 @@ from itertools import chain
 
 iterchain = chain.from_iterable
 
-import abc
 import clu.abstract
 import collections
 import collections.abc
@@ -12,8 +11,6 @@ import contextlib
 import copy
 import os
 import sys
-
-abstract = abc.abstractmethod
 
 from clu.constants.consts import PROJECT_NAME
 from clu.constants.consts import NoDefault

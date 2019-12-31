@@ -269,11 +269,11 @@ class InlineTester(collections.abc.Set,
             with watch.timer(label_timer):
                 out = function(*args, **kwargs)
             
-            # If we asked for it, we’ll get it:
-            if newline and verbose:
-                print()
-            
             if verbose:
+                # If we asked for it, we’ll get it:
+                if newline:
+                    print()
+                
                 # Get the reported timer value *before* closing out
                 # the root-level stopwatch timer:
                 timervals = item(watch._reported_values, label_timer,

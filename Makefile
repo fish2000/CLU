@@ -77,14 +77,17 @@ test-all: check tox
 version:
 	python -m clu.version
 
-consts:
+consts-old:
 	DEBUG=1 PYTHONPATH="." ./clu/scripts/show-consts.py
 
 modules-old:
 	DEBUG=1 PYTHONPATH="." ./clu/scripts/show-modules.py
 
-modules:
+consts:
 	python -m clu.constants
+
+modules:
+	python -m clu
 
 remove-changelog:
 	rm -f CHANGELOG.md

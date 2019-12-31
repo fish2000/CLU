@@ -4,6 +4,7 @@ from functools import wraps, lru_cache
 
 import collections.abc
 import clu.abstract
+import enum
 import sys, os, re
 
 import pprint
@@ -100,6 +101,10 @@ def format_report(aggregated_report, show_buckets=False,
     
     return "\n".join(entries)
 
+def json_report(aggregated_report):
+    import json
+    return json.dumps(aggregated_report.aggregated_values, indent=4, default=str)
+
 @export
 def get_title(function):
     """ Harvest a title string from a functions’ doctext """
@@ -154,6 +159,49 @@ def format_environment(environment=None):
 
 format_environment.outdenter = re.compile(r'^(?P<bracket>[\[\{\(])\s+')
 
+@export
+class Bucket(enum.Enum):
+    
+    """ Testing bucket enum, for use with @inline.test() """
+    
+    MAIN        = 'test'
+    CHECK       = 'pre-check'
+    POSTEXEC    = 'diagnostic'
+    FIXTURE     = 'fixture'     # not in use
+    
+    @classmethod
+    def byname(cls, string):
+        """ Get a bucket by its bucket name, matching case-insensitively """
+        for bucket in cls:
+            if bucket.group_name == string.casefold():
+                return bucket
+        raise ValueError(f"bucket not found: {string}")
+    
+    @classmethod
+    def bytitle(cls, string):
+        """ Retrieve a bucket by its title, matching case-insensitively """
+        for bucket in cls:
+            if bucket.group_title.casefold() == string.casefold():
+                return bucket
+        raise ValueError(f"bucket not found: {string}")
+    
+    def to_string(self):
+        return str(self.name)
+    
+    def __str__(self):
+        return self.to_string()
+    
+    def __bytes__(self):
+        return bytes(self.name, encoding=consts.ENCODING)
+    
+    @property
+    def group_name(self):
+        return self.to_string().casefold()
+    
+    @property
+    def group_title(self):
+        return str(self.value)
+    
 @export
 class InlineTester(collections.abc.Set,
                    collections.abc.Sequence,
@@ -222,7 +270,7 @@ class InlineTester(collections.abc.Set,
         if iterable is not None:
             self.test_functions.extend(iterable)
     
-    def wrap(self, function, group='main', groupname='test', newline=False):
+    def wrap(self, function, bucket=Bucket.MAIN, newline=False):
         """ Wrap an inline function with timing, banner-printing,
             and all sorts of other useful bookkeeping code used
             internally by the inline testing harness.
@@ -259,14 +307,14 @@ class InlineTester(collections.abc.Set,
                 
                 # Print header:
                 print()
-                print(f"§ RUNNING {groupname.upper()} #{idx+1}: `{name}(¬)` – {title}")
+                print(f"§ RUNNING {bucket.group_title.upper()} #{idx+1}: `{name}(¬)` – {title}")
                 asterisks('-')
                 print()
             
             # Run the wrapped function, timing it:
             label_idx = f"{idx+1}".zfill(len(f"{max}"))
             label_timer = f"{label_idx} – {name}"
-            with watch.timer(label_timer):
+            with watch.timer(label_timer, bucket=bucket):
                 out = function(*args, **kwargs)
             
             if verbose:
@@ -278,9 +326,9 @@ class InlineTester(collections.abc.Set,
                 # the root-level stopwatch timer:
                 timervals = item(watch._reported_values, label_timer,
                                                  f'root#{label_timer}',
-                                              f'{group}#{label_timer}',
-                                         f'root#{group}#{label_timer}',
-                                          'root')
+                                  f'{bucket.group_name}#{label_timer}',
+                             f'root#{bucket.group_name}#{label_timer}',
+                              'root')
             
             # Close the context stack,
             # regardless of verbosity:
@@ -299,7 +347,7 @@ class InlineTester(collections.abc.Set,
                     dt = timervals[0] * 0.001
                     dtout = "%6.3f" % dt
                     ndtout = natural_millis(timervals[0])
-                    print(f"→ {groupname.capitalize()} function “{name}(¬)” ran in about {ndtout} –{dtout}s")
+                    print(f"→ {bucket.group_title.capitalize()} function “{name}(¬)” ran in about {ndtout} –{dtout}s")
                     
                 asterisks('=')
             
@@ -310,8 +358,7 @@ class InlineTester(collections.abc.Set,
     
     def __call__(self, function):
         """ Decorate a testing function, marking it as an inline test. """
-        wrapper = self.wrap(function, group='main',
-                                      groupname='test',
+        wrapper = self.wrap(function, bucket=Bucket.MAIN,
                                       newline=False)
         
         # Add the wrapper to the internal test function list:
@@ -346,8 +393,7 @@ class InlineTester(collections.abc.Set,
             ahead of the main test run.
         """
         def decoration(function):
-            wrapper = self.wrap(function, group='check',
-                                          groupname='pre-check',
+            wrapper = self.wrap(function, bucket=Bucket.CHECK,
                                           newline=True)
             
             # Add the wrapper to the internal precheck function list:
@@ -369,8 +415,7 @@ class InlineTester(collections.abc.Set,
             informational shit; hence the name “diagnostics”.
         """
         def decoration(function):
-            wrapper = self.wrap(function, group='postexec',
-                                          groupname='diagnostic',
+            wrapper = self.wrap(function, bucket=Bucket.POSTEXEC,
                                           newline=True)
             
             # Add the wrapper to the internal diagnostic list:
@@ -386,12 +431,10 @@ class InlineTester(collections.abc.Set,
     def runtwice(self):
         """ Decorate a function as both a precheck and a diagnostic. """
         def decoration(function):
-            begin_wrapper = self.wrap(function, group='check',
-                                                groupname='pre-check',
+            begin_wrapper = self.wrap(function, bucket=Bucket.CHECK,
                                                 newline=True)
             
-            end_wrapper = self.wrap(function, group='postexec',
-                                              groupname='diagnostic',
+            end_wrapper = self.wrap(function, bucket=Bucket.POSTEXEC,
                                               newline=True)
             
             self.prechecks.insert(0, begin_wrapper)
@@ -414,7 +457,7 @@ class InlineTester(collections.abc.Set,
             return wrapper
         return decoration
     
-    def test(self, exec_count=1, *args):
+    def test(self, exec_count=1, *args, **kwargs):
         """ Run all functions marked as @inline within the modules’ main
             inline test function, using individual context timers for each
             test function call (provided by dbx-stopwatch).
@@ -422,6 +465,9 @@ class InlineTester(collections.abc.Set,
         from contextlib import redirect_stdout
         import stopwatch
         import io
+        
+        # Get the mode
+        mode = kwargs.get('mode', None)
         
         # Count the test functions:
         precount = len(self.prechecks)
@@ -472,34 +518,42 @@ class InlineTester(collections.abc.Set,
         
         # REPORT IN:
         report = self.watch.get_last_aggregated_report()
-        out = format_report(report)
         
-        # Cough up the final report data:
-        print()
-        count_text = f"{exec_count} times"
+        if not mode:
+            out = format_report(report)
+            
+            # Cough up the final report data:
+            print()
+            count_text = f"{exec_count} times"
+            
+            # Some trivial english-ification:
+            if exec_count == 1:
+                count_text = "once"
+            elif exec_count == 2:
+                count_text = "twice"
+            elif exec_count == 3:
+                count_text = "thrice"
+            elif exec_count == 100:
+                count_text = "a hundred times"
+            
+            # Header:
+            print(f"⌀ TIME TOTALS "
+                  f"– ran {funcount} test{multiple(funcount)} {count_text} "
+                  f"– {precount} precheck{multiple(precount)}"
+                  f", {diacount} diagnostic{multiple(diacount)}")
+            
+            # Body:
+            asterisks('≈')
+            print(out)
+            
+            # Footer:
+            asterisks('≠')
         
-        # Some trivial english-ification:
-        if exec_count == 1:
-            count_text = "once"
-        elif exec_count == 2:
-            count_text = "twice"
-        elif exec_count == 3:
-            count_text = "thrice"
-        elif exec_count == 100:
-            count_text = "a hundred times"
-        
-        # Header:
-        print(f"⌀ TIME TOTALS "
-              f"– ran {funcount} test{multiple(funcount)} {count_text} "
-              f"– {precount} precheck{multiple(precount)}"
-              f", {diacount} diagnostic{multiple(diacount)}")
-        
-        # Body:
-        asterisks('≈')
-        print(out)
-        
-        # Footer:
-        asterisks('≠')
+        elif mode == 'json':
+            out = json_report(report)
+            print()
+            print(out)
+            print()
         
         # Clear the stopwatch instance:
         self.watch = None
@@ -660,7 +714,7 @@ def test():
     
     @inline
     def test_five_countfiles():
-        """ Check for “clu.testing.utils.countfiles” """
+        """ Testing “clu.testing.utils.countfiles(…)” """
         from clu.typology import isvalidpathlist
         from clu.fs.filesystem import TemporaryDirectory
         

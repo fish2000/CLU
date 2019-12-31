@@ -437,10 +437,17 @@ def merge(*dicts, **overrides):
 @export
 def asdict(thing):
     """ asdict(thing) → returns either thing, thing.__dict__, or dict(thing) as necessary """
-    from clu.predicates import haspyattr
+    from clu.predicates import haspyattr, or_none
     from clu.typology import ismapping
-    if isinstance(thing, dict):
-        return thing
+    from clu.typespace.namespace import isnamespace
+    if ischainmap(thing):
+        return merge_fast(*reversed(thing.maps))
+    if isnamespace(thing):
+        return dict(thing.__dict__)
+    if ismapping(thing):
+        return dict(thing)
+    if callable(or_none(thing, 'items')):
+        return dict(thing.items())
     if haspyattr(thing, 'dict'):
         return asdict(thing.__dict__)
     if hasattr(thing, '_asdict'):
@@ -449,8 +456,8 @@ def asdict(thing):
         return asdict(thing.to_dict())
     if hasattr(thing, 'dict'):
         return asdict(thing.dict)
-    if ismapping(thing):
-        return dict(thing)
+    if isinstance(thing, dict):
+        return thing
     return dict(thing)
 
 with exporter as export:
@@ -543,7 +550,7 @@ def test():
             assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
             assert try_items(key, *chain0.maps, default=None) == chain0[key]
             assert try_items(key, *chain0.maps, default=None) == chainX[key]
-
+    
     @inline
     def test_three():
         """ Equality comparisons across the board """

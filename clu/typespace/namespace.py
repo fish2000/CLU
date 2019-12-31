@@ -333,7 +333,7 @@ def test():
         sn = SimpleNamespace(flat_dict())
         assert dir(sn) == ['i_heard', 'nested', 'so', 'yo']
         assert chop_instance_repr(reprizer.fullrepr(sn, short=True)) == shorty_repr()
-        
+    
     class NamespaceKeyError(KeyError):
         pass
     

@@ -74,8 +74,20 @@ class MetaRegistry(Extensible):
         if not appname:
             raise ValueError("appname required")
         if not isstring(appname):
-            raise TypeError("module registry access by string keys only")
+            raise TypeError("module registry access by strings only")
         return Registry.monomers[appname]
+    
+    @staticmethod
+    def for_qualname(qualname):
+        if not qualname:
+            raise ValueError("qualname required")
+        if not isstring(qualname):
+            raise TypeError("module registry access by strings only")
+        if not consts.QUALIFIER in qualname:
+            raise ValueError("qualname isn’t qualified")
+        modulename, appnamespace = dotpath_split(qualname)
+        appname, _, appspace = appnamespace.partition(consts.QUALIFIER)
+        return Registry.for_appname(appname)[qualname]
     
     def __getitem__(cls, key):
         """ Allows lookup of an app name through subscripting the Registry class """
@@ -344,6 +356,10 @@ class LoaderBase(clu.abstract.AppName,
             else:
                 module._executed = True
     
+    def __reduce__(self):
+        return (polymers.get_loader,
+                tuplize(type(self).appname))
+    
     def __repr__(self):
         qualname = qualified_name(self)
         appname = getattr(self, 'appname', None)
@@ -562,6 +578,11 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         return dotpath_join(self.prefix,
                             self.name)
     
+    def __reduce__(self):
+        return (Registry.for_qualname,
+                tuplize(self.qualname),
+                        self.__dict__)
+    
     def __dir__(self):
         cls = type(self)
         if hasattr(cls, 'exporter'):
@@ -630,6 +651,16 @@ class PolymerType(dict):
             raise NameError(f"module already exists in “{appname}” for appspace: {appspace}")
         self[appname].modules.update({ appspace : module })
         return self[appname]
+    
+    def get_finder(self, appname):
+        if not self.get(appname, None):
+            raise ValueError(f"no PerApp instance for appname: {appname}")
+        return self[appname].finder
+    
+    def get_loader(self, appname):
+        if not self.get(appname, None):
+            raise ValueError(f"no PerApp instance for appname: {appname}")
+        return self[appname].loader
 
 # The per-appname subtype registry dictionary:
 polymers = PolymerType()

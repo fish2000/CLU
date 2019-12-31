@@ -36,6 +36,9 @@ DYNAMIC_MODULE_PREFIX = sys.intern('__dynamic_modules__')
 # On non-macOS platforms this may be awry:
 ENCODING = sys.intern(sys.getfilesystemencoding().upper()) # 'UTF-8'
 
+# The environment-variable name partition separator:
+ENVIRONS_SEP = sys.intern('_')
+
 # Possible names for file arguments (used for introspection):
 FILE_ARGUMENT_NAMES = ('path', 'pth', 'file')
 
@@ -51,6 +54,9 @@ lam = lambda: None
 # N.B. this may or may not be a PY2/PY3 thing:
 MAXINT = getattr(sys, 'maxint',
          getattr(sys, 'maxsize', (2 ** 64) / 2))
+
+# The namespace separator for namespaced KeyMaps:
+NAMESPACE_SEP = sys.intern(':')
 
 # The PATH environment variable, with a sensible default:
 PYTHON_BIN = os.path.join(sysconfig.get_path('data'), 'bin')
@@ -149,10 +155,12 @@ __all__ = ('BASEPATH',
            'DEFAULT_TERMINAL_WIDTH',
            'DYNAMIC_MODULE_PREFIX',
            'ENCODING',
+           'ENVIRONS_SEP',
            'FILE_ARGUMENT_NAMES',
            'HOSTNAME',
            'LAMBDA', 'λ',
            'MAXINT',
+           'NAMESPACE_SEP',
            'PATH',
            'PARTIAL', 'φ',
            'PROJECT_NAME', 'PROJECT_PATH',

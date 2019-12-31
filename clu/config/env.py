@@ -4,16 +4,14 @@ from __future__ import print_function
 import os
 
 from clu.abstract import Slotted, AppName, Cloneable, ReprWrapper
-from clu.constants.consts import PROJECT_NAME, NoDefault
-from clu.config.abc import NAMESPACE_SEP, NamespacedMutableMapping
+from clu.constants.consts import ENVIRONS_SEP, NAMESPACE_SEP, PROJECT_NAME, NoDefault
+from clu.config.abc import NamespacedMutableMapping
 from clu.predicates import tuplize
 from clu.typology import iterlen
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
-
-PREFIX_SEP = '_'
 
 @export
 class EnvBase(NamespacedMutableMapping, AppName,
@@ -50,11 +48,11 @@ class EnvBase(NamespacedMutableMapping, AppName,
                    +––––––––––––––––––– app name (uppercased)
         """
         if not namespace:
-            return cls.appname.upper() + PREFIX_SEP
+            return cls.appname.upper() + ENVIRONS_SEP
         if not str(namespace).isidentifier():
             raise KeyError(f"Invalid namespace: {namespace!s}")
-        return cls.appname.upper() + PREFIX_SEP + \
-            str(namespace).upper() + PREFIX_SEP
+        return cls.appname.upper() + ENVIRONS_SEP + \
+            str(namespace).upper() + ENVIRONS_SEP
     
     @classmethod
     def envkey(cls, key, namespace=None):
@@ -80,10 +78,10 @@ class EnvBase(NamespacedMutableMapping, AppName,
         """ Transform an environment-variable name into a (possibly
             namespaced) NamespacedMutableMapping key.
         """
-        string = key.lstrip(cls.appname.upper() + PREFIX_SEP)
-        if PREFIX_SEP not in string:
+        string = key.lstrip(cls.appname.upper() + ENVIRONS_SEP)
+        if ENVIRONS_SEP not in string:
             return string.casefold()
-        return NAMESPACE_SEP.join(string.casefold().split(PREFIX_SEP, 1))
+        return NAMESPACE_SEP.join(string.casefold().split(ENVIRONS_SEP, 1))
     
     def __init__(self, *args, **kwargs):
         """ Initialize the environment-variable mapping interface.
@@ -151,7 +149,7 @@ class EnvBase(NamespacedMutableMapping, AppName,
         """
         prefix = type(self).prefix(namespace=None)
         envkeys = (key.lstrip(prefix) for key in self.environment.keys() if key.startswith(prefix))
-        prefixes = frozenset(key.casefold().split(PREFIX_SEP, 1)[0] for key in envkeys if PREFIX_SEP in key)
+        prefixes = frozenset(key.casefold().split(ENVIRONS_SEP, 1)[0] for key in envkeys if ENVIRONS_SEP in key)
         return tuple(sorted(prefixes))
     
     def inner_repr(self):

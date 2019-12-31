@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from itertools import chain, zip_longest
+from itertools import chain
 
 iterchain = chain.from_iterable
 
@@ -15,301 +15,19 @@ import sys
 
 abstract = abc.abstractmethod
 
-from clu.constants.consts import DEBUG, PROJECT_NAME, NoDefault, pytuple
+from clu.constants.consts import DEBUG, ENVIRONS_SEP, PROJECT_NAME, NAMESPACE_SEP
+from clu.constants.consts import NoDefault, pytuple
+from clu.config.keymapview import concatenate_ns, prefix_for
+from clu.config.keymapview import KeyMapKeysView, KeyMapItemsView, KeyMapValuesView
+from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsView
+from clu.config.keymapview import NamespaceWalkerValuesView
+from clu.config.nsutils import unpack_ns, pack_ns, get_ns, compare_ns
 from clu.predicates import attr, tuplize, listify
 from clu.typology import iterlen, ismapping
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
-
-ENVIRONS_SEP = '_'
-NAMESPACE_SEP = ':'
-
-typename = lambda thing: type(thing).__name__
-
-def concatenate_ns(*namespaces):
-    """ Return the given namespace(s), concatenated with the
-        namespace separator.
-    """
-    return NAMESPACE_SEP.join(namespaces)
-
-def prefix_for(*namespaces):
-    """ Return the prefix string for the given namespace(s) """
-    ns = concatenate_ns(*namespaces)
-    return ns and f"{ns}{NAMESPACE_SEP}" or ns
-
-def strip_ns(nskey):
-    """ Strip all namespace-related prefixing from a namespaced key """
-    return nskey.rpartition(NAMESPACE_SEP)[-1]
-
-def startswith_ns(putative, prefix):
-    """ Boolean predicate to compare a pair of namespace iterables,
-        returning True if the first starts with the second.
-        
-        Do not confuse this with the helper function “compare_ns(…)”,
-        defined below, which returns False if the namespace iterables
-        in question aren’t exactly alike.
-    """
-    putative_ns = concatenate_ns(*putative)
-    prefix_ns = concatenate_ns(*prefix)
-    return putative_ns.startswith(prefix_ns)
-
-@export
-class KeyMapViewBase(collections.abc.Sequence,
-                     collections.abc.Sized,
-                     metaclass=clu.abstract.Slotted):
-    
-    """ The base class for KeyMap view classes.
-        
-        These view classes correspond to, but do not inherit directly from,
-        the descendants of “collections.abc.MappingView”. They have been
-        specially kitted out to deal with KeyMap namespaces: each instance
-        has a ‘mapping’ attribute referring to the parent KeyMap instance,
-        a ‘namespaces’ iterable attribute with the unconcatenated namespace
-        parts for which the instance was allocated, and a ‘prefix’ shortcut
-        attribute containing the concatenated namespace parts as a string
-        prefix.
-        
-        Each concrete subclass of KeyMapViewBase registers itself as a
-        “virtual subclass” of its corresponding ‘collections.abc’ view
-        class, like for good measure.
-    """
-    
-    __slots__ = pytuple('weakref') \
-              + tuplize('mapping', 'namespaces', 'prefix')
-    
-    def __init__(self, mapping, *namespaces):
-        """ Initialize a view on a KeyMap instance, for a given namespace """
-        self.mapping = mapping
-        self.namespaces = namespaces
-        self.prefix = prefix_for(*namespaces)
-    
-    @property
-    def _mapping(self):
-        """ For compatibility with “collections.abc” stuff """
-        return self.mapping
-    
-    def __len__(self):
-        if not self.prefix:
-            return len(self.mapping)
-        return len([nskey \
-                for nskey in self.mapping \
-                 if nskey.startswith(self.prefix)])
-    
-    def __getitem__(self, idx):
-        return tuple(self)[idx]
-    
-    @abstract
-    def __contains__(self, nskey):
-        ...
-    
-    @abstract
-    def __iter__(self):
-        ...
-    
-    def __repr__(self):
-        tn = typename(self)
-        nslist = ', '.join(self.namespaces)
-        ns = bool(self.prefix) and f"<{nslist}>" or ''
-        return f"{tn}{ns}({self.mapping!r})"
-
-@export
-@collections.abc.KeysView.register
-class KeyMapKeysView(KeyMapViewBase,
-                     collections.abc.Set):
-    
-    """ A KeyMap key view. """
-    
-    @classmethod
-    def _from_iterable(cls, iterable):
-        # Required by the “collections.abc.Set” API:
-        return set(iterable)
-    
-    def __contains__(self, nskey):
-        return nskey in self.mapping.submap(*self.namespaces)
-    
-    def __iter__(self):
-        yield from (nskey \
-                for nskey in self.mapping \
-                 if nskey.startswith(self.prefix))
-
-@export
-@collections.abc.ItemsView.register
-class KeyMapItemsView(KeyMapViewBase,
-                      collections.abc.Set):
-    
-    """ A KeyMap items view. """
-    
-    @classmethod
-    def _from_iterable(cls, iterable):
-        # Required by the “collections.abc.Set” API:
-        return set(iterable)
-    
-    def __contains__(self, item):
-        nskey, value = item
-        try:
-            contained = self.mapping.submap(*self.namespaces)[nskey]
-        except KeyError:
-            return False
-        else:
-            return contained is value or contained == value
-    
-    def __iter__(self):
-        yield from ((nskey, self.mapping[nskey]) \
-                 for nskey in self.mapping \
-                  if nskey.startswith(self.prefix))
-
-@export
-@collections.abc.ValuesView.register
-class KeyMapValuesView(KeyMapViewBase,
-                       collections.abc.Collection):
-    
-    """ A KeyMap values view. """
-    
-    def __contains__(self, value):
-        submap = self.mapping.submap(*self.namespaces)
-        for nskey in submap:
-            contained = submap[nskey]
-            if contained is value or contained == value:
-                return True
-        return False
-    
-    def __iter__(self):
-        yield from (self.mapping[nskey] \
-                             for nskey in self.mapping \
-                              if nskey.startswith(self.prefix))
-
-@export
-class NamespaceWalkerViewBase(KeyMapViewBase):
-    
-    """ A view abstract base class tailored to NamespaceWalker types;
-        specifically, it overrides “__len__(…)” to better utilize
-        the underlying mapping types’ “walk(…)” method.
-    """
-    
-    def __len__(self):
-        if not self.prefix:
-            return iterlen(self.mapping.walk())
-        return iterlen(concatenate_ns(*namespaces) \
-                                  for *namespaces, _, _ in self.mapping.walk() \
-                                   if startswith_ns(namespaces,
-                                               self.namespaces))
-
-@export
-@collections.abc.KeysView.register
-class NamespaceWalkerKeysView(NamespaceWalkerViewBase,
-                              collections.abc.Set):
-    
-    """ A keys view specifically tailored to NamespaceWalker types. """
-    
-    @classmethod
-    def _from_iterable(cls, iterable):
-        # Required by the “collections.abc.Set” API:
-        return set(iterable)
-    
-    def __contains__(self, nskey):
-        for *namespaces, key, value in self.mapping.walk():
-            if startswith_ns(namespaces, self.namespaces):
-                if nskey == pack_ns(key, *namespaces):
-                    return True
-        return False
-    
-    def __iter__(self):
-        for *namespaces, key, value in self.mapping.walk():
-            if startswith_ns(namespaces, self.namespaces):
-                yield pack_ns(key, *namespaces)
-
-@export
-@collections.abc.ItemsView.register
-class NamespaceWalkerItemsView(NamespaceWalkerViewBase,
-                               collections.abc.Set):
-    
-    """ An items view specifically tailored to NamespaceWalker types. """
-    
-    @classmethod
-    def _from_iterable(cls, iterable):
-        # Required by the “collections.abc.Set” API:
-        return set(iterable)
-    
-    def __contains__(self, item):
-        nskey, putative = item
-        for *namespaces, key, value in self.mapping.walk():
-            if putative is value or putative == value:
-                if startswith_ns(namespaces, self.namespaces):
-                    if nskey == pack_ns(key, *namespaces):
-                        return True
-        return False
-    
-    def __iter__(self):
-        for *namespaces, key, value in self.mapping.walk():
-            if startswith_ns(namespaces, self.namespaces):
-                yield (pack_ns(key, *namespaces), value)
-
-@export
-@collections.abc.ValuesView.register
-class NamespaceWalkerValuesView(NamespaceWalkerViewBase,
-                                collections.abc.Collection):
-    
-    """ A values view specifically tailored to NamespaceWalker types. """
-    
-    def __contains__(self, putative):
-        for *namespaces, key, value in self.mapping.walk():
-            if putative is value or putative == value:
-                if startswith_ns(namespaces, self.namespaces):
-                    return True
-        return False
-    
-    def __iter__(self):
-        for *namespaces, key, value in self.mapping.walk():
-            if startswith_ns(namespaces, self.namespaces):
-                yield value
-
-# NAMESPACE-MANIPULATION FUNCTION API:
-
-def validate_ns(*namespaces):
-    """ Raise a ValueError if any of the given namespaces are invalid. """
-    for namespace in namespaces:
-        if not namespace.isidentifier():
-            raise ValueError(f"Invalid namespace: “{namespace}”")
-        if NAMESPACE_SEP in namespace:
-            raise ValueError(f"Namespace contains separator: “{namespace}”")
-
-def unpack_ns(nskey):
-    """ Unpack a namespaced key into a set of namespaces and a key name.
-        
-        To wit: if the namespaced key is “yo:dogg:i-heard”, calling “unpack_ns(…)”
-        on it will return the tuple ('i-heard', ('yo', 'dogg'));
-        
-        If the key is not namespaced (like e.g. “wat”) the “unpack_ns(…)”
-        call will return the tuple ('wat', tuple()).
-    """
-    *namespaces, key = nskey.split(NAMESPACE_SEP)
-    return key, tuple(namespaces)
-
-def pack_ns(key, *namespaces):
-    """ Pack a key and a set of (optional) namespaces into a namespaced key.
-        
-        To wit: if called as “pack_ns('i-heard, 'yo', 'dogg')” the return
-        value will be the string "yo:dogg:i-heard".
-        
-        If no namespaces are provided (like e.g. “pack_ns('wat')”)
-        the return value will be the string "wat".
-    """
-    return NAMESPACE_SEP.join(chain(namespaces, tuplize(key, expand=False)))
-
-def get_ns(nskey):
-    """ Get the namespace portion of a namespaced key as a packed string. """
-    return nskey.rpartition(NAMESPACE_SEP)[0]
-
-def compare_ns(iterone, itertwo):
-    """ Boolean predicate to compare a pair of namespace iterables, value-by-value """
-    for one, two in zip_longest(iterone,
-                                itertwo,
-                                fillvalue=NoDefault):
-        if one != two:
-            return False
-    return True
 
 # SUB-BASE AND ABSTRACT BASE CLASSES:
 
@@ -1033,9 +751,6 @@ class Environ(FrozenEnviron, KeyMap, contextlib.AbstractContextManager):
         self.stash = None
         return exc_type is None
 
-export(ENVIRONS_SEP,  name='ENVIRONS_SEP')
-export(NAMESPACE_SEP, name='NAMESPACE_SEP')
-
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
@@ -1043,7 +758,7 @@ from clu.testing.utils import inline, format_environment
 
 @inline.fixture
 def nestedmaps():
-    """ Private nested-dictionary pseudo-fixture """
+    """ Nested-dictionary fixture function """
     return {'body':   {'declare_i': {'id': {'name': 'i', 'type': 'Identifier'},
                                             'init': {'type': 'Literal', 'value': 2},
                                             'type': 'VariableDeclarator'},
@@ -1068,7 +783,7 @@ def nestedmaps():
 
 @inline.fixture
 def flatdict():
-    """ Private flat-dictionary pseudo-fixture """
+    """ Flat-dictionary fixture function """
     out = {}
     for mappingpath in mapwalk(nestedmaps()):
         *namespaces, key, value = mappingpath

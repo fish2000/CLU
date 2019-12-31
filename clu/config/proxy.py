@@ -131,7 +131,8 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
-    from clu.config.defg import mapwalk, pack_ns, unpack_ns
+    from clu.config.nsutils import pack_ns, unpack_ns
+    from clu.config.defg import mapwalk
     from clu.config.defg import FrozenFlat, Flat, Nested
     from pprint import pprint
     
@@ -198,10 +199,10 @@ def test():
             
             for keys0, keys1 in zip(kmap.keys(), prox.keys()):
                 assert keys0 == keys1
-                # key0, ns0 = unpack_ns(keys0)
-                # key1, ns1 = unpack_ns(keys1)
-                # assert kmap.get(key0, *ns0) == prox.get(key1, *ns1)
-                # assert kmap.get(key1, *ns1) == prox.get(key0, *ns0)
+                key0, ns0 = unpack_ns(keys0)
+                key1, ns1 = unpack_ns(keys1)
+                assert kmap.get(key0, *ns0) == prox.get(key1, *ns1)
+                assert kmap.get(key1, *ns1) == prox.get(key0, *ns0)
             
             for items0, items1 in zip(kmap.items(), prox.items()):
                 key0, val0 = items0

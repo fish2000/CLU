@@ -9,7 +9,7 @@ import copy
 
 abstract = abc.abstractmethod
 
-from clu.constants.consts import DEBUG, NoDefault
+from clu.constants.consts import DEBUG, NAMESPACE_SEP, NoDefault
 from clu.predicates import (isiterable, always, uncallable,
                             isexpandable, iscontainer, isnotnone,
                             tuplize)
@@ -19,8 +19,6 @@ from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
-
-NAMESPACE_SEP = ':'
 
 @export
 class FlatOrderedSet(collections.abc.Set,
@@ -313,8 +311,6 @@ class NamespacedMutableMapping(collections.abc.MutableMapping,
     
     def __bool__(self):
         return len(self.keys()) > 0
-
-export(NAMESPACE_SEP, name='NAMESPACE_SEP')
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

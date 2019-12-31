@@ -10,10 +10,10 @@ import os
 import sys
 import weakref
 
-from clu.constants.consts import NoDefault
+from clu.constants.consts import NAMESPACE_SEP, NoDefault
 from clu.constants.polyfills import Path
 from clu.abstract import Slotted
-from clu.config.abc import NAMESPACE_SEP, functional_and, functional_set
+from clu.config.abc import functional_and, functional_set
 from clu.naming import nameof
 from clu.predicates import (negate, isclasstype,
                             getpyattr, always, no_op, attr,

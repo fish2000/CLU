@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from itertools import chain
-
-iterchain = chain.from_iterable
 
 import clu.abstract
 import collections

@@ -6,7 +6,6 @@ iterchain = chain.from_iterable
 
 import clu.abstract
 import collections
-import collections.abc
 import contextlib
 import copy
 import os

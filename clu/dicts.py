@@ -336,7 +336,7 @@ class ChainMap(collections.abc.MutableMapping,
     def mapcontaining(self, itx, default=NoDefault):
         from clu.predicates import finditem
         if default is NoDefault:
-            return finditem(itx, *self.maps) or self.__missing__(itx)
+            return finditem(itx, *self.maps) or { itx : self.__missing__(itx) }
         return finditem(itx, *self.maps, default=default)
     
     def flatten(self):

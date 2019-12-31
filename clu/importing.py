@@ -111,12 +111,22 @@ def all_registered_appnames():
 @export
 def all_registered_modules():
     """ Return a generator over the instances of all registered class-based modules """
-    yield from (iterchain(modules.values() for modules in Registry.monomers.values()))
+    yield from iterchain(modules.values() for modules in Registry.monomers.values())
 
 @export
 def modules_for_appname(appname):
     """ Return a generator over the instances of an apps’ registered class-based modules """
-    yield from Registry.monomers.get(appname, {}).values()
+    # N.B. iterating this particular generator can sometimes trigger
+    # garbage-collection of class-based module subtypes that are 
+    # in the monomer cache, but not in “sys.modules” – that’s why
+    # we’re trapping RuntimeErrors here, as that’s what gets raised
+    # when e.g. the monomer cache resizes during iteration, due to
+    # garbage collection nullifying one or more of the weakrefs that
+    # comprise said cache.
+    try:
+        yield from Registry.monomers.get(appname, {}).values()
+    except RuntimeError:
+        yield from Registry.monomers.get(appname, {}).values()
 
 @export
 class Registry(abc.ABC, metaclass=MetaRegistry):
@@ -749,10 +759,6 @@ class ChainModuleMap(clu.dicts.ChainMap):
         if key in self:
             return 0
         raise KeyError(key)
-    
-    def inner_repr(self):
-        from pprint import pformat
-        return pformat(dict(zip(self, (self[item] for item in self))))
 
 # Define an out-of-line target-processing function:
 def add_targets(instance, *targets):

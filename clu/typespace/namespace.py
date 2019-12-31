@@ -181,6 +181,10 @@ class Namespace(BaseNamespace,
         
         Since it implements a `get(…)` method, Namespace instances can be passed
         to `merge(…)` – q.v. `merge(…)` function definition supra.
+        
+        The Namespace class also furnishes a `__missing__(…)` method, which can
+        be overridden by subclasses to provide “collections.defaultdict”–like
+        behaviors.
     """
     
     def get(self, key, default=NoDefault):
@@ -221,13 +225,19 @@ class Namespace(BaseNamespace,
         return exc_type is None
     
     def __getitem__(self, key):
-        return self.__dict__.__getitem__(key)
+        try:
+            return self.__dict__.__getitem__(key)
+        except KeyError:
+            return self.__missing__(key)
     
     def __setitem__(self, key, value):
         self.__dict__.__setitem__(key, value)
     
     def __delitem__(self, key):
         self.__dict__.__delitem__(key)
+    
+    def __missing__(self, key):
+        raise KeyError(key)
     
     def __add__(self, operand):
         # On add, old values are not overwritten
@@ -323,6 +333,24 @@ def test():
         sn = SimpleNamespace(flat_dict())
         assert dir(sn) == ['i_heard', 'nested', 'so', 'yo']
         assert chop_instance_repr(reprizer.fullrepr(sn, short=True)) == shorty_repr()
+        
+    class NamespaceKeyError(KeyError):
+        pass
+    
+    @inline
+    def test_three():
+        """ Namespace subclass “__missing__(…)” check """
+        
+        class MissingNamespace(Namespace):
+            
+            def __missing__(self, key):
+                """ Raise a bespoke exception on missing key access """
+                raise NamespaceKeyError(key)
+        
+        try:
+            MissingNamespace()['wat']
+        except NamespaceKeyError as exc:
+            assert bool(exc)
     
     return inline.test(100)
 

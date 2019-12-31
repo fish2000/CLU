@@ -151,8 +151,8 @@ from clu.abstract import Cloneable, ReprWrapper
 
 from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
 from clu.config.abc import FlatOrderedSet, functional_and, functional_set
-from clu.config.defg import FrozenFlat, Flat, FrozenNested, Nested
-from clu.config.defg import nestedmaps, flatdict
+from clu.config.keymap import FrozenFlat, Flat, FrozenNested, Nested
+from clu.config.keymap import nestedmaps, flatdict
 from clu.config.proxy import KeyMapView, KeyMapProxy
 
 from clu.config.base import Env

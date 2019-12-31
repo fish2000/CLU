@@ -554,7 +554,7 @@ def test():
     @inline
     def test_three():
         """ Equality comparisons across the board """
-        from clu.config.defg import flatdict, Flat
+        from clu.config.keymap import flatdict, Flat
         
         chain0 = ChainMap(dict_arbitrary(),
                            Flat(flatdict()))
@@ -575,7 +575,7 @@ def test():
     @inline
     def test_four_experimental():
         """ Nested map source for ChainMap """
-        from clu.config.defg import nestedmaps
+        from clu.config.keymap import nestedmaps
         
         chainN = ChainMap(nestedmaps())
         
@@ -587,7 +587,7 @@ def test():
     @inline
     def test_five():
         """ Compatibility checks with “collections.ChainMap” """
-        from clu.config.defg import flatdict, Flat
+        from clu.config.keymap import flatdict, Flat
         
         chain0 = ChainMap(dict_arbitrary(), Flat(flatdict()))
         chainO = collections.ChainMap(dict_arbitrary(), Flat(flatdict()))

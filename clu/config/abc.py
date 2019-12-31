@@ -295,7 +295,7 @@ class NamespaceWalker(FrozenKeyMap):
     
     def flatten(self, cls=None):
         """ Dearticulate an articulated KeyMap instance into one that is flat. """
-        from clu.config.defg import Flat
+        from clu.config.keymap import Flat
         if cls is None:
             cls = Flat
         out = cls()

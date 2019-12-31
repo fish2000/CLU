@@ -182,7 +182,7 @@ class TestDicts(object):
     def test_chainmap_equality_comparisons(self, arbitrary):
         """ Equality comparisons across the board """
         from clu.dicts import ChainMap
-        from clu.config.defg import flatdict, Flat
+        from clu.config.keymap import flatdict, Flat
         
         chain0 = ChainMap(arbitrary, Flat(flatdict()))
         chain1 = chain0.clone()
@@ -196,7 +196,7 @@ class TestDicts(object):
     def test_chainmap_compatibilty_stdlib_collections_chainmap(self, arbitrary):
         """ Compatibility checks with “collections.ChainMap” """
         from clu.dicts import ChainMap, ChainRepr
-        from clu.config.defg import flatdict, Flat
+        from clu.config.keymap import flatdict, Flat
         import collections
         
         chain0 = ChainMap(arbitrary, Flat(flatdict()))

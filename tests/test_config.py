@@ -7,7 +7,7 @@ import pytest
 class TestConfigKeyMaps(object):
     
     def test_nested_and_flat_KeyMaps(self):
-        from clu.config.defg import Nested
+        from clu.config.keymap import Nested
         from clu.config.keymapview import (KeyMapKeysView,
                                            KeyMapItemsView,
                                            KeyMapValuesView, NamespaceWalkerKeysView,
@@ -72,7 +72,7 @@ class TestConfigKeyMaps(object):
         assert renestified == nested
     
     def test_env_get_KeyMaps(self, environment, consts):
-        from clu.config.defg import Environ
+        from clu.config.keymap import Environ
         
         env = Environ(environment=environment,
                           appname=consts.PROJECT_NAME)
@@ -100,7 +100,7 @@ class TestConfigKeyMaps(object):
         assert 'envtest1' not in env.namespaces()
     
     def test_env_set_KeyMaps(self, environment, consts):
-        from clu.config.defg import Environ
+        from clu.config.keymap import Environ
         
         env = Environ(environment=environment,
                           appname=consts.PROJECT_NAME)

@@ -611,7 +611,7 @@ def test():
         pypath.enhance(prefix0, prefix1)
         
         from yodogg.config import Env
-        from clu.config.defg import Environ
+        from clu.config.keymap import Environ
         
         env0 = Env()
         envy = Environ(appname=Env.appname)
@@ -631,7 +631,7 @@ def test():
         """ Busywork, mark II. """
         # Fuck around with the CLU app’s environment overrides:
         from clu.config.base import Env
-        from clu.config.defg import Environ
+        from clu.config.keymap import Environ
         
         env0 = Env()
         envy = Environ(appname=Env.appname)

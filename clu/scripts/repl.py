@@ -52,7 +52,7 @@ star_export(consts, namespace=globals())
 # star_export(namespace, namespace=globals())
 
 starmods = ('clu.repl',
-            'clu.config.defg',
+            'clu.config.keymap',
             'clu.dicts', 'clu.enums', 'clu.exporting', 'clu.extending',
             'clu.importing', 'clu.naming', 'clu.predicates', 'clu.typology',
             'clu.fs.filesystem', 'clu.fs.misc')

@@ -2,8 +2,10 @@
 from __future__ import print_function
 from datetime import datetime, timedelta
 from functools import wraps
+from pathlib import Path
 
 import abc
+import clu.abstract
 import collections.abc
 import contextlib
 import os
@@ -11,17 +13,18 @@ import sys
 import weakref
 
 from clu.constants.consts import NAMESPACE_SEP, NoDefault
-from clu.constants.polyfills import Path
-from clu.abstract import Slotted
 from clu.config.abc import functional_and, functional_set
-from clu.naming import nameof
+
 from clu.predicates import (negate, isclasstype,
                             getpyattr, always, no_op, attr,
                             uncallable, hoist, tuplize, slots_for)
-from clu.repr import stringify
+
 from clu.typology import (isderivative, ismapping,
                                         isnumber,
                                         isstring, ispath, isvalidpath)
+
+from clu.naming import nameof
+from clu.repr import stringify
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -33,7 +36,7 @@ class ValidationError(Exception):
     pass
 
 @export
-class FieldBase(abc.ABC, metaclass=Slotted):
+class FieldBase(abc.ABC, metaclass=clu.abstract.Slotted):
     
     """ FieldBase is the base ancestor for all field descriptor classes.
         
@@ -708,7 +711,7 @@ class DictField(FieldBase):
         return super(DictField, self).__set__(instance, newvalue)
 
 class NamespaceContext(contextlib.AbstractContextManager,
-                       metaclass=Slotted):
+                       metaclass=clu.abstract.Slotted):
     
     """ NamespaceContext is a private context-manager proxy class, employed by the
         NamespacedFieldManager pseudo-module class to perform the actual context

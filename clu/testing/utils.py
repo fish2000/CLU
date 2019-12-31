@@ -468,6 +468,7 @@ class InlineTester(collections.abc.Set,
         
         # Get the mode
         mode = kwargs.get('mode', None)
+        verbosity = mode != 'json'
         
         # Count the test functions:
         precount = len(self.prechecks)
@@ -487,14 +488,14 @@ class InlineTester(collections.abc.Set,
                     
                     # Call preflight checks each exactly once:
                     for idx, precheck in enumerate(self.prechecks):
-                        precheck(*args, verbose=True, idx=idx, max=most)
+                        precheck(*args, verbose=verbosity, idx=idx, max=most)
             
             # Main timer for execution times:
             with self.watch.timer('main'):
                 
                 # Call testing functions once, initially:
                 for idx, function in enumerate(self.test_functions):
-                    function(*args, verbose=True, idx=idx, max=most)
+                    function(*args, verbose=verbosity, idx=idx, max=most)
                 
                 # Call them twice through «adnauseumn» –
                 # Redirecting `stdout` so we only get the
@@ -514,7 +515,7 @@ class InlineTester(collections.abc.Set,
                     
                     # Call diagnostics each exactly once:
                     for idx, diagnostic in enumerate(self.diagnostics):
-                        diagnostic(*args, verbose=True, idx=idx, max=most)
+                        diagnostic(*args, verbose=verbosity, idx=idx, max=most)
         
         # REPORT IN:
         report = self.watch.get_last_aggregated_report()
@@ -747,6 +748,7 @@ def test():
             print(envline)
     
     return inline.test(100)
+    # return inline.test(100, mode='json')
 
 if __name__ == '__main__':
     sys.exit(test())

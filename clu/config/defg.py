@@ -15,13 +15,14 @@ import sys
 
 abstract = abc.abstractmethod
 
-from clu.constants.consts import DEBUG, ENVIRONS_SEP, PROJECT_NAME, NAMESPACE_SEP
+from clu.constants.consts import DEBUG, PROJECT_NAME, NAMESPACE_SEP
 from clu.constants.consts import NoDefault, pytuple
 from clu.config.keymapview import concatenate_ns, prefix_for
 from clu.config.keymapview import KeyMapKeysView, KeyMapItemsView, KeyMapValuesView
 from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsView
 from clu.config.keymapview import NamespaceWalkerValuesView
 from clu.config.nsutils import unpack_ns, pack_ns, get_ns, compare_ns
+from clu.config.nsutils import prefix_env, unpack_env, nskey_to_env
 from clu.predicates import attr, tuplize, listify
 from clu.typology import iterlen, ismapping
 from clu.exporting import Exporter
@@ -547,73 +548,6 @@ class Nested(FrozenNested, KeyMap):
                 del d[key]
         else:
             raise KeyError(nskey)
-
-# ENVIRONMENT-VARIABLE MANIPULATION API:
-
-def concatenate_env(*namespaces):
-    """ Concatenate and UPPERCASE namespaces, per environment variables. """
-    return ENVIRONS_SEP.join(namespace.upper() for namespace in namespaces)
-
-def prefix_env(appname, *namespaces):
-    """ Determine the environment-variable prefix based on a given
-        set of namespaces and the provided “appname” value. Like e.g.,
-        for an appname of “YoDogg” and a namespace value of “iheard”,
-        the environment variable prefix would work out such that
-        a variable with a key value of “youlike” would look like this:
-            
-            YODOGG_IHEARD_YOULIKE
-                                 
-            ^^^^^^ ^^^^^^ ^^^^^^^
-               |      |      |
-               |      |      +––––– mapping key (uppercased)
-               |      +–––––––––––– namespaces (uppercased, one value)
-               +––––––––––––––––––– app name (uppercased)
-    """
-    if not appname and not namespaces:
-        return ''
-    if not appname:
-        return concatenate_env(*namespaces) + ENVIRONS_SEP
-    if not namespaces:
-        return appname.upper() + ENVIRONS_SEP
-    return appname.upper() + ENVIRONS_SEP + concatenate_env(*namespaces) + ENVIRONS_SEP
-
-def pack_env(appname, key, *namespaces):
-    """ Transform a mapping key, along with optional “namespaces”
-        values and the provided “appname” value, into an environment-
-        variable name. Like e.g., for an appname of “YoDogg” and
-        a namespace value of “iheard”, the environment variable
-        prefix would work out such that a variable with a key value
-        of “youlike” would look like this:
-            
-            YODOGG_IHEARD_YOULIKE
-                                 
-            ^^^^^^ ^^^^^^ ^^^^^^^
-               |      |      |
-               |      |      +––––– mapping key (uppercased)
-               |      +–––––––––––– namespaces (uppercased, one value)
-               +––––––––––––––––––– app name (uppercased)
-    """
-    prefix = prefix_env(appname, *namespaces)
-    return f"{prefix}{key.upper()}"
-
-def unpack_env(envkey):
-    """ Unpack the appname, possible namespaces, and the key from an environment
-        variable key name.
-    """
-    appname, *namespaces, key = envkey.casefold().split(ENVIRONS_SEP)
-    return appname, key, tuple(namespaces)
-
-def nskey_from_env(envkey):
-    """ Repack an environment-variable key name as a packed namespace key. """
-    appname, *namespaces, key = envkey.casefold().split(ENVIRONS_SEP)
-    return appname, pack_ns(key, *namespaces)
-
-def nskey_to_env(appname, nskey):
-    """ Repack a packed namespace key, with a given appname, as an environment
-        variable key name.
-    """
-    key, namespaces = unpack_ns(nskey)
-    return pack_env(appname, key, *namespaces)
 
 @export
 def envwalk(appname, mapping):

@@ -72,6 +72,7 @@ class TestConfigKeyMaps(object):
     
     def test_env_get_KeyMaps(self, environment, consts):
         from clu.config.defg import Environ
+        
         env = Environ(environment=environment,
                           appname=consts.PROJECT_NAME)
         
@@ -99,6 +100,7 @@ class TestConfigKeyMaps(object):
     
     def test_env_set_KeyMaps(self, environment, consts):
         from clu.config.defg import Environ
+        
         env = Environ(environment=environment,
                           appname=consts.PROJECT_NAME)
         
@@ -380,6 +382,7 @@ class TestConfig(object):
     
     def test_env_get(self, environment):
         from clu.config.env import Env
+        
         env = Env()
         
         try:
@@ -406,6 +409,7 @@ class TestConfig(object):
     
     def test_env_set(self, environment):
         from clu.config.env import Env
+        
         env = Env()
         
         try:

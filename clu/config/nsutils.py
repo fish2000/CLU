@@ -4,7 +4,7 @@ from itertools import chain, zip_longest
 
 import sys
 
-from clu.constants.consts import NAMESPACE_SEP, NoDefault
+from clu.constants.consts import ENVIRONS_SEP, NAMESPACE_SEP, NoDefault
 from clu.predicates import tuplize
 from clu.exporting import Exporter
 
@@ -92,6 +92,79 @@ def compare_ns(iterone, itertwo):
         if one != two:
             return False
     return True
+
+# ENVIRONMENT-VARIABLE MANIPULATION API:
+
+@export
+def concatenate_env(*namespaces):
+    """ Concatenate and UPPERCASE namespaces, per environment variables. """
+    return ENVIRONS_SEP.join(namespace.upper() for namespace in namespaces)
+
+@export
+def prefix_env(appname, *namespaces):
+    """ Determine the environment-variable prefix based on a given
+        set of namespaces and the provided “appname” value. Like e.g.,
+        for an appname of “YoDogg” and a namespace value of “iheard”,
+        the environment variable prefix would work out such that
+        a variable with a key value of “youlike” would look like this:
+            
+            YODOGG_IHEARD_YOULIKE
+                                 
+            ^^^^^^ ^^^^^^ ^^^^^^^
+               |      |      |
+               |      |      +––––– mapping key (uppercased)
+               |      +–––––––––––– namespaces (uppercased, one value)
+               +––––––––––––––––––– app name (uppercased)
+    """
+    if not appname and not namespaces:
+        return ''
+    if not appname:
+        return concatenate_env(*namespaces) + ENVIRONS_SEP
+    if not namespaces:
+        return appname.upper() + ENVIRONS_SEP
+    return appname.upper() + ENVIRONS_SEP + concatenate_env(*namespaces) + ENVIRONS_SEP
+
+@export
+def pack_env(appname, key, *namespaces):
+    """ Transform a mapping key, along with optional “namespaces”
+        values and the provided “appname” value, into an environment-
+        variable name. Like e.g., for an appname of “YoDogg” and
+        a namespace value of “iheard”, the environment variable
+        prefix would work out such that a variable with a key value
+        of “youlike” would look like this:
+            
+            YODOGG_IHEARD_YOULIKE
+                                 
+            ^^^^^^ ^^^^^^ ^^^^^^^
+               |      |      |
+               |      |      +––––– mapping key (uppercased)
+               |      +–––––––––––– namespaces (uppercased, one value)
+               +––––––––––––––––––– app name (uppercased)
+    """
+    prefix = prefix_env(appname, *namespaces)
+    return f"{prefix}{key.upper()}"
+
+@export
+def unpack_env(envkey):
+    """ Unpack the appname, possible namespaces, and the key from an environment
+        variable key name.
+    """
+    appname, *namespaces, key = envkey.casefold().split(ENVIRONS_SEP)
+    return appname, key, tuple(namespaces)
+
+@export
+def nskey_from_env(envkey):
+    """ Repack an environment-variable key name as a packed namespace key. """
+    appname, *namespaces, key = envkey.casefold().split(ENVIRONS_SEP)
+    return appname, pack_ns(key, *namespaces)
+
+@export
+def nskey_to_env(appname, nskey):
+    """ Repack a packed namespace key, with a given appname, as an environment
+        variable key name.
+    """
+    key, namespaces = unpack_ns(nskey)
+    return pack_env(appname, key, *namespaces)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

@@ -228,7 +228,7 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     from clu.config.abc import FlatOrderedSet as FOSet
-    from clu.config.abc import NamespacedMutableMapping as NaMutMap
+    from clu.config.base import NamespacedMutableMapping as NaMutMap
     from clu.testing.utils import pout, inline
     
     @inline

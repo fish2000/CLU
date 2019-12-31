@@ -1,21 +1,173 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from itertools import chain
-import copy
 
 iterchain = chain.from_iterable
 
-from clu.abstract import Cloneable, ReprWrapper
-from clu.constants.consts import NAMESPACE_SEP, NoDefault
-from clu.config.abc import NamespacedMutableMapping
-from clu.typology import ismapping
+import abc
+import clu.abstract
+import collections
+import collections.abc
+import copy
+
+abstract = abc.abstractmethod
+
+from clu.constants.consts import DEBUG, NAMESPACE_SEP, NoDefault
+from clu.predicates import isiterable
+from clu.typology import iterlen, ismapping
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 @export
-class Flat(NamespacedMutableMapping, ReprWrapper, Cloneable):
+class NamespacedMutableMapping(collections.abc.MutableMapping,
+                               collections.abc.Reversible):
+    
+    __slots__ = tuple()
+    
+    @staticmethod
+    def unpack_ns(string):
+        """ Unpack a namespaced key into a namespace name and a key name.
+            
+            To wit: if the namespaced key is “yo:dogg”, calling “unpack_ns(…)”
+            on it will return the tuple ('yo', 'dogg');
+            
+            If the key is not namespaced (like e.g. “wat”) the “unpack_ns(…)”
+            call will return the tuple (None, 'wat').
+        """
+        if NAMESPACE_SEP not in string:
+            return None, string
+        return string.split(NAMESPACE_SEP, 1)
+    
+    @staticmethod
+    def pack_ns(string, namespace=None):
+        """ Pack a key and an (optional) namespace name into a namespaced key.
+            
+            To wit: if called as “pack_ns('dogg', namespace='yo')” the return
+            value will be the string "yo:dogg".
+            
+            If “None” is the namespace (like e.g. “pack_ns('wat', namespace=None)”)
+            the return value will be the string "wat".
+        """
+        if namespace is None:
+            return string
+        return NAMESPACE_SEP.join((namespace, string))
+    
+    @abstract
+    def get(self, key, namespace=None, default=NoDefault):
+        """ Retrieve a (possibly namespaced) value for a given key.
+            
+            An optional default value may be specified, to be returned
+            if the key in question is not found in the mapping.
+        """
+        ...
+    
+    @abstract
+    def set(self, key, value, namespace=None):
+        """ Set a (possibly namespaced) value for a given key. """
+        ...
+    
+    def delete(self, key, namespace=None):
+        """ Delete a (possibly namespaced) value from the mapping.
+            
+            N.B. – The default implementation is a no-op. Subclasses must
+                   explicitly override this method to allow deletion.
+        """
+        pass
+    
+    @abstract
+    def keys(self, namespace=None):
+        """ Return an iterable generator over either all keys in the mapping,
+            or over only those keys in the mapping matching the specified
+            namespace value.
+        """
+        ...
+    
+    @abstract
+    def values(self, namespace=None):
+        """ Return an iterable generator over either all values in the mapping,
+            or over only those values in the mapping whose keys match the specified
+            namespace value.
+        """
+        ...
+    
+    def items(self, namespace=None):
+        """ Return an iterable generator over either all keys and values in the
+            mapping, or over only those values in the mapping whose keys match the
+            specified namespace value.
+            
+            The generator yields the keys and values as two-tuples containing both:
+                
+                >>> (key, value)
+        """
+        return zip(self.keys(namespace),
+                   self.values(namespace))
+    
+    @abstract
+    def namespaces(self):
+        """ Return a sorted tuple listing all of the namespaces defined in
+            the mapping.
+        """
+        ...
+    
+    def update(self, dictish=NoDefault, **updates):
+        """ NamespacedMutableMapping.update([E, ]**F) -> None.
+            
+            Update D from dict/iterable E and/or F.
+        """
+        if dictish is not NoDefault:
+            if hasattr(dictish, 'items'):
+                dictish = dictish.items()
+            if not isiterable(dictish):
+                raise TypeError(f"{dictish!r} is not iterable")
+            for key, value in dictish:
+                self[key] = value
+        for key, value in updates.items():
+            self[key] = value
+    
+    def __iter__(self):
+        yield from self.keys()
+    
+    def __reversed__(self):
+        yield from reversed(self.keys())
+    
+    def __len__(self):
+        return iterlen(self.keys())
+    
+    def __contains__(self, key):
+        ns, string = self.unpack_ns(key)
+        try:
+            self.get(string, namespace=ns)
+        except KeyError:
+            return False
+        else:
+            return True
+    
+    def __getitem__(self, key):
+        ns, string = self.unpack_ns(key)
+        return self.get(string, namespace=ns)
+    
+    def __setitem__(self, key, value):
+        ns, string = self.unpack_ns(key)
+        return self.set(string, value, namespace=ns)
+    
+    def __delitem__(self, key):
+        ns, string = self.unpack_ns(key)
+        return self.delete(string, namespace=ns)
+    
+    def __missing__(self, key):
+        if DEBUG:
+            print(f"__missing__(…): {key}")
+        raise KeyError(key)
+    
+    def __bool__(self):
+        return len(self.keys()) > 0
+
+@export
+class Flat(NamespacedMutableMapping,
+           clu.abstract.ReprWrapper,
+           clu.abstract.Cloneable):
     
     def __init__(self, dictionary=None, *args, **kwargs):
         try:
@@ -75,7 +227,9 @@ class Flat(NamespacedMutableMapping, ReprWrapper, Cloneable):
         return type(self)(dictionary=copy.copy(self.dictionary))
 
 @export
-class Nested(NamespacedMutableMapping, ReprWrapper, Cloneable):
+class Nested(NamespacedMutableMapping,
+             clu.abstract.ReprWrapper,
+             clu.abstract.Cloneable):
     
     def __init__(self, tree=None, *args, **kwargs):
         try:

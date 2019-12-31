@@ -5,7 +5,7 @@ import os
 
 from clu.abstract import Slotted, AppName, Cloneable, ReprWrapper
 from clu.constants.consts import ENVIRONS_SEP, NAMESPACE_SEP, PROJECT_NAME, NoDefault
-from clu.config.abc import NamespacedMutableMapping
+from clu.config.base import NamespacedMutableMapping
 from clu.predicates import tuplize
 from clu.typology import iterlen
 from clu.exporting import Exporter

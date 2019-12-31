@@ -7,10 +7,12 @@ from clu.constants.consts import (BASEPATH,
                                   DELETE_FLAG,
                                   DYNAMIC_MODULE_PREFIX,
                                   ENCODING,
+                                  ENVIRONS_SEP,
                                   FILE_ARGUMENT_NAMES,
                                   HOSTNAME,
                                   LAMBDA, λ,
                                   MAXINT,
+                                  NAMESPACE_SEP,
                                   PATH,
                                   PARTIAL, φ,
                                   PROJECT_NAME, PROJECT_PATH,
@@ -147,10 +149,9 @@ from clu.naming import (determine_module, nameof, moduleof,
 
 from clu.abstract import Cloneable, ReprWrapper
 
-# from clu.config.base import Flat, Nested
+from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
 from clu.config.abc import FlatOrderedSet, functional_and, functional_set
-from clu.config.defg import (NAMESPACE_SEP, FrozenKeyMap, KeyMap, FrozenFlat, Flat,
-                                                                  FrozenNested, Nested)
+from clu.config.defg import FrozenFlat, Flat, FrozenNested, Nested
 from clu.config.defg import nestedmaps, flatdict
 from clu.config.proxy import KeyMapView, KeyMapProxy
 
@@ -268,10 +269,12 @@ __all__ = ('Image',
            'DELETE_FLAG',
            'DYNAMIC_MODULE_PREFIX',
            'ENCODING',
+           'ENVIRONS_SEP',
            'FILE_ARGUMENT_NAMES',
            'HOSTNAME',
            'LAMBDA', 'λ',
            'MAXINT',
+           'NAMESPACE_SEP',
            'PATH',
            'PARTIAL', 'φ',
            'PROJECT_NAME', 'PROJECT_PATH',
@@ -390,8 +393,8 @@ __all__ = ('Image',
            'qualified_import', 'qualified_name_tuple', 'qualified_name',
            'dotpath_to_prefix', 'path_to_prefix',
            'split_abbreviations',
-           'NAMESPACE_SEP', 'Cloneable', 'ReprWrapper', 'FlatOrderedSet',
-           'FrozenKeyMap', 'KeyMap',
+           'Cloneable', 'ReprWrapper', 'FlatOrderedSet',
+           'FrozenKeyMap', 'KeyMap', 'NamespaceWalker',
            'FrozenFlat', 'FrozenNested',
            'KeyMapView', 'KeyMapProxy',
            'Flat', 'Nested',

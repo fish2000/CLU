@@ -7,7 +7,7 @@ import contextlib
 import weakref
 import sys
 
-from clu.config.defg import FrozenKeyMap, KeyMap
+from clu.config.abc import FrozenKeyMap, KeyMap
 from clu.naming import qualified_name
 from clu.predicates import typeof, tuplize
 from clu.exporting import Exporter

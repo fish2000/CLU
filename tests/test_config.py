@@ -7,11 +7,12 @@ import pytest
 class TestConfigKeyMaps(object):
     
     def test_nested_and_flat_KeyMaps(self):
-        from clu.config.defg import (Nested, KeyMapKeysView,
-                                             KeyMapItemsView,
-                                             KeyMapValuesView, NamespaceWalkerKeysView,
-                                                               NamespaceWalkerItemsView,
-                                                               NamespaceWalkerValuesView)
+        from clu.config.defg import Nested
+        from clu.config.keymapview import (KeyMapKeysView,
+                                           KeyMapItemsView,
+                                           KeyMapValuesView, NamespaceWalkerKeysView,
+                                                             NamespaceWalkerItemsView,
+                                                             NamespaceWalkerValuesView)
         
         tree = {
             'yo'        : "dogg",

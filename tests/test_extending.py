@@ -54,7 +54,7 @@ class TestExtending(object):
     
     def test_pairmro0(self):
         from clu.config.abc import FlatOrderedSet as FOSet
-        from clu.config.abc import NamespacedMutableMapping as NaMutMap
+        from clu.config.base import NamespacedMutableMapping as NaMutMap
         from clu.extending import pairmro
         from itertools import chain, product as dot_product
         
@@ -79,7 +79,7 @@ class TestExtending(object):
     
     def test_pairmro1(self):
         from clu.config.abc import FlatOrderedSet as FOSet
-        from clu.config.abc import NamespacedMutableMapping as NaMutMap
+        from clu.config.base import NamespacedMutableMapping as NaMutMap
         from clu.extending import pairmro
         from itertools import product as dot_product
         

@@ -33,3 +33,5 @@ sdist/
 
 tmtags
 tmtagsHistory
+
+docs/_build

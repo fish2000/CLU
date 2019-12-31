@@ -12,10 +12,10 @@ import collections.abc
 abstract = abc.abstractmethod
 
 from clu.constants.consts import pytuple
-from clu.config.nsutils import (concatenate_ns,
-                                prefix_for,
-                                startswith_ns,
-                                pack_ns)
+from clu.config.ns import (concatenate_ns,
+                           prefix_for,
+                           startswith_ns,
+                           pack_ns)
 
 from clu.predicates import tuplize
 from clu.typology import iterlen

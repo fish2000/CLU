@@ -131,7 +131,7 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
-    from clu.config.nsutils import pack_ns, unpack_ns
+    from clu.config.ns import pack_ns, unpack_ns
     from clu.config.keymap import mapwalk
     from clu.config.keymap import FrozenFlat, Flat
     # from clu.config.keymap import Nested

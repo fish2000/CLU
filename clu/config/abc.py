@@ -10,8 +10,8 @@ import copy
 abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, NAMESPACE_SEP, NoDefault, pytuple
-from clu.config.nsutils import concatenate_ns, prefix_for
-from clu.config.nsutils import unpack_ns, pack_ns, get_ns, compare_ns
+from clu.config.ns import concatenate_ns, prefix_for
+from clu.config.ns import unpack_ns, pack_ns, get_ns, compare_ns
 from clu.config.keymapview import KeyMapKeysView, KeyMapItemsView, KeyMapValuesView
 from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsView
 from clu.config.keymapview import NamespaceWalkerValuesView

@@ -18,8 +18,8 @@ abstract = abc.abstractmethod
 from clu.constants.consts import PROJECT_NAME
 from clu.constants.consts import NoDefault
 from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
-from clu.config.nsutils import unpack_ns, pack_ns
-from clu.config.nsutils import prefix_env, unpack_env, nskey_to_env
+from clu.config.ns import unpack_ns, pack_ns
+from clu.config.ns import prefix_env, unpack_env, nskey_to_env
 from clu.predicates import attr, tuplize, listify
 from clu.typology import iterlen, ismapping
 from clu.exporting import Exporter

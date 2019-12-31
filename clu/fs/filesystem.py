@@ -964,7 +964,7 @@ class Directory(collections.abc.Hashable,
         """ Sugar for calling os.walk(self.name)
             
             Note that the “followlinks” default here is True, whereas
-            the underlying functions default to False for that argument.
+            the underlying function defaults to False for that argument.
         """
         return os.walk(self.name, followlinks=followlinks)
     

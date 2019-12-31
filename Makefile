@@ -80,8 +80,11 @@ version:
 consts:
 	DEBUG=1 PYTHONPATH="." ./clu/scripts/show-consts.py
 
-modules:
+modules-old:
 	DEBUG=1 PYTHONPATH="." ./clu/scripts/show-modules.py
+
+modules:
+	python -m clu.constants
 
 remove-changelog:
 	rm -f CHANGELOG.md

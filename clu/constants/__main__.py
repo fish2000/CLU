@@ -6,10 +6,10 @@ import os
 
 from clu.constants import consts
 from clu.repl import ansi
-from ansicolors import (green, red, lightred, cyan, dimcyan,
-                        lightcyan, dimlightcyan, gray, dimgray,
-                        yellow, blue, lightblue,
-                        green_bg, cyan_bg, yellow_bg, nothing)
+from clu.scripts.ansicolors import (green, red, lightred, cyan, dimcyan,
+                                    lightcyan, dimlightcyan, gray, dimgray,
+                                    yellow, blue, lightblue,
+                                    green_bg, cyan_bg, yellow_bg, nothing)
 
 # socking them all in a tuple gets PyFlakes to shut up:
 colors = (green, red, lightred, cyan, dimcyan,

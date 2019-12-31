@@ -12,8 +12,7 @@ import copy
 import os
 import sys
 
-from clu.constants.consts import PROJECT_NAME
-from clu.constants.consts import NoDefault
+from clu.constants.consts import PROJECT_NAME, NoDefault
 from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
 from clu.config.ns import unpack_ns, pack_ns
 from clu.config.ns import prefix_env, unpack_env, nskey_to_env

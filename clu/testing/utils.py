@@ -270,7 +270,7 @@ class InlineTester(collections.abc.Set,
         if iterable is not None:
             self.test_functions.extend(iterable)
     
-    def wrap(self, function, bucket=Bucket.MAIN, newline=False):
+    def wrap(self, function, bucket=Bucket.MAIN):
         """ Wrap an inline function with timing, banner-printing,
             and all sorts of other useful bookkeeping code used
             internally by the inline testing harness.
@@ -318,8 +318,8 @@ class InlineTester(collections.abc.Set,
                 out = function(*args, **kwargs)
             
             if verbose:
-                # If we asked for it, we’ll get it:
-                if newline:
+                # Give us a line-break on non-main verbose runs:
+                if bucket is not Bucket.MAIN:
                     print()
                 
                 # Get the reported timer value *before* closing out
@@ -358,8 +358,7 @@ class InlineTester(collections.abc.Set,
     
     def __call__(self, function):
         """ Decorate a testing function, marking it as an inline test. """
-        wrapper = self.wrap(function, bucket=Bucket.MAIN,
-                                      newline=False)
+        wrapper = self.wrap(function, bucket=Bucket.MAIN)
         
         # Add the wrapper to the internal test function list:
         self.test_functions.append(wrapper)
@@ -393,8 +392,7 @@ class InlineTester(collections.abc.Set,
             ahead of the main test run.
         """
         def decoration(function):
-            wrapper = self.wrap(function, bucket=Bucket.CHECK,
-                                          newline=True)
+            wrapper = self.wrap(function, bucket=Bucket.CHECK)
             
             # Add the wrapper to the internal precheck function list:
             self.prechecks.append(wrapper)
@@ -415,8 +413,7 @@ class InlineTester(collections.abc.Set,
             informational shit; hence the name “diagnostics”.
         """
         def decoration(function):
-            wrapper = self.wrap(function, bucket=Bucket.POSTEXEC,
-                                          newline=True)
+            wrapper = self.wrap(function, bucket=Bucket.POSTEXEC)
             
             # Add the wrapper to the internal diagnostic list:
             self.diagnostics.append(wrapper)
@@ -431,12 +428,8 @@ class InlineTester(collections.abc.Set,
     def runtwice(self):
         """ Decorate a function as both a precheck and a diagnostic. """
         def decoration(function):
-            begin_wrapper = self.wrap(function, bucket=Bucket.CHECK,
-                                                newline=True)
-            
-            end_wrapper = self.wrap(function, bucket=Bucket.POSTEXEC,
-                                              newline=True)
-            
+            begin_wrapper = self.wrap(function, bucket=Bucket.CHECK)
+            end_wrapper = self.wrap(function, bucket=Bucket.POSTEXEC)
             self.prechecks.insert(0, begin_wrapper)
             self.diagnostics.insert(0, end_wrapper)
             return function

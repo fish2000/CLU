@@ -229,7 +229,7 @@ class TestPredicates(object):
         # assert isorigin({},                 original=dict)
     
     def test_newtype(self):
-        from clu.predicates import isclass, ismetaclass
+        from clu.predicates import isclass, ismetaclass, metaclass
         from clu.predicates import newtype
         import abc
         
@@ -247,6 +247,14 @@ class TestPredicates(object):
         assert MetaThingy.__name__ == 'MetaThingy'
         assert MetaThingy.__qualname__.endswith('MetaThingy')
         
+        # equivalent to class ThingyWithMeta(Thingy, metaclass=MetaThingy): pass
+        ThingyWithMeta = newtype('ThingyWithMeta', Thingy, keywords=dict(metaclass=MetaThingy))
+        assert isclass(ThingyWithMeta)
+        assert not ismetaclass(ThingyWithMeta)
+        assert ThingyWithMeta.__name__ == 'ThingyWithMeta'
+        assert ThingyWithMeta.__qualname__.endswith('ThingyWithMeta')
+        assert metaclass(ThingyWithMeta) is MetaThingy
+        
         # equivalent to class DerivedThingy(Thingy): pass
         DerivedThingy = newtype('DerivedThingy', Thingy)
         assert isclass(DerivedThingy)
@@ -262,6 +270,7 @@ class TestPredicates(object):
         assert AbstractThingy.__name__ == 'AbstractThingy'
         assert AbstractThingy.__qualname__.endswith('AbstractThingy')
         assert AbstractThingy.__mro__ == (AbstractThingy, Thingy, abc.ABC, object)
+        assert metaclass(AbstractThingy) is abc.ABCMeta
         
         # equivalent to:
         # class ThingyWithAttrs(Thingy):

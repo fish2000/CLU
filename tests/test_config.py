@@ -72,7 +72,7 @@ class TestConfigKeyMaps(object):
         assert renestified == nested
     
     def test_env_get_KeyMaps(self, environment, consts):
-        from clu.config.keymap import Environ
+        from clu.config.env import Environ
         
         env = Environ(environment=environment,
                           appname=consts.PROJECT_NAME)
@@ -100,7 +100,7 @@ class TestConfigKeyMaps(object):
         assert 'envtest1' not in env.namespaces()
     
     def test_env_set_KeyMaps(self, environment, consts):
-        from clu.config.keymap import Environ
+        from clu.config.env import Environ
         
         env = Environ(environment=environment,
                           appname=consts.PROJECT_NAME)

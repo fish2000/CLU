@@ -161,7 +161,6 @@ def test():
     
     from clu.testing.utils import inline, format_environment
     from clu.config.keymap import nestedmaps
-    # from clu.config.keymap import flatdict
     from pprint import pprint
     
     @inline.precheck

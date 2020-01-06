@@ -6,7 +6,6 @@ import collections
 import copy
 import sys
 
-# from clu.constants.consts import PROJECT_NAME, NoDefault
 from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
 from clu.config.ns import unpack_ns, pack_ns
 from clu.predicates import attr, tuplize

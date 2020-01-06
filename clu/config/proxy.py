@@ -134,7 +134,6 @@ def test():
     from clu.config.ns import pack_ns, unpack_ns
     from clu.config.keymap import mapwalk
     from clu.config.keymap import FrozenFlat, Flat
-    # from clu.config.keymap import Nested
     from pprint import pprint
     
     @inline.fixture

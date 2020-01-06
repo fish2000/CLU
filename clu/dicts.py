@@ -148,7 +148,7 @@ class ChainRepr(Repr):
         
         tn = typename(chainmap)
         mapcount = len(chainmap.maps)
-        keycount = len(chainmap.keys())
+        keycount = len(chainmap)
         items = (STRINGPAIR.format(qualified_name(type(mapping)),
                                    self.primerepr(mapping, level - 1)) \
                                    for mapping in chainmap.maps)
@@ -234,16 +234,16 @@ class ChainMap(collections.abc.MutableMapping,
         return try_items(key, *self.maps, default=None) or self.__missing__(key)
     
     def __len__(self):
-        return len(set(iterchain(self.maps)))
+        return len(set(iterchain(map.keys() for map in self.maps)))
     
-    def __bool__(self):
-        return any(self.maps)
+    def __iter__(self):
+        yield from set(iterchain(map.keys() for map in self.maps))
     
     def __contains__(self, key):
         return any(key in map for map in self.maps)
     
-    def __iter__(self):
-        yield from merge_fast(*reversed(self.maps))
+    def __bool__(self):
+        return any(self.maps)
     
     def __repr__(self):
         return cmrepr(self)
@@ -344,6 +344,7 @@ class ChainMap(collections.abc.MutableMapping,
             into a new, single, flat dictionary instance.
         """
         return merge_fast(*reversed(self.maps))
+        # return dict(frozenset(iterchain(map.items() for map in self.maps)))
     
     def clone(self, deep=False, memo=None):
         """ Return a cloned copy of the ChainMap """
@@ -388,16 +389,51 @@ def merge_fast_two(one, two):
     return { **two, **one }
 
 @export
-def merge_fast(*dicts, **overrides):
+def merge_fast(*dicts, **extras):
     """ Merge all dictionary arguments into a new instance of “dict”.
         passing all additional keyword arguments as an additional dict instance.
         
         Based on this extremely beloved SO answer:
             https://stackoverflow.com/a/26853961/298171
     """
-    merged = { **overrides }
-    for d in dicts:
-        merged = { **merged, **d }
+    length = len(dicts)
+    if length == 10:
+        return { **extras,   **dicts[9], **dicts[8], **dicts[7], **dicts[6],
+                 **dicts[5], **dicts[4], **dicts[3], **dicts[2],
+                 **dicts[1], **dicts[0] }
+    elif length == 9:
+        return { **extras,   **dicts[8], **dicts[7], **dicts[6],
+                 **dicts[5], **dicts[4], **dicts[3], **dicts[2],
+                 **dicts[1], **dicts[0] }
+    elif length == 8:
+        return { **extras,   **dicts[7], **dicts[6],
+                 **dicts[5], **dicts[4], **dicts[3], **dicts[2],
+                 **dicts[1], **dicts[0] }
+    elif length == 7:
+        return { **extras,   **dicts[6],
+                 **dicts[5], **dicts[4], **dicts[3], **dicts[2],
+                 **dicts[1], **dicts[0] }
+    elif length == 6:
+        return { **extras,
+                 **dicts[5], **dicts[4], **dicts[3], **dicts[2],
+                 **dicts[1], **dicts[0] }
+    elif length == 5:
+        return { **extras,   **dicts[4], **dicts[3], **dicts[2],
+                 **dicts[1], **dicts[0] }
+    elif length == 4:
+        return { **extras,   **dicts[3], **dicts[2],
+                 **dicts[1], **dicts[0] }
+    elif length == 3:
+        return { **extras,   **dicts[2],
+                 **dicts[1], **dicts[0] }
+    elif length == 2:
+        return { **extras,   **dicts[1], **dicts[0] }
+    elif length == 1:
+        return { **extras,   **dicts }
+    else:
+        merged = { **extras }
+        for d in dicts:
+            merged = { **merged, **d }
     return merged
 
 @export
@@ -441,7 +477,8 @@ def asdict(thing):
     from clu.typology import ismapping
     from clu.typespace.namespace import isnamespace
     if ischainmap(thing):
-        return merge_fast(*reversed(thing.maps))
+        # return merge_fast(*reversed(thing.maps))
+        return set(iterchain(thing.maps))
     if isnamespace(thing):
         return dict(thing.__dict__)
     if ismapping(thing):

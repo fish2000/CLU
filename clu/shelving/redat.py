@@ -146,13 +146,11 @@ class RedisConf(clu.abstract.ManagedContext,
         return Directory(self.get('dir'))
     
     def get_includes(self):
-        includes = []
         for value_parts in self.config.popall('include', tuple()):
             value = os.path.abspath(self.compose(value_parts))
             if not os.path.isfile(value):
                 raise ValueError(f"bad include directive: {value}")
-            includes.append(value)
-        return tuple(includes)
+            yield value
     
     def getline(self, key):
         value = self.get(key)
@@ -161,17 +159,12 @@ class RedisConf(clu.abstract.ManagedContext,
     def getlines(self, key):
         if key not in self:
             raise KeyError(key)
-        lines = []
         for value_parts in self.config.getall(key):
-            value = self.compose(value_parts)
-            lines.append(f"{key} {value}")
-        return lines
+            yield f"{key} {self.compose(value_parts)}"
     
     def getall(self):
-        lines = []
         for key in uniquify(self.config.keys()):
-            lines.extend(self.getlines(key))
-        return lines
+            yield from self.getlines(key)
     
     def assemble(self):
         return "\n".join(self)
@@ -494,4 +487,5 @@ def test():
     logging.debug(repr(redconf))
 
 if __name__ == '__main__':
+    # test_context()
     test()

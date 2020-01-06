@@ -429,7 +429,7 @@ def merge_fast(*dicts, **extras):
     elif length == 2:
         return { **extras,   **dicts[1], **dicts[0] }
     elif length == 1:
-        return { **extras,   **dicts }
+        return { **extras,   **dicts[0] }
     else:
         merged = { **extras }
         for d in dicts:

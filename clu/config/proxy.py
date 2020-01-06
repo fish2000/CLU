@@ -131,45 +131,10 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
-    from clu.config.ns import pack_ns, unpack_ns
-    from clu.config.keymap import mapwalk
+    from clu.config.ns import unpack_ns
     from clu.config.keymap import FrozenFlat, Flat
+    from clu.config.keymap import nestedmaps, flatdict
     from pprint import pprint
-    
-    @inline.fixture
-    def nestedmaps():
-        """ Private nested-dictionary pseudo-fixture """
-        return {'body':   {'declare_i': {'id': {'name': 'i', 'type': 'Identifier'},
-                                                'init': {'type': 'Literal', 'value': 2},
-                                                'type': 'VariableDeclarator'},
-                               'kind': 'var',
-                               'type': 'VariableDeclaration',
-                               'declare_j': {'id': {'name': 'j', 'type': 'Identifier'},
-                                                'init': {'type': 'Literal', 'value': 4},
-                                                'type': 'VariableDeclarator'},
-                               'kind': 'var',
-                               'type': 'VariableDeclaration',
-                               'declare_answer': {'id': {'name': 'answer', 'type': 'Identifier'},
-                                                'init': {'left': {'name': 'i',
-                                                                  'type': 'Identifier'},
-                                                         'operator': '*',
-                                                         'right': {'name': 'j',
-                                                                   'type': 'Identifier'},
-                                                         'type': 'BinaryExpression'},
-                                                'type': 'VariableDeclarator'},
-                               'kind': 'var',
-                               'type': 'VariableDeclaration'},
-                'type':     'Program'}
-    
-    @inline.fixture
-    def flatdict():
-        """ Private flat-dictionary pseudo-fixture """
-        out = {}
-        for mappingpath in mapwalk(nestedmaps()):
-            *namespaces, key, value = mappingpath
-            nskey = pack_ns(key, *namespaces)
-            out[nskey] = value
-        return out
     
     @inline.precheck
     def show_nestedmaps_fixture():

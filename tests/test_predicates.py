@@ -232,6 +232,7 @@ class TestPredicates(object):
     def test_newtype(self):
         from clu.predicates import isclass, ismetaclass, metaclass
         from clu.predicates import newtype, ObjectType
+        from clu.typespace.namespace import SimpleNamespace
         import abc
         
         # equivalient to class Thingy(ObjectType): pass
@@ -250,7 +251,7 @@ class TestPredicates(object):
         assert MetaThingy.__qualname__.endswith('MetaThingy')
         
         # equivalent to class ThingyWithMeta(Thingy, metaclass=MetaThingy): pass
-        ThingyWithMeta = newtype('ThingyWithMeta', Thingy, keywords=dict(metaclass=MetaThingy))
+        ThingyWithMeta = newtype('ThingyWithMeta', Thingy, metaclass=MetaThingy)
         assert isclass(ThingyWithMeta)
         assert not ismetaclass(ThingyWithMeta)
         assert ThingyWithMeta.__name__ == 'ThingyWithMeta'
@@ -278,7 +279,8 @@ class TestPredicates(object):
         # class ThingyWithAttrs(Thingy):
         #     yo = 'dogg',
         #     iheard = 'you like attributes'
-        ThingyWithAttrs = newtype('ThingyWithAttrs', Thingy, yo='dogg', iheard='you like attributes')
+        ThingyWithAttrs = newtype('ThingyWithAttrs', Thingy, attributes=SimpleNamespace(yo='dogg',
+                                                                                    iheard='you like attributes'))
         assert isclass(ThingyWithAttrs)
         assert not ismetaclass(ThingyWithAttrs)
         assert ThingyWithAttrs.__name__ == 'ThingyWithAttrs'

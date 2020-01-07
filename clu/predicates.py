@@ -2,7 +2,7 @@
 from __future__ import print_function
 from inspect import getattr_static
 from itertools import chain
-from functools import partial, wraps
+from functools import lru_cache, partial, wraps
 
 iterchain = chain.from_iterable
 
@@ -11,6 +11,8 @@ from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
+
+cache = lambda function: export(lru_cache(maxsize=128, typed=True)(function))
 
 # PREDICATE LOGIC: negate(function) will “negate” a boolean predicate function –
 
@@ -205,35 +207,38 @@ class ObjectType(object):
     """ Base type for programmatically created new types """
     pass
 
-@export
-def newtype(name, *bases, keywords=None, **attributes):
-    """ newtype(name, *bases, keywords=None, **attributes)
-        → Shortcut for “type(name, tuple(bases) or (object,), dict(attributes))”
+@cache
+def newtype(name, *bases, metaclass=None, attributes=None, **keywords):
+    """ newtype(name, *bases, metaclass=None, attributes=None, **keywords)
+        → Shortcut for “type(name, tuple(bases) or (ObjectType,), dict(attributes))”
         
         q.v. https://docs.python.org/3/library/types.html#dynamic-type-creation supra.
     """
-    from types import prepare_class, new_class, resolve_bases
+    from clu.dicts import asdict
+    from clu.typespace import types
     
     # Default arguments:
     if not bases:
         bases = (ObjectType,)
-    if keywords is None:
-        keywords = {}
+    if attributes is None:
+        attributes = {}
+    if ismetaclass(metaclass):
+        keywords['metaclass'] = metaclass
     
     # Resolve bases, prepare class namespace:
-    ordered_bases = resolve_bases(bases)
-    metacls, namespace, kwds = prepare_class(name, bases=ordered_bases,
-                                                   kwds=keywords)
+    ordered_bases = types.resolve_bases(bases)
+    metacls, namespace, kwds = types.prepare_class(name, bases=ordered_bases,
+                                                         kwds=keywords)
     
     # Update namespace and keywords:
-    namespace.update(attributes)
+    namespace.update(asdict(attributes))
     kwds.update(keywords)
     kwds['metaclass'] = metacls
     
     # Create and return the new class:
-    return new_class(name, bases=ordered_bases,
-                           kwds=kwds,
-                           exec_body=lambda ns: ns.update(namespace))
+    return types.new_class(name, bases=ordered_bases,
+                                 kwds=kwds,
+                                 exec_body=lambda ns: ns.update(namespace))
 
 # ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)

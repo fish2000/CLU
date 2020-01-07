@@ -16,7 +16,9 @@ class TestDicts(object):
             'yo'    : "dogg",
             'i'     : "heard",
             'you'   : "liked",
-            'dict'  : "chains"
+            'dict'  : "chains",
+            
+            'SYSTEMROOT' : 'wat'
         }
     
     @pytest.fixture
@@ -33,7 +35,7 @@ class TestDicts(object):
         hey = ChainMap(arbitrary, fsdata, environment)
         
         # Check length and boolean value:
-        assert len(hey) == len(arbitrary) + len(fsdata) + len(environment)
+        assert len(hey) <= len(arbitrary) + len(fsdata) + len(environment)
         assert bool(hey)
         
         # Check keys from respective sub-maps:

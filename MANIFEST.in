@@ -18,6 +18,7 @@ include README.md
 include Makefile
 include conftest.py
 include mypy.ini
+include noxfile.py
 include pyproject.toml
 include pytype.cfg
 include setup.cfg

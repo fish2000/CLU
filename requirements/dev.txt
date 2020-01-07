@@ -12,6 +12,7 @@ gfm
 imageio
 ipython
 jupyter
+nox
 # pout>=0.8.10
 pythonpy
 pytz

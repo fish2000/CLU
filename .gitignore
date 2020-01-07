@@ -24,6 +24,7 @@ sdist/
 .cache/
 .config/
 .hypothesis/
+.nox/
 .pytest_cache/
 .tox/
 

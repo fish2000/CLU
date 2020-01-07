@@ -345,9 +345,9 @@ class TestFsFilesystem(object):
         # TODO: un-hardcode this binary list, somehow
         from clu.fs.filesystem import which, back_tick
         
-        BINARIES = ('ls', 'clang', 'gawk',
-                    'bpython',
-                    'bumpversion')
+        BINARIES = ('ls', 'cat', 'df',
+                    'python',
+                    'python-config')
         
         for binary in BINARIES:
             assert which(binary) == back_tick(f"which {binary}")

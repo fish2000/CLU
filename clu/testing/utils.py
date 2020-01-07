@@ -621,10 +621,10 @@ def __getattr__(key):
     """ Module __getattr__(…) patches the “pout” module on-demand, and
         also live-instances the “@inline” decorator from “InlineTester”
     """
-    if key == 'pout':
-        return stdpout()
-    elif key == 'inline':
+    if key == 'inline':
         return InlineTester()
+    elif key == 'pout':
+        return stdpout()
     raise AttributeError(f"module {__name__} has no attribute {key}")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

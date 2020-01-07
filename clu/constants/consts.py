@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import getpass
 import os
+import platform
 import re
 import socket
 import sysconfig
@@ -20,6 +21,9 @@ BASEPATH = sys.intern(
 # Possible names for builtin modules:
 builtins = ('builtins', 'builtin')
 BUILTINS = pytuple(*builtins) + builtins
+
+# Determine if we’re on CPython:
+CPYTHON = platform.python_implementation().casefold() == 'cpython'
 
 # Are we debuggin out?
 DEBUG = bool(int(os.environ.get('DEBUG', '0'), base=10))
@@ -150,6 +154,7 @@ pytuple.__doc__ = "pytuple(*attrs) → turns ('do', 're', 'mi') into ('__do__', 
 
 __all__ = ('BASEPATH',
            'BUILTINS',
+           'CPYTHON',
            'DEBUG',
            'DELETE_FLAG',
            'DEFAULT_TERMINAL_WIDTH',

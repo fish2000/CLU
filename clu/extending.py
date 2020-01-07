@@ -12,7 +12,7 @@ import zict # type: ignore
 
 iterchain = chain.from_iterable
 
-from clu.constants.consts import pytuple
+from clu.constants.consts import CPYTHON, pytuple
 from clu.predicates import typeof, tuplize, attr
 from clu.exporting import Exporter
 
@@ -152,7 +152,7 @@ class DoubleDutchFunction(collections.abc.Callable):
     
     __slots__ = tuplize('registry') \
               + pytuple('wrapped', 'weakref') \
-              + ASSIGNMENTS
+              + (CPYTHON and ASSIGNMENTS or UPDATES)
     
     def __init__(self, function):
         self.registry = DoubleDutchRegistry()

@@ -189,7 +189,8 @@ def try_items(itx, *things, default=NoDefault):
             pass
     if default is not NoDefault:
         return default
-    raise KeyError(f"{itx} not found in any of things: {things!r}")
+    howmany = len(things)
+    raise KeyError(f"{itx} not found in {howmany} things")
 
 # SOME COMMON SHORTCUTS:
 

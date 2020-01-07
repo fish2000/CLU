@@ -40,9 +40,12 @@ def pytest_sessionfinish(session, exitstatus):
         @exithandle
         def remover(signum, frame=None):
             """ Exit handler for removing ‘pytest’ artifacts """
+            from clu.scripts.ansicolors import yellow
+            from clu.repl import ansi
             if putative.exists:
+                message = f"removing: “$TMPDIR/{putative.basename}”"
+                ansi.print_ansi_centered(message, color=yellow, filler='-')
                 print()
-                print(f"REMOVING: {putative.name}")
                 return rm_rf(putative.name)
             return True
 

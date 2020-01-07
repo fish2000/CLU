@@ -340,14 +340,13 @@ def print_ansi(text, color=''):
     for line in text.splitlines():
         print(fmt.render(line), sep='', end='\n', file=sys.__stdout__)
 
-@export
-def print_ansi_centered(text, color='',
+def _print_ansi_centered(text, color='',
                               filler='•',
                               width=SEPARATOR_WIDTH):
     """ print_ansi_centered(…) → Print a string to the terminal, centered
                                  and bookended with asterisks """
     message = f" {text.strip()} "
-    asterisks = math.floor((width / 2) - (len(message) / 2))
+    asterisks = math.trunc((width / 2) - (len(message) / 2))
     fill = filler[0]
     
     aa = fill * asterisks
@@ -358,6 +357,15 @@ def print_ansi_centered(text, color='',
         ab += fill
     
     print_ansi(f"{aa}{message}{ab}", color=color)
+
+@export
+def print_ansi_centered(text, color='',
+                              filler='•',
+                              width=SEPARATOR_WIDTH):
+    """ print_ansi_centered(…) → Print a string to the terminal, centered
+                                 and bookended with asterisks """
+    message = f" {text.strip()} "
+    print_ansi(message.center(width, filler), color=color)
 
 INITIAL     = '  ¶ '
 SUBSEQUENT  = '    '

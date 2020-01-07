@@ -27,10 +27,10 @@ clean-build-artifacts:
 clean-test-artifacts: clean-pyc
 	rm -rf  $(PROJECT_ROOT)/.pytest_cache \
 			$(PROJECT_ROOT)/.hypothesis \
-			$(PROJECT_BASE).pytest_cache \
-			$(PROJECT_BASE).hypothesis \
-			$(PROJECT_BASE).nox \
-			$(PROJECT_BASE).tox
+			$(PROJECT_BASE)/.pytest_cache \
+			$(PROJECT_BASE)/.hypothesis \
+			$(PROJECT_BASE)/.nox \
+			$(PROJECT_BASE)/.tox
 
 clean-type-caches:
 	rm -rf $(PROJECT_VENV)/var/cache/mypy_cache

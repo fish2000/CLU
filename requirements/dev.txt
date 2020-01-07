@@ -1,24 +1,20 @@
+-r changelog.txt
+-r docs.txt
 -r tox.txt
+-r typecheck.txt
 Click
 bpython
 bumpversion
 colorio
 colormath
 cython
-flake8
-flake8-bugbear
 gfm
-gitchangelog>=3.0.0
-# instakit
 imageio
 ipython
 jupyter
-mypy>=0.720
-pystache>=0.5.0
+# pout>=0.8.10
 pythonpy
-pytype
 pytz
-readme-renderer
 requests
 scipy
 setproctitle

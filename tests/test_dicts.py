@@ -33,7 +33,7 @@ class TestDicts(object):
         hey = ChainMap(arbitrary, fsdata, environment)
         
         # Check length and boolean value:
-        assert len(hey) <= len(arbitrary) + len(fsdata) + len(environment)
+        assert len(hey) == len(arbitrary) + len(fsdata) + len(environment)
         assert bool(hey)
         
         # Check keys from respective sub-maps:

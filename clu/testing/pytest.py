@@ -43,7 +43,8 @@ def pytest_sessionfinish(session, exitstatus):
             if putative.exists:
                 print()
                 print(f"REMOVING: {putative.name}")
-                rm_rf(putative.name)
+                return rm_rf(putative.name)
+            return True
 
 @pytest.fixture(scope='session')
 def consts():

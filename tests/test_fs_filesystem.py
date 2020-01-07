@@ -342,7 +342,7 @@ class TestFsFilesystem(object):
     @pytest.mark.TODO
     def test_which_and_back_tick(self):
         """ Test clu.fs.which(…) and clu.fs.back_tick(…) against one another """
-        # TODO: un-hardcode this binary list, somehow
+        # TODO: ensure that these binaries are plausibly portable
         from clu.fs.filesystem import which, back_tick
         
         BINARIES = ('ls', 'cat', 'df',

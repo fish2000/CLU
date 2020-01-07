@@ -6,7 +6,6 @@ import colorama
 colorama.init()
 
 import inspect
-import math
 import sys
 import textwrap
 import zict
@@ -339,24 +338,6 @@ def print_ansi(text, color=''):
     fmt = ANSIFormat(color)
     for line in text.splitlines():
         print(fmt.render(line), sep='', end='\n', file=sys.__stdout__)
-
-def _print_ansi_centered(text, color='',
-                              filler='•',
-                              width=SEPARATOR_WIDTH):
-    """ print_ansi_centered(…) → Print a string to the terminal, centered
-                                 and bookended with asterisks """
-    message = f" {text.strip()} "
-    asterisks = math.trunc((width / 2) - (len(message) / 2))
-    fill = filler[0]
-    
-    aa = fill * asterisks
-    ab = fill * (asterisks + ((width % 2) - (len(message) % 2)))
-    
-    if len(f"{aa}{message}{ab}") < width:
-        aa += fill
-        ab += fill
-    
-    print_ansi(f"{aa}{message}{ab}", color=color)
 
 @export
 def print_ansi_centered(text, color='',

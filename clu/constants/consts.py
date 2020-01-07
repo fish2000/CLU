@@ -19,7 +19,7 @@ BASEPATH = sys.intern(
            os.path.dirname(__file__))))
 
 # Possible names for builtin modules:
-builtins = ('builtins', 'builtin')
+builtins = ('builtins', 'builtin', 'main')
 BUILTINS = pytuple(*builtins) + builtins
 
 # Determine if we’re on CPython:

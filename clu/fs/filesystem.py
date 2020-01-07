@@ -199,18 +199,26 @@ def rm_rf(path):
         BE FUCKING CAREFUL WITH IT.
     """
     if not isvalidpath(path):
-        raise ExecutionError(
-            "Can’t rm -rf without something to rm arr-effedly")
+        raise FilesystemError(
+            f"Can’t rm -rf without something to rm arr-effedly: {path!s}")
     path = os.fspath(path)
     try:
-        if os.path.isfile(path) or os.path.islink(path):
+        if os.path.isfile(path):
             os.unlink(path)
+            return True
+        elif os.path.islink(path):
+            os.unlink(path)
+            return True
         elif os.path.isdir(path):
             shutil.rmtree(path)
-        return True
-    except (OSError, IOError):
-        pass
-    return False
+            return True
+    except FileNotFoundError:
+        return False
+    except OSError:
+        return False
+    except IOError as exc:
+        raise FilesystemError(f"Fatal in underlying “rm_rf(…)” syscall: {exc!s}, {path}")
+    raise FilesystemError(f"Couldn’t remove path: {path}")
 
 @export
 def temporary(suffix='', prefix='', parent=None, **kwargs):

@@ -18,7 +18,7 @@ import sys
 import weakref
 import zipfile
 
-from clu.constants.consts import λ, DELETE_FLAG, ENCODING, PATH, SCRIPT_PATH
+from clu.constants.consts import λ, ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
 from clu.predicates import attr, allattrs, isexpandable, anyof, uniquify
@@ -248,6 +248,26 @@ def temporary(suffix='', prefix='', parent=None, **kwargs):
     return fullpth
 
 @export
+def modeflags(mode, delete=True):
+    """ Convert a file-open modestring to an integer flag.
+        
+        Helper function, used by the “filesystem.TemporaryNamedFile(…)” and
+        “filesystem.NamedTemporaryFile(…)” functions’ internal logic.
+    """
+    from tempfile import _bin_openflags, _text_openflags
+    from clu.constants.consts import DELETE_FLAG
+    
+    if 'b' in u8str(mode):
+        flags = _bin_openflags
+    else:
+        flags = _text_openflags
+    
+    if delete:
+        flags |= DELETE_FLAG
+    
+    return flags
+
+@export
 class TypeLocker(abc.ABCMeta):
     
     """ clu.fs.filesystem.TypeLocker is a metaclass that does two
@@ -374,15 +394,7 @@ def TemporaryNamedFile(temppath, mode='wb',
             ``os.open(…)`` and ``os.fdopen(…)``
         
     """
-    from tempfile import _bin_openflags, _text_openflags
-    
-    if 'b' in mode:
-        flags = _bin_openflags
-    else:
-        flags = _text_openflags
-    if delete:
-        flags |= DELETE_FLAG
-    
+    flags = modeflags(mode, delete)
     descriptor = 0
     filehandle = None
     path = None
@@ -1470,9 +1482,7 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
         standard library version which makes you pass suffixes WITH
         the fucking period, ugh).
     """
-    from tempfile import (gettempdir, _bin_openflags,
-                                      _text_openflags,
-                                      _mkstemp_inner)
+    from tempfile import gettempdir, _mkstemp_inner
     
     parent = Directory(pth=directory or gettempdir())
     
@@ -1482,15 +1492,8 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
     else:
         suffix = f"{os.extsep}tmp"
     
-    if 'b' in mode:
-        flags = _bin_openflags
-    else:
-        flags = _text_openflags
-    if delete:
-        flags |= DELETE_FLAG
-    
     (descriptor, name) = _mkstemp_inner(parent.name, prefix,
-                                                     suffix, flags,
+                                                     suffix, modeflags(mode, delete),
                                                bytes(suffix, encoding=ENCODING))
     try:
         filehandle = os.fdopen(descriptor, mode, buffer_size)

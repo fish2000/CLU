@@ -16,16 +16,20 @@ def pytest(session):
     session.run('pytest')
 
 @nox.session
-def check_clu_modules(session):
-    """ Check CLU constants and module exports """
+def inlinetest(session):
+    """ Run CLU inline tests, and check modules and constants """
     session.install("-r", "requirements/install.txt")
-    session.run('python', '-m', 'clu.constants')
-    session.run('python', '-m', 'clu')
     
+    # First, check CLU consts:
+    session.run('python', '-m', 'clu.constants')
+    
+    # Next, import all CLU modules:
     from clu.all import import_clu_modules
     from clu.predicates import resolve
     clumods = import_clu_modules()
     
+    # Find all CLU modules with inline tests,
+    # and execute them:
     for dotpath, module in clumods.items():
         test_fn = resolve(module, 'test')
         if test_fn is not None:
@@ -35,3 +39,6 @@ def check_clu_modules(session):
                     if 'inline' in names:
                         session.run('python', '-m', dotpath,
                            env=dict(SYSTEMROOT='wat'))
+    
+    # End with module export checks:
+    session.run('python', '-m', 'clu')

@@ -3,7 +3,6 @@ from __future__ import print_function
 from itertools import chain
 from reprlib import recursive_repr
 
-iterchain = chain.from_iterable
 recursive = recursive_repr(fillvalue="…")
 
 from clu.constants import consts

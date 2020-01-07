@@ -775,8 +775,10 @@ class ChainModuleMap(clu.dicts.ChainMap):
         # Use “item_search(…)” in order to only trigger a constituent
         # maps’ “__missing__(…)” method within our own “__missing__(…)”
         # function call:
-        return item_search(key, *self.maps, default=None) \
-            or self.__missing__(key)
+        item = item_search(key, *self.maps, default=NoDefault)
+        if item is NoDefault:
+            return self.__missing__(key)
+        return item
     
     def __missing__(self, key):
         # “self.fallbacks” should be populated with any module-level

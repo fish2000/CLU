@@ -231,7 +231,10 @@ class ChainMap(collections.abc.MutableMapping,
     
     def __getitem__(self, key):
         from clu.predicates import try_items
-        return try_items(key, *self.maps, default=None) or self.__missing__(key)
+        try:
+            return try_items(key, *self.maps)
+        except KeyError:
+            return self.__missing__(key)
     
     def __len__(self):
         return len(set(iterchain(map.keys() for map in self.maps)))

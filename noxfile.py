@@ -27,7 +27,6 @@ def inlinetest(session):
     from clu.all import import_clu_modules
     from clu.predicates import resolve
     clumods = import_clu_modules()
-    env = dict(SYSTEMROOT='wat')
     
     # Find all CLU modules with inline tests,
     # and execute them:
@@ -38,7 +37,7 @@ def inlinetest(session):
                 names = resolve(test_fn, '__code__.co_names')
                 if names is not None:
                     if 'inline' in names:
-                        session.run('python', '-m', dotpath, env=env)
+                        session.run('python', '-m', dotpath)
     
     # End with module export checks:
     session.run('python', '-m', 'clu')

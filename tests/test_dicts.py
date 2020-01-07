@@ -16,9 +16,7 @@ class TestDicts(object):
             'yo'    : "dogg",
             'i'     : "heard",
             'you'   : "liked",
-            'dict'  : "chains",
-            
-            'SYSTEMROOT' : 'wat'
+            'dict'  : "chains"
         }
     
     @pytest.fixture

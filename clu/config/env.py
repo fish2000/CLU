@@ -47,9 +47,9 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
             dictionary from a target dictionary, with a supplied appname.
         """
         try:
-            super(FrozenEnviron, self).__init__(**updates)
+            super().__init__(**updates)
         except TypeError:
-            super(FrozenEnviron, self).__init__()
+            super().__init__()
         self.appname = appname or PROJECT_NAME
         self.environment = environment is None \
                        and os.environ.copy() \
@@ -110,12 +110,12 @@ class Environ(FrozenEnviron, KeyMap, contextlib.AbstractContextManager):
         if environment is None:
             environment = os.environ
         try:
-            super(Environ, self).__init__(environment=environment,
-                                              appname=appname,
-                                                    **updates)
+            super().__init__(environment=environment,
+                                 appname=appname,
+                                       **updates)
         except TypeError:
-            super(Environ, self).__init__(environment=environment,
-                                              appname=appname)
+            super().__init__(environment=environment,
+                                 appname=appname)
         self.stash = None
     
     def freeze(self):

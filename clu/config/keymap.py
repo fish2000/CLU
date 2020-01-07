@@ -33,9 +33,9 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
             output of ‘pack_ns(…)’ (q.v. function definition supra.)
         """
         try:
-            super(FrozenFlat, self).__init__(**updates)
+            super().__init__(**updates)
         except TypeError:
-            super(FrozenFlat, self).__init__()
+            super().__init__()
         if hasattr(dictionary, 'dictionary'):
             dictionary = attr(dictionary, 'dictionary')
         elif hasattr(dictionary, 'flatten'):
@@ -130,9 +130,9 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
             target nested dictionary (or a “tree” of dicts).
         """
         try:
-            super(FrozenNested, self).__init__(**updates)
+            super().__init__(**updates)
         except TypeError:
-            super(FrozenNested, self).__init__()
+            super().__init__()
         if hasattr(tree, 'tree'):
             tree = attr(tree, 'tree')
         elif hasattr(tree, 'nestify'):

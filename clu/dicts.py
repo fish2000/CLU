@@ -184,12 +184,12 @@ class ChainMap(collections.abc.MutableMapping,
     __slots__ = ('maps', '__weakref__')
     
     @classmethod
-    def fromkeys(cls, iterable, *args):
+    def fromkeys(cls, iterable, *args, **overrides):
         """ Create a new ChainMap instance, using keys plucked from
             “iterable”, and values harvested from the subsequent
             variadic arguments.
         """
-        return cls(dict.fromkeys(iterable, *args))
+        return cls(dict.fromkeys(iterable, *args), **overrides)
     
     @classmethod
     def fromitems(cls, *iterables, **overrides):
@@ -197,7 +197,7 @@ class ChainMap(collections.abc.MutableMapping,
             obtained from one or more iterables, with any keyword
             arguments serving as optional overrides.
         """
-        return cls(dict(iterchain(iterables)), **overrides)
+        return cls((dict(iterable) for iterable in iterables), **overrides)
     
     def __init__(self, *dicts, **overrides):
         """ Initialize a new ChainMap, using as many maps as specified as varargs,
@@ -344,7 +344,7 @@ class ChainMap(collections.abc.MutableMapping,
             into a new, single, flat dictionary instance.
         """
         return merge_fast(*reversed(self.maps))
-        # return dict(frozenset(iterchain(map.items() for map in self.maps)))
+        # return dict(iterchain(map.items() for map in self.maps))
     
     def clone(self, deep=False, memo=None):
         """ Return a cloned copy of the ChainMap """

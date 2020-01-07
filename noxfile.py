@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(__file__))
 # @nox.session(python=['3.7', '3.8', 'pypy3'])
 @nox.session
 def pytest(session):
-    """ Run pytest unit tests and check MANIFEST.in """
+    """ Run CLU’s pytest unit test suite, and check MANIFEST.in """
     session.install("-r", "requirements/install.txt")
     session.install("-r", "requirements/nox/tests.txt")
     session.install("-r", "requirements/nox/manifest.txt")

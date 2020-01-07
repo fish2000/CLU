@@ -138,15 +138,16 @@ class TestPredicates(object):
     
     def test_mro_and_rmro(self):
         from clu.predicates import mro, rmro
-        from clu.predicates import newtype
+        from clu.predicates import newtype, ObjectType
         
         A = newtype('A')
         B = newtype('B', A)
         C = newtype('C', B)
         D = newtype('D', C)
         
-        assert mro(D)           == (D, C, B, A, object)
-        assert tuple(rmro(D))   == (object, A, B, C, D)
+        # “ObjectType” ◀︎◀︎ the base type of things made with “newtype(…)”
+        assert mro(D)           == (D, C, B, A, ObjectType, object)
+        assert tuple(rmro(D))   == (object, ObjectType, A, B, C, D)
     
     def test_unwrap(self):
         from clu.predicates import unwrap
@@ -198,17 +199,17 @@ class TestPredicates(object):
     @pytest.mark.TODO
     def test_isancestor_and_isorigin(self):
         from clu.predicates import isancestor
-        from clu.predicates import newtype
+        from clu.predicates import newtype, ObjectType
         
         A = newtype('A')
         B = newtype('B', A)
         C = newtype('C', B)
         D = newtype('D', C)
         
-        assert isancestor(A) # defaults to “object”
-        assert isancestor(B) # defaults to “object”
-        assert isancestor(C) # defaults to “object”
-        assert isancestor(D) # defaults to “object”
+        assert isancestor(A, ObjectType) # ◀︎◀︎ the base type of things made with “newtype(…)”
+        assert isancestor(B, ObjectType) # ◀︎◀︎ the base type of things made with “newtype(…)”
+        assert isancestor(C, ObjectType) # ◀︎◀︎ the base type of things made with “newtype(…)”
+        assert isancestor(D, ObjectType) # ◀︎◀︎ the base type of things made with “newtype(…)”
         
         assert isancestor(B, A)
         assert isancestor(C, B)
@@ -230,10 +231,11 @@ class TestPredicates(object):
     
     def test_newtype(self):
         from clu.predicates import isclass, ismetaclass, metaclass
-        from clu.predicates import newtype
+        from clu.predicates import newtype, ObjectType
         import abc
         
-        # equivalient to class Thingy(object): pass
+        # equivalient to class Thingy(ObjectType): pass
+        # “ObjectType” ◀︎◀︎ the base type of things made with “newtype(…)”
         Thingy = newtype('Thingy')
         assert isclass(Thingy)
         assert not ismetaclass(Thingy)
@@ -261,7 +263,7 @@ class TestPredicates(object):
         assert not ismetaclass(DerivedThingy)
         assert DerivedThingy.__name__ == 'DerivedThingy'
         assert DerivedThingy.__qualname__.endswith('DerivedThingy')
-        assert DerivedThingy.__mro__ == (DerivedThingy, Thingy, object)
+        assert DerivedThingy.__mro__ == (DerivedThingy, Thingy, ObjectType, object)
         
         # equivalent to class AbstractThingy(Thingy, abc.ABC): pass
         AbstractThingy = newtype('AbstractThingy', Thingy, abc.ABC)
@@ -269,7 +271,7 @@ class TestPredicates(object):
         assert not ismetaclass(AbstractThingy)
         assert AbstractThingy.__name__ == 'AbstractThingy'
         assert AbstractThingy.__qualname__.endswith('AbstractThingy')
-        assert AbstractThingy.__mro__ == (AbstractThingy, Thingy, abc.ABC, object)
+        assert AbstractThingy.__mro__ == (AbstractThingy, Thingy, ObjectType, abc.ABC, object)
         assert metaclass(AbstractThingy) is abc.ABCMeta
         
         # equivalent to:
@@ -281,7 +283,7 @@ class TestPredicates(object):
         assert not ismetaclass(ThingyWithAttrs)
         assert ThingyWithAttrs.__name__ == 'ThingyWithAttrs'
         assert ThingyWithAttrs.__qualname__.endswith('ThingyWithAttrs')
-        assert ThingyWithAttrs.__mro__ == (ThingyWithAttrs, Thingy, object)
+        assert ThingyWithAttrs.__mro__ == (ThingyWithAttrs, Thingy, ObjectType, object)
         assert ThingyWithAttrs.yo == 'dogg'
         assert ThingyWithAttrs.iheard == 'you like attributes'
     

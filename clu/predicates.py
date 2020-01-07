@@ -201,6 +201,10 @@ rmro        = reverse(mro)
 isancestor  = lambda cls, ancestor=object: isclasstype(cls) and (ancestor in mro(cls))
 isorigin    = lambda cls, original=object: isclasstype(cls) and isancestor(origin(cls), typeof(original))
 
+class ObjectType(object):
+    """ Base type for programmatically created new types """
+    pass
+
 @export
 def newtype(name, *bases, keywords=None, **attributes):
     """ newtype(name, *bases, keywords=None, **attributes)
@@ -212,7 +216,7 @@ def newtype(name, *bases, keywords=None, **attributes):
     
     # Default arguments:
     if not bases:
-        bases = (object,)
+        bases = (ObjectType,)
     if keywords is None:
         keywords = {}
     

@@ -23,12 +23,15 @@ def inlinetest(session):
     # First, check CLU consts:
     session.run('python', '-m', 'clu.constants')
     
+    # Next, run module export checks:
+    session.run('python', '-m', 'clu')
+    
     # Next, import all CLU modules:
     from clu.all import import_clu_modules
     from clu.predicates import resolve
     clumods = import_clu_modules()
     
-    # Find all CLU modules with inline tests,
+    # Finally, find all CLU modules with inline tests,
     # and execute them:
     for dotpath, module in clumods.items():
         test_fn = resolve(module, 'test')
@@ -38,6 +41,3 @@ def inlinetest(session):
                 if names is not None:
                     if 'inline' in names:
                         session.run('python', '-m', dotpath)
-    
-    # End with module export checks:
-    session.run('python', '-m', 'clu')

@@ -5,6 +5,9 @@ import nox
 import sys, os
 sys.path.append(os.path.dirname(__file__))
 
+# Recycle, reduce, reuse:
+nox.options.reuse_existing_virtualenvs = True
+
 # @nox.session(python=['3.7', '3.8', 'pypy3'])
 @nox.session
 def pytest(session):

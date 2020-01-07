@@ -29,6 +29,7 @@ clean-test-artifacts: clean-pyc
 			$(PROJECT_ROOT)/.hypothesis \
 			$(PROJECT_BASE).pytest_cache \
 			$(PROJECT_BASE).hypothesis \
+			$(PROJECT_BASE).nox \
 			$(PROJECT_BASE).tox
 
 clean-type-caches:
@@ -70,6 +71,12 @@ pytest:
 tox:
 	tox
 
+nox:
+	nox
+
+renox: clean-test-artifacts
+	nox
+
 test: check pytest
 
 test-all: check tox
@@ -102,4 +109,7 @@ changelog: remove-changelog
 
 .PHONY: cython sdist wheel twine-upload bump bigbump
 
-.PHONY: check pytest tox test test-all version consts-old modules-old consts modules
+.PHONY: check pytest tox nox renox
+.PHONY: test test-all
+
+.PHONY: version consts-old modules-old consts modules

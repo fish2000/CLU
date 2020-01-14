@@ -33,24 +33,8 @@ def pytest(session):
     session.install("-r", "requirements/nox/tests.txt")
     session.run('pytest')
 
-def clu_inline_tests():
-    # First: import all CLU modules:
-    from clu.all import import_clu_modules
-    from clu.predicates import resolve
-    clumods = import_clu_modules()
-    
-    # Then: find all CLU modules with inline tests,
-    # and execute them:
-    for dotpath, module in clumods.items():
-        test_fn = resolve(module, 'test')
-        if test_fn is not None:
-            if callable(test_fn):
-                names = resolve(test_fn, '__code__.co_names')
-                if names is not None:
-                    if 'inline' in names:
-                        yield dotpath
-
 def parametrized_inline_tests():
+    from clu.all import clu_inline_tests
     for dotpath in clu_inline_tests():
         yield nox.param(dotpath,
                      id=dotpath.lstrip('clu').lstrip('.'))

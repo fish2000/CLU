@@ -10,28 +10,29 @@ nox.options.reuse_existing_virtualenvs = True
 
 @nox.session
 def checkmanifest(session):
-    """ Check MANIFEST.in """
+    """ Check CLU’s MANIFEST.in against the Git HEAD """
     session.install("-r", "requirements/nox/manifest.txt")
     session.run('python', '-m', 'check_manifest', '-v')
+
+@nox.session
+@nox.parametrize('module', ['clu.constants', 'clu'])
+def checkmodule(session, module):
+    """ Check CLU modules and constants """
+    session.install("-r", "requirements/install.txt")
+    session.run('python', '-m', module)
 
 # @nox.session(python=['3.7', '3.8', 'pypy3'])
 @nox.session
 def pytest(session):
-    """ Run CLU’s pytest unit test suite """
+    """ Run CLU’s `pytest` unit test suite """
     session.install("-r", "requirements/install.txt")
     session.install("-r", "requirements/nox/tests.txt")
     session.run('pytest')
 
 @nox.session
 def inlinetest(session):
-    """ Run CLU inline tests, and check modules and constants """
+    """ Run CLU’s per-moduyle inline tests """
     session.install("-r", "requirements/install.txt")
-    
-    # First, check CLU consts:
-    session.run('python', '-m', 'clu.constants')
-    
-    # Next, run module export checks:
-    session.run('python', '-m', 'clu')
     
     # Next, import all CLU modules:
     from clu.all import import_clu_modules

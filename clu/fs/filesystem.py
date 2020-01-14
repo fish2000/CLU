@@ -1201,11 +1201,10 @@ class Directory(collections.abc.Hashable,
         # the “dirs” list in-place:
         for root, dirs, files in os.walk(target):
             dirs[:] = list(filter(excluder, dirs))
-            for ext in filter(None,
-                       map(lambda filename: extension(filename).casefold(),
-                       filter(excluder,
-                       filter(searcher, files)))):
-                suffixes[ext] += 1
+            suffixes.update(filter(None,
+                            map(lambda filename: extension(filename).casefold(),
+                            filter(excluder,
+                            filter(searcher, files)))))
         return suffixes
     
     def close(self):

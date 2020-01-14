@@ -51,10 +51,10 @@ def import_clu_modules():
 @export
 def clu_inline_tests():
     """ Generator over all CLU modules that contain inline tests """
+    # Use “clu.predicates.resolve(…)” for nested attribute access:
     from clu.predicates import resolve
     
-    # Find all CLU modules with inline tests,
-    # and yield them:
+    # Find all CLU modules with inline tests, and yield them:
     for dotpath, module in import_clu_modules().items():
         test_fn = resolve(module, 'test')
         if test_fn is not None:

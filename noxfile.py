@@ -8,14 +8,18 @@ sys.path.append(os.path.dirname(__file__))
 # Recycle, reduce, reuse:
 nox.options.reuse_existing_virtualenvs = True
 
+@nox.session
+def checkmanifest(session):
+    """ Check MANIFEST.in """
+    session.install("-r", "requirements/nox/manifest.txt")
+    session.run('python', '-m', 'check_manifest', '-v')
+
 # @nox.session(python=['3.7', '3.8', 'pypy3'])
 @nox.session
 def pytest(session):
-    """ Run CLU’s pytest unit test suite, and check MANIFEST.in """
+    """ Run CLU’s pytest unit test suite """
     session.install("-r", "requirements/install.txt")
     session.install("-r", "requirements/nox/tests.txt")
-    session.install("-r", "requirements/nox/manifest.txt")
-    session.run('python', '-m', 'check_manifest', '-v')
     session.run('pytest')
 
 @nox.session

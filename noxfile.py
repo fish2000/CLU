@@ -22,7 +22,6 @@ def pytest(session):
 def inlinetest(session):
     """ Run CLU inline tests, and check modules and constants """
     session.install("-r", "requirements/install.txt")
-    # session.install("-r", "requirements/nox/tests.txt")
     
     # First, check CLU consts:
     session.run('python', '-m', 'clu.constants')

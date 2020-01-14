@@ -9,13 +9,17 @@ colorio
 colormath
 cython
 gfm
+heapdict>=1.0.0
 imageio
 ipython
 jupyter
+lmdb>=0.8.0
 nox
 # pout>=0.8.10
 pythonpy
 pytz
+readme-renderer
+readme-renderer[md]
 requests
 scipy
 setproctitle

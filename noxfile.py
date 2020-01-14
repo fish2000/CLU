@@ -15,7 +15,11 @@ def checkmanifest(session):
     session.run('python', '-m', 'check_manifest', '-v')
 
 @nox.session
-@nox.parametrize('module', ['clu.constants', 'clu'])
+@nox.parametrize('module', [
+    nox.param('clu.constants',  id='consts'),
+    nox.param('clu',            id='modules'),
+    nox.param('clu.version',    id='version'),
+])
 def checkmodule(session, module):
     """ Check CLU modules and constants """
     session.install("-r", "requirements/install.txt")

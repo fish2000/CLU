@@ -33,17 +33,13 @@ def pytest(session):
     session.install("-r", "requirements/nox/tests.txt")
     session.run('pytest')
 
-@nox.session
-def inlinetest(session):
-    """ Run CLU’s per-moduyle inline tests """
-    session.install("-r", "requirements/install.txt")
-    
-    # Next, import all CLU modules:
+def clu_inline_tests():
+    # First: import all CLU modules:
     from clu.all import import_clu_modules
     from clu.predicates import resolve
     clumods = import_clu_modules()
     
-    # Finally, find all CLU modules with inline tests,
+    # Then: find all CLU modules with inline tests,
     # and execute them:
     for dotpath, module in clumods.items():
         test_fn = resolve(module, 'test')
@@ -52,4 +48,16 @@ def inlinetest(session):
                 names = resolve(test_fn, '__code__.co_names')
                 if names is not None:
                     if 'inline' in names:
-                        session.run('python', '-m', dotpath)
+                        yield dotpath
+
+def parametrized_inline_tests():
+    for dotpath in clu_inline_tests():
+        yield nox.param(dotpath,
+                     id=dotpath.lstrip('clu').lstrip('.'))
+
+@nox.session
+@nox.parametrize('module', list(parametrized_inline_tests()))
+def inline(session, module):
+    """ Run CLU’s per-module inline test suite """
+    session.install("-r", "requirements/install.txt")
+    session.run('python', '-m', module)

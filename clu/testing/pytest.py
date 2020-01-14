@@ -9,10 +9,38 @@ import pytest
 # enum.IntEnum of pytest’s exit status codes:
 from _pytest.main import ExitCode
 
-# when not to bind the exit handler:
+# When not to bind the exit handler:
 no_delete_codes = (ExitCode.INTERNAL_ERROR,
                    ExitCode.USAGE_ERROR,
                    ExitCode.NO_TESTS_COLLECTED)
+
+# Internal name for the “--delete-temporary” option:
+dtmp = 'delete_temporary'
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_addhooks(pluginmanager):
+    """ Add all hooks defined in the “clu.testing.hooks” module """
+    from clu.testing import hook
+    pluginmanager.add_hookspecs(hook)
+
+def pytest_addoption(parser, pluginmanager):
+    """ Set up the CLI/config option for “--delete-temporary” """
+    # Default hook values:
+    temporary_delete_default = pluginmanager.hook.pytest_delete_temporary_default()
+    temporary_delete_help = str(bool(temporary_delete_default))
+    no_temporary_delete_help = str(bool(not temporary_delete_default))
+    
+    # Options and option groups:
+    group = parser.getgroup(f"{dtmp}_group", description="temporary file deletion")
+    group.addoption(
+        "--delete-temps",
+        help=f"Delete pytest-related temporary files (default {temporary_delete_help})",
+        default=temporary_delete_default,
+        dest=dtmp, action='store_true')
+    group.addoption(
+        "--no-delete-temps",
+        help=f"Don’t delete pytest-related temporary files (default {no_temporary_delete_help})",
+        dest=dtmp, action='store_false')
 
 @pytest.hookimpl(trylast=True)
 def pytest_sessionfinish(session, exitstatus):
@@ -31,23 +59,30 @@ def pytest_sessionfinish(session, exitstatus):
     from clu.repl import ansi
     from clu.scripts.ansicolors import yellow
     
+    # check the exit status:
+    if exitstatus in no_delete_codes:
+        return
+    
+    # check the CLI/config options:
+    if not session.config.getoption(dtmp):
+        return
+    
     # putative temporary directory:
     putative = td().subdirectory(f"pytest-of-{consts.USER}")
     
-    # check the exit status:
-    if exitstatus not in no_delete_codes:
-        # bind a remover function if the exit status is “natural” –
-        # i.e. no internal errors and tests ran normally (this can
-        # include occasions when tests fail):
-        @exithandle
-        def remover(signum, frame=None):
-            """ Exit handler for removing ‘pytest’ artifacts """
-            if putative.exists:
-                message = f"removing: “$TMPDIR/{putative.basename}”"
-                ansi.print_ansi_centered(message, color=yellow, filler='-')
-                print()
-                return rm_rf(putative.name)
-            return True
+    # bind a remover function if the exit status is “natural” –
+    # i.e. no internal errors and tests ran normally (this can
+    # include occasions when tests fail):
+    @exithandle
+    def remover(signum, frame=None):
+        """ Exit handler for removing ‘pytest’ artifacts """
+        if putative.exists:
+            message = f"removing: “$TMPDIR/{putative.basename}”"
+            ansi.print_ansi_centered(message, color=yellow,
+                                              filler='-')
+            print()
+            return rm_rf(putative.name)
+        return True
 
 @pytest.fixture(scope='session')
 def consts():

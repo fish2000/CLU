@@ -51,8 +51,8 @@ def iterlen(iterable):
             return next(counter)
         raise
 
-samelength = lambda a, b: operator.eq(len(a), len(b))
-differentlength = lambda a, b: operator.ne(len(a), len(b))
+samelength = lambda a, b: operator.eq(iterlen(a), iterlen(b))
+differentlength = lambda a, b: operator.ne(iterlen(a), iterlen(b))
 isunique = lambda thing: isiterable(thing) and haslength(thing) and samelength(tuple(thing), frozenset(thing))
 
 # TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)` –

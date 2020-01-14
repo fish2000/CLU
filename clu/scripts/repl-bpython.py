@@ -45,8 +45,8 @@ from clu.constants.polyfills import (Enum, EnumMeta, unique,
                                      AutoType, auto,
                                      Path, reduce)
 
-from clu.compilation import (Macro, Macros,
-                             CDBSubBase, CDBBase, CDBJsonFile)
+from clu.compilation.macros import Macro, Macros
+from clu.compilation.compiledb import CDBSubBase, CDBBase, CDBJsonFile
 
 from clu.exporting import (itermodule, moduleids, itermoduleids,
                            search_by_id,

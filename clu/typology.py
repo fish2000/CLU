@@ -35,23 +35,28 @@ from clu.typespace import types
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-# TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)` –
-# can be formulated and tested by these lambdas and functions
-
-samelength = lambda a, b: haslength(a) and haslength(b) and operator.eq(len(a), len(b))
-differentlength = lambda a, b: haslength(a) and haslength(b) and operator.ne(len(a), len(b))
-isunique = lambda thing: isiterable(thing) and samelength(tuple(thing), frozenset(thing))
-
 @export
 def iterlen(iterable):
     """ iterlen(iterable) → Return the number of items in “iterable.”
         
-        This will consume the iterable – be careful with it!
+        This will consume iterables without a “__len__()” method – be careful!
     """
     # Stolen from “more-itertools”: http://bit.ly/2LUZqCx
-    counter = count()
-    collections.deque(zip(iterable, counter), maxlen=0)
-    return next(counter)
+    try:
+        return len(iterable)
+    except TypeError as exc:
+        if 'has no len' in str(exc):
+            counter = count()
+            collections.deque(zip(iterable, counter), maxlen=0)
+            return next(counter)
+        raise
+
+samelength = lambda a, b: operator.eq(len(a), len(b))
+differentlength = lambda a, b: operator.ne(len(a), len(b))
+isunique = lambda thing: isiterable(thing) and haslength(thing) and samelength(tuple(thing), frozenset(thing))
+
+# TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)` –
+# can be formulated and tested by these lambdas and functions
 
 istypelist = predicate_all(isclasstype)
 ismetatypelist = predicate_all(ismetaclass)

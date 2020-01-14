@@ -117,7 +117,7 @@ from clu.predicates import (negate, reverse,
 from clu.typespace import types, modulize
 from clu.typespace.namespace import NamespaceRepr, SimpleNamespace, Namespace, isnamespace
 
-from clu.typology import (samelength, differentlength, isunique,
+from clu.typology import (samelength, differentlength, isunique, iterlen,
                           istypelist, ismetatypelist, maketypelist, makemetatypelist,
                           isderivative, subclasscheck, metaclasscheck, graceful_issubclass,
                           numeric_types, array_types, scalar_types, string_types, bytes_types,
@@ -366,7 +366,7 @@ __all__ = ('Image',
            'allof', 'anyof', 'noneof',
            'types', 'modulize',
            'NamespaceRepr', 'SimpleNamespace', 'Namespace', 'isnamespace',
-           'samelength', 'differentlength', 'isunique',
+           'samelength', 'differentlength', 'isunique', 'iterlen',
            'istypelist', 'ismetatypelist', 'maketypelist', 'makemetatypelist',
            'isderivative', 'subclasscheck', 'metaclasscheck', 'graceful_issubclass',
            'numeric_types', 'array_types', 'scalar_types', 'string_types', 'bytes_types',

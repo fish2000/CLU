@@ -35,7 +35,7 @@ def pytest_addoption(parser, pluginmanager):
     group.addoption(
         "--delete-temps",
         help=f"Delete pytest-related temporary files (default {temporary_delete_help})",
-        default=temporary_delete_default,
+        default=bool(temporary_delete_default),
         dest=dtmp, action='store_true')
     group.addoption(
         "--no-delete-temps",

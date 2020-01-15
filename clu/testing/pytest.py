@@ -30,7 +30,13 @@ def pytest_addoption(parser, pluginmanager):
     temporary_delete_help = str(bool(temporary_delete_default))
     no_temporary_delete_help = str(bool(not temporary_delete_default))
     
-    # Options and option groups:
+    # Config file values:
+    parser.addini(
+        'delete-temps',
+        help=f"Delete pytest-related temporary files (default {temporary_delete_help})",
+        type='bool', default=bool(temporary_delete_default))
+    
+    # CLI options and option groups:
     group = parser.getgroup(f"{dtmp}_group", description="temporary file deletion")
     group.addoption(
         "--delete-temps",
@@ -74,7 +80,8 @@ def pytest_sessionfinish(session, exitstatus):
         return
     
     # check the CLI/config options:
-    if not session.config.getoption(dtmp):
+    cfg = session.config
+    if not cfg.getoption(dtmp, default=cfg.getini('delete-temps')):
         return
     
     # putative temporary directory:

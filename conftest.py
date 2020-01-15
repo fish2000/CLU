@@ -4,9 +4,10 @@
 pytest_plugins = "clu.testing.pytest"
 
 # Directories to exclude (using “norecursedirs”):
-excludes = ('.git', '.svn', '.hg', '.tox', 'CVS',
+excludes = ('.git', '.svn', '.hg', '.nox', '.tox', 'CVS',
             '*.egg', '*.egg-info',
-            '*.',
+            '__pycache__',
+            '.pytest_cache',
             'build', 'bdist', 'dist', 'sdist',
             'venv', 'develop')
 

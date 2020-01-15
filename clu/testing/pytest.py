@@ -43,6 +43,16 @@ def pytest_addoption(parser, pluginmanager):
         dest=dtmp, action='store_false')
 
 @pytest.hookimpl(trylast=True)
+def pytest_configure(config):
+    """ Add the pytest custom markers for CLU’s testing extensions """
+    config.addinivalue_line(
+        'markers',
+        "nondeterministic: mark a test as potentially nondeterministic.")
+    config.addinivalue_line(
+        'markers',
+        "TODO: mark a test as suggesting work needing to be done.")
+
+@pytest.hookimpl(trylast=True)
 def pytest_sessionfinish(session, exitstatus):
     """ Hook function to bind an exit handle – using “clu.dispatch”
         via the ‘@exithandle’ decorator – that removes any remaining

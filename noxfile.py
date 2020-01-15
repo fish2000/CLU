@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(__file__))
 
 # Recycle, reduce, reuse:
 nox.options.reuse_existing_virtualenvs = True
+nox.options.stop_on_first_error = True
 
 @nox.session
 def checkmanifest(session):

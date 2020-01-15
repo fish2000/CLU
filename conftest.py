@@ -12,10 +12,11 @@ excludes = ('.git', '.svn', '.hg', '.tox', 'CVS',
 
 import pytest
 
-# The same as passing “--delete-temporary”:
 @pytest.hookimpl(tryfirst=True)
-def pytest_delete_temporary_default():
+def pytest_delete_temps_default():
     """ Delete all “$TMPDIR/pytest-of-$USER” files by default """
+    # Defining this function is the same as always passing the
+    # option “--delete-temps” when running pytest:
     return True
 
 @pytest.hookimpl(tryfirst=True)

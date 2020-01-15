@@ -9,5 +9,5 @@ except (ImportError, RuntimeError):
 
 else:
     @pytest.hookspec(firstresult=True)
-    def pytest_delete_temporary_default():
+    def pytest_delete_temps_default():
         """ Return the default value for the “delete-temps” option """

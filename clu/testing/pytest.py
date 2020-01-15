@@ -27,7 +27,7 @@ def pytest_addhooks(pluginmanager):
 def pytest_addoption(parser, pluginmanager):
     """ Set up the CLI/config option for “--delete-temps” """
     # Default hook values:
-    default = pluginmanager.hook.pytest_delete_temporary_default()
+    default = pluginmanager.hook.pytest_delete_temps_default()
     default_str = str(bool(default))
     no_default_str = str(bool(not default))
     
@@ -57,7 +57,7 @@ def pytest_addoption(parser, pluginmanager):
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config):
-    """ Add the pytest custom markers for CLU’s testing extensions """
+    """ Add the pytest custom markers used in CLU’s testing extensions """
     config.addinivalue_line(
         'markers',
         "nondeterministic: mark a test as potentially nondeterministic.")
@@ -71,6 +71,11 @@ def pytest_sessionfinish(session, exitstatus):
         via the ‘@exithandle’ decorator – that removes any remaining
         temporary-file artifacts that may be hanging out in the
         putative directory “$TMPDIR/pytest-of-$USER”.
+        
+        The exit handle function is bound if the exit status is “natural” –
+        i.e. no internal errors and tests ran normally (this can include
+        occasions when tests fail) – and if the relevant CLI, INI, and hook
+        function values indicate said binding is warranted by the user.
         
         The exit handle function executes when the Python interpreter
         either enters shutdown (via the “atexit” module) or receives
@@ -88,15 +93,13 @@ def pytest_sessionfinish(session, exitstatus):
     
     # check the CLI/config options:
     cfg = session.config
-    if not cfg.getoption(dtmp, default=cfg.getini(dtemp)):
+    if not cfg.getoption(dtmp, default=cfg.getini(dtmp)):
         return
     
     # putative temporary directory:
     putative = td().subdirectory(f"pytest-of-{consts.USER}")
     
-    # bind a remover function if the exit status is “natural” –
-    # i.e. no internal errors and tests ran normally (this can
-    # include occasions when tests fail):
+    # bind our “remover(…)” exit-handle function:
     @exithandle
     def remover(signum, frame=None):
         """ Exit handler for removing ‘pytest’ artifacts """

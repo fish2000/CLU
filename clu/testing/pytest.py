@@ -38,7 +38,7 @@ def pytest_addoption(parser, pluginmanager):
     
     # Config file values:
     parser.addini(
-        dtemp,
+        dtmp,
         help=helptxt,
         default=bool(default),
         type='bool')

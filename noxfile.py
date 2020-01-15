@@ -30,6 +30,8 @@ def checkmodule(session, module):
 @nox.session
 def pytest(session):
     """ Run CLU’s `pytest` unit test suite """
+    session.env['MACOSX_DEPLOYMENT_TARGET']         = '10.14'
+    session.env['PYTEST_DISABLE_PLUGIN_AUTOLOAD']   = '1'
     session.install("-r", "requirements/install.txt")
     session.install("-r", "requirements/nox/tests.txt")
     session.run('pytest')

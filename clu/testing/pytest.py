@@ -14,9 +14,9 @@ no_delete_codes = (ExitCode.INTERNAL_ERROR,
                    ExitCode.USAGE_ERROR,
                    ExitCode.NO_TESTS_COLLECTED)
 
-# Internal name for the “--delete-temporary” option:
-dtmp = 'delete_temporary'
+# Internal name for the “--delete-temps” option:
 dtemp = 'delete-temps'
+dtmp = dtemp.replace('-', "_")
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_addhooks(pluginmanager):
@@ -25,28 +25,30 @@ def pytest_addhooks(pluginmanager):
     pluginmanager.add_hookspecs(hook)
 
 def pytest_addoption(parser, pluginmanager):
-    """ Set up the CLI/config option for “--delete-temporary” """
+    """ Set up the CLI/config option for “--delete-temps” """
     # Default hook values:
-    temporary_delete_default = pluginmanager.hook.pytest_delete_temporary_default()
-    temporary_delete_help = str(bool(temporary_delete_default))
-    no_temporary_delete_help = str(bool(not temporary_delete_default))
+    default = pluginmanager.hook.pytest_delete_temporary_default()
+    default_str = str(bool(default))
+    no_default_str = str(bool(not default))
     
-    helptxt = f"Delete pytest-related temporary files (default {temporary_delete_help})"
-    nohelptxt = f"Don’t delete pytest-related temporary files (default {no_temporary_delete_help})"
+    # Descriptive and help-related text:
+    desctxt = "temporary file deletion"
+    helptxt = f"Delete pytest-related temporary files (default {default_str})"
+    nohelptxt = f"Don’t delete pytest-related temporary files (default {no_default_str})"
     
     # Config file values:
     parser.addini(
         dtemp,
         help=helptxt,
-        default=bool(temporary_delete_default),
+        default=bool(default),
         type='bool')
     
     # CLI options and option groups:
-    group = parser.getgroup(f"{dtmp}_group", description="temporary file deletion")
+    group = parser.getgroup(f"{dtmp}_group", description=desctxt)
     group.addoption(
         f"--{dtemp}",
         help=helptxt,
-        default=bool(temporary_delete_default),
+        default=bool(default),
         dest=dtmp, action='store_true')
     group.addoption(
         f"--no-{dtemp}",

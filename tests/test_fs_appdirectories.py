@@ -20,14 +20,19 @@ class TestFsAppdirectories(object):
     """ Run the tests for the clu.fs.appdirectories module. """
     # DARWIN, WIN32, LINUX, LINUX2
     
-    appname = "TestApp"
-    appauthor = "OST"
-    appversion = "1.2.4"
+    @pytest.fixture
+    def arbitrary(self):
+        """ Fixture function furnishing exemplary initial AppDirs values """
+        yield {
+            'name'      : "TestApp",
+            'author'    : "OST",
+            'version'   : "1.2.4"
+        }
     
-    def test_LINUX_yes_version_no_author(self, environment):
+    def test_LINUX_yes_version_no_author(self, arbitrary, environment):
         home = environment.get('HOME', gethomedir())
-        appname = type(self).appname
-        appversion = type(self).appversion
+        appname = arbitrary['name']
+        appversion = arbitrary['version']
         appdirs = AppDirs(appname, version=appversion, system=System.LINUX)
         
         for xdg in XDGS:
@@ -57,11 +62,11 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
         assert str(appdirs) == repr(appdirs)
     
-    def test_LINUX_yes_version_yes_author(self, environment):
+    def test_LINUX_yes_version_yes_author(self, arbitrary, environment):
         home = environment.get('HOME', gethomedir())
-        appname = type(self).appname
-        appauthor = type(self).appauthor
-        appversion = type(self).appversion
+        appname = arbitrary['name']
+        appauthor = arbitrary['author']
+        appversion = arbitrary['version']
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
@@ -96,9 +101,9 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
         assert str(appdirs) == repr(appdirs)
     
-    def test_LINUX_no_version_no_author(self, environment):
+    def test_LINUX_no_version_no_author(self, arbitrary, environment):
         home = environment.get('HOME', gethomedir())
-        appname = type(self).appname
+        appname = arbitrary['name']
         appdirs = AppDirs(appname, system=System.LINUX)
         
         for xdg in XDGS:
@@ -127,10 +132,10 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
         assert str(appdirs) == repr(appdirs)
     
-    def test_LINUX_no_version_yes_author(self, environment):
+    def test_LINUX_no_version_yes_author(self, arbitrary, environment):
         home = environment.get('HOME', gethomedir())
-        appname = type(self).appname
-        appauthor = type(self).appauthor
+        appname = arbitrary['name']
+        appauthor = arbitrary['author']
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
@@ -163,10 +168,10 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
         assert str(appdirs) == repr(appdirs)
     
-    def test_LINUX2_yes_version_no_author(self, environment):
+    def test_LINUX2_yes_version_no_author(self, arbitrary, environment):
         home = environment.get('HOME', gethomedir())
-        appname = type(self).appname
-        appversion = type(self).appversion
+        appname = arbitrary['name']
+        appversion = arbitrary['version']
         appdirs = AppDirs(appname, version=appversion,
                                     system=System.LINUX2)
         
@@ -197,11 +202,11 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
         assert str(appdirs) == repr(appdirs)
     
-    def test_LINUX2_yes_version_yes_author(self, environment):
+    def test_LINUX2_yes_version_yes_author(self, arbitrary, environment):
         home = environment.get('HOME', gethomedir())
-        appname = type(self).appname
-        appauthor = type(self).appauthor
-        appversion = type(self).appversion
+        appname = arbitrary['name']
+        appauthor = arbitrary['author']
+        appversion = arbitrary['version']
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
@@ -236,9 +241,9 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
         assert str(appdirs) == repr(appdirs)
     
-    def test_LINUX2_no_version_no_author(self, environment):
+    def test_LINUX2_no_version_no_author(self, arbitrary, environment):
         home = environment.get('HOME', gethomedir())
-        appname = type(self).appname
+        appname = arbitrary['name']
         appdirs = AppDirs(appname, system=System.LINUX2)
         
         for xdg in XDGS:
@@ -267,10 +272,10 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
         assert str(appdirs) == repr(appdirs)
     
-    def test_LINUX2_no_version_yes_author(self, environment):
+    def test_LINUX2_no_version_yes_author(self, arbitrary, environment):
         home = environment.get('HOME', gethomedir())
-        appname = type(self).appname
-        appauthor = type(self).appauthor
+        appname = arbitrary['name']
+        appauthor = arbitrary['author']
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
@@ -303,10 +308,10 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
         assert str(appdirs) == repr(appdirs)
     
-    def test_DARWIN_yes_version_no_author(self, environment, consts):
+    def test_DARWIN_yes_version_no_author(self, arbitrary, environment, consts):
         user = environment.get('USER', consts.USER)
-        appname = type(self).appname
-        appversion = type(self).appversion
+        appname = arbitrary['name']
+        appversion = arbitrary['version']
         appdirs = AppDirs(appname, version=appversion,
                                     system=System.DARWIN)
         
@@ -337,11 +342,11 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
         assert str(appdirs) == repr(appdirs)
     
-    def test_DARWIN_yes_version_yes_author(self, environment, consts):
+    def test_DARWIN_yes_version_yes_author(self, arbitrary, environment, consts):
         user = environment.get('USER', consts.USER)
-        appname = type(self).appname
-        appauthor = type(self).appauthor
-        appversion = type(self).appversion
+        appname = arbitrary['name']
+        appauthor = arbitrary['author']
+        appversion = arbitrary['version']
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
@@ -376,9 +381,9 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
         assert str(appdirs) == repr(appdirs)
     
-    def test_DARWIN_no_version_no_author(self, environment, consts):
+    def test_DARWIN_no_version_no_author(self, arbitrary, environment, consts):
         user = environment.get('USER', consts.USER)
-        appname = type(self).appname
+        appname = arbitrary['name']
         appdirs = AppDirs(appname, system=System.DARWIN)
         
         for xdg in XDGS:
@@ -407,10 +412,10 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
         assert str(appdirs) == repr(appdirs)
     
-    def test_DARWIN_no_version_yes_author(self, environment, consts):
+    def test_DARWIN_no_version_yes_author(self, arbitrary, environment, consts):
         user = environment.get('USER', consts.USER)
-        appname = type(self).appname
-        appauthor = type(self).appauthor
+        appname = arbitrary['name']
+        appauthor = arbitrary['author']
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,

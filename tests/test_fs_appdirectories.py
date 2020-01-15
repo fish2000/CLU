@@ -65,6 +65,7 @@ class TestFsAppdirectories(object):
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
+                               roaming=True,
                                version=appversion,
                                 system=System.LINUX)
         
@@ -133,6 +134,7 @@ class TestFsAppdirectories(object):
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
+                               roaming=True,
                                 system=System.LINUX)
         
         for xdg in XDGS:
@@ -203,6 +205,7 @@ class TestFsAppdirectories(object):
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
+                               roaming=True,
                                version=appversion,
                                 system=System.LINUX2)
         
@@ -271,6 +274,7 @@ class TestFsAppdirectories(object):
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
+                               roaming=True,
                                 system=System.LINUX2)
         
         for xdg in XDGS:
@@ -341,6 +345,7 @@ class TestFsAppdirectories(object):
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
+                               roaming=True,
                                version=appversion,
                                 system=System.DARWIN)
         
@@ -409,6 +414,7 @@ class TestFsAppdirectories(object):
         
         with pytest.warns(UnusedValueWarning):
             appdirs = AppDirs(appname, appauthor,
+                               roaming=True,
                                 system=System.DARWIN)
         
         for xdg in XDGS:

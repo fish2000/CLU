@@ -16,7 +16,10 @@ Dev Notes:
 - Mac OS X: http://developer.apple.com/documentation/MacOSX/Conceptual/BPFileSystem/index.html
 - XDG spec for Un*x: https://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
 """
+from functools import lru_cache
 
+import collections
+import collections.abc
 import sys
 import os
 import platform
@@ -33,12 +36,14 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
+cache = lambda function: export(lru_cache(maxsize=16, typed=True)(function))
+
 # Module-specific version/version-info:
 __version__ = "2.2.0"
 __version_info__ = VersionInfo(__version__)
 
 @export
-class AppDirs(object):
+class AppDirs(collections.abc.Hashable):
     
     """ Convenience wrapper for getting application dirs. """
     
@@ -94,9 +99,6 @@ class AppDirs(object):
         else:
             # On non-Windows platforms, warn when options relevant only to
             # Windows-y OSes have been specified:
-            if appauthor is not None:
-                warnings.warn("The “appauthor” value is currently only used under Windows",
-                              UnusedValueWarning, stacklevel=2)
             if roaming:
                 warnings.warn("The “roaming” option is currently only used under Windows",
                               UnusedValueWarning, stacklevel=2)
@@ -163,6 +165,11 @@ class AppDirs(object):
     
     def __bytes__(self):
         return bytes(self.to_string(), encoding=ENCODING)
+    
+    def __hash__(self):
+        return hash(self.to_string()) & \
+               hash(self.appname) & \
+               hash(self.version_info.to_string())
     
     @property
     def user_data_dir(self):
@@ -735,6 +742,23 @@ def get_win_folder_with_jna(csidl):
     
     return directory
 
+@cache
+def clu_appdirs(system=System.LINUX2, versioning=True):
+    """ Retrieve an AppDirs instance specific to the CLU project """
+    import clu
+    from clu.constants import consts
+    from clu.version import version_info
+    
+    # Determine version value:
+    version = bool(versioning) and version_info.to_string() or None
+    
+    # Return an AppDirs instance for project CLU:
+    return AppDirs(consts.PROJECT_NAME,
+                   clu.__author__,
+                   version=version,
+                   system=system)
+
+
 export(System)
 export(CSIDL)
 export(SYSTEM,  name='SYSTEM')
@@ -790,6 +814,18 @@ def test():
             
             print("-- app dirs (with disabled 'appauthor')")
             dirs = AppDirs(appname, appauthor=False, system=system)
+            for prop in props:
+                print("%20s : %s" % (prop, getattr(dirs, prop)))
+            print()
+            
+            print("-- CLU-specific AppDirs instance (from “clu_appdirs(…)”)")
+            dirs = clu_appdirs(system=system, versioning=False)
+            for prop in props:
+                print("%20s : %s" % (prop, getattr(dirs, prop)))
+            print()
+            
+            print("-- CLU-specific versioned AppDirs instance (from “clu_appdirs(…)”)")
+            dirs = clu_appdirs(system=system)
             for prop in props:
                 print("%20s : %s" % (prop, getattr(dirs, prop)))
             print()

@@ -32,6 +32,7 @@ def pytest_addoption(parser, pluginmanager):
     no_temporary_delete_help = str(bool(not temporary_delete_default))
     
     helptxt = f"Delete pytest-related temporary files (default {temporary_delete_help})"
+    nohelptxt = f"Don’t delete pytest-related temporary files (default {no_temporary_delete_help})"
     
     # Config file values:
     parser.addini(
@@ -49,7 +50,7 @@ def pytest_addoption(parser, pluginmanager):
         dest=dtmp, action='store_true')
     group.addoption(
         f"--no-{dtemp}",
-        help=f"Don’t delete pytest-related temporary files (default {no_temporary_delete_help})",
+        help=nohelptxt,
         dest=dtmp, action='store_false')
 
 @pytest.hookimpl(trylast=True)

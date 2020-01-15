@@ -79,7 +79,7 @@ renox: clean-test-artifacts
 
 test: check pytest
 
-test-all: check tox
+test-all: check nox
 
 version:
 	python -m clu.version

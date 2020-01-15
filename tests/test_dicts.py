@@ -9,7 +9,7 @@ class TestDicts(object):
         ChainMaps (both “clu.dicts.ChainMap” and the stdlib version)
     """
     
-    @pytest.fixture
+    @pytest.fixture(scope='module')
     def arbitrary(self):
         """ Fixture function providing an arbitrary flat directory """
         yield {

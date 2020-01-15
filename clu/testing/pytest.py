@@ -137,6 +137,14 @@ def greektext():
     from clu.constants.data import GREEKOUT
     yield dict(GREEKOUT)
 
+@pytest.fixture(scope='session')
+def cluversion():
+    """ Fixture providing access to the current base version identifier –
+        née the “semver” or “semantic version” – of the CLU project
+    """
+    from clu.version import version_info
+    yield version_info
+
 @pytest.fixture(scope='package')
 def clumods(consts):
     """ Import all CLU modules that use the “clu.exporting.Exporter”

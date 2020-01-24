@@ -36,8 +36,8 @@ class TestFsAppdirectories(object):
                                          consts,
                                          environment):
         """ Arbitrary app info, with versioning, sans author """
-        user = environment.get('USER', consts.USER)
-        home = environment.get('HOME', gethomedir())
+        # user = environment.get('USER', consts.USER)
+        # home = environment.get('HOME', gethomedir())
         appname = arbitrary['name']
         appversion = arbitrary['version']
         appdirs = AppDirs(appname, version=appversion, system=system)
@@ -66,8 +66,8 @@ class TestFsAppdirectories(object):
                                           consts,
                                           environment):
         """ Arbitrary app info, with versioning and author """
-        user = environment.get('USER', consts.USER)
-        home = environment.get('HOME', gethomedir())
+        # user = environment.get('USER', consts.USER)
+        # home = environment.get('HOME', gethomedir())
         appname = arbitrary['name']
         appauthor = arbitrary['author']
         appversion = arbitrary['version']
@@ -102,8 +102,8 @@ class TestFsAppdirectories(object):
                                         consts,
                                         environment):
         """ Arbitrary app info, sans both versioning and author """
-        user = environment.get('USER', consts.USER)
-        home = environment.get('HOME', gethomedir())
+        # user = environment.get('USER', consts.USER)
+        # home = environment.get('HOME', gethomedir())
         appname = arbitrary['name']
         appdirs = AppDirs(appname, system=system)
         
@@ -130,8 +130,8 @@ class TestFsAppdirectories(object):
                                          consts,
                                          environment):
         """ Arbitrary app info, sans versioning, with author """
-        user = environment.get('USER', consts.USER)
-        home = environment.get('HOME', gethomedir())
+        # user = environment.get('USER', consts.USER)
+        # home = environment.get('HOME', gethomedir())
         appname = arbitrary['name']
         appauthor = arbitrary['author']
         
@@ -165,8 +165,8 @@ class TestFsAppdirectories(object):
         """ CLU-specific app info, with versioning """
         import clu
         
-        user = environment.get('USER', consts.USER)
-        home = environment.get('HOME', gethomedir())
+        # user = environment.get('USER', consts.USER)
+        # home = environment.get('HOME', gethomedir())
         appdirs = clu_appdirs(system=system)
         
         assert type(appdirs.site_config)    is Directory
@@ -193,8 +193,8 @@ class TestFsAppdirectories(object):
         """ CLU-specific app info, without versioning """
         import clu
         
-        user = environment.get('USER', consts.USER)
-        home = environment.get('HOME', gethomedir())
+        # user = environment.get('USER', consts.USER)
+        # home = environment.get('HOME', gethomedir())
         appdirs = clu_appdirs(system=system,
                               versioning=False)
         

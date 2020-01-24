@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from functools import lru_cache
 
 import sys
 import platform
@@ -7,10 +8,14 @@ import platform
 from clu.constants.consts import ENCODING
 from clu.constants.polyfills import Enum, unique
 
+onecache = lambda function: lru_cache(maxsize=1, typed=True)(function)
+
 @unique
 class System(Enum):
     
-    """ An enumeration class for dealing with system names """
+    """ An enumeration class for dealing with the name of the
+        underlying operating system upon which we are running.
+    """
     
     DARWIN = 'Mac'
     WIN32 = 'Windows'
@@ -18,6 +23,7 @@ class System(Enum):
     LINUX2 = ''
     
     @classmethod
+    @onecache
     def determine(cls):
         """ Determine the System value for the current platform """
         if sys.platform.startswith('java'):
@@ -30,13 +36,23 @@ class System(Enum):
     @classmethod
     def from_string(cls, string):
         """ Retrieve a System value by name (case-insensitively) """
+        folded = str(string).casefold()
         for system in cls:
-            if system.sys_name == string.casefold():
+            if system.sys_name == folded:
                 return system
-        raise ValueError(f"System not found: {string}")
+        raise ValueError(f"System not found: {string!s}")
     
     @classmethod
     def match(cls, value):
+        """ Match a system to a value – the nature of which can be:
+                
+                • a string (unicode or bytes-type) naming the system;
+                • an existing “System” enum-member value; or
+                • an arbitrary alternative enum-member value.
+            
+            … The matched system is returned. If no match is found,
+            a ValueError will be raised.
+        """
         if type(value) is cls:
             return value
         if Enum in type(value).__mro__:
@@ -44,6 +60,18 @@ class System(Enum):
         if type(value) in (bytes, bytearray):
             return cls.from_string(str(value, encoding=ENCODING))
         return cls.from_string(value) # Assume string as last resort
+    
+    @classmethod
+    def all(cls):
+        """ Get a generator over all System values """
+        yield from cls
+    
+    @classmethod
+    def unixes(cls):
+        """ Get a generator over the UNIX-based System values """
+        for system in cls.all():
+            if system.is_unix_based:
+                yield system
     
     def to_string(self):
         """ A given System value’s name """
@@ -72,11 +100,18 @@ class System(Enum):
     def sys_name(self):
         """ A given System value’s name, lowercased """
         return self.to_string().casefold()
+    
+    @property
+    def is_unix_based(self):
+        """ A boolean value expressing if a given System value
+            represents a UNIX-based operating system
+        """
+        return self != type(self).WIN32
 
 @unique
 class CSIDL(Enum):
     
-    """ An enumeration encapsulating Windows CSIDLs """
+    """ An enumeration encapsulating Windows CSIDLs. """
     # … which I have no idea WTF those actually are
     
     APPDATA         = ('AppData',        26)
@@ -85,25 +120,28 @@ class CSIDL(Enum):
     
     @classmethod
     def for_name(cls, name):
-        string_name = str(name)
+        """ Retrieve a CSIDL by name (case-insensitively) """
+        folded = str(name).casefold()
         for csidl in cls:
-            if csidl.name == string_name:
+            if folded in (nm.casefold() for nm in (csidl.name,
+                                                   csidl.fullname)):
                 return csidl
-            elif csidl.fullname == string_name:
-                return csidl
-        raise LookupError(f"No CSIDL found named {string_name}")
+        raise LookupError(f"No CSIDL found named {name!s}")
     
     def __init__(self, *args):
         self.shell_folder_name, self.const = args
     
     @property
     def fullname(self):
+        """ A CSIDL’s “full name” – which is basically of the form “CSIDL_NAME_STRING” """
         return "%s_%s" (type(self).__name__, self.name)
     
     def to_string(self):
+        """ A given CSIDL’s full name """
         return str(self.fullname)
     
     def to_int(self):
+        """ A given CSIDL’s integer value """
         return int(self.const)
     
     def __str__(self):
@@ -114,5 +152,8 @@ class CSIDL(Enum):
     
     def __index__(self):
         return self.to_int()
+    
+    def __hash__(self):
+        return hash(self.to_string())
 
 SYSTEM = System.determine()

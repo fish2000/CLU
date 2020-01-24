@@ -16,10 +16,6 @@ XDGS = ('XDG_CONFIG_DIRS', 'XDG_DATA_HOME',
                           'XDG_STATE_HOME',
                          'XDG_RUNTIME_DIR')
 
-SYSTEMS = [System.DARWIN,
-           System.LINUX,
-           System.LINUX2]
-
 class TestFsAppdirectories(object):
     
     """ Run the tests for the clu.fs.appdirectories module. """
@@ -34,7 +30,7 @@ class TestFsAppdirectories(object):
             'version'   : "1.2.4"
         }
     
-    @pytest.mark.parametrize('system', SYSTEMS)
+    @pytest.mark.parametrize('system', System.unixes())
     def test_yes_version_no_author(self, arbitrary,
                                          system,
                                          consts,
@@ -64,7 +60,7 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
         assert str(appdirs) == repr(appdirs)
     
-    @pytest.mark.parametrize('system', SYSTEMS)
+    @pytest.mark.parametrize('system', System.unixes())
     def test_yes_version_yes_author(self, arbitrary,
                                           system,
                                           consts,
@@ -100,7 +96,7 @@ class TestFsAppdirectories(object):
         assert str(appdirs.version_info) == str(VersionInfo(appversion))
         assert str(appdirs) == repr(appdirs)
     
-    @pytest.mark.parametrize('system', SYSTEMS)
+    @pytest.mark.parametrize('system', System.unixes())
     def test_no_version_no_author(self, arbitrary,
                                         system,
                                         consts,
@@ -128,7 +124,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
         assert str(appdirs) == repr(appdirs)
     
-    @pytest.mark.parametrize('system', SYSTEMS)
+    @pytest.mark.parametrize('system', System.unixes())
     def test_no_version_yes_author(self, arbitrary,
                                          system,
                                          consts,
@@ -161,7 +157,7 @@ class TestFsAppdirectories(object):
         assert appdirs.version_info     == None
         assert str(appdirs) == repr(appdirs)
     
-    @pytest.mark.parametrize('system', SYSTEMS)
+    @pytest.mark.parametrize('system', System.unixes())
     def test_clu_appdirs_versioned(self, system,
                                          consts,
                                          environment,
@@ -190,7 +186,7 @@ class TestFsAppdirectories(object):
         
         assert appdirs is clu_appdirs(system=system)
     
-    @pytest.mark.parametrize('system', SYSTEMS)
+    @pytest.mark.parametrize('system', System.unixes())
     def test_clu_appdirs_unversioned(self, system,
                                            consts,
                                            environment):

@@ -80,13 +80,13 @@ class AppDirs(collections.abc.Hashable):
         # The name of the application:
         self.appname = appname
         
-        # These next three data only matter on Windows:
+        # The next three data are only relevant on Windows:
         self.appauthor = appauthor
         self.roaming = bool(roaming)
         self.multipath = bool(multipath)
         
         # System and Version can be specified as instances of the System enum
-        # or of clu.version.VersuionInfo, respectively:
+        # or of clu.version.VersionInfo, respectively:
         self.system = system and System.match(system) or SYSTEM
         self.version = version and str(version) or None
         self.version_info = version and VersionInfo(version) or None

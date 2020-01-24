@@ -64,7 +64,7 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     @selfcheck
     def __iter__(self):
-        yield from self.referent().keys()
+        yield from self.referent()
     
     @selfcheck
     def __len__(self):

@@ -42,17 +42,17 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
         instance.referent = lambda: None
         return instance
     
-    def __init__(self, referent):
-        if not referent:
-            raise ValueError("A valid keymap referent is required")
+    def __init__(self, keymap):
+        if not keymap:
+            raise ValueError("A valid keymap instance is required")
         basetype = type(self).get_basetype()
-        if not isinstance(referent, basetype):
+        if not isinstance(keymap, basetype):
             qualname = qualified_name(basetype)
-            raise TypeError(f"A descendant of “{qualname}” is required")
-        if type(getattr(referent, 'referent', None)) is weakref.ReferenceType:
-            self.referent = weakref.ref(referent.referent())
+            raise TypeError(f"A keymap instance descending from “{qualname}” is required")
+        if type(getattr(keymap, 'referent', None)) is weakref.ReferenceType:
+            self.referent = weakref.ref(keymap.referent())
         else:
-            self.referent = weakref.ref(referent)
+            self.referent = weakref.ref(keymap)
     
     @selfcheck
     def get_reftype(self):
@@ -80,15 +80,15 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     @selfcheck
     def keys(self, *namespaces, unprefixed=False):
-        return self.referent().keys(*namespaces, unprefixed=False)
+        return self.referent().keys(*namespaces, unprefixed=unprefixed)
     
     @selfcheck
     def items(self, *namespaces, unprefixed=False):
-        return self.referent().items(*namespaces, unprefixed=False)
+        return self.referent().items(*namespaces, unprefixed=unprefixed)
     
     @selfcheck
     def values(self, *namespaces, unprefixed=False):
-        return self.referent().values(*namespaces, unprefixed=False)
+        return self.referent().values(*namespaces, unprefixed=unprefixed)
     
     @selfcheck
     def __enter__(self):

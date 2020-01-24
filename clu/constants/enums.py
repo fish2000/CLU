@@ -102,6 +102,13 @@ class System(Enum):
         return self.to_string().casefold()
     
     @property
+    def is_current(self):
+        """ A boolean value expressing if a given System value
+            represents the current running operating system
+        """
+        return self is type(self).determine()
+    
+    @property
     def is_unix_based(self):
         """ A boolean value expressing if a given System value
             represents a UNIX-based operating system

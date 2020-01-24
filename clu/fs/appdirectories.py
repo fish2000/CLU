@@ -758,7 +758,6 @@ def clu_appdirs(system=System.LINUX2, versioning=True):
                    version=version,
                    system=system)
 
-
 export(System)
 export(CSIDL)
 export(SYSTEM,  name='SYSTEM')
@@ -769,16 +768,20 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     """ Inline tests for appdirectories """
     from clu.repl.ansi import print_separator
+    from clu.version import version_info
     
     appname = "MyApp"
     appauthor = "MyCompany"
+    appversion = "1.0"
     
-    props = ("system", "version", "version_info",
-             "site_config_dir", "site_data_dir",
-             "user_cache_dir", "user_config_dir",
-                               "user_data_dir",
-                               "user_log_dir",
-                               "user_state_dir")
+    dirs = ("site_config", "site_data",
+             "user_cache", "user_config",
+                           "user_data",
+                           "user_log",
+                           "user_state")
+    
+    props = ("system", "version", "version_info") \
+          + tuple(f"{dirname}_dir" for dirname in dirs)
     
     print(f"-- “appdirectories” __version__: {__version__} --")
     print()
@@ -787,47 +790,69 @@ def test():
     for system in System:
         
         print_separator()
-        default = (system is SYSTEM) and "(DEFAULT)" or ""
-        print(f"-- System: {system.to_string()} {default}")
+        current = system.is_current and "(CURRENT SYSTEM)" or ""
+        print(f"-- System: {system.to_string()} {current}")
         # print()
         
         if (system is not System.WIN32) or ((system is System.WIN32) \
                                         and (SYSTEM is System.WIN32)):
             
             print("-- app dirs (with optional 'version')")
-            dirs = AppDirs(appname, appauthor, version="1.0", system=system)
+            appdirs = AppDirs(appname, appauthor, version=appversion, system=system)
             for prop in props:
-                print("%20s : %s" % (prop, getattr(dirs, prop)))
+                assert hasattr(appdirs, prop)
+                if prop.endswith('dir') and prop != "site_config_dir":
+                    assert appversion in str(getattr(appdirs, prop))
+                print("%20s : %s" % (prop, getattr(appdirs, prop)))
+            for dirname in dirs:
+                assert type(getattr(appdirs, dirname)) is Directory
             print()
             
             print("-- app dirs (without optional 'version')")
-            dirs = AppDirs(appname, appauthor, system=system)
+            appdirs = AppDirs(appname, appauthor, system=system)
             for prop in props:
-                print("%20s : %s" % (prop, getattr(dirs, prop)))
+                assert hasattr(appdirs, prop)
+                print("%20s : %s" % (prop, getattr(appdirs, prop)))
+            for dirname in dirs:
+                assert type(getattr(appdirs, dirname)) is Directory
             print()
             
             print("-- app dirs (without optional 'appauthor')")
-            dirs = AppDirs(appname, system=system)
+            appdirs = AppDirs(appname, system=system)
             for prop in props:
-                print("%20s : %s" % (prop, getattr(dirs, prop)))
+                assert hasattr(appdirs, prop)
+                print("%20s : %s" % (prop, getattr(appdirs, prop)))
+            for dirname in dirs:
+                assert type(getattr(appdirs, dirname)) is Directory
             print()
             
             print("-- app dirs (with disabled 'appauthor')")
-            dirs = AppDirs(appname, appauthor=False, system=system)
+            appdirs = AppDirs(appname, appauthor=False, system=system)
             for prop in props:
-                print("%20s : %s" % (prop, getattr(dirs, prop)))
+                assert hasattr(appdirs, prop)
+                print("%20s : %s" % (prop, getattr(appdirs, prop)))
+            for dirname in dirs:
+                assert type(getattr(appdirs, dirname)) is Directory
             print()
             
             print("-- CLU-specific AppDirs instance (from “clu_appdirs(…)”)")
-            dirs = clu_appdirs(system=system, versioning=False)
+            appdirs = clu_appdirs(system=system, versioning=False)
             for prop in props:
-                print("%20s : %s" % (prop, getattr(dirs, prop)))
+                assert hasattr(appdirs, prop)
+                print("%20s : %s" % (prop, getattr(appdirs, prop)))
+            for dirname in dirs:
+                assert type(getattr(appdirs, dirname)) is Directory
             print()
             
             print("-- CLU-specific versioned AppDirs instance (from “clu_appdirs(…)”)")
-            dirs = clu_appdirs(system=system)
+            appdirs = clu_appdirs(system=system)
             for prop in props:
-                print("%20s : %s" % (prop, getattr(dirs, prop)))
+                assert hasattr(appdirs, prop)
+                if prop.endswith('dir') and prop != "site_config_dir":
+                    assert version_info.to_string() in str(getattr(appdirs, prop))
+                print("%20s : %s" % (prop, getattr(appdirs, prop)))
+            for dirname in dirs:
+                assert type(getattr(appdirs, dirname)) is Directory
             print()
         
         else:

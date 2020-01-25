@@ -151,8 +151,8 @@ def format_environment(environment=None):
     for key, value in environment.items():
         jkey = f"{key}".ljust(most)
         begin = f"» {jkey} : "
-        if key.endswith('PATH') and ':' in value:
-            wvalue = pformat(value.split(':'))
+        if key.endswith('PATH') and os.pathsep in value:
+            wvalue = pformat(value.split(os.pathsep))
         else:
             wvalue = wrapper.fill(value)
         yield f"{begin}{wvalue}"

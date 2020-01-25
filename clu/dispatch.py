@@ -31,7 +31,7 @@ def wraphandler(function):
     return wrapper
 
 def bindhandles():
-    """ Freshly bind all exit handles listed in “clu.shelving.dispatch.exithandles” """
+    """ Freshly bind all exit handles listed in “clu.dispatch.exithandles” """
     # If there’s a handle set already registered with “atexit”,
     # unregister it first:
     if callable(bindhandles.last):

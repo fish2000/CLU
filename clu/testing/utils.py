@@ -697,17 +697,7 @@ def test():
         print()
     
     @inline
-    def test_three():
-        """ Busywork, mark III. """
-        pass
-    
-    @inline
-    def test_four():
-        """ Busywork, mark IV. """
-        pass
-    
-    @inline
-    def test_five_countfiles():
+    def test_three_countfiles():
         """ Testing “clu.testing.utils.countfiles(…)” """
         from clu.typology import isvalidpathlist
         from clu.fs.filesystem import TemporaryDirectory

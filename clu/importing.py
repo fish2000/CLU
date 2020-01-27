@@ -109,8 +109,8 @@ class MetaRegistry(Extensible):
                 cls = Registry.monomers[appname].pop(qualified_name)
                 if qualified_name in sys.modules:
                     del sys.modules[qualified_name]
-                if hasattr(cls, 'exporter'):
-                    cls.exporter.unregister(qualified_name)
+                if hasattr(cls, consts.EXPORTER_NAME):
+                    getattr(cls, consts.EXPORTER_NAME).unregister(qualified_name)
                 importlib.invalidate_caches()
                 return bool(cls)
         return False
@@ -481,7 +481,8 @@ class MetaModule(MetaRegistry):
         if cls.appname is not None and not name.endswith('Module'):
             if ExporterRegistry.has_appname(cls.appname):
                 ExporterClass = ExporterRegistry[cls.appname]
-                cls.exporter = ExporterClass(dotpath=cls.qualname)
+                setattr(cls, consts.EXPORTER_NAME,
+                             ExporterClass(dotpath=cls.qualname))
                 
                 # Invoke all of our argument sinks against the
                 # Exporter instance’s “export(…)” function:
@@ -585,8 +586,8 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
     
     def __dir__(self):
         cls = type(self)
-        if hasattr(cls, 'exporter'):
-            return cls.exporter.dir_function()()
+        if hasattr(cls, consts.EXPORTER_NAME):
+            return getattr(cls, consts.EXPORTER_NAME).dir_function()()
         names = chain(cls.__dict__.keys(),
                       super(ModuleBase, self).__dir__())
         return sorted(frozenset(names) - DO_NOT_INCLUDE)

@@ -245,7 +245,7 @@ def test():
     def show_fixture_cache_stats():
         """ Show the per-fixture-function cache stats """
         total = len(inline.fixtures)
-        for idx, name in enumerate(inline.fixtures.keys()):
+        for idx, name in enumerate(inline.fixtures):
             if idx > 0:
                 print()
             print(f"FUNCTION CACHE INFO: {name} ({idx+1} of {total})")

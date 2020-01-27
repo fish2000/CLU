@@ -211,17 +211,17 @@ def qualified_import(qualified):
 
 @export
 def qualified_name_tuple(thing):
-    """ Get the module/package and thing-name for a class or module.
-        e.g. ('instakit.processors.halftone', 'FloydSteinberg')
+    """ Get the thing-name and module/package name for a class or module.
+        e.g. ('FloydSteinberg', 'instakit.processors.halftone')
     """
-    return moduleof(thing), nameof(thing)
+    return nameof(thing), moduleof(thing)
 
 @export
 def qualified_name(thing):
     """ Get a qualified thing-name for a thing.
         e.g. 'instakit.processors.halftone.FloydSteinberg'
     """
-    module_name, thing_name = qualified_name_tuple(thing)
+    thing_name, module_name = qualified_name_tuple(thing)
     qualname = dotpath_join(module_name, thing_name)
     return qualname
 

@@ -109,15 +109,15 @@ def moduleof(thing, default=NoDefault):
 
 # MODULE INSPECTOR PREDICATES: determine what undergirds a module object
 
+EXTENSION_SUFFIXES = tuple(suffix.lstrip(QUALIFIER) \
+                       for suffix \
+                        in importlib.machinery.EXTENSION_SUFFIXES)
+
 isbuiltin = lambda thing: moduleof(thing) == 'builtins'
 
 suffix = lambda filename: QUALIFIER in filename \
             and filename.rpartition(QUALIFIER)[-1] \
              or ''
-
-EXTENSION_SUFFIXES = tuple(suffix.lstrip(QUALIFIER) \
-                       for suffix \
-                        in importlib.machinery.EXTENSION_SUFFIXES)
 
 @export
 def isnativemodule(module):

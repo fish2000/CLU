@@ -24,8 +24,6 @@ hexid = lambda thing: hex(id(thing))
 typenameof = lambda thing: pyname(typeof(thing))
 typename_hexid = lambda thing: (pyname(typeof(thing)), hex(id(thing)))
 
-INSTANCE_DELIMITER = '@'
-
 @recursive
 def strfield(value):
     """ Basic, simple, straightforward type-switch-based sub-repr """
@@ -54,7 +52,7 @@ def strfield(value):
         if isenum(value):
             typename, hex_id = typename_hexid(value)
             choices = ", ".join(enumchoices(value))
-            return f"‘{typename}<({choices}) {INSTANCE_DELIMITER} {hex_id}>’"
+            return f"‘{typename}<({choices}) {consts.REPR_DELIMITER} {hex_id}>’"
         return repr(value)
     return f"‘{value!r}’"
 
@@ -78,7 +76,7 @@ def strfields(instance, fields,
             def __repr__(self):
                 typename, hex_id = typename_hexid(self)
                 attr_string = self.inner_repr()
-                return f"{typename}({attr_string}) {INSTANCE_DELIMITER} {hex_id}"
+                return f"{typename}({attr_string}) {consts.REPR_DELIMITER} {hex_id}"
         
         Callable fields, by default, will be called with no arguments
         to obtain their value. To supress this behavior – if you wish
@@ -124,7 +122,7 @@ def fullrepr(instance, string):
         the “instance” parameter.
     """
     typename, hex_id = typename_hexid(instance)
-    return f"{typename}({string}) {INSTANCE_DELIMITER} {hex_id}"
+    return f"{typename}({string}) {consts.REPR_DELIMITER} {hex_id}"
 
 @export
 def stringify(instance, fields,
@@ -164,7 +162,7 @@ def chop_instance_repr(instance):
         an instance repr string
     """
     instance_repr = isstring(instance) and instance or repr(instance)
-    return instance_repr.rsplit(INSTANCE_DELIMITER).pop(0).strip()
+    return instance_repr.rsplit(consts.REPR_DELIMITER).pop(0).strip()
 
 @export
 def compare_instance_reprs(repr0, *reprX):

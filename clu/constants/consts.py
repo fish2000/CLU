@@ -60,7 +60,7 @@ MAXINT = getattr(sys, 'maxint',
          getattr(sys, 'maxsize', (2 ** 64) / 2))
 
 # The namespace separator for namespaced KeyMaps:
-NAMESPACE_SEP = sys.intern(':')
+NAMESPACE_SEP = sys.intern(os.pathsep)
 
 # The PATH environment variable, with a sensible default:
 PYTHON_BIN = os.path.join(sysconfig.get_path('data'), 'bin')
@@ -90,6 +90,9 @@ PYTHON_VERSION = float("%s%s%s" % (sys.version_info.major, os.extsep,
 
 # Qualifier for qualified-name operations:
 QUALIFIER = sys.intern(os.extsep)
+
+# Delimiter for repr-strings indicating instance IDs:
+REPR_DELIMITER = sys.intern('@')
 
 # List of Python’s built-in singleton types:
 NoneType = type(None)
@@ -172,6 +175,7 @@ __all__ = ('BASEPATH',
            'PY3', 'PYPY',
            'PYTHON_VERSION',
            'QUALIFIER',
+           'REPR_DELIMITER',
            'SEPARATOR_WIDTH',
            'SINGLETON_TYPES',
            'STRINGPAIR',

@@ -113,7 +113,7 @@ class ReprWrapper(abc.ABC):
         from clu.repr import typename_hexid
         cnm, hxa = typename_hexid(self)
         rpr = self.inner_repr()
-        return f"{cnm}({rpr}) @ {hxa}"
+        return f"{cnm}({rpr}) {consts.REPR_DELIMITER} {hxa}"
 
 class SlottedRepr(ReprWrapper, metaclass=Slotted):
     

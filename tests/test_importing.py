@@ -157,7 +157,7 @@ class TestImporting(object):
                 Registry.unregister(clsmod.appname,
                                     clsmod.qualname)
     
-    def test_module_export_within_execute(self):
+    def test_module_export_within_execute(self, consts):
         from clu.importing import Module, Registry, DO_NOT_INCLUDE
         from clu.exporting import Exporter
         
@@ -205,6 +205,8 @@ class TestImporting(object):
             assert type(derived) is DerivedWithExecute
             assert repr(derived) == "<class-module ‘clu.app.DerivedWithExecute’ from “clu.app”>"
             assert derived.yo == 'dogg'
+            
+            assert hasattr(derived, consts.EXPORTER_NAME)
             
             assert type(derived.exporter) is Exporter
             assert len(derived.exporter) == len(dir(derived))
@@ -396,7 +398,7 @@ class TestImporting(object):
             from clu.importing import Registry
             Registry.unregister(derived.appname, derived.qualname)
     
-    def test_derived_import_with_export(self):
+    def test_derived_import_with_export(self, consts):
         from clu.importing import Module, Registry, DO_NOT_INCLUDE
         from clu.exporting import Exporter
         export = None # SHUT UP, PYFLAKES!!
@@ -432,6 +434,8 @@ class TestImporting(object):
             assert type(derived) is AnotherDerived
             assert repr(derived) == "<class-module ‘clu.app.AnotherDerived’ from “clu.app”>"
             assert derived.yo == 'dogg'
+            
+            assert hasattr(derived, consts.EXPORTER_NAME)
             
             assert type(derived.exporter) is Exporter
             assert len(derived.exporter) == len(dir(derived))

@@ -612,6 +612,12 @@ class ExporterBase(collections.abc.MutableMapping,
         """
         return search_by_id.cache_info()
     
+    def module(self):
+        """ Shortcut to get the parent module for the exporter. """
+        if self.dotpath is not None:
+            return importlib.import_module(self.dotpath)
+        return None
+    
     def __enter__(self):
         return self.decorator()
     

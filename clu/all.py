@@ -51,18 +51,17 @@ def import_clu_modules():
 @export
 def clu_inline_tests():
     """ Generator over all CLU modules that contain inline tests """
-    # Use “clu.predicates.resolve(…)” for nested attribute access:
-    from clu.predicates import resolve
+    # Use “resolve(…)” and “attrs(…)” for nested attribute access:
+    from clu.predicates import resolve, attrs
     
-    # Find all CLU modules with inline tests, and yield them:
+    # Find and yield all CLU modules defining inline test functions:
     for dotpath, module in import_clu_modules().items():
         test_fn = resolve(module, 'test')
-        if test_fn is not None:
-            if callable(test_fn):
-                names = resolve(test_fn, '__code__.co_names')
-                if names is not None:
-                    if 'inline' in names:
-                        yield dotpath
+        if callable(test_fn):
+            names = attrs(test_fn, '__code__.co_names',
+                                   '__code__.co_varnames')
+            if any('inline' in name for name in names):
+                yield dotpath
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

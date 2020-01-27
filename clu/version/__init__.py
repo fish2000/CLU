@@ -143,8 +143,8 @@ class VersionInfo(VersionAncestor):
         return out
     
     def to_dict(self):
-        """ Really an OrderedDict but who’s counting? """
-        out = OrderedDict() # type: OrderedDict
+        """ Returns what you think it returns """
+        out = {} # type: dict
         for field in FIELDS:
             if getattr(self, field, None) is not None:
                 out[field] = getattr(self, field)

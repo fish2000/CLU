@@ -244,12 +244,18 @@ def test():
     @inline.diagnostic
     def show_fixture_cache_stats():
         """ Show the per-fixture-function cache stats """
-        total = len(inline.fixtures)
-        for idx, name in enumerate(inline.fixtures):
+        from clu.config.keymap import inline as keymap_inline
+        from clu.dicts import merge_fast_two
+        
+        fixtures = merge_fast_two(inline.fixtures,
+                           keymap_inline.fixtures)
+        total = len(fixtures)
+        
+        for idx, name in enumerate(fixtures.keys()):
             if idx > 0:
                 print()
             print(f"FUNCTION CACHE INFO: {name} ({idx+1} of {total})")
-            print(inline.fixtures[name].cache_info())
+            print(fixtures[name].cache_info())
     
     # Run all test functions:
     return inline.test(100)

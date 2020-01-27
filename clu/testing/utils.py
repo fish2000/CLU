@@ -751,7 +751,6 @@ def test():
             print(inline.fixtures[name].cache_info())
     
     return inline.test(100)
-    # return inline.test(100, mode='json')
 
 if __name__ == '__main__':
     sys.exit(test())

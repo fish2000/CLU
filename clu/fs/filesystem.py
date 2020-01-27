@@ -1174,7 +1174,7 @@ class Directory(collections.abc.Hashable,
         excluder = re_excluder(excludes)
         searcher = suffix_searcher(suffix)
         dotpaths = []
-        target = self.subdirectory(subdir or os.path.curdir, source)
+        target = self.subdirectory(subdir or os.curdir, source)
         # Use a call to “os.walk(…)” directly to allow modification of
         # the “dirs” list in-place:
         for root, dirs, files in os.walk(target):
@@ -1194,9 +1194,9 @@ class Directory(collections.abc.Hashable,
             excluding anything matching any of the “excludes” strings
         """
         excluder = re_excluder(excludes)
-        searcher = re_searcher(re.escape(os.path.extsep))
+        searcher = re_searcher(re.escape(os.extsep))
         suffixes = collections.Counter()
-        target = self.subdirectory(subdir or os.path.curdir, source)
+        target = self.subdirectory(subdir or os.curdir, source)
         # Use a call to “os.walk(…)” directly to allow modification of
         # the “dirs” list in-place:
         for root, dirs, files in os.walk(target):

@@ -34,6 +34,9 @@ DELETE_FLAG = getattr(os, 'O_TEMPORARY', 0)
 # Default terminal width:
 DEFAULT_TERMINAL_WIDTH = int(os.environ.get('COLUMNS', '100'), base=10)
 
+# Dollar-sign string (for use in regexing):
+DOLLA = '$'
+
 # A prefix to use when creating new modules programmatically:
 DYNAMIC_MODULE_PREFIX = sys.intern('__dynamic_modules__')
 
@@ -161,6 +164,7 @@ __all__ = ('BASEPATH',
            'DEBUG',
            'DELETE_FLAG',
            'DEFAULT_TERMINAL_WIDTH',
+           'DOLLA',
            'DYNAMIC_MODULE_PREFIX',
            'ENCODING',
            'ENVIRONS_SEP',

@@ -204,14 +204,19 @@ rmro        = reverse(mro)
 isancestor  = lambda cls, ancestor=object: isclasstype(cls) and (ancestor in mro(cls))
 isorigin    = lambda cls, original=object: isclasstype(cls) and isancestor(origin(cls), typeof(original))
 
-class ObjectType(object):
-    """ Base type for programmatically created new types """
+@export
+class Base(object):
+    """ Base type for programmatically created new types.
+        
+        Can be accessed as an attribute of “newtype(…)”, e.g. “newtype.Base”;
+        q.v. the “newtype(…)” function sub.
+    """
     pass
 
 @cache
 def newtype(name, *bases, metaclass=None, attributes=None, **keywords):
     """ newtype(name, *bases, metaclass=None, attributes=None, **keywords)
-        → Shortcut for “type(name, tuple(bases) or (ObjectType,), dict(attributes))”
+        → Shortcut for “type(name, tuple(bases) or (newtype.Base,), dict(attributes))”
         
         q.v. https://docs.python.org/3/library/types.html#dynamic-type-creation supra.
     """
@@ -220,7 +225,7 @@ def newtype(name, *bases, metaclass=None, attributes=None, **keywords):
     
     # Default arguments:
     if not bases:
-        bases = (ObjectType,)
+        bases = (newtype.Base,)
     if attributes is None:
         attributes = {}
     if ismetaclass(metaclass):
@@ -240,6 +245,10 @@ def newtype(name, *bases, metaclass=None, attributes=None, **keywords):
     return types.new_class(name, bases=ordered_bases,
                                  kwds=kwds,
                                  exec_body=lambda ns: ns.update(namespace))
+
+# Hang the base type off of the “newtype(…)” function,
+# for E-Z access:
+newtype.Base = Base
 
 # ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)

@@ -6,7 +6,7 @@ import os
 import re
 import sys
 
-from clu.constants.consts import ENCODING
+from clu.constants.consts import DOLLA, ENCODING, QUALIFIER
 from clu.predicates import negate, true_function, itervariadic
 from clu.typology import isvalidpath, isnumeric, isstring
 from clu.exporting import Exporter
@@ -21,9 +21,6 @@ onecache = lambda function: export(lru_cache(maxsize=1)(function))
 
 gethomedir = lambda: os.path.expanduser("~")
 isinvalidpath = negate(isvalidpath)
-
-ex = os.path.extsep
-dolla = '$'
 
 @cache
 def re_matcher(string):
@@ -60,12 +57,12 @@ def re_searcher(string):
 
 @export
 def re_suffix(string):
-    """ Remove any “os.path.extsep” prefixing a string and ensure
+    """ Remove any “os.extsep” prefixing a string, and ensure that
         it ends with a “$” – to indicate a regular expression suffix.
     """
     if not string:
         return None
-    return rf"{string.casefold().lstrip(ex).rstrip(dolla)}$"
+    return rf"{string.casefold().lstrip(QUALIFIER).rstrip(DOLLA)}{DOLLA}"
 
 @export
 def suffix_searcher(string):
@@ -100,7 +97,7 @@ def extension(path, dotted=False):
     out = os.path.splitext(u8str(path))[-1]
     if dotted:
         return out
-    return out.lstrip(ex)
+    return out.lstrip(QUALIFIER)
 
 @export
 def swapext(path, new_extension):
@@ -121,7 +118,7 @@ def swapext(path, new_extension):
     bulk = os.path.splitext(path)[0]
     if new_extension is None:
         return bulk
-    return ex.join((bulk, new_extension.lstrip(ex)))
+    return QUALIFIER.join((bulk, new_extension.lstrip(QUALIFIER)))
 
 @export
 def filesize(path):

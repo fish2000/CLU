@@ -152,7 +152,8 @@ def clumods(consts):
     """
     from clu.all import import_all_modules
     modules = import_all_modules(basepath=consts.BASEPATH,
-                                  appname=consts.PROJECT_NAME)
+                                  appname=consts.PROJECT_NAME,
+                             exportername=consts.EXPORTER_NAME)
     yield modules
 
 @pytest.fixture(scope='package')

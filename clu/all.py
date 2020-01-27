@@ -5,20 +5,20 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-typename = lambda thing: type(thing).__name__
-
 @export
-def import_all_modules(basepath, appname):
-    """ Import all modules that use the “clu.exporting.Exporter”
+def import_all_modules(basepath, appname, exportername='exporter'):
+    """ Import all modules that use the “clu.exporting.ExporterBase”
         mechanism for listing and exporting their module contents,
-        for a given «basepath» and «appname», where:
+        for a given «basepath», «appname», and «exportername» – where:
         
-            • “basepath” is the root path of a Python package, and
-            • “appname” is a valid module name within «basepath»
+            • “basepath” is the root path of a Python package;
+            • “appname” is a valid module name within «basepath»; and
+            • “exportername” is the name of the “Exporter” instances.
     """
     from clu.fs.filesystem import Directory
+    from clu.exporting import ExporterBase
     from clu.importing import modules_for_appname
-    from clu.predicates import or_none
+    from clu.predicates import resolve
     from importlib import import_module
     from itertools import chain
     
@@ -26,12 +26,13 @@ def import_all_modules(basepath, appname):
     importables = Directory(basepath).importables(appname)
     cls_modules = (clsmod.qualname for clsmod in modules_for_appname(appname))
     
-    # Only include modules whose “exporter” entry is an instance
-    # of a subclass of “clu.exporting.ExporterBase” whose class
-    # name is ‘Exporter’:
+    # Only include those modules whose exporter instance is
+    # a subclass of “clu.exporting.ExporterBase” named as
+    # “exportername” indicates, within the module in question:
     for modname in chain(importables, cls_modules):
         module = import_module(modname)
-        if typename(or_none(module, 'exporter')) == 'Exporter':
+        exporter = resolve(module, exportername)
+        if isinstance(exporter, ExporterBase):
             modules[modname] = module
     
     return modules
@@ -46,7 +47,8 @@ def import_clu_modules():
     # and «appname=clu.constants.consts.PROJECT_NAME»
     from clu.constants import consts
     return import_all_modules(basepath=consts.BASEPATH,
-                               appname=consts.PROJECT_NAME)
+                               appname=consts.PROJECT_NAME,
+                          exportername=consts.EXPORTER_NAME)
 
 @export
 def clu_inline_tests():

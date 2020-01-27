@@ -70,7 +70,8 @@ def compare_module_lookups_for_all_things():
     mismatches = []
     results = []
     clumodules = import_all_modules(consts.BASEPATH,
-                                    consts.PROJECT_NAME)
+                                    consts.PROJECT_NAME,
+                                    consts.EXPORTER_NAME)
     modulenames = tuple(Exporter.modulenames())
     
     for modulename in modulenames:

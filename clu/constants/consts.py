@@ -46,6 +46,9 @@ ENCODING = sys.intern(sys.getfilesystemencoding().upper()) # 'UTF-8'
 # The environment-variable name partition separator:
 ENVIRONS_SEP = sys.intern('_')
 
+# The default exporter instance name:
+EXPORTER_NAME = sys.intern('exporter')
+
 # Possible names for file arguments (used for introspection):
 FILE_ARGUMENT_NAMES = ('path', 'pth', 'file')
 
@@ -168,6 +171,7 @@ __all__ = ('BASEPATH',
            'DYNAMIC_MODULE_PREFIX',
            'ENCODING',
            'ENVIRONS_SEP',
+           'EXPORTER_NAME',
            'FILE_ARGUMENT_NAMES',
            'HOSTNAME',
            'LAMBDA', 'λ',

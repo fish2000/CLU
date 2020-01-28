@@ -156,4 +156,4 @@ class TestRepr(object):
         export(test_lambda_qualname, 'yo_dogg')     # renames using provided string name
         
         assert repr(test_lambda) == f"<function test_lambda at {test_hex_id}>"
-        assert repr(test_lambda_qualname) == f"<function yo_dogg at {test_hex_id_qualname}>"
+        assert repr(test_lambda_qualname) == f"<function TestRepr.test_repr_lambdas.<locals>.yo_dogg at {test_hex_id_qualname}>"

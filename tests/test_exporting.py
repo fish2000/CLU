@@ -284,8 +284,8 @@ class TestExporting(object):
         assert 'i_heard' in exporter
         assert yo_dogg.__name__ == 'yo_dogg'
         assert i_heard.__name__ == 'i_heard'
-        assert yo_dogg.__qualname__ == 'yo_dogg'
-        assert i_heard.__qualname__ == 'i_heard'
+        assert yo_dogg.__qualname__.endswith('yo_dogg')
+        assert i_heard.__qualname__.endswith('i_heard')
         assert nameof(yo_dogg) == 'yo_dogg'
         assert nameof(i_heard) == 'i_heard'
         
@@ -318,8 +318,8 @@ class TestExporting(object):
         assert 'i_heard' in exporter
         assert yo_dogg.__name__ == 'yo_dogg'
         assert i_heard.__name__ == 'i_heard'
-        assert yo_dogg.__qualname__ == 'yo_dogg'
-        assert i_heard.__qualname__ == 'i_heard'
+        assert yo_dogg.__qualname__.endswith('yo_dogg')
+        assert i_heard.__qualname__.endswith('i_heard')
         assert nameof(yo_dogg) == 'yo_dogg'
         assert nameof(i_heard) == 'i_heard'
         

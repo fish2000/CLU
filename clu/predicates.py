@@ -313,12 +313,20 @@ class Partial(partial):
     def __init__(self, *args, **kwargs):
         """ Initialize a new Partial object, with a predicate and a function """
         # N.B. The real action seems to happen in partial.__new__(…)
-        # Name the Partial instance, as if it’s a phi-type:
-        self.__name__ = self.__qualname__ = φ
         try:
             super(Partial, self).__init__(*args, **kwargs)
         except:
             super(Partial, self).__init__() # type: ignore
+        
+        # Name the Partial instance, as if it’s a phi-type:
+        qname = or_none(self, '__qualname__')
+        if qname:
+            setattr(self, '__qualname__',
+                    qname.replace(
+                    getattr(self, '__name__'), φ))
+        else:
+            self.__qualname__ = φ
+        self.__name__ = φ
     
     @property
     def predicate(self):

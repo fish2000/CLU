@@ -371,11 +371,18 @@ class InlineTester(collections.abc.Set,
             Optionally, a name may be specified.
         """
         from clu.exporting import determine_name
+        from clu.predicates import or_none
         
         # Stash the old name before assigning the new one:
         if name is not None:
             dname = determine_name(function)
-            function.__name__ = function.__qualname__ = name
+            qname = or_none(function, '__qualname__')
+            if qname:
+                setattr(function, '__qualname__',
+                        qname.replace(
+                        getattr(function, '__name__'),
+                                name))
+            function.__name__ = name
             function.__function_name__ = dname
         
         # Wrap and return:

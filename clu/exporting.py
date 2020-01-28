@@ -161,7 +161,7 @@ def determine_name(thing, name=None, try_repr=False):
         if hasattr(thing, '__name__'):
             name = thing.__name__
         elif hasattr(thing, '__qualname__'):
-            name = thing.__qualname__
+            name = thing.__qualname__.rpartition(QUALIFIER)[-1]
     # We likely have something by now:
     if name is not None:
         return name
@@ -529,7 +529,14 @@ class ExporterBase(collections.abc.MutableMapping,
                     named = search_for_name(thing)
                 if named is None:
                     raise ExportError(type(self).messages['noname'] % id(thing))
-                thing.__name__ = thing.__qualname__ = named
+                qname = getattr(thing, '__qualname__')
+                if qname:
+                    setattr(thing, '__qualname__',
+                            qname.replace(
+                            getattr(thing, '__name__'),
+                                    named))
+                    # thing.__qualname__ = thing.__qualname__.replace(thing.__name__, named)
+                thing.__name__ = named
                 thing.__lambda_name__ = dname # To recall the lambda’s genesis
                 if dname == φ and self.dotpath is not None:
                     thing.__module__ = str(self.dotpath) # Reset __module__ for phi-types

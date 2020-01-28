@@ -775,7 +775,7 @@ class NamespacedFieldManager(object):
             No parameters are accepted.
         """
         self.namespace_stack = []
-        self.__qualname__ = self.__name__ = 'fields'
+        self.__qualname__ = self.__name__ = 'fields' # TODO: qualname updates
         self.__file__ = __file__
     
     def push(self, namespace):

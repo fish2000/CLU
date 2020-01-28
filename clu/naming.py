@@ -301,6 +301,7 @@ def duplicate(target, name, gs=None, **attributes):
         Q.v. pypy/rpython source supra:
             http://bit.ly/func-with-new-name
     """
+    from clu.constants.consts import λ, φ
     from clu.predicates import allpyattrs, pyattr, pyattrs, unwrap
     from clu.typespace import types
     from clu.typology import ΛΛ
@@ -349,6 +350,8 @@ def duplicate(target, name, gs=None, **attributes):
     # Copy the “lambda_name”, if present:
     if pyattr(target, 'lambda_name'):
         function.__lambda_name__ = target.__lambda_name__
+    elif target.__name__ in (λ, φ):
+        function.__lambda_name__ = target.__name__
     
     # Duplicate the wrapped function, if present:
     if ΛΛ(pyattr(target, 'wrapped')):

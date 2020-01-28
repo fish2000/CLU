@@ -64,6 +64,25 @@ def itermoduleids(module):
 # of the `pickle.whichmodule(…)` function (!)
 sysmods = lambda: reversed(tuple(frozenset(sys.modules.values())))
 
+class Modulespace(object):
+    
+    """ Makes top-level python modules available as an attribute,
+        importing them on first access.
+        
+        Q.v. pypy/rpython source supra:
+            http://bit.ly/lazy-borg-modulespace
+    """
+    
+    def __init__(self):
+        self.__dict__ = sys.modules
+    
+    def __getattr__(self, key):
+        try:
+            module = importlib.import_module(key)
+        except (ModuleNotFoundError, ImportError):
+            raise AttributeError("could not import module: %s" % key)
+        return module
+
 @cache
 def search_by_id(thingID):
     """ Cached function to find the name of a thing, according

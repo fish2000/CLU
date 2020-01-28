@@ -535,7 +535,6 @@ class ExporterBase(collections.abc.MutableMapping,
                             qname.replace(
                             getattr(thing, '__name__'),
                                     named))
-                    # thing.__qualname__ = thing.__qualname__.replace(thing.__name__, named)
                 thing.__name__ = named
                 thing.__lambda_name__ = dname # To recall the lambda’s genesis
                 if dname == φ and self.dotpath is not None:

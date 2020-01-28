@@ -8,10 +8,13 @@ import importlib.machinery
 import inspect
 import pickle
 
-from clu.constants.consts import λ, φ, BASEPATH, QUALIFIER, NoDefault
+from clu.constants.consts import λ, φ
+from clu.constants.consts import BASEPATH, QUALIFIER, NoDefault
+
 from clu.exporting import (path_to_dotpath, determine_name,
                                             search_for_name,
                                             search_for_module)
+
 from clu.exporting import Exporter, Registry
 
 exporter = Exporter(path=__file__)
@@ -301,7 +304,6 @@ def duplicate(target, name, gs=None, **attributes):
         Q.v. pypy/rpython source supra:
             http://bit.ly/func-with-new-name
     """
-    from clu.constants.consts import λ, φ
     from clu.predicates import allpyattrs, pyattr, pyattrs, unwrap
     from clu.typespace import types
     from clu.typology import ΛΛ

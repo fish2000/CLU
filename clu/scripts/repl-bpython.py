@@ -145,6 +145,7 @@ from clu.naming import (determine_module, nameof, moduleof,
                                                      qualified_name_tuple,
                                                      qualified_name,
                         dotpath_to_prefix, path_to_prefix,
+                        duplicate, renamer,
                         split_abbreviations)
 
 from clu.abstract import Cloneable, ReprWrapper
@@ -392,6 +393,7 @@ __all__ = ('Image',
            'dotpath_join', 'dotpath_split',
            'qualified_import', 'qualified_name_tuple', 'qualified_name',
            'dotpath_to_prefix', 'path_to_prefix',
+           'duplicate', 'renamer',
            'split_abbreviations',
            'Cloneable', 'ReprWrapper', 'FlatOrderedSet',
            'FrozenKeyMap', 'KeyMap', 'NamespaceWalker',

@@ -14,17 +14,94 @@ class TestNaming(object):
     """ Run the tests for the clu.naming module. """
     
     def test_renamer(self):
+        """ N.B. compare this to the “legacy callable” q.v. test sub. """
+        from clu.naming import renamer
+        from clu.predicates import pyname
+        
+        yo_dogg_lambda = lambda: print("Yo dogg.")
+        i_heard_lambda = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
+        
+        # renaming creates duplicate functions:
+        yo_dogg = renamer('yo_dogg')(yo_dogg_lambda)
+        i_heard = renamer('i_heard')(i_heard_lambda)
+        
+        # confirm new names:
+        assert pyname(yo_dogg) == 'yo_dogg'
+        assert yo_dogg.__qualname__.endswith('yo_dogg')
+        assert pyname(i_heard) == 'i_heard'
+        assert i_heard.__qualname__.endswith('i_heard')
+        
+        # these are duplicates, they do *not* compare equal:
+        assert yo_dogg != yo_dogg_lambda
+        assert i_heard != i_heard_lambda
+    
+    @pytest.mark.TODO
+    def test_duplicate(self):
+        # TODO: 1) verify lambdas renamed via @export or clu.naming.rename,
+        #       2) verify __annotations__, __kwdefaults__, and __dict__ updates
+        from functools import recursive_repr, wraps
+        from clu.naming import duplicate
+        from clu.predicates import haspyattr, pyattr
+        from clu.typology import ΛΛ
+        
+        # Normal function:
+        def no_dogg(yo, dogg='no'):
+            """ NO, DOGG. """
+            print('YO:',  f"{yo!s}")
+            print('DOGG:' f"{dogg!s}")
+        
+        yo_dogg = duplicate(no_dogg, 'yo_dogg')
+        
+        assert yo_dogg.__name__ == 'yo_dogg'
+        assert yo_dogg.__qualname__.endswith('yo_dogg')
+        assert yo_dogg.__defaults__.index('no') == 0
+        assert yo_dogg.__doc__.strip() == "NO, DOGG."
+        assert not haspyattr(yo_dogg, 'wrapped')
+        
+        # Wrapped function:
+        @wraps(recursive_repr)
+        def oh_dogg(yo, dogg='oh!'):
+            """ OH, DOGG! """
+            print('YO:',  f"{yo!s}")
+            print('DOGG:' f"{dogg!s}")
+        
+        so_dogg = duplicate(oh_dogg, 'so_dogg')
+        
+        assert so_dogg.__name__ == 'so_dogg'
+        assert so_dogg.__qualname__.endswith('so_dogg')
+        assert so_dogg.__defaults__.index('oh!') == 0
+        assert so_dogg.__doc__.strip() == recursive_repr.__doc__.strip()
+        assert ΛΛ(pyattr(oh_dogg, 'wrapped'))
+        assert ΛΛ(pyattr(so_dogg, 'wrapped'))
+        
+        # Bound method:
+        class DoggNamespaceEncapsulation(object):
+            def bro_dogg(yo, dogg='bro.'):
+                """ Bro. Dogg. """
+                print('YO:',  f"{yo!s}")
+                print('DOGG:' f"{dogg!s}")
+        
+        dogg_ns = DoggNamespaceEncapsulation()
+        faux_dogg = duplicate(dogg_ns.bro_dogg, 'faux_dogg')
+        
+        assert faux_dogg.__name__ == 'faux_dogg'
+        assert faux_dogg.__qualname__.endswith('faux_dogg')
+        assert faux_dogg.__defaults__.index('bro.') == 0
+        assert faux_dogg.__doc__.strip() == "Bro. Dogg."
+        assert not haspyattr(faux_dogg, 'wrapped')
+    
+    def test_rename_legacy_callable(self):
         from clu.naming import rename
         from clu.predicates import pyname
         fake_dotpath = 'yodogg.iheard'
         
-        renamer = rename(dotpath=fake_dotpath)
+        renaming_callable = rename(dotpath=fake_dotpath)
         
         # yo_dogg = lambda: print("Yo dogg.")
         # i_heard = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) for w in wat))
         
-        yo_dogg = renamer(yo_dogg_rename)
-        i_heard = renamer(i_heard_rename)
+        yo_dogg = renaming_callable(yo_dogg_rename)
+        i_heard = renaming_callable(i_heard_rename)
         
         assert pyname(yo_dogg) == pyname(yo_dogg_rename) == 'yo_dogg_rename'
         assert pyname(i_heard) == pyname(i_heard_rename) == 'i_heard_rename'

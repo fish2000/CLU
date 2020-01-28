@@ -295,6 +295,85 @@ class rename(collections.abc.Callable):
         return renamed
 
 @export
+def duplicate(target, name, gs=None, **attributes):
+    """ Make a renamed copy of a target function.
+        
+        Q.v. pypy/rpython source supra:
+            http://bit.ly/func-with-new-name
+    """
+    from clu.predicates import allpyattrs, pyattr, pyattrs, unwrap
+    from clu.typespace import types
+    from clu.typology import ΛΛ
+    
+    # Sanity-check arguments:
+    if not ΛΛ(target):
+        raise TypeError("“duplicate(…)” requires a function target")
+    if not name:
+        raise NameError("“duplicate(…)” requires a new function name")
+    if not name.isidentifier():
+        raise NameError(f"bad name “{name}” passed to “duplicate(…)”")
+    
+    # For bound methods, delegate the duplication
+    # to the underlying function:
+    if allpyattrs(target, 'func', 'self'):
+        if ΛΛ(pyattr(target, 'func')):
+            return duplicate(target.__func__, name, gs=gs, **attributes)
+    
+    # Create a new function object:
+    function = types.Function(target.__code__,
+                              gs or target.__globals__,
+                              name, target.__defaults__,
+                                    target.__closure__)
+    
+    # Update function dictionary:
+    function.__dict__ = { **function.__dict__,
+                          **target.__dict__,
+                          **attributes }
+    
+    # Add keyword defaults and/or annotations:
+    if target.__annotations__:
+        function.__annotations__ = target.__annotations__.copy()
+    
+    if target.__kwdefaults__:
+        function.__kwdefaults__  = target.__kwdefaults__.copy()
+    
+    # Replace the docstring:
+    if target.__doc__:
+        function.__doc__         = inspect.getdoc(target)
+    
+    # Replace only the relevant part of the qualname:
+    if allpyattrs(target, 'qualname', 'name'):
+        qnm, nm = pyattrs(target, 'qualname', 'name')
+        function.__qualname__    = qnm.replace(nm, name)
+    
+    # Copy the “lambda_name”, if present:
+    if pyattr(target, 'lambda_name'):
+        function.__lambda_name__ = target.__lambda_name__
+    
+    # Duplicate the wrapped function, if present:
+    if ΛΛ(pyattr(target, 'wrapped')):
+        function.__wrapped__ = duplicate(unwrap(target),
+                                       f"{name}_target", gs=gs,
+                                       **attributes)
+    # Return anew:
+    return function
+
+@export
+def renamer(name, gs=None, **attributes):
+    """ A decorator which renames the target function. Usage:
+        
+            @renamer('yo_dogg')
+            def no_dogg():
+                # …
+        
+        Q.v. pypy/rpython source supra:
+            http://bit.ly/func-with-new-name
+    """
+    def decoration(target):
+        return duplicate(target, name, gs=gs, **attributes)
+    return decoration
+
+@export
 def split_abbreviations(s):
     """ Split a string into a tuple of its unique constituents,
         based on its internal capitalization -- to wit:

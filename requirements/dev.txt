@@ -1,21 +1,22 @@
 -r changelog.txt
 -r docs.txt
--r tox.txt
 -r typecheck.txt
 Click
 bpython
 bumpversion
+check-manifest
 colorio
 colormath
 cython
 gfm
-heapdict>=1.0.0
 imageio
 ipython
 jupyter
 lmdb>=0.8.0
 nox
+numpy>=1.18.0
 pythonpy
+pytest
 pytz
 readme-renderer
 readme-renderer[md]

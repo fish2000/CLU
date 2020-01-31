@@ -1248,18 +1248,18 @@ class Directory(collections.abc.Hashable,
         return self.exists
     
     def __iter__(self):
-        out = self.exists \
-              and (k.name for k in os.scandir(
-                                   os.path.realpath(self.name))) \
-               or iter(tuple())
-        yield from out
+        if self.exists:
+            with os.scandir(os.path.realpath(self.name)) as iterscan:
+                yield from (k.name for k in iterscan)
+        else:
+            yield from iter(tuple())
     
     def __reversed__(self):
-        out = self.exists \
-              and (k.name for k in reversed(os.scandir(
-                                   os.path.realpath(self.name)))) \
-               or iter(tuple())
-        yield from out
+        if self.exists:
+            with os.scandir(os.path.realpath(self.name)) as iterscan:
+                yield from (k.name for k in reversed(iterscan))
+        else:
+            yield from iter(tuple())
     
     def __len__(self):
         return self.exists \

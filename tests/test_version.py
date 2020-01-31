@@ -1,30 +1,55 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import os
-import pytest
-
-from clu.constants import consts
-from clu.version import read_version_file
-
-BASEPATH = os.path.join(
-           os.path.dirname(
-           os.path.dirname(__file__)), 'clu')
-
-__version__ = read_version_file(BASEPATH)
-
 class TestVersion(object):
     
     """ Run the tests for the clu.version module. """
     
-    @pytest.mark.skipif(consts.PYPY, reason="Failure on PyPy")
-    def test_pypy_failure(self):
-        assert not consts.PYPY, "This will fail on PyPY"
+    def test_git_version_function(self, cluversion):
+        from clu.version.git_version import git_version_tags
+        from clu.fs.filesystem import td
+        
+        version = cluversion.to_string()
+        
+        vtags0 = git_version_tags()
+        assert vtags0 is not None
+        assert vtags0.startswith(f'v{version}')
+        
+        vtags1 = git_version_tags(directory=td())
+        assert vtags1 is None
     
-    def test_VersionInfo(self):
-        from clu.version import VersionInfo
+    def test_are_we_gitted_function(self):
+        from clu.version.git_version import are_we_gitted
+        from clu.fs.filesystem import td
+        
+        assert are_we_gitted()
+        assert not are_we_gitted(directory=td())
+     
+    def test_cluversion_and_VersionInfo(self, consts, cluversion):
+        from clu.version import VersionInfo, read_version_file
         from pkg_resources.extern.packaging.version import Version as PkgResourcesVersion
         
+        __version__ = read_version_file(consts.PROJECT_PATH)
+        version_info = VersionInfo(__version__)
+        
+        assert cluversion  < VersionInfo("9.0.0")
+        assert cluversion == VersionInfo(version_info)
+        assert cluversion == VersionInfo(__version__)
+        assert cluversion == VersionInfo(PkgResourcesVersion(__version__))
+        assert cluversion == VersionInfo(str(PkgResourcesVersion(__version__)))
+        assert cluversion <= VersionInfo(__version__)
+        assert cluversion >= VersionInfo(__version__)
+        assert cluversion  > VersionInfo(b'0.0.1')
+        assert cluversion != VersionInfo(b'0.0.1')
+        
+        assert bool(cluversion)
+        assert not bool(VersionInfo('‽.‽.‽'))
+    
+    def test_VersionInfo(self, consts):
+        from clu.version import VersionInfo, read_version_file
+        from pkg_resources.extern.packaging.version import Version as PkgResourcesVersion
+        
+        __version__ = read_version_file(consts.PROJECT_PATH)
         version_info = VersionInfo(__version__)
         
         assert version_info  < VersionInfo("9.0.0")

@@ -14,6 +14,23 @@ class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     
+    def test_suffixes(self, dirname):
+        from clu.fs.misc import extension
+        
+        histo = dirname.suffix_histogram()
+        keys = tuple(histo.keys()) # same as dirname.suffixes()
+        
+        for suffix in dirname.suffixes():
+            assert suffix in histo
+            assert suffix in keys
+        
+        for root, dirs, files in dirname.walk():
+            for filename in files:
+                ext = extension(filename)
+                if ext:
+                    assert ext in histo
+                    assert ext in keys
+    
     def test_suffix_histogram(self, dirname):
         
         histo = dirname.suffix_histogram()

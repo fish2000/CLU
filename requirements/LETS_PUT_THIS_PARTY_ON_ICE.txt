@@ -78,7 +78,7 @@ pickleshare==0.7.5
 Pillow==7.0.0
 pkginfo==1.5.0.1
 pluggy==0.13.1
-pout==0.7.9
+pout==0.8.13
 prometheus-client==0.7.1
 prompt-toolkit==3.0.2
 ptyprocess==0.6.0

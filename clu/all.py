@@ -44,7 +44,7 @@ def import_clu_modules():
     """
     # Convenience function: calls “clu.all.import_all_modules(…)”
     # with «basepath=clu.constants.consts.BASEPATH»,
-    # and «appname=clu.constants.consts.PROJECT_NAME»
+    # and «appname=clu.constants.consts.APPNAME»
     from clu.constants import consts
     return import_all_modules(basepath=consts.BASEPATH,
                                appname=consts.APPNAME,

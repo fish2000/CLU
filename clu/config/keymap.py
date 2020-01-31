@@ -8,7 +8,7 @@ import sys
 
 from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
 from clu.config.ns import unpack_ns, pack_ns
-from clu.predicates import attr, tuplize
+from clu.predicates import tuplize
 from clu.typology import ismapping
 from clu.exporting import Exporter
 
@@ -37,9 +37,9 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         except TypeError:
             super().__init__()
         if hasattr(dictionary, 'dictionary'):
-            dictionary = attr(dictionary, 'dictionary')
+            dictionary = getattr(dictionary, 'dictionary')
         elif hasattr(dictionary, 'flatten'):
-            dictionary = attr(dictionary.flatten(), 'dictionary')
+            dictionary = getattr(dictionary.flatten(), 'dictionary')
         self.dictionary = dict(dictionary or {})
         if updates:
             self.dictionary.update(**updates)
@@ -134,9 +134,9 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
         except TypeError:
             super().__init__()
         if hasattr(tree, 'tree'):
-            tree = attr(tree, 'tree')
+            tree = getattr(tree, 'tree')
         elif hasattr(tree, 'nestify'):
-            tree = attr(tree.nestify(), 'tree')
+            tree = getattr(tree.nestify(), 'tree')
         self.tree = DefaultTree(tree or {})
         if updates:
             self.tree.update(**updates)

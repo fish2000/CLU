@@ -64,7 +64,7 @@ def unpack_ns(nskey):
         call will return the tuple ('wat', tuple()).
     """
     *namespaces, key = nskey.split(NAMESPACE_SEP)
-    return key, tuple(namespaces)
+    return key, namespaces
 
 @export
 def pack_ns(key, *namespaces):
@@ -76,6 +76,8 @@ def pack_ns(key, *namespaces):
         If no namespaces are provided (like e.g. “pack_ns('wat')”)
         the return value will be the string "wat".
     """
+    if not namespaces:
+        return key
     return NAMESPACE_SEP.join(chain(namespaces, tuplize(key, expand=False)))
 
 @export
@@ -150,7 +152,7 @@ def unpack_env(envkey):
         variable key name.
     """
     appname, *namespaces, key = envkey.casefold().split(ENVIRONS_SEP)
-    return appname, key, tuple(namespaces)
+    return appname, key, namespaces
 
 @export
 def nskey_from_env(envkey):

@@ -58,6 +58,7 @@ class TestFsMisc(object):
     def test_suffix_searcher(self, dirname):
         from clu.fs.misc import suffix_searcher
         from clu.testing.utils import countfiles
+        from clu.typology import iterlen
         from collections import Counter
         
         data = dirname.subdirectory('data')
@@ -67,13 +68,14 @@ class TestFsMisc(object):
         
         for root, dirs, files in data.walk():
             for suffix in suffixes:
-                counts[suffix] += len(tuple(filter(searchers[suffix], files)))
+                counts[suffix] += iterlen(filter(searchers[suffix], files))
         
-        for suffix in suffixes:
-            assert counts[suffix] == countfiles(data, suffix=suffix)
+        histo = data.suffix_histogram()
+        for suffix in histo.keys():
+            assert counts[suffix] == histo[suffix]
         
         # The LHS here can pick up random shit occasionally:
-        # assert countfiles(data) >= sum(counts.values())
+        # assert sum(histo.values()) + 1 == counts[None]
         assert countfiles(data) == counts[None]
     
     def test_swapext(self):

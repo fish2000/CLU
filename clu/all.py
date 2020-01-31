@@ -51,6 +51,7 @@ def import_clu_modules():
                           exportername=consts.EXPORTER_NAME)
 
 code_attrs = tuple(f'__code__.co_{attname}' for attname in ('cellvars',
+                                                            'freevars',
                                                             'names',
                                                             'varnames'))
 

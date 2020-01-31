@@ -13,6 +13,18 @@ class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     
+    def test_suffix_histogram(self, dirname):
+        from clu.testing.utils import countfiles
+        
+        histo = dirname.suffix_histogram()
+        
+        assert len(histo)
+        assert 'py' in histo
+        assert 'pyc' in histo
+        
+        for suffix in histo.keys():
+            assert histo[suffix] == countfiles(dirname, suffix=suffix)
+    
     def test_flatten(self, datadir,
                            temporarydir):
         from clu.testing.utils import countfiles

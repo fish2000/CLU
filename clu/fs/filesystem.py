@@ -1266,10 +1266,6 @@ class Directory(collections.abc.Hashable,
             return 0
         return len(os.listdir(
                    os.path.realpath(self.name)))
-        # return self.exists \
-        #        and len(os.listdir(
-        #                os.path.realpath(self.name))) \
-        #         or 0
     
     def __getitem__(self, filename):
         pth = self.subpath(filename, requisite=True)

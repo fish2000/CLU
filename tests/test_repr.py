@@ -97,7 +97,6 @@ class TestRepr(object):
         
         t0 = Thingy()
         assert repr(t0) == "yo=“YO”, dogg=“DOGG”, iheard=“IHEARD”, youlike=“YOULIKE”"
-        
     
     def test_strfields_slotted_class(self):
         from clu.abstract import Slotted

@@ -78,6 +78,37 @@ class TestFsMisc(object):
         # assert sum(histo.values()) + 1 == counts[None]
         assert countfiles(data) == counts[None]
     
+    def test_re_excluder(self):
+        from clu.fs.misc import re_excluder
+        from clu.typology import iterlen
+        
+        tonestr = lambda *tones: f"tones: {'-'.join(t.upper() for t in tones)}"
+        
+        strings = (
+            tonestr(),
+            tonestr('do'),
+            tonestr('do', 're'),
+            tonestr('do', 're', 'mi'),
+            tonestr('do', 're', 'mi', 'fa'),
+            tonestr('do', 're', 'mi', 'fa', 'so'),
+            tonestr('do', 're', 'mi', 'fa', 'so', 'la'),
+            tonestr('do', 're', 'mi', 'fa', 'so', 'la', 'ti'),
+            tonestr('do', 're', 'mi', 'fa', 'so', 'la', 'ti', 'do'),
+        )
+        
+        assert iterlen(filter(re_excluder('do'), strings)) == 1
+        assert iterlen(filter(re_excluder('re'), strings)) == 2
+        assert iterlen(filter(re_excluder('mi'), strings)) == 3
+        
+        assert iterlen(filter(re_excluder('ti-do'), strings)) == 8
+        assert iterlen(filter(re_excluder('la-ti'), strings)) == 7
+        assert iterlen(filter(re_excluder('so-la'), strings)) == 6
+        
+        assert iterlen(filter(re_excluder('fa-so', 'la-ti'), strings)) == 5
+        assert iterlen(filter(re_excluder('ti-do', 'la-ti'), strings)) == 7
+        assert iterlen(filter(re_excluder('do-', '-do'), strings)) == 2 # Aha!
+        assert iterlen(filter(re_excluder('-mi-'), strings)) == 4
+    
     def test_swapext(self):
         from clu.fs.misc import swapext
         

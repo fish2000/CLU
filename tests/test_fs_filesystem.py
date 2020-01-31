@@ -7,6 +7,7 @@ import contextlib
 import os
 import pytest
 
+from clu.testing.utils import countfiles
 from clu.fs.filesystem import Directory
 
 class TestFsFilesystem(object):
@@ -14,7 +15,6 @@ class TestFsFilesystem(object):
     """ Run the tests for the clu.fs.filesystem module. """
     
     def test_suffix_histogram(self, dirname):
-        from clu.testing.utils import countfiles
         
         histo = dirname.suffix_histogram()
         
@@ -27,7 +27,6 @@ class TestFsFilesystem(object):
     
     def test_flatten(self, datadir,
                            temporarydir):
-        from clu.testing.utils import countfiles
         from clu.typology import isvalidpathlist
         
         # target directory should not already exist:
@@ -59,7 +58,6 @@ class TestFsFilesystem(object):
     
     def test_flatten_with_suffix_filter(self, datadir,
                                               temporarydir):
-        from clu.testing.utils import countfiles
         from clu.typology import isvalidpathlist
         
         # target directory should not already exist:
@@ -92,7 +90,6 @@ class TestFsFilesystem(object):
     
     def test_flatten_with_new_suffix(self, datadir,
                                            temporarydir):
-        from clu.testing.utils import countfiles
         from clu.typology import isvalidpathlist
         
         # target directory should not already exist:
@@ -126,7 +123,6 @@ class TestFsFilesystem(object):
     
     def test_flatten_with_new_suffix_and_suffix_filter(self, datadir,
                                                              temporarydir):
-        from clu.testing.utils import countfiles
         from clu.typology import isvalidpathlist
         
         # target directory should not already exist:
@@ -160,7 +156,6 @@ class TestFsFilesystem(object):
             assert os.path.basename(f) in destination
     
     def test_zip_archive_temporaryname(self, dirname, temporaryname):
-        from clu.testing.utils import countfiles
         
         # Ensure the “data” directory has something
         # in it, of which we can make use:
@@ -183,7 +178,6 @@ class TestFsFilesystem(object):
     
     def test_zip_archive(self, dirname):
         from clu.fs.filesystem import temporary
-        from clu.testing.utils import countfiles
         
         # Ensure the “data” directory has something
         # in it, of which we can make use:
@@ -304,7 +298,6 @@ class TestFsFilesystem(object):
     def test_rm_rf(self, temporarydir):
         # Also involves `write_to_path(…)` and `Directory.walk()`
         from clu.fs.filesystem import write_to_path, rm_rf
-        from clu.testing.utils import countfiles
         
         # Make subdirectories:
         dd = temporarydir.subdirectory('yo')

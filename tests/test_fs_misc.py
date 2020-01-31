@@ -82,6 +82,7 @@ class TestFsMisc(object):
         from clu.fs.misc import re_excluder
         from clu.typology import iterlen
         
+        # tonestr('so', 'la', 'ti', 'do') → 'tones: SO-LA-TI-DO'
         tonestr = lambda *tones: f"tones: {'-'.join(t.upper() for t in tones)}"
         
         strings = (

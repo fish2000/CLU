@@ -60,9 +60,8 @@ class TestRepr(object):
         assert strfield(Decimal(3.14)).startswith("3.1400000000000001243")
         assert strfield(Things).startswith("‘Things<(YO, DOGG, I, HEARD) @ ")
     
-    def test_chop_instance_repr(self, dirname):
+    def test_chop_instance_repr(self, dirname, consts):
         from clu.repr import chop_instance_repr
-        from clu.constants.consts import REPR_DELIMITER
         data = dirname.subdirectory('data')
         
         assert chop_instance_repr(dirname)       == "Directory(name=“/Users/fish/Dropbox/CLU/clu/tests”, exists=«True»)"
@@ -72,10 +71,10 @@ class TestRepr(object):
         assert repr(dirname).startswith(chop_instance_repr(dirname))
         assert repr(data).startswith(chop_instance_repr(data))
         
-        assert repr(dirname).find(REPR_DELIMITER) != -1
-        assert repr(data).find(REPR_DELIMITER) != -1
-        assert chop_instance_repr(dirname).find(REPR_DELIMITER) == -1
-        assert chop_instance_repr(data).find(REPR_DELIMITER) == -1
+        assert repr(dirname).find(consts.REPR_DELIMITER) != -1
+        assert repr(data).find(consts.REPR_DELIMITER) != -1
+        assert chop_instance_repr(dirname).find(consts.REPR_DELIMITER) == -1
+        assert chop_instance_repr(data).find(consts.REPR_DELIMITER) == -1
     
     def test_strfields(self):
         pass

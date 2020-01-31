@@ -50,10 +50,10 @@ def import_clu_modules():
                                appname=consts.APPNAME,
                           exportername=consts.EXPORTER_NAME)
 
-code_attrs = tuple(f'__code__.co_{attname}' for attname in ('cellvars',
-                                                            'freevars',
-                                                            'names',
-                                                            'varnames'))
+code_attrs = tuple(f'__code__.co_{attname}' for attname in ('names',
+                                                            'varnames',
+                                                            'cellvars',
+                                                            'freevars'))
 
 @export
 def clu_inline_tests():

@@ -1207,6 +1207,17 @@ class Directory(collections.abc.Hashable,
                             filter(searcher, files)))))
         return suffixes
     
+    def suffixes(self, subdir=None,
+                       source=None,
+                       excludes=('~', '#', 'ds_store', '.git')):
+        """ Return a generator over all the file suffixes of all files
+            found recursively within the given subdirectory, excluding
+            anything matching any of the “excludes” strings
+        """
+        yield from self.suffix_histogram(subdir=subdir,
+                                         source=source,
+                                       excludes=excludes).keys()
+    
     def close(self):
         """ Stub method -- always returns True: """
         return True

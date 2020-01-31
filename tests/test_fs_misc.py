@@ -62,7 +62,7 @@ class TestFsMisc(object):
         from collections import Counter
         
         data = dirname.subdirectory('data')
-        suffixes = ('jpg', 'png', 'toml', None) # None → count everything!
+        suffixes = tuple(data.suffixes()) + (None,) # None → count everything!
         searchers = { suffix : suffix_searcher(suffix) for suffix in suffixes }
         counts = Counter({ suffix : 0 for suffix in suffixes })
         

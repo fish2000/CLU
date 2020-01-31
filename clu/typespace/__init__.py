@@ -9,7 +9,7 @@ import re
 
 from clu.constants.consts import (BASEPATH,
                                   DYNAMIC_MODULE_PREFIX,
-                                  PROJECT_NAME, VERBOTEN)
+                                  APPNAME, VERBOTEN)
 
 from clu.constants.polyfills import cache_from_source
 from clu.typespace.namespace import SimpleNamespace, Namespace
@@ -59,7 +59,7 @@ setattr(types, '__package__',       path_to_dotpath(__file__,
 @export
 def modulize(name, namespace, docs=None,
                               path=None,
-                           appname=PROJECT_NAME,
+                           appname=APPNAME,
                        relative_to=BASEPATH):
     """ Convert a dictionary mapping into a legit Python module """
     from clu.naming import dotpath_join

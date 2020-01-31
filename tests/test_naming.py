@@ -193,11 +193,11 @@ class TestNaming(object):
         
         """ This commented-out bit fails because “clu.__title__” (defined in clu/__init__.py)
             is the same string – and interning makes them into the same object. """
-        # qname = qualified_name(consts.PROJECT_NAME)
+        # qname = qualified_name(consts.APPNAME)
         # try:
-        #     assert qname == 'clu.constants.consts.PROJECT_NAME'
+        #     assert qname == 'clu.constants.consts.APPNAME'
         # except AssertionError:
-        #     raise Nondeterminism(f"Nondeterminism in qualified_name(consts.PROJECT_NAME) → {qname}")
+        #     raise Nondeterminism(f"Nondeterminism in qualified_name(consts.APPNAME) → {qname}")
     
     def test_qualified_name_instances(self):
         """ » Checking “qualified_name(¬) on instances of objects …” """

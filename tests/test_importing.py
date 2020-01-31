@@ -8,7 +8,7 @@ class TestImporting(object):
     def test_proxy_module_for_reals(self, consts):
         from clu.importing import ProxyModule, Registry
         
-        overrides = dict(PROJECT_NAME='yodogg',
+        overrides = dict(APPNAME='yodogg',
                          PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
                          BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
         
@@ -21,7 +21,7 @@ class TestImporting(object):
             
             assert overridden.USER == consts.USER
             assert overridden.BUILTINS == consts.BUILTINS
-            assert overridden.PROJECT_NAME == 'yodogg'
+            assert overridden.APPNAME == 'yodogg'
             assert overridden.PROJECT_PATH.endswith('yodogg')
             assert overridden.BASEPATH.endswith('yodogg')
             
@@ -46,7 +46,7 @@ class TestImporting(object):
         from clu.importing import Module, Registry
         from clu.typology import ismodule, ismapping
         
-        overrides = dict(PROJECT_NAME='yodogg',
+        overrides = dict(APPNAME='yodogg',
                          PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
                          BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
         
@@ -136,7 +136,7 @@ class TestImporting(object):
             
             assert overridden.USER == consts.USER
             assert overridden.BUILTINS == consts.BUILTINS
-            assert overridden.PROJECT_NAME == 'yodogg'
+            assert overridden.APPNAME == 'yodogg'
             assert overridden.PROJECT_PATH.endswith('yodogg')
             assert overridden.BASEPATH.endswith('yodogg')
             
@@ -243,12 +243,12 @@ class TestImporting(object):
         from clu.naming import nameof
         from clu.importing import Registry, Module
         
-        m = Module(consts.PROJECT_NAME)
+        m = Module(consts.APPNAME)
         assert m
-        assert m.appname == consts.PROJECT_NAME
+        assert m.appname == consts.APPNAME
         assert m.appspace == 'app'
         assert m.__name__ == 'clu.app.clu'
-        assert nameof(m) == consts.PROJECT_NAME
+        assert nameof(m) == consts.APPNAME
         
         assert len(Registry.monomers) > 0
         assert len(m.monomers) == 0

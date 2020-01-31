@@ -97,8 +97,8 @@ class TestExporting(object):
         from clu.predicates import haspyattr
         
         # Walk the importables:
-        submodules = Directory(consts.BASEPATH).importables(consts.PROJECT_NAME)
-        clsmodules = tuple(clsmodule.qualname for clsmodule in modules_for_appname(consts.PROJECT_NAME))
+        submodules = Directory(consts.BASEPATH).importables(consts.APPNAME)
+        clsmodules = tuple(clsmodule.qualname for clsmodule in modules_for_appname(consts.APPNAME))
         
         # Sanity-check the number of modules:
         assert len(clumods) <= len(submodules) + len(clsmodules)

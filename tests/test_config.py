@@ -75,7 +75,7 @@ class TestConfigKeyMaps(object):
         from clu.config.env import Environ
         
         env = Environ(environment=environment,
-                          appname=consts.PROJECT_NAME)
+                          appname=consts.APPNAME)
         
         try:
             environment['CLU_ENVTEST1_YODOGG']  = "Yo, Dogg –"

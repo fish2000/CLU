@@ -20,7 +20,7 @@ chain = itertools.chain
 iterchain = itertools.chain.from_iterable
 
 from clu.constants.consts import (λ, φ, # type: ignore
-                                  BASEPATH, BUILTINS, PROJECT_NAME,
+                                  APPNAME, BASEPATH, BUILTINS,
                                   QUALIFIER,
                                   NoDefault, pytuple)
 from clu.constants.exceptions import BadDotpathWarning, ExportError, ExportWarning
@@ -312,7 +312,7 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
             Attempting to unregister the core CLU application’s exporter
             is not allowed and will raise a KeyError.
         """
-        if appname == PROJECT_NAME:
+        if appname == APPNAME:
             raise KeyError("Can’t unregister the core application exporter")
         cls = classes.pop(appname, None)
         if cls:
@@ -710,7 +710,7 @@ class ExporterBase(collections.abc.MutableMapping,
                                                      'unregister'),
                            super(ExporterBase, self).__dir__()))
 
-class Exporter(ExporterBase, prefix=BASEPATH, appname=PROJECT_NAME):
+class Exporter(ExporterBase, prefix=BASEPATH, appname=APPNAME):
     
     """ A class representing a list of things for a module to export.
         

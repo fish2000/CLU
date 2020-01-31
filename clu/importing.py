@@ -742,7 +742,7 @@ def initialize_types(appname, appspace='app'):
     
     return Module, Finder, Loader
 
-Module, Finder, Loader = initialize_types(consts.PROJECT_NAME)
+Module, Finder, Loader = initialize_types(consts.APPNAME)
 
 @export
 class ChainModuleMap(clu.dicts.ChainMap):
@@ -1024,12 +1024,12 @@ def test():
     def test_one():
         """ Class-module basics """
         
-        m = Module(consts.PROJECT_NAME)
+        m = Module(consts.APPNAME)
         assert m
-        assert m.appname == consts.PROJECT_NAME
+        assert m.appname == consts.APPNAME
         assert m.appspace == 'app'
         assert m.__name__ == 'clu.app.clu'
-        assert nameof(m) == consts.PROJECT_NAME
+        assert nameof(m) == consts.APPNAME
     
     @inline
     def test_two():
@@ -1066,7 +1066,7 @@ def test():
         pprint(tuple(all_registered_modules()))
         print()
         
-        m = Module(consts.PROJECT_NAME)
+        m = Module(consts.APPNAME)
         
         assert len(Registry.monomers) > 0
         
@@ -1077,10 +1077,10 @@ def test():
         else:
             pass
         
-        assert m.appname == consts.PROJECT_NAME
+        assert m.appname == consts.APPNAME
         assert m.appspace == 'app'
         assert m.__name__ == 'clu.app.clu'
-        assert nameof(m) == consts.PROJECT_NAME
+        assert nameof(m) == consts.APPNAME
         
         print("mro(m):")
         pprint(mro(m))
@@ -1153,7 +1153,7 @@ def test():
     def test_five():
         """ Proxy-module properties and value resolution """
         
-        overrides = dict(PROJECT_NAME='yodogg',
+        overrides = dict(APPNAME='yodogg',
                          PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
                          BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
         
@@ -1164,7 +1164,7 @@ def test():
         
         assert overridden.USER == consts.USER
         assert overridden.BUILTINS == consts.BUILTINS
-        assert overridden.PROJECT_NAME == 'yodogg'
+        assert overridden.APPNAME == 'yodogg'
         assert overridden.PROJECT_PATH.endswith('yodogg')
         assert overridden.BASEPATH.endswith('yodogg')
         
@@ -1176,7 +1176,7 @@ def test():
     def test_five_point_five():
         """ Proxy-module fallback callable check """
         
-        overrides = dict(PROJECT_NAME='yodogg',
+        overrides = dict(APPNAME='yodogg',
                          PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
                          BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
         
@@ -1192,7 +1192,7 @@ def test():
         
         assert overridden.USER == consts.USER
         assert overridden.BUILTINS == consts.BUILTINS
-        assert overridden.PROJECT_NAME == 'yodogg'
+        assert overridden.APPNAME == 'yodogg'
         assert overridden.PROJECT_PATH.endswith('yodogg')
         assert overridden.BASEPATH.endswith('yodogg')
         
@@ -1206,7 +1206,7 @@ def test():
     def test_six():
         """ Polymer-type caching and “initialize_types(…)” checks """
         
-        Module0, Finder0, Loader0 = initialize_types(consts.PROJECT_NAME)
+        Module0, Finder0, Loader0 = initialize_types(consts.APPNAME)
         
         assert Finder is Finder0
         assert Loader is Loader0
@@ -1215,7 +1215,7 @@ def test():
         assert isinstance(Module0.__loader__, Loader0)
         assert isinstance(Finder0.loader, Loader0)
         
-        Module1, Finder1, Loader1 = initialize_types(consts.PROJECT_NAME, appspace='aux')
+        Module1, Finder1, Loader1 = initialize_types(consts.APPNAME, appspace='aux')
         
         assert Finder is Finder1
         assert Loader is Loader1

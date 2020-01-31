@@ -47,7 +47,7 @@ def import_clu_modules():
     # and «appname=clu.constants.consts.PROJECT_NAME»
     from clu.constants import consts
     return import_all_modules(basepath=consts.BASEPATH,
-                               appname=consts.PROJECT_NAME,
+                               appname=consts.APPNAME,
                           exportername=consts.EXPORTER_NAME)
 
 @export

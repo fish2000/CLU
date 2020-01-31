@@ -7,7 +7,7 @@ import copy
 import os
 import sys
 
-from clu.constants.consts import PROJECT_NAME, NoDefault
+from clu.constants.consts import APPNAME, NoDefault
 from clu.config.abc import KeyMap, NamespaceWalker
 from clu.config.ns import pack_ns, prefix_env, unpack_env, nskey_to_env
 from clu.predicates import tuplize, listify
@@ -50,7 +50,7 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
             super().__init__(**updates)
         except TypeError:
             super().__init__()
-        self.appname = appname or PROJECT_NAME
+        self.appname = appname or APPNAME
         self.environment = environment is None \
                        and os.environ.copy() \
                         or environment

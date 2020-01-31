@@ -94,7 +94,7 @@ class TestExtending(object):
         
         class X(metaclass=Extensible):
             
-            appname = consts.PROJECT_NAME
+            appname = consts.APPNAME
             filepath = os.getcwd()
             
             def __init__(self, name=None):

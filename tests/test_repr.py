@@ -77,7 +77,27 @@ class TestRepr(object):
         assert chop_instance_repr(data).find(consts.REPR_DELIMITER) == -1
     
     def test_strfields(self):
-        pass
+        from clu.repr import strfields
+        
+        class Thingy(object):
+            
+            fields = ('yo', 'dogg', 'iheard', 'youlike')
+            
+            def __init__(self, **kwargs):
+                self.yo         = kwargs.pop('yo',      'YO')
+                self.dogg       = kwargs.pop('dogg',    'DOGG')
+                self.iheard     = kwargs.pop('iheard',  'IHEARD')
+                self._youlike   = kwargs.pop('youlike', 'YOULIKE')
+            
+            def youlike(self):
+                return getattr(self, '_youlike', None)
+            
+            def __repr__(self):
+                return strfields(self, type(self).fields, try_callables=True)
+        
+        t0 = Thingy()
+        assert repr(t0) == "yo=“YO”, dogg=“DOGG”, iheard=“IHEARD”, youlike=“YOULIKE”"
+        
     
     def test_strfields_slotted_class(self):
         from clu.abstract import Slotted
@@ -111,7 +131,26 @@ class TestRepr(object):
         assert chop_instance_repr(data)    == chop_instance_repr(stringify(data,    None))
     
     def test_stringify(self):
-        pass
+        from clu.repr import stringify, chop_instance_repr
+        
+        class Thingy(object):
+            
+            fields = ('yo', 'dogg', 'iheard', 'youlike')
+            
+            def __init__(self, **kwargs):
+                self.yo         = kwargs.pop('yo',      'YO')
+                self.dogg       = kwargs.pop('dogg',    'DOGG')
+                self.iheard     = kwargs.pop('iheard',  'IHEARD')
+                self._youlike   = kwargs.pop('youlike', 'YOULIKE')
+            
+            def youlike(self):
+                return getattr(self, '_youlike', None)
+            
+            def __repr__(self):
+                return stringify(self, type(self).fields, try_callables=True)
+        
+        t0 = Thingy()
+        assert chop_instance_repr(t0) == "Thingy(yo=“YO”, dogg=“DOGG”, iheard=“IHEARD”, youlike=“YOULIKE”)"
     
     def test_stringify_slotted_class(self):
         from clu.abstract import Slotted

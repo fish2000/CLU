@@ -50,6 +50,10 @@ def import_clu_modules():
                                appname=consts.APPNAME,
                           exportername=consts.EXPORTER_NAME)
 
+code_attrs = tuple(f'__code__.co_{attname}' for attname in ('cellvars',
+                                                            'names',
+                                                            'varnames'))
+
 @export
 def clu_inline_tests():
     """ Generator over all CLU modules that contain inline tests """
@@ -60,8 +64,7 @@ def clu_inline_tests():
     for dotpath, module in import_clu_modules().items():
         test_fn = resolve(module, 'test')
         if callable(test_fn):
-            names = attrs(test_fn, '__code__.co_names',
-                                   '__code__.co_varnames')
+            names = attrs(test_fn, *code_attrs)
             if any('inline' in name for name in names):
                 yield dotpath
 

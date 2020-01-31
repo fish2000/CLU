@@ -26,7 +26,7 @@ from clu.repr import stringify
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
-from clu.fs.misc import re_searcher, suffix_searcher, re_excluder
+from clu.fs.misc import re_matcher, re_searcher, suffix_searcher, re_excluder
 from clu.fs.misc import swapext, u8str, extension
 from clu.exporting import Exporter, path_to_dotpath
 
@@ -698,8 +698,7 @@ class TemporaryName(collections.abc.Hashable,
     def __hash__(self):
         return hash((self._name, self.exists))
 
-non_dotfile_match = re.compile(r"^[^\.]").match
-non_dotfile_matcher = lambda p: non_dotfile_match(p.name)
+non_dotfile_matcher = re_matcher(r"^[^\.]")
 
 @export
 class Directory(collections.abc.Hashable,
@@ -926,8 +925,8 @@ class Directory(collections.abc.Hashable,
         """
         with os.scandir(self.realpath(source)) as iterscan:
             return tuple(filter(suffix_searcher(suffix),
-                        (direntry.name for direntry in filter(non_dotfile_matcher,
-                                                              iterscan))))
+                         filter(non_dotfile_matcher,
+                        (direntry.name for direntry in iterscan))))
     
     def ls_la(self, suffix=None, source=None):
         """ List all files, including files whose name starts with a dot.

@@ -23,7 +23,7 @@ class TestKeyValue(object):
         
         interface.update(dict_one)
         
-        assert len(tuple(temporarydir.ls())) == 4
+        assert len(temporarydir.ls()) == 4
         assert len(interface) == 4
         
         assert interface['compress_level'] == 9
@@ -40,7 +40,7 @@ class TestKeyValue(object):
             assert sidehustle['format']         == "png"
             assert sidehustle['yo']             == "dogg"
         
-        assert len(tuple(temporarydir.ls())) == 4
+        assert len(temporarydir.ls()) == 4
     
     def test_keyvalue_cluinterface_long_text(self, environment,
                                                    temporarydir,
@@ -57,7 +57,7 @@ class TestKeyValue(object):
         # Add the greek-text fixture dict:
         interface.update(greektext)
         
-        assert len(tuple(temporarydir.ls())) == 4
+        assert len(temporarydir.ls()) == 4
         assert len(interface) == 4
         
         assert interface['lorem']   == greektext['lorem']
@@ -74,4 +74,4 @@ class TestKeyValue(object):
             assert sidehustle['thoreau'] == greektext['thoreau']
             assert sidehustle['poe']     == greektext['poe']
         
-        assert len(tuple(temporarydir.ls())) == 4
+        assert len(temporarydir.ls()) == 4

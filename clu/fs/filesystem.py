@@ -923,6 +923,8 @@ class Directory(collections.abc.Hashable,
             Specify an optional “suffix” parameter to filter the list by a
             particular file suffix (leading dots unnecessary but unharmful).
         """
+        if not self.exists:
+            return tuple()
         with os.scandir(self.realpath(source)) as iterscan:
             return tuple(filter(suffix_searcher(suffix),
                          filter(non_dotfile_matcher,
@@ -942,6 +944,8 @@ class Directory(collections.abc.Hashable,
             commands I ever learned, and it reads better than `ls_a()` which
             I think looks awkward and goofy.)
         """
+        if not self.exists:
+            return tuple()
         with os.scandir(self.realpath(source)) as iterscan:
             return tuple(filter(suffix_searcher(suffix),
                         (direntry.name for direntry in iterscan)))

@@ -35,7 +35,7 @@ DELETE_FLAG = getattr(os, 'O_TEMPORARY', 0)
 DEFAULT_TERMINAL_WIDTH = int(os.environ.get('COLUMNS', '100'), base=10)
 
 # Dollar-sign string (for use in regexing):
-DOLLA = '$'
+DOLLA = sys.intern('$')
 
 # A prefix to use when creating new modules programmatically:
 DYNAMIC_MODULE_PREFIX = sys.intern('__dynamic_modules__')

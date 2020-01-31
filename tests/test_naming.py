@@ -13,7 +13,7 @@ class TestNaming(object):
     
     """ Run the tests for the clu.naming module. """
     
-    def test_renamer(self):
+    def test_renamer(self, consts):
         """ N.B. compare this to the “legacy callable” q.v. test sub. """
         from clu.naming import renamer
         from clu.predicates import pyname
@@ -28,8 +28,10 @@ class TestNaming(object):
         # confirm new names:
         assert pyname(yo_dogg) == 'yo_dogg'
         assert yo_dogg.__qualname__.endswith('yo_dogg')
+        assert yo_dogg.__qualname__.startswith(yo_dogg_lambda.__qualname__.rpartition(consts.QUALIFIER)[0])
         assert pyname(i_heard) == 'i_heard'
         assert i_heard.__qualname__.endswith('i_heard')
+        assert i_heard.__qualname__.startswith(i_heard_lambda.__qualname__.rpartition(consts.QUALIFIER)[0])
         
         # these are duplicates, they do *not* compare equal:
         assert yo_dogg != yo_dogg_lambda

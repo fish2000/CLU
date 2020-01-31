@@ -5,6 +5,19 @@ class TestVersion(object):
     
     """ Run the tests for the clu.version module. """
     
+    def test_print_version(self, cluversion):
+        from clu.predicates import anyof
+        from clu.repl.cli.print_version import version_string
+        
+        version = cluversion.to_string()
+        
+        vstring = version_string()
+        assert vstring.startswith(f'{version}')
+        
+        snapshot = 'SNAPSHOT' in vstring
+        release = 'release' in vstring
+        assert anyof(snapshot, release)
+    
     def test_git_version_function(self, cluversion):
         from clu.version.git_version import git_version_tags
         from clu.fs.filesystem import td

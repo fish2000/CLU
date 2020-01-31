@@ -12,6 +12,9 @@ import sys
 # pytuple shortcut lambda:
 pytuple = lambda *attrs: tuple(f'__{atx}__' for atx in attrs)
 
+# Appname (née PROJECT_NAME):
+APPNAME = sys.intern('clu')
+
 # Project base path:
 BASEPATH = sys.intern(
            os.path.dirname(
@@ -79,10 +82,10 @@ PATH = os.getenv("PATH", DEFAULT_PATH)
 φ = PARTIAL = sys.intern("<Partial>")
 
 # The name of this project
-PROJECT_NAME = sys.intern('clu')
+PROJECT_NAME = APPNAME
 
 # Path to the projects’ root package directory:
-PROJECT_PATH = sys.intern(os.path.join(BASEPATH, PROJECT_NAME))
+PROJECT_PATH = sys.intern(os.path.join(BASEPATH, APPNAME))
 
 # Determine if our Python is three’d up:
 PY3 = sys.version_info.major > 2
@@ -111,7 +114,7 @@ SINGLETON_TYPES = (bool, NoneType, EllipsisType, NotImplementedType)
 STRINGPAIR = sys.intern("{!s} : {!s}")
 
 # Path to the script directory:
-SCRIPT_PATH = sys.intern(os.path.join(BASEPATH, 'clu', 'scripts'))
+SCRIPT_PATH = sys.intern(os.path.join(BASEPATH, APPNAME, 'scripts'))
 
 # Path to the project tests:
 TEST_PATH = sys.intern(os.path.join(BASEPATH, 'tests'))
@@ -161,7 +164,8 @@ pytuple.__lambda_name__ = λ # type: ignore
 pytuple.__qualname__ = pytuple.__name__ = 'pytuple'
 pytuple.__doc__ = "pytuple(*attrs) → turns ('do', 're', 'mi') into ('__do__', '__re__', '__mi__')"
 
-__all__ = ('BASEPATH',
+__all__ = ('APPNAME',
+           'BASEPATH',
            'BUILTINS',
            'CPYTHON',
            'DEBUG',

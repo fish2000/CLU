@@ -214,6 +214,8 @@ class AppName(abc.ABC):
         """ Translate the “appname” class-keyword into an “appname” read-only
             descriptor value
         """
+        if 'appspace' in kwargs:
+            del kwargs['appspace']
         super(AppName, cls).__init_subclass__(**kwargs)
         cls.appname = ValueDescriptor(appname)
     

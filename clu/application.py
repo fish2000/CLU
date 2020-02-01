@@ -21,6 +21,7 @@ export = exporter.decorator()
 
 DEFAULT_APPSPACE = 'app'
 
+@export
 class AppBase(ModuleBase):
     
     @classmethod
@@ -47,6 +48,7 @@ class AppBase(ModuleBase):
                                                   appname=cls.appname)
         return FinderCls, LoaderCls
 
+@export
 class Application(AppBase, appname=consts.APPNAME,
                           appspace=DEFAULT_APPSPACE):
     pass

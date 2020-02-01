@@ -22,7 +22,7 @@ from clu.constants.consts import λ, ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
 from clu.predicates import attr, allattrs, isexpandable, anyof, uniquify
-from clu.repr import stringify
+from clu.repr import stringify, strfields
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
@@ -706,6 +706,7 @@ class Directory(collections.abc.Hashable,
                 collections.abc.Mapping,
                 collections.abc.Sized,
                 clu.abstract.Cloneable,
+                clu.abstract.ReprWrapper,
                 contextlib.AbstractContextManager,
                 os.PathLike,
                 metaclass=TypeLocker):
@@ -1227,7 +1228,11 @@ class Directory(collections.abc.Hashable,
     
     def to_string(self):
         """ Stringify the Directory instance. """
-        return stringify(self, type(self).fields)
+        return strfields(self, type(self).fields)
+    
+    def inner_repr(self):
+        """ Stringify the Directory instance. """
+        return self.to_string()
     
     @wraps(dict.items)
     def items(self):
@@ -1243,9 +1248,6 @@ class Directory(collections.abc.Hashable,
     
     def clone(self, deep=False, memo=None):
         return self.directory(self.name)
-    
-    def __repr__(self):
-        return self.to_string()
     
     def __str__(self):
         if self.exists:

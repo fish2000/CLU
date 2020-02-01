@@ -511,7 +511,7 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         is “app” – all class-based modules are therefore imported
         from “clu.app”, á la:
             
-            from clu.app import class_based_module
+            >>> from clu.app import class_based_module
         
         Note that class-based modules are forbidden from using
         the “__slots__” class attribute – the module class’ metaclass
@@ -710,7 +710,7 @@ def initialize_types(appname, appspace='app'):
         You use ‘initialize_types(…)’ in one of your own app’s modules
         like so:
         
-            Module, Finder, Loader = initialize_types('myappname')
+            >>> Module, Finder, Loader = initialize_types('myappname')
         
         … if you insert that line of code in a module of yours called,
         say, “myappname/modules.py” you could then either a) proceed
@@ -871,29 +871,29 @@ class ProxyModule(Module):
         
         Here’s a basic example of a ProxyModule definition:
         
-            overrides = dict(…)
-            from yodogg.app import base_module
-            from yodogg.utils import misc as second_module
-            from yodogg.utils.functions import default_factory
+            >>> overrides = dict(…)
+            >>> from yodogg.app import base_module
+            >>> from yodogg.utils import misc as second_module
+            >>> from yodogg.utils.functions import default_factory
             
-            class myproxy(ProxyModule):
-                targets = (overrides, base_module,
-                                    second_module,
-                                  default_factory)
+            >>> class myproxy(ProxyModule):
+            >>>     targets = (overrides, base_module,
+            >>>                         second_module,
+            >>>                       default_factory)
         
         … which after defining that, you’d use it like so – assuming your app
         is called “yodogg” with a default “app” appspace (see “ModuleBase” for
         more on these terms):
         
-            from yodogg.app import myproxy
-            myproxy.attrib # searches overrides, base_module and second_module
-                           # in sequence, looking for the 'attrib' value
-            dir(myproxy)   # returns a list of the union of available stuff,
-                           # across the proxy modules’ targets
-            myproxy.NOATTR # unknown attributes will be forwarded to each
-                           # module-level “__getattr__(…)” function, dictionary
-                           # “__missing__(…)” method, or callable target found,
-                           # in turn, if the attribute search proves exhaustive
+            >>> from yodogg.app import myproxy
+            >>> myproxy.attrib # searches overrides, base_module and second_module
+            >>>                # in sequence, looking for the 'attrib' value
+            >>> dir(myproxy)   # returns a list of the union of available stuff,
+            >>>                # across the proxy modules’ targets
+            >>> myproxy.NOATTR # unknown attributes will be forwarded to each
+            >>>                # module-level “__getattr__(…)” function, dictionary
+            >>>                # “__missing__(…)” method, or callable target found,
+            >>>                # in turn, if the attribute search proves exhaustive
         
         … you can, in the modules’ definition, include other stuff besides the
         class-level “targets” tuple; other elements added to the proxy will

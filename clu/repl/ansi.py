@@ -12,8 +12,10 @@ import zict
 
 from clu.constants.consts import DEBUG, ENCODING, SEPARATOR_WIDTH
 from clu.constants.polyfills import Enum, unique, auto
+from clu.predicates import attr, attrs, mro
+from clu.typology import dict_types, isstring, isbytes
+from clu.fs.misc import re_matcher
 from clu.naming import nameof, qualified_name
-from clu.typology import string_types, bytes_types, dict_types
 from clu.enums import alias, AliasingEnumMeta
 from clu.exporting import Exporter
 
@@ -30,7 +32,7 @@ class ANSIBase(Enum):
     
     @classmethod
     def is_ansi(cls, instance):
-        return cls in type(instance).__mro__
+        return cls in mro(instance)
 
 class CacheDescriptor(object):
     
@@ -88,11 +90,11 @@ class ANSI(AliasingEnumMeta):
             return self.to_string()
         
         def add_method(self, other):
-            if type(other) in string_types:
+            if isstring(other):
                 return self.to_string() + other
-            elif type(other) in bytes_types:
+            elif isbytes(other):
                 return self.to_string() + str(other, encoding=ENCODING)
-            elif ANSIBase.is_ansi(other):
+            elif hasattr(other, 'to_string'):
                 return self.to_string() + other.to_string()
             return NotImplemented
         
@@ -144,10 +146,12 @@ class ANSI(AliasingEnumMeta):
         """ Convert a specifier of unknown type to an enum or alias member """
         if cls.is_ansi(specifier):
             return specifier                        # Already an ANSI type, return it
-        if isinstance(specifier, string_types):
+        if isstring(specifier):
             return cls.for_name(specifier)          # Match by name, decoding if necessary
-        elif isinstance(specifier, bytes_types):
+        elif isbytes(specifier):
             return cls.for_name(str(specifier, encoding=ENCODING))
+        elif hasattr(specifier, 'to_string'):
+            return cls.for_name(specifier.to_string())
         raise LookupError(f"Couldn’t convert specifier to {cls.__name__}: {specifier!s}")
     
     def _missing_(cls, value):
@@ -243,7 +247,7 @@ class ANSIFormat(ANSIFormatBase):
         """ Instantiate an ANSIFormat with a dict of related ANSI values –
             q.v. FIELD string names supra.
         """
-        assert any((field in format_dict) for field in FIELDS)
+        assert any(field in format_dict for field in FIELDS)
         assert frozenset(format_dict.keys()).issubset(fields)
         return cls(**format_dict)
     
@@ -283,10 +287,12 @@ class ANSIFormat(ANSIFormatBase):
                 return cls.from_dict(from_value.to_dict())
             elif hasattr(from_value, 'to_dict'):
                 return cls.from_dict(from_value.to_dict())
-            elif type(from_value) in dict_types:
+            elif isinstance(from_value, tuple(dict_types)):
                 return cls.from_dict(from_value)
-            elif type(from_value) in string_types + bytes_types:
+            elif isstring(from_value):
                 text = from_value
+            elif isbytes(from_value):
+                text = str(from_value, encoding=ENCODING)
             elif ANSIBase.is_ansi(from_value):
                 text = from_value
         instance = super(ANSIFormat, cls).__new__(cls, Text.convert(text),
@@ -331,25 +337,36 @@ class ANSIFormat(ANSIFormatBase):
         suffix = prefix and self.RESET_ALL or ""
         return f"{prefix}{string!s}{suffix}"
 
+# Determine the proper output streams for the current I/O environment:
+sostream = attr(sys, '__stdout__', 'stdout')
+streams = attrs(sys, '__stdout__', 'stdout')
+linebreak = lambda: print(file=sostream)
+flush_all = lambda: (stream.flush() for stream in streams)
+
 @export
-def print_ansi(text, color=''):
+def print_ansi(text, color='', file=sostream):
     """ print_ansi(…) → Print text in ANSI color, using optional inline markup
                         from `colorama` for terminal color-escape delimiters """
     fmt = ANSIFormat(color)
     for line in text.splitlines():
-        print(fmt.render(line), sep='', end='\n', file=sys.__stdout__)
+        print(fmt.render(line), sep='', end='\n', file=file)
 
 @export
 def print_ansi_centered(text, color='',
                               filler='•',
-                              width=SEPARATOR_WIDTH):
+                              width=SEPARATOR_WIDTH,
+                              file=sostream):
     """ print_ansi_centered(…) → Print a string to the terminal, centered
                                  and bookended with asterisks """
     message = f" {text.strip()} "
-    print_ansi(message.center(width, filler), color=color)
+    print_ansi(message.center(width, filler), color=color, file=file)
 
 INITIAL     = '  ¶ '
 SUBSEQUENT  = '    '
+
+# Regex boolean predicates for matching marked (or bulleted) paragraphs:
+para_mark_matcher = re_matcher(r"^[0-9+•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
+para_line_matcher = re_matcher(r"^[+•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
 
 @export
 def paragraphize(doc):
@@ -357,38 +374,55 @@ def paragraphize(doc):
     lines = [line.strip() for line in doc.strip().splitlines()]
     for idx, line in enumerate(lines):
         if line == '':
-            lines[idx] = "\n\n"
+            lines[idx] = lines[idx-1].endswith('\n') and "\n" or "\n\n"
         else:
-            lines[idx] += " "
+            if para_line_matcher(line):
+                lines[idx] += " \n"
+            else:
+                lines[idx] += " "
     return ''.join(lines).splitlines()
 
 @export
 def ansidoc(*things):
     """ ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
-    sys.__stdout__.flush()
-    sys.stdout.flush()
+    # Calculate width
+    width = int(SEPARATOR_WIDTH * 0.8)
+    
+    # Start output
+    flush_all()
     print()
+    
     for thing in things:
-        print_ansi_centered(f"__doc__ for “{nameof(thing)}”", color=Text.CYAN)
-        print(file=sys.__stdout__)
-        doc = inspect.getdoc(thing) or "«unknown»"
+        # Process each things’ name and doc
+        thingname = nameof(thing)
+        doc = inspect.getdoc(thing) or "«¡no docstring found!»"
         paras = paragraphize(doc)
+        
+        # Print the ANSI header
+        print_ansi_centered(f"__doc__ for “{thingname}”", color=Text.CYAN)
+        linebreak()
+        
+        # Format and print each paragraph
         for para in paras:
             if para:
-                print_ansi(textwrap.fill(para, initial_indent=INITIAL,
+                marked = para_mark_matcher(para)
+                print_ansi(textwrap.fill(para, initial_indent=marked and SUBSEQUENT or INITIAL,
                                             subsequent_indent=SUBSEQUENT,
-                                           replace_whitespace=False,
-                                                        width=80),
+                                           replace_whitespace=marked,
+                                             break_on_hyphens=False,
+                                              drop_whitespace=True,
+                                                  placeholder='…',
+                                                      tabsize=4,
+                                                        width=width),
                                                         color=Text.GRAY)
             else:
-                print(file=sys.__stdout__)
-        print(file=sys.__stdout__)
-        print_ansi_centered("¡FUCK YEAH!", filler='Ø',
-                                           color=ANSIFormat(text=Text.BLACK,
-                                                      background=Background.GRAY))
+                linebreak()
+        
+        # FLush and cease output
+        linebreak()
+        linebreak()
         print()
-        sys.__stdout__.flush()
-        sys.stdout.flush()
+        flush_all()
 
 @export
 def highlight(code_string, language='json',
@@ -404,6 +438,8 @@ def highlight(code_string, language='json',
 
 export(print_separator,     name='print_separator', doc="print_separator(filler_char='-') → print filler_char TERMINAL_WIDTH times")
 export(evict_announcer,     name='evict_announcer', doc="evict_announcer(key, value) → print a debug trace message about the key and value")
+export(linebreak,           name='linebreak',       doc="linebreak() → print a newline to `stdout`")
+export(flush_all,           name='flush_all',       doc="flush_all() → flush the output buffers of all possible `stdout` candidates")
 
 # NO DOCS ALLOWED:
 export(Text)

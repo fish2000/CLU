@@ -299,8 +299,8 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
         """ Return a specific registered class from the registry,
             given an “appname”, like e.g:
             
-                from clu import exporting
-                assert Registry['clu'] is exporting.Exporter
+                >>> from clu import exporting
+                >>> assert Registry['clu'] is exporting.Exporter
         """
         return cls.for_appname(key)
     
@@ -385,8 +385,8 @@ class ExporterBase(collections.abc.MutableMapping,
         """ Return a specific Exporter instance from the registry,
             given a dotted module path, like e.g:
             
-                from clu import naming
-                assert Exporter['clu.naming'] == naming.exporter
+                >>> from clu import naming
+                >>> assert Exporter['clu.naming'] == naming.exporter
         """
         # N.B. you are theoretically “not supposed” to use the
         # “__class_getitem__” method for anything whatsoever, and
@@ -509,22 +509,22 @@ class ExporterBase(collections.abc.MutableMapping,
             It looks better if this method is decoupled from its parent
             instance, to wit:
             
-                exporter = Exporter()
-                export = exporter.decorator() # q.v. “decorator()” sub.
+                >>> exporter = Exporter()
+                >>> export = exporter.decorator() # q.v. “decorator()” sub.
             
             Use `export` as a decorator to a function definition:
                 
-                @export
-                def yo_dogg(i_heard=None):
-                    …
+                >>> @export
+                >>> def yo_dogg(i_heard=None):
+                >>>     …
                 
             … or manually, to export anything that doesn’t have a name:
                 
-                yo_dogg = lambda i_heard=None: …
-                dogg_heard_index = ( ¬ ) 
+                >>> yo_dogg = lambda i_heard=None: …
+                >>> dogg_heard_index = ( ¬ ) 
                 
-                export(yo_dogg,             name="yo_dogg")
-                export(dogg_heard_index,    name="dogg_heard_index")
+                >>> export(yo_dogg,             name="yo_dogg")
+                >>> export(dogg_heard_index,    name="dogg_heard_index")
             
         """
         # Try to determine the thing’s name – deferring to anything passed:
@@ -583,12 +583,12 @@ class ExporterBase(collections.abc.MutableMapping,
         """ Return a reference to this Exporter instances’ “export”
             method, suitable for use as a decorator, e.g.:
             
-                export = exporter.decorator()
+                >>> export = exporter.decorator()
                 
-                @export
-                def yodogg():
-                    ''' Yo dogg, I heard you like exporting '''
-                    …
+                >>> @export
+                >>> def yodogg():
+                >>>     ''' Yo dogg, I heard you like exporting '''
+                >>>     …
             
             … This should be done near the beginning of a module,
             to facilitate marking functions and other objects to be
@@ -607,7 +607,7 @@ class ExporterBase(collections.abc.MutableMapping,
     def all_and_dir(self, *additionals):
         """ Assign a modules’ __all__ and __dir__ values, e.g.:
             
-                __all__, __dir__ = exporter.all_and_dir()
+                >>> __all__, __dir__ = exporter.all_and_dir()
             
             … This should be done near the end of a module, after
             all calls to `exporter.export(…)` (aka @export) have
@@ -619,7 +619,7 @@ class ExporterBase(collections.abc.MutableMapping,
     def dir_and_all(self, *additionals):
         """ Assign a modules’ __dir__ and __all__ values, e.g.:
             
-                __dir__, __all__ = exporter.dir_and_all()
+                >>> __dir__, __all__ = exporter.dir_and_all()
             
             … This should be done near the end of a module, after
             all calls to `exporter.export(…)` (aka @export) have
@@ -736,7 +736,7 @@ class Exporter(ExporterBase, prefix=BASEPATH, appname=APPNAME):
         you desire a class with a working “__dict__” attribute for
         some reason, you’ll need to specify:
         
-            __slots__ = tuplize('__dict__')
+            >>> __slots__ = tuplize('__dict__')
         
         … in your class (or an equivalent).
     """

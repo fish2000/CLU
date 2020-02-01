@@ -15,12 +15,10 @@ Copyright (c) 2012-2025 Objects In Space And Time, LLC. All rights reserved.
 from __future__ import print_function
 
 import datetime
-import colorama
-import os
 import sys
 
-from clu.constants.consts import DEBUG, PY3, PYPY, TEXTMATE
-from clu.repl.ansi import Text, print_ansi_centered
+from clu.constants import consts
+from clu.repl import ansi
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -165,15 +163,15 @@ banners['pypy2.7'] = """
 """
 
 # Determine if we’re on PyPy and/or Python 3:
-prefix = PYPY and 'pypy' or 'python'
+prefix = consts.PYPY and 'pypy' or 'python'
 
 # Configure ANSI-color python banner, per python version:
-if PY3:
+if consts.PY3:
     banner = banners.get(f'{prefix}3.{sys.version_info.minor}', banners[f'{prefix}3.x'])
-    banner_color = colorama.Fore.CYAN
+    banner_color = ansi.Text.CYAN
 else:
     banner = banners[f'{prefix}2.7']
-    banner_color = colorama.Fore.LIGHTGREEN_EX
+    banner_color = ansi.Text.LIGHTGREEN
 
 now = datetime.datetime.now
 python2_expires = 'January 1st, 2020'
@@ -181,14 +179,14 @@ is_python2_dead = now() >= now().strptime(python2_expires, '%B %dst, %Y') and ['
 
 @export
 def print_python_banner(text, color,
-                              reset=colorama.Style.RESET_ALL):
+                              reset=ansi.ANSIFormat.RESET_ALL):
     for line in text.splitlines():
         print(color + line, sep='')
     print(reset, end='')
 
 @export
-def print_warning(text, color=colorama.Fore.RED,
-                        reset=colorama.Style.RESET_ALL):
+def print_warning(text, color=ansi.Text.RED,
+                        reset=ansi.ANSIFormat.RESET_ALL):
     print(color + text, sep='')
     print(reset, end='')
 
@@ -197,27 +195,30 @@ def print_banner():
     # If we’re running in TextMate, use `sys.stderr` instead of ANSI colors,
     # as that’s the only way to get any sort of colored output in TextMate’s
     # console output window:
-    if TEXTMATE:
+    if consts.TEXTMATE:
         print(banner, file=sys.stderr)
+    
     else:
-        colorama.init()
         print_python_banner(banner, banner_color)
     
-    if DEBUG:
-        print_ansi_centered("DEBUG MODE INITIATED",
-                             color=(TEXTMATE and Text.NOTHING \
-                                              or Text.LIGHTYELLOW_EX))
+    if consts.DEBUG:
+        ansi.print_ansi_centered("DEBUG MODE INITIATED",
+                                 color=(consts.TEXTMATE and ansi.Text.NOTHING \
+                                                         or ansi.Text.LIGHTYELLOW_EX))
         print()
     
-    if not PY3:
+    if not consts.PY3:
+        
         if is_python2_dead:
             warning = u"∞§• ¡LOOK OUT! Python 2.x has been officially declared DEAD!!!!!!!\n"
         else:
             warning = u"∞§• ¡BEWARE! Python 2.x will perish when the clock strikes 2020!!!\n"
-        if os.environ.get('TM_PYTHON'):
+        
+        if consts.TEXTMATE:
             print(warning, file=sys.stderr)
         else:
             print_warning(warning)
+            ansi.flush_all()
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

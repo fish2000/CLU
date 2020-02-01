@@ -37,8 +37,8 @@ def pytest(session):
     session.run('pytest')
 
 def parametrized_inline_tests():
-    from clu.all import inline_tests
-    for dotpath in inline_tests():
+    from clu import all
+    for dotpath in all.inline_tests():
         yield nox.param(dotpath,
                      id=dotpath.lstrip('clu').lstrip('.'))
 

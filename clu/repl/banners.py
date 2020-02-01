@@ -179,16 +179,18 @@ is_python2_dead = now() >= now().strptime(python2_expires, '%B %dst, %Y') and ['
 
 @export
 def print_python_banner(text, color,
-                              reset=ansi.ANSIFormat.RESET_ALL):
+                              reset=ansi.ANSIFormat.RESET_ALL,
+                               file=ansi.sostream):
     for line in text.splitlines():
-        print(color + line, sep='')
-    print(reset, end='')
+        print(color + line, sep='', file=file)
+    print(reset, end='', file=file)
 
 @export
 def print_warning(text, color=ansi.Text.RED,
-                        reset=ansi.ANSIFormat.RESET_ALL):
-    print(color + text, sep='')
-    print(reset, end='')
+                        reset=ansi.ANSIFormat.RESET_ALL,
+                         file=ansi.sostream):
+    print(color + text, sep='', file=file)
+    print(reset, end='', file=file)
 
 @export
 def print_banner():

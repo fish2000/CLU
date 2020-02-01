@@ -338,8 +338,10 @@ class ANSIFormat(ANSIFormatBase):
         return f"{prefix}{string!s}{suffix}"
 
 # Determine the proper output streams for the current I/O environment:
+sestream = attr(sys, '__stderr__', 'stderr')
 sostream = attr(sys, '__stdout__', 'stdout')
 streams = attrs(sys, '__stdout__', 'stdout')
+
 linebreak = lambda: print(file=sostream)
 flush_all = lambda: (stream.flush() for stream in streams)
 

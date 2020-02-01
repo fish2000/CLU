@@ -24,29 +24,6 @@ DEFAULT_APPSPACE = 'app'
 class AppBase(ModuleBase):
     
     @classmethod
-    def yodogg__init_subclass__(cls, **kwargs):
-        # 1) Call up:
-        
-        # super(AppBase, cls).__init_subclass__(appname=appname,
-        #                                      appspace=appspace,
-        #                                             **kwargs)
-        
-        # super(AppBase, cls).__init_subclass__(appname=kwargs.pop('appname'),
-        #                                      appspace=kwargs.pop('appspace'),
-        #                                             **kwargs)
-        
-        super(AppBase, cls).__init_subclass__(**kwargs)
-        
-        # 2) Check appname:
-        if not cls.appname:
-            raise NameError("no appname available on AppBase subclass")
-        
-        # 3) install finder and loader
-        Finder, Loader = cls.initialize_finder_and_loader()
-        cls.finder = Finder
-        cls.loader = Loader
-    
-    @classmethod
     def __init_subclass__(cls, **kwargs):
         # 1) Call up:
         super(AppBase, cls).__init_subclass__(**kwargs)
@@ -86,6 +63,26 @@ def test():
         """ Instance the base Application class """
         app = Application('test_app', doc="Test Application Instance")
         assert app
+    
+    @inline
+    def test_two():
+        """ Subclass and instance a second AppBase subclass """
+        
+        class Shmapplication(AppBase, appname='flynn',
+                                     appspace=DEFAULT_APPSPACE):
+            pass
+        
+        shmapp = Shmapplication('test_subclass', doc="Test Secondary Subclass")
+        
+        assert shmapp
+        assert shmapp.appname == 'flynn'
+        assert shmapp.appspace == 'app'
+        
+        # from flynn.app import Shmapplication as shmodule
+        #
+        # assert shmodule
+        # assert shmodule.appname == 'flynn'
+        # assert shmodule.appspace == 'app'
     
     @inline.diagnostic
     def show_application_class_attributes():

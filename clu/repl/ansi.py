@@ -382,12 +382,12 @@ def paragraphize(doc):
                 lines[idx] += " "
     return ''.join(lines).splitlines()
 
+# Pre-calculate width
+WIDTH = int(SEPARATOR_WIDTH * 0.8)
+
 @export
 def ansidoc(*things):
     """ ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
-    # Calculate width
-    width = int(SEPARATOR_WIDTH * 0.8)
-    
     # Start output
     flush_all()
     print()
@@ -413,7 +413,7 @@ def ansidoc(*things):
                                               drop_whitespace=True,
                                                   placeholder='…',
                                                       tabsize=4,
-                                                        width=width),
+                                                        width=WIDTH),
                                                         color=Text.GRAY)
             else:
                 linebreak()

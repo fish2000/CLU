@@ -1,17 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-banners.py
-
-• Default module imports and other configgy code,
-• For generic use in python repls – both the python2 and python3 interactive
-  interpreters, as well as bpython, ipython, ptpython, pyzo, PyCharm, and
-  whatever else; code specific to any given repl module lives in the config
-  files, per whatever that packages’ demands may be.
-
-Created by FI$H 2000 on 2019-02-27.
-Copyright (c) 2012-2025 Objects In Space And Time, LLC. All rights reserved.
-
-"""
 from __future__ import print_function
 
 import datetime

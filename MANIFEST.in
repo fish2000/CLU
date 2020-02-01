@@ -29,11 +29,13 @@ include tox.ini
 recursive-include clu *
 recursive-include docs *
 recursive-include requirements *.txt
+recursive-include scratch *.py *.ipynb
 recursive-include tests *.py *.jpg *.png *.toml *.json
 
 recursive-exclude clu *.pyc *~ *.so .DS_Store
 recursive-exclude docs *.pyc *~ *.so .DS_Store
 recursive-exclude requirements *.pyc *~ *.so .DS_Store
+recursive-exclude scratch *.pyc *~ *.so .DS_Store
 recursive-exclude tests *.pyc *~ *.so .DS_Store
 recursive-exclude docs _build *
 graft docs

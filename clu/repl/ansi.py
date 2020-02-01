@@ -3,7 +3,7 @@ from __future__ import print_function
 from collections import namedtuple as NamedTuple
 
 import colorama
-colorama.init()
+# colorama.init()
 
 import inspect
 import sys

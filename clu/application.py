@@ -12,8 +12,8 @@ from clu.importing import (FinderBase,
                            ModuleBase)
 
 from clu.constants import consts
-# from clu.importing import MetaModule
 # from clu.extending import Extensible
+from clu.importing import installed_appnames
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -35,8 +35,13 @@ class AppBase(ModuleBase):
         
         # 3) install finder and loader
         Finder, Loader = cls.initialize_finder_and_loader()
-        cls.finder = Finder
-        cls.loader = Loader
+        cls.finder     = Finder
+        cls.loader     = Loader
+        cls.__loader__ = Finder.loader
+        
+        # 4) possibly update `sys.meta_path`
+        if cls.appname not in installed_appnames():
+            sys.meta_path.append(cls.finder)
     
     @classmethod
     def initialize_finder_and_loader(cls):
@@ -80,16 +85,18 @@ def test():
         assert shmapp.appname == 'flynn'
         assert shmapp.appspace == 'app'
         
-        # from flynn.app import Shmapplication as shmodule
-        #
-        # assert shmodule
-        # assert shmodule.appname == 'flynn'
-        # assert shmodule.appspace == 'app'
+        from flynn.app import Shmapplication as shmodule
+        
+        assert shmodule
+        assert shmodule.appname == 'flynn'
+        assert shmodule.appspace == 'app'
     
     @inline.diagnostic
-    def show_application_class_attributes():
+    def show_app_class_attribs():
         pout.v(Application)
-        pout.v(dir(Application))
+        
+        stuff = dir(Application)
+        pout.v({ k : getattr(Application, k) for k in stuff })
         
         print("APPNAME:", Application.appname)
         print("APPSPACE:", Application.appspace)

@@ -56,7 +56,7 @@ code_attrs = tuple(f'__code__.co_{attname}' for attname in ('names',
                                                             'freevars'))
 
 @export
-def clu_inline_tests(testername='test'):
+def inline_tests(testername='test'):
     """ Generator over all CLU modules that contain inline tests """
     # Use “resolve(…)” and “attrs(…)” for nested attribute access:
     from clu.predicates import resolve, attrs

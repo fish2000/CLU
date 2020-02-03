@@ -186,7 +186,6 @@ import itertools
 import math
 import operator
 import pickle
-import requests
 import shutil
 import six
 import sysconfig
@@ -250,7 +249,6 @@ __all__ = ('Image',
            'operator',
            'pickle',
            'reduce',
-           'requests',
            'shutil',
            'six',
            'sysconfig',
@@ -419,12 +417,19 @@ __all__ = ('Image',
 
 try:
     import numpy
-    import scipy
 except (ImportError, SyntaxError):
     pass
 else:
     # Extend `__all__`:
-    __all__ += ('numpy', 'scipy')
+    __all__ += ('numpy',)
+
+try:
+    import more_itertools
+except (ImportError, SyntaxError):
+    pass
+else:
+    # Extend `__all__`:
+    __all__ += ('more_itertools',)
 
 try:
     import colorama
@@ -434,15 +439,6 @@ except (ImportError, SyntaxError):
 else:
     # Extend `__all__`:
     __all__ += ('colorama', 'termcolor')
-
-try:
-    import colorio
-    import colormath
-except (ImportError, SyntaxError):
-    pass
-else:
-    # Extend `__all__`:
-    __all__ += ('colorio', 'colormath')
 
 try:
     import xerox

@@ -36,25 +36,27 @@ class AppBase(ModuleBase, metaclass=AppMeta):
     
     @classmethod
     def __init_subclass__(cls, **kwargs):
-        # 1) Call up:
+        # 1) Process default class keywords:
         if 'appspace' not in kwargs:
             kwargs['appspace'] = DEFAULT_APPSPACE
         basepath = kwargs.pop('basepath', None)
         cls.basepath = basepath or attr_search('basepath', *mro(cls))
+        
+        # 2) Call up:
         super(AppBase, cls).__init_subclass__(**kwargs)
         
-        # 2) Check appname:
+        # 3) Check appname:
         if not cls.appname:
             raise NameError("no appname available on AppBase subclass")
         
-        # 3) install finder, loader, exporter…
+        # 4) install finder, loader, exporter…
         cls._exporter  = cls.initialize_exporter()
         Finder, Loader = cls.initialize_finder_and_loader()
         cls.finder     = Finder
         cls.loader     = Loader
         cls.__loader__ = Finder.loader
         
-        # 4) possibly update `sys.meta_path`
+        # 5) possibly update `sys.meta_path`
         if cls.appname not in installed_appnames():
             sys.meta_path.append(cls.finder)
     

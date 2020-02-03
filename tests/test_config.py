@@ -239,9 +239,9 @@ class TestConfig(object):
         from clu.fs import pypath
         
         # Ensure “sys.path” contains the “yodogg” package:
-        prefix = dirname.subdirectory('yodogg')
-        assert prefix.exists
-        pypath.enhance(prefix)
+        basepath = dirname.subdirectory('yodogg')
+        assert basepath.exists
+        pypath.enhance(basepath)
         
         from yodogg.config import Env
         from yodogg.config import MySchema
@@ -281,9 +281,9 @@ class TestConfig(object):
         from clu.fs import pypath
         
         # Ensure “sys.path” contains the “yodogg” package:
-        prefix = dirname.subdirectory('yodogg')
-        assert prefix.exists
-        pypath.enhance(prefix)
+        basepath = dirname.subdirectory('yodogg')
+        assert basepath.exists
+        pypath.enhance(basepath)
         
         from yodogg.config import MySchema
         

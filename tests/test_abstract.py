@@ -70,24 +70,24 @@ class TestAbstractMetas(object):
         assert getpyattr(DerivedTwo, 'slots') == tuple()
         assert getpyattr(DerivedThree, 'slots') == tuple()
     
-    def test_metaclass_Prefix(self, dirname):
+    def test_metaclass_BasePath(self, dirname):
         from clu.fs import pypath
         
         # Ensure “sys.path” contains the “yodogg” package:
-        prefix = dirname.subdirectory('yodogg')
-        assert prefix.exists
-        pypath.enhance(prefix)
+        basepath = dirname.subdirectory('yodogg')
+        assert basepath.exists
+        pypath.enhance(basepath)
         
-        class AppConfigBase(abc.ABC, metaclass=clu.abstract.Prefix):
+        class AppConfigBase(abc.ABC, metaclass=clu.abstract.BasePath):
             pass
         
-        class AppConfig(AppConfigBase, prefix=prefix):
+        class AppConfig(AppConfigBase, basepath=basepath):
             pass
         
         appconfig = AppConfig()
-        assert appconfig.prefix == AppConfig.prefix
-        assert appconfig.prefix == os.fspath(prefix)
-        assert os.path.exists(appconfig.prefix)
+        assert appconfig.basepath == AppConfig.basepath
+        assert appconfig.basepath == os.fspath(basepath)
+        assert os.path.exists(appconfig.basepath)
 
 class TestAbstractABCs(object):
     

@@ -5,11 +5,11 @@ import os
 
 from clu.exporting import ExporterBase
 
-# The “prefix” is the directory enclosing the package root:
-prefix = os.path.dirname(
-         os.path.dirname(__file__))
+# The “basepath” is the directory enclosing the package root:
+basepath = os.path.dirname(
+           os.path.dirname(__file__))
 
-class Exporter(ExporterBase, prefix=prefix, appname="yodogg"):
+class Exporter(ExporterBase, basepath=basepath, appname="yodogg"):
     pass
 
 exporter = Exporter(path=__file__)

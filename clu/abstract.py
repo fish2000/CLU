@@ -180,30 +180,30 @@ class ValueDescriptor(Descriptor):
                isinstance(self.value, bytes) and self.value.decode(ENCODING) or \
                                             repr(self.value)
 
-class Prefix(Slotted):
+class BasePath(Slotted):
     
-    """ A metaclass to assign a “prefix” class property,
-        extracted from a “prefix” class keyword, to a new
+    """ A metaclass to assign a “basepath” class property,
+        extracted from a “basepath” class keyword, to a new
         slotted type. 
     """
     
     @classmethod
-    def __prepare__(metacls, name, bases, prefix="/", **kwargs):
-        """ Remove the “prefix” class keyword before calling up """
-        return super(Prefix, metacls).__prepare__(name, bases, **kwargs)
+    def __prepare__(metacls, name, bases, basepath="/", **kwargs):
+        """ Remove the “basepath” class keyword before calling up """
+        return super(BasePath, metacls).__prepare__(name, bases, **kwargs)
     
-    def __new__(metacls, name, bases, attributes, prefix="/", **kwargs):
+    def __new__(metacls, name, bases, attributes, basepath="/", **kwargs):
         """ Override for `Slotted.__new__(…)` setting up a
-            derived slotted class that pulls from a “prefix”
+            derived slotted class that pulls from a “basepath”
             with the requisite methods defined for access.
         """
-        if 'prefix' not in attributes:
-            attributes['prefix'] = ValueDescriptor(prefix)
+        if 'basepath' not in attributes:
+            attributes['basepath'] = ValueDescriptor(basepath)
         
-        return super(Prefix, metacls).__new__(metacls, name,
-                                                       bases,
-                                                       attributes,
-                                                     **kwargs)
+        return super(BasePath, metacls).__new__(metacls, name,
+                                                         bases,
+                                                         attributes,
+                                                       **kwargs)
 
 class AppName(abc.ABC):
     
@@ -276,7 +276,7 @@ __all__ = ('Slotted', 'NonSlotted',
            'ReprWrapper',
            'SlottedRepr', 'MappingViewRepr',
            'Descriptor', 'ValueDescriptor',
-           'Prefix', 'AppName',
+           'BasePath', 'AppName',
            'ManagedContext', 'AsyncManagedContext')
 
 __dir__ = lambda: list(__all__)

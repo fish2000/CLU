@@ -20,9 +20,9 @@ class TestExporting(object):
         import os
         
         # Ensure “sys.path” contains the “yodogg” package:
-        prefix = dirname.subdirectory('yodogg')
-        assert prefix.exists
-        pypath.enhance(prefix)
+        basepath = dirname.subdirectory('yodogg')
+        assert basepath.exists
+        pypath.enhance(basepath)
         
         # Bring in the package-specific ExporterBase subclass,
         # as well as the module-local instance of that subclass,
@@ -47,14 +47,14 @@ class TestExporting(object):
         from clu.typology import iterlen
         import os
         
-        prefix = dirname.subdirectory('yodogg')
-        yodogg = prefix.subdirectory('yodogg')
-        assert prefix.exists
+        basepath = dirname.subdirectory('yodogg')
+        yodogg = basepath.subdirectory('yodogg')
+        assert basepath.exists
         assert yodogg.exists
         
         # Subclass ExporterBase locally -
         # This will register the subclass:
-        class Exporter(ExporterBase, prefix=prefix, appname="yolocal"):
+        class Exporter(ExporterBase, basepath=basepath, appname="yolocal"):
             pass
         
         # Instantiate the ExporterBase subclass –

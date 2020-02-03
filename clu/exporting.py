@@ -342,14 +342,14 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
 
 class ExporterBase(collections.abc.MutableMapping,
                    contextlib.AbstractContextManager,
-                   Registry, metaclass=clu.abstract.Prefix):
+                   Registry, metaclass=clu.abstract.BasePath):
     
     """ The base class for “clu.exporting.Exporter”. Override this
         class in your own project to use the CLU exporting mechanism –
         q.v. “clu.exporting.Exporter” docstring sub.
         
-        This class uses the “clu.abstract.Prefix” metaclass, which
-        automatically adds a “prefix” class attribute, as well as
+        This class uses the “clu.abstract.BasePath” metaclass, which
+        automatically adds a “basepath” class attribute, as well as
         the “clu.exporting.Registry” mixin, which keeps a registry
         containing it and all of its derived subclasses, and furnishes
         the “instances” weak-value dictionary for instance registration.
@@ -360,7 +360,7 @@ class ExporterBase(collections.abc.MutableMapping,
     def __new__(cls, *args, path=None, dotpath=None, **kwargs):
         
         putative = path_to_dotpath(path,
-                   relative_to=cls.prefix) or dotpath
+                   relative_to=cls.basepath) or dotpath
         
         if putative is not None:
             if putative in cls.instances:
@@ -710,17 +710,17 @@ class ExporterBase(collections.abc.MutableMapping,
                                                      'unregister'),
                            super(ExporterBase, self).__dir__()))
 
-class Exporter(ExporterBase, prefix=BASEPATH, appname=APPNAME):
+class Exporter(ExporterBase, basepath=BASEPATH, appname=APPNAME):
     
     """ A class representing a list of things for a module to export.
         
         This class is specifically germane to the CLU project – note
-        that the “prefix” class keyword is used to assign a value from
+        that the “basepath” class keyword is used to assign a value from
         the CLU constants module.
         
         Users of CLU who wish to use the Exporter mechanism in their
         own projects should create a subclass of ExporterBase of their
-        own. Like this one, it need only assign the “prefix” class
+        own. Like this one, it need only assign the “basepath” class
         keyword; it is unnecessary (but OK!) to define further methods,
         properties, class constants, and whatnot.
         

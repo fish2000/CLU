@@ -80,7 +80,7 @@ class AppBase(ModuleBase, metaclass=AppMeta):
             return cls.exportercls
         except TypeError:
             ExporterCls = newtype('Exporter', ExporterBase, appname=cls.appname,
-                                                            prefix=cls.basepath)
+                                                            basepath=cls.basepath)
             return ExporterCls
 
 @export

@@ -37,6 +37,8 @@ class AppBase(ModuleBase, metaclass=AppMeta):
     @classmethod
     def __init_subclass__(cls, **kwargs):
         # 1) Call up:
+        if 'appspace' not in kwargs:
+            kwargs['appspace'] = DEFAULT_APPSPACE
         basepath = kwargs.pop('basepath', None)
         cls.basepath = basepath or attr_search('basepath', *mro(cls))
         super(AppBase, cls).__init_subclass__(**kwargs)
@@ -102,8 +104,7 @@ def test():
     def test_two():
         """ Subclass and instance a second AppBase subclass """
         
-        class Shmapplication(AppBase, appname='flynn',
-                                     appspace=DEFAULT_APPSPACE):
+        class Shmapplication(AppBase, appname='flynn'):
             pass
         
         shmapp = Shmapplication('test_subclass', doc="Test Secondary Subclass")

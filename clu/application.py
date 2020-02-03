@@ -7,14 +7,12 @@ import sys
 # from clu.repr import stringify
 from clu.predicates import newtype, mro, allattrs, attr_search
 from clu.typespace import SimpleNamespace as sns
-from clu.importing import (FinderBase,
-                           LoaderBase,
-                           ModuleBase,
-                           MetaModule)
+from clu.importing import (ModuleBase,
+                           MetaModule,
+                           installed_appnames)
 
 from clu.constants import consts
 # from clu.extending import Extensible
-from clu.importing import installed_appnames
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -63,6 +61,8 @@ class AppBase(ModuleBase, metaclass=AppMeta):
     @classmethod
     def initialize_finder_and_loader(cls):
         # name, *bases, metaclass, attributes, **keywords
+        from clu.importing import FinderBase, LoaderBase
+        
         if allattrs(cls, 'finder', 'loader'):
             return cls.finder, cls.loader
         LoaderCls = newtype('Loader', LoaderBase, appname=cls.appname)
@@ -75,6 +75,7 @@ class AppBase(ModuleBase, metaclass=AppMeta):
     @classmethod
     def initialize_exporter(cls):
         from clu.exporting import ExporterBase
+        
         try:
             return cls.exportercls
         except TypeError:

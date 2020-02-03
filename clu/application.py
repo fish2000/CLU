@@ -38,7 +38,7 @@ class AppBase(ModuleBase, metaclass=AppMeta):
     def __init_subclass__(cls, **kwargs):
         # 1) Call up:
         prefix = kwargs.pop('prefix', None)
-        cls.basepath = prefix or attr_search('prefix', *mro(cls))
+        cls.basepath = prefix or attr_search('basepath', *mro(cls))
         super(AppBase, cls).__init_subclass__(**kwargs)
         
         # 2) Check appname:

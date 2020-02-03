@@ -37,8 +37,8 @@ class AppBase(ModuleBase, metaclass=AppMeta):
     @classmethod
     def __init_subclass__(cls, **kwargs):
         # 1) Call up:
-        prefix = kwargs.pop('prefix', None)
-        cls.basepath = prefix or attr_search('basepath', *mro(cls))
+        basepath = kwargs.pop('basepath', None)
+        cls.basepath = basepath or attr_search('basepath', *mro(cls))
         super(AppBase, cls).__init_subclass__(**kwargs)
         
         # 2) Check appname:
@@ -80,7 +80,7 @@ class AppBase(ModuleBase, metaclass=AppMeta):
 
 @export
 class Application(AppBase, appname=consts.APPNAME,
-                            prefix=consts.BASEPATH,
+                          basepath=consts.BASEPATH,
                           appspace=DEFAULT_APPSPACE):
     pass
 

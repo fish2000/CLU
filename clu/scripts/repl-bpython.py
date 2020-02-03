@@ -39,15 +39,17 @@ from clu.extending import (Extensible,
                            DoubleDutchFunction)
 
 from clu.importing import (Module, Finder, Loader,
-                           initialize_types,
+                           initialize_types, installed_appnames,
                            all_registered_appnames,
                            all_registered_modules,
                            modules_for_appname,
                            ModuleBase, FinderBase, LoaderBase,
                            Package, ModuleSpec,
-                           Registry as ClassModuleRegistry,
-                           ArgumentSink)
+                           ArgumentSink,
+                           PerApp, PolymerType,
+                           ChainModuleMap, ProxyModule)
 
+from clu.application import AppBase, Application
 from clu.sanitizer import sanitize, sanitizers, utf8_encode, utf8_decode
 from clu.version import version_info
 
@@ -124,8 +126,6 @@ from clu.naming import (determine_module, nameof, moduleof,
                         duplicate, renamer,
                         split_abbreviations)
 
-from clu.abstract import Cloneable, ReprWrapper
-
 from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
 from clu.config.abc import FlatOrderedSet, functional_and, functional_set
 from clu.config.keymap import FrozenFlat, Flat, FrozenNested, Nested
@@ -149,6 +149,7 @@ from PIL import Image
 from pprint import pprint, pformat
 import sys, os, re
 import argparse
+import clu.abstract
 import collections
 import contextlib
 import copy
@@ -174,7 +175,7 @@ from clu.mathematics import (σ, Σ,
                                       isnumpytypelist,
                              Clamper, clamp)
 
-from clu import keyvalue
+from clu import keyvalue, all
 from clu.enums import (DUNDER, SUNDER,
                        alias, AliasingEnumMeta, AliasingEnum)
 
@@ -205,12 +206,16 @@ GREEK_PHONETICS = ('sigma-lower',
 GREEK_STRINGDICT = dict(zip(GREEK_STRINGS, GREEK_DEFS))
 GREEK_NAMEDICT = dict(zip(GREEK_PHONETICS, GREEK_DEFS))
 
+# SHUT UP, PYFLAKES!!
+assert clu.abstract
+
 # Practice safe star-importing:
 __all__ = ('Image',
            'pprint', 'pformat',
            'sys', 'os', 're',
            'appdirectories',
            'argparse',
+           # 'clu.abstract',
            'collections',
            'contextlib',
            'copy',
@@ -267,14 +272,16 @@ __all__ = ('Image',
            'DoubleDutchRegistry', 'doubledutch',
            'DoubleDutchFunction',
            'Module', 'Finder', 'Loader',
-           'initialize_types',
+           'initialize_types', 'installed_appnames',
            'all_registered_appnames',
            'all_registered_modules',
            'modules_for_appname',
            'ModuleBase', 'FinderBase', 'LoaderBase',
            'Package', 'ModuleSpec',
-           'ClassModuleRegistry',
            'ArgumentSink',
+           'PerApp', 'PolymerType',
+           'ChainModuleMap', 'ProxyModule',
+           'AppBase', 'Application',
            'negate', 'reverse',
            'ismetaclass', 'isclass', 'isclasstype',
            'metaclass', 'typeof',
@@ -343,7 +350,7 @@ __all__ = ('Image',
            'dotpath_to_prefix', 'path_to_prefix',
            'duplicate', 'renamer',
            'split_abbreviations',
-           'Cloneable', 'ReprWrapper', 'FlatOrderedSet',
+           'FlatOrderedSet',
            'FrozenKeyMap', 'KeyMap', 'NamespaceWalker',
            'FrozenFlat', 'FrozenNested',
            'KeyMapView', 'KeyMapProxy',
@@ -363,7 +370,7 @@ __all__ = ('Image',
            'ansidoc', 'highlight',
            'ANSIBase', 'ANSI',
            'Text', 'Weight', 'Background', 'ANSIFormat',
-           'keyvalue')
+           'keyvalue', 'all')
 
 try:
     import numpy
@@ -427,13 +434,13 @@ else:
 
 try:
     import abc
-    import collections.abc as collectionsabc
+    import collections.abc
     import asciiplotlib
 except (ImportError, SyntaxError):
     pass
 else:
     # Extend `__all__`:
-    __all__ += ('abc', 'collectionsabc', 'asciiplotlib')
+    __all__ += ('abc', 'asciiplotlib')
 
 try:
     from clu.fs.filesystem import (DEFAULT_PREFIX, DEFAULT_TIMEOUT,

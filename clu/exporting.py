@@ -340,9 +340,29 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
         """
         return search_modules(thing, *cls.all_modules())[0]
 
+class ExporterTypeRepr(clu.abstract.BasePath):
+    
+    """ At the time of writing, type-specific “__repr__(…)” definitions
+        require the use of a metaclass – soooooooo…
+    """
+    
+    def __repr__(cls):
+        from clu.naming import qualified_name
+        appname = getattr(cls, 'appname', None)
+        basepath = getattr(cls, 'basepath', None)
+        qualname = qualified_name(cls)
+        if not appname and not basepath:
+            return f"<class “{qualname}”>"
+        if not appname:
+            return f"<class “{qualname}”, basepath=“{basepath}”>"
+        if not basepath:
+            return f"<class “{qualname}”, appname=“{appname}”>"
+        return f"<class “{qualname}”, appname=“{appname}”, basepath=“{basepath}”>"
+
 class ExporterBase(collections.abc.MutableMapping,
+                   clu.abstract.ReprWrapper,
                    contextlib.AbstractContextManager,
-                   Registry, metaclass=clu.abstract.BasePath):
+                   Registry, metaclass=ExporterTypeRepr):
     
     """ The base class for “clu.exporting.Exporter”. Override this
         class in your own project to use the CLU exporting mechanism –
@@ -643,6 +663,16 @@ class ExporterBase(collections.abc.MutableMapping,
             return importlib.import_module(self.dotpath)
         return None
     
+    fields = ('appname', 'basepath', 'path', 'dotpath')
+    
+    def inner_repr(self):
+        """ Stringify a subset of the Exporter instances’ fields. """
+        from clu.repr import strfields
+        length = len(self)
+        return strfields(self, type(self).fields,
+                               try_callables=False,
+                               items=length)
+    
     def __enter__(self):
         return self.decorator()
     
@@ -746,9 +776,11 @@ class Exporter(ExporterBase, basepath=BASEPATH, appname=APPNAME):
 exporter = Exporter(path=__file__)
 
 with exporter as export:
+    
     export(itermodule)
     export(moduleids)
     export(itermoduleids)
+    export(Modulespace)
     export(search_by_id)
     export(search_for_name)
     export(search_for_module)
@@ -758,6 +790,7 @@ with exporter as export:
     
     # NO DOCS ALLOWED:
     export(Registry)
+    export(ExporterTypeRepr)
     export(ExporterBase)
     export(Exporter) # hahaaaaa
 

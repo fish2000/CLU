@@ -7,7 +7,6 @@ bumpversion
 check-manifest
 cython
 gfm
-imageio
 ipython
 lmdb>=0.8.0
 nox

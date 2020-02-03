@@ -231,20 +231,17 @@ def newtype(name, *bases, metaclass=None, attributes=None, **keywords):
     if ismetaclass(metaclass):
         keywords['metaclass'] = metaclass
     
-    # Resolve bases, prepare class namespace:
-    ordered_bases = types.resolve_bases(bases)
-    metacls, namespace, kwds = types.prepare_class(name, bases=ordered_bases,
-                                                         kwds=keywords)
+    # Resolve bases and prepare class namespace:
+    resolved_bases = types.resolve_bases(bases)
+    meta, namespace, kwds = types.prepare_class(name, bases=resolved_bases,
+                                                      kwds=keywords)
     
-    # Update namespace and keywords:
+    # Update the namespace with class attributes:
     namespace.update(asdict(attributes))
-    kwds.update(keywords)
-    kwds['metaclass'] = metacls
+    namespace['__metaclass__'] = meta # old-skool
     
     # Create and return the new class:
-    return types.new_class(name, bases=ordered_bases,
-                                 kwds=kwds,
-                                 exec_body=lambda ns: ns.update(namespace))
+    return meta(name, resolved_bases, namespace, **kwds)
 
 # Hang the base type off of the “newtype(…)” function,
 # for E-Z access:

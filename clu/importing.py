@@ -481,8 +481,9 @@ class MetaModule(MetaRegistry):
         if cls.appname is not None and not name.endswith('Module'):
             if ExporterRegistry.has_appname(cls.appname):
                 ExporterClass = ExporterRegistry[cls.appname]
-                setattr(cls, consts.EXPORTER_NAME,
-                             ExporterClass(dotpath=cls.qualname))
+                if not hasattr(cls, consts.EXPORTER_NAME):
+                    setattr(cls, consts.EXPORTER_NAME,
+                                 ExporterClass(dotpath=cls.qualname))
                 
                 # Invoke all of our argument sinks against the
                 # Exporter instance’s “export(…)” function:

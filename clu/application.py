@@ -5,11 +5,12 @@ from __future__ import print_function
 import sys
 
 # from clu.repr import stringify
-from clu.predicates import newtype
-from clu.typespace import SimpleNamespace
+from clu.predicates import newtype, mro, attr_search
+from clu.typespace import SimpleNamespace as sns
 from clu.importing import (FinderBase,
                            LoaderBase,
-                           ModuleBase)
+                           ModuleBase,
+                           MetaModule)
 
 from clu.constants import consts
 # from clu.extending import Extensible
@@ -21,19 +22,31 @@ export = exporter.decorator()
 
 DEFAULT_APPSPACE = 'app'
 
+class AppMeta(MetaModule):
+    
+    @property
+    def exportercls(cls):
+        from clu.exporting import Registry
+        if Registry.has_appname(cls.appname):
+            return Registry[cls.appname]
+        raise TypeError(f"exporter class not found for appname: {cls.appname}")
+
 @export
-class AppBase(ModuleBase):
+class AppBase(ModuleBase, metaclass=AppMeta):
     
     @classmethod
     def __init_subclass__(cls, **kwargs):
         # 1) Call up:
+        prefix = kwargs.pop('prefix', None)
+        cls.basepath = prefix or attr_search('prefix', *mro(cls))
         super(AppBase, cls).__init_subclass__(**kwargs)
         
         # 2) Check appname:
         if not cls.appname:
             raise NameError("no appname available on AppBase subclass")
         
-        # 3) install finder and loader
+        # 3) install finder, loader, exporter…
+        cls._exporter  = cls.initialize_exporter()
         Finder, Loader = cls.initialize_finder_and_loader()
         cls.finder     = Finder
         cls.loader     = Loader
@@ -47,14 +60,25 @@ class AppBase(ModuleBase):
     def initialize_finder_and_loader(cls):
         # name, *bases, metaclass, attributes, **keywords
         LoaderCls = newtype('Loader', LoaderBase, appname=cls.appname)
-        attrspace = SimpleNamespace(__loader__=LoaderCls,
-                                      loader=LoaderCls())
+        attrspace = sns(__loader__=LoaderCls,
+                          loader=LoaderCls())
         FinderCls = newtype('Finder', FinderBase, attributes=attrspace,
                                                   appname=cls.appname)
         return FinderCls, LoaderCls
+    
+    @classmethod
+    def initialize_exporter(cls):
+        from clu.exporting import ExporterBase
+        try:
+            return cls.exportercls
+        except TypeError:
+            ExporterCls = newtype('Exporter', ExporterBase, appname=cls.appname,
+                                                            prefix=cls.basepath)
+            return ExporterCls
 
 @export
 class Application(AppBase, appname=consts.APPNAME,
+                            prefix=consts.BASEPATH,
                           appspace=DEFAULT_APPSPACE):
     pass
 
@@ -70,6 +94,7 @@ def test():
         """ Instance the base Application class """
         app = Application('test_app', doc="Test Application Instance")
         assert app
+        assert app._exporter is Exporter
     
     @inline
     def test_two():

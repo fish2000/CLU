@@ -8,9 +8,8 @@ import contextlib
 import sys
 
 from clu.constants.consts import STRINGPAIR, WHITESPACE, pytuple, NoDefault
-from clu.constants.polyfills import ispyname
 from clu.dicts import merge_fast_two, asdict
-from clu.predicates import ismergeable
+from clu.predicates import ispyname, ismergeable
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

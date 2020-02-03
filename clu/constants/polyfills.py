@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from enum import Enum, EnumMeta, unique, _is_dunder as ispyname
+from enum import Enum, EnumMeta, unique
 from functools import wraps
 
-from clu.constants.consts import PY3, pytuple
+from clu.constants.consts import PY3
 
 class AutoType(object):
     
@@ -75,7 +75,6 @@ except (ImportError, SyntaxError):
     pass
 
 __all__ = ('Enum', 'EnumMeta', 'unique',
-           'ispyname', 'pytuple',
            'AutoType', 'auto',
            'unicode', 'long',
            'cache_from_source',

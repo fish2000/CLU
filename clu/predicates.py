@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from enum import _is_dunder as ispyname
 from inspect import getattr_static
 from itertools import chain
 from functools import lru_cache, partial, wraps
@@ -485,6 +486,7 @@ def slots_for(cls):
                        for ancestor in reversed(mro)))
 
 # MODULE EXPORTS:
+export(ispyname,        name='ispyname')
 export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n" + negate_doc)
 export(reverse,         name='reverse',         doc="reverse(function) → Reverse an iterating function, returning the reverse of the iterable returned.")
 

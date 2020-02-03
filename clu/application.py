@@ -5,7 +5,7 @@ from __future__ import print_function
 import sys
 
 # from clu.repr import stringify
-from clu.predicates import newtype, mro, attr_search
+from clu.predicates import newtype, mro, allattrs, attr_search
 from clu.typespace import SimpleNamespace as sns
 from clu.importing import (FinderBase,
                            LoaderBase,
@@ -59,6 +59,8 @@ class AppBase(ModuleBase, metaclass=AppMeta):
     @classmethod
     def initialize_finder_and_loader(cls):
         # name, *bases, metaclass, attributes, **keywords
+        if allattrs(cls, 'finder', 'loader'):
+            return cls.finder, cls.loader
         LoaderCls = newtype('Loader', LoaderBase, appname=cls.appname)
         attrspace = sns(__loader__=LoaderCls,
                           loader=LoaderCls())

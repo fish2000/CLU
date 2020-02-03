@@ -5,13 +5,10 @@ Click
 bpython
 bumpversion
 check-manifest
-colorio
-colormath
 cython
 gfm
 imageio
 ipython
-jupyter
 lmdb>=0.8.0
 nox
 numpy>=1.18.0
@@ -20,8 +17,6 @@ pytest
 pytz
 readme-renderer
 readme-renderer[md]
-requests
-scipy
 setproctitle
 termplotlib
 termtables

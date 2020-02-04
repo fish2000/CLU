@@ -2,7 +2,6 @@
 from __future__ import print_function
 from distutils.spawn import find_executable
 from functools import lru_cache, wraps
-# from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
 cache = lambda function: lru_cache(maxsize=128, typed=True)(function)
 
@@ -266,30 +265,6 @@ def modeflags(mode, delete=True):
     
     return flags
 
-# class TemporaryFileWrapper(TemporaryFileWrapperBase,
-#                            collections.abc.Iterable,
-#                            contextlib.AbstractContextManager,
-#                            os.PathLike,
-#                            metaclass=TypeLocker):
-#
-#     """ Local subclass of `tempfile._TemporaryFileWrapper`.
-#
-#         We also inherit from both `contextlib.AbstractContextManager`
-#         and the `os.PathLike` abstract bases -- the latter requires
-#         that we implement an __fspath__(…) method (q.v. implementation,
-#         sub.) -- and additionally, `filesystem.TypeLocker` is named as
-#         the metaclass (q.v. metaclass __new__(…) implementation supra.)
-#         to cache its type and register it as an os.PathLike subclass.
-#
-#         … Basically a better deal than the original ancestor, like
-#         all-around. Plus it does not have a name prefixed with an
-#         underscore, which if it’s not your implementation dogg that
-#         can be a bit lexically irritating.
-#     """
-#
-#     def __fspath__(self):
-#         return self.name
-
 @cache
 def TemporaryNamedFile(temppath, mode='wb',
                                  delete=True,
@@ -316,7 +291,7 @@ def TemporaryNamedFile(temppath, mode='wb',
         
         Returns
         -------
-            A ``clu.fs.filesystem.TemporaryFileWrapper`` object,
+            A ``clu.fs.abc.TemporaryFileWrapper`` object,
             initialized and ready to be used, as per its counterpart(s),
             ``tempfile.NamedTemporaryFile``, and
             `filesystem.NamedTemporaryFile`.
@@ -482,8 +457,8 @@ class TemporaryName(collections.abc.Hashable,
     
     @property
     def filehandle(self):
-        """ Access a TemporaryNamedFile instance, opened and ready to read and write,
-            for this TemporaryName instances’ temporary file path.
+        """ Access a “clu.fs.abc.TemporaryNamedFile” instance, opened and ready
+            to read and write, for this TemporaryName instances’ file path.
             
             While this is a normal property descriptor – each time it is accessed,
             its function is called anew – the underlying `TemporaryNamedFile` call

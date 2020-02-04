@@ -25,6 +25,11 @@ BASEPATH = sys.intern(
 builtins = ('builtins', 'builtin', 'main')
 BUILTINS = pytuple(*builtins) + builtins
 
+# Determine if we’re running in bpython:
+# BPYTHON = type(sys.stdout).__module__.startswith('bpython')
+# BPYTHON = 'bpython' in sys.argv[0]
+BPYTHON = '__console__' in sys.modules
+
 # Determine if we’re on CPython:
 CPYTHON = platform.python_implementation().casefold() == 'cpython'
 
@@ -175,6 +180,7 @@ pytuple.__doc__ = "pytuple(*attrs) → turns ('do', 're', 'mi') into ('__do__', 
 __all__ = ('APPNAME',
            'BASEPATH',
            'BUILTINS',
+           'BPYTHON',
            'CPYTHON',
            'DEBUG',
            'DELETE_FLAG',

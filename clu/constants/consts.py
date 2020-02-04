@@ -26,8 +26,6 @@ builtins = ('builtins', 'builtin', 'main')
 BUILTINS = pytuple(*builtins) + builtins
 
 # Determine if we’re running in bpython:
-# BPYTHON = type(sys.stdout).__module__.startswith('bpython')
-# BPYTHON = 'bpython' in sys.argv[0]
 BPYTHON = '__console__' in sys.modules
 
 # Determine if we’re on CPython:

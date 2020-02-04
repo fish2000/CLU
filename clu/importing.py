@@ -30,7 +30,7 @@ except ImportError:
 
 from clu.constants import consts
 from clu.extending import Extensible
-from clu.naming import nameof, moduleof, dotpath_split, dotpath_join, qualified_name
+from clu.naming import nameof, dotpath_split, dotpath_join, qualified_name
 from clu.predicates import anyattrs, attr, attr_search, item_search, mro, tuplize
 from clu.repr import stringify
 from clu.typespace import Namespace, types
@@ -97,9 +97,9 @@ class MetaRegistry(Extensible):
         """ Type repr definition for class-based modules and ancestors """
         qualname = getattr(cls, 'qualname', None)
         if not qualname:
-            module = moduleof(cls)
-            return f"<class-module ancestor type “{module}.{cls.__name__}”>"
-        return f"<class-module “{cls.qualname}”>"
+            qname = qualified_name(cls) # DIFFERENT!!! CONFUSING!!!!
+            return f"<class-module ancestor “{qname}”>"
+        return f"<class-module “{qualname}”>"
     
     @staticmethod
     def unregister(appname, qualified_name):

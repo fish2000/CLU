@@ -37,9 +37,9 @@ def intify(arg):
 def strify(arg):
     if arg is None:
         return None
-    if type(arg) in string_types:
+    if isinstance(arg, tuple(string_types)):
         return arg
-    if type(arg) in byte_types:
+    if isinstance(arg, tuple(byte_types)):
         return arg.decode('UTF-8') # type: ignore
     return str(arg)
 
@@ -50,7 +50,7 @@ def dictify(arg):
         return arg._asdict()
     if hasattr(arg, 'to_dict'):
         return arg.to_dict()
-    if type(arg) in dict_types:
+    if isinstance(arg, tuple(dict_types)):
         return arg
     return dict(arg)
 

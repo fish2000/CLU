@@ -30,6 +30,7 @@ import importlib
 
 from clu.all import import_clu_modules
 from clu.naming import nameof, qualified_import
+from clu.predicates import ispyname
 
 # MODULE EXPORT FUNCTIONS: given a module name, export
 # either the module or its contents into a given namespace:
@@ -47,7 +48,8 @@ def star_export(modulename, namespace=None):
         return
     else:
         for name in dir(module):
-            namespace[name] = getattr(module, name)
+            if not ispyname(name):
+                namespace[name] = getattr(module, name)
 
 def module_export(modulename, namespace=None):
     """ Safely bind a module to a namespace. """
@@ -84,8 +86,7 @@ starmods = ('clu.repl.ansi',
             'clu.dicts', 'clu.enums', 'clu.exporting', 'clu.extending', 'clu.shelving.redat',
             'clu.importing', 'clu.mathematics', 'clu.naming', 'clu.predicates', 'clu.typology',
             'clu.fs.filesystem', 'clu.fs.misc', 'clu.repr', 'clu.typespace.namespace',
-            'clu.testing.utils',
-            'PIL', 'pprint')
+            'clu.testing.utils')
 
 mods = ('clu.all',
         'clu.constants.consts',
@@ -133,6 +134,9 @@ import collections.abc
 
 from clu.testing.utils import pout, inline
 
+from PIL import Image
+from pprint import pprint, pformat
+
 try:
     from instakit.utils.static import asset
 except (ImportError, SyntaxError):
@@ -153,6 +157,11 @@ from clu.fs.pypath import remove_invalid_paths
 remove_invalid_paths()
 
 # Print the Python banner and/or warnings, messages, and other tripe:
+
+if __name__ == '__main__':
+    # In theory, this will *not* run when repl.py
+    # is loaded into a REPL using a “-i” flag:
+    print(__doc__)
 
 from clu.repl.banners import print_banner
 print()

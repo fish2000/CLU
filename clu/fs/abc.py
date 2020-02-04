@@ -37,9 +37,9 @@ class TypeLocker(abc.ABCMeta):
            was passed).
         
         … The point of this is to allow any of the classes throughout the
-        clu.fs.filesystem module regardless of where they are defined
-        or from whom they inherit, to make use of cheaply-constructed
-        Directory instances wherever convenient.
+        “clu.fs” subpackage, regardless of where they are defined or from
+        whom they inherit, to make use of cheaply-constructed Directory
+        instances wherever convenient.
         
         Because the “directory(…)” method installed by TypeLocker performs
         a lazy-lookup of the Directory class, using its own type index dict,
@@ -244,15 +244,14 @@ class FileName(BaseFSName,
 class TemporaryFileWrapper(TemporaryFileWrapperBase,
                            collections.abc.Iterable,
                            contextlib.AbstractContextManager,
-                           os.PathLike,
-                           metaclass=TypeLocker):
+                           os.PathLike, metaclass=TypeLocker):
     
     """ Local subclass of `tempfile._TemporaryFileWrapper`.
         
         We also inherit from both `contextlib.AbstractContextManager`
         and the `os.PathLike` abstract bases -- the latter requires
         that we implement an __fspath__(…) method (q.v. implementation,
-        sub.) -- and additionally, `filesystem.TypeLocker` is named as
+        sub.) -- and additionally, `clu.fs.abc.TypeLocker` is named as
         the metaclass (q.v. metaclass __new__(…) implementation supra.)
         to cache its type and register it as an os.PathLike subclass.
         

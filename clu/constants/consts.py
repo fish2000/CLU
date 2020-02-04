@@ -58,6 +58,14 @@ FILE_ARGUMENT_NAMES = ('path', 'pth', 'file')
 # The hostname for this computer:
 HOSTNAME = sys.intern(socket.gethostname())
 
+# Determine if we’re running in IPython:
+try:
+    __IPYTHON__
+except NameError:
+    IPYTHON = False
+else:
+    IPYTHON = True
+
 # The __name__ of a lambda function:
 lam = lambda: None
 λ = LAMBDA = sys.intern(getattr(lam, '__qualname__',
@@ -178,6 +186,7 @@ __all__ = ('APPNAME',
            'EXPORTER_NAME',
            'FILE_ARGUMENT_NAMES',
            'HOSTNAME',
+           'IPYTHON',
            'LAMBDA', 'λ',
            'MAXINT',
            'NAMESPACE_SEP',

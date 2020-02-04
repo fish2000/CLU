@@ -26,48 +26,106 @@ repl.py – THE RUBRICK:
 """
 from __future__ import print_function
 
-from clu.constants import consts
-from clu.all import import_clu_modules
-from clu.naming import dotpath_split, qualified_import, qualified_name
-from clu.typespace.namespace import Namespace
+import importlib
 
-def star_export(module, namespace=None):
+from clu.all import import_clu_modules
+from clu.naming import nameof, qualified_import
+
+def star_export(modulename, namespace=None):
     """ Safely bind everything a module exports to a namespace. """
     if namespace is None:
         return
-    for name in dir(module):
-        namespace[name] = getattr(module, name)
+    try:
+        try:
+            module = qualified_import(modulename)
+        except ValueError:
+            module = importlib.import_module(modulename)
+    except ModuleNotFoundError:
+        return
+    else:
+        for name in dir(module):
+            namespace[name] = getattr(module, name)
 
-def module_export(module, namespace=None):
+def module_export(modulename, namespace=None):
     """ Safely bind a module to a namespace. """
     if namespace is None:
         return
-    name = dotpath_split(qualified_name(module))[0]
-    namespace[name] = module
+    try:
+        try:
+            module = qualified_import(modulename)
+        except ValueError:
+            module = importlib.import_module(modulename)
+    except ModuleNotFoundError:
+        return
+    else:
+        name = nameof(module)
+        namespace[name] = module
 
-modules = import_clu_modules()
-namespace = Namespace(**modules)
+# Warm up sys.modules and friends:
+import_clu_modules()
 
-star_export(consts, namespace=globals())
-# star_export(namespace, namespace=globals())
+# Set up the GLOBAL namespace and the __all__ tuple:
+__all__ = tuple()
+GLOBALS = globals()
 
-starmods = ('clu.repl',
+starmods = ('clu.repl.ansi',
+            'clu.constants.enums',
+            'clu.constants.data',
+            'clu.config.abc',
+            'clu.config.env',
             'clu.config.keymap',
-            'clu.dicts', 'clu.enums', 'clu.exporting', 'clu.extending',
-            'clu.importing', 'clu.naming', 'clu.predicates', 'clu.typology',
-            'clu.fs.filesystem', 'clu.fs.misc')
+            'clu.config.proxy',
+            'clu.application',
+            'clu.dicts', 'clu.enums', 'clu.exporting', 'clu.extending', 'clu.shelving.redat',
+            'clu.importing', 'clu.mathematics', 'clu.naming', 'clu.predicates', 'clu.typology',
+            'clu.fs.filesystem', 'clu.fs.misc', 'clu.repr', 'clu.typespace.namespace',
+            'clu.testing.utils',
+            'PIL', 'pprint')
 
 mods = ('clu.all',
+        'clu.constants.consts',
         'clu.config.base',
         'clu.config.settings',
+        'clu.config.ns',
+        'clu.fs.appdirectories',
+        'clu.keyvalue',
         'clu.dispatch', 'clu.sanitizer', 'clu.fs.pypath',
-        'clu.typespace.types')
+        'clu.scripts.ansicolors',
+        'clu.typespace.types',
+        'sys', 'os', 'io', 're', 'abc',
+        'argparse', 'collections', 'contextlib', 'copy',
+        'datetime', 'functools', 'importlib', 'inspect',
+        'itertools', 'math', 'operator', 'pickle', 'six',
+        'shutil', 'sysconfig', 'weakref',
+        'numpy', 'more_itertools', 'colorama', 'termcolor',
+        'xerox', 'zict', 'pytz', 'dateutil',
+        'termplotlib', 'termtables')
 
 for starmod in starmods:
-    star_export(qualified_import(starmod), namespace=globals())
+    star_export(starmod, namespace=GLOBALS)
 
 for mod in mods:
-    module_export(qualified_import(mod), namespace=globals())
+    module_export(mod, namespace=GLOBALS)
+
+# Additionals and corner-cases:
+import clu.abstract
+import collections.abc
+
+from clu.testing.utils import pout, inline
+
+try:
+    from instakit.utils.static import asset
+except (ImportError, SyntaxError):
+    pass
+else:
+    # Extend `__all__`:
+    __all__ += ('asset', 'image_paths', 'catimage')
+    # Prepare a list of readily open-able image file paths:
+    image_paths = list(map(
+        lambda image_file: asset.path('img', image_file),
+            asset.listfiles('img')))
+    # I do this practically every time, so I might as well do it here:
+    catimage = Image.open(image_paths[0])
 
 # Remove duplicate and invalid sys.paths:
 from clu.fs.pypath import remove_invalid_paths

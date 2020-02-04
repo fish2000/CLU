@@ -110,6 +110,9 @@ remove-changelog:
 changelog: remove-changelog
 	gitchangelog > CHANGELOG.md
 
+repl:
+	python -m bpython --config=$(PROJECT_ROOT)/.config/bpython/config.py3 -i $(PROJECT_BASE)/clu/scripts/repl.py
+
 .PHONY: clean distclean rebuild
 .PHONY: dist upload bigupload
 .PHONY: clean-pyc clean-cython
@@ -121,3 +124,4 @@ changelog: remove-changelog
 .PHONY: test test-all
 
 .PHONY: version consts-old modules-old consts modules
+.PHONY: repl

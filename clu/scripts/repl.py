@@ -31,6 +31,9 @@ import importlib
 from clu.all import import_clu_modules
 from clu.naming import nameof, qualified_import
 
+# MODULE EXPORT FUNCTIONS: given a module name, export
+# either the module or its contents into a given namespace:
+
 def star_export(modulename, namespace=None):
     """ Safely bind everything a module exports to a namespace. """
     if namespace is None:
@@ -62,9 +65,11 @@ def module_export(modulename, namespace=None):
         namespace[name] = module
 
 # Warm up sys.modules and friends:
+
 import_clu_modules()
 
 # Set up the GLOBAL namespace and the __all__ tuple:
+
 __all__ = tuple()
 GLOBALS = globals()
 
@@ -101,13 +106,28 @@ mods = ('clu.all',
         'xerox', 'zict', 'pytz', 'dateutil',
         'termplotlib', 'termtables')
 
+# “Star-import” all starmods – this is equivalent to doing:
+# 
+#    from <starmod> import *
+# 
+# … for each <starmod> module name…
+
 for starmod in starmods:
     star_export(starmod, namespace=GLOBALS)
+
+# Import all modules in “mods” – this is equivalent to doing:
+# 
+#    qualified_import(<mod>)
+# 
+# … for each <mod> module name; q.v. “qualified_import(…)”
+# function definition supra.
 
 for mod in mods:
     module_export(mod, namespace=GLOBALS)
 
-# Additionals and corner-cases:
+# Additionals and corner-cases – imports requiring their own
+# bespoke import-statement forms:
+
 import clu.abstract
 import collections.abc
 
@@ -128,10 +148,12 @@ else:
     catimage = Image.open(image_paths[0])
 
 # Remove duplicate and invalid sys.paths:
+
 from clu.fs.pypath import remove_invalid_paths
 remove_invalid_paths()
 
 # Print the Python banner and/or warnings, messages, and other tripe:
+
 from clu.repl.banners import print_banner
 print()
 print_banner()

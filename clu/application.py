@@ -48,6 +48,7 @@ class AppBase(ModuleBase, metaclass=AppMeta):
             raise NameError("no appname available on AppBase subclass")
         
         # 4) install finder, loader, exporter…
+        cls.environ    = cls.initialize_environ()
         cls._exporter  = cls.initialize_exporter()
         Finder, Loader = cls.initialize_finder_and_loader()
         cls.finder     = Finder
@@ -65,6 +66,7 @@ class AppBase(ModuleBase, metaclass=AppMeta):
         
         if allattrs(cls, 'finder', 'loader'):
             return cls.finder, cls.loader
+        
         LoaderCls = newtype('Loader', LoaderBase, appname=cls.appname)
         attrspace = sns(__loader__=LoaderCls,
                           loader=LoaderCls())
@@ -82,6 +84,15 @@ class AppBase(ModuleBase, metaclass=AppMeta):
             ExporterCls = newtype('Exporter', ExporterBase, appname=cls.appname,
                                                             basepath=cls.basepath)
             return ExporterCls
+    
+    @classmethod
+    def initialize_environ(cls):
+        from clu.config.env import Environ
+        
+        if hasattr(cls, 'environ'):
+            return cls.environ
+        
+        return Environ(appname=cls.appname)
 
 @export
 class Application(AppBase, appname=consts.APPNAME,

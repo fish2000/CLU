@@ -79,7 +79,7 @@ def read_version(*fpath, **kwargs):
                     if any(isinstance(t, ast.Name) and t.id == variable
                            for t in target.elts):
                         value = ast.literal_eval(statement.value)
-                        for t,v in zip(target.elts, value):
+                        for t, v in zip(target.elts, value):
                             if isinstance(t, ast.Name) and t.id == variable:
                                 result = v
                 elif isinstance(target, ast.Name) and target.id == variable:

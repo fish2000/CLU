@@ -133,4 +133,6 @@ remove_invalid_paths()
 
 # Print the Python banner and/or warnings, messages, and other tripe:
 from clu.repl.banners import print_banner
+print()
 print_banner()
+print()

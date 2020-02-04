@@ -75,6 +75,14 @@ indication that you need to change something, dogg.
 """
 
 @export
+def main_module_name(basepath=None):
+    import __main__
+    if basepath is None:
+        basepath = BASEPATH
+    return path_to_dotpath(__main__.__file__,
+                           relative_to=basepath)
+
+@export
 def nameof(thing, default=NoDefault):
     """ Get the name of a thing, according to its attributes,
         how it appears as a registered item in any Exporter
@@ -105,6 +113,9 @@ def moduleof(thing, default=NoDefault):
                  Registry.moduleof(thing) or \
                  search_for_module(thing)) or \
              determine_module(thing)
+    
+    if result == '__main__':
+        return main_module_name()
     
     if default is NoDefault:
         return result

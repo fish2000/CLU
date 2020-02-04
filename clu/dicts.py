@@ -248,6 +248,9 @@ class ChainMap(collections.abc.MutableMapping,
     def __bool__(self):
         return any(self.maps)
     
+    def __str__(self):
+        return cmshortrepr(self)
+    
     def __repr__(self):
         return cmrepr(self)
     

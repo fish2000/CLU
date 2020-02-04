@@ -2,7 +2,7 @@
 from __future__ import print_function
 from distutils.spawn import find_executable
 from functools import lru_cache, wraps
-from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
+# from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
 cache = lambda function: lru_cache(maxsize=128, typed=True)(function)
 
@@ -23,7 +23,7 @@ from clu.predicates import attr, allattrs, isexpandable, anyof, uniquify
 from clu.repr import stringify, strfields
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
-from clu.fs.abc import TypeLocker
+from clu.fs.abc import TypeLocker, TemporaryFileWrapper
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
 from clu.fs.misc import re_matcher, re_searcher, suffix_searcher, re_excluder
 from clu.fs.misc import swapext, u8str, extension
@@ -266,29 +266,29 @@ def modeflags(mode, delete=True):
     
     return flags
 
-class TemporaryFileWrapper(TemporaryFileWrapperBase,
-                           collections.abc.Iterable,
-                           contextlib.AbstractContextManager,
-                           os.PathLike,
-                           metaclass=TypeLocker):
-    
-    """ Local subclass of `tempfile._TemporaryFileWrapper`.
-        
-        We also inherit from both `contextlib.AbstractContextManager`
-        and the `os.PathLike` abstract bases -- the latter requires
-        that we implement an __fspath__(…) method (q.v. implementation,
-        sub.) -- and additionally, `filesystem.TypeLocker` is named as
-        the metaclass (q.v. metaclass __new__(…) implementation supra.)
-        to cache its type and register it as an os.PathLike subclass.
-        
-        … Basically a better deal than the original ancestor, like
-        all-around. Plus it does not have a name prefixed with an
-        underscore, which if it’s not your implementation dogg that
-        can be a bit lexically irritating.
-    """
-    
-    def __fspath__(self):
-        return self.name
+# class TemporaryFileWrapper(TemporaryFileWrapperBase,
+#                            collections.abc.Iterable,
+#                            contextlib.AbstractContextManager,
+#                            os.PathLike,
+#                            metaclass=TypeLocker):
+#
+#     """ Local subclass of `tempfile._TemporaryFileWrapper`.
+#
+#         We also inherit from both `contextlib.AbstractContextManager`
+#         and the `os.PathLike` abstract bases -- the latter requires
+#         that we implement an __fspath__(…) method (q.v. implementation,
+#         sub.) -- and additionally, `filesystem.TypeLocker` is named as
+#         the metaclass (q.v. metaclass __new__(…) implementation supra.)
+#         to cache its type and register it as an os.PathLike subclass.
+#
+#         … Basically a better deal than the original ancestor, like
+#         all-around. Plus it does not have a name prefixed with an
+#         underscore, which if it’s not your implementation dogg that
+#         can be a bit lexically irritating.
+#     """
+#
+#     def __fspath__(self):
+#         return self.name
 
 @cache
 def TemporaryNamedFile(temppath, mode='wb',

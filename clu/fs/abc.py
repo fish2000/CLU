@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from tempfile import _TemporaryFileWrapper as TemporaryFileWrapperBase
 
 import abc
 import clu.abstract
@@ -238,6 +239,31 @@ class FileName(BaseFSName,
     
     def inner_repr(self):
         return self.to_string()
+
+@export
+class TemporaryFileWrapper(TemporaryFileWrapperBase,
+                           collections.abc.Iterable,
+                           contextlib.AbstractContextManager,
+                           os.PathLike,
+                           metaclass=TypeLocker):
+    
+    """ Local subclass of `tempfile._TemporaryFileWrapper`.
+        
+        We also inherit from both `contextlib.AbstractContextManager`
+        and the `os.PathLike` abstract bases -- the latter requires
+        that we implement an __fspath__(…) method (q.v. implementation,
+        sub.) -- and additionally, `filesystem.TypeLocker` is named as
+        the metaclass (q.v. metaclass __new__(…) implementation supra.)
+        to cache its type and register it as an os.PathLike subclass.
+        
+        … Basically a better deal than the original ancestor, like
+        all-around. Plus it does not have a name prefixed with an
+        underscore, which if it’s not your implementation dogg that
+        can be a bit lexically irritating.
+    """
+    
+    def __fspath__(self):
+        return self.name
 
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:

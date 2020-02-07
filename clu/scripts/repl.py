@@ -97,7 +97,6 @@ mods = ('clu.all',
         'clu.keyvalue',
         'clu.dispatch', 'clu.sanitizer', 'clu.fs.pypath',
         'clu.scripts.ansicolors',
-        'clu.typespace.types',
         'sys', 'os', 'io', 're', 'abc',
         'argparse', 'collections', 'contextlib', 'copy',
         'datetime', 'functools', 'importlib', 'inspect',
@@ -133,6 +132,7 @@ import clu.abstract
 import collections.abc
 
 from clu.testing.utils import pout, inline
+from clu.typespace import types
 
 from PIL import Image
 from pprint import pprint, pformat

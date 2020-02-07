@@ -1010,7 +1010,7 @@ class TestPredicates(object):
         assert ismergeable(odc)
         assert ismergeable(ddc)
         assert ismergeable(nsi)
-        assert not ismergeable(sns)
+        assert ismergeable(sns)
         
         class TechnicallyMergeable(object):
             """ This is to show the limitations of the predicate """

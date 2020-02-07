@@ -7,7 +7,7 @@ import collections.abc
 import contextlib
 import sys
 
-from clu.constants.consts import STRINGPAIR, WHITESPACE, pytuple, NoDefault
+from clu.constants.consts import STRINGPAIR, WHITESPACE, ENCODING, pytuple, NoDefault
 from clu.dicts import merge_fast_two, asdict
 from clu.predicates import ispyname, ismergeable
 from clu.exporting import Exporter
@@ -109,7 +109,7 @@ nsshortrepr = reprizer.shortrepr
 
 @export
 class BaseNamespace(collections.abc.Set,
-                    collections.abc.Collection,
+                    collections.abc.Mapping,
                     metaclass=clu.abstract.Slotted):
     
     """ The abstract base for SimpleNamespace and Namespace. """
@@ -139,6 +139,15 @@ class BaseNamespace(collections.abc.Set,
     def __contains__(self, key):
         return key in self.__dict__
     
+    def __getitem__(self, key):
+        try:
+            return self.__dict__.__getitem__(key)
+        except KeyError:
+            return self.__missing__(key)
+    
+    def __missing__(self, key):
+        raise KeyError(key)
+    
     def __eq__(self, other):
         return self.__dict__ == asdict(other)
     
@@ -151,6 +160,12 @@ class BaseNamespace(collections.abc.Set,
     
     def __repr__(self):
         return reprizer.fullrepr(self)
+    
+    def __str__(self):
+        return reprizer.fullrepr(self, short=True)
+    
+    def __bytes__(self):
+        return bytes(str(self), encoding=ENCODING)
     
     def __bool__(self):
         return bool(self.__dict__)
@@ -223,20 +238,11 @@ class Namespace(BaseNamespace,
                        exc_tb=None):
         return exc_type is None
     
-    def __getitem__(self, key):
-        try:
-            return self.__dict__.__getitem__(key)
-        except KeyError:
-            return self.__missing__(key)
-    
     def __setitem__(self, key, value):
         self.__dict__.__setitem__(key, value)
     
     def __delitem__(self, key):
         self.__dict__.__delitem__(key)
-    
-    def __missing__(self, key):
-        raise KeyError(key)
     
     def __add__(self, operand):
         # On add, old values are not overwritten

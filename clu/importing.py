@@ -256,6 +256,11 @@ class FinderBase(clu.abstract.AppName,
     cache = zict.LRU(64, specs)
     
     @classmethod
+    def spec(cls, fullname):
+        out = cls.cache[fullname] = ModuleSpec(fullname, cls.loader)
+        return out
+    
+    @classmethod
     def find_spec(cls, fullname, path=None, target=None):
         """ Return a ModuleSpec for a qualified module name –
             creating an instance anew if necessary, and returning
@@ -263,9 +268,13 @@ class FinderBase(clu.abstract.AppName,
         """
         if fullname in cls.cache:
             return cls.cache[fullname]
-        if cls.appname == fullname.split(consts.QUALIFIER).pop(0):
-            out = cls.cache[fullname] = ModuleSpec(fullname, cls.loader)
-            return out
+        if consts.QUALIFIER not in fullname:
+            if fullname == cls.appname:
+                return cls.spec(fullname)
+            return None
+        appname, appspace, *remainders = fullname.split(consts.QUALIFIER, 2)
+        if appname == cls.appname and appspace in polymers.all_appspaces():
+            return cls.spec(fullname)
         return None
     
     @classmethod
@@ -325,7 +334,13 @@ class LoaderBase(clu.abstract.AppName,
                 docstr = inspect.getdoc(ModuleClass)
                 module = ModuleClass(modulename, doc=docstr)
                 return module
-            return self.package_module(spec.name)
+            else:
+                if spec.name == cls.appname:
+                    return self.package_module(spec.name)
+                appname, appspace, *remainders = spec.name.split(consts.QUALIFIER, 2)
+                if appname == cls.appname and appspace in polymers.all_appspaces():
+                    return self.package_module(spec.name)
+            return None
         return None
     
     def exec_module(self, module):
@@ -663,6 +678,10 @@ class PolymerType(dict):
         if not self.get(appname, None):
             raise ValueError(f"no PerApp instance for appname: {appname}")
         return self[appname].loader
+    
+    def all_appspaces(self):
+        for key in self.keys():
+            yield from self[key].appspaces()
 
 # The per-appname subtype registry dictionary:
 polymers = PolymerType()

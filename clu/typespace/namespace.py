@@ -51,13 +51,14 @@ class NamespaceRepr(Repr):
         """ The internal method for “core” repr production
             of all namespace descendant types.
         """
-        if len(thing) == 0:
+        if len(thing.__dict__) == 0:
             return "{}"
-        elif len(thing) == 1:
-            key = tuple(thing)[0]
+        elif len(thing.__dict__) == 1:
+            key = tuple(thing.__dict__.keys())[0]
             item = STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level))
             return f"{{ {item} }}"
-        items = (STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level)) for key in thing)
+        items = (STRINGPAIR.format(key, self.subrepr(thing.__dict__[key], level)) \
+                                          for key in thing.__dict__.keys())
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
         total = (f",\n{ts}").join(items)
@@ -356,6 +357,22 @@ def test():
             MissingNamespace()['wat']
         except NamespaceKeyError as exc:
             assert bool(exc)
+    
+    @inline
+    def test_four():
+        """ Compatibility with standard-library “types.SimpleNamespace” """
+        import types
+        
+        stdn = types.SimpleNamespace(**flat_dict())
+        sn = SimpleNamespace(flat_dict())
+        
+        assert stdn.__dict__ == sn.__dict__
+        assert nsrepr(stdn) == nsrepr(sn)
+        assert nsshortrepr(stdn) == nsshortrepr(sn)
+        
+        print(repr(stdn))
+        print()
+        print(repr(sn))
     
     return inline.test(100)
 

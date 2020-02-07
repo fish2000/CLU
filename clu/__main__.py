@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import namedtuple as NamedTuple
@@ -30,9 +29,9 @@ chevron = red.render("»")
 ronchev = gray.render("»")
 colon = gray.render(":")
 
-def printout(name, value):
+def printout(name, value, most):
     """ Format and colorize each segment of the name/value output """
-    itemname = brightblue.render(" %25s " % name)
+    itemname = brightblue.render(f" {name} ".rjust(most+2))
     itemvalue = gray.render(f" {value}")
     ansi.print_ansi(chevron + itemname + colon + itemvalue, color=nothing)
 
@@ -120,12 +119,13 @@ def show():
     ansi.print_ansi_centered(header0,    color=yellow)
     print()
     
-    # lineprefix=f"{ronchev}    "
+    most = max(len(result.modulename) for result in results.result_records)
+    
     for result in results.result_records:
         thinglength = len(result.thingnames)
         columns = columnize(result.thingnames, displaywidth=WIDTH)
         printout(f"{result.modulename}",
-                 f"{thinglength} exported thing{isplural(thinglength)}")
+                 f"{thinglength} exported thing{isplural(thinglength)}", most=most)
         print()
         ansi.print_ansi(columns,         color=green)
         print()
@@ -137,7 +137,7 @@ def show():
         idx = f"{mismatch.idx}"
         
         printout(f"{mismatch.thingname} [{idx.zfill(2)}]",
-                 f"{mismatch.which} ≠ {mismatch.determine}")
+                 f"{mismatch.which} ≠ {mismatch.determine}", most=most)
     
     print()
     ansi.print_ansi_centered(footer0,   color=cyan)
@@ -147,8 +147,6 @@ def show():
 def main():
     """ Main CLI entry point """
     if consts.TEXTMATE:
-        # # Textmate: delegate to “consts.print_all()”:
-        # consts.print_all()
         print()
         print("NO TEXTMATE VERSION AT THIS TIME SO SORRY COME BACK ANYTIME")
         print()

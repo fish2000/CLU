@@ -119,6 +119,13 @@ ipy:
 			--config=$(PROJECT_ROOT)/.config/ipython/config3.py \
 			-i $(PROJECT_BASE)/clu/scripts/repl.py
 
+ptpy:
+	python -m ptpython -i $(PROJECT_BASE)/clu/scripts/repl.py
+
+# this loads the system IPython, not the virtualenv:
+ptipy:
+	ptipython -i $(PROJECT_BASE)/clu/scripts/repl.py
+
 .PHONY: clean distclean rebuild
 .PHONY: dist upload bigupload
 .PHONY: clean-pyc clean-cython
@@ -130,4 +137,4 @@ ipy:
 .PHONY: test test-all
 
 .PHONY: version consts-old modules-old consts modules
-.PHONY: repl ipy
+.PHONY: repl ipy ptpy ptipy

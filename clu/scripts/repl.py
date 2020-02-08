@@ -35,36 +35,24 @@ from clu.predicates import ispublic
 # MODULE EXPORT FUNCTIONS: given a module name, export
 # either the module or its contents into a given namespace:
 
-def star_export(modulename, namespace=None):
+def star_export(modulename, namespace):
     """ Safely bind everything a module exports to a namespace. """
-    if namespace is None:
-        return
     try:
-        try:
-            module = qualified_import(modulename)
-        except ValueError:
-            module = importlib.import_module(modulename)
-    except ModuleNotFoundError:
-        return
-    else:
-        for name in dir(module):
-            if ispublic(name):
-                namespace[name] = getattr(module, name)
+        module = qualified_import(modulename)
+    except ValueError:
+        module = importlib.import_module(modulename)
+    for name in dir(module):
+        if ispublic(name):
+            namespace[name] = getattr(module, name)
 
-def module_export(modulename, namespace=None):
+def module_export(modulename, namespace):
     """ Safely bind a module to a namespace. """
-    if namespace is None:
-        return
     try:
-        try:
-            module = qualified_import(modulename)
-        except ValueError:
-            module = importlib.import_module(modulename)
-    except ModuleNotFoundError:
-        return
-    else:
-        name = nameof(module)
-        namespace[name] = module
+        module = qualified_import(modulename)
+    except ValueError:
+        module = importlib.import_module(modulename)
+    name = nameof(module)
+    namespace[name] = module
 
 # Warm up sys.modules and friends:
 

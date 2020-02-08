@@ -30,7 +30,7 @@ import importlib
 
 from clu.all import import_clu_modules
 from clu.naming import nameof, qualified_import
-from clu.predicates import ispyname
+from clu.predicates import ispublic
 
 # MODULE EXPORT FUNCTIONS: given a module name, export
 # either the module or its contents into a given namespace:
@@ -48,7 +48,7 @@ def star_export(modulename, namespace=None):
         return
     else:
         for name in dir(module):
-            if not ispyname(name):
+            if ispublic(name):
                 namespace[name] = getattr(module, name)
 
 def module_export(modulename, namespace=None):

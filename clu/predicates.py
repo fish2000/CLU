@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from enum import _is_dunder as ispyname
+from enum import _is_dunder as ispyname, _is_sunder as ismifflin
 from inspect import getattr_static
 from itertools import chain
 from functools import lru_cache, partial, wraps
@@ -205,6 +205,8 @@ rmro        = reverse(mro)
 isancestor  = lambda cls, ancestor=object: isclasstype(cls) and (ancestor in mro(cls))
 isorigin    = lambda cls, original=object: isclasstype(cls) and isancestor(origin(cls), typeof(original))
 
+ispublic    = lambda string: not ispyname(string) and not ismifflin(string)
+
 @export
 class Base(object):
     """ Base type for programmatically created new types.
@@ -395,7 +397,7 @@ isdictish = lambda thing: haspyattr(thing, 'dict') and negate(isclasstype)(thing
 isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and negate(isclasstype)(thing)
 
 # For sorting with ALL_CAPS stuff first or last:
-case_sort = lambda c: c.lower() if c.isupper() else c.upper()
+case_sort = lambda string: string.lower() if string.isupper() else string.upper()
 
 # UTILITY FUNCTIONS: helpers for builtin container types:
 
@@ -487,6 +489,7 @@ def slots_for(cls):
 
 # MODULE EXPORTS:
 export(ispyname,        name='ispyname')
+export(ismifflin,       name='ismifflin')
 export(negate,          name='negate',          doc="negate(function) → Negate a boolean function, returning the callable inverse. \n" + negate_doc)
 export(reverse,         name='reverse',         doc="reverse(function) → Reverse an iterating function, returning the reverse of the iterable returned.")
 
@@ -564,6 +567,7 @@ export(unwrap,          name='unwrap',          doc="unwrap(thing) → Return ei
 export(origin,          name='origin',          doc="origin(thing) → Return either `typeof(thing).__origin__` or `typeof(thing)` for a given `thing`")
 export(isancestor,      name='isancestor',      doc="isancestor(thing, ancestor=object) → boolean predicate, True if `ancestor` is found in “mro(thing)”")
 export(isorigin,        name='isorigin',        doc="isorigin(thing, original=object) → boolean predicate, True if `original` is an ancestor of “origin(thing)”")
+export(ispublic,        name='ispublic',        doc="ispublic(string) → boolean predicate, True if `string` is neither in __dunder__ or _sunder_ (née “_mifflin_”) form")
 
 export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns `None`")
 export(function_nop,    name='function_nop',    doc="function_nop(*args) → variadic function always returns `None`")

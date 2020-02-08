@@ -1,18 +1,24 @@
 -r changelog.txt
 -r docs.txt
 -r typecheck.txt
+appdirs>=1.4.3
+blessings>=1.7
 bpython>=0.18
 bumpversion>=0.5.3
 check-manifest>=0.40
 Click>=7.0
-curtsies>=0.3.0
+curtsies>=0.3.1
 cython>=0.29.14
 gfm>=0.0.2
 greenlet>=0.4.0
 ipython>=7.10.0
+jedi>=0.16.0
 lmdb>=0.8.0
 nox>=2019.11.9
 numpy>=1.18.0
+parso>=0.6.1
+prompt-toolkit>=3.0.3
+ptpython>=3.0.0
 pythonpy>=0.4.10
 pytest>=5.3.0
 pytz>=2019.3
@@ -29,4 +35,5 @@ urllib3>=1.25.0
 yajl>=0.3.2
 yapf>=0.29.0
 yolk1977
+wcwidth>=0.1.8
 xerox>=0.4.0

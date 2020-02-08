@@ -93,10 +93,10 @@ version:
 	python -m clu.version
 
 consts-old:
-	DEBUG=1 PYTHONPATH="." ./clu/scripts/show-consts.py
+	DEBUG=1 PYTHONPATH="." $(PROJECT_BASE)/clu/scripts/show-consts.py
 
 modules-old:
-	DEBUG=1 PYTHONPATH="." ./clu/scripts/show-modules.py
+	DEBUG=1 PYTHONPATH="." $(PROJECT_BASE)/clu/scripts/show-modules.py
 
 consts:
 	python -m clu.constants

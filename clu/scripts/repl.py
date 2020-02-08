@@ -139,7 +139,7 @@ from pprint import pprint, pformat
 
 try:
     from instakit.utils.static import asset
-except (ImportError, SyntaxError):
+except (ImportError, SyntaxError, TypeError):
     pass
 else:
     # Extend `__all__`:

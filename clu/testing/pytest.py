@@ -85,7 +85,7 @@ def pytest_sessionfinish(session, exitstatus):
     from clu.scripts.ansicolors import yellow
     from clu.fs.filesystem import td, rm_rf
     from clu.dispatch import exithandle
-    from clu.stdio import terminal_size
+    from clu.stdio import TermSize
     from clu.repl import ansi
     
     # check the exit status:
@@ -101,7 +101,7 @@ def pytest_sessionfinish(session, exitstatus):
     putative = td().subdirectory(f"pytest-of-{consts.USER}")
     
     # terminal width:
-    width = terminal_size()[0]
+    width = TermSize().width
     
     # bind our “remover(…)” exit-handle function:
     @exithandle

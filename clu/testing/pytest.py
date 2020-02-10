@@ -99,6 +99,9 @@ def pytest_sessionfinish(session, exitstatus):
     # putative temporary directory:
     putative = td().subdirectory(f"pytest-of-{consts.USER}")
     
+    # terminal width:
+    width = ansi.terminal_size()[0]
+    
     # bind our “remover(…)” exit-handle function:
     @exithandle
     def remover(signum, frame=None):
@@ -106,7 +109,8 @@ def pytest_sessionfinish(session, exitstatus):
         if putative.exists:
             message = f"removing: “$TMPDIR/{putative.basename}”"
             ansi.print_ansi_centered(message, color=yellow,
-                                              filler='-')
+                                              filler='-',
+                                              width=width)
             print()
             return rm_rf(putative.name)
         return True

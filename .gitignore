@@ -6,6 +6,7 @@ __pycache__/
 *~
 \#*\#
 Icon*
+coverage.xml
 dump.rdb
 
 *.o
@@ -28,6 +29,7 @@ sdist/
 .pytest_cache/
 .tox/
 
+.coverage
 .env
 .envrc
 .tm_properties

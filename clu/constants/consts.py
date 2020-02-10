@@ -133,13 +133,28 @@ TEST_PATH = sys.intern(os.path.join(BASEPATH, 'tests'))
 # Determine if we’re in TextMate:
 TEXTMATE = 'TM_PYTHON' in os.environ
 
-# For terminal-printing:
+# For terminal pretty-printing:
 if TEXTMATE:
     SEPARATOR_WIDTH = DEFAULT_TERMINAL_WIDTH
+
 else:
+    def terminal_width(fallback=DEFAULT_TERMINAL_WIDTH):
+        """ Wrapper for “os.get_terminal_size(…)” """
+        # q.v. http://bit.ly/py-term-size sub.
+        for idx in range(0, 3): # stdin, stdout, stderr
+            try:
+                columns = os.get_terminal_size(idx)[0]
+            except OSError:
+                continue
+            break
+        else:
+            columns = fallback
+        return columns
+    
     try:
-        SEPARATOR_WIDTH = os.get_terminal_size()[0]
-    except (IOError, OSError):
+        SEPARATOR_WIDTH = terminal_width()
+    
+    except IOError:
         SEPARATOR_WIDTH = DEFAULT_TERMINAL_WIDTH
 
 # WTF HAX:

@@ -280,7 +280,7 @@ class ANSIFormat(ANSIFormatBase):
                                       background=Background.NOTHING,
                                       weight=Weight.NORMAL):
         """ Instantiate an ANSIFormat, populating its fields per args """
-        if from_value is not None:
+        if from_value not in (None, ''):
             if type(from_value) is cls:
                 if all(field is None for field in from_value):
                     return from_value
@@ -346,7 +346,21 @@ linebreak = lambda: print(file=sostream)
 flush_all = lambda: (stream.flush() for stream in streams)
 
 @export
-def print_ansi(text, color='', file=sostream):
+def terminal_size():
+    """ Deeper cut than “os.get_terminal_size(…)” value in “consts” """
+    # q.v. https://stackoverflow.com/a/3010495/298171 sub.
+    import fcntl, termios, struct, os
+    try:
+        descriptor = os.open(os.ctermid(), os.O_RDONLY)
+        h, w, hp, wp = struct.unpack('HHHH',
+            fcntl.ioctl(descriptor, termios.TIOCGWINSZ,
+            struct.pack('HHHH', 0, 0, 0, 0)))
+        return w, h
+    finally:
+        os.close(descriptor)
+
+@export
+def print_ansi(text, color=None, file=sostream):
     """ print_ansi(…) → Print text in ANSI color, using optional inline markup
                         from `colorama` for terminal color-escape delimiters """
     fmt = ANSIFormat(color)
@@ -354,7 +368,7 @@ def print_ansi(text, color='', file=sostream):
         print(fmt.render(line), sep='', end='\n', file=file)
 
 @export
-def print_ansi_centered(text, color='',
+def print_ansi_centered(text, color=None,
                               filler='•',
                               width=SEPARATOR_WIDTH,
                               file=sostream):

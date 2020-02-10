@@ -1,0 +1,44 @@
+[paths]
+source = clu
+
+[run]
+omit =
+    */__main__.py
+    clu/scripts/*
+    clu/testing/*
+
+dynamic_context = test_function
+
+source = clu
+branch = True
+parallel = False
+
+[report]
+omit =
+    */__main__.py
+    clu/scripts/*
+    clu/testing/*
+
+show_missing = False
+ignore_errors = True
+precision = 2
+exclude_lines =
+    pragma: no cover
+    if DEBUG
+    def test\(\)
+    def main
+    if __name__ == .__main__.
+    raise AssertionError
+    raise NotImplementedError
+    def __repr__
+    def inner_repr
+
+[html]
+directory = "coverage_html"
+
+[xml]
+output = "coverage.xml"
+
+[json]
+output = "coverage.json"
+pretty_print = true

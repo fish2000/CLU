@@ -1,6 +1,7 @@
 exclude *.pyc *~ *.so .DS_Store
 
 include .bumpversion.cfg
+include .coveragerc
 include .editorconfig
 include .gitchangelog.rc
 include .gitignore
@@ -33,6 +34,9 @@ recursive-include docs *
 recursive-include requirements *.txt
 recursive-include scratch *.py *.ipynb
 recursive-include tests *.py *.jpg *.png *.toml *.json
+
+exclude .coverage
+exclude coverage.xml
 
 recursive-exclude clu *.pyc *~ *.so .DS_Store
 recursive-exclude docs *.pyc *~ *.so .DS_Store

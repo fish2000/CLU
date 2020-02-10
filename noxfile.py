@@ -6,6 +6,7 @@ import sys, os
 sys.path.append(os.path.dirname(__file__))
 
 # Recycle, reduce, reuse:
+nox.options.keywords = "not codecov"
 nox.options.reuse_existing_virtualenvs = True
 nox.options.stop_on_first_error = True
 
@@ -48,3 +49,10 @@ def inline(session, module):
     """ Run CLU’s per-module inline test suite """
     session.install("-r", "requirements/install.txt")
     session.run('python', '-m', module)
+
+@nox.session
+def codecov(session):
+    """ Run `codecov` for the project """
+    session.install("-r", "requirements/install.txt")
+    session.install("-r", "requirements/nox/codecov.txt")
+    session.run('codecov')

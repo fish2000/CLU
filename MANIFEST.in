@@ -7,6 +7,7 @@ include .gitignore
 include .landscape.yml
 include .travis.yml
 include appveyor.yml
+include codecov.yml
 
 include ABOUT.md
 include CHANGELOG.md

@@ -6,17 +6,17 @@ import colorama
 # colorama.init()
 
 import inspect
-import sys
 import textwrap
 import zict
 
 from clu.constants.consts import DEBUG, ENCODING, SEPARATOR_WIDTH
 from clu.constants.polyfills import Enum, unique, auto
-from clu.predicates import attr, attrs, mro
+from clu.predicates import mro
 from clu.typology import dict_types, isstring, isbytes
 from clu.fs.misc import re_matcher
 from clu.naming import nameof, qualified_name
 from clu.enums import alias, AliasingEnumMeta
+from clu.stdio import sostream, linebreak, flush_all
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -337,28 +337,6 @@ class ANSIFormat(ANSIFormatBase):
         suffix = prefix and self.RESET_ALL or ""
         return f"{prefix}{string!s}{suffix}"
 
-# Determine the proper output streams for the current I/O environment:
-sestream = attr(sys, '__stderr__', 'stderr')
-sostream = attr(sys, '__stdout__', 'stdout')
-streams = attrs(sys, '__stdout__', 'stdout')
-
-linebreak = lambda: print(file=sostream)
-flush_all = lambda: (stream.flush() for stream in streams)
-
-@export
-def terminal_size():
-    """ Deeper cut than “os.get_terminal_size(…)” value in “consts” """
-    # q.v. https://stackoverflow.com/a/3010495/298171 sub.
-    import fcntl, termios, struct, os
-    try:
-        descriptor = os.open(os.ctermid(), os.O_RDONLY)
-        h, w, hp, wp = struct.unpack('HHHH',
-            fcntl.ioctl(descriptor, termios.TIOCGWINSZ,
-            struct.pack('HHHH', 0, 0, 0, 0)))
-        return w, h
-    finally:
-        os.close(descriptor)
-
 @export
 def print_ansi(text, color=None, file=sostream):
     """ print_ansi(…) → Print text in ANSI color, using optional inline markup
@@ -370,12 +348,12 @@ def print_ansi(text, color=None, file=sostream):
 @export
 def print_ansi_centered(text, color=None,
                               filler='•',
-                              width=SEPARATOR_WIDTH,
+                              width=None,
                               file=sostream):
     """ print_ansi_centered(…) → Print a string to the terminal, centered
                                  and bookended with asterisks """
     message = f" {text.strip()} "
-    print_ansi(message.center(width, filler), color=color, file=file)
+    print_ansi(message.center(width or SEPARATOR_WIDTH, filler), color=color, file=file)
 
 INITIAL     = '  ¶ '
 SUBSEQUENT  = '    '
@@ -454,8 +432,6 @@ def highlight(code_string, language='json',
 
 export(print_separator,     name='print_separator', doc="print_separator(filler_char='-') → print filler_char TERMINAL_WIDTH times")
 export(evict_announcer,     name='evict_announcer', doc="evict_announcer(key, value) → print a debug trace message about the key and value")
-export(linebreak,           name='linebreak',       doc="linebreak() → print a newline to `stdout`")
-export(flush_all,           name='flush_all',       doc="flush_all() → flush the output buffers of all possible `stdout` candidates")
 
 # NO DOCS ALLOWED:
 export(Text)

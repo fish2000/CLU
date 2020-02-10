@@ -82,10 +82,11 @@ def pytest_sessionfinish(session, exitstatus):
         a terminating signal (via the “signal” module).
     """
     from clu.constants import consts
-    from clu.dispatch import exithandle
-    from clu.fs.filesystem import td, rm_rf
-    from clu.repl import ansi
     from clu.scripts.ansicolors import yellow
+    from clu.fs.filesystem import td, rm_rf
+    from clu.dispatch import exithandle
+    from clu.stdio import terminal_size
+    from clu.repl import ansi
     
     # check the exit status:
     if exitstatus in no_delete_codes:
@@ -100,7 +101,7 @@ def pytest_sessionfinish(session, exitstatus):
     putative = td().subdirectory(f"pytest-of-{consts.USER}")
     
     # terminal width:
-    width = ansi.terminal_size()[0]
+    width = terminal_size()[0]
     
     # bind our “remover(…)” exit-handle function:
     @exithandle

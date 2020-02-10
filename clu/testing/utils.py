@@ -586,6 +586,7 @@ def stdpout():
     """
     # N.B. I fucking hate this Javaesque boilerplate-tastic shit
     import logging, pout
+    from clu.stdio import std
     
     # If we’ve been here before we don’t need to bother:
     if not getattr(pout, '__WTF_HAX__', False):
@@ -595,17 +596,17 @@ def stdpout():
             pout.stream.logger.handlers.pop()
             
             # Step two: set up a new logging StreamHandler:
-            loghandler = logging.StreamHandler(stream=sys.stdout)
+            loghandler = logging.StreamHandler(stream=std.OUT)
             loghandler.setFormatter(logging.Formatter('%(message)s'))
             pout.stream.logger.addHandler(loghandler)
             pout.stream.logger.propagate = False
             
             # Step three: instantiate a “pout.StderrStream” and root
-            # around with that shit to use `sys.stdout`:
+            # around with that shit to use `clu.stdio.std.OUT`:
             streamy = pout.StderrStream()
             streamy.logger = pout.stream.logger
             streamy.logger.setLevel(logging.DEBUG)
-            streamy.logger.handlers[0].setStream(sys.stdout)
+            streamy.logger.handlers[0].setStream(std.OUT)
             streamy.logger.handlers[0].set_name('stderr')
             streamy.logger.handlers[0].setLevel(logging.DEBUG)
             

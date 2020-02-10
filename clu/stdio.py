@@ -3,11 +3,13 @@ from __future__ import print_function
 from dataclasses import dataclass as dataclass_fn, field, fields
 from functools import lru_cache
 
+import contextlib
 import sys, os
 
 from clu.constants import consts
-from clu.predicates import attr, attrs
+from clu.predicates import attr, attrs, attr_search, mro
 from clu.repr import stringify
+from clu.typespace.namespace import Namespace
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -18,13 +20,15 @@ cache = lambda function: export(lru_cache()(function))
 onecache = lambda function: export(lru_cache(maxsize=1)(function))
 
 # Determine the proper output streams for the current I/O environment:
-sestream = attr(sys, '__stderr__', 'stderr')
-sostream = attr(sys, '__stdout__', 'stdout')
-streams = attrs(sys, '__stdout__', 'stdout')
+std = Namespace(IN=attr(sys, '__stdin__',  'stdin'),
+               ERR=attr(sys, '__stderr__', 'stderr'),
+               OUT=attr(sys, '__stdout__', 'stdout'),
+               OS=attrs(sys, '__stdout__', 'stdout'),
+               IS=attrs(sys, '__stdin__',  'stdin'))
 
 # Some basic shortcuts:
-linebreak = lambda: print(file=sostream)
-flush_all = lambda: (stream.flush() for stream in streams)
+linebreak = lambda: print(file=std.OUT)
+flush_all = lambda: (stream.flush() for stream in std.OS)
 
 def terminal_size_fd():
     import fcntl, termios, struct
@@ -78,10 +82,21 @@ class TermSize:
 # and every fucking time a TermSize instance is to get repr’d:
 TermSize.fields = tuple(field.name for field in fields(TermSize))
 
-# NO DOCS ALLOWED:
-export(sestream,            name='sestream')
-export(sostream,            name='sostream')
-export(streams,             name='streams')
+class Redirect(contextlib.AbstractContextManager):
+    
+    @classmethod
+    def __init_subclass__(cls, target=None, **kwargs):
+        cls.target = target or attr_search('target', *mro(cls))
+        super(Redirect, cls).__init_subclass__(**kwargs)
+    
+    def __init__(self, **replacements):
+        pass
+
+
+export(std,                 name='std',             doc="std: a namespace containing the (possibly redirected or monkeypatched\n "
+                                                        "standard I/O streams: std.IN should be something like “sys.stdin”,\n "
+                                                        "std.OUT should be akin to “sys.stdout”, and soforth. std.OS is a tuple\n "
+                                                        "that contains at least one “sys.stdout”-ish stream… etc etc.")
 
 export(linebreak,           name='linebreak',       doc="linebreak() → print a newline to `stdout`")
 export(flush_all,           name='flush_all',       doc="flush_all() → flush the output buffers of all possible `stdout` candidates")
@@ -106,4 +121,3 @@ def test():
 
 if __name__ == '__main__':
     sys.exit(test())
-

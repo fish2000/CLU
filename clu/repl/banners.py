@@ -6,6 +6,7 @@ import sys
 
 from clu.constants import consts
 from clu.repl import ansi
+from clu.stdio import std
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -167,7 +168,7 @@ is_python2_dead = now() >= now().strptime(python2_expires, '%B %dst, %Y') and ['
 @export
 def print_python_banner(text, color,
                               reset=ansi.ANSIFormat.RESET_ALL,
-                               file=ansi.sostream):
+                               file=std.OUT):
     for line in text.splitlines():
         print(color + line, sep='', file=file)
     print(reset, end='', file=file)
@@ -175,7 +176,7 @@ def print_python_banner(text, color,
 @export
 def print_warning(text, color=ansi.Text.RED,
                         reset=ansi.ANSIFormat.RESET_ALL,
-                         file=ansi.sostream):
+                         file=std.OUT):
     print(color + text, sep='', file=file)
     print(reset, end='', file=file)
 
@@ -185,7 +186,7 @@ def print_banner():
     # as that’s the only way to get any sort of colored output in TextMate’s
     # console output window:
     if consts.TEXTMATE:
-        print(banner, file=sys.stderr)
+        print(banner, file=std.ERR)
     
     else:
         print_python_banner(banner, banner_color)
@@ -204,10 +205,13 @@ def print_banner():
             warning = u"∞§• ¡BEWARE! Python 2.x will perish when the clock strikes 2020!!!\n"
         
         if consts.TEXTMATE:
-            print(warning, file=sys.stderr)
+            print(warning, file=std.ERR)
         else:
             print_warning(warning)
             ansi.flush_all()
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
+
+if __name__ == '__main__':
+    print_banner()

@@ -7,6 +7,7 @@ import colorama
 
 import inspect
 import textwrap
+import sys
 import zict
 
 from clu.constants.consts import DEBUG, ENCODING, SEPARATOR_WIDTH
@@ -16,7 +17,7 @@ from clu.typology import dict_types, isstring, isbytes
 from clu.fs.misc import re_matcher
 from clu.naming import nameof, qualified_name
 from clu.enums import alias, AliasingEnumMeta
-from clu.stdio import sostream, linebreak, flush_all
+from clu.stdio import std, linebreak, flush_all
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -235,10 +236,12 @@ class Weight(ANSIBase, metaclass=ANSI, source=colorama.Style):
 FIELDS = ('text', 'background', 'weight')
 fields = frozenset(FIELDS)
 
-ANSIFormatBase = NamedTuple('ANSIFormatBase', FIELDS, module=__file__)
+ANSIFormatBase = NamedTuple('ANSIFormatBase', FIELDS)
 
 @export
 class ANSIFormat(ANSIFormatBase):
+    
+    """ The formatter class for ANSI markup codes. """
     
     RESET_ALL = Weight.RESET_ALL.to_string()
     
@@ -338,10 +341,23 @@ class ANSIFormat(ANSIFormatBase):
         return f"{prefix}{string!s}{suffix}"
 
 @export
-def print_ansi(text, color=None, file=sostream):
+class NonFormat(object):
+    
+    """ A “format” type whose “render(…)” method is a no-op. """
+    
+    def __init__(self, *args):
+        pass
+    
+    def render(self, string):
+        """ Return a string, unchanged """
+        return string
+
+@export
+def print_ansi(text, color=None, file=std.OUT):
     """ print_ansi(…) → Print text in ANSI color, using optional inline markup
                         from `colorama` for terminal color-escape delimiters """
-    fmt = ANSIFormat(color)
+    FormatClass = file.isatty() and ANSIFormat or NonFormat
+    fmt = FormatClass(color)
     for line in text.splitlines():
         print(fmt.render(line), sep='', end='\n', file=file)
 
@@ -349,7 +365,7 @@ def print_ansi(text, color=None, file=sostream):
 def print_ansi_centered(text, color=None,
                               filler='•',
                               width=None,
-                              file=sostream):
+                              file=std.OUT):
     """ print_ansi_centered(…) → Print a string to the terminal, centered
                                  and bookended with asterisks """
     message = f" {text.strip()} "
@@ -359,8 +375,8 @@ INITIAL     = '  ¶ '
 SUBSEQUENT  = '    '
 
 # Regex boolean predicates for matching marked (or bulleted) paragraphs:
-para_mark_matcher = re_matcher(r"^[0-9+•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
-para_line_matcher = re_matcher(r"^[+•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
+para_mark_matcher = re_matcher(r"^\s*[0-9+•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
+para_line_matcher = re_matcher(r"^\s*[+•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
 
 @export
 def paragraphize(doc):
@@ -380,6 +396,21 @@ def paragraphize(doc):
 WIDTH = int(SEPARATOR_WIDTH * 0.8)
 
 @export
+def highlight(code_string, language='json',
+                             markup='terminal256',
+                              style='paraiso-dark',
+                             isatty=True):
+    """ Highlight a code string with inline 256-color ANSI markup,
+        using `pygments.highlight(…)` and the “Paraiso Dark” theme
+    """
+    if not isatty:
+        return code_string
+    import pygments, pygments.lexers, pygments.formatters
+    LexerCls = pygments.lexers.find_lexer_class_by_name(language)
+    formatter = pygments.formatters.get_formatter_by_name(markup, style=style)
+    return pygments.highlight(code_string, lexer=LexerCls(), formatter=formatter)
+
+@export
 def ansidoc(*things):
     """ ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
     # Start output
@@ -390,11 +421,22 @@ def ansidoc(*things):
         # Process each things’ name and doc
         thingname = nameof(thing)
         doc = inspect.getdoc(thing) or "«¡no docstring found!»"
+        sig = inspect.signature(thing) or ""
         paras = paragraphize(doc)
         
         # Print the ANSI header
         print_ansi_centered(f"__doc__ for “{thingname}”", color=Text.CYAN)
         linebreak()
+        
+        # Code-highlight, format and print the thing and its call-signature:
+        print(highlight(textwrap.fill(f"{thingname}{sig}",
+                        initial_indent=INITIAL,
+                        subsequent_indent=SUBSEQUENT,
+                        replace_whitespace=True,
+                        placeholder="…",
+                        tabsize=4, width=WIDTH), language='python', isatty=std.OUT.isatty()),
+                                                 sep='', end='\n',
+                                                 file=std.OUT)
         
         # Format and print each paragraph
         for para in paras:
@@ -414,21 +456,8 @@ def ansidoc(*things):
         
         # FLush and cease output
         linebreak()
-        linebreak()
         print()
         flush_all()
-
-@export
-def highlight(code_string, language='json',
-                             markup='terminal256',
-                              style='paraiso-dark'):
-    """ Highlight a code string with inline 256-color ANSI markup,
-        using `pygments.highlight(…)` and the “Paraiso Dark” theme
-    """
-    import pygments, pygments.lexers, pygments.formatters
-    LexerCls = pygments.lexers.find_lexer_class_by_name(language)
-    formatter = pygments.formatters.get_formatter_by_name(markup, style=style)
-    return pygments.highlight(code_string, lexer=LexerCls(), formatter=formatter)
 
 export(print_separator,     name='print_separator', doc="print_separator(filler_char='-') → print filler_char TERMINAL_WIDTH times")
 export(evict_announcer,     name='evict_announcer', doc="evict_announcer(key, value) → print a debug trace message about the key and value")
@@ -440,3 +469,22 @@ export(Weight)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
+
+
+def test():
+    
+    from clu.testing.utils import inline
+    
+    @inline
+    def test_one():
+        print_ansi('yo dogg')
+        print_ansi_centered('I heard you like non-ANSI-formatted text')
+    
+    @inline
+    def test_two():
+        ansidoc(ansidoc)
+    
+    return inline.test(10)
+
+if __name__ == '__main__':
+    sys.exit(test())

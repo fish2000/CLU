@@ -111,6 +111,7 @@ nsshortrepr = reprizer.shortrepr
 @export
 class BaseNamespace(collections.abc.Set,
                     collections.abc.Mapping,
+                    clu.abstract.Cloneable,
                     metaclass=clu.abstract.Slotted):
     
     """ The abstract base for SimpleNamespace and Namespace. """
@@ -170,6 +171,10 @@ class BaseNamespace(collections.abc.Set,
     
     def __bool__(self):
         return bool(self.__dict__)
+    
+    def clone(self, deep=False, memo=None):
+        # Only shallow clone for the moment:
+        return type(self)(self.__dict__.copy())
 
 @export
 class SimpleNamespace(BaseNamespace,

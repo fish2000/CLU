@@ -53,6 +53,5 @@ def inline(session, module):
 @nox.session
 def codecov(session):
     """ Run `codecov` for the project """
-    session.install("-r", "requirements/install.txt")
     session.install("-r", "requirements/nox/codecov.txt")
     session.run('codecov')

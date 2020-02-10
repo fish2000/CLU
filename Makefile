@@ -126,6 +126,9 @@ ptpy:
 ptipy:
 	ptipython -i $(PROJECT_BASE)/clu/scripts/repl.py
 
+coverage:
+	python -m pytest -p pytest_cov --cov=$(PROJECT_NAME) tests/
+
 .PHONY: clean distclean rebuild
 .PHONY: dist upload bigupload
 .PHONY: clean-pyc clean-cython

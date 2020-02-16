@@ -19,12 +19,27 @@ dataclass = dataclass_fn(repr=False)
 cache = lambda function: export(lru_cache()(function))
 onecache = lambda function: export(lru_cache(maxsize=1)(function))
 
+class Redirect(contextlib.AbstractContextManager):
+    
+    @classmethod
+    def __init_subclass__(cls, target=None, **kwargs):
+        cls.target = target or attr_search('target', *mro(cls))
+        super(Redirect, cls).__init_subclass__(**kwargs)
+    
+    def __init__(self, to_stream):
+        pass
+
+class Streamspace(Namespace):
+    
+    def redirect(self, from_name, to_stream):
+        pass
+
 # Determine the proper output streams for the current I/O environment:
-std = Namespace(IN=attr(sys, '__stdin__',  'stdin'),
-               ERR=attr(sys, '__stderr__', 'stderr'),
-               OUT=attr(sys, '__stdout__', 'stdout'),
-               OS=attrs(sys, '__stdout__', 'stdout'),
-               IS=attrs(sys, '__stdin__',  'stdin'))
+std = Streamspace(IN=attr(sys, '__stdin__',  'stdin'),
+                 ERR=attr(sys, '__stderr__', 'stderr'),
+                 OUT=attr(sys, '__stdout__', 'stdout'),
+                 OS=attrs(sys, '__stdout__', 'stdout'),
+                 IS=attrs(sys, '__stdin__',  'stdin'))
 
 # Some basic shortcuts:
 linebreak = lambda: print(file=std.OUT)
@@ -81,17 +96,6 @@ class TermSize:
 # Sort this out once (when the module loads) instead of each
 # and every fucking time a TermSize instance is to get repr’d:
 TermSize.fields = tuple(field.name for field in fields(TermSize))
-
-class Redirect(contextlib.AbstractContextManager):
-    
-    @classmethod
-    def __init_subclass__(cls, target=None, **kwargs):
-        cls.target = target or attr_search('target', *mro(cls))
-        super(Redirect, cls).__init_subclass__(**kwargs)
-    
-    def __init__(self, **replacements):
-        pass
-
 
 export(std,                 name='std',             doc="std: a namespace containing the (possibly redirected or monkeypatched\n "
                                                         "standard I/O streams: std.IN should be something like “sys.stdin”,\n "

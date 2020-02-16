@@ -434,7 +434,8 @@ def ansidoc(*things):
                         subsequent_indent=SUBSEQUENT,
                         replace_whitespace=True,
                         placeholder="…",
-                        tabsize=4, width=WIDTH), language='python', isatty=std.OUT.isatty()),
+                        tabsize=4, width=WIDTH), language='python',
+                                                 isatty=std.OUT.isatty()),
                                                  sep='', end='\n',
                                                  file=std.OUT)
         

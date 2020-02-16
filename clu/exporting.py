@@ -663,15 +663,17 @@ class ExporterBase(collections.abc.MutableMapping,
             return importlib.import_module(self.dotpath)
         return None
     
-    fields = ('appname', 'basepath', 'path', 'dotpath')
+    fields = ('dotpath', 'appname', 'basepath')
     
     def inner_repr(self):
         """ Stringify a subset of the Exporter instances’ fields. """
         from clu.repr import strfields
         length = len(self)
+        path = os.path.relpath(self.path, start=self.basepath)
         return strfields(self, type(self).fields,
                                try_callables=False,
-                               items=length)
+                               items=length,
+                               path=f"“{path}”")
     
     def __enter__(self):
         return self.decorator()

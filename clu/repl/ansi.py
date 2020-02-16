@@ -2,6 +2,7 @@
 from __future__ import print_function
 from collections import namedtuple as NamedTuple
 
+import abc
 import colorama
 # colorama.init()
 
@@ -9,6 +10,8 @@ import inspect
 import textwrap
 import sys
 import zict
+
+abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, ENCODING, SEPARATOR_WIDTH
 from clu.constants.polyfills import Enum, unique, auto
@@ -239,7 +242,15 @@ fields = frozenset(FIELDS)
 ANSIFormatBase = NamedTuple('ANSIFormatBase', FIELDS)
 
 @export
-class ANSIFormat(ANSIFormatBase):
+class Format(abc.ABC):
+    
+    @abstract
+    def render(self, string):
+        """ Render a string with respect to the Format instance. """
+        ...
+
+@export
+class ANSIFormat(ANSIFormatBase, Format):
     
     """ The formatter class for ANSI markup codes. """
     
@@ -341,7 +352,7 @@ class ANSIFormat(ANSIFormatBase):
         return f"{prefix}{string!s}{suffix}"
 
 @export
-class NonFormat(object):
+class NonFormat(Format):
     
     """ A “format” type whose “render(…)” method is a no-op. """
     

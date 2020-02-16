@@ -43,21 +43,22 @@ def show():
     SEP = ",\n" + (" " * (most + 5))
     
     for const_name in consts.__all__:
-        if isnormative(G[const_name]):
-            if isbytes(G[const_name]):
-                G[const_name] = str(G[const_name], encoding=consts.ENCODING)
-            elif ispath(G[const_name]):
-                G[const_name] = os.fspath(G[const_name])
-            if const_name.endswith('PATH') and os.pathsep in G[const_name]:
-                printout(const_name, G[const_name].replace(os.pathsep, SEP), most=most)
+        const_value = G[const_name]
+        if isnormative(const_value):
+            if isbytes(const_value):
+                const_value = str(const_value, encoding=consts.ENCODING)
+            elif ispath(const_value):
+                const_value = os.fspath(const_value)
+            if const_name.endswith('PATH') and os.pathsep in const_value:
+                printout(const_name, const_value.replace(os.pathsep, SEP), most=most)
             else:
-                printout(const_name, f"“{G[const_name]}”", most=most)
-        elif isiterable(G[const_name]):
-            printout(const_name, SEP.join(f"“{g!s}”" for g in G[const_name]), most=most)
-        elif isnumber(G[const_name]):
-            printout(const_name, f"«{G[const_name]!r}»", most=most)
+                printout(const_name, f"“{const_value}”", most=most)
+        elif isiterable(const_value):
+            printout(const_name, SEP.join(f"“{value!s}”" for value in const_value), most=most)
+        elif isnumber(const_value):
+            printout(const_name, f"«{const_value!r}»", most=most)
         else:
-            printout(const_name, G[const_name], most=most)
+            printout(const_name, const_value, most=most)
     
     # Print footer:
     print()

@@ -18,7 +18,7 @@ import zipfile
 from clu.constants.consts import ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
-from clu.predicates import attr, allattrs, isexpandable, anyof, uniquify
+from clu.predicates import attr, allattrs, isexpandable, anyof
 from clu.repr import stringify, strfields
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
@@ -1086,7 +1086,7 @@ class Directory(collections.abc.Hashable,
         """
         excluder = re_excluder(excludes)
         searcher = suffix_searcher(suffix)
-        dotpaths = []
+        dotpaths = set()
         target = self.subdirectory(subdir or os.curdir, source)
         # Use a call to “os.walk(…)” directly to allow modification of
         # the “dirs” list in-place:
@@ -1094,10 +1094,10 @@ class Directory(collections.abc.Hashable,
             dirs[:] = list(filter(excluder, dirs))
             filenames = filter(excluder,
                         filter(searcher, files))
-            dotpaths.extend(path_to_dotpath(os.path.join(root, filename),
+            dotpaths.update(path_to_dotpath(os.path.join(root, filename),
                                             relative_to=self.name)
                             for filename in filenames)
-        return sorted(uniquify(dotpaths))
+        return sorted(dotpaths)
     
     def suffix_histogram(self, subdir=None,
                                source=None,

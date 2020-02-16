@@ -237,25 +237,16 @@ class Weight(ANSIBase, metaclass=ANSI, source=colorama.Style):
     RESET_ALL           = auto()
     RESET               = alias(RESET_ALL)
 
-@export
-class Format(abc.ABC):
-    
-    __slots__ = tuple()
-    
-    @abstract
-    def render(self, string):
-        """ Render a string with respect to the Format instance. """
-        ...
-
 FIELDS = ('text', 'background', 'weight')
 fields = frozenset(FIELDS)
 
 ANSIFormatBase = NamedTuple('ANSIFormatBase', FIELDS)
 
 @export
-class ANSIFormat(clu.abstract.Cloneable,
+class ANSIFormat(clu.abstract.Format,
+                 clu.abstract.Cloneable,
                  clu.abstract.ReprWrapper,
-                 ANSIFormatBase, Format):
+                 ANSIFormatBase):
     
     """ The formatter class for ANSI markup codes. """
     
@@ -369,7 +360,7 @@ class ANSIFormat(clu.abstract.Cloneable,
         return f"{prefix}{string!s}{suffix}"
 
 @export
-class NonFormat(Format):
+class NonFormat(clu.abstract.Format):
     
     """ A “format” type whose “render(…)” method is a no-op. """
     

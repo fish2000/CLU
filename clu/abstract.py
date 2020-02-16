@@ -46,6 +46,19 @@ class NonSlotted(abc.ABCMeta):
                                                            attributes,
                                                          **kwargs)
 
+class Format(abc.ABC):
+    
+    """ An abstract class representing something that formats something
+        else. It only offers the one abstract method, “render(…)” at
+        this time.
+    """
+    __slots__ = tuple()
+    
+    @abstract
+    def render(self, string):
+        """ Render a string with respect to the Format instance. """
+        ...
+
 class Cloneable(abc.ABC):
     
     """ An abstract class representing something “clonable.” A cloneable
@@ -272,6 +285,7 @@ else:
         pass
 
 __all__ = ('Slotted', 'NonSlotted',
+           'Format',
            'Cloneable',
            'ReprWrapper',
            'SlottedRepr', 'MappingViewRepr',

@@ -5,73 +5,65 @@ from __future__ import print_function
 import os
 
 from clu.constants import consts
+from clu.predicates import isiterable, isnormative
+from clu.typology import isnumber, isbytes, ispath
 from clu.repl import ansi
-from clu.scripts.ansicolors import (green, red, lightred, cyan, dimcyan,
-                                    lightcyan, dimlightcyan, gray, dimgray,
-                                    yellow, blue, lightblue,
-                                    green_bg, cyan_bg, yellow_bg, nothing)
+from clu.scripts import ansicolors as colors
 
-# socking them all in a tuple gets PyFlakes to shut up:
-colors = (green, red, lightred, cyan, dimcyan,
-          lightcyan, dimlightcyan, gray, dimgray,
-          yellow, blue, lightblue,
-          green_bg, cyan_bg, yellow_bg, nothing)
+chevron = colors.red.render("»")
+colon = colors.gray.render(":")
 
-# Printout lambda:
-printmono = lambda name, value: ansi.print_ansi("» %25s : %s" % (name, value),
-                                                 color=cyan)
-
-chevron = red.render("»")
-colon = gray.render(":")
-
-def printout(name, value):
+def printout(name, value, most=25):
     """ Format and colorize each segment of the name/value output """
-    itemname = lightblue.render(" %25s " % name)
-    itemvalue = gray.render(f" {value}")
-    ansi.print_ansi(chevron + itemname + colon + itemvalue, color=nothing)
+    itemname = colors.lightblue.render(f" {name} ".rjust(most+2))
+    itemvalue = colors.gray.render(f" {value!s}")
+    ansi.print_ansi(chevron + itemname + colon + itemvalue, color=colors.nothing)
 
 def show():
     """ Print out all of the constant variables defined in consts.py,
         only nice-looking, and with ANSI
     """
-    from clu.naming import nameof
+    from clu.naming import qualified_name
     
-    # Terminal width:
-    WIDTH = consts.TEXTMATE and max(consts.SEPARATOR_WIDTH, 125) \
-                                 or consts.SEPARATOR_WIDTH
+    # Header + footer:
+    length = len(consts.__all__)
+    mdname = qualified_name(consts)
+    header = f'CONSTS MODULE ({length} consts defined)'
+    footer = f'Module: {mdname}'
     
-    # Header:
-    # count = f'{len(consts.__all__)} defined'
-    header = f'CONSTS ({len(consts.__all__)} defined)'
-    footer = f'Module: {nameof(consts)}'
-    
-    # ansi.print_ansi('≠' * WIDTH,        color=yellow_bg)
-    # ansi.print_ansi_centered('CONSTS:', color=gray)
-    # ansi.print_ansi('≠' * WIDTH,        color=dimgray)
-    # ansi.print_ansi_centered(count,     color=gray)
-    # ansi.print_ansi('≠' * WIDTH,        color=dimgray)
-    # ansi.print_ansi_centered(count,     color=gray)
-    # ansi.print_ansi('≠' * WIDTH,        color=gray)
-    ansi.print_ansi('–' * WIDTH,        color=gray)
-    ansi.print_ansi_centered(header,    color=yellow)
+    # Print header:
+    ansi.print_ansi_centered(filler='–', color=colors.gray)
+    ansi.print_ansi_centered(header,     color=colors.yellow)
     print()
+    
+    # Calculate the longest constant name,
+    # used to align multi-line value outputs and name-value pairs:
+    most = max(len(name) for name in consts.__all__)
     
     G = vars(consts)
-    SEP = ",\n" + (" " * 30)
+    SEP = ",\n" + (" " * (most + 5))
     
     for const_name in consts.__all__:
-        if const_name.endswith('PATH') and os.pathsep in G[const_name]:
-            printout(const_name, G[const_name].replace(os.pathsep, SEP))
-        elif type(G[const_name]) is tuple:
-            printout(const_name, SEP.join(f"“{g!s}”" for g in G[const_name]))
-        elif type(G[const_name]) is str:
-            printout(const_name, f"“{G[const_name]}”")
+        if isnormative(G[const_name]):
+            if isbytes(G[const_name]):
+                G[const_name] = str(G[const_name], encoding=consts.ENCODING)
+            elif ispath(G[const_name]):
+                G[const_name] = os.fspath(G[const_name])
+            if const_name.endswith('PATH') and os.pathsep in G[const_name]:
+                printout(const_name, G[const_name].replace(os.pathsep, SEP), most=most)
+            else:
+                printout(const_name, f"“{G[const_name]}”", most=most)
+        elif isiterable(G[const_name]):
+            printout(const_name, SEP.join(f"“{g!s}”" for g in G[const_name]), most=most)
+        elif isnumber(G[const_name]):
+            printout(const_name, f"«{G[const_name]!r}»", most=most)
         else:
-            printout(const_name, G[const_name])
+            printout(const_name, G[const_name], most=most)
     
+    # Print footer:
     print()
-    ansi.print_ansi_centered(footer,    color=cyan)
-    ansi.print_ansi('–' * WIDTH,        color=gray)
+    ansi.print_ansi_centered(footer,     color=colors.cyan)
+    ansi.print_ansi_centered(filler='–', color=colors.gray)
 
 def main():
     """ Main CLI entry point """

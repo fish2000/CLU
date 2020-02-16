@@ -10,30 +10,18 @@ from clu.exporting import Exporter
 from clu.naming import nameof, moduleof
 from clu.repl import ansi
 from clu.repl.columnize import columnize
-from clu.typology import iterlen
+from clu.scripts import ansicolors as colors
+# from clu.typology import iterlen
 
-from clu.scripts.ansicolors import (green, lightgreen, red, lightred,
-                                    cyan, dimcyan, lightcyan, dimlightcyan,
-                                    gray, dimgray,
-                                    yellow, blue, lightblue, brightblue,
-                                    green_bg, cyan_bg, yellow_bg, nothing)
+chevron = colors.red.render("»")
+ronchev = colors.gray.render("»")
+colon = colors.gray.render(":")
 
-# socking them all in a tuple gets PyFlakes to shut up:
-colors = (green, lightgreen, red, lightred,
-          cyan, dimcyan, lightcyan, dimlightcyan,
-          gray, dimgray,
-          yellow, blue, lightblue, brightblue,
-          green_bg, cyan_bg, yellow_bg, nothing)
-
-chevron = red.render("»")
-ronchev = gray.render("»")
-colon = gray.render(":")
-
-def printout(name, value, most):
+def printout(name, value, most=25):
     """ Format and colorize each segment of the name/value output """
-    itemname = brightblue.render(f" {name} ".rjust(most+2))
-    itemvalue = gray.render(f" {value}")
-    ansi.print_ansi(chevron + itemname + colon + itemvalue, color=nothing)
+    itemname = colors.brightblue.render(f" {name} ".rjust(most+2))
+    itemvalue = colors.gray.render(f" {value}")
+    ansi.print_ansi(chevron + itemname + colon + itemvalue, color=colors.nothing)
 
 Mismatch = NamedTuple('Mismatch', ('which',
                                    'determine',
@@ -68,9 +56,12 @@ def compare_module_lookups_for_all_things():
     mismatch_count = 0
     mismatches = []
     results = []
+    
     clumodules = import_all_modules(consts.BASEPATH,
                                     consts.PROJECT_NAME,
                                     consts.EXPORTER_NAME)
+    assert clumodules
+    
     modulenames = tuple(Exporter.modulenames())
     
     for modulename in modulenames:
@@ -93,8 +84,7 @@ def compare_module_lookups_for_all_things():
     
     # In practice the failure rate seemed to be around 7.65 %
     failure_rate = 100 * (float(mismatch_count) / float(total))
-    # assert failure_rate < 8.0 # percent
-    # assert len(clumodules) >= iterlen(Exporter.modulenames())
+    assert failure_rate < 10.0 # percent
     
     return Results(idx, modulenames, tuple(results)), \
            Mismatches(total,         tuple(mismatches),
@@ -104,10 +94,6 @@ isplural = lambda integer: integer != 1 and 's' or ''
 
 def show():
     """ Prettyprint the module lookup results """
-    # Terminal width:
-    WIDTH = consts.TEXTMATE and max(consts.SEPARATOR_WIDTH, 125) \
-                                 or consts.SEPARATOR_WIDTH
-    
     results, mismatches = compare_module_lookups_for_all_things()
     
     header0 = f'MODULE LOOKUPS ({results.total} performed)'
@@ -115,22 +101,22 @@ def show():
     footer0 = f'MISMATCHES: {len(mismatches.mismatch_records)} (of {mismatches.total} total)'
     footer1 = f'FAILURE RATE: {mismatches.failure_rate}'
     
-    ansi.print_ansi('–' * WIDTH,         color=gray)
-    ansi.print_ansi_centered(header0,    color=yellow)
+    ansi.print_ansi_centered(filler='–', color=colors.gray)
+    ansi.print_ansi_centered(header0,    color=colors.yellow)
     print()
     
     most = max(len(result.modulename) for result in results.result_records)
     
     for result in results.result_records:
         thinglength = len(result.thingnames)
-        columns = columnize(result.thingnames, displaywidth=WIDTH)
+        columns = columnize(result.thingnames)
         printout(f"{result.modulename}",
                  f"{thinglength} exported thing{isplural(thinglength)}", most=most)
         print()
-        ansi.print_ansi(columns,         color=green)
+        ansi.print_ansi(columns,         color=colors.green)
         print()
     
-    ansi.print_ansi_centered(header1,    color=yellow)
+    ansi.print_ansi_centered(header1,    color=colors.yellow)
     print()
     
     for mismatch in mismatches.mismatch_records:
@@ -140,9 +126,9 @@ def show():
                  f"{mismatch.which} ≠ {mismatch.determine}", most=most)
     
     print()
-    ansi.print_ansi_centered(footer0,   color=cyan)
-    ansi.print_ansi_centered(footer1,   color=cyan)
-    ansi.print_ansi('–' * WIDTH,        color=gray)
+    ansi.print_ansi_centered(footer0,    color=colors.cyan)
+    ansi.print_ansi_centered(footer1,    color=colors.cyan)
+    ansi.print_ansi_centered(filler='–', color=colors.gray)
 
 def main():
     """ Main CLI entry point """

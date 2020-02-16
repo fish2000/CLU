@@ -2,12 +2,9 @@
 from __future__ import print_function
 
 import getpass
-import os
 import platform
-import re
-import socket
 import sysconfig
-import sys
+import sys, os, re
 
 # pytuple shortcut lambda:
 pytuple = lambda *attrs: tuple(f'__{atx}__' for atx in attrs)
@@ -59,7 +56,8 @@ EXPORTER_NAME = sys.intern('exporter')
 FILE_ARGUMENT_NAMES = ('path', 'pth', 'file')
 
 # The hostname for this computer:
-HOSTNAME = sys.intern(socket.gethostname())
+nodename = platform.node().casefold()
+HOSTNAME = sys.intern(f"{nodename}.local")
 
 # Determine if we’re running in IPython:
 try:
@@ -68,6 +66,9 @@ except NameError:
     IPYTHON = False
 else:
     IPYTHON = True
+
+# Determine if we’re on Jython (hint, not likely):
+JYTHON = sys.platform.casefold().startswith('java')
 
 # The __name__ of a lambda function:
 lam = lambda: None
@@ -206,6 +207,7 @@ __all__ = ('APPNAME',
            'FILE_ARGUMENT_NAMES',
            'HOSTNAME',
            'IPYTHON',
+           'JYTHON',
            'LAMBDA', 'λ',
            'MAXINT',
            'NAMESPACE_SEP',

@@ -43,7 +43,7 @@ def get_option(key, options):
     return options.get(key, default_opts.get(key))
 
 @export
-def columnize(array, displaywidth=80,
+def columnize(array, displaywidth=computed_displaywidth(),
                      colsep = '  ',
                      arrange_vertical=True,
                      ljust=True,

@@ -4,8 +4,7 @@ from collections import namedtuple as NamedTuple
 
 import abc
 import colorama
-# colorama.init()
-
+import clu.abstract
 import inspect
 import textwrap
 import sys
@@ -15,7 +14,7 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, ENCODING, SEPARATOR_WIDTH
 from clu.constants.polyfills import Enum, unique, auto
-from clu.predicates import mro
+from clu.predicates import mro, or_none
 from clu.typology import dict_types, isstring, isbytes
 from clu.fs.misc import re_matcher
 from clu.naming import nameof, qualified_name
@@ -25,6 +24,8 @@ from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
+
+# colorama.init()
 
 print_separator = lambda filler='-': print(filler * SEPARATOR_WIDTH)
 evict_announcer = lambda key, value: print(f"Cache dropped: {key}")
@@ -236,21 +237,25 @@ class Weight(ANSIBase, metaclass=ANSI, source=colorama.Style):
     RESET_ALL           = auto()
     RESET               = alias(RESET_ALL)
 
-FIELDS = ('text', 'background', 'weight')
-fields = frozenset(FIELDS)
-
-ANSIFormatBase = NamedTuple('ANSIFormatBase', FIELDS)
-
 @export
 class Format(abc.ABC):
+    
+    __slots__ = tuple()
     
     @abstract
     def render(self, string):
         """ Render a string with respect to the Format instance. """
         ...
 
+FIELDS = ('text', 'background', 'weight')
+fields = frozenset(FIELDS)
+
+ANSIFormatBase = NamedTuple('ANSIFormatBase', FIELDS)
+
 @export
-class ANSIFormat(ANSIFormatBase, Format):
+class ANSIFormat(clu.abstract.Cloneable,
+                 clu.abstract.ReprWrapper,
+                 ANSIFormatBase, Format):
     
     """ The formatter class for ANSI markup codes. """
     
@@ -269,8 +274,9 @@ class ANSIFormat(ANSIFormatBase, Format):
         """ Return the ANSI format primitives as a dict """
         out = {}
         for field in FIELDS:
-            if getattr(self, field, None) is not None:
-                out[field] = getattr(self, field)
+            fieldval = or_none(self, field)
+            if fieldval is not None:
+                out[field] = fieldval
         return out
     
     def to_tuple(self):
@@ -342,6 +348,17 @@ class ANSIFormat(ANSIFormatBase, Format):
                     self.background is None and \
                     self.weight is None)
     
+    def clone(self, deep=False, memo=None):
+        # N.B. deep-cloning is meaningless here as everything’s an enum value:
+        return type(self)(text=self.text,
+                          background=self.background,
+                          weight=self.weight)
+    
+    def inner_repr(self):
+        return f"text={self.text.name or 'None'}, " \
+               f"background={self.background.name or 'None'}, " \
+               f"weight={self.weight.name or 'None'}"
+    
     def render(self, string):
         """ Render a string appropriately marked up with the ANSI formatting
             called for by this ANSIFormat instance, ending with the necessary
@@ -371,16 +388,19 @@ def print_ansi(text, color=None, file=std.OUT):
     fmt = FormatClass(color)
     for line in text.splitlines():
         print(fmt.render(line), sep='', end='\n', file=file)
+    return None
 
 @export
-def print_ansi_centered(text, color=None,
-                              filler='•',
-                              width=None,
-                              file=std.OUT):
+def print_ansi_centered(text=None, color=None,
+                                   filler='•',
+                                   width=None,
+                                   file=std.OUT):
     """ print_ansi_centered(…) → Print a string to the terminal, centered
                                  and bookended with asterisks """
+    if text is None:
+        return print_ansi(filler * (width or SEPARATOR_WIDTH), color=color, file=file)
     message = f" {text.strip()} "
-    print_ansi(message.center(width or SEPARATOR_WIDTH, filler), color=color, file=file)
+    return print_ansi(message.center(width or SEPARATOR_WIDTH, filler), color=color, file=file)
 
 INITIAL     = '  ¶ '
 SUBSEQUENT  = '    '
@@ -471,7 +491,7 @@ def ansidoc(*things):
         print()
         flush_all()
 
-export(print_separator,     name='print_separator', doc="print_separator(filler_char='-') → print filler_char TERMINAL_WIDTH times")
+export(print_separator,     name='print_separator', doc="print_separator(filler='-') → print ‘filler’ character consts.SEPARATOR_WIDTH times")
 export(evict_announcer,     name='evict_announcer', doc="evict_announcer(key, value) → print a debug trace message about the key and value")
 
 # NO DOCS ALLOWED:

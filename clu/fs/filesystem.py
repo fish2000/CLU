@@ -870,6 +870,8 @@ class Directory(collections.abc.Hashable,
         """ Returns the path to a subpath of the instances’ target path --
             much like Directory.subpath(…) -- as an instance of Directory.
         """
+        if source is None and subdir == os.curdir:
+            return self
         path = self.subpath(subdir, source, requisite=False)
         if os.path.isfile(path):
             raise FilesystemError(f"file exists at subdirectory path: {path}")

@@ -355,16 +355,16 @@ def duplicate(target, name, gs=None, **attributes):
     if target.__doc__:
         function.__doc__         = inspect.getdoc(target)
     
-    # Replace only the relevant part of the qualname:
-    if allpyattrs(target, 'qualname', 'name'):
-        qnm, nm = pyattrs(target, 'qualname', 'name')
-        function.__qualname__    = qnm.replace(nm, name)
-    
     # Copy the “lambda_name”, if present:
     if pyattr(target, 'lambda_name'):
         function.__lambda_name__ = target.__lambda_name__
     elif target.__name__ in (λ, φ):
         function.__lambda_name__ = target.__name__
+    
+    # Replace only the relevant part of the qualname:
+    if allpyattrs(target, 'qualname', 'name'):
+        qnm, nm = pyattrs(target, 'qualname', 'name')
+        function.__qualname__    = qnm.replace(nm, name)
     
     # Duplicate the wrapped function, if present:
     if ΛΛ(pyattr(target, 'wrapped')):

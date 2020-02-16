@@ -11,7 +11,6 @@ from clu.naming import nameof, moduleof
 from clu.repl import ansi
 from clu.repl.columnize import columnize
 from clu.scripts import ansicolors as colors
-# from clu.typology import iterlen
 
 chevron = colors.red.render("»")
 ronchev = colors.gray.render("»")

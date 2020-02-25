@@ -80,11 +80,6 @@ test: check pytest
 
 test-all: check nox
 
-# python -m pytest --setup-plan --trace-config | pygmentize -l eiffel -O "style=monokai"
-# python -m pytest --setup-plan --trace-config | pygmentize -l cry -O "style=vim"
-# python -m pytest --setup-plan --trace-config | pygmentize -l aconf -O "style=vim"
-# python -m pytest --setup-plan --trace-config | pygmentize -l hs -O "style=friendly"
-
 test-configuration:
 	python -m pytest --setup-plan --trace-config | pygmentize -l clean -O "style=vim"
 

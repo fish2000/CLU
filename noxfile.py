@@ -28,7 +28,6 @@ def checkmodule(session, module):
         session.install("-r", "requirements/nox/tests.txt")
     session.run('python', '-m', module)
 
-# @nox.session(python=['3.7', '3.8', 'pypy3'])
 @nox.session
 def pytest(session):
     """ Run CLU’s entire unit-test suite with `pytest` """

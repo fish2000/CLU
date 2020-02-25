@@ -8,15 +8,6 @@ from clu.repl import ansi
 
 from clu.scripts import ansicolors as colors
 
-# chevron = colors.red.render("»")
-# colon = colors.gray.render(":")
-
-# def printout(name, value, most=25):
-#     """ Format and colorize each segment of the name/value output """
-#     itemname = colors.lightblue.render(f" {name} ".rjust(most+2))
-#     itemvalue = colors.gray.render(f" {value!s}")
-#     ansi.print_ansi(chevron + itemname + colon + itemvalue, color=colors.nothing)
-
 def show():
     """ Print out all of the constant variables defined in consts.py,
         only nice-looking, and with ANSI

@@ -353,7 +353,7 @@ class ChainMap(collections.abc.MutableMapping,
         # return dict(iterchain(map.items() for map in self.maps))
     
     def clone(self, deep=False, memo=None):
-        """ Return a cloned copy of the ChainMap """
+        """ Return a cloned copy of the ChainMap instance """
         from copy import copy, deepcopy
         cls = type(self)
         if not deep:

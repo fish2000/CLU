@@ -10,7 +10,7 @@ import sys
 
 from clu import all
 from clu.constants import consts
-from clu.predicates import ispyname, negate, tuplize
+from clu.predicates import ispyname, negate
 from clu.typespace import types
 from clu.typology import iterlen
 from clu.exporting import Exporter
@@ -21,27 +21,28 @@ export = exporter.decorator()
 notpyname   = negate(ispyname)
 isplural    = lambda integer: integer != 1 and 's' or ''
 
-Mismatch    = NamedTuple('Mismatch', ('which',
-                                      'determine',
-                                      'modulename',
-                                      'thingname',
-                                      'idx'))
+Mismatch    = NamedTuple('Mismatch',    ('which',
+                                         'determine',
+                                         'modulename',
+                                         'thingname',
+                                         'idx'))
 
-Mismatches  = NamedTuple('Mismatches', ('total',
-                                        'mismatch_records',
-                                        'failure_rate'))
+Mismatches  = NamedTuple('Mismatches',  ('total',
+                                         'mismatch_records',
+                                         'failure_rate'))
 
-Result      = NamedTuple('Result', ('modulename',
-                                    'thingnames',
-                                    'idx'))
+Result      = NamedTuple('Result',      ('modulename',
+                                         'thingnames',
+                                         'idx'))
 
-Results     = NamedTuple('Results', ('total',
-                                     'modulenames',
-                                     'result_records'))
+Results     = NamedTuple('Results',     ('total',
+                                         'modulenames',
+                                         'result_records'))
 
 @export
 class ModuleMap(collections.abc.Mapping,
                 collections.abc.Reversible,
+                clu.abstract.Cloneable,
                 metaclass=clu.abstract.Slotted):
     
     """ An adaptor class, wrapping a module and providing access to
@@ -49,18 +50,19 @@ class ModuleMap(collections.abc.Mapping,
         of the “collections.abc.Mapping” interface.
     """
     
-    __slots__ = tuplize('module', 'dir')
+    __slots__ = ('module', 'dir')
     
     def __init__(self, module):
         """ Initialize a ModuleMap with a single module-type argument. """
         if not module:
             raise TypeError("valid module required")
-        if not isinstance(module, types.Module):
-            raise TypeError("module-type instance required")
-        self.module = module
-        self.dir = tuple(filter(notpyname, dir(module)))
-        if len(self.dir) < 1:
-            raise ValueError("module instance must export one or more things")
+        if not isinstance(module, (type(self), types.Module)):
+            raise TypeError("module instance required")
+        if isinstance(module, type(self)):
+            self.module = getattr(module, 'module')
+        else:
+            self.module = module
+        self.reload()
     
     def __iter__(self):
         yield from self.dir
@@ -78,8 +80,6 @@ class ModuleMap(collections.abc.Mapping,
             out = getattr(self.module, key)
         except AttributeError:
             raise KeyError(key)
-        # if out is None:
-        #     raise KeyError(key)
         return out
     
     def __len__(self):
@@ -93,6 +93,23 @@ class ModuleMap(collections.abc.Mapping,
     
     def items(self):
         return clu.dicts.OrderedItemsView(self)
+    
+    def reload(self):
+        self.dir = tuple(filter(notpyname, dir(self.module)))
+        length = len(self.dir)
+        if length < 1:
+            raise ValueError("module instance must export one or more things")
+        return length
+    
+    def most(self):
+        """ Return the string-length of the longest item name in the module """
+        return max(len(name) for name in self.dir)
+    
+    def clone(self, deep=False, memo=None):
+        """ Return a cloned copy of the ModuleMap instance """
+        # N.B. since we can’t readily deep-clone a module,
+        # all cloned instances are shallow:
+        return type(self)(self)
 
 @export
 def compare_module_lookups_for_all_things(*modules, **options):
@@ -124,6 +141,7 @@ def compare_module_lookups_for_all_things(*modules, **options):
         exports = Exporter[modulename].exports()
         total += len(exports)
         results.append(Result(modulename, tuple(exports.keys()), idx))
+        
         for name, thing in exports.items():
             whichmodule = pickle.whichmodule(thing, None)
             determination = moduleof(thing)

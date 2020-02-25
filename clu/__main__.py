@@ -9,16 +9,6 @@ from clu.repl import ansi
 
 from clu.scripts import ansicolors as colors
 
-# chevron = colors.red.render("»")
-# ronchev = colors.gray.render("»")
-# colon = colors.gray.render(":")
-
-# def printout(name, value, most=25):
-#     """ Format and colorize each segment of the name/value output """
-#     itemname = colors.brightblue.render(f" {name} ".rjust(most+2))
-#     itemvalue = colors.gray.render(f" {value}")
-#     ansi.print_ansi(chevron + itemname + colon + itemvalue, color=colors.nothing)
-
 def show():
     """ Prettyprint the module lookup results """
     results, mismatches = compare_module_lookups_for_all_things()

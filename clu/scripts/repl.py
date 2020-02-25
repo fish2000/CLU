@@ -64,8 +64,10 @@ __all__ = tuple()
 GLOBALS = globals()
 
 starmods = ('clu.repl.ansi',
+            'clu.repl.modules',
             'clu.constants.enums',
             'clu.constants.data',
+            'clu.application',
             'clu.config.abc',
             'clu.config.env',
             'clu.config.keymap',
@@ -73,14 +75,18 @@ starmods = ('clu.repl.ansi',
             'clu.application',
             'clu.dicts', 'clu.enums', 'clu.exporting', 'clu.extending', 'clu.shelving.redat',
             'clu.importing', 'clu.mathematics', 'clu.naming', 'clu.predicates', 'clu.typology',
-            'clu.fs.filesystem', 'clu.fs.misc', 'clu.repr', 'clu.typespace.namespace',
-            'clu.testing.utils')
+            'clu.fs.abc', 'clu.fs.filesystem', 'clu.fs.misc', 'clu.repr', 'clu.stdio',
+            'clu.typespace.namespace',
+            'clu.testing.utils',
+            'clu.version', 'clu.version.git_version')
 
 mods = ('clu.all',
         'clu.constants.consts',
+        'clu.constants.polyfills',
         'clu.config.base',
         'clu.config.settings',
         'clu.config.ns',
+        'clu.csv',
         'clu.fs.appdirectories',
         'clu.keyvalue',
         'clu.dispatch', 'clu.sanitizer', 'clu.fs.pypath',

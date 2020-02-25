@@ -287,11 +287,11 @@ class ANSIFormat(clu.abstract.Format,
             before finally ending up as the return itself.
         """
         try:
-            return cls.instance_for(text, background, weight)
+            out = cls.instance_for(text, background, weight)
         except KeyError:
-            inew = super().__new__(cls, text, background, weight)
-            cls.instances[(text, background, weight)] = inew
-            return inew
+            out = super().__new__(cls, text, background, weight)
+            cls.instances[(text, background, weight)] = out
+        return out
     
     @classmethod
     def from_dict(cls, format_dict):
@@ -354,7 +354,9 @@ class ANSIFormat(clu.abstract.Format,
     
     @classmethod
     def null(cls):
-        """  """
+        """ Retrieve a “null instance” of ANSIFormat – one with all of its
+            formatting directives unspecified.
+        """
         instance = super(ANSIFormat, cls).get_or_create(None, None, None)
         return instance
     
@@ -434,22 +436,25 @@ def print_ansi_centered(text=None, color=None,
     return print_ansi(message.center(width or SEPARATOR_WIDTH, filler), color=color, file=file)
 
 LIGHTBLUE   = ANSIFormat(text=Text.LIGHTBLUE)
-GRAY        = ANSIFormat(text=Text.GRAY)
+DARKGRAY    = ANSIFormat(text=Text.GRAY)
 RED         = ANSIFormat(text=Text.RED)
 NOTHING     = ANSIFormat()
 
-chevron = RED.render("»")
-colon = GRAY.render(":")
+chevron     = RED.render("»")
+colon       = DARKGRAY.render(":")
 
 @export
-def print_ansi_name_value(name, value, most=25):
+def print_ansi_name_value(name, value, most=25,
+                                    pilcrow=chevron,
+                                     equals=colon,
+                                  namecolor=LIGHTBLUE,
+                                 valuecolor=DARKGRAY,
+                                       file=std.OUT):
     """ Format and colorize each segment of the name/value output """
-    itemname = LIGHTBLUE.render(f" {name} ".rjust(most+2))
-    itemvalue = GRAY.render(f" {value!s}")
-    print_ansi(chevron + itemname + colon + itemvalue, color=NOTHING)
-
-INITIAL     = '  ¶ '
-SUBSEQUENT  = '    '
+    key = namecolor.render(f" {name} ".rjust(most+2))
+    val = valuecolor.render(f" {value!s}")
+    return print_ansi(pilcrow + key
+                     + equals + val, color=NOTHING)
 
 # Regex boolean predicates for matching marked (or bulleted) paragraphs:
 para_mark_matcher = re_matcher(r"^\s*[0-9+•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
@@ -469,9 +474,6 @@ def paragraphize(doc):
                 lines[idx] += " "
     return ''.join(lines).splitlines()
 
-# Pre-calculate width
-WIDTH = int(SEPARATOR_WIDTH * 0.8)
-
 @export
 def highlight(code_string, language='json',
                              markup='terminal256',
@@ -486,6 +488,13 @@ def highlight(code_string, language='json',
     LexerCls = pygments.lexers.find_lexer_class_by_name(language)
     formatter = pygments.formatters.get_formatter_by_name(markup, style=style)
     return pygments.highlight(code_string, lexer=LexerCls(), formatter=formatter)
+
+# Margin-dwelling legibility symbols:
+INITIAL         = '  ¶ '
+SUBSEQUENT      = '    '
+
+# Pre-calculate eighty-percent width:
+EIGHTY_PERCENT  = int(SEPARATOR_WIDTH * 0.8)
 
 @export
 def ansidoc(*things):
@@ -511,10 +520,11 @@ def ansidoc(*things):
                         subsequent_indent=SUBSEQUENT,
                         replace_whitespace=True,
                         placeholder="…",
-                        tabsize=4, width=WIDTH), language='python',
-                                                 isatty=std.OUT.isatty()),
-                                                 sep='', end='\n',
-                                                 file=std.OUT)
+                        tabsize=4,
+                        width=EIGHTY_PERCENT), language='python',
+                                               isatty=std.OUT.isatty()),
+                                               sep='', end='\n',
+                                               file=std.OUT)
         
         # Format and print each paragraph
         for para in paras:
@@ -527,7 +537,7 @@ def ansidoc(*things):
                                               drop_whitespace=True,
                                                   placeholder='…',
                                                       tabsize=4,
-                                                        width=WIDTH),
+                                                        width=EIGHTY_PERCENT),
                                                         color=Text.GRAY)
             else:
                 linebreak()

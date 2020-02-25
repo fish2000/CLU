@@ -357,8 +357,7 @@ class ANSIFormat(clu.abstract.Format,
         """ Retrieve a “null instance” of ANSIFormat – one with all of its
             formatting directives unspecified.
         """
-        instance = super(ANSIFormat, cls).get_or_create(None, None, None)
-        return instance
+        return cls.get_or_create(None, None, None)
     
     def __str__(self):
         """ Stringify the ANSIFormat (q.v. “to_string(…)” supra.) """

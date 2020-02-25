@@ -558,26 +558,49 @@ class ExporterBase(collections.abc.MutableMapping,
         if thing is self:
             raise ExportError("can’t export an exporter instance directly")
         
+        ### if dname in (λ, φ, name, named):
+        
         # At this point, “named” is valid -- if we were passed
-        # a lambda, try to rename it with either our valid name,
-        # or the result of an ID-based search for that lambda:
+        # a callable, try to rename it with either our valid name,
+        # or the result of an ID-based search for that callable:
         if callable(thing) and hasattr(thing, '__name__'):
+            
+            # Ensure “named” is something with which we can work:
+            if named in (λ, φ):
+                named = search_for_name(thing)
+            if named is None:
+                raise ExportError(type(self).messages['noname'] % id(thing))
+            
+            # Retrieve the things’ ostensible name attribute value,
             dname = getattr(thing, '__name__')
-            if dname in (λ, φ):
-                if named in (λ, φ):
-                    named = search_for_name(thing)
-                if named is None:
-                    raise ExportError(type(self).messages['noname'] % id(thing))
-                qname = getattr(thing, '__qualname__')
+            
+            # Re-target bound-method-type things to their parent function definition:
+            target = getattr(thing, '__func__', thing)
+            qname = getattr(target, '__qualname__')
+            
+            # ATTEMPT TO RENAME!!!…
+            # VIA FULL-FLOW MULTI-STAGED COMBUSTION:
+            
+            # Attempt Nº1: update the part(s) of __qualname__ matching __name__:
+            try:
                 if qname:
-                    setattr(thing, '__qualname__',
-                            qname.replace(
-                            getattr(thing, '__name__'),
-                                    named))
-                thing.__name__ = named
-                thing.__lambda_name__ = dname # To recall the lambda’s genesis
+                    setattr(target, '__qualname__', qname.replace(
+                    getattr(target, '__name__'), named))
+            except AttributeError:
+                pass
+            
+            # Attempt Nº2: update __name__ and set __lambda_name__ if necessary –
+            # …to recall the lambda’s genesis:
+            try:
+                target.__name__ = named
+                target.__lambda_name__ = getattr(target, '__lambda_name__', dname)
+            except AttributeError:
+                pass
+            else:
+                # Only pursue the Nº3 attempt if Nº2 didn’t fail –
+                # …reset __module__ for phi-types:
                 if dname == φ and self.dotpath is not None:
-                    thing.__module__ = str(self.dotpath) # Reset __module__ for phi-types
+                    target.__module__ = str(self.dotpath)
         
         # If a “doc” argument was passed in, attempt to assign
         # the __doc__ attribute accordingly on the item -- note

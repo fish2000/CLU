@@ -1081,7 +1081,7 @@ class Directory(collections.abc.Hashable,
                                   source=None,
                                   excludes=('-', '+', 'pytest',
                                                       'obsolete',
-                                                      'scripts')):
+                                                      'repl.py')):
         """ List the importable file-based modules found within “subdir”,
             matching the “suffix” string, and not matching any of the
             “excludes” strings.

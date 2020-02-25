@@ -3,7 +3,6 @@ appnope==0.1.0
 attrs==19.3.0
 Babel==2.8.0
 backcall==0.1.0
-bleach==3.1.0
 blessings==1.7
 bpython==0.18
 bumpversion==0.5.3

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-# from clu.repl.modules import Mismatch, Mismatches, Result, Results
 from clu.repl.modules import compare_module_lookups_for_all_things
 from clu.repl.modules import isplural
 from clu.repl.columnize import columnize

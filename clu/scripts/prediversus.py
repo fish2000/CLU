@@ -40,9 +40,6 @@ def test():
         mifflin_results = tuple(predicate_test(ismifflin, name)[-1] for name in dunder_mifflins())
         public_results = tuple(predicate_test(ispublic, name)[-1] for name in dunder_mifflins())
         
-        # from pprint import pprint
-        # pprint(public_results)
-        
         assert pyname_results   == (False, False, False, True, False, False, False)
         #                                                ^^^^^
         #                                                  └─« only hit: '__yodogg__'

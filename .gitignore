@@ -32,6 +32,7 @@ sdist/
 .coverage
 .env
 .envrc
+.noxresults.json
 .tm_properties
 
 tmtags

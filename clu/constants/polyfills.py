@@ -4,8 +4,6 @@ from __future__ import print_function
 from enum import Enum, EnumMeta, unique
 from functools import wraps
 
-from clu.constants.consts import PY3
-
 class AutoType(object):
     
     """ Simple polyfill for `enum.auto` (which apparently
@@ -34,8 +32,14 @@ except (ImportError, SyntaxError):
     auto = AutoType()
 
 # Deal with some “missing” Python 3 things:
-if PY3:
+try:
+    unicode
+except NameError:
     unicode = str
+
+try:
+    long
+except NameError:
     long = int
 
 try:

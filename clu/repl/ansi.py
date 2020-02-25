@@ -250,7 +250,34 @@ class ANSIFormat(clu.abstract.Format,
     
     """ The formatter class for ANSI markup codes. """
     
+    instances = {}
     RESET_ALL = Weight.RESET_ALL.to_string()
+    
+    @classmethod
+    def pre_existing(cls, text, background, weight):
+        return hash((text, background, weight)) in (hash(key) for key in cls.instances.keys())
+    
+    @classmethod
+    def instance_for(cls, text, background, weight):
+        h = hash((text, background, weight))
+        for key in cls.instances.keys():
+            if hash(key) == h:
+                return cls.instances[key]
+        raise KeyError(f"no instance found for text/background/weight: {text!s}, {background!s}, {weight!s}")
+    
+    @classmethod
+    def get_or_create(cls, text, background, weight):
+        # if cls.exists_for(text, background, weight):
+        #     return cls.instance_for(text, background, weight)
+        # inew = super().__new__(cls, text, background, weight)
+        # cls.instances[(text, background, weight)] = inew
+        # return inew
+        try:
+            return cls.instance_for(text, background, weight)
+        except KeyError:
+            inew = super().__new__(cls, text, background, weight)
+            cls.instances[(text, background, weight)] = inew
+            return inew
     
     @classmethod
     def from_dict(cls, format_dict):
@@ -306,9 +333,7 @@ class ANSIFormat(clu.abstract.Format,
                 text = str(from_value, encoding=ENCODING)
             elif ANSIBase.is_ansi(from_value):
                 text = from_value
-        instance = super(ANSIFormat, cls).__new__(cls, Text.convert(text),
-                                                       Background.convert(background),
-                                                       Weight.convert(weight))
+        instance = cls.get_or_create(text, background, weight)
         return instance
     
     @classmethod

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-MOCK_NUMPY = False
-
+from clu.constants import consts
 from clu.constants.polyfills import numpy, reduce # type: ignore
 from clu.naming import moduleof
 from clu.predicates import isclasstype
@@ -15,7 +14,6 @@ export = exporter.decorator()
 if numpy is None:
     from mock import Mock
     numpy = Mock()
-    MOCK_NUMPY = True
 
 # JUST LIKE THE GREEKS
 σ = sum
@@ -30,7 +28,6 @@ isnumpytype = lambda cls: isclasstype(cls) and isnumpything(cls)
 isnumpythinglist = lambda thinglist: isxlist(isnumpything, thinglist)
 isnumpytypelist = lambda thinglist: isxlist(isnumpytype, thinglist)
 
-@export
 def isdtype(thing):
     """ isdtype(thing) → boolean predicate, True if thing is a non-object numpy dtype """
     try:
@@ -39,7 +36,6 @@ def isdtype(thing):
         return False
     return dt != numpy.object_
 
-@export
 class Clamper(object):
     
     """ A callable object representing a per-dtype clamp function """
@@ -84,8 +80,10 @@ class Clamper(object):
 
 clamp = Clamper(dtype=numpy.uint8)
 
-if MOCK_NUMPY is not True:
+if consts.NUMPY:
     
+    export(isdtype,             name='isdtype')
+    export(Clamper,             name='Clamper')
     export(σ,                   name='σ')
     export(Σ,                   name='Σ')
     
@@ -97,5 +95,4 @@ if MOCK_NUMPY is not True:
     
     export(clamp,               name='clamp')
     
-    __all__, __dir__ = exporter.all_and_dir()
-    
+__all__, __dir__ = exporter.all_and_dir()

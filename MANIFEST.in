@@ -36,6 +36,7 @@ recursive-include scratch *.py *.ipynb
 recursive-include tests *.py *.jpg *.png *.toml *.json
 
 exclude .coverage
+exclude .noxresults.json
 exclude coverage.xml
 
 recursive-exclude clu *.pyc *~ *.so .DS_Store

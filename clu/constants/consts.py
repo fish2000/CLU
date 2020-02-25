@@ -83,6 +83,14 @@ MAXINT = getattr(sys, 'maxint',
 # The namespace separator for namespaced KeyMaps:
 NAMESPACE_SEP = sys.intern(os.pathsep)
 
+# A boolean value for “numpy” availability – False if it’s not present:
+try:
+    from clu.constants.polyfills import numpy
+except (ImportError, SyntaxError):
+    NUMPY = False
+else:
+    NUMPY = bool(numpy)
+
 # The PATH environment variable, with a sensible default:
 PYTHON_BIN = os.path.join(sysconfig.get_path('data'), 'bin')
 DEFAULT_PATH = os.pathsep.join(filter(os.path.exists, (PYTHON_BIN,
@@ -210,6 +218,7 @@ __all__ = ('APPNAME',
            'JYTHON',
            'LAMBDA', 'λ',
            'MAXINT',
+           'NUMPY',
            'NAMESPACE_SEP',
            'PATH',
            'PARTIAL', 'φ',

@@ -72,10 +72,9 @@ tox:
 	tox
 
 nox:
-	nox
+	nox --report $(PROJECT_BASE)/.noxresults.json
 
-renox: clean-test-artifacts
-	nox
+renox: clean-test-artifacts nox
 
 test: check pytest
 

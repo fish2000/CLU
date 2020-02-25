@@ -17,20 +17,21 @@ def checkmanifest(session):
     session.run('python', '-m', 'check_manifest', '-v')
 
 @nox.session
-@nox.parametrize('module', [
+@nox.parametrize('module', (
     nox.param('clu.constants',  id='consts'),
     nox.param('clu',            id='modules'),
-    nox.param('clu.version',    id='version'),
-])
+    nox.param('clu.version',    id='version')))
 def checkmodule(session, module):
-    """ Check CLU modules and constants """
+    """ Show CLU consts, modules, or versioning """
     session.install("-r", "requirements/install.txt")
+    if module == 'clu':
+        session.install("-r", "requirements/nox/tests.txt")
     session.run('python', '-m', module)
 
 # @nox.session(python=['3.7', '3.8', 'pypy3'])
 @nox.session
 def pytest(session):
-    """ Run CLU’s `pytest` unit test suite """
+    """ Run CLU’s entire unit-test suite with `pytest` """
     session.env['MACOSX_DEPLOYMENT_TARGET']         = '10.14'
     session.env['PYTEST_DISABLE_PLUGIN_AUTOLOAD']   = '1'
     session.install("-r", "requirements/install.txt")
@@ -44,15 +45,17 @@ def parametrized_inline_tests():
                      id=dotpath.lstrip('clu').lstrip('.'))
 
 @nox.session
-@nox.parametrize('module', list(parametrized_inline_tests()))
+@nox.parametrize('module', tuple(parametrized_inline_tests()))
 def inline(session, module):
-    """ Run CLU’s per-module inline test suite """
+    """ Run specific per-module inline tests """
     session.install("-r", "requirements/install.txt")
+    if str(module).endswith('mathematics'):
+        session.install("-r", "requirements/nox/tests.txt")
     session.run('python', '-m', module)
 
 @nox.session
 def codecov(session):
-    """ Run `codecov` for the project """
+    """ Run `codecov`, updating CLU’s statistics on codecov.io """
     session.env['MACOSX_DEPLOYMENT_TARGET']         = '10.14'
     session.env['PYTEST_DISABLE_PLUGIN_AUTOLOAD']   = '1'
     session.install("-r", "requirements/install.txt")

@@ -91,6 +91,9 @@ class ANSI(AliasingEnumMeta):
         def init_method(self, value):
             self.code = str(getattr(type(self).source, self.name, ''))
         
+        def bool_method(self):
+            return bool(self.to_string())
+        
         def str_method(self):
             return self.to_string()
         
@@ -111,6 +114,7 @@ class ANSI(AliasingEnumMeta):
         attributes['cache']     = CacheDescriptor()
         attributes['source']    = SourceDescriptor()
         attributes['__init__']  = init_method
+        attributes['__bool__']  = bool_method
         attributes['__str__']   = str_method
         attributes['__add__']   = add_method
         attributes['__doc__']   = inspect.cleandoc(doc_string)
@@ -149,7 +153,9 @@ class ANSI(AliasingEnumMeta):
     
     def convert(cls, specifier):
         """ Convert a specifier of unknown type to an enum or alias member """
-        if cls.is_ansi(specifier):
+        if specifier is None:
+            return cls.NOTHING
+        elif cls.is_ansi(specifier):
             return specifier                        # Already an ANSI type, return it
         if isstring(specifier):
             return cls.for_name(specifier)          # Match by name, decoding if necessary
@@ -192,7 +198,7 @@ class Text(ANSIBase, metaclass=ANSI, source=colorama.Fore):
     PINK                = alias(LIGHTRED_EX)
     LIGHTWHITE          = alias(LIGHTWHITE_EX)
     LIGHTYELLOW         = alias(LIGHTYELLOW_EX)
-    NOTHING             = auto()
+    NOTHING             = auto() # None
     RESET               = auto()
 
 @unique
@@ -224,7 +230,7 @@ class Background(ANSIBase, metaclass=ANSI, source=colorama.Back):
     PINK                = alias(LIGHTRED_EX)
     LIGHTWHITE          = alias(LIGHTWHITE_EX)
     LIGHTYELLOW         = alias(LIGHTYELLOW_EX)
-    NOTHING             = auto()
+    NOTHING             = auto() # None
     RESET               = auto()
 
 @unique
@@ -233,7 +239,7 @@ class Weight(ANSIBase, metaclass=ANSI, source=colorama.Style):
     BRIGHT              = auto()
     DIM                 = auto()
     NORMAL              = auto()
-    NOTHING             = auto()
+    NOTHING             = auto() # None
     RESET_ALL           = auto()
     RESET               = alias(RESET_ALL)
 
@@ -255,10 +261,17 @@ class ANSIFormat(clu.abstract.Format,
     
     @classmethod
     def pre_existing(cls, text, background, weight):
+        """ Boolean function to test the instance cache for the presence of
+            an ANSIFormat instance matching a given text/background/weight
+        """
         return hash((text, background, weight)) in (hash(key) for key in cls.instances.keys())
     
     @classmethod
     def instance_for(cls, text, background, weight):
+        """ Return an instance matching a given text/background/weight from
+            the instance cache, or – if such an instance can’t be found –
+            raise a descriptive KeyError to indicate failure
+        """
         h = hash((text, background, weight))
         for key in cls.instances.keys():
             if hash(key) == h:
@@ -267,11 +280,12 @@ class ANSIFormat(clu.abstract.Format,
     
     @classmethod
     def get_or_create(cls, text, background, weight):
-        # if cls.exists_for(text, background, weight):
-        #     return cls.instance_for(text, background, weight)
-        # inew = super().__new__(cls, text, background, weight)
-        # cls.instances[(text, background, weight)] = inew
-        # return inew
+        """ Return an instance matching the given text/background/weight.
+            
+            Any such instance found in the cache will be summarily returned;
+            otherwise, a new instance is created and ensconced in the cache
+            before finally ending up as the return itself.
+        """
         try:
             return cls.instance_for(text, background, weight)
         except KeyError:
@@ -306,11 +320,11 @@ class ANSIFormat(clu.abstract.Format,
     def to_string(self):
         """ Build up an initial ANSI format string based on values present """
         out = ""
-        if self.text is not None:
+        if bool(self.text):
             out += str(self.text)
-        if self.background is not None:
+        if bool(self.background):
             out += str(self.background)
-        if self.weight is not None:
+        if bool(self.weight):
             out += str(self.weight)
         return out
     
@@ -333,14 +347,15 @@ class ANSIFormat(clu.abstract.Format,
                 text = str(from_value, encoding=ENCODING)
             elif ANSIBase.is_ansi(from_value):
                 text = from_value
-        instance = cls.get_or_create(text, background, weight)
+        instance = cls.get_or_create(Text.convert(text),
+                               Background.convert(background),
+                                   Weight.convert(weight))
         return instance
     
     @classmethod
     def null(cls):
-        instance = super(ANSIFormat, cls).__new__(cls, None,
-                                                       None,
-                                                       None)
+        """  """
+        instance = super(ANSIFormat, cls).get_or_create(None, None, None)
         return instance
     
     def __str__(self):
@@ -360,9 +375,9 @@ class ANSIFormat(clu.abstract.Format,
            “background”, and “weight” fields are all set to None; otherwise it’s
             a Truthy value in boolean contexts
         """
-        return not (self.text is None and \
-                    self.background is None and \
-                    self.weight is None)
+        return not (bool(self.text) and \
+                    bool(self.background) and \
+                    bool(self.weight))
     
     def clone(self, deep=False, memo=None):
         # N.B. deep-cloning is meaningless here as everything’s an enum value:
@@ -371,9 +386,9 @@ class ANSIFormat(clu.abstract.Format,
                           weight=self.weight)
     
     def inner_repr(self):
-        return f"text={self.text.name or 'None'}, " \
-               f"background={self.background.name or 'None'}, " \
-               f"weight={self.weight.name or 'None'}"
+        return f"text={self.text and self.text.name or 'NOTHING'}, " \
+               f"background={self.background and self.background.name or 'NOTHING'}, " \
+               f"weight={self.weight and self.weight.name or 'NOTHING'}"
     
     def render(self, string):
         """ Render a string appropriately marked up with the ANSI formatting
@@ -417,6 +432,21 @@ def print_ansi_centered(text=None, color=None,
         return print_ansi(filler * (width or SEPARATOR_WIDTH), color=color, file=file)
     message = f" {text.strip()} "
     return print_ansi(message.center(width or SEPARATOR_WIDTH, filler), color=color, file=file)
+
+LIGHTBLUE   = ANSIFormat(text=Text.LIGHTBLUE)
+GRAY        = ANSIFormat(text=Text.GRAY)
+RED         = ANSIFormat(text=Text.RED)
+NOTHING     = ANSIFormat()
+
+chevron = RED.render("»")
+colon = GRAY.render(":")
+
+@export
+def print_ansi_name_value(name, value, most=25):
+    """ Format and colorize each segment of the name/value output """
+    itemname = LIGHTBLUE.render(f" {name} ".rjust(most+2))
+    itemvalue = GRAY.render(f" {value!s}")
+    print_ansi(chevron + itemname + colon + itemvalue, color=NOTHING)
 
 INITIAL     = '  ¶ '
 SUBSEQUENT  = '    '

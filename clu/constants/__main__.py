@@ -1,28 +1,28 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import os
-
 from clu.constants import consts
 from clu.predicates import isiterable, isnormative
 from clu.typology import isnumber, isbytes, ispath
 from clu.repl import ansi
+
 from clu.scripts import ansicolors as colors
 
-chevron = colors.red.render("»")
-colon = colors.gray.render(":")
+# chevron = colors.red.render("»")
+# colon = colors.gray.render(":")
 
-def printout(name, value, most=25):
-    """ Format and colorize each segment of the name/value output """
-    itemname = colors.lightblue.render(f" {name} ".rjust(most+2))
-    itemvalue = colors.gray.render(f" {value!s}")
-    ansi.print_ansi(chevron + itemname + colon + itemvalue, color=colors.nothing)
+# def printout(name, value, most=25):
+#     """ Format and colorize each segment of the name/value output """
+#     itemname = colors.lightblue.render(f" {name} ".rjust(most+2))
+#     itemvalue = colors.gray.render(f" {value!s}")
+#     ansi.print_ansi(chevron + itemname + colon + itemvalue, color=colors.nothing)
 
 def show():
     """ Print out all of the constant variables defined in consts.py,
         only nice-looking, and with ANSI
     """
     from clu.naming import qualified_name
+    import os
     
     # Header + footer:
     length = len(consts.__all__)
@@ -50,15 +50,15 @@ def show():
             elif ispath(const_value):
                 const_value = os.fspath(const_value)
             if const_name.endswith('PATH') and os.pathsep in const_value:
-                printout(const_name, const_value.replace(os.pathsep, SEP), most=most)
+                ansi.print_ansi_name_value(const_name, const_value.replace(os.pathsep, SEP), most=most)
             else:
-                printout(const_name, f"“{const_value}”", most=most)
+                ansi.print_ansi_name_value(const_name, f"“{const_value}”", most=most)
         elif isiterable(const_value):
-            printout(const_name, SEP.join(f"“{value!s}”" for value in const_value), most=most)
+            ansi.print_ansi_name_value(const_name, SEP.join(f"“{value!s}”" for value in const_value), most=most)
         elif isnumber(const_value):
-            printout(const_name, f"«{const_value!r}»", most=most)
+            ansi.print_ansi_name_value(const_name, f"«{const_value!r}»", most=most)
         else:
-            printout(const_name, const_value, most=most)
+            ansi.print_ansi_name_value(const_name, const_value, most=most)
     
     # Print footer:
     print()
@@ -67,6 +67,8 @@ def show():
 
 def main():
     """ Main CLI entry point """
+    import os
+    
     if consts.TEXTMATE:
         # Textmate: delegate to “consts.print_all()”:
         consts.print_all()
@@ -76,6 +78,9 @@ def main():
         if consts.DEBUG:
             print()
             print(f"")
+    
+    return os.EX_OK
 
 if __name__ == '__main__':
-    main()
+    import sys
+    sys.exit(main())

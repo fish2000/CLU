@@ -1,95 +1,23 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from collections import namedtuple as NamedTuple
 
-import pickle
-
-from clu.all import import_all_modules
-from clu.constants import consts
-from clu.exporting import Exporter
-from clu.naming import nameof, moduleof
-from clu.repl import ansi
+# from clu.repl.modules import Mismatch, Mismatches, Result, Results
+from clu.repl.modules import compare_module_lookups_for_all_things
+from clu.repl.modules import isplural
 from clu.repl.columnize import columnize
+from clu.repl import ansi
+
 from clu.scripts import ansicolors as colors
 
-chevron = colors.red.render("»")
-ronchev = colors.gray.render("»")
-colon = colors.gray.render(":")
+# chevron = colors.red.render("»")
+# ronchev = colors.gray.render("»")
+# colon = colors.gray.render(":")
 
-def printout(name, value, most=25):
-    """ Format and colorize each segment of the name/value output """
-    itemname = colors.brightblue.render(f" {name} ".rjust(most+2))
-    itemvalue = colors.gray.render(f" {value}")
-    ansi.print_ansi(chevron + itemname + colon + itemvalue, color=colors.nothing)
-
-Mismatch = NamedTuple('Mismatch', ('which',
-                                   'determine',
-                                   'modulename',
-                                   'thingname',
-                                   'idx'))
-
-Mismatches = NamedTuple('Mismatches', ('total',
-                                       'mismatch_records',
-                                       'failure_rate'))
-
-Result = NamedTuple('Result', ('modulename',
-                               'thingnames',
-                               'idx'))
-
-Results = NamedTuple('Results', ('total',
-                                 'modulenames',
-                                 'result_records'))
-
-def compare_module_lookups_for_all_things():
-    """ Iterate through each exported item, for each exported module,
-        and look up the original module of the exported item with both:
-            
-            1) “pickle.whichmodule(…)” and
-            2) “clu.naming.moduleof(…)”
-        
-        … comparing the results of the two search functions and computing
-        the overall results.
-    """
-    idx = 0
-    total = 0
-    mismatch_count = 0
-    mismatches = []
-    results = []
-    
-    clumodules = import_all_modules(consts.BASEPATH,
-                                    consts.PROJECT_NAME,
-                                    consts.EXPORTER_NAME)
-    assert clumodules
-    
-    modulenames = tuple(Exporter.modulenames())
-    
-    for modulename in modulenames:
-        exports = Exporter[modulename].exports()
-        total += len(exports)
-        results.append(Result(modulename, tuple(exports.keys()), idx))
-        for name, thing in exports.items():
-            whichmodule = pickle.whichmodule(thing, None)
-            determination = moduleof(thing)
-            try:
-                assert determination == whichmodule
-            except AssertionError:
-                mismatches.append(Mismatch(whichmodule,
-                                           determination,
-                                           modulename,
-                                           nameof(thing),
-                                           mismatch_count))
-                mismatch_count += 1
-            idx += 1
-    
-    # In practice the failure rate seemed to be around 7.65 %
-    failure_rate = 100 * (float(mismatch_count) / float(total))
-    assert failure_rate < 10.0 # percent
-    
-    return Results(idx, modulenames, tuple(results)), \
-           Mismatches(total,         tuple(mismatches),
-                                           failure_rate)
-
-isplural = lambda integer: integer != 1 and 's' or ''
+# def printout(name, value, most=25):
+#     """ Format and colorize each segment of the name/value output """
+#     itemname = colors.brightblue.render(f" {name} ".rjust(most+2))
+#     itemvalue = colors.gray.render(f" {value}")
+#     ansi.print_ansi(chevron + itemname + colon + itemvalue, color=colors.nothing)
 
 def show():
     """ Prettyprint the module lookup results """
@@ -109,8 +37,8 @@ def show():
     for result in results.result_records:
         thinglength = len(result.thingnames)
         columns = columnize(result.thingnames)
-        printout(f"{result.modulename}",
-                 f"{thinglength} exported thing{isplural(thinglength)}", most=most)
+        ansi.print_ansi_name_value(f"{result.modulename}",
+                                   f"{thinglength} exported thing{isplural(thinglength)}", most=most)
         print()
         ansi.print_ansi(columns,         color=colors.green)
         print()
@@ -121,8 +49,8 @@ def show():
     for mismatch in mismatches.mismatch_records:
         idx = f"{mismatch.idx}"
         
-        printout(f"{mismatch.thingname} [{idx.zfill(2)}]",
-                 f"{mismatch.which} ≠ {mismatch.determine}", most=most)
+        ansi.print_ansi_name_value(f"{mismatch.thingname} [{idx.zfill(2)}]",
+                                   f"{mismatch.which} ≠ {mismatch.determine}", most=most)
     
     print()
     ansi.print_ansi_centered(footer0,    color=colors.cyan)
@@ -131,16 +59,24 @@ def show():
 
 def main():
     """ Main CLI entry point """
+    from clu.constants import consts
+    import os
+    
     if consts.TEXTMATE:
         print()
         print("NO TEXTMATE VERSION AT THIS TIME SO SORRY COME BACK ANYTIME")
         print()
+        return os.EX_IOERR
+    
     else:
         # Show ’em and weep:
         show()
         if consts.DEBUG:
             print()
             print(f"")
+    
+    return os.EX_OK
 
 if __name__ == '__main__':
-    main()
+    import sys
+    sys.exit(main())

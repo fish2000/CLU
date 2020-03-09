@@ -41,9 +41,9 @@ printout = lambda name, value: print("» %25s : %s" % (name, value))
 @export
 def natural_millis(millis):
     """ Convert a quantity of milliseconds to an English expression """
-    import humanize
+    import humanize, datetime
     return humanize.naturaldelta(
-           humanize.time.timedelta(milliseconds=millis))
+           datetime.timedelta(milliseconds=millis))
 
 MOST = 38
 

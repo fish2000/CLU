@@ -542,11 +542,11 @@ class InlineTester(collections.abc.Set,
                   f", {diacount} diagnostic{multiple(diacount)}")
             
             # Body:
-            asterisks('≈')
+            asterisks('∆')
             print(out)
             
             # Footer:
-            asterisks('≠')
+            asterisks('∇')
         
         elif mode == 'json':
             out = json_report(report)

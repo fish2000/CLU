@@ -456,8 +456,8 @@ def print_ansi_name_value(name, value, most=25,
                      + equals + val, color=NOTHING)
 
 # Regex boolean predicates for matching marked (or bulleted) paragraphs:
-para_mark_matcher = re_matcher(r"^\s*[0-9+•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
-para_line_matcher = re_matcher(r"^\s*[+•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
+para_mark_matcher = re_matcher(r"^\s*[0-9•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
+para_line_matcher = re_matcher(r"^\s*[•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
 
 @export
 def paragraphize(doc):

@@ -1106,7 +1106,7 @@ class Directory(collections.abc.Hashable,
                                excludes=('~', '#', 'ds_store', '.git')):
         """ Return a ‘collections.Counter’ filled with a histogram of the
             file suffixes for all files found in the given subdirectory,
-            excluding anything matching any of the “excludes” strings
+            excluding anything matching any of the “excludes” strings.
         """
         excluder = re_excluder(excludes)
         searcher = re_searcher(re.escape(os.extsep))

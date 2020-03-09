@@ -1127,7 +1127,7 @@ class Directory(collections.abc.Hashable,
                        excludes=('~', '#', 'ds_store', '.git')):
         """ Return a generator over all the file suffixes of all files
             found recursively within the given subdirectory, excluding
-            anything matching any of the “excludes” strings
+            anything matching any of the “excludes” strings.
         """
         yield from self.suffix_histogram(subdir=subdir,
                                          source=source,

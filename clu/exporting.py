@@ -558,7 +558,8 @@ class ExporterBase(collections.abc.MutableMapping,
         if thing is self:
             raise ExportError("can’t export an exporter instance directly")
         
-        ### if dname in (λ, φ, name, named):
+        # Re-target bound-method-type things to their parent function definition:
+        target = getattr(thing, '__func__', thing)
         
         # At this point, “named” is valid -- if we were passed
         # a callable, try to rename it with either our valid name,
@@ -571,11 +572,8 @@ class ExporterBase(collections.abc.MutableMapping,
             if named is None:
                 raise ExportError(type(self).messages['noname'] % id(thing))
             
-            # Retrieve the things’ ostensible name attribute value,
+            # Retrieve the things’ ostensible __name__ and __qualname__ attribute values:
             dname = getattr(thing, '__name__')
-            
-            # Re-target bound-method-type things to their parent function definition:
-            target = getattr(thing, '__func__', thing)
             qname = getattr(target, '__qualname__')
             
             # ATTEMPT TO RENAME!!!…
@@ -608,7 +606,6 @@ class ExporterBase(collections.abc.MutableMapping,
         # types that lack mutable __dict__ internals (or at least
         # a settable __doc__ slot or established attribute).
         if doc is not None:
-            target = getattr(thing, '__func__', thing)
             try:
                 target.__doc__ = inspect.cleandoc(doc)
             except (AttributeError, TypeError):

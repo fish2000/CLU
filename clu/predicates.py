@@ -272,7 +272,7 @@ def enumchoices(cls):
 
 @export
 def wrap_value(value):
-    """ Get a “lazified” copy of a value, wrapped in a lamba """
+    """ wrap_value(value) → Get a “lazified” copy of `value`, wrapped in a lamba """
     wrapper = lambda *args, **kwargs: value
     wrapper.__wrapped__ = value
     return wrapper

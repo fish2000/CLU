@@ -110,9 +110,21 @@ def test():
     @inline
     def test_one():
         """ Instance the base Application class """
-        app = Application('test_app', doc="Test Application Instance")
+        # First, instance it normally:
+        test_app = Application('test_app', doc="Test Application Instance")
+        
+        assert test_app
+        assert test_app._exporter is Exporter
+        assert test_app.appname == consts.APPNAME
+        assert test_app.appspace == DEFAULT_APPSPACE
+        
+        # Scond, instance it via import hook:
+        from clu.app import Application as app
+        
         assert app
         assert app._exporter is Exporter
+        assert app.appname == consts.APPNAME
+        assert app.appspace == DEFAULT_APPSPACE
     
     @inline
     def test_two():
@@ -121,12 +133,14 @@ def test():
         class Shmapplication(AppBase, appname='flynn'):
             pass
         
+        # First, instance it normally:
         shmapp = Shmapplication('test_subclass', doc="Test Secondary Subclass")
         
         assert shmapp
         assert shmapp.appname == 'flynn'
         assert shmapp.appspace == 'app'
         
+        # Scond, instance it via import hook:
         from flynn.app import Shmapplication as shmodule
         
         assert shmodule
@@ -145,6 +159,29 @@ def test():
         
         print("consts.APPNAME:", consts.APPNAME)
         print("DEFAULT_APPSPACE:", DEFAULT_APPSPACE)
+    
+    @inline.diagnostic
+    def show_spec_cache():
+        from clu.importing import FinderBase
+        from pprint import pformat
+        
+        speccount = len(FinderBase.specs)
+        plural = (speccount == 1) and "spec" or "specs"
+        
+        print(f"SPEC CACHE ({speccount} {plural} total):")
+        
+        for specname in sorted(FinderBase.specs.keys()):
+            spec = FinderBase.specs[specname]
+            string = pformat(spec.__dict__, indent=4)
+            cached = getattr(spec, 'cached', None)
+            hasloc = getattr(spec, 'has_location', None)
+            parent = getattr(spec, 'parent', None)
+            print()
+            print(f"    «{specname}»")
+            print(f"{string}")
+            print(f"    +      cached: {cached}")
+            print(f"    +has_location: {hasloc}")
+            print(f"    +      parent: {parent}")
     
     return inline.test(100)
 

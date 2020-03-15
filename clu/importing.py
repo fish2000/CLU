@@ -273,6 +273,9 @@ class FinderBase(clu.abstract.AppName,
                 return cls.spec(fullname)
             return None
         appname, appspace, *remainders = fullname.split(consts.QUALIFIER, 2)
+        # if appname == cls.appname and appname in polymers:
+        #     if appspace in polymers[appname].appspaces():
+        #         return cls.spec(fullname)
         if appname == cls.appname and appspace in polymers.all_appspaces():
             return cls.spec(fullname)
         return None
@@ -338,6 +341,9 @@ class LoaderBase(clu.abstract.AppName,
                 if spec.name == cls.appname:
                     return self.package_module(spec.name)
                 appname, appspace, *remainders = spec.name.split(consts.QUALIFIER, 2)
+                # if appname == cls.appname and appname in polymers:
+                #     if appspace in polymers[appname].appspaces():
+                #         return self.package_module(spec.name)
                 if appname == cls.appname and appspace in polymers.all_appspaces():
                     return self.package_module(spec.name)
             return None

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import namedtuple as NamedTuple
+from functools import lru_cache
 
 import collections.abc
 import clu.abstract
@@ -17,6 +18,8 @@ from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
+
+cache       = lambda function: export(lru_cache(maxsize=128, typed=True)(function))
 
 notpyname   = negate(ispyname)
 isplural    = lambda integer: integer != 1 and 's' or ''
@@ -111,7 +114,7 @@ class ModuleMap(collections.abc.Mapping,
         # all cloned instances are shallow:
         return type(self)(self)
 
-@export
+@cache
 def compare_module_lookups_for_all_things(*modules, **options):
     """ Iterate through each exported item, for each exported module,
         and look up the original module of the exported item with both:

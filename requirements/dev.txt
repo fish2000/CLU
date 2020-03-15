@@ -1,7 +1,6 @@
 -r changelog.txt
 -r docs.txt
 -r typecheck.txt
-appdirs>=1.4.3
 blessings>=1.7
 bpython>=0.18
 bumpversion>=0.5.3

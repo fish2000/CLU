@@ -45,7 +45,7 @@ class TestPredicates(object):
         
         morefields = ('name', 'old', 'new', 'exists',
                       'will_change', 'did_change', 'will_change_back', 'did_change_back',
-                      'destroy', 'prefix', 'suffix', 'parent')
+                      'destroy', 'prefix', 'suffix', 'parent', 'change')
         
         assert ancestral_union('fields', Directory) == fields
         assert ancestral_union('fields', TemporaryDirectory) == morefields

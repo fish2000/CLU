@@ -569,7 +569,9 @@ def test():
     
     @inline
     def test_two():
+        ansidoc(Enum)
         ansidoc(ansidoc)
+        ansidoc(Exporter)
     
     return inline.test(10)
 

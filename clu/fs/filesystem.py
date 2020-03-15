@@ -334,10 +334,11 @@ class TemporaryName(collections.abc.Hashable,
         Unless you say not to. Really it's your call dogg I could give AF
     """
     
-    fields = ('name',   'exists', 
-                        'destroy',
-              'mode',   'binary_mode',
-              'prefix', 'suffix', 'dirname')
+    fields = ('name', 'exists', 'destroy',
+              'mode', 'binary_mode',
+             'flags', 'prefix',
+                      'suffix',
+                      'dirname')
     
     def __init__(self, prefix=None, suffix="tmp",
                        parent=None,
@@ -483,6 +484,11 @@ class TemporaryName(collections.abc.Hashable,
     def filesize(self):
         """ The filesize for the temporary file """
         return filesize(self._name)
+    
+    @property
+    def flags(self):
+        """ A flag value matching the instances’ mode and deletion disposition. """
+        return modeflags(self.mode, self._destroy)
     
     def split(self):
         """ Return (dirname, basename) e.g. for /yo/dogg/i/heard/youlike.jpg,
@@ -1275,9 +1281,12 @@ class TemporaryDirectory(Directory):
     """
     
     fields = ('name', 'old', 'new', 'exists',
-              'destroy', 'prefix',  'suffix', 'parent',
-              'will_change',        'did_change',
-              'will_change_back',   'did_change_back')
+              'destroy', 'prefix', 
+                         'suffix',
+                         'parent',
+                   'change',
+              'will_change',      'did_change',
+              'will_change_back', 'did_change_back')
     
     def __init__(self, prefix="TemporaryDirectory-", suffix="",
                                                      parent=None,

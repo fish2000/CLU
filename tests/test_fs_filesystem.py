@@ -14,6 +14,22 @@ class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     
+    def test_modeflags(self, consts):
+        from clu.fs.filesystem import modeflags
+        from tempfile import _bin_openflags as binflags, _text_openflags as textflags
+        
+        # N.B. the DELETE_FLAG const is zero on non-Windows systems
+        
+        assert modeflags('r') == textflags | consts.DELETE_FLAG
+        assert modeflags('w') == textflags | consts.DELETE_FLAG
+        assert modeflags('rb') == binflags | consts.DELETE_FLAG
+        assert modeflags('wb') == binflags | consts.DELETE_FLAG
+        
+        assert modeflags('r', delete=False) == textflags
+        assert modeflags('w', delete=False) == textflags
+        assert modeflags('rb', delete=False) == binflags
+        assert modeflags('wb', delete=False) == binflags
+    
     def test_suffixes(self, dirname):
         from clu.fs.misc import extension
         
@@ -32,7 +48,6 @@ class TestFsFilesystem(object):
                     assert ext in keys
     
     def test_suffix_histogram(self, dirname):
-        
         histo = dirname.suffix_histogram()
         
         assert len(histo)
@@ -173,6 +188,7 @@ class TestFsFilesystem(object):
             assert os.path.basename(f) in destination
     
     def test_zip_archive_temporaryname(self, dirname, temporaryname):
+        from clu.fs.filesystem import modeflags
         
         # Ensure the “data” directory has something
         # in it, of which we can make use:
@@ -187,6 +203,7 @@ class TestFsFilesystem(object):
         
         assert tzip.exists
         assert tzip.filesize > 10000
+        assert tzip.flags == modeflags(tzip.mode, tzip.destroy)
         assert os.path.exists(tzip)
         assert os.lstat(tzip).st_size > 10000
         
@@ -429,6 +446,7 @@ class TestFsFilesystem(object):
         
         p = temporarydir.subdirectory('a/b')
         assert temporarydir.exists
+        assert not temporarydir.change
         assert not p.exists
         
         with pytest.raises(FilesystemError) as exc:
@@ -441,7 +459,7 @@ class TestFsFilesystem(object):
     
     def test_TemporaryName(self):
         """ Tests for clu.fs.filesystem.TemporaryName """
-        from clu.fs.filesystem import TemporaryName
+        from clu.fs.filesystem import TemporaryName, modeflags
         initial = os.getcwd()
         tfp = None
         
@@ -452,12 +470,15 @@ class TestFsFilesystem(object):
             assert gettempdir() in tfn.name
             assert tfn.prefix == "test-temporaryname-"
             assert tfn.suffix == ".tmp"
+            assert tfn.mode == 'wb'
+            assert tfn.binary_mode
             assert not tfn._parent
             assert tfn.prefix in tfn.name
             assert tfn.suffix in tfn.name
             assert tfn.prefix in os.fspath(tfn)
             assert tfn.suffix in os.fspath(tfn)
             assert tfn.destroy
+            assert tfn.flags == modeflags('wb', delete=True)
             assert type(tfn.directory(os.path.basename(tfn.name))) == Directory
             assert isinstance(tfn,                          TemporaryName)
             assert isinstance(tfn,                          collections.abc.Hashable)
@@ -525,6 +546,7 @@ class TestFsFilesystem(object):
     def test_cd(self):
         """ Tests for clu.fs.filesystem.cd """
         from clu.fs.filesystem import cd
+        from clu.fs.misc import differentfile
         initial = os.getcwd()
         
         with cd(gettempdir()) as tmp:
@@ -534,9 +556,9 @@ class TestFsFilesystem(object):
             assert os.path.samefile(gettempdir(),         tmp.new)
             assert os.path.samefile(os.getcwd(),          os.fspath(tmp))
             assert os.path.samefile(gettempdir(),         os.fspath(tmp))
-            assert not os.path.samefile(os.getcwd(),      initial)
-            assert not os.path.samefile(tmp.new,          initial)
-            assert not os.path.samefile(os.fspath(tmp),   initial)
+            assert differentfile(os.getcwd(),             initial)
+            assert differentfile(tmp.new,                 initial)
+            assert differentfile(os.fspath(tmp),          initial)
             assert os.path.samefile(tmp.old,              initial)
             assert tmp.will_change
             assert tmp.did_change
@@ -556,6 +578,7 @@ class TestFsFilesystem(object):
     def test_td(self):
         """ Tests for clu.fs.filesystem.td """
         from clu.fs.filesystem import td
+        from clu.fs.misc import differentfile
         initial = os.getcwd()
         
         with td() as tmp:
@@ -565,9 +588,9 @@ class TestFsFilesystem(object):
             assert os.path.samefile(gettempdir(),         tmp.new)
             assert os.path.samefile(os.getcwd(),          os.fspath(tmp))
             assert os.path.samefile(gettempdir(),         os.fspath(tmp))
-            assert not os.path.samefile(os.getcwd(),      initial)
-            assert not os.path.samefile(tmp.new,          initial)
-            assert not os.path.samefile(os.fspath(tmp),   initial)
+            assert differentfile(os.getcwd(),             initial)
+            assert differentfile(tmp.new,                 initial)
+            assert differentfile(os.fspath(tmp),          initial)
             assert os.path.samefile(tmp.old,              initial)
             assert tmp.will_change
             assert tmp.did_change
@@ -587,7 +610,7 @@ class TestFsFilesystem(object):
     def test_hd(self):
         """ Tests for clu.fs.filesystem.hd """
         from clu.fs.filesystem import hd
-        from clu.fs.misc import gethomedir
+        from clu.fs.misc import differentfile, gethomedir
         initial = os.getcwd()
         
         with hd() as home:
@@ -597,9 +620,9 @@ class TestFsFilesystem(object):
             assert os.path.samefile(gethomedir(),         home.new)
             assert os.path.samefile(os.getcwd(),          os.fspath(home))
             assert os.path.samefile(gethomedir(),         os.fspath(home))
-            assert not os.path.samefile(os.getcwd(),      initial)
-            assert not os.path.samefile(home.new,         initial)
-            assert not os.path.samefile(os.fspath(home),  initial)
+            assert differentfile(os.getcwd(),             initial)
+            assert differentfile(home.new,                initial)
+            assert differentfile(os.fspath(home),         initial)
             assert os.path.samefile(home.old,             initial)
             assert home.will_change
             assert home.did_change
@@ -640,6 +663,7 @@ class TestFsFilesystem(object):
             assert ttd.prefix in ttd.name
             assert ttd.exists
             assert ttd.destroy
+            assert ttd.change
             assert ttd.will_change
             assert ttd.did_change
             assert ttd.will_change_back

@@ -17,6 +17,7 @@ lmdb>=0.8.0
 nox>=2019.11.9
 numpy>=1.18.0
 parso>=0.6.1
+Pillow>=7.0.0
 prompt-toolkit>=3.0.3
 ptpython>=3.0.0
 python-dateutil>=2.8.0

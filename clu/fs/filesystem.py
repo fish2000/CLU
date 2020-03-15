@@ -203,20 +203,20 @@ def rm_rf(path):
     try:
         if os.path.isfile(path):
             os.unlink(path)
-            return True
+            return not os.path.isfile(path)
         elif os.path.islink(path):
             os.unlink(path)
-            return True
+            return not os.path.islink(path)
         elif os.path.isdir(path):
             shutil.rmtree(path)
-            return True
+            return not os.path.isdir(path)
+        elif os.path.ismount(path):
+            raise FilesystemError(f"Couldn’t rm_rf(…): {path!s} is a mountpoint")
     except FileNotFoundError:
         return False
-    except OSError:
-        return False
-    except IOError as exc:
-        raise FilesystemError(f"Fatal in underlying “rm_rf(…)” syscall: {path}") from exc
-    raise FilesystemError(f"Couldn’t remove path: {path}")
+    except (OSError, IOError) as exc:
+        raise FilesystemError(f"Fatal in underlying “rm_rf(…)” syscall: {path!s}") from exc
+    raise FilesystemError(f"Failed to rm_rf(…): {path!s}")
 
 @export
 def temporary(suffix='', prefix='', parent=None, **kwargs):

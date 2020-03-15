@@ -81,8 +81,8 @@ class ModuleMap(collections.abc.Mapping,
             raise KeyError(key)
         try:
             out = getattr(self.module, key)
-        except AttributeError:
-            raise KeyError(key)
+        except AttributeError as exc:
+            raise KeyError(key) from exc
         return out
     
     def __len__(self):

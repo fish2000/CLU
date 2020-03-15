@@ -1021,7 +1021,7 @@ class ProxyModule(Module):
             return self.__proxies__[key]
         except KeyError as exc:
             typename = type(self).__name__
-            raise AttributeError(f"‘{typename}’ access failure for {key}: «{exc!s}»")
+            raise AttributeError(f"‘{typename}’ access failure for «{key}»") from exc
 
 export(Module, name='Module')
 export(Finder, name='Finder')

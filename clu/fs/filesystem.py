@@ -215,7 +215,7 @@ def rm_rf(path):
     except OSError:
         return False
     except IOError as exc:
-        raise FilesystemError(f"Fatal in underlying “rm_rf(…)” syscall: {exc!s}, {path}")
+        raise FilesystemError(f"Fatal in underlying “rm_rf(…)” syscall: {path}") from exc
     raise FilesystemError(f"Couldn’t remove path: {path}")
 
 @export
@@ -313,13 +313,13 @@ def TemporaryNamedFile(temppath, mode='wb',
         descriptor = os.open(path, flags)
         filehandle = os.fdopen(descriptor, mode, buffer_size)
         return TemporaryFileWrapper(filehandle, path, delete)
-    except BaseException as base_exception:
+    except BaseException as exc:
         try:
             rm_rf(path)
         finally:
             if descriptor > 0:
                 os.close(descriptor)
-        raise FilesystemError(str(base_exception))
+        raise FilesystemError("error in underlying syscalls") from exc
 
 @export
 class TemporaryName(collections.abc.Hashable,
@@ -897,8 +897,8 @@ class Directory(collections.abc.Hashable,
                         os.fspath(subpath or os.curdir))),
                         exist_ok=False,
                         mode=masked_permissions(mode))
-        except OSError as os_error:
-            raise FilesystemError(str(os_error))
+        except OSError as exc:
+            raise FilesystemError("error in underlying syscalls") from exc
         return self
     
     def walk(self, followlinks=True):
@@ -1433,11 +1433,11 @@ def NamedTemporaryFile(mode='w+b', buffer_size=-1,
     try:
         filehandle = os.fdopen(descriptor, mode, buffer_size)
         return TemporaryFileWrapper(filehandle, name, delete)
-    except BaseException as base_exception:
+    except BaseException as exc:
         rm_rf(name)
         if descriptor > 0:
             os.close(descriptor)
-        raise FilesystemError(str(base_exception))
+        raise FilesystemError("error in underlying syscalls") from exc
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

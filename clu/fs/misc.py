@@ -2,9 +2,7 @@
 from __future__ import print_function
 from functools import lru_cache
 
-import os
-import re
-import sys
+import sys, re, os
 
 from clu.constants.consts import DOLLA, ENCODING, QUALIFIER
 from clu.predicates import negate, true_function, itervariadic
@@ -14,13 +12,13 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-cache = lambda function: export(lru_cache(maxsize=32)(function))
-onecache = lambda function: export(lru_cache(maxsize=1)(function))
+cache           = lambda function: export(lru_cache(maxsize=32)(function))
+onecache        = lambda function: export(lru_cache(maxsize=1)(function))
 
 # OS UTILITIES: get the current users’ home directory
 
-gethomedir = lambda: os.path.expanduser("~")
-isinvalidpath = negate(isvalidpath)
+gethomedir      = lru_cache(maxsize=1)(lambda: os.path.expanduser("~"))
+isinvalidpath   = negate(isvalidpath)
 
 @cache
 def re_matcher(string):

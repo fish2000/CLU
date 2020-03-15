@@ -309,8 +309,8 @@ class ChainMap(collections.abc.MutableMapping,
     def __delitem__(self, key):
         try:
             del self.top[key]
-        except KeyError:
-            raise KeyError(f'Key not found in the topmost mapping: {key!r}')
+        except KeyError as exc:
+            raise KeyError(f'Key not found in the topmost mapping: {key!r}') from exc
     
     def popitem(self):
         """ chainmap.popitem() → (key, value), remove & return a (key, value)
@@ -319,8 +319,8 @@ class ChainMap(collections.abc.MutableMapping,
         """
         try:
             return self.top.popitem()
-        except KeyError:
-            raise KeyError('No keys found in the topmost mapping')
+        except KeyError as exc:
+            raise KeyError('No keys found in the topmost mapping') from exc
     
     def pop(self, key, default=NoDefault):
         """ chainmap.pop(key[, default]) → v, remove specified “key” from

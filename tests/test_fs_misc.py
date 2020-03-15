@@ -13,6 +13,8 @@ class TestFsMisc(object):
     def test_gethomedir(self, environment):
         from clu.fs.misc import gethomedir
         if 'HOME' in environment:
+            # it’s cached, so do it twice:
+            assert gethomedir() == environment['HOME']
             assert gethomedir() == environment['HOME']
     
     def test_re_matcher(self):

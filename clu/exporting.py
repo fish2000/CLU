@@ -79,8 +79,8 @@ class Modulespace(object):
     def __getattr__(self, key):
         try:
             module = importlib.import_module(key)
-        except (ModuleNotFoundError, ImportError):
-            raise AttributeError("could not import module: %s" % key)
+        except (ModuleNotFoundError, ImportError) as exc:
+            raise AttributeError("could not import module: %s" % key) from exc
         return module
 
 @cache

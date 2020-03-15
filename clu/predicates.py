@@ -397,7 +397,7 @@ isdictish = lambda thing: haspyattr(thing, 'dict') and negate(isclasstype)(thing
 isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and negate(isclasstype)(thing)
 
 # For sorting with ALL_CAPS stuff first or last:
-case_sort = lambda string: string.lower() if string.isupper() else string.upper()
+case_sort = lambda string: string.casefold() if string.isupper() else string.upper()
 
 # UTILITY FUNCTIONS: helpers for builtin container types:
 

@@ -59,6 +59,23 @@ class Format(abc.ABC):
         """ Render a string with respect to the Format instance. """
         ...
 
+class NonFormat(Format):
+    
+    """ A “format” type whose “render(…)” method is a no-op. """
+    __slots__ = tuple()
+    
+    def __init__(self, *args):
+        pass
+    
+    def render(self, string):
+        """ Return a string, unchanged """
+        return str(string)
+
+class SlottedFormat(Format, metaclass=Slotted):
+    
+    """ A base format type, with a slot for a format-operation string. """
+    __slots__ = 'opstring'
+
 class Cloneable(abc.ABC):
     
     """ An abstract class representing something “clonable.” A cloneable
@@ -285,12 +302,13 @@ else:
         pass
 
 __all__ = ('Slotted', 'NonSlotted',
-           'Format',
-           'Cloneable',
-           'ReprWrapper',
-           'SlottedRepr', 'MappingViewRepr',
+           'Format', 'NonFormat', 'SlottedFormat',
+           'Cloneable', 'ReprWrapper',
+                        'SlottedRepr',
+                        'MappingViewRepr',
            'Descriptor', 'ValueDescriptor',
-           'BasePath', 'AppName',
+           'BasePath',
+           'AppName',
            'ManagedContext', 'AsyncManagedContext')
 
 __dir__ = lambda: list(__all__)

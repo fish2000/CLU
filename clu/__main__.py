@@ -5,6 +5,7 @@ from clu.repl.modules import compare_module_lookups_for_all_things
 from clu.repl.modules import isplural
 from clu.repl.columnize import columnize
 from clu.repl import ansi
+from clu.stdio import TermSize
 
 from clu.scripts import ansicolors as colors
 
@@ -22,10 +23,11 @@ def show():
     print()
     
     most = max(len(result.modulename) for result in results.result_records)
+    width = TermSize().width
     
     for result in results.result_records:
         thinglength = len(result.thingnames)
-        columns = columnize(result.thingnames)
+        columns = columnize(result.thingnames, display_width=width)
         ansi.print_ansi_name_value(f"{result.modulename}",
                                    f"{thinglength} exported thing{isplural(thinglength)}", most=most)
         print()

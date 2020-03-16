@@ -401,22 +401,10 @@ class ANSIFormat(clu.abstract.Format,
         return f"{prefix}{string!s}{suffix}"
 
 @export
-class NonFormat(clu.abstract.Format):
-    
-    """ A “format” type whose “render(…)” method is a no-op. """
-    
-    def __init__(self, *args):
-        pass
-    
-    def render(self, string):
-        """ Return a string, unchanged """
-        return string
-
-@export
 def print_ansi(text, color=None, file=std.OUT):
     """ print_ansi(…) → Print text in ANSI color, using optional inline markup
                         from `colorama` for terminal color-escape delimiters """
-    FormatClass = file.isatty() and ANSIFormat or NonFormat
+    FormatClass = file.isatty() and ANSIFormat or clu.abstract.NonFormat
     fmt = FormatClass(color)
     for line in text.splitlines():
         print(fmt.render(line), sep='', end='\n', file=file)

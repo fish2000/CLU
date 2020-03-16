@@ -6,8 +6,7 @@ import abc
 import clu.abstract
 import collections.abc
 import contextlib
-import os
-import sys
+import sys, os
 import weakref
 
 abstract = abc.abstractmethod
@@ -99,6 +98,10 @@ class BaseFSName(collections.abc.Hashable,
         """ The instances’ target path. """
         ...
     
+    @abstract
+    def to_string(self):
+        ...
+    
     @property
     def basename(self):
         """ The basename (aka the name of the instance, like as opposed to the
@@ -171,10 +174,6 @@ class BaseFSName(collections.abc.Hashable,
     def close(self):
         """ Stub method -- always returns True: """
         return True
-    
-    @abstract
-    def to_string(self):
-        ...
     
     def inner_repr(self):
         return self.to_string()

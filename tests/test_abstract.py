@@ -8,6 +8,12 @@ import os
 
 import pytest
 
+@pytest.fixture(scope='module')
+def capstrings():
+    yield ('YoDogg',
+           'iHeardYouLike',
+           'VariouslyCapitalizedStrings')
+
 class TestAbstractMetas(object):
     
     """ Run the tests for the clu.abstract module’s metaclasses. """
@@ -154,6 +160,28 @@ class TestAbstractABCs(object):
         assert not compare_instance_reprs(i0, i2)
         assert not compare_instance_reprs(i0, i1, i2)
     
+    def test_abc_Format(self, capstrings):
+        
+        class UpperCaser(clu.abstract.Format):
+            def render(self, string):
+                return str(string).upper()
+        
+        class CaseFolder(clu.abstract.Format):
+            def render(self, string):
+                return str(string).casefold()
+        
+        uppercaser = UpperCaser()
+        casefolder = CaseFolder()
+        do_nothing = clu.abstract.NonFormat()
+        
+        for string in capstrings:
+            assert uppercaser.render(string) == string.upper()
+            assert uppercaser.render(string).isupper()
+            assert casefolder.render(string) == string.casefold()
+            assert casefolder.render(string).islower()
+            assert do_nothing.render(string) == str(string)
+            assert do_nothing.render(string).isprintable() # why not
+    
     def test_abc_AppName(self):
         
         class AppConfigBase(clu.abstract.AppName):
@@ -240,6 +268,34 @@ class TestAbstractReprClasses(object):
         assert compare_instance_reprs(values.replace('ValuesView', 'ItemsView'), items)
         assert not compare_instance_reprs(keys, items)
         assert not compare_instance_reprs(values, items)
+
+class TestAbstractFormats(object):
+    
+    """ Run the tests for the clu.abstract module’s format types. """
+    
+    def test_format_SlottedFormat(self, capstrings):
+        
+        class HTMLTagger(clu.abstract.SlottedFormat):
+            
+            def __init__(self, tag_name):
+                self.opstring = "<"  + tag_name.casefold() \
+                              + ">"  + "{0}"               \
+                              + "</" + tag_name.casefold() \
+                              + ">"
+            
+            def render(self, string):
+                return self.opstring.format(string)
+        
+        boldizer        = HTMLTagger('b')
+        italizer        = HTMLTagger('i')
+        strengthener    = HTMLTagger('strong')
+        emphasizer      = HTMLTagger('em')
+        
+        for string in capstrings:
+            assert boldizer.render(string) == f"<b>{string}</b>"
+            assert italizer.render(string) == f"<i>{string}</i>"
+            assert strengthener.render(string) == f"<strong>{string}</strong>"
+            assert emphasizer.render(string) == f"<em>{string}</em>"
 
 class TestAbstractDescriptors(object):
     

@@ -64,6 +64,7 @@ __all__ = tuple()
 GLOBALS = globals()
 
 starmods = ('clu.repl.ansi',
+            'clu.repl.columnize',
             'clu.repl.modules',
             'clu.constants.enums',
             'clu.constants.data',

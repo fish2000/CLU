@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+from clu.stdio import TermSize, linebreak
 from clu.repl.modules import compare_module_lookups_for_all_things
 from clu.repl.modules import isplural
 from clu.repl.columnize import columnize
 from clu.repl import ansi
-from clu.stdio import TermSize
 
 from clu.scripts import ansicolors as colors
 
 def show():
     """ Prettyprint the module lookup results """
     results, mismatches = compare_module_lookups_for_all_things()
+    
+    most = max(len(result.modulename) for result in results.result_records)
+    width = TermSize().width
     
     header0 = f'MODULE LOOKUPS ({results.total} performed)'
     header1 = f'MISMATCHES FOUND (of {mismatches.total} total)'
@@ -20,10 +23,7 @@ def show():
     
     ansi.print_ansi_centered(filler='–', color=colors.gray)
     ansi.print_ansi_centered(header0,    color=colors.yellow)
-    print()
-    
-    most = max(len(result.modulename) for result in results.result_records)
-    width = TermSize().width
+    linebreak()
     
     for result in results.result_records:
         thinglength = len(result.thingnames)
@@ -32,12 +32,12 @@ def show():
         ansi.print_ansi_name_value(f"{result.modulename}",
                                    f"{thinglength} exported thing{isplural(thinglength)}",
                                          most=most)
-        print()
+        linebreak()
         ansi.print_ansi(columns,         color=colors.green)
-        print()
+        linebreak()
     
     ansi.print_ansi_centered(header1,    color=colors.yellow)
-    print()
+    linebreak()
     
     for mismatch in mismatches.mismatch_records:
         idx = f"{mismatch.idx}"
@@ -46,7 +46,7 @@ def show():
                                    f"{mismatch.which} ≠ {mismatch.determine}",
                                          most=most)
     
-    print()
+    linebreak()
     ansi.print_ansi_centered(footer0,    color=colors.cyan)
     ansi.print_ansi_centered(footer1,    color=colors.cyan)
     ansi.print_ansi_centered(filler='–', color=colors.gray)
@@ -56,18 +56,10 @@ def main():
     from clu.constants import consts
     import os
     
-    if consts.TEXTMATE:
+    show()
+    if consts.DEBUG:
         print()
-        print("NO TEXTMATE VERSION AT THIS TIME SO SORRY COME BACK ANYTIME")
-        print()
-        return os.EX_IOERR
-    
-    else:
-        # Show ’em and weep:
-        show()
-        if consts.DEBUG:
-            print()
-            print(f"")
+        print(f"")
     
     return os.EX_OK
 

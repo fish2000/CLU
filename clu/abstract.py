@@ -46,7 +46,7 @@ class NonSlotted(abc.ABCMeta):
                                                            attributes,
                                                          **kwargs)
 
-class Format(abc.ABC):
+class Format(abc.ABC, metaclass=Slotted):
     
     """ An abstract class representing something that formats something
         else. It only offers the one abstract method, “render(…)” at
@@ -71,10 +71,18 @@ class NonFormat(Format):
         """ Return a string, unchanged """
         return str(string)
 
-class SlottedFormat(Format, metaclass=Slotted):
+class SlottedFormat(Format):
     
     """ A base format type, with a slot for a format-operation string. """
     __slots__ = 'opstring'
+
+class Sanitizer(Format):
+    
+    """ A base format type, with a slot for a compiled regular expression. """
+    __slots__ = 'regex'
+    
+    def render(self, string):
+        return self.regex.sub('', string)
 
 class Cloneable(abc.ABC):
     

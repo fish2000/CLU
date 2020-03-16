@@ -7,7 +7,7 @@ import colorama
 import clu.abstract
 import inspect
 import textwrap
-import sys
+import sys, re
 import zict
 
 abstract = abc.abstractmethod
@@ -400,27 +400,57 @@ class ANSIFormat(clu.abstract.Format,
         suffix = prefix and self.RESET_ALL or ""
         return f"{prefix}{string!s}{suffix}"
 
+class ANSISanitizer(clu.abstract.Sanitizer):
+    
+    def __init__(self, *args):
+        """ Initialize with ANSI code sanitizer regex.
+            
+            Any arguments passed will be unceremoniously swallowed.
+        """
+        # q.v. https://stackoverflow.com/a/14693789/298171 for the regex
+        self.regex = re.compile(
+                     r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
 @export
-def print_ansi(text, color=None, file=std.OUT):
+def print_ansi(text, **kwargs):
     """ print_ansi(…) → Print text in ANSI color, using optional inline markup
                         from `colorama` for terminal color-escape delimiters """
-    FormatClass = file.isatty() and ANSIFormat or clu.abstract.NonFormat
-    fmt = FormatClass(color)
+    color   = kwargs.pop('color',   None)
+    file    = kwargs.pop('file', std.OUT)
+    sep     = kwargs.pop('sep',   """""")
+    end     = kwargs.pop('end',     '\n')
+    fmt     = kwargs.pop('fmt',     None)
+    
+    # FormatClass = file.isatty() and ANSIFormat or clu.abstract.NonFormat
+    if not fmt:
+        FormatClass = kwargs.pop('FormatClass', file.isatty() \
+                                                and ANSIFormat \
+                                                 or ANSISanitizer)
+        fmt = FormatClass(color)
+    
     for line in text.splitlines():
-        print(fmt.render(line), sep='', end='\n', file=file)
+        out = fmt.render(line)
+        print(out, sep=sep,
+                   end=end,
+                  file=file)
     return None
 
 @export
-def print_ansi_centered(text=None, color=None,
-                                   filler='•',
+def print_ansi_centered(text=None, filler='•',
                                    width=None,
-                                   file=std.OUT):
+                                   color=None,
+                                   file=std.OUT,
+                                 **kwargs):
     """ print_ansi_centered(…) → Print a string to the terminal, centered
                                  and bookended with asterisks """
     if text is None:
-        return print_ansi(filler * (width or SEPARATOR_WIDTH), color=color, file=file)
+        return print_ansi(filler * (width or SEPARATOR_WIDTH), color=color,
+                                                                file=file,
+                                                                   **kwargs)
     message = f" {text.strip()} "
-    return print_ansi(message.center(width or SEPARATOR_WIDTH, filler), color=color, file=file)
+    return print_ansi(message.center(width or SEPARATOR_WIDTH, filler), color=color,
+                                                                         file=file,
+                                                                            **kwargs)
 
 LIGHTBLUE   = ANSIFormat(text=Text.LIGHTBLUE)
 DARKGRAY    = ANSIFormat(text=Text.GRAY)
@@ -434,14 +464,19 @@ colon       = DARKGRAY.render(":")
 def print_ansi_name_value(name, value, most=25,
                                     pilcrow=chevron,
                                      equals=colon,
+                                      color=NOTHING,
+                                       file=std.OUT,
                                   namecolor=LIGHTBLUE,
                                  valuecolor=DARKGRAY,
-                                       file=std.OUT):
+                                   **kwargs):
     """ Format and colorize each segment of the name/value output """
+    
     key = namecolor.render(f" {name} ".rjust(most+2))
     val = valuecolor.render(f" {value!s}")
     return print_ansi(pilcrow + key
-                     + equals + val, color=NOTHING)
+                     + equals + val, color=color,
+                                      file=file,
+                                         **kwargs)
 
 # Regex boolean predicates for matching marked (or bulleted) paragraphs:
 para_mark_matcher = re_matcher(r"^\s*[0-9•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")

@@ -527,12 +527,182 @@ class ANSICodeHighlighter(clu.abstract.SlottedFormat):
                                    markup=self.markup,
                                     style=self.style)
 
+class PygmentsHighlighter(clu.abstract.Format):
+    
+    __slots__ = ('lexer', 'formatter')
+    
+    def __init__(self, language='python',
+                         markup='terminal256',
+                          style='paraiso-dark'):
+        from pygments.lexers import find_lexer_class_by_name as get_lexer_class
+        from pygments.formatters import get_formatter_by_name as get_formatter
+        self.lexer = get_lexer_class(language)()
+        self.formatter = get_formatter(markup, style=style)
+    
+    def render(self, string):
+        from pygments import highlight as pygmenticate
+        return pygmenticate(string, lexer=self.lexer,
+                                formatter=self.formatter)
+
+class TextWrapper(clu.abstract.Format):
+    
+    __slots__ = ('kwargs', 'textwrapper')
+    
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        self.textwrapper = textwrap.TextWrapper(**kwargs)
+    
+    def render(self, string):
+        return self.textwrapper.fill(string)
+
 # Margin-dwelling legibility symbols:
 INITIAL         = '  ¶ '
 SUBSEQUENT      = '    '
 
 # Pre-calculate eighty-percent width:
 EIGHTY_PERCENT  = int(SEPARATOR_WIDTH * 0.8)
+
+class HighlighterWrapper(TextWrapper):
+    
+    def __init__(self):
+        super().__init__(initial_indent=INITIAL,
+                         subsequent_indent=SUBSEQUENT,
+                         replace_whitespace=True,
+                         placeholder="…",
+                         tabsize=4,
+                         width=EIGHTY_PERCENT)
+
+class DualOptionWrapper(clu.abstract.Format):
+    
+    __slots__ = ('kwargs', 'wrap', 'kwalts', 'warp')
+    
+    def __init__(self, kwargs, kwalts):
+        self.kwargs = kwargs
+        self.kwalts = kwalts
+        self.wrap = textwrap.TextWrapper(**kwargs)
+        self.warp = textwrap.TextWrapper(**kwalts)
+    
+    def render(self, string):
+        return para_mark_matcher(string) \
+              and self.wrap.fill(string) \
+               or self.warp.fill(string)
+
+class ParagraphWrapper(DualOptionWrapper):
+    
+    def __init__(self):
+        # N.B. kwargs → marked, kwalts → unmarked
+        super().__init__(kwargs=dict(initial_indent=SUBSEQUENT,
+                                     subsequent_indent=SUBSEQUENT,
+                                     replace_whitespace=True,
+                                     break_on_hyphens=False,
+                                     drop_whitespace=True,
+                                     placeholder='…',
+                                     tabsize=4,
+                                     width=EIGHTY_PERCENT),
+                         kwalts=dict(initial_indent=INITIAL,
+                                     subsequent_indent=SUBSEQUENT,
+                                     replace_whitespace=False,
+                                     break_on_hyphens=False,
+                                     drop_whitespace=True,
+                                     placeholder='…',
+                                     tabsize=4,
+                                     width=EIGHTY_PERCENT))
+
+class Printer(clu.abstract.Format):
+    
+    __slots__ = 'iohandle'
+    
+    def __init__(self, iohandle=std.OUT):
+        self.iohandle = iohandle
+    
+    def render(self, string):
+        print(string, file=self.iohandle)
+        return string
+
+class StagedFormat(clu.abstract.Format):
+    
+    __slots__ = 'formatters'
+    
+    def __init__(self, *args):
+        self.formatters = args
+    
+    def render(self, string):
+        for formatter in self.formatters:
+            string = formatter.render(string)
+        return string
+
+class DocFormat(clu.abstract.Format):
+    
+    head = ANSIFormat(text=Text.CYAN)
+    body = ANSIFormat(text=Text.GRAY)
+    
+    code = StagedFormat(HighlighterWrapper(),
+                        PygmentsHighlighter())
+    para = StagedFormat(ParagraphWrapper(), body)
+    
+    null = StagedFormat(ParagraphWrapper(),
+                        ANSISanitizer())
+    
+    __slots__ = 'iohandle'
+    
+    def __init__(self, iohandle=std.OUT):
+        self.iohandle = iohandle
+    
+    @property
+    def isatty(self):
+        return self.iohandle.isatty()
+    
+    def get(self, atx):
+        cls = type(self)
+        if not self.isatty:
+            return cls.null
+        if not hasattr(cls, atx):
+            raise AttributeError(f"format not found: {atx!s}")
+        return getattr(cls, atx)
+    
+    def put(self, string):
+        return print(string, file=self.iohandle)
+    
+    def putcenter(self, text=None, filler='•', width=None, color=None, **kwargs):
+        file = kwargs.get('file', self.iohandle)
+        return print_ansi_centered(text=text, filler=filler,
+                                               width=width,
+                                               color=color,
+                                                file=file,
+                                                   **kwargs)
+    
+    def putln(self):
+        return print(file=self.iohandle)
+    
+    def putcode(self, codestring):
+        fmt = self.get('code')
+        return self.put(fmt.render(codestring))
+    
+    def putpara(self, paragraph):
+        if paragraph:
+            fmt = self.get('para')
+            return self.put(fmt.render(paragraph))
+        return self.putln()
+    
+    def render(self, thing):
+        # cls = type(self)
+        thingname = nameof(thing)
+        doc = inspect.getdoc(thing) or "«¡no docstring found!»"
+        sig = inspect.signature(thing) or ""
+        paras = paragraphize(doc)
+        
+        self.putcenter(f"__doc__ for “{thingname}”", color=self.get('head'))
+        self.putln()
+        
+        self.putcode(f"{thingname}{sig}")
+        if not self.isatty:
+            self.putln()
+        
+        for paragraph in paras:
+            self.putpara(paragraph)
+        
+        self.putln()
+        self.putln()
 
 @export
 def ansidoc(*things):
@@ -608,11 +778,16 @@ def test():
     
     @inline
     def test_two():
-        ansidoc(Enum)
-        ansidoc(ansidoc)
+        # ansidoc(Enum)
+        # ansidoc(ansidoc)
         ansidoc(Exporter)
     
-    return inline.test(10)
+    @inline
+    def test_three():
+        fmt = DocFormat()
+        fmt.render(Exporter)
+    
+    return inline.test()
 
 if __name__ == '__main__':
     sys.exit(test())

@@ -162,6 +162,26 @@ def differentsize(path0, path1):
         return False
 
 @export
+def modeflags(mode, delete=True):
+    """ Convert a file-open modestring to an integer flag.
+        
+        Helper function, used by “clu.fs.filesystem.TemporaryNamedFile(…)”
+        and “clu.fs.filesystem.NamedTemporaryFile(…)” functions internally.
+    """
+    from tempfile import _bin_openflags, _text_openflags
+    from clu.constants.consts import DELETE_FLAG
+    
+    if 'b' in u8str(mode):
+        flags = _bin_openflags
+    else:
+        flags = _text_openflags
+    
+    if delete:
+        flags |= DELETE_FLAG
+    
+    return flags
+
+@export
 def u8encode(source):
     """ Encode a source as bytes using the UTF-8 codec """
     return bytes(source, encoding=ENCODING)

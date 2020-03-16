@@ -22,7 +22,7 @@ from clu.typology import isnotpath, isvalidpath
 from clu.fs.abc import BaseFSName, TemporaryFileWrapper
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
 from clu.fs.misc import re_matcher, re_searcher, suffix_searcher, re_excluder
-from clu.fs.misc import swapext, u8str, extension
+from clu.fs.misc import swapext, u8str, extension, modeflags
 from clu.exporting import Exporter, path_to_dotpath
 
 exporter = Exporter(path=__file__)
@@ -242,32 +242,12 @@ def temporary(suffix='', prefix='', parent=None, **kwargs):
         raise FilesystemError(f"temporary(): file exists: {fullpth}")
     return fullpth
 
-@export
-def modeflags(mode, delete=True):
-    """ Convert a file-open modestring to an integer flag.
-        
-        Helper function, used by the “filesystem.TemporaryNamedFile(…)” and
-        “filesystem.NamedTemporaryFile(…)” functions’ internal logic.
-    """
-    from tempfile import _bin_openflags, _text_openflags
-    from clu.constants.consts import DELETE_FLAG
-    
-    if 'b' in u8str(mode):
-        flags = _bin_openflags
-    else:
-        flags = _text_openflags
-    
-    if delete:
-        flags |= DELETE_FLAG
-    
-    return flags
-
 @cache
 def TemporaryNamedFile(temppath, mode='wb',
                                  delete=True,
                                  buffer_size=-1):
     """ Variation on ``tempfile.NamedTemporaryFile(…)``, for use within
-        `filesystem.TemporaryName()` – q.v. class definition sub.
+        `clu.fs.filesystem.TemporaryName()` – q.v. class definition sub.
         
         Parameters
         ----------
@@ -291,7 +271,7 @@ def TemporaryNamedFile(temppath, mode='wb',
             A ``clu.fs.abc.TemporaryFileWrapper`` object,
             initialized and ready to be used, as per its counterpart(s),
             ``tempfile.NamedTemporaryFile``, and
-            `filesystem.NamedTemporaryFile`.
+            `clu.fs.filesystem.NamedTemporaryFile`.
         
         Raises
         ------
@@ -321,11 +301,11 @@ def TemporaryNamedFile(temppath, mode='wb',
 @export
 class TemporaryName(BaseFSName):
     
-    """ This is like NamedTemporaryFile without any of the actual stuff;
-        it just makes a file name -- YOU have to make shit happen with it.
+    """ This is like `NamedTemporaryFile` without any of the actual stuff;
+        it just makes up a file name – YOU have to make shit happen with it.
         But: should you cause such scatalogical events to transpire, this
-        class (when invoked as a context manager) will clean it up for you.
-        Unless you say not to. Really it's your call dogg I could give AF
+        class (when instanced as a context manager) will clean it up for you.
+        Unless you say not to. Really it's your call dogg, I could give AF
     """
     
     fields = ('name', 'exists', 'destroy',
@@ -424,8 +404,9 @@ class TemporaryName(BaseFSName):
             
             Filehandles constructed through “non-binary” TemporaryName instances
             are the other way around – their `write(…)` methods can only be passed
-            instances of `str` (or, `unicode`, for the Python-2 diehards amongst us)
-            or similar; attempt to pass anything `byte`-y and you’ll get raised on.
+            instances of `str` (or, `unicode`, for those Python-2 diehards still
+            remaining amongst us) or similar; attempt to pass anything `byte`-y
+            and you’ll get raised on.
         """
         return 'b' in self._mode
     

@@ -90,7 +90,8 @@ class TypeLocker(abc.ABCMeta):
 class BaseFSName(collections.abc.Hashable,
                  clu.abstract.ReprWrapper,
                  contextlib.AbstractContextManager,
-                 os.PathLike, metaclass=TypeLocker):
+                 os.PathLike,
+                 metaclass=TypeLocker):
     
     @property
     @abstract
@@ -225,7 +226,8 @@ class BaseFSName(collections.abc.Hashable,
 class TemporaryFileWrapper(TemporaryFileWrapperBase,
                            collections.abc.Iterable,
                            contextlib.AbstractContextManager,
-                           os.PathLike, metaclass=TypeLocker):
+                           os.PathLike,
+                           metaclass=TypeLocker):
     
     """ Local subclass of `tempfile._TemporaryFileWrapper`.
         

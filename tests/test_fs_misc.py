@@ -10,6 +10,22 @@ class TestFsMisc(object):
     
     """ Run the tests for the clu.fs.misc module. """
     
+    def test_modeflags(self, consts):
+        from clu.fs.misc import modeflags
+        from tempfile import _bin_openflags as binflags, _text_openflags as textflags
+        
+        # N.B. the DELETE_FLAG const is zero on non-Windows systems
+        
+        assert modeflags('r') == textflags | consts.DELETE_FLAG
+        assert modeflags('w') == textflags | consts.DELETE_FLAG
+        assert modeflags('rb') == binflags | consts.DELETE_FLAG
+        assert modeflags('wb') == binflags | consts.DELETE_FLAG
+        
+        assert modeflags('r', delete=False) == textflags
+        assert modeflags('w', delete=False) == textflags
+        assert modeflags('rb', delete=False) == binflags
+        assert modeflags('wb', delete=False) == binflags
+    
     def test_gethomedir(self, environment):
         from clu.fs.misc import gethomedir
         if 'HOME' in environment:

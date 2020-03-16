@@ -648,7 +648,7 @@ class DocFormat(clu.abstract.Format):
     
     @property
     def isatty(self):
-        return self.iohandle.isatty()
+        return bool(self.iohandle.isatty())
     
     def get(self, atx):
         cls = type(self)
@@ -669,8 +669,9 @@ class DocFormat(clu.abstract.Format):
                                                 file=file,
                                                    **kwargs)
     
-    def putln(self):
-        return print(file=self.iohandle)
+    def putln(self, count=1):
+        for idx in range(count):
+            print(file=self.iohandle)
     
     def putcode(self, codestring):
         fmt = self.get('code')
@@ -693,21 +694,18 @@ class DocFormat(clu.abstract.Format):
         self.putln()
         
         self.putcode(f"{thingname}{sig}")
-        if not self.isatty:
-            self.putln()
+        self.putln(count=int(not self.isatty))
         
         for paragraph in paras:
             self.putpara(paragraph)
         
-        self.putln()
-        self.putln()
+        self.putln(count=2)
 
 @export
 def ansidoc(*things):
     """ ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
     # Start output
     flush_all()
-    print()
     
     for thing in things:
         # Process each things’ name and doc
@@ -716,9 +714,9 @@ def ansidoc(*things):
         sig = inspect.signature(thing) or ""
         paras = paragraphize(doc)
         
-        # Print the ANSI header
         print_ansi_centered(f"__doc__ for “{thingname}”", color=Text.CYAN)
-        linebreak()
+        flush_all()
+        print()
         
         # Code-highlight, format and print the thing and its call-signature:
         print(highlight(textwrap.fill(f"{thingname}{sig}",
@@ -731,6 +729,10 @@ def ansidoc(*things):
                                                isatty=std.OUT.isatty()),
                                                sep='', end='\n',
                                                file=std.OUT)
+        
+        if not std.OUT.isatty():
+            flush_all()
+            print()
         
         # Format and print each paragraph
         for para in paras:

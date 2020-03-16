@@ -27,9 +27,11 @@ def show():
     
     for result in results.result_records:
         thinglength = len(result.thingnames)
-        columns = columnize(result.thingnames, display_width=width)
+        columns = columnize(result.thingnames, display_width=width,
+                                               ljust=True)
         ansi.print_ansi_name_value(f"{result.modulename}",
-                                   f"{thinglength} exported thing{isplural(thinglength)}", most=most)
+                                   f"{thinglength} exported thing{isplural(thinglength)}",
+                                         most=most)
         print()
         ansi.print_ansi(columns,         color=colors.green)
         print()
@@ -41,7 +43,8 @@ def show():
         idx = f"{mismatch.idx}"
         
         ansi.print_ansi_name_value(f"{mismatch.thingname} [{idx.zfill(2)}]",
-                                   f"{mismatch.which} ≠ {mismatch.determine}", most=most)
+                                   f"{mismatch.which} ≠ {mismatch.determine}",
+                                         most=most)
     
     print()
     ansi.print_ansi_centered(footer0,    color=colors.cyan)

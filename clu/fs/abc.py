@@ -14,8 +14,8 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import λ, ENCODING
 from clu.constants.exceptions import FilesystemError
-from clu.fs.misc import u8str
-from clu.repr import strfields
+from clu.fs.misc import differentfile, u8str
+from clu.typology import isnotpath
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -88,19 +88,20 @@ class TypeLocker(abc.ABCMeta):
 
 @export
 class BaseFSName(collections.abc.Hashable,
+                 clu.abstract.ReprWrapper,
                  contextlib.AbstractContextManager,
                  os.PathLike, metaclass=TypeLocker):
     
     @property
     @abstract
     def name(self):
-        """ The instances’ target directory path. """
+        """ The instances’ target path. """
         ...
     
     @property
     def basename(self):
-        """ The basename (aka the name of the directory, like as opposed to the
-            entire fucking absolute path) of the target directory.
+        """ The basename (aka the name of the instance, like as opposed to the
+            entire fucking absolute path) of the target instance.
         """
         return os.path.basename(self.name)
     
@@ -114,7 +115,7 @@ class BaseFSName(collections.abc.Hashable,
     @property
     def exists(self):
         """ Whether or not the instances’ target path exists as a directory. """
-        return os.path.isdir(self.name)
+        return os.path.exists(self.name)
     
     def split(self):
         """ Return a two-tuple containing `(dirname, basename)` – like e.g.
@@ -130,88 +131,29 @@ class BaseFSName(collections.abc.Hashable,
             os.fspath(source or self.name)))
     
     def parent(self):
-        """ Sugar for `os.path.abspath(os.path.join(self.name, os.pardir))`
+        """ Sugar for `self.directory(os.path.abspath(self.basename))`
             which, if you are curious, gets you the parent directory of
-            the instances’ target directory, wrapped in a Directory
-            instance.
+            the target instance, wrapped in a new Directory instance.
         """
-        return self.directory(os.path.abspath(self.basename))
-    
-    def close(self):
-        """ Stub method -- always returns True: """
-        return True
-    
-    @abstract
-    def to_string(self):
-        ...
-    
-    def __str__(self):
-        if self.exists:
-            return os.path.realpath(self.name)
-        return self.name
-    
-    def __bytes__(self):
-        return bytes(str(self), encoding=ENCODING)
-    
-    def __repr__(self):
-        return self.to_string()
-    
-    def __fspath__(self):
-        return self.name
-    
-    @abstract
-    def __enter__(self):
-        ...
-    
-    def __exit__(self, exc_type=None,
-                       exc_val=None,
-                       exc_tb=None):
-        # if self.destroy:
-        #     self.close()
-        return exc_type is None
-    
-    def __bool__(self):
-        return self.exists
-    
-    @abstract
-    def __eq__(self, other):
-        ...
-    
-    @abstract
-    def __ne__(self, other):
-        ...
-    
-    @abstract
-    def __hash__(self):
-        ...
-
-@export
-class FileName(BaseFSName,
-               clu.abstract.Cloneable,
-               clu.abstract.ReprWrapper):
+        return self.directory(os.path.abspath(os.path.dirname(self.name)))
     
     def relparent(self, path):
-        """ Relativize a path, relative to the parent of the directory,
-            and return it as a string.
-            
-            Used internally in the implementations of the instance
-            methods “Directory.flatten(…)”, and “Directory.zip_archive(…)”.
+        """ Relativize a path, relative to its directory parent, and
+            return it as a string.
         """
-        return os.path.relpath(path, start=os.path.abspath(self.basename))
+        return os.path.relpath(path, start=os.path.abspath(os.path.dirname(self.name)))
     
     def relprefix(self, path, separator='_'):
-        """ Return a “prefix” string based on a file path –
-            the actual path separators are replaced with underscores,
-            with which the individual path segments are joined, creating
-            a single long string that is unique to the original file path.
-            
-            Used internally in the implementation of “Directory.flatten(…)”.
+        """ Return a “prefix” string based on a file path – the actual path
+            separators are replaced with underscores, with which individual
+            path segments are joined, creating a single long string that is
+            unique to the original filesystem path.
         """
         return (self.relparent(path) + os.sep).replace(os.sep, separator)
     
     def symlink(self, destination, source=None):
         """ Create a symlink at `destination`, pointing to this instances’
-            directory path (or an alternative source path, if specified).
+            path (or an alternative source path, if specified).
             
             The `destination` argument can be anything path-like: instances of
             `str`, `unicode`, `bytes`, `bytearray`, `pathlib.Path`, `os.PathLike`,
@@ -225,20 +167,59 @@ class FileName(BaseFSName,
                    target_is_directory=os.path.isdir(target))
         return self
     
-    def to_string(self):
-        # N.B. without a “fields” attribute on the class,
-        # this method could act somewhat peculiar:
-        cls = type(self)
-        return strfields(self,
-               getattr(cls, 'fields', None),
-                       try_callables=False)
+    def close(self):
+        """ Stub method -- always returns True: """
+        return True
     
     @abstract
-    def clone(self, deep=False, memo=None):
+    def to_string(self):
         ...
     
     def inner_repr(self):
         return self.to_string()
+    
+    def __str__(self):
+        if self.exists:
+            return os.path.realpath(self.name)
+        return self.name
+    
+    def __bytes__(self):
+        return bytes(str(self), encoding=ENCODING)
+    
+    def __fspath__(self):
+        return self.name
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type=None,
+                       exc_val=None,
+                       exc_tb=None):
+        return exc_type is None
+    
+    def __bool__(self):
+        return self.exists
+    
+    def __eq__(self, other):
+        if isnotpath(other):
+            return NotImplemented
+        try:
+            return os.path.samefile(self.name,
+                                    os.fspath(other))
+        except FileNotFoundError:
+            return False
+    
+    def __ne__(self, other):
+        if isnotpath(other):
+            return NotImplemented
+        try:
+            return differentfile(self.name,
+                                 os.fspath(other))
+        except FileNotFoundError:
+            return True
+    
+    def __hash__(self):
+        return hash((self.name, self.exists))
 
 @export
 class TemporaryFileWrapper(TemporaryFileWrapperBase,
@@ -263,7 +244,6 @@ class TemporaryFileWrapper(TemporaryFileWrapperBase,
     
     def __fspath__(self):
         return self.name
-
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

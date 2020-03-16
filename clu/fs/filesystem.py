@@ -6,23 +6,20 @@ from functools import lru_cache, wraps
 cache = lambda function: lru_cache(maxsize=128, typed=True)(function)
 
 import clu.abstract
+import clu.dicts
 import collections
 import collections.abc
-import contextlib
-import os
-import re
 import shutil
-import sys
+import sys, re, os
 import zipfile
 
 from clu.constants.consts import ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
-from clu.dicts import OrderedItemsView, OrderedKeysView, OrderedValuesView
 from clu.predicates import attr, allattrs, isexpandable, anyof
-from clu.repr import stringify, strfields
+from clu.repr import strfields
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
-from clu.fs.abc import TypeLocker, TemporaryFileWrapper
+from clu.fs.abc import BaseFSName, TemporaryFileWrapper
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
 from clu.fs.misc import re_matcher, re_searcher, suffix_searcher, re_excluder
 from clu.fs.misc import swapext, u8str, extension
@@ -322,10 +319,7 @@ def TemporaryNamedFile(temppath, mode='wb',
         raise FilesystemError("error in underlying syscalls") from exc
 
 @export
-class TemporaryName(collections.abc.Hashable,
-                    contextlib.AbstractContextManager,
-                    os.PathLike,
-                    metaclass=TypeLocker):
+class TemporaryName(BaseFSName):
     
     """ This is like NamedTemporaryFile without any of the actual stuff;
         it just makes a file name -- YOU have to make shit happen with it.
@@ -402,27 +396,6 @@ class TemporaryName(collections.abc.Hashable,
         return self._name
     
     @property
-    def basename(self):
-        """ The basename (aka the filename) of the temporary file path. """
-        return os.path.basename(self._name)
-    
-    @property
-    def dirname(self):
-        """ The dirname (aka the enclosing directory) of the temporary file. """
-        return self.parent()
-    
-    @property
-    def exists(self):
-        """ Whether or not there is anything existant at the temporary file path.
-            
-            Note that this property will be true for directories created therein,
-            as well as FIFOs or /dev entries, or any of the other zany filesystem
-            possibilities you and the POSIX standard can imagine, in addition to
-            regular files.
-        """
-        return os.path.exists(self._name)
-    
-    @property
     def destroy(self):
         """ Whether or not this TemporaryName instance should destroy any file
             that should happen to exist at its temporary file path (as per its
@@ -490,12 +463,6 @@ class TemporaryName(collections.abc.Hashable,
         """ A flag value matching the instances’ mode and deletion disposition. """
         return modeflags(self.mode, self._destroy)
     
-    def split(self):
-        """ Return (dirname, basename) e.g. for /yo/dogg/i/heard/youlike.jpg,
-            you get back (Directory("/yo/dogg/i/heard"), "youlike.jpg")
-        """
-        return self.dirname, self.basename
-    
     def copy(self, destination):
         """ Copy the file (if one exists) at the instances’ file path
             to a new destination.
@@ -513,16 +480,6 @@ class TemporaryName(collections.abc.Hashable,
                    shutil.copy2(self._name, os.fspath(destination),
                                 follow_symlinks=True))
         return False
-    
-    def parent(self):
-        """ Sugar for `os.path.abspath(os.path.join(self.name, os.pardir))`
-            which, if you are curious, gets you the parent directory of
-            the instances’ target filename, wrapped in a Directory
-            instance.
-        """
-        return self.directory(os.path.abspath(
-                              os.path.join(self.name,
-                                           os.pardir)))
     
     def read(self, *, original_position=False):
         """ Read data from the temporary name, if it points to an existing file """
@@ -563,68 +520,25 @@ class TemporaryName(collections.abc.Hashable,
             return rm_rf(self._name)
         return False
     
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, exc_type=None, exc_val=None, exc_tb=None):
+    def __exit__(self, exc_type=None,
+                       exc_val=None,
+                       exc_tb=None):
         if self.destroy:
             self.close()
         return exc_type is None
     
     def to_string(self):
         """ Stringify the TemporaryName instance. """
-        return stringify(self, type(self).fields, try_callables=False)
-    
-    def __repr__(self):
-        return self.to_string()
-    
-    def __str__(self):
-        if self.exists:
-            return os.path.realpath(self._name)
-        return self._name
-    
-    def __bytes__(self):
-        return bytes(str(self), encoding=ENCODING)
-    
-    def __fspath__(self):
-        return self._name
-    
-    def __bool__(self):
-        return self.exists
-    
-    def __eq__(self, other):
-        if isnotpath(other):
-            return NotImplemented
-        try:
-            return os.path.samefile(self._name,
-                                    os.fspath(other))
-        except FileNotFoundError:
-            return False
-    
-    def __ne__(self, other):
-        if isnotpath(other):
-            return NotImplemented
-        try:
-            return differentfile(self._name,
-                                 os.fspath(other))
-        except FileNotFoundError:
-            return True
-    
-    def __hash__(self):
-        return hash((self._name, self.exists))
+        return strfields(self, type(self).fields, try_callables=False)
 
 non_dotfile_matcher = re_matcher(r"^[^\.]")
 
 @export
-class Directory(collections.abc.Hashable,
+class Directory(BaseFSName,
                 collections.abc.Reversible,
                 collections.abc.Mapping,
                 collections.abc.Sized,
-                clu.abstract.Cloneable,
-                clu.abstract.ReprWrapper,
-                contextlib.AbstractContextManager,
-                os.PathLike,
-                metaclass=TypeLocker):
+                clu.abstract.Cloneable):
     
     """ A context-managed directory: change in on enter, change back out
         on exit. Plus a few convenience functions for listing and whatnot.
@@ -669,20 +583,6 @@ class Directory(collections.abc.Hashable,
         return attr(self, 'target', 'new')
     
     @property
-    def basename(self):
-        """ The basename (aka the name of the directory, like as opposed to the
-            entire fucking absolute path) of the target directory.
-        """
-        return os.path.basename(self.name)
-    
-    @property
-    def dirname(self):
-        """ The dirname (aka the path of the enclosing directory) of the target
-            directory, wrapped in a new Directory instance.
-        """
-        return self.parent()
-    
-    @property
     def exists(self):
         """ Whether or not the instances’ target path exists as a directory. """
         return os.path.isdir(self.name)
@@ -712,13 +612,6 @@ class Directory(collections.abc.Hashable,
                               'will_change_back',
                               'did_change',
                               'did_change_back')
-    
-    def split(self):
-        """ Return a two-tuple containing `(dirname, basename)` – like e.g.
-            for `/yo/dogg/i/heard/youlike`, your return value will be like
-            `(Directory("/yo/dogg/i/heard"), "youlike")`
-        """
-        return self.dirname, self.basename
     
     def ctx_initialize(self):
         """ Restores the instance to the freshly-allocated state -- with one
@@ -825,12 +718,6 @@ class Directory(collections.abc.Hashable,
         self.ctx_initialize()
         return False
     
-    def realpath(self, source=None):
-        """ Sugar for calling os.path.realpath(self.name) """
-        return u8str(
-            os.path.realpath(
-            os.fspath(source or self.name)))
-    
     def ls(self, suffix=None, source=None):
         """ List files -- defaults to the process’ current working directory.
             As per the UNIX custom, files whose name begins with a dot are
@@ -908,37 +795,6 @@ class Directory(collections.abc.Hashable,
             the underlying function defaults to False for that argument.
         """
         return os.walk(self.name, followlinks=followlinks)
-    
-    def parent(self):
-        """ Sugar for `os.path.abspath(os.path.join(self.name, os.pardir))`
-            which, if you are curious, gets you the parent directory of
-            the instances’ target directory, wrapped in a Directory
-            instance.
-        """
-        return self.directory(os.path.abspath(
-                              os.path.join(self.name,
-                                           os.pardir)))
-    
-    def relparent(self, path):
-        """ Relativize a path, relative to the parent of the directory,
-            and return it as a string.
-            
-            Used internally in the implementations of the instance
-            methods “Directory.flatten(…)”, and “Directory.zip_archive(…)”.
-        """
-        return os.path.relpath(path, start=os.path.abspath(
-                                           os.path.join(self.name,
-                                                        os.pardir)))
-    
-    def relprefix(self, path, separator='_'):
-        """ Return a “prefix” string based on a file path –
-            the actual path separators are replaced with underscores,
-            with which the individual path segments are joined, creating
-            a single long string that is unique to the original file path.
-            
-            Used internally in the implementation of “Directory.flatten(…)”.
-        """
-        return (self.relparent(path) + os.sep).replace(os.sep, separator)
     
     def flatten(self, destination, suffix=None, new_suffix=None):
         """ Copy the entire directory tree, all contents included, to a new
@@ -1068,21 +924,6 @@ class Directory(collections.abc.Hashable,
             assert ztmp.copy(zpth)
         return self.realpath(zpth)
     
-    def symlink(self, destination, source=None):
-        """ Create a symlink at `destination`, pointing to this instances’
-            directory path (or an alternative source path, if specified).
-            
-            The `destination` argument can be anything path-like: instances of
-            `str`, `unicode`, `bytes`, `bytearray`, `pathlib.Path`, `os.PathLike`,
-            or anything with an `__fspath__(…)` method. 
-        """
-        if destination is None:
-            raise FilesystemError("“symlink(…)” destination path cannot be None")
-        os.symlink(os.fspath(source or self.name),
-                   os.fspath(destination),
-                   target_is_directory=True)
-        return self
-    
     def importables(self, subdir, suffix='py',
                                   source=None,
                                   excludes=('-', '+', 'pytest',
@@ -1139,46 +980,24 @@ class Directory(collections.abc.Hashable,
                                          source=source,
                                        excludes=excludes).keys()
     
-    def close(self):
-        """ Stub method -- always returns True: """
-        return True
-    
     def to_string(self):
         """ Stringify the Directory instance. """
-        return strfields(self, type(self).fields)
-    
-    def inner_repr(self):
-        """ Stringify the Directory instance. """
-        return self.to_string()
+        return strfields(self, type(self).fields, try_callables=False)
     
     @wraps(dict.items)
     def items(self):
-        return OrderedItemsView(self)
+        return clu.dicts.OrderedItemsView(self)
     
     @wraps(dict.keys)
     def keys(self):
-        return OrderedKeysView(self)
+        return clu.dicts.OrderedKeysView(self)
     
     @wraps(dict.values)
     def values(self):
-        return OrderedValuesView(self)
+        return clu.dicts.OrderedValuesView(self)
     
     def clone(self, deep=False, memo=None):
         return self.directory(self.name)
-    
-    def __str__(self):
-        if self.exists:
-            return self.realpath()
-        return self.name
-    
-    def __bytes__(self):
-        return bytes(str(self), encoding=ENCODING)
-    
-    def __fspath__(self):
-        return self.name
-    
-    def __bool__(self):
-        return self.exists
     
     def __iter__(self):
         if self.exists:
@@ -1215,27 +1034,6 @@ class Directory(collections.abc.Hashable,
     
     def __rtruediv__(self, filepath):
         return self.directory(filepath).subdirectory(self)
-    
-    def __eq__(self, other):
-        if isnotpath(other):
-            return NotImplemented
-        try:
-            return os.path.samefile(self.name,
-                                    os.fspath(other))
-        except FileNotFoundError:
-            return False
-    
-    def __ne__(self, other):
-        if isnotpath(other):
-            return NotImplemented
-        try:
-            return differentfile(self.name,
-                                 os.fspath(other))
-        except FileNotFoundError:
-            return True
-    
-    def __hash__(self):
-        return hash((self.name, self.exists))
 
 @export
 class cd(Directory):

@@ -497,7 +497,7 @@ def paragraphize(doc):
     return ''.join(lines).splitlines()
 
 @export
-def highlight(code_string, language='json',
+def highlight(code_string, language='python',
                              markup='terminal256',
                               style='paraiso-dark',
                              isatty=True):
@@ -510,6 +510,22 @@ def highlight(code_string, language='json',
     LexerCls = pygments.lexers.find_lexer_class_by_name(language)
     formatter = pygments.formatters.get_formatter_by_name(markup, style=style)
     return pygments.highlight(code_string, lexer=LexerCls(), formatter=formatter)
+
+class ANSICodeHighlighter(clu.abstract.SlottedFormat):
+    
+    __slots__ = ('markup', 'style')
+    
+    def __init__(self, language='python',
+                         markup='terminal256',
+                          style='paraiso-dark'):
+        self.opstring = language
+        self.markup = markup
+        self.style = style
+    
+    def render(self, string):
+        return highlight(string, language=self.opstring,
+                                   markup=self.markup,
+                                    style=self.style)
 
 # Margin-dwelling legibility symbols:
 INITIAL         = '  ¶ '

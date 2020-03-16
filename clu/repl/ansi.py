@@ -400,6 +400,7 @@ class ANSIFormat(clu.abstract.Format,
         suffix = prefix and self.RESET_ALL or ""
         return f"{prefix}{string!s}{suffix}"
 
+@export
 class ANSISanitizer(clu.abstract.Sanitizer):
     
     def __init__(self, *args):
@@ -511,6 +512,7 @@ def highlight(code_string, language='python',
     formatter = pygments.formatters.get_formatter_by_name(markup, style=style)
     return pygments.highlight(code_string, lexer=LexerCls(), formatter=formatter)
 
+@export
 class ANSICodeHighlighter(clu.abstract.SlottedFormat):
     
     __slots__ = ('markup', 'style')
@@ -527,6 +529,7 @@ class ANSICodeHighlighter(clu.abstract.SlottedFormat):
                                    markup=self.markup,
                                     style=self.style)
 
+@export
 class PygmentsHighlighter(clu.abstract.Format):
     
     __slots__ = ('lexer', 'formatter')
@@ -544,6 +547,7 @@ class PygmentsHighlighter(clu.abstract.Format):
         return pygmenticate(string, lexer=self.lexer,
                                 formatter=self.formatter)
 
+@export
 class TextWrapper(clu.abstract.Format):
     
     __slots__ = ('kwargs', 'textwrapper')
@@ -562,6 +566,7 @@ SUBSEQUENT      = '    '
 # Pre-calculate eighty-percent width:
 EIGHTY_PERCENT  = int(SEPARATOR_WIDTH * 0.8)
 
+@export
 class HighlighterWrapper(TextWrapper):
     
     def __init__(self):
@@ -572,6 +577,7 @@ class HighlighterWrapper(TextWrapper):
                          tabsize=4,
                          width=EIGHTY_PERCENT)
 
+@export
 class DualOptionWrapper(clu.abstract.Format):
     
     __slots__ = ('kwargs', 'wrap', 'kwalts', 'warp')
@@ -581,12 +587,8 @@ class DualOptionWrapper(clu.abstract.Format):
         self.kwalts = kwalts
         self.wrap = textwrap.TextWrapper(**kwargs)
         self.warp = textwrap.TextWrapper(**kwalts)
-    
-    def render(self, string):
-        return para_mark_matcher(string) \
-              and self.wrap.fill(string) \
-               or self.warp.fill(string)
 
+@export
 class ParagraphWrapper(DualOptionWrapper):
     
     def __init__(self):
@@ -607,18 +609,13 @@ class ParagraphWrapper(DualOptionWrapper):
                                      placeholder='…',
                                      tabsize=4,
                                      width=EIGHTY_PERCENT))
-
-class Printer(clu.abstract.Format):
-    
-    __slots__ = 'iohandle'
-    
-    def __init__(self, iohandle=std.OUT):
-        self.iohandle = iohandle
     
     def render(self, string):
-        print(string, file=self.iohandle)
-        return string
+        return para_mark_matcher(string) \
+              and self.wrap.fill(string) \
+               or self.warp.fill(string)
 
+@export
 class StagedFormat(clu.abstract.Format):
     
     __slots__ = 'formatters'
@@ -631,6 +628,7 @@ class StagedFormat(clu.abstract.Format):
             string = formatter.render(string)
         return string
 
+@export
 class DocFormat(clu.abstract.Format):
     
     head = ANSIFormat(text=Text.CYAN)

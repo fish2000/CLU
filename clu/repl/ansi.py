@@ -459,6 +459,7 @@ RED         = ANSIFormat(text=Text.RED)
 NOTHING     = ANSIFormat()
 
 chevron     = RED.render("»")
+chevrons    = RED.render(">>>")
 colon       = DARKGRAY.render(":")
 
 @export
@@ -482,6 +483,7 @@ def print_ansi_name_value(name, value, most=25,
 # Regex boolean predicates for matching marked (or bulleted) paragraphs:
 para_mark_matcher = re_matcher(r"^\s*[0-9•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
 para_line_matcher = re_matcher(r"^\s*[•⌀\<\>«»→\#¬†‡¶§±–\-\+\*]+")
+para_code_matcher = re_matcher(r"^\s*\>{3,5}")
 
 @export
 def paragraphize(doc):
@@ -610,6 +612,11 @@ class ParagraphWrapper(DualOptionWrapper):
                                      tabsize=4,
                                      width=EIGHTY_PERCENT))
     
+    def code_mark(self, string):
+        return para_code_matcher(string) \
+              and chevrons + " " \
+               or self.wrap.fill(string)
+    
     def render(self, string):
         return para_mark_matcher(string) \
               and self.wrap.fill(string) \
@@ -689,6 +696,7 @@ class DocFormat(clu.abstract.Format):
         doc = inspect.getdoc(thing) or "«¡no docstring found!»"
         sig = inspect.signature(thing) or ""
         paras = paragraphize(doc)
+        self.putln()
         
         self.putcenter(f"__doc__ for “{thingname}”", color=self.get('head'))
         self.putln()
@@ -706,6 +714,7 @@ def ansidoc(*things):
     """ ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
     # Start output
     flush_all()
+    print()
     
     for thing in things:
         # Process each things’ name and doc

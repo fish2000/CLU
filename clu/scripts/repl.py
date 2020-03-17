@@ -132,6 +132,41 @@ from clu.testing.utils import pout, inline
 from PIL import Image
 from pprint import pprint, pformat
 
+# Not quite sure where to put this, for now:
+
+_explain = lambda thing=None: print(columnize(dir(thing),
+                                    display_width=consts.SEPARATOR_WIDTH,
+                                            ljust=True))
+
+def explain(thing, width=None):
+    """ Print the “dir(…)” results of something, nicely columnized """
+    display_width = width or consts.SEPARATOR_WIDTH
+    
+    typename = nameof(type(thing)).capitalize()
+    thingname = nameof(thing, "¡unknown!")
+    subthings = dir(thing)
+    subcount = len(subthings)
+    
+    contents = f"» {typename} instance «{thingname}» "
+    if subcount == 0:
+        contents += "contains no “dir(…)” results"
+        print(contents)
+        return
+    elif subcount == 1:
+        contents += "contains one sub-thing"
+        print(contents)
+    else:
+        contents += f"contains {subcount} sub-things"
+        print(contents)
+    
+    # print_ansi_centered()
+    print('—' * display_width)
+    print()
+    
+    print(columnize(subthings,
+          display_width=display_width,
+                  ljust=True))
+
 try:
     from instakit.utils.static import asset
 except (ImportError, SyntaxError, TypeError):

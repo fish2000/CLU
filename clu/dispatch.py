@@ -18,8 +18,7 @@ exithandles = []
 # The list of signals to which we’ll be listening:
 signals = (signal.SIGHUP,
            signal.SIGQUIT,
-           signal.SIGTERM,
-           signal.SIGWINCH)
+           signal.SIGTERM)
 
 def wraphandler(function):
     """ Wrap a signal handler in a system-exit function """

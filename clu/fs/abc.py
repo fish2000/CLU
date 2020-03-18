@@ -23,7 +23,7 @@ export = exporter.decorator()
 @export
 class TypeLocker(abc.ABCMeta):
     
-    """ clu.fs.abc.TypeLocker is a metaclass that does two things
+    """ `clu.fs.abc.TypeLocker` is a metaclass that does two things
         with the types for whom it is designated as meta:
         
         1) It keeps an index of those types in a dictionary member of
@@ -31,21 +31,21 @@ class TypeLocker(abc.ABCMeta):
         
         2) During class creation – the call to `TypeLocker.__new__(…)` –
            it installs a class method called “directory(…)” that will,
-           when invoked, always return a new Directory instance that has
+           when invoked, always return a new `Directory` instance that has
            been initialized with the one provided argument “pth” (if one
            was passed).
         
         … The point of this is to allow any of the classes throughout the
         “clu.fs” subpackage, regardless of where they are defined or from
-        whom they inherit, to make use of cheaply-constructed Directory
+        whom they inherit, to make use of cheaply-constructed `Directory`
         instances wherever convenient.
         
-        Because the “directory(…)” method installed by TypeLocker performs
-        a lazy-lookup of the Directory class, using its own type index dict,
-        the order of definition does not matter i.e. the TemporaryName class
+        Because the “directory(…)” method installed by `TypeLocker` performs
+        a lazy-lookup of the `Directory` class, using its own type index dict,
+        the order of definition does not matter i.e. the `TemporaryName` class
         (q.v. definition immediately sub.) can use Directories despite its
-        definition occuring before Directory – in fact TemporaryName itself
-        is utilized within at least one Directory method – sans any issues.
+        definition occuring before `Directory` – in fact `TemporaryName` itself
+        is utilized within at least one `Directory` method – sans any issues.
     """
     
     # The metaclass-internal dictionary of descendant type weakrefs:
@@ -54,7 +54,7 @@ class TypeLocker(abc.ABCMeta):
     def __new__(metacls, name, bases, attributes, **kwargs):
         """ All classes are initialized with a “directory(…)”
             static method, lazily returning an instance of the
-            clu.fs.filesystem.Directory(…) class.
+            `clu.fs.filesystem.Directory(…)` class.
             
             A read-only descriptor shadows the “types” attribute,
             to block access to the metaclass type-registry dict
@@ -78,11 +78,11 @@ class TypeLocker(abc.ABCMeta):
                                                           attributes,
                                                         **kwargs)
         
-        # Register with clu.fs.TypeLocker and os.PathLike:
+        # Register with `clu.fs.TypeLocker` and `os.PathLike`:
         metacls.types[name] = cls
         os.PathLike.register(cls)
         
-        # Return the new type
+        # Return the new type:
         return cls
 
 @export
@@ -112,7 +112,7 @@ class BaseFSName(collections.abc.Hashable,
     @property
     def dirname(self):
         """ The dirname (aka the path of the enclosing directory) of the target
-            directory, wrapped in a new Directory instance.
+            instance, wrapped in a new Directory instance.
         """
         return self.parent()
     
@@ -124,26 +124,29 @@ class BaseFSName(collections.abc.Hashable,
     def split(self):
         """ Return a two-tuple containing `(dirname, basename)` – like e.g.
             for `/yo/dogg/i/heard/youlike`, your return value will be like
-            `(Directory("/yo/dogg/i/heard"), "youlike")`
+            `(Directory("/yo/dogg/i/heard"), "youlike")`.
         """
         return self.dirname, self.basename
     
     def realpath(self, source=None):
-        """ Sugar for calling os.path.realpath(self.name) """
+        """ Sugar for calling `os.path.realpath(self.name)` with additional
+            assurances that the path string in question will be UTF-8 Unicode
+            data and not a byte-string type.
+        """
         return u8str(
             os.path.realpath(
             os.fspath(source or self.name)))
     
     def parent(self):
-        """ Sugar for `self.directory(os.path.abspath(self.basename))`
-            which, if you are curious, gets you the parent directory of
-            the target instance, wrapped in a new Directory instance.
+        """ Sugar for `self.directory(os.path.abspath(os.path.dirname(self.name)))`
+            …which, if you are curious, gets you the parent directory of the target
+            instance, wrapped in a new `Directory` instance.
         """
         return self.directory(os.path.abspath(os.path.dirname(self.name)))
     
     def relparent(self, path):
-        """ Relativize a path, relative to its directory parent, and
-            return it as a string.
+        """ Relativize a path, relative to its directory parent, and return it
+            as a string.
         """
         return os.path.relpath(path, start=os.path.abspath(os.path.dirname(self.name)))
     
@@ -157,11 +160,13 @@ class BaseFSName(collections.abc.Hashable,
     
     def symlink(self, destination, source=None):
         """ Create a symlink at `destination`, pointing to this instances’
-            path (or an alternative source path, if specified).
+            path location (or an alternative source path, if specified).
             
             The `destination` argument can be anything path-like: instances of
             `str`, `unicode`, `bytes`, `bytearray`, `pathlib.Path`, `os.PathLike`,
-            or anything with an `__fspath__(…)` method. 
+            or anything with an `__fspath__(…)` method – which this includes
+            `clu.fs.filesystem.TemporaryName` and `clu.fs.filesystem.Directory`
+            instances and relevant derived-type instances thereof.
         """
         if destination is None:
             raise FilesystemError("“symlink(…)” destination path cannot be None")
@@ -232,9 +237,9 @@ class TemporaryFileWrapper(TemporaryFileWrapperBase,
         
         We also inherit from both `contextlib.AbstractContextManager`
         and the `os.PathLike` abstract bases -- the latter requires
-        that we implement an __fspath__(…) method (q.v. implementation,
+        that we implement an `__fspath__(…)` method (q.v. implementation,
         sub.) -- and additionally, `clu.fs.abc.TypeLocker` is named as
-        the metaclass (q.v. metaclass __new__(…) implementation supra.)
+        the metaclass (q.v. metaclass `__new__(…)` implementation supra.)
         to cache its type and register it as an os.PathLike subclass.
         
         … Basically a better deal than the original ancestor, like
@@ -265,4 +270,3 @@ def test():
 
 if __name__ == '__main__':
     sys.exit(test())
-

@@ -9,6 +9,10 @@ import os
 import pytest
 
 @pytest.fixture(scope='module')
+def strings():
+    yield ('yo', 'dogg', 'iheard', 'youlike')
+
+@pytest.fixture(scope='module')
 def capstrings():
     yield ('YoDogg',
            'iHeardYouLike',
@@ -18,7 +22,7 @@ class TestAbstractMetas(object):
     
     """ Run the tests for the clu.abstract module’s metaclasses. """
     
-    def test_metaclass_Slotted(self):
+    def test_metaclass_Slotted(self, strings):
         from clu.predicates import slots_for
         
         class Base(abc.ABC, metaclass=clu.abstract.Slotted):
@@ -33,7 +37,7 @@ class TestAbstractMetas(object):
         class DerivedThree(DerivedTwo):
             __slots__ = ('iheard', 'youlike')
         
-        assert slots_for(DerivedThree) == ('yo', 'dogg', 'iheard', 'youlike')
+        assert slots_for(DerivedThree) == strings
         
         assert Base.__slots__ == tuple()
         assert DerivedOne.__slots__ == ('yo', 'dogg')

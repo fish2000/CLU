@@ -653,13 +653,13 @@ class DocFormat(clu.abstract.Format):
             print(file=self.iohandle)
     
     def putcode(self, codestring):
-        fmt = self.get('code')
-        return self.put(fmt.render(codestring))
+        return self.put(
+               self.get('code').render(codestring))
     
     def putpara(self, paragraph):
         if paragraph:
-            fmt = self.get('para')
-            return self.put(fmt.render(paragraph))
+            return self.put(
+                   self.get('para').render(paragraph))
         return self.putln()
     
     def render(self, thing):

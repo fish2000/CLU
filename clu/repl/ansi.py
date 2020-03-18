@@ -5,14 +5,14 @@ from collections import namedtuple as NamedTuple
 import abc
 import colorama
 import clu.abstract
+import collections.abc
 import inspect
 import textwrap
 import sys, re
-import zict
 
 abstract = abc.abstractmethod
 
-from clu.constants.consts import DEBUG, ENCODING, SEPARATOR_WIDTH
+from clu.constants.consts import ENCODING, SEPARATOR_WIDTH
 from clu.constants.polyfills import Enum, unique, auto
 from clu.predicates import mro, or_none
 from clu.typology import dict_types, isstring, isbytes
@@ -28,7 +28,6 @@ export = exporter.decorator()
 # colorama.init()
 
 print_separator = lambda filler='-': print(filler * SEPARATOR_WIDTH)
-evict_announcer = lambda key, value: print(f"Cache dropped: {key}")
 
 @export
 class ANSIBase(Enum):
@@ -38,26 +37,6 @@ class ANSIBase(Enum):
     @classmethod
     def is_ansi(cls, instance):
         return cls in mro(instance)
-
-class CacheDescriptor(object):
-    
-    __slots__ = ('cache', 'lru')
-    
-    def __init__(self):
-        self.cache = {}
-        self.lru = zict.LRU(18, self.cache,
-                                on_evict=(DEBUG \
-                                      and evict_announcer \
-                                       or None))
-    
-    def __get__(self, *args):
-        return self.lru
-    
-    def __set__(self, instance, value):
-        self.lru = value
-    
-    def __repr__(self):
-        return repr(self.lru)
 
 @export
 class ANSI(AliasingEnumMeta):
@@ -111,7 +90,7 @@ class ANSI(AliasingEnumMeta):
         def to_string(self):
             return str(self.code)
         
-        attributes['cache']     = CacheDescriptor()
+        attributes['cache']     = clu.abstract.CacheDescriptor()
         attributes['source']    = SourceDescriptor()
         attributes['__init__']  = init_method
         attributes['__bool__']  = bool_method
@@ -252,6 +231,7 @@ ANSIFormatBase = NamedTuple('ANSIFormatBase', FIELDS)
 class ANSIFormat(clu.abstract.Format,
                  clu.abstract.Cloneable,
                  clu.abstract.ReprWrapper,
+                 collections.abc.Hashable,
                  ANSIFormatBase):
     
     """ The formatter class for ANSI markup codes. """
@@ -636,7 +616,8 @@ class StagedFormat(clu.abstract.Format):
         return string
 
 @export
-class DocFormat(clu.abstract.Format):
+class DocFormat(clu.abstract.Format,
+                collections.abc.Callable):
     
     head = ANSIFormat(text=Text.CYAN)
     body = ANSIFormat(text=Text.GRAY)
@@ -706,6 +687,10 @@ class DocFormat(clu.abstract.Format):
         
         for paragraph in paras:
             self.putpara(paragraph)
+    
+    def __call__(self, *things):
+        for thing in things:
+            self.render(thing)
         
         self.putln(count=2)
 
@@ -765,7 +750,7 @@ def ansidoc(*things):
         flush_all()
 
 export(print_separator,     name='print_separator', doc="print_separator(filler='-') → print ‘filler’ character consts.SEPARATOR_WIDTH times")
-export(evict_announcer,     name='evict_announcer', doc="evict_announcer(key, value) → print a debug trace message about the key and value")
+export(ANSIFormatBase,      name='ANSIFormatBase')
 
 # NO DOCS ALLOWED:
 export(Text)
@@ -794,7 +779,7 @@ def test():
     @inline
     def test_three():
         fmt = DocFormat()
-        fmt.render(Exporter)
+        fmt(Exporter)
     
     return inline.test()
 

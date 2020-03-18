@@ -180,6 +180,30 @@ class MappingViewRepr(ReprWrapper):
         """ Return the repr string for “self._mapping” """
         return repr(self._mapping)
 
+evict_announcer = lambda key, value: print(f"Cache dropped: {key}")
+
+class CacheDescriptor(object):
+    
+    __slots__ = ('cache', 'lru')
+    
+    def __init__(self):
+        import zict
+        
+        self.cache = {}
+        self.lru = zict.LRU(18, self.cache,
+                                on_evict=(consts.DEBUG \
+                                      and evict_announcer \
+                                       or None))
+    
+    def __get__(self, *args):
+        return self.lru
+    
+    def __set__(self, instance, value):
+        self.lru = value
+    
+    def __repr__(self):
+        return repr(self.lru)
+
 class Descriptor(SlottedRepr):
     
     """ A simple, generic desciptor, wrapping one value, and storing its name """
@@ -314,7 +338,8 @@ __all__ = ('Slotted', 'NonSlotted',
            'Cloneable', 'ReprWrapper',
                         'SlottedRepr',
                         'MappingViewRepr',
-           'Descriptor', 'ValueDescriptor',
+           'evict_announcer',
+           'CacheDescriptor', 'Descriptor', 'ValueDescriptor',
            'BasePath',
            'AppName',
            'ManagedContext', 'AsyncManagedContext')

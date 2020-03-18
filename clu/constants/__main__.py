@@ -60,15 +60,10 @@ def main():
     """ Main CLI entry point """
     import os
     
-    if consts.TEXTMATE:
-        # Textmate: delegate to “consts.print_all()”:
-        consts.print_all()
-    else:
-        # Show ’em and weep:
-        show()
-        if consts.DEBUG:
-            print()
-            print(f"")
+    show()
+    if consts.DEBUG:
+        print()
+        print(f"")
     
     return os.EX_OK
 

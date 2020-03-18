@@ -237,9 +237,8 @@ class ValueDescriptor(Descriptor):
     
     def __repr__(self):
         """ A custom repr for the ValueDescriptor’s literal value """
-        from clu.constants.consts import ENCODING
         return isinstance(self.value, str)   and self.value or \
-               isinstance(self.value, bytes) and self.value.decode(ENCODING) or \
+               isinstance(self.value, bytes) and self.value.decode(consts.ENCODING) or \
                                             repr(self.value)
 
 class BasePath(Slotted):

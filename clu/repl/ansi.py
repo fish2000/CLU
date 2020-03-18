@@ -609,8 +609,7 @@ class StagedFormat(clu.abstract.Format):
         return string
 
 @export
-class DocFormat(clu.abstract.Format,
-                collections.abc.Callable):
+class DocFormat(clu.abstract.Format):
     
     head = ANSIFormat(text=Text.CYAN)
     body = ANSIFormat(text=Text.GRAY)

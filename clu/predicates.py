@@ -476,7 +476,7 @@ def noneof(*items):
     """ noneof(*items) → Return the result of “not any(…)” on all non-`None` arguments """
     return negate(any)(item for item in items if item is not None)
 
-@export
+@cache
 def slots_for(cls):
     """ slots_for(cls) → get the summation of the `__slots__` tuples for a class and its ancestors """
     # q.v. https://stackoverflow.com/a/6720815/298171

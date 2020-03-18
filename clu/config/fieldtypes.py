@@ -169,7 +169,7 @@ class FieldBase(abc.ABC, metaclass=clu.abstract.Slotted):
     
     def __repr__(self):
         return stringify(self,
-               slots_for(self),
+               slots_for(type(self)),
                try_callables=False)
     
     def __json__(self, **kwargs):

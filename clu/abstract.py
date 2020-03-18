@@ -4,6 +4,7 @@ from reprlib import recursive_repr
 
 import abc
 import contextlib
+import collections.abc
 
 abstract = abc.abstractmethod
 recursive = recursive_repr(fillvalue="…")
@@ -46,7 +47,7 @@ class NonSlotted(abc.ABCMeta):
                                                            attributes,
                                                          **kwargs)
 
-class Format(abc.ABC, metaclass=Slotted):
+class Format(collections.abc.Callable, metaclass=Slotted):
     
     """ An abstract class representing something that formats something
         else. It only offers the one abstract method, “render(…)” at
@@ -58,6 +59,9 @@ class Format(abc.ABC, metaclass=Slotted):
     def render(self, string):
         """ Render a string with respect to the Format instance. """
         ...
+    
+    def __call__(self, string):
+        return self.render(string)
 
 class NonFormat(Format):
     
@@ -167,7 +171,7 @@ class SlottedRepr(ReprWrapper, metaclass=Slotted):
         from clu.predicates import slots_for
         from clu.repr import strfields
         return strfields(self,
-               slots_for(self),
+               slots_for(type(self)),
                     try_callables=False)
 
 class MappingViewRepr(ReprWrapper):

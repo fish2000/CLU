@@ -745,6 +745,7 @@ def ansidoc(*things):
         flush_all()
 
 export(print_separator,     name='print_separator', doc="print_separator(filler='-') → print ‘filler’ character consts.SEPARATOR_WIDTH times")
+export(wrapper_kws,         name='wrapper_kws',     doc="wrapper_kws(**kwargs) → prepare default arguments for instancing a “textwrap.TextWrapper”")
 export(ANSIFormatBase,      name='ANSIFormatBase')
 
 # NO DOCS ALLOWED:

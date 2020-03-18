@@ -548,16 +548,19 @@ SUBSEQUENT      = '    '
 # Pre-calculate eighty-percent width:
 EIGHTY_PERCENT  = int(SEPARATOR_WIDTH * 0.8)
 
+BASE_KWARGS = dict(subsequent_indent=SUBSEQUENT,
+                   placeholder="…",
+                   tabsize=4,
+                   width=EIGHTY_PERCENT)
+
+wrapper_kws = lambda **kwargs: { **BASE_KWARGS, **kwargs }
+
 @export
 class HighlighterWrapper(TextWrapper):
     
     def __init__(self):
-        super().__init__(initial_indent=INITIAL,
-                         subsequent_indent=SUBSEQUENT,
-                         replace_whitespace=True,
-                         placeholder="…",
-                         tabsize=4,
-                         width=EIGHTY_PERCENT)
+        super().__init__(**wrapper_kws(initial_indent=INITIAL,
+                                       replace_whitespace=True))
 
 @export
 class DualOptionWrapper(clu.abstract.Format):
@@ -575,22 +578,14 @@ class ParagraphWrapper(DualOptionWrapper):
     
     def __init__(self):
         # N.B. kwargs → marked, kwalts → unmarked
-        super().__init__(kwargs=dict(initial_indent=SUBSEQUENT,
-                                     subsequent_indent=SUBSEQUENT,
-                                     replace_whitespace=True,
-                                     break_on_hyphens=False,
-                                     drop_whitespace=True,
-                                     placeholder='…',
-                                     tabsize=4,
-                                     width=EIGHTY_PERCENT),
-                         kwalts=dict(initial_indent=INITIAL,
-                                     subsequent_indent=SUBSEQUENT,
-                                     replace_whitespace=False,
-                                     break_on_hyphens=False,
-                                     drop_whitespace=True,
-                                     placeholder='…',
-                                     tabsize=4,
-                                     width=EIGHTY_PERCENT))
+        super().__init__(kwargs=wrapper_kws(initial_indent=SUBSEQUENT,
+                                            replace_whitespace=True,
+                                            break_on_hyphens=False,
+                                            drop_whitespace=True),
+                         kwalts=wrapper_kws(initial_indent=INITIAL,
+                                            replace_whitespace=False,
+                                            break_on_hyphens=False,
+                                            drop_whitespace=True))
     
     def code_mark(self, string):
         return para_code_matcher(string) \

@@ -57,14 +57,15 @@ class ANSI(AliasingEnumMeta):
         """
         source = kwargs.pop('source')
         
-        class SourceDescriptor(object):
+        class SourceDescriptor(clu.abstract.BaseDescriptor,
+                               clu.abstract.ReprWrapper):
             
             __slots__ = tuple()
             
             def __get__(self, *args):
                 return source
             
-            def __repr__(self):
+            def inner_repr(self):
                 return repr(source)
         
         def init_method(self, value):
@@ -548,7 +549,11 @@ SUBSEQUENT      = '    '
 # Pre-calculate eighty-percent width:
 EIGHTY_PERCENT  = int(SEPARATOR_WIDTH * 0.8)
 
-BASE_KWARGS = dict(subsequent_indent=SUBSEQUENT,
+BASE_KWARGS = dict(initial_indent=INITIAL,
+                   subsequent_indent=SUBSEQUENT,
+                   break_on_hyphens=False,
+                   drop_whitespace=True,
+                   replace_whitespace=True,
                    placeholder="…",
                    tabsize=4,
                    width=EIGHTY_PERCENT)
@@ -559,8 +564,7 @@ wrapper_kws = lambda **kwargs: { **BASE_KWARGS, **kwargs }
 class HighlighterWrapper(TextWrapper):
     
     def __init__(self):
-        super().__init__(**wrapper_kws(initial_indent=INITIAL,
-                                       replace_whitespace=True))
+        super().__init__(**wrapper_kws())
 
 @export
 class DualOptionWrapper(clu.abstract.Format):
@@ -578,14 +582,8 @@ class ParagraphWrapper(DualOptionWrapper):
     
     def __init__(self):
         # N.B. kwargs → marked, kwalts → unmarked
-        super().__init__(kwargs=wrapper_kws(initial_indent=SUBSEQUENT,
-                                            replace_whitespace=True,
-                                            break_on_hyphens=False,
-                                            drop_whitespace=True),
-                         kwalts=wrapper_kws(initial_indent=INITIAL,
-                                            replace_whitespace=False,
-                                            break_on_hyphens=False,
-                                            drop_whitespace=True))
+        super().__init__(kwargs=wrapper_kws(initial_indent=SUBSEQUENT),
+                         kwalts=wrapper_kws(replace_whitespace=False))
     
     def code_mark(self, string):
         return para_code_matcher(string) \
@@ -703,21 +701,16 @@ def ansidoc(*things):
         sig = inspect.signature(thing) or ""
         paras = paragraphize(doc)
         
-        print_ansi_centered(f"__doc__ for “{thingname}”", color=Text.CYAN)
+        print_ansi_centered(f"__doc__ for “{thingname}”",
+                            color=Text.CYAN)
         flush_all()
         print()
         
         # Code-highlight, format and print the thing and its call-signature:
-        print(highlight(textwrap.fill(f"{thingname}{sig}",
-                        initial_indent=INITIAL,
-                        subsequent_indent=SUBSEQUENT,
-                        replace_whitespace=True,
-                        placeholder="…",
-                        tabsize=4,
-                        width=EIGHTY_PERCENT), language='python',
-                                               isatty=std.OUT.isatty()),
-                                               sep='', end='\n',
-                                               file=std.OUT)
+        print(highlight(textwrap.fill(f"{thingname}{sig}", **wrapper_kws()),
+                        isatty=std.OUT.isatty()),
+                        sep='', end='\n',
+                        file=std.OUT)
         
         if not std.OUT.isatty():
             flush_all()
@@ -727,15 +720,10 @@ def ansidoc(*things):
         for para in paras:
             if para:
                 marked = para_mark_matcher(para)
-                print_ansi(textwrap.fill(para, initial_indent=marked and SUBSEQUENT or INITIAL,
-                                            subsequent_indent=SUBSEQUENT,
-                                           replace_whitespace=marked,
-                                             break_on_hyphens=False,
-                                              drop_whitespace=True,
-                                                  placeholder='…',
-                                                      tabsize=4,
-                                                        width=EIGHTY_PERCENT),
-                                                        color=Text.GRAY)
+                print_ansi(textwrap.fill(para,
+                           **wrapper_kws(initial_indent=marked and SUBSEQUENT or INITIAL,
+                                         replace_whitespace=marked)),
+                                         color=Text.GRAY)
             else:
                 linebreak()
         

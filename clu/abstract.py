@@ -182,7 +182,35 @@ class MappingViewRepr(ReprWrapper):
 
 evict_announcer = lambda key, value: print(f"Cache dropped: {key}")
 
-class CacheDescriptor(object):
+class BaseDescriptor(abc.ABC):
+    
+    __slots__ = tuple()
+    
+    @abstract
+    def __get__(self, instance, cls=None):
+        ...
+
+class DataDescriptor(BaseDescriptor):
+    
+    __slots__ = tuple()
+    
+    @abstract
+    def __set__(self, instance, value):
+        ...
+    
+    def __delete__(self, instance):
+        # raise NotImplementedError("DataDescriptor.__delete__()")
+        pass
+
+class NamedDescriptor(DataDescriptor):
+    
+    __slots__ = tuple()
+    
+    @abstract
+    def __set_name__(self, cls, name):
+        ...
+
+class CacheDescriptor(DataDescriptor, ReprWrapper):
     
     __slots__ = ('cache', 'lru')
     
@@ -201,10 +229,10 @@ class CacheDescriptor(object):
     def __set__(self, instance, value):
         self.lru = value
     
-    def __repr__(self):
+    def inner_repr(self):
         return repr(self.lru)
 
-class Descriptor(SlottedRepr):
+class Descriptor(NamedDescriptor, SlottedRepr):
     
     """ A simple, generic desciptor, wrapping one value, and storing its name """
     
@@ -338,6 +366,7 @@ __all__ = ('Slotted', 'NonSlotted',
                         'SlottedRepr',
                         'MappingViewRepr',
            'evict_announcer',
+           'BaseDescriptor', 'DataDescriptor', 'NamedDescriptor',
            'CacheDescriptor', 'Descriptor', 'ValueDescriptor',
            'BasePath',
            'AppName',

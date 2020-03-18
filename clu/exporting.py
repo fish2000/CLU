@@ -16,6 +16,7 @@ import sys, os
 import warnings
 import weakref
 
+abstract = abc.abstractmethod
 chain = itertools.chain
 iterchain = itertools.chain.from_iterable
 
@@ -261,6 +262,14 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
         “clu.abstract.Slotted” metaclass and respects the
         class keywords already in use.
     """
+    
+    @abstract
+    def exports(self):
+        """ An abstract method, ensuring Registry types can’t be just
+            instantiated willy-nilly. The clu.exporting.ExporterBase
+            descendant class implements this method.
+        """
+        ...
     
     @classmethod
     def __init_subclass__(cls, appname=None, **kwargs):

@@ -613,13 +613,12 @@ class DocFormat(clu.abstract.Format):
     
     head = ANSIFormat(text=Text.CYAN)
     body = ANSIFormat(text=Text.GRAY)
+    wrap = ParagraphWrapper()
     
     code = StagedFormat(HighlighterWrapper(),
                         PygmentsHighlighter())
-    para = StagedFormat(ParagraphWrapper(), body)
-    
-    null = StagedFormat(ParagraphWrapper(),
-                        ANSISanitizer())
+    para = StagedFormat(wrap, body)
+    null = StagedFormat(wrap, ANSISanitizer())
     
     __slots__ = 'iohandle'
     
@@ -671,7 +670,8 @@ class DocFormat(clu.abstract.Format):
         paras = paragraphize(doc)
         self.putln()
         
-        self.putcenter(f"__doc__ for “{thingname}”", color=self.get('head'))
+        self.putcenter(f"__doc__ for “{thingname}”",
+                       fmt=self.get('head'))
         self.putln()
         
         self.putcode(f"{thingname}{sig}")

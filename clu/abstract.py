@@ -361,15 +361,13 @@ else:
         pass
 
 __all__ = ('Slotted', 'NonSlotted',
-           'Format', 'NonFormat', 'SlottedFormat',
-           'Cloneable', 'ReprWrapper',
-                        'SlottedRepr',
-                        'MappingViewRepr',
+           'Format', 'NonFormat', 'SlottedFormat', 'Sanitizer',
+           'Cloneable',
+           'ReprWrapper', 'SlottedRepr', 'MappingViewRepr',
            'evict_announcer',
            'BaseDescriptor', 'DataDescriptor', 'NamedDescriptor',
            'CacheDescriptor', 'Descriptor', 'ValueDescriptor',
-           'BasePath',
-           'AppName',
+           'BasePath', 'AppName',
            'ManagedContext', 'AsyncManagedContext')
 
 __dir__ = lambda: list(__all__)

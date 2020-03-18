@@ -172,7 +172,7 @@ class SlottedRepr(ReprWrapper, metaclass=Slotted):
         from clu.repr import strfields
         return strfields(self,
                slots_for(type(self)),
-                    try_callables=False)
+                         try_callables=False)
 
 class MappingViewRepr(ReprWrapper):
     

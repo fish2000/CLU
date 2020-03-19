@@ -116,25 +116,37 @@ class ChainRepr(Repr):
     def subrepr(self, thing, level):
         """ An internal “core” repr helper method. """
         from clu.typology import ismapping
+        
+        # For mappings, go down another level:
         if ischainmap(thing) or ismapping(thing):
             return self.repr1(thing, level - 1)
+        
+        # For everything else, defer to the type:
         return repr(thing)
     
     def primerepr(self, mapping, level):
         """ The internal method for “core” repr production
             of all ChainMaps, and related descendant types.
         """
+        # Special-case empty and single-item maps:
         if len(mapping) == 0:
             return "{}"
+        
         elif len(mapping) == 1:
             key = tuple(mapping.keys())[0]
             item = STRINGPAIR.format(key, self.subrepr(mapping[key], level))
             return f"{{ {item} }}"
+        
+        # Format all items:
         items = (STRINGPAIR.format(key, self.subrepr(mapping[key], level)) \
                                for key in mapping.keys())
+        
+        # Compute indentation levels:
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
         total = (f",\n{ts}").join(items)
+        
+        # Return the formatted map contents:
         return f"{{ \n{ts}{total}\n{ls}}}"
     
     def toprepr(self, chainmap, level):
@@ -146,21 +158,36 @@ class ChainRepr(Repr):
         from clu.naming import qualified_name
         from clu.testing.utils import multiple
         
+        # Typename and map item counts:
         tn = typename(chainmap)
         mapcount = len(chainmap.maps)
         keycount = len(chainmap)
+        
+        # Special-case empty maps:
+        if mapcount == 0 and keycount == 0:
+            ts = ls = total = ""
+            return f"{tn} «{mapcount} map{multiple(mapcount)}, " \
+                         f"{keycount} key{multiple(keycount)}» " \
+                         f"[{ts}{total}{ls}]"
+        
+        # Format all items:
         items = (STRINGPAIR.format(qualified_name(type(mapping)),
                                    self.primerepr(mapping, level - 1)) \
                                    for mapping in chainmap.maps)
+        
+        # Compute indentation levels:
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
         total = (f",\n{ts}").join(items)
+        
+        # Return all formatted sub-reprs:
         return f"{tn} «{mapcount} map{multiple(mapcount)}, " \
                      f"{keycount} key{multiple(keycount)}» " \
                      f"[\n{ts}{total}\n{ls}]"
     
     def repr_ChainMap(self, chainmap, level):
-        # Handles both “clu.dict.ChainMap” and “collections.ChainMap”
+        # Handles both “clu.dict.ChainMap” and “collections.ChainMap”,
+        # thanks to “reprlib.Repr” name-based type dispatching:
         return self.toprepr(chainmap, level)
     
     def shortrepr(self, thing):
@@ -199,6 +226,18 @@ class ChainMap(collections.abc.MutableMapping,
         """
         return cls((dict(iterable) for iterable in iterables), **overrides)
     
+    @classmethod
+    def is_a(cls, instance):
+        """ Check if an instance is a ChainMap of any sort – this covers:
+            
+            • this class (whichever it may be, derived or otherwise)
+            • the root clu.dicts.ChainMap type, and
+            • the original collections.ChainMap type as well.
+        """
+        return isinstance(instance, (cls,
+                                     ChainMap,
+                                     collections.ChainMap))
+    
     def __init__(self, *dicts, **overrides):
         """ Initialize a new ChainMap, using as many maps as specified as varargs,
             with any additional keyword args going into a new first map.
@@ -213,7 +252,7 @@ class ChainMap(collections.abc.MutableMapping,
         extras = [dict(**overrides)]
         maps = [] # type: list
         for d in dicts:
-            if isinstance(d, (type(self), collections.ChainMap)):
+            if type(self).is_a(d):
                 for map in d.maps:
                     if bool(map):
                         if map not in maps:
@@ -221,10 +260,10 @@ class ChainMap(collections.abc.MutableMapping,
             else:
                 if d not in maps:
                     maps.append(d)
-        if extras[0]:
+        if bool(extras[0]):
             self.maps = list(chain(maps, extras))
         else:
-            self.maps = list(maps) or extras
+            self.maps = maps
     
     def __missing__(self, key):
         raise KeyError(key)
@@ -267,14 +306,17 @@ class ChainMap(collections.abc.MutableMapping,
         return getitem(self, key, default=default)
     
     def mapchain(self):
+        """ Return a generator over all of the ChainMap’s mappings """
         yield from self.maps
     
     @property
     def top(self):
+        """ Return the first mapping – aka ``car(maps)`` """
         return self.maps[0]
     
     @property
     def rest(self):
+        """ Return all of the mappings behind the first – aka ``cdr(maps)`` """
         return self.maps[1:]
     
     def shift(self):
@@ -298,10 +340,7 @@ class ChainMap(collections.abc.MutableMapping,
             scene deleted from a kind of Pythonic Saw movie.
         """
         # Equivalent to collections.ChainMap.new_child(…)
-        cls = type(self)
-        if isinstance(map, (cls, collections.ChainMap)):
-            return cls(*(m for m in map.maps if bool(m)), *self.maps)
-        return cls(map or {}, *self.maps)
+        return type(self)(map or {}, *self.maps)
     
     def __setitem__(self, key, value):
         self.top[key] = value
@@ -340,6 +379,14 @@ class ChainMap(collections.abc.MutableMapping,
         return self
     
     def mapcontaining(self, itx, default=NoDefault):
+        """ Search the ChainMap’s internal mappings for an item, by name,
+            and return the first mapping in which an item by this name
+            can be found.
+            
+            A default value, returned when no mappings are to be found
+            containing an item by the specified name, may optionally
+            be passsed in as well.
+        """
         from clu.predicates import finditem
         if default is NoDefault:
             return finditem(itx, *self.maps) or { itx : self.__missing__(itx) }
@@ -350,7 +397,6 @@ class ChainMap(collections.abc.MutableMapping,
             into a new, single, flat dictionary instance.
         """
         return merge_fast(*reversed(self.maps))
-        # return dict(iterchain(map.items() for map in self.maps))
     
     def clone(self, deep=False, memo=None):
         """ Return a cloned copy of the ChainMap instance """
@@ -483,7 +529,6 @@ def asdict(thing):
     from clu.typology import ismapping
     from clu.typespace.namespace import isnamespace
     if ischainmap(thing):
-        # return merge_fast(*reversed(thing.maps))
         return set(iterchain(thing.maps))
     if isnamespace(thing):
         return dict(thing.__dict__)

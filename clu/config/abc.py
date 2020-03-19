@@ -395,6 +395,12 @@ class FlatOrderedSet(collections.abc.Set,
     """
     __slots__ = tuplize('things')
     
+    @classmethod
+    def is_a(cls, instance):
+        return isinstance(instance, (cls, FlatOrderedSet)) or \
+               isinstance(getattr(instance, 'things', None),
+                                  collections.abc.Iterable)
+    
     def __init__(self, *things, predicate=always):
         """ Initialize a new FlatOrderedSet instance with zero or more things.
             
@@ -411,7 +417,7 @@ class FlatOrderedSet(collections.abc.Set,
                 things = tuple(things[0])
         for thing in things:
             if thing is not None:
-                if isinstance(thing, type(self)):
+                if type(self).is_a(thing):
                     for other in thing.things:
                         if predicate(other):
                             if other not in thinglist:
@@ -441,6 +447,16 @@ class FlatOrderedSet(collections.abc.Set,
     
     def __hash__(self):
         return hash(self.things) & hash(id(self.things))
+    
+    def __eq__(self, other):
+        if not type(self).is_a(other):
+            return NotImplemented
+        return self.things == other.things
+    
+    def __ne__(self, other):
+        if not type(self).is_a(other):
+            return NotImplemented
+        return self.things != other.things
     
     def clone(self, deep=False, memo=None):
         # Q.v. https://stackoverflow.com/a/48550898/298171

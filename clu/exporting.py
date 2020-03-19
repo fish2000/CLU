@@ -698,7 +698,10 @@ class ExporterBase(collections.abc.MutableMapping,
         """ Stringify a subset of the Exporter instances’ fields. """
         from clu.repr import strfields
         length = len(self)
-        path = os.path.relpath(self.path, start=self.basepath)
+        if self.path:
+            path = os.path.relpath(self.path, start=self.basepath)
+        else:
+            path = "«undefined»"
         return strfields(self, type(self).fields,
                                try_callables=False,
                                items=length,

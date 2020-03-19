@@ -82,7 +82,7 @@ class TestDicts(object):
         # UNSHIFT » like collections.ChainMap.new_child(…):
         tomeetyou = hey.unshift()
         
-        assert len(tomeetyou.maps) > len(hey.maps)
+        assert len(tomeetyou.maps) == len(hey.maps) + 1
         assert len(tomeetyou.keys()) == len(hey.keys())
         assert len(tomeetyou.values()) == len(hey.values())
         assert len(tomeetyou.keys()) > len(beentrying.keys())
@@ -100,7 +100,7 @@ class TestDicts(object):
         
         for key in ('mustbe', 'betweenus', 'whoredoor'):
             assert key in tomeetyou
-            assert key not in hey
+            # assert key not in hey
             assert key not in beentrying
             assert len(tomeetyou.mapcontaining(key)) == 3
             assert type(tomeetyou.get(key)) is str

@@ -152,10 +152,8 @@ class ReprWrapper(abc.ABC):
     @recursive
     def __repr__(self):
         """ This classes’ object instances’ unique string representation """
-        from clu.repr import typename_hexid
-        cnm, hxa = typename_hexid(self)
-        rpr = self.inner_repr()
-        return f"{cnm}({rpr}) {consts.REPR_DELIMITER} {hxa}"
+        from clu.repr import fullrepr
+        return fullrepr(self, self.inner_repr())
 
 class SlottedRepr(ReprWrapper, metaclass=Slotted):
     

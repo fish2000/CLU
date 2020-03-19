@@ -470,7 +470,10 @@ class FlatOrderedSet(collections.abc.Set,
         return out
     
     def inner_repr(self):
-        return repr(self.things)
+        # N.B. string-indexing strips off the parens,
+        # which are superfluous as “inner_repr(…)” will
+        # add its own parens by default
+        return repr(self.things)[1:-1]
 
 # CONCRETE CALLABLE SUBTYPES: functional_and, functional_set
 

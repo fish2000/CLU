@@ -452,14 +452,18 @@ class FlatOrderedSet(collections.abc.Set,
         return hash(self.things) & hash(id(self.things))
     
     def __eq__(self, other):
-        if not type(self).is_a(other):
-            return NotImplemented
-        return self.things == other.things
+        if type(self).is_a(other):
+            return self.things == other.things
+        elif isinstance(other, collections.abc.Sequence):
+            return self.things == tuple(other)
+        return NotImplemented
     
     def __ne__(self, other):
-        if not type(self).is_a(other):
-            return NotImplemented
-        return self.things != other.things
+        if type(self).is_a(other):
+            return self.things != other.things
+        elif isinstance(other, collections.abc.Sequence):
+            return self.things != tuple(other)
+        return NotImplemented
     
     def clone(self, deep=False, memo=None):
         # Q.v. https://stackoverflow.com/a/48550898/298171

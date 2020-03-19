@@ -19,7 +19,7 @@ from clu.config.keymapview import NamespaceWalkerValuesView
 from clu.predicates import (isexpandable, iscontainer, isnotnone,
                             always, uncallable, tuplize)
 
-from clu.typology import iterlen
+from clu.typology import iterlen, ismapping
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -413,7 +413,7 @@ class FlatOrderedSet(collections.abc.Set,
         if len(things) == 1:
             if isexpandable(things[0]):
                 things = things[0]
-            elif iscontainer(things[0]):
+            elif iscontainer(things[0]) and not ismapping(things[0]):
                 things = tuple(things[0])
         for thing in things:
             if thing is not None:

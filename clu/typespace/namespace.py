@@ -8,8 +8,6 @@ import contextlib
 import sys
 
 from clu.constants.consts import STRINGPAIR, WHITESPACE, ENCODING, pytuple, NoDefault
-from clu.dicts import merge_fast_two, asdict
-from clu.predicates import ispyname, ismergeable
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -126,7 +124,7 @@ class BaseNamespace(collections.abc.Set,
             
             Any loose keyword arguments will also be merged in.
         """
-        for mapping in (asdict(arg) for arg in args):
+        for mapping in (dict(arg) for arg in args):
             for key, value in mapping.items():
                 self.__dict__[key] = value
         for key, value in kwargs.items():
@@ -151,9 +149,11 @@ class BaseNamespace(collections.abc.Set,
         raise KeyError(key)
     
     def __eq__(self, other):
+        from clu.dicts import asdict
         return self.__dict__ == asdict(other)
     
     def __ne__(self, other):
+        from clu.dicts import asdict
         return self.__dict__ != asdict(other)
     
     def __dir__(self):
@@ -230,6 +230,7 @@ class Namespace(BaseNamespace,
     def __getattr__(self, key):
         # Called when “key” is missing from ‘self.__dict__’ –
         # provided “key” isn’t dunderized!…
+        from clu.predicates import ispyname
         if not ispyname(key):
             subnamespace = type(self)()
             self.__dict__[key] = subnamespace
@@ -252,18 +253,24 @@ class Namespace(BaseNamespace,
     
     def __add__(self, operand):
         # On add, old values are not overwritten
+        from clu.predicates import ismergeable
+        from clu.dicts import merge_fast_two
         if not ismergeable(operand):
             return NotImplemented
         return type(self)(merge_fast_two(self, operand))
     
     def __radd__(self, operand):
         # On reverse-add, old values are overwritten
+        from clu.predicates import ismergeable
+        from clu.dicts import merge_fast_two
         if not ismergeable(operand):
             return NotImplemented
         return type(self)(merge_fast_two(operand, self))
     
     def __iadd__(self, operand):
         # On in-place add, old values are updated and replaced
+        from clu.predicates import ismergeable
+        from clu.dicts import asdict
         if not ismergeable(operand):
             return NotImplemented
         self.__dict__.update(asdict(operand))

@@ -11,6 +11,7 @@ import collections.abc
 import sys
 
 from clu.constants.consts import STRINGPAIR, WHITESPACE, NoDefault
+from clu.config.abc import FlatOrderedSet as FOSet
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -86,8 +87,6 @@ class OrderedValuesView(collections.abc.ValuesView,
 
 # CHAINMAP: custom reprlib.Repr subclass
 
-typename = lambda thing: type(thing).__name__
-
 @export
 class ChainRepr(Repr):
     
@@ -159,7 +158,7 @@ class ChainRepr(Repr):
         from clu.testing.utils import multiple
         
         # Typename and map item counts:
-        tn = typename(chainmap)
+        tn = qualified_name(type(chainmap))
         mapcount = len(chainmap.maps)
         keycount = len(chainmap)
         
@@ -185,9 +184,39 @@ class ChainRepr(Repr):
                      f"{keycount} key{multiple(keycount)}» " \
                      f"[\n{ts}{total}\n{ls}]"
     
+    def repr_dict(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
+    def repr_UserDict(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
+    def repr_Directory(self, mapping, level):
+        return mapping.inner_repr()
+    
+    def repr_TemporaryDirectory(self, mapping, level):
+        return mapping.inner_repr()
+    
+    def repr_SimpleNamespace(self, mapping, level):
+        return self.primerepr(asdict(mapping), level)
+    
+    def repr_Namespace(self, mapping, level):
+        return self.primerepr(asdict(mapping), level)
+    
+    def repr_defaultdict(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
+    def repr_OrderedDict(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
+    def repr_mappingproxy(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
     def repr_ChainMap(self, chainmap, level):
         # Handles both “clu.dict.ChainMap” and “collections.ChainMap”,
         # thanks to “reprlib.Repr” name-based type dispatching:
+        return self.toprepr(chainmap, level)
+    
+    def repr_ChainMapPlusPlus(self, chainmap, level):
         return self.toprepr(chainmap, level)
     
     def shortrepr(self, thing):
@@ -408,6 +437,23 @@ class ChainMap(collections.abc.MutableMapping,
         return cls(deepcopy(self.top),
                  *(deepcopy(map) for map in self.rest))
 
+class ChainMapPlusPlus(ChainMap):
+    
+    def __init__(self, *dicts, **overrides):
+        
+        maps = []
+        
+        for d in dicts:
+            if type(self).is_a(d):
+                maps.append(FOSet(*d.maps, predicate=bool))
+            else:
+                maps.append(d)
+        
+        if bool(overrides):
+            maps.append(FOSet(dict(**overrides)))
+        
+        self.maps = FOSet(*maps)
+
 @export
 def ischainmap(thing):
     """ ischainmap(thing) → boolean predicate, True if the
@@ -563,7 +609,8 @@ def test():
     from clu.constants.data import XDGS
     from clu.fs.filesystem import Directory
     from clu.predicates import try_items
-    from clu.testing.utils import inline, format_environment
+    from clu.testing.utils import inline
+    # from clu.testing.utils import format_environment
     import os
     
     stash = {}
@@ -633,7 +680,7 @@ def test():
             assert key in chainX
             
             # N.B. SLOW AS FUCK:
-            assert key in chain0.flatten()
+            # assert key in chain0.flatten()
             
             assert try_items(key, *chain0.maps, default=None) == try_items(key, *chainX.maps, default=None)
             assert try_items(key, *chain0.maps, default=None) == chain0[key]
@@ -643,17 +690,21 @@ def test():
     def test_three():
         """ Equality comparisons across the board """
         from clu.config.keymap import flatdict, Flat
+        from itertools import product
         
         chain0 = ChainMap(dict_arbitrary(),
-                           Flat(flatdict()))
+                          Flat(flatdict()))
         chain1 = chain0.clone()
         chainX = chain0.clone(deep=True)
+        chainZ = ChainMap(dict_arbitrary(),
+                          Flat(flatdict()))
         
-        assert chain0 == ChainMap(dict_arbitrary(),
-                                   Flat(flatdict()))
-        assert chain0 == chain1
-        assert chain0 == chainX
-        assert chainX == chain1
+        chains = (chain0, chain1, chainX, chainZ)
+        
+        # Assert that they’re all equal to one another:
+        for first, second in product(chains, chains):
+            if first is not second:
+                assert first == second
         
         print("REPR»CHAIN0:")
         print()
@@ -692,18 +743,71 @@ def test():
         
         repr_instance = ChainRepr()
         
-        assert repr_instance.repr(chain0) == repr_instance.repr(chainO)
+        print("REPR»CHAIN-OH:")
+        print()
+        print(repr_instance.repr(chainO))
+        print()
+    
+    @inline
+    def test_six_experimental():
+        """ Parity checks for experimental `ChainMapPlusPlus` """
+        chain0 = ChainMapPlusPlus(dict_arbitrary(),
+                                          fsdata(),
+                                     environment())
+        
+        chain1 = chain0.clone()
+        assert len(chain0) == len(chain1)
+        
+        for key in chain0.keys():
+            assert key in chain0
+            assert key in chain1
+            
+            # N.B. SLOW AS FUCK:
+            # assert key in chain0.flatten()
+            
+            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
+            assert try_items(key, *chain0.maps, default=None) == chain0[key]
+            assert try_items(key, *chain0.maps, default=None) == chain1[key]
+    
+    @inline
+    def test_seven_experimental():
+        """ Equality comparisons with `ChainMapPlusPlus` """
+        from clu.config.keymap import flatdict, Flat
+        from itertools import product
+        
+        chain0 = ChainMapPlusPlus(dict_arbitrary(),
+                                  Flat(flatdict()))
+        chain1 = chain0.clone()
+        chainX = chain0.clone(deep=True)
+        
+        chain00 = ChainMap(dict_arbitrary(),
+                           Flat(flatdict()))
+        chain11 = chain00.clone()
+        chainXX = chain00.clone(deep=True)
+        
+        pp = (chain0,  chain1,  chainX)
+        cm = (chain00, chain11, chainXX)
+        
+        # Assert that they’re all equal to one another:
+        for first, second in product(pp+cm, cm+pp):
+            if first is not second:
+                assert first == second
+        
+        print("REPR»CHAIN0:")
+        print()
+        print(repr(chain0))
+        print()
     
     @inline.diagnostic
     def restore_environment():
         """ Restore environment from stashed values """
         os.environ = stash
     
-    @inline.diagnostic
-    def show_environment():
-        """ Show environment variables """
-        for envline in format_environment():
-            print(envline)
+    # @inline.diagnostic
+    # def show_environment():
+    #     """ Show environment variables """
+    #     for envline in format_environment():
+    #         print(envline)
     
     # Run all inline tests, return POSIX status
     return inline.test(100)

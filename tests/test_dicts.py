@@ -183,19 +183,24 @@ class TestDicts(object):
         """ Equality comparisons across the board """
         from clu.dicts import ChainMap
         from clu.config.keymap import flatdict, Flat
+        from itertools import product
         
         chain0 = ChainMap(arbitrary, Flat(flatdict()))
         chain1 = chain0.clone()
         chainX = chain0.clone(deep=True)
+        chainZ = ChainMap(arbitrary, Flat(flatdict()))
         
-        assert chain0 == ChainMap(arbitrary, Flat(flatdict()))
-        assert chain0 == chain1
-        assert chain0 == chainX
-        assert chainX == chain1
+        chains = (chain0, chain1, chainX, chainZ)
+        
+        # assert that they’re all equal to one another:
+        for first, second in product(chains, chains):
+            if first is not second:
+                assert first == second
     
     def test_chainmap_compatibilty_stdlib_collections_chainmap(self, arbitrary):
         """ Compatibility checks with “collections.ChainMap” """
-        from clu.dicts import ChainMap, ChainRepr
+        from clu.dicts import ChainMap
+        # from clu.dicts import ChainRepr
         from clu.config.keymap import flatdict, Flat
         import collections
         
@@ -212,9 +217,8 @@ class TestDicts(object):
         assert chainZ == chain0
         assert chainZ == chainO
         
-        repr_instance = ChainRepr()
-        
-        assert repr_instance.repr(chain0) == repr_instance.repr(chainO)
+        # repr_instance = ChainRepr()
+        # assert repr_instance.repr(chain0) == repr_instance.repr(chainO)
     
     def test_ordered_mapping_views(self, dirname, fsdata):
         """ The ordered mapping views are returned from “clu.fs.filesystem.Directory”

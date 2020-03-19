@@ -17,7 +17,7 @@ from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsV
 from clu.config.keymapview import NamespaceWalkerValuesView
 
 from clu.predicates import (isexpandable, iscontainer, isnotnone,
-                            always, uncallable, tuplize)
+                            always, uncallable)
 
 from clu.typology import iterlen, ismapping
 from clu.exporting import Exporter
@@ -393,7 +393,7 @@ class FlatOrderedSet(collections.abc.Set,
         used to initialize the FlatOrderedSet for which the predicate returns
         a Falsey value. 
     """
-    __slots__ = tuplize('things')
+    __slots__ = ('things', 'predicate')
     
     @classmethod
     def is_a(cls, instance):
@@ -426,6 +426,7 @@ class FlatOrderedSet(collections.abc.Set,
                     if thing not in thinglist:
                         thinglist.append(thing)
         self.things = tuple(thinglist)
+        self.predicate = predicate
     
     def __iter__(self):
         yield from self.things
@@ -442,7 +443,7 @@ class FlatOrderedSet(collections.abc.Set,
     def __getitem__(self, idx):
         if isinstance(idx, int):
             return self.things[idx]
-        return type(self)(*self.things[idx])
+        return type(self)(*self.things[idx], predicate=self.predicate)
     
     def __bool__(self):
         return len(self.things) > 0
@@ -468,7 +469,7 @@ class FlatOrderedSet(collections.abc.Set,
         copier = getattr(copy, deep and 'deepcopy' or 'copy')
         for thing in self.things:
             things.append(copier(thing))
-        super(cls, out).__init__(*things)
+        super(cls, out).__init__(*things, predicate=self.predicate)
         return out
     
     def inner_repr(self):

@@ -17,7 +17,7 @@ from clu.constants.polyfills import Enum, unique, auto
 from clu.predicates import mro, or_none
 from clu.typology import dict_types, isstring, isbytes
 from clu.fs.misc import re_matcher
-from clu.naming import nameof, qualified_name
+from clu.naming import nameof, qualified_name, isinspectable
 from clu.enums import alias, AliasingEnumMeta
 from clu.stdio import std, linebreak, flush_all
 from clu.exporting import Exporter
@@ -481,6 +481,20 @@ def paragraphize(doc):
     return ''.join(lines).splitlines()
 
 @export
+def signature(thing):
+    """ Retrieve the signature for a thing, parsing the docstring
+        if necessary.
+    """
+    try:
+        return nameof(thing) + str(inspect.signature(thing))
+    except ValueError as exc:
+        if 'no signature found' in str(exc):
+            doc = inspect.getdoc(thing)
+            if doc:
+                return doc.splitlines()[0].strip().replace('-->', '# →')
+    return None
+
+@export
 def highlight(code_string, language='python',
                              markup='terminal256',
                               style='paraiso-dark',
@@ -666,18 +680,20 @@ class DocFormat(clu.abstract.Format):
         # cls = type(self)
         thingname = nameof(thing)
         doc = inspect.getdoc(thing) or "«¡no docstring found!»"
-        sig = inspect.signature(thing) or ""
+        sig = signature(thing) or ""
         paras = paragraphize(doc)
         self.putln()
         
         self.putcenter(f"__doc__ for “{thingname}”",
-                       fmt=self.get('head'))
+                       color=self.get('head'))
         self.putln()
         
-        self.putcode(f"{thingname}{sig}")
-        self.putln(count=int(not self.isatty))
+        if sig:
+            self.putcode(sig)
+            self.putln(count=int(not self.isatty))
         
-        for paragraph in paras:
+        start = int(not isinspectable(thing)) * 2
+        for paragraph in paras[start:]:
             self.putpara(paragraph)
     
     def __call__(self, *things):
@@ -697,7 +713,7 @@ def ansidoc(*things):
         # Process each things’ name and doc
         thingname = nameof(thing)
         doc = inspect.getdoc(thing) or "«¡no docstring found!»"
-        sig = inspect.signature(thing) or ""
+        sig = signature(thing) or ""
         paras = paragraphize(doc)
         
         print_ansi_centered(f"__doc__ for “{thingname}”",
@@ -706,17 +722,19 @@ def ansidoc(*things):
         print()
         
         # Code-highlight, format and print the thing and its call-signature:
-        print(highlight(textwrap.fill(f"{thingname}{sig}", **wrapper_kws()),
-                        isatty=std.OUT.isatty()),
-                        sep='', end='\n',
-                        file=std.OUT)
-        
-        if not std.OUT.isatty():
-            flush_all()
-            print()
+        if sig:
+            print(highlight(textwrap.fill(sig, **wrapper_kws()),
+                            isatty=std.OUT.isatty()),
+                            sep='', end='\n',
+                            file=std.OUT)
+            
+            if not std.OUT.isatty():
+                flush_all()
+                print()
         
         # Format and print each paragraph
-        for para in paras:
+        start = int(not isinspectable(thing)) * 2
+        for para in paras[start:]:
             if para:
                 marked = para_mark_matcher(para)
                 print_ansi(textwrap.fill(para,
@@ -747,6 +765,7 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
+    from itertools import product
     
     @inline
     def test_one():
@@ -758,11 +777,13 @@ def test():
         # ansidoc(Enum)
         # ansidoc(ansidoc)
         ansidoc(Exporter)
+        ansidoc(product)
     
     @inline
     def test_three():
         fmt = DocFormat()
         fmt(Exporter)
+        fmt(product)
     
     return inline.test()
 

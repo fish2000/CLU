@@ -155,7 +155,11 @@ def isnativemodule(module):
     
     # Step three: in leu of either of those indicators,
     # check the module path’s file suffix:
-    ext = suffix(inspect.getfile(module))
+    try:
+        ext = suffix(inspect.getfile(module))
+    except TypeError as exc:
+        return 'is a built-in' in str(exc)
+    
     return ext in EXTENSION_SUFFIXES
 
 @export
@@ -169,6 +173,15 @@ def isnative(thing):
     return isnativemodule(
            importlib.import_module(
                             module))
+
+@export
+def isinspectable(thing):
+    """ isinspectable(thing) → boolean predicate, True
+        if `thing` is inspectable, through the “inspect”
+        modules’ myriad functions and types.
+    """
+    return (not isbuiltin(thing)) \
+       and (not isnative(thing))
 
 # QUALIFIED-NAME FUNCTIONS: import by qualified name (like e.g. “yo.dogg.DoggListener”),
 # assess a thing’s qualified name, etc etc.

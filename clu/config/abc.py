@@ -440,7 +440,9 @@ class FlatOrderedSet(collections.abc.Set,
         return thing in self.things
     
     def __getitem__(self, idx):
-        return self.things[idx]
+        if isinstance(idx, int):
+            return self.things[idx]
+        return type(self)(*self.things[idx])
     
     def __bool__(self):
         return len(self.things) > 0

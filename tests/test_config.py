@@ -357,16 +357,6 @@ class TestConfig(object):
         assert renestified == flat
         assert flat == nested
         assert renestified == nested
-        
-    def test_FlatOrderedSet(self):
-        from clu.config.abc import FlatOrderedSet
-        
-        stuff = FlatOrderedSet(None, "a", "b", FlatOrderedSet("c", None, "a", "d"))
-        summary = FlatOrderedSet("a", "b", "c", "d")
-        
-        assert stuff.things == summary.things
-        assert stuff == summary
-        assert not stuff.isdisjoint(summary)
     
     def test_NamespacedFieldManager_module_getattr_instancing(self):
         from clu.config.fieldtypes import fields as fields0

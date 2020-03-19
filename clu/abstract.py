@@ -232,7 +232,7 @@ class CacheDescriptor(DataDescriptor, ReprWrapper):
         self.lru = value
     
     def inner_repr(self):
-        return repr(self.lru)
+        return repr(self.lru)[1:-1]
 
 class Descriptor(NamedDescriptor, SlottedRepr):
     
@@ -257,7 +257,7 @@ class Descriptor(NamedDescriptor, SlottedRepr):
     def alternative_inner_repr(self):
         from clu.repr import strfield
         value = strfield(self.value)
-        return f"[name={self.name}, value={value}]"
+        return f"name={self.name}, value={value}"
 
 class ValueDescriptor(Descriptor):
     

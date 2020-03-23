@@ -6,7 +6,6 @@ import collections.abc
 import importlib
 import importlib.machinery
 import inspect
-import pickle
 
 from clu.constants.consts import λ, φ
 from clu.constants.consts import BASEPATH, QUALIFIER, NoDefault
@@ -30,6 +29,7 @@ def determine_module(thing, name=None):
     if thing is None:
         return None
     
+    import pickle
     return pickle.whichmodule(thing, None) or name # type: ignore
 
 """

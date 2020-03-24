@@ -699,13 +699,14 @@ class ExporterBase(collections.abc.MutableMapping,
         from clu.repr import strfields
         length = len(self)
         if self.path:
-            path = os.path.relpath(self.path, start=self.basepath)
+            relpath = os.path.relpath(self.path, start=self.basepath)
+            path = f"“{relpath}”"
         else:
             path = "«undefined»"
         return strfields(self, type(self).fields,
                                try_callables=False,
                                items=length,
-                               path=f"“{path}”")
+                               path=f"{path}")
     
     def __enter__(self):
         return self.decorator()

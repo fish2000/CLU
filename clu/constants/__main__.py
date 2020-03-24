@@ -58,18 +58,23 @@ def show():
                 const_value = os.fspath(const_value)
             
             if const_name.endswith('PATH') and os.pathsep in const_value:
-                keyval(const_name, SEP.join(truncate(const_value.split(os.pathsep))), most=most)
+                keyval(const_name, SEP.join(truncate(const_value.split(os.pathsep))),
+                                   most=most)
             else:
-                keyval(const_name, f"“{const_value}”", most=most)
+                keyval(const_name, f"“{const_value}”",
+                                   most=most)
         
         elif isiterable(const_value):
-            keyval(const_name, SEP.join(truncate(const_value)), most=most)
+            keyval(const_name, SEP.join(truncate(const_value)),
+                               most=most)
         
         elif isnumber(const_value):
-            keyval(const_name, f"«{const_value!r}»", most=most)
+            keyval(const_name, f"«{const_value!r}»",
+                               most=most)
         
         else:
-            keyval(const_name, const_value, most=most)
+            keyval(const_name, const_value,
+                               most=most)
     
     # Print footer:
     print()

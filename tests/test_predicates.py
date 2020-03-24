@@ -997,14 +997,14 @@ class TestPredicates(object):
     def test_ismergeable(self):
         """ » Checking “ismergeable” lambda from clu.predicates … """
         from clu.predicates import ismergeable
-        from clu.typespace import Namespace, SimpleNamespace
+        from clu.typespace import types
         from collections import OrderedDict, defaultdict
         
         dic = { 'yo' : "dogg" }
         odc = OrderedDict({ 'i_heard' : "you liked" })
         ddc = defaultdict(lambda: "wat", { "mergeable" : "instances" })
-        nsi = Namespace(dogg="yo")
-        sns = SimpleNamespace(dogg="yo")
+        nsi = types.Namespace(dogg="yo")
+        sns = types.SimpleNamespace(dogg="yo")
         
         assert ismergeable(dic)
         assert ismergeable(odc)

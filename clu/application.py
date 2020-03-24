@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-# import clu.abstract
 import sys
 
-# from clu.repr import stringify
 from clu.predicates import newtype, mro, allattrs, attr_search
-from clu.typespace import SimpleNamespace as sns
+from clu.typespace import types
 from clu.importing import (ModuleBase,
                            MetaModule,
                            installed_appnames)
 
 from clu.constants import consts
-# from clu.extending import Extensible
 from clu.exporting import Exporter
+
+# save some typographic room:
+sns = types.SimpleNamespace
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

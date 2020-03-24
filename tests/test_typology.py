@@ -146,7 +146,7 @@ class TestTypology(object):
         """ » Checking basic isXXX(•) functions from clu.typology … """
         import array, decimal, os
         from clu.predicates import attr
-        from clu.typespace import SimpleNamespace
+        from clu.typespace import types
         from clu.typology import (subclasscheck,
                                   ispathtype, ispath, isvalidpath,
                                   isnumber, isnumeric, ismapping, isarray,
@@ -159,9 +159,9 @@ class TestTypology(object):
         
         assert ispathtype(str)
         assert ispathtype(bytes)
-        assert not ispathtype(SimpleNamespace)
+        assert not ispathtype(types.SimpleNamespace)
         assert ispath('/yo/dogg')
-        assert not ispath(SimpleNamespace())
+        assert not ispath(types.SimpleNamespace())
         assert not isvalidpath('/yo/dogg')
         assert isvalidpath('/')
         assert isvalidpath('/private/tmp')
@@ -196,8 +196,8 @@ class TestTypology(object):
         assert isfunction(lambda: None)
         assert isfunction(attr)
         assert isfunction(subclasscheck)
-        assert not isfunction(SimpleNamespace())
-        assert not isfunction(SimpleNamespace)
+        assert not isfunction(types.SimpleNamespace())
+        assert not isfunction(types.SimpleNamespace)
     
     def test_numpy_predicates(self):
         from clu.typology import isarray

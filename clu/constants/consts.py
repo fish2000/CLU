@@ -6,9 +6,6 @@ import platform
 import sysconfig
 import sys, os, re
 
-# Define the “pytuple” shortcut lambda:
-pytuple = lambda *attrs: tuple(f'__{atx}__' for atx in attrs)
-
 # Choose a “path” interim operator for path-type consts –
 # trying “pathlib.Path”, “pathlib2.Path”, and falling
 # back to string-interning with “sys.intern”:
@@ -19,6 +16,9 @@ except (ImportError, SyntaxError):
 else:
     if not callable(path):
         path = sys.intern
+
+# Define the “pytuple” shortcut lambda:
+pytuple = lambda *attrs: tuple(f'__{atx}__' for atx in attrs)
 
 # Appname (née PROJECT_NAME):
 APPNAME = sys.intern('clu')

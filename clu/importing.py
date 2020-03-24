@@ -33,7 +33,7 @@ from clu.extending import Extensible
 from clu.naming import nameof, dotpath_split, dotpath_join, qualified_name
 from clu.predicates import anyattrs, attr, attr_search, item_search, mro, tuplize
 from clu.repr import stringify
-from clu.typespace import Namespace, types
+from clu.typespace import types
 from clu.typology import ismodule, ismapping, isstring, subclasscheck
 from clu.exporting import Registry as ExporterRegistry
 from clu.exporting import ExporterBase, Exporter
@@ -475,7 +475,7 @@ class MetaModule(MetaRegistry):
         
         # Return a new Namespace with the deferred export function
         # defined as “export”:
-        return Namespace(export=deferred_export, **attributes)
+        return types.Namespace(export=deferred_export, **attributes)
     
     def __new__(metacls, name, bases, attributes, **kwargs):
         """ Create a new class-module subclass, expanding any

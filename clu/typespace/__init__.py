@@ -7,57 +7,63 @@ import collections.abc
 import weakref
 import re
 
-from clu.constants.consts import (BASEPATH,
-                                  APPNAME, VERBOTEN)
-
-from clu.constants.polyfills import cache_from_source
-from clu.typespace.namespace import SimpleNamespace, Namespace
+from clu.constants.consts import BASEPATH, APPNAME, VERBOTEN
 from clu.exporting import Exporter, path_to_dotpath
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-# A prefix to use when creating new modules programmatically:
-DYNAMIC_MODULE_PREFIX = '__dynamic_modules__'
+def prepare_types_ns():
+    """ Prepare and return the “types” alias namespace """
+    from clu.constants.polyfills import cache_from_source
+    from clu.typespace.namespace import SimpleNamespace, Namespace
+    
+    # Import-rename the original “types” module:
+    import types as thetypes
+    types = Namespace()
+    typed = re.compile(r"^(?P<typename>\w+)(?:Type)$")
+    
+    # Fill a Namespace with type aliases, minus the fucking 'Type' suffix --
+    # We know they are types because they are in the fucking “types” module, OK?
+    # And those irritating four characters take up too much pointless space, if
+    # you asked me, which you implicitly did by reading the comments in my code,
+    # dogg.
+    
+    for typename in dir(thetypes):
+        if typename.endswith('Type'):
+            setattr(types, typed.match(typename).group('typename'),
+            getattr(thetypes, typename))
+        elif typename not in VERBOTEN:
+            setattr(types, typename, getattr(thetypes, typename))
+    
+    # Substitute our own SimpleNamespace class, instead of the provided version:
+    setattr(types, 'SimpleNamespace',   SimpleNamespace)
+    setattr(types, 'Namespace',         Namespace)
+    
+    # Add the array.ArrayType base type as “Array”:
+    setattr(types, 'Array',             array.ArrayType)
+    
+    # Add the collections.abc.MappingView base type:
+    setattr(types, 'MappingView',       collections.abc.MappingView)
+    
+    # Add weakref builtin types:
+    setattr(types, 'Reference',         weakref.ReferenceType)
+    setattr(types, 'Proxy',             weakref.ProxyType)
+    setattr(types, 'CallableProxy',     weakref.CallableProxyType)
+    
+    # Throw in the `cache_from_source` function:
+    setattr(types, 'cache_from_source', cache_from_source)
+    
+    # Manually set `types.__file__` and related attributes:
+    setattr(types, '__file__',          __file__)
+    setattr(types, '__cached__',        cache_from_source(__file__))
+    setattr(types, '__package__',       path_to_dotpath(__file__,
+                                                        relative_to=BASEPATH))
+    setattr(types, '__qualname__',      getattr(thetypes, '__name__'))
+    
+    return types
 
-import types as thetypes
-types = Namespace()
-typed = re.compile(r"^(?P<typename>\w+)(?:Type)$")
-
-# Fill a Namespace with type aliases, minus the fucking 'Type' suffix --
-# We know they are types because they are in the fucking “types” module, OK?
-# And those irritating four characters take up too much pointless space, if
-# you asked me, which you implicitly did by reading the comments in my code,
-# dogg.
-
-for typename in dir(thetypes):
-    if typename.endswith('Type'):
-        setattr(types, typed.match(typename).group('typename'),
-        getattr(thetypes, typename))
-    elif typename not in VERBOTEN:
-        setattr(types, typename, getattr(thetypes, typename))
-
-# Substitute our own SimpleNamespace class, instead of the provided version:
-setattr(types, 'SimpleNamespace',   SimpleNamespace)
-setattr(types, 'Namespace',         Namespace)
-
-# Add the array.ArrayType base type as “Array”:
-setattr(types, 'Array',             array.ArrayType)
-
-# Add the collections.abc.MappingView base type:
-setattr(types, 'MappingView',       collections.abc.MappingView)
-
-# Add weakref builtin types:
-setattr(types, 'Reference',         weakref.ReferenceType)
-setattr(types, 'Proxy',             weakref.ProxyType)
-setattr(types, 'CallableProxy',     weakref.CallableProxyType)
-
-# Manually set `types.__file__` and related attributes:
-setattr(types, '__file__',          __file__)
-setattr(types, '__cached__',        cache_from_source(__file__))
-setattr(types, '__package__',       path_to_dotpath(__file__,
-                                                    relative_to=BASEPATH))
-setattr(types, '__qualname__',      getattr(thetypes, '__name__'))
+types = prepare_types_ns()
 
 @export
 def modulize(name, namespace, docs=None,
@@ -80,7 +86,7 @@ def modulize(name, namespace, docs=None,
         raise TypeError("Module namespace must be a mapping type")
     
     # Ensure “namespace” is an instance of “clu.typespace.namespace.Namespace”:
-    namespace = Namespace(namespace)
+    namespace = types.Namespace(namespace)
     
     # Update the namespace with '__all__' and '__dir__' if necessary:
     ns_all = None
@@ -105,21 +111,17 @@ def modulize(name, namespace, docs=None,
     # based on the given name, the given file path (if any), and
     # some reasonable prefixes:
     if path:
-        qualified_name = dotpath_join(DYNAMIC_MODULE_PREFIX,
-                                      appname,
-                                      path_to_dotpath(path,
-                                                      relative_to),
+        qualified_name = dotpath_join(appname,
+                                      path_to_dotpath(path, relative_to),
                                       name)
         
         # Note that one can use a file path that does not
         # have to necessarily exist on the filesystem in an
         # accessible manner:
         namespace.update({ '__file__' : path,
-                         '__cached__' : cache_from_source(path) })
+                         '__cached__' : types.cache_from_source(path) })
     else:
-        qualified_name = dotpath_join(DYNAMIC_MODULE_PREFIX,
-                                      appname,
-                                      name)
+        qualified_name = dotpath_join(appname, name)
     
     # Has this already been done with this name?
     if qualified_name in sys.modules:

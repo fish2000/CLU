@@ -6,14 +6,17 @@ from functools import lru_cache
 import collections.abc
 import clu.abstract
 import clu.dicts
+import clu.all
 import pickle
 import sys
 
-from clu import all
 from clu.constants import consts
-from clu.predicates import ispyname, negate, lowers
 from clu.typespace import types
 from clu.typology import iterlen
+from clu.predicates import (ispyname,
+                            negate,
+                            lowers)
+
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -133,9 +136,9 @@ def compare_module_lookups_for_all_things(*modules, **options):
     mismatches = []
     results = []
     
-    clumodules = all.import_all_modules(consts.BASEPATH,
-                                        consts.APPNAME,
-                                        consts.EXPORTER_NAME)
+    clumodules = clu.all.import_all_modules(consts.BASEPATH,
+                                            consts.APPNAME,
+                                            consts.EXPORTER_NAME)
     assert clumodules
     
     modulenames = tuple(modules or Exporter.modulenames())

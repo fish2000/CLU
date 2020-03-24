@@ -50,7 +50,6 @@ class AppDirs(collections.abc.Hashable):
     fields = ('appname', 'appauthor',
               'roaming', 'multipath',
               'system',  'version',
-                         'version_info',
               
               'site_config', 'site_data',
               'user_cache',  'user_config',

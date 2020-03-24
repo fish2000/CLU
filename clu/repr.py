@@ -12,7 +12,7 @@ from clu.predicates import (ismetaclass, typeof,
                             pyname)
 
 from clu.typology import (isnumeric, isbytes, isstring,
-                          ismapping, issequence,
+                          ispath, ismapping, issequence,
                           issingleton)
 
 from clu.exporting import Exporter
@@ -42,6 +42,8 @@ def strfield(value):
         return f"{value!s}"
     elif isbytes(T):
         return strfield(value.decode(consts.ENCODING))
+    elif ispath(T):
+        return f"“{value!s}”"
     elif issequence(T):
         contents = ", ".join(strfield(item) for item in value)
         return f"[ {contents} ]"

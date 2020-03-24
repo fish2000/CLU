@@ -6,14 +6,23 @@ import platform
 import sysconfig
 import sys, os, re
 
-# pytuple shortcut lambda:
+# Define the “pytuple” shortcut lambda:
 pytuple = lambda *attrs: tuple(f'__{atx}__' for atx in attrs)
+
+# Choose a “path” interim operator for path-type consts:
+try:
+    from clu.constants.polyfills import Path as path
+except (ImportError, SyntaxError):
+    path = sys.intern
+else:
+    if not callable(path):
+        path = sys.intern
 
 # Appname (née PROJECT_NAME):
 APPNAME = sys.intern('clu')
 
 # Project base path:
-BASEPATH = sys.intern(
+BASEPATH = path(
            os.path.dirname(
            os.path.dirname(
            os.path.dirname(__file__))))
@@ -105,7 +114,7 @@ PATH = os.getenv("PATH", DEFAULT_PATH)
 PROJECT_NAME = APPNAME
 
 # Path to the projects’ root package directory:
-PROJECT_PATH = sys.intern(os.path.join(BASEPATH, APPNAME))
+PROJECT_PATH = path(os.path.join(BASEPATH, APPNAME))
 
 # Determine if our Python is three’d up:
 PY3 = sys.version_info.major > 2
@@ -134,10 +143,10 @@ SINGLETON_TYPES = (bool, NoneType, EllipsisType, NotImplementedType)
 STRINGPAIR = sys.intern("{!s} : {!s}")
 
 # Path to the script directory:
-SCRIPT_PATH = sys.intern(os.path.join(BASEPATH, APPNAME, 'scripts'))
+SCRIPT_PATH = path(os.path.join(BASEPATH, APPNAME, 'scripts'))
 
 # Path to the project tests:
-TEST_PATH = sys.intern(os.path.join(BASEPATH, 'tests'))
+TEST_PATH = path(os.path.join(BASEPATH, 'tests'))
 
 # Determine if we’re in TextMate:
 TEXTMATE = 'TM_PYTHON' in os.environ
@@ -184,8 +193,8 @@ WHITESPACE = re.compile(r'\s+')
 basedir = "/usr/local/var/run/xdg"
 symlink = os.path.join(basedir, 'CURRENT')
 
-XDG_RUNTIME_BASE = basedir
-XDG_RUNTIME_DIR = symlink
+XDG_RUNTIME_BASE = path(basedir)
+XDG_RUNTIME_DIR = path(symlink)
 XDG_RUNTIME_MODE = 0o700
 
 class NoDefault(object):
@@ -257,8 +266,8 @@ def print_all():
     printout = lambda name, value: print("» %25s : %s" % (name, value))
     
     for const_name in __all__:
-        if const_name.endswith('PATH') and os.pathsep in G[const_name]:
-            printout(const_name, G[const_name].replace(os.pathsep, SEP))
+        if const_name.endswith('PATH') and os.pathsep in str(G[const_name]):
+            printout(const_name, str(G[const_name]).replace(os.pathsep, SEP))
         elif type(G[const_name]) is tuple:
             printout(const_name, SEP.join(f"“{g!s}”" for g in G[const_name]))
         elif type(G[const_name]) is str:

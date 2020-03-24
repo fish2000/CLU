@@ -83,6 +83,9 @@ class System(Enum):
     def __bytes__(self):
         return bytes(self.name, encoding=ENCODING)
     
+    def __repr__(self):
+        return self.to_string()
+    
     def __eq__(self, other):
         return str(self) == str(other)
     

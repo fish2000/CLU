@@ -753,6 +753,9 @@ export(print_separator,     name='print_separator', doc="print_separator(filler=
 export(wrapper_kws,         name='wrapper_kws',     doc="wrapper_kws(**kwargs) → prepare default arguments for instancing a “textwrap.TextWrapper”")
 export(ANSIFormatBase,      name='ANSIFormatBase')
 
+export(SEPARATOR_WIDTH,     name='SEPARATOR_WIDTH')
+export(EIGHTY_PERCENT,      name='EIGHTY_PERCENT')
+
 # NO DOCS ALLOWED:
 export(Text)
 export(Background)

@@ -8,7 +8,6 @@ import weakref
 import re
 
 from clu.constants.consts import (BASEPATH,
-                                  DYNAMIC_MODULE_PREFIX,
                                   APPNAME, VERBOTEN)
 
 from clu.constants.polyfills import cache_from_source
@@ -17,6 +16,9 @@ from clu.exporting import Exporter, path_to_dotpath
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
+
+# A prefix to use when creating new modules programmatically:
+DYNAMIC_MODULE_PREFIX = '__dynamic_modules__'
 
 import types as thetypes
 types = Namespace()

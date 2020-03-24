@@ -11,7 +11,7 @@ import sys
 
 from clu import all
 from clu.constants import consts
-from clu.predicates import ispyname, negate
+from clu.predicates import ispyname, negate, lowers
 from clu.typespace import types
 from clu.typology import iterlen
 from clu.exporting import Exporter
@@ -98,7 +98,7 @@ class ModuleMap(collections.abc.Mapping,
         return clu.dicts.OrderedItemsView(self)
     
     def reload(self):
-        self.dir = tuple(filter(notpyname, dir(self.module)))
+        self.dir = tuple(sorted(filter(notpyname, dir(self.module)), key=lowers))
         length = len(self.dir)
         if length < 1:
             raise ValueError("module instance must export one or more things")

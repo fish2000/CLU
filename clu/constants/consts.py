@@ -9,7 +9,9 @@ import sys, os, re
 # Define the “pytuple” shortcut lambda:
 pytuple = lambda *attrs: tuple(f'__{atx}__' for atx in attrs)
 
-# Choose a “path” interim operator for path-type consts:
+# Choose a “path” interim operator for path-type consts –
+# trying “pathlib.Path”, “pathlib2.Path”, and falling
+# back to string-interning with “sys.intern”:
 try:
     from clu.constants.polyfills import Path as path
 except (ImportError, SyntaxError):
@@ -50,7 +52,7 @@ DEFAULT_TERMINAL_WIDTH = int(os.environ.get('COLUMNS', '100'), base=10)
 DOLLA = sys.intern('$')
 
 # A prefix to use when creating new modules programmatically:
-DYNAMIC_MODULE_PREFIX = sys.intern('__dynamic_modules__')
+# DYNAMIC_MODULE_PREFIX = sys.intern('__dynamic_modules__')
 
 # On non-macOS platforms this may be awry:
 ENCODING = sys.intern(sys.getfilesystemencoding().upper()) # 'UTF-8'
@@ -107,6 +109,10 @@ DEFAULT_PATH = os.pathsep.join(filter(os.path.exists, (PYTHON_BIN,
                                                        "/bin",  "/usr/bin",
                                                        "/sbin", "/usr/sbin"))) # type: ignore
 PATH = os.getenv("PATH", DEFAULT_PATH)
+
+# Boolean indicating whether or not the Path type
+# (á la “pathlib.Path”) is available
+# PATH_TYPE_AVAILABLE = path is not sys.intern
 
 φ = PARTIAL = sys.intern("<Partial>")
 
@@ -190,12 +196,12 @@ VERBOTEN += ('Namespace', 'SimpleNamespace')
 WHITESPACE = re.compile(r'\s+')
 
 # XDG_RUNTIME_DIR support:
-basedir = "/usr/local/var/run/xdg"
-symlink = os.path.join(basedir, 'CURRENT')
+# basedir = "/usr/local/var/run/xdg"
+# symlink = os.path.join(basedir, 'CURRENT')
 
-XDG_RUNTIME_BASE = path(basedir)
-XDG_RUNTIME_DIR = path(symlink)
-XDG_RUNTIME_MODE = 0o700
+# XDG_RUNTIME_BASE = path(basedir)
+# XDG_RUNTIME_DIR = path(symlink)
+# XDG_RUNTIME_MODE = 0o700
 
 class NoDefault(object):
     """ A singleton object to signify a lack of an argument. """
@@ -215,9 +221,10 @@ __all__ = ('APPNAME',
            'CPYTHON',
            'DEBUG',
            'DELETE_FLAG',
+           'DEFAULT_PATH',
            'DEFAULT_TERMINAL_WIDTH',
            'DOLLA',
-           'DYNAMIC_MODULE_PREFIX',
+           # 'DYNAMIC_MODULE_PREFIX',
            'ENCODING',
            'ENVIRONS_SEP',
            'EXPORTER_NAME',
@@ -225,14 +232,16 @@ __all__ = ('APPNAME',
            'HOSTNAME',
            'IPYTHON',
            'JYTHON',
-           'LAMBDA', 'λ',
+           'LAMBDA',
            'MAXINT',
            'NUMPY',
            'NAMESPACE_SEP',
            'PATH',
-           'PARTIAL', 'φ',
+           # 'PATH_TYPE_AVAILABLE',
+           'PARTIAL',
            'PROJECT_NAME', 'PROJECT_PATH',
            'PY3', 'PYPY',
+           'PYTHON_BIN',
            'PYTHON_VERSION',
            'QUALIFIER',
            'REPR_DELIMITER',
@@ -245,9 +254,11 @@ __all__ = ('APPNAME',
            'USER',
            'VERBOTEN',
            'WHITESPACE',
-           'XDG_RUNTIME_BASE', 'XDG_RUNTIME_DIR',
-                               'XDG_RUNTIME_MODE',
-           'pytuple', 'NoDefault')
+           # 'XDG_RUNTIME_BASE', 'XDG_RUNTIME_DIR',
+           #                     'XDG_RUNTIME_MODE',
+           'φ', 'λ',
+           'NoDefault',
+           'pytuple')
 
 __dir__ = lambda: list(__all__)
 
@@ -264,8 +275,9 @@ def print_all():
     SEP = ",\n" + (" " * 30)
     
     printout = lambda name, value: print("» %25s : %s" % (name, value))
+    lowers   = lambda string: sum(1 for c in string if c.islower())
     
-    for const_name in __all__:
+    for const_name in sorted(__all__, key=lowers):
         if const_name.endswith('PATH') and os.pathsep in str(G[const_name]):
             printout(const_name, str(G[const_name]).replace(os.pathsep, SEP))
         elif type(G[const_name]) is tuple:

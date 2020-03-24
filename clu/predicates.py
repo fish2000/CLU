@@ -398,6 +398,8 @@ isslotdicty = lambda thing: allpyattrs(thing, 'slots', 'dict') and negate(isclas
 
 # For sorting with ALL_CAPS stuff first or last:
 case_sort = lambda string: string.casefold() if string.isupper() else string.upper()
+lowers    = lambda string: sum(1 for c in string if c.islower()) # lowercase character count
+uppers    = lambda string: sum(1 for c in string if c.isupper()) # uppercase character count
 
 # UTILITY FUNCTIONS: helpers for builtin container types:
 
@@ -592,9 +594,11 @@ export(predicate_and,   name='predicate_and',   doc="predicate_and(predicate, a,
 export(predicate_or,    name='predicate_or',    doc="predicate_or(predicate, a, b) → boolean predicate, shortcut for `apply_to(predicate, any, a, b)`")
 export(predicate_xor,   name='predicate_xor',   doc="predicate_xor(predicate, a, b) → boolean predicate, shortcut for `apply_to(predicate, any, a, b) and not apply_to(predicate, all, a, b)`")
 
-export(case_sort,       name='case_sort',       doc="case_sort(string) → Sorting predicate to sort UPPERCASE names first")
-export(isnotnone,       name='isnotnone',       doc="isnotnone(thing) → boolean predicate, return True if “thing” is not None")
+export(case_sort,       name='case_sort',       doc="case_sort(string) → Sorting predicate to sort UPPERCASE names first (spoilers: it doesn’t quite work actually)")
+export(lowers,          name='lowers',          doc="lowers(string) → Sorting predicate, for sorting lowercase-containing names first – returns the lowercase character count")
+export(uppers,          name='uppers',          doc="uppers(string) → Sorting predicate, for sorting UPPERCASE-containing names first – returns the UPPERCASE character count")
 
+export(isnotnone,       name='isnotnone',       doc="isnotnone(thing) → boolean predicate, return True if “thing” is not None")
 export(ancestral,       name='ancestral',       doc="ancestral(atx, cls[, default]) → shortcut for “attr_across(atx, *rmro(cls)[, default])”")
 export(ancestral_union, name='ancestral_union', doc="ancestral_union(atx, cls[, default]) → shortcut for “uniquify(iterchain(attr_across(atx, *mro(cls)[, default])))”")
 

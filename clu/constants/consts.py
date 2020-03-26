@@ -65,7 +65,9 @@ FILE_ARGUMENT_NAMES = ('path', 'pth', 'file')
 
 # The hostname for this computer:
 nodename = platform.node().casefold()
-HOSTNAME = sys.intern(f"{nodename}.local")
+HOSTNAME = sys.intern(os.extsep in nodename \
+                               and nodename \
+                             or f"{nodename}.local")
 
 # Determine if we’re running in IPython:
 try:

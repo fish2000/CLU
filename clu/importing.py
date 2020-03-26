@@ -1032,6 +1032,7 @@ class ProxyModule(ModuleBase):
                 # subject to being called more than once:
                 setattr(cls, '_targets', attr(cls, 'targets', '_targets'))
                 try:
+                    # Fails when “targets” is a superclass attribute:
                     delattr(cls, 'targets')
                 except AttributeError:
                     pass

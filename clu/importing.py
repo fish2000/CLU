@@ -1274,6 +1274,35 @@ def test():
         assert hasattr(overridden, '_targets')          # attribute found normally
     
     @inline
+    def test_five_point_eight():
+        """ Proxy-module hybrid definition check """
+        
+        overrides = dict(APPNAME='yodogg',
+                         PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
+                         BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
+        
+        # Ensure that the definitions in the class-module itself
+        # take precedent over all proxied target items:
+        class TestOverrideConstsHybridProxy(ProxyModule[Module]):
+            targets = (overrides, consts)
+            
+            APPNAME = 'DOGG-YO'
+            BASEPATH = consts.BASEPATH
+        
+        from clu.app import TestOverrideConstsHybridProxy as overridden
+        
+        assert overridden.USER == consts.USER                   # value from “consts” target
+        assert overridden.BUILTINS == consts.BUILTINS           # value from “consts” target
+        assert overridden.BASEPATH == consts.BASEPATH           # value from class-module
+        assert overridden.APPNAME == 'DOGG-YO'                  # value from class-module
+        assert str(overridden.PROJECT_PATH).endswith('yodogg')  # value from “overrides” target
+        assert not str(overridden.BASEPATH).endswith('yodogg')  # NOT the value from “overrides”
+        
+        assert not hasattr(overridden, 'targets')
+        assert not hasattr(overridden, 'target_dicts')
+        assert hasattr(overridden, '_targets')
+        
+    @inline
     def test_six():
         """ Polymer-type caching and “initialize_types(…)” checks """
         

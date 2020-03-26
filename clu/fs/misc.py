@@ -208,12 +208,12 @@ def temporary(suffix='', prefix='', parent=None, **kwargs):
     if not prefix or kwargs.pop('randomized', False):
         prefix, _ = os.path.splitext(tempsplit[0]) # WTF, HAX!
     
-    fullpth = os.path.join(directory, f"{prefix}{suffix}")
+    fullpath = os.path.join(directory, f"{prefix}{suffix}")
     
-    if os.path.exists(fullpth):
-        raise FilesystemError(f"temporary(): file exists: {fullpth}")
+    if os.path.exists(fullpath):
+        raise FilesystemError(f"temporary(): file exists: {fullpath}")
     
-    return fullpth
+    return fullpath
 
 @export
 def u8encode(source):

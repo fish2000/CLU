@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from typing import T, KT, VT
 
 import abc
 import clu.abstract
 import collections
 import collections.abc
 import copy
+import typing
 
 abstract = abc.abstractmethod
 
@@ -28,8 +30,8 @@ export = exporter.decorator()
 # SUB-BASE AND ABSTRACT BASE CLASSES:
 
 @export
-class FrozenKeyMapBase(collections.abc.Mapping,
-                       collections.abc.Reversible,
+class FrozenKeyMapBase(typing.Mapping[KT, VT],
+                       typing.Reversible[KT],
                        metaclass=clu.abstract.Slotted):
     
     """ Abstract sub-base interface class for immutable namespaced mappings.
@@ -75,8 +77,8 @@ class FrozenKeyMapBase(collections.abc.Mapping,
         return len(self) > 0
 
 @export
-class KeyMapBase(FrozenKeyMapBase,
-                 collections.abc.MutableMapping):
+class KeyMapBase(FrozenKeyMapBase[KT, VT],
+                 typing.MutableMapping[KT, VT]):
     
     """ Abstract sub-base interface class for mutable namespaced mappings.
         
@@ -98,7 +100,7 @@ class KeyMapBase(FrozenKeyMapBase,
         ...
 
 @export
-class FrozenKeyMap(FrozenKeyMapBase):
+class FrozenKeyMap(FrozenKeyMapBase[KT, VT]):
     
     """ The abstract base class for frozen – immutable once created – namespaced mappings,
         also known as “FrozenKeyMaps”.
@@ -172,7 +174,7 @@ class FrozenKeyMap(FrozenKeyMapBase):
         yield from sorted(nss)
 
 @export
-class KeyMap(KeyMapBase, FrozenKeyMap):
+class KeyMap(KeyMapBase[KT, VT], FrozenKeyMap[KT, VT]):
     
     """ The abstract base class for mutable namespaced mappings (née “KeyMaps”).
         
@@ -244,7 +246,7 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
 # INTERIM ABSTRACT BASE: NamespaceWalker
 
 @export
-class NamespaceWalker(FrozenKeyMap):
+class NamespaceWalker(FrozenKeyMap[KT, VT]):
     
     """ A NamespaceWalker type implements a “walk(…)” method for iterating
         over namespaced key-value items.
@@ -364,9 +366,9 @@ class NamespaceWalker(FrozenKeyMap):
 # NON-KEYMAP ABC STRUCTURES: FlatOrderedSet
 
 @export
-class FlatOrderedSet(collections.abc.Set,
-                     collections.abc.Sequence,
-                     collections.abc.Reversible,
+class FlatOrderedSet(typing.Set[T],
+                     typing.Sequence[T],
+                     typing.Reversible[T],
                      collections.abc.Hashable, clu.abstract.Cloneable,
                                                clu.abstract.ReprWrapper,
                                                metaclass=clu.abstract.Slotted):
@@ -485,7 +487,7 @@ class FlatOrderedSet(collections.abc.Set,
 # CONCRETE CALLABLE SUBTYPES: functional_and, functional_set
 
 @export
-class functional_and(FlatOrderedSet,
+class functional_and(FlatOrderedSet[T],
                      collections.abc.Callable):
     
     """ The “functional_and” FlatOrderedSet subclass is designed to hold
@@ -511,7 +513,7 @@ class functional_and(FlatOrderedSet,
                 if function is not None)
 
 @export
-class functional_set(FlatOrderedSet,
+class functional_set(FlatOrderedSet[T],
                      collections.abc.Callable):
     
     """ The “functional_set” FlatOrderedSet subclass is designed to hold

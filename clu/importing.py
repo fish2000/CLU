@@ -1031,7 +1031,10 @@ class ProxyModule(ModuleBase):
                 # how module “__init__(…)” methods are nondeterministically
                 # subject to being called more than once:
                 setattr(cls, '_targets', attr(cls, 'targets', '_targets'))
-                delattr(cls, 'targets')
+                try:
+                    delattr(cls, 'targets')
+                except AttributeError:
+                    pass
     
     def __execute__(self):
         # Create the internal “clu.dicts.ChainMap” subclass instance,

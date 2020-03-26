@@ -157,8 +157,8 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     # stub test method – to trick nox into running __main__.py,
     # which is where the real tests are:
-    from clu.typespace.__main__ import test as realtest
-    return realtest()
+    from clu.typespace.__main__ import test as inline
+    return inline()
 
 if __name__ == '__main__':
-    test()
+    sys.exit(test())

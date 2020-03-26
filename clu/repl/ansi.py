@@ -480,6 +480,11 @@ def paragraphize(doc):
                 lines[idx] += " "
     return ''.join(lines).splitlines()
 
+# Regex to insert a comment mark prior to an “arrow” glyph,
+# and to update said glyph to a nicely higher codepoint:
+arrow_re = re.compile(r'[\-–—]+>')
+arrow_sb = '# →'
+
 @export
 def signature(thing):
     """ Retrieve the signature for a thing, parsing the docstring
@@ -491,7 +496,8 @@ def signature(thing):
         if 'no signature found' in str(exc):
             doc = inspect.getdoc(thing)
             if doc:
-                return doc.splitlines()[0].strip().replace('-->', '# →')
+                return arrow_re.sub(arrow_sb,
+                                    doc.splitlines()[0].strip())
     return None
 
 @export

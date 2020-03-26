@@ -21,7 +21,9 @@ def show():
     #    to the actual module from whence it camel;
     # 3) Pack the results into named tuples of tuples of named tuples –
     # 4) – the final product of which you see before you one line further down:
-    results, mismatches = compare_module_lookups_for_all_things()
+    results, mismatches = compare_module_lookups_for_all_things(basepath=consts.BASEPATH,
+                                                                 appname=consts.APPNAME,
+                                                           exporter_name=consts.EXPORTER_NAME)
     
     # Calculate the longest qualified module name – a value used to align
     # multi-line name-value pairs:

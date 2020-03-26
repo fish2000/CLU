@@ -5,23 +5,25 @@ import array
 import collections
 import collections.abc
 import weakref
-import re
+import sys, re
 
-from clu.constants.consts import BASEPATH, APPNAME, VERBOTEN
+from clu.constants.consts import pytuple, BASEPATH, APPNAME, VERBOTEN
 from clu.exporting import Exporter, path_to_dotpath
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-def prepare_types_ns():
+typed = re.compile(r"^(?P<typename>\w+)(?:Type)$")
+
+def prepare_types_ns(path, basepath):
     """ Prepare and return the “types” alias namespace """
     from clu.constants.polyfills import cache_from_source
     from clu.typespace.namespace import SimpleNamespace, Namespace
+    from clu.predicates import pyattr
     
     # Import-rename the original “types” module:
     import types as thetypes
     types = Namespace()
-    typed = re.compile(r"^(?P<typename>\w+)(?:Type)$")
     
     # Fill a Namespace with type aliases, minus the fucking 'Type' suffix --
     # We know they are types because they are in the fucking “types” module, OK?
@@ -55,26 +57,27 @@ def prepare_types_ns():
     setattr(types, 'cache_from_source', cache_from_source)
     
     # Manually set `types.__file__` and related attributes:
-    setattr(types, '__file__',          __file__)
-    setattr(types, '__cached__',        cache_from_source(__file__))
-    setattr(types, '__package__',       path_to_dotpath(__file__,
-                                                        relative_to=BASEPATH))
-    setattr(types, '__qualname__',      getattr(thetypes, '__name__'))
+    setattr(types, '__file__',          path)
+    setattr(types, '__cached__',        cache_from_source(path))
+    setattr(types, '__package__',       path_to_dotpath(path, relative_to=basepath))
+    setattr(types, '__qualname__',      pyattr(thetypes, 'qualname', 'name'))
     
     return types
 
-types = prepare_types_ns()
+# Prepare CLU’s typespace:
+types = prepare_types_ns(path=__file__,
+                         basepath=BASEPATH)
 
 @export
 def modulize(name, namespace, docs=None,
                               path=None,
                            appname=APPNAME,
-                       relative_to=BASEPATH):
+                          basepath=BASEPATH):
     """ Convert a dictionary mapping into a legit Python module """
-    from clu.naming import dotpath_join
-    from clu.predicates import nopyattr
+    from clu.dicts import asdict
+    from clu.naming import dotpath_join, dotpath_split
     from clu.typology import ismapping
-    import inspect, sys
+    import inspect
     
     # Ensure a module with the given module name we received
     # doesn’t already exist in `sys.modules`:
@@ -85,66 +88,58 @@ def modulize(name, namespace, docs=None,
     if not ismapping(namespace):
         raise TypeError("Module namespace must be a mapping type")
     
-    # Ensure “namespace” is an instance of “clu.typespace.namespace.Namespace”:
-    namespace = types.Namespace(namespace)
-    
-    # Update the namespace with '__all__' and '__dir__' if necessary:
-    ns_all = None
-    
-    if '__all__' not in namespace and not nopyattr(namespace, 'all'):
-        ns_all = tuple(sorted(namespace.keys()))
-        namespace['__all__'] = ns_all
-    
-    if '__dir__' not in namespace:
-        if ns_all is None:
-            ns_all = namespace.get('__all__', None) or \
-                     tuple(sorted(namespace.keys()))
-        namespace['__dir__'] = lambda: list(ns_all)
+    # Ensure we have an instance of “clu.typespace.namespace.Namespace”:
+    ns = types.Namespace(asdict(namespace))
     
     # Check for a __file__ entry in the namespace if we weren’t
-    # called with a name:
-    if '__file__' in namespace:
-        if not path:
-            path = namespace.get('__file__', path)
+    # called with a path:
+    if not path:
+        path = ns.get('__file__', None)
     
     # Construct a trivially namespaced name for the module,
     # based on the given name, the given file path (if any), and
     # some reasonable prefixes:
-    if path:
-        qualified_name = dotpath_join(appname,
-                                      path_to_dotpath(path, relative_to),
-                                      name)
-        
-        # Note that one can use a file path that does not
-        # have to necessarily exist on the filesystem in an
-        # accessible manner:
-        namespace.update({ '__file__' : path,
-                         '__cached__' : types.cache_from_source(path) })
-    else:
-        qualified_name = dotpath_join(appname, name)
+    qname = dotpath_join(path_to_dotpath(path,
+                         relative_to=basepath) or appname,
+                         name)
     
     # Has this already been done with this name?
-    if qualified_name in sys.modules:
-        return sys.modules[qualified_name]
+    if qname in sys.modules:
+        return sys.modules[qname]
+    
+    # Add '__all__' and '__dir__' to the namespace if necessary:
+    if '__all__' not in ns:
+        ns['__all__'] = tuple(sorted(ns.keys()))
+    
+    if '__dir__' not in ns:
+        allval = ns['__all__']
+        ns['__dir__'] = lambda: list(allval)
+    
+    # Note that one can use a file path that does not
+    # have to necessarily exist on the filesystem in an
+    # accessible manner:
+    if path:
+        ns.update({ '__file__' : path,
+                  '__cached__' : types.cache_from_source(path) })
     
     # Ensure we have a name and a package dotpath in our namespace:
-    namespace.update({ '__name__' : name,
-                   '__qualname__' : name,
-                    '__package__' : qualified_name })
+    ns.update({ '__name__' : name,
+            '__qualname__' : name,
+             '__package__' : dotpath_split(qname)[-1] })
     
     # Construct the module type from the qualified name, using
     # any given docstring text:
-    module = types.Module(qualified_name, inspect.cleandoc(docs))
+    module = types.Module(qname, inspect.cleandoc(docs))
     
     # Update the module’s `__dict__` with our namespaced mapping
-    module.__dict__.update(namespace.__dict__)
+    module.__dict__.update(ns.__dict__)
     
     # Update the `sys.modules` mapping with the new module,
     # as required by Python’s internal import machinery --
     # Once `sys.modules` has been thusly updated, the new module
     # can be imported with an “import «name»” statement, as with
     # any other available module:
-    sys.modules[qualified_name] = module
+    sys.modules[qname] = module
     
     # Return our new module instance:
     return module
@@ -158,3 +153,58 @@ export(types,           name='types',       doc=""" A Namespace instance contain
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
+
+def test():
+    
+    from clu.testing.utils import inline
+    
+    @inline
+    def test_one():
+        """ Check the typespace (the “types” namespace) """
+        import types as thetypes
+        
+        for typename in dir(thetypes):
+            
+            if typename.endswith('Type'):
+                shortname = typed.match(typename).group('typename')
+                assert hasattr(types, shortname)
+                assert getattr(types, shortname) == getattr(thetypes, typename)
+            
+            elif typename not in VERBOTEN:
+                # Can’t assert equality – many of these are different:
+                assert hasattr(types, typename)
+    
+    # __doc__ won’t be equal as we reset it during the export;
+    # and neither will the name attributes, like by definition:
+    verboten = VERBOTEN + pytuple('doc', 'name', 'qualname')
+    
+    @inline
+    def test_two():
+        """ Check the output of the “prepare_types_ns(…)” function """
+        moretypes = prepare_types_ns(path=__file__, basepath=BASEPATH)
+        
+        for typename in dir(types):
+            if typename not in verboten:
+                assert types[typename] == getattr(moretypes, typename)
+                # print("UNEQUAL:", typename, types[typename], moretypes[typename])
+    
+    @inline
+    def test_three():
+        """ Check modulization """
+        moretypes = prepare_types_ns(path=__file__, basepath=BASEPATH)
+        modulize('moretypes', moretypes, "A module containing aliases into the `types` module")
+        
+        # from pprint import pprint
+        # pprint([key for key in sys.modules.keys() if key.startswith('clu')])
+        
+        from clu.typespace import moretypes
+        
+        for typename in dir(types):
+            if typename not in verboten:
+                assert types[typename] == getattr(moretypes, typename)
+                # print("UNEQUAL:", typename, types[typename], getattr(moretypes, typename))
+    
+    return inline.test(100)
+
+if __name__ == '__main__':
+    sys.exit(test())

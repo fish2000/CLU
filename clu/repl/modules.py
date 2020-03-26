@@ -12,7 +12,6 @@ import sys
 
 from clu.constants import consts
 from clu.typespace import types
-from clu.typology import iterlen
 from clu.predicates import (ispyname,
                             negate,
                             lowers)
@@ -49,6 +48,7 @@ Results     = NamedTuple('Results',     ('total',
 class ModuleMap(collections.abc.Mapping,
                 collections.abc.Reversible,
                 clu.abstract.Cloneable,
+                clu.abstract.ReprWrapper,
                 metaclass=clu.abstract.Slotted):
     
     """ An adaptor class, wrapping a module and providing access to
@@ -64,10 +64,7 @@ class ModuleMap(collections.abc.Mapping,
             raise TypeError("valid module required")
         if not isinstance(module, (type(self), types.Module)):
             raise TypeError("module instance required")
-        if isinstance(module, type(self)):
-            self.module = getattr(module, 'module')
-        else:
-            self.module = module
+        self.module = getattr(module, 'module', module)
         self.reload()
     
     def __iter__(self):
@@ -89,7 +86,7 @@ class ModuleMap(collections.abc.Mapping,
         return out
     
     def __len__(self):
-        return iterlen(self.dir)
+        return len(self.dir)
     
     def keys(self):
         return clu.dicts.OrderedKeysView(self)
@@ -116,6 +113,9 @@ class ModuleMap(collections.abc.Mapping,
         # N.B. since we can’t readily deep-clone a module,
         # all cloned instances are shallow:
         return type(self)(self)
+    
+    def inner_repr(self):
+        return repr(dict(self))
 
 @cache
 def compare_module_lookups_for_all_things(*modules, **options):
@@ -130,15 +130,24 @@ def compare_module_lookups_for_all_things(*modules, **options):
     """
     from clu.naming import nameof, moduleof
     
+    # N.B. This is not yet properly paramatrized,
+    # as it is using CLU’s exporter class, by fiat –
+    # it will need the “clu.application” stuff to
+    # be up and running to get around that, methinks
+    
+    basepath      = options.get('basepath',      consts.BASEPATH)
+    appname       = options.get('appname',       consts.APPNAME)
+    exporter_name = options.get('exporter_name', consts.EXPORTER_NAME)
+    
     idx = 0
     total = 0
     mismatch_count = 0
     mismatches = []
     results = []
     
-    clumodules = clu.all.import_all_modules(consts.BASEPATH,
-                                            consts.APPNAME,
-                                            consts.EXPORTER_NAME)
+    clumodules = clu.all.import_all_modules(basepath,
+                                            appname,
+                                            exporter_name)
     assert clumodules
     
     modulenames = tuple(modules or Exporter.modulenames())

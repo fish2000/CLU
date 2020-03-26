@@ -89,10 +89,6 @@ class MetaRegistry(Extensible):
         appname, _, appspace = appnamespace.partition(consts.QUALIFIER)
         return Registry.for_appname(appname)[qualname]
     
-    def __getitem__(cls, key):
-        """ Allows lookup of an app name through subscripting the Registry class """
-        return Registry.for_appname(key)
-    
     def __repr__(cls):
         """ Type repr definition for class-based modules and ancestors """
         qualname = getattr(cls, 'qualname', None)
@@ -167,6 +163,13 @@ class Registry(abc.ABC, metaclass=MetaRegistry):
             # also name-wellness permitting:
             # if cls.prefix not in Registry.monomers[cls.appname]:
             #     Registry.monomers[cls.appname][cls.qualname] = ???
+    
+    @classmethod
+    def __class_getitem__(cls, key):
+        """ Allows lookup of an app name through direct subscripting
+            of the Registry class
+        """
+        return Registry.for_appname(key)
 
 @export
 class ModuleSpec(importlib.machinery.ModuleSpec):
@@ -508,6 +511,31 @@ class MetaModule(MetaRegistry):
         # Return the new module class:
         return cls
 
+@export
+class ModuleAlias(object):
+    
+    """ A ModuleAlias is created when subscripting the ModuleBase
+        type, or a subtype thereof, with another ModuleBase subtype,
+        as per the definition of ProxyModule – q.v. sub. and
+        “typing” code sample supra.:
+            
+            https://www.python.org/dev/peps/pep-0560/#mro-entries
+    """
+    
+    __slots__ = ('origin', 'specializer')
+    
+    def __init__(self, origin, specializer):
+        if not issubclass(origin, ModuleBase):
+            raise TypeError('Specialization requires a Module type')
+        if not issubclass(specializer, ModuleBase):
+            raise TypeError('Specialization requires a Module type')
+        self.origin = origin 
+        self.specializer = specializer
+    
+    def __mro_entries__(self, bases):
+        return tuplize(self.origin,
+                       self.specializer)
+
 DO_NOT_INCLUDE = { '__abstractmethods__',
                    '__execute__',
                    '_abc_impl', '_executed', 'monomers' }
@@ -551,6 +579,15 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         cls.appname  = appname  or attr_search('appname',  *ancestors)
         cls.appspace = appspace or attr_search('appspace', *ancestors)
         super(ModuleBase, cls).__init_subclass__(**kwargs)
+    
+    @classmethod
+    def __class_getitem__(cls, key):
+        """ Subscripting ModuleBase or one of its subtypes returns an
+            instance of ModuleAlias (q.v. class definition supra.),
+            used to “specialize” ModuleBase subtypes by inserting the
+            specialization type into the ModuleBase subtypes’ MRO.
+        """
+        return ModuleAlias(cls, key)
     
     def __init__(self, name, doc=None):
         """ Initialize a new class-based module instance, using the name
@@ -874,7 +911,7 @@ def add_targets(instance, *targets):
             continue
 
 @export
-class ProxyModule(Module):
+class ProxyModule(ModuleBase):
     
     """ A ProxyModule is a specific type of module: one that wraps one or
         more other things and surfaces their attributes, as if they are all
@@ -889,14 +926,24 @@ class ProxyModule(Module):
         method of the internal ChainMap, when attribute lookup across all of
         the module and mapping proxy targets is exhaustively unsuccessful.
         
-        Here’s a basic example of a ProxyModule definition:
+        The ProxyModule is a “pseudo-template” type – you need to specialize
+        it with the specific Module types with which you wish to use it.
+        In nearly every use-case scenario, this means using one of the Module
+        class types you have obtained through calling “initialize_types(…)”
+        (as above) – like so:
+            
+            >>> Module, Finder, Loader = initialize_types(my_appname)
+            >>> class MyProxy(ProxyModule[Module]):
+            >>>     # …etc
+        
+        Here’s a basic example of a ProxyModule subtype definition:
         
             >>> overrides = dict(…)
             >>> from yodogg.app import base_module
             >>> from yodogg.utils import misc as second_module
             >>> from yodogg.utils.functions import default_factory
             
-            >>> class myproxy(ProxyModule):
+            >>> class myproxy(ProxyModule[Module]):
             >>>     targets = (overrides, base_module,
             >>>                         second_module,
             >>>                       default_factory)
@@ -1177,7 +1224,7 @@ def test():
                          PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
                          BASEPATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg')
         
-        class TestOverrideConstsProxy(ProxyModule):
+        class TestOverrideConstsProxy(ProxyModule[Module]):
             targets = (overrides, consts)
         
         from clu.app import TestOverrideConstsProxy as overridden
@@ -1205,7 +1252,7 @@ def test():
                 return f"NO DOGG: {key}"
             raise KeyError(key)
         
-        class TestOverrideConstsFallbackProxy(ProxyModule):
+        class TestOverrideConstsFallbackProxy(ProxyModule[Module]):
             targets = (overrides, consts, fallback_function)
         
         from clu.app import TestOverrideConstsFallbackProxy as overridden

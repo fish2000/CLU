@@ -6,7 +6,7 @@ import pytest
 class TestImporting(object):
     
     def test_proxy_module_for_reals(self, consts):
-        from clu.importing import ProxyModule, Registry
+        from clu.importing import ProxyModule, Module, Registry
         
         overrides = dict(APPNAME='yodogg',
                          PROJECT_PATH='/Users/fish/Dropbox/CLU/clu/tests/yodogg/yodogg',
@@ -14,7 +14,7 @@ class TestImporting(object):
         
         try:
             
-            class testing1_overridden_consts(ProxyModule):
+            class testing1_overridden_consts(ProxyModule[Module]):
                 targets = (overrides, consts)
             
             from clu.app import testing1_overridden_consts as overridden

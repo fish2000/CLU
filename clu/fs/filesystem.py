@@ -9,6 +9,7 @@ import clu.abstract
 import clu.dicts
 import collections
 import collections.abc
+import contextlib
 import shutil
 import sys, re, os
 import zipfile
@@ -272,7 +273,7 @@ def TemporaryNamedFile(temppath, mode='wb',
         raise FilesystemError("error in underlying syscalls") from exc
 
 @export
-class TemporaryName(BaseFSName):
+class TemporaryName(BaseFSName, contextlib.AbstractContextManager):
     
     """ This is like `NamedTemporaryFile` without any of the actual stuff;
         it just makes up a file name – YOU have to make shit happen with it.
@@ -474,6 +475,9 @@ class TemporaryName(BaseFSName):
             return rm_rf(self._name)
         return False
     
+    def __enter__(self):
+        return self
+    
     def __exit__(self, exc_type=None,
                        exc_val=None,
                        exc_tb=None):
@@ -492,7 +496,8 @@ class Directory(BaseFSName,
                 collections.abc.Reversible,
                 collections.abc.Mapping,
                 collections.abc.Sized,
-                clu.abstract.Cloneable):
+                clu.abstract.Cloneable,
+                contextlib.AbstractContextManager):
     
     """ A context-managed directory: change in on enter, change back out
         on exit. Plus a few convenience functions for listing and whatnot.

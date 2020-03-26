@@ -88,7 +88,6 @@ class TypeLocker(abc.ABCMeta):
 @export
 class BaseFSName(collections.abc.Hashable,
                  clu.abstract.ReprWrapper,
-                 contextlib.AbstractContextManager,
                  os.PathLike,
                  metaclass=TypeLocker):
     
@@ -193,14 +192,6 @@ class BaseFSName(collections.abc.Hashable,
     
     def __fspath__(self):
         return self.name
-    
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, exc_type=None,
-                       exc_val=None,
-                       exc_tb=None):
-        return exc_type is None
     
     def __bool__(self):
         return self.exists

@@ -10,6 +10,91 @@ class TestFsMisc(object):
     
     """ Run the tests for the clu.fs.misc module. """
     
+    def test_temporary(self, temporarydir):
+        from clu.fs.misc import temporary
+        from clu.fs.filesystem import write_to_path
+        from clu.constants.exceptions import FilesystemError
+        
+        # These automatically randomize:
+        assert temporary(dir=temporarydir).startswith(temporarydir.name)
+        assert temporary(parent=temporarydir).startswith(temporarydir.name)
+        
+        # These are deterministic:
+        prefix = os.path.join(temporarydir.name, 'yo-dogg')
+        assert temporary(prefix='yo-dogg', dir=temporarydir) == prefix
+        assert temporary(prefix='yo-dogg', parent=temporarydir) == prefix
+        
+        # These are deterministic (see below):
+        prefix_suffix = os.path.join(temporarydir.name, 'yo-dogg.tmp')
+        assert temporary(prefix='yo-dogg', suffix='tmp', dir=temporarydir) == prefix_suffix
+        assert temporary(prefix='yo-dogg', suffix='tmp', parent=temporarydir) == prefix_suffix
+        assert temporary(prefix='yo-dogg', suffix='.tmp', dir=temporarydir) == prefix_suffix
+        assert temporary(prefix='yo-dogg', suffix='.tmp', parent=temporarydir) == prefix_suffix
+        
+        # These are manually randomized:
+        starts = os.path.join(temporarydir.name, 'yo-dogg-')
+        ends = '.tmp'
+        
+        assert temporary(prefix='yo-dogg-',
+                         suffix='tmp',
+                         randomized=True,
+                         dir=temporarydir).startswith(starts)
+        assert temporary(prefix='yo-dogg-',
+                         suffix='tmp',
+                         randomized=True,
+                         parent=temporarydir).startswith(starts)
+        
+        assert temporary(prefix='yo-dogg-',
+                         suffix='tmp',
+                         randomized=True,
+                         dir=temporarydir).endswith(ends)
+        assert temporary(prefix='yo-dogg-',
+                         suffix='tmp',
+                         randomized=True,
+                         parent=temporarydir).endswith(ends)
+        
+        # Prepare the subpath
+        p = temporarydir.subpath('yo-dogg.tmp')
+        assert not os.path.exists(p)
+        
+        # Prepare data:
+        data = "yo dogg, " * 1000
+        data += "yo dogg."
+        
+        try:
+            write_to_path(data, p)
+            
+            with open(p, 'rb') as handle:
+                roundtrip = handle.read()
+                assert len(data) == len(roundtrip)
+            
+            # Ensure we wrote data to the subpath:
+            assert os.path.exists(p)
+            
+            # Ensure that temporary() raises when a deterministic call results
+            # in the computation of a file path that already exists –
+            # see also the original forms of the deterministic calls, above:
+            with pytest.raises(FilesystemError) as exc:
+                temporary(prefix='yo-dogg', suffix='tmp', dir=temporarydir)
+            assert "file exists" in str(exc.value)
+            
+            with pytest.raises(FilesystemError) as exc:
+                temporary(prefix='yo-dogg', suffix='tmp', parent=temporarydir)
+            assert "file exists" in str(exc.value)
+            
+            with pytest.raises(FilesystemError) as exc:
+                temporary(prefix='yo-dogg', suffix='.tmp', dir=temporarydir)
+            assert "file exists" in str(exc.value)
+            
+            with pytest.raises(FilesystemError) as exc:
+                temporary(prefix='yo-dogg', suffix='.tmp', parent=temporarydir)
+            assert "file exists" in str(exc.value)
+        
+        finally:
+            os.unlink(p)
+        
+        assert not os.path.exists(p)
+    
     def test_modeflags(self, consts):
         from clu.fs.misc import modeflags
         from tempfile import _bin_openflags as binflags, _text_openflags as textflags

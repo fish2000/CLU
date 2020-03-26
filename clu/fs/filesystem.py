@@ -22,7 +22,7 @@ from clu.typology import isnotpath, isvalidpath
 from clu.fs.abc import BaseFSName, TemporaryFileWrapper
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
 from clu.fs.misc import re_matcher, re_searcher, suffix_searcher, re_excluder
-from clu.fs.misc import swapext, u8str, extension, modeflags
+from clu.fs.misc import swapext, u8str, extension, modeflags, temporary
 from clu.exporting import Exporter, path_to_dotpath
 
 exporter = Exporter(path=__file__)
@@ -214,33 +214,6 @@ def rm_rf(path):
     except (OSError, IOError) as exc:
         raise FilesystemError(f"Fatal in underlying “rm_rf(…)” syscall: {path!s}") from exc
     raise FilesystemError(f"Failed to rm_rf(…): {path!s}")
-
-@export
-def temporary(suffix='', prefix='', parent=None, **kwargs):
-    """ Wrapper around `tempfile.mktemp()` that allows full overriding of the
-        prefix and suffix by the caller -- that is to say, no random elements
-        are used in the returned filename if both a prefix and a suffix are
-        supplied.
-        
-        To avoid problems, the function will throw a FilesystemError if it is
-        called with arguments that result in the computation of a filename
-        that already exists.
-    """
-    from tempfile import mktemp, gettempdir
-    directory = os.fspath(kwargs.pop('dir', parent) or gettempdir())
-    if suffix:
-        if not suffix.startswith(os.extsep):
-            suffix = f"{os.extsep}{suffix}"
-    tempmade = mktemp(prefix=prefix, suffix=suffix, dir=directory)
-    tempsplit = os.path.splitext(os.path.basename(tempmade))
-    if not suffix:
-        suffix = tempsplit[1][1:]
-    if not prefix or kwargs.pop('randomized', False):
-        prefix, _ = os.path.splitext(tempsplit[0]) # WTF, HAX!
-    fullpth = os.path.join(directory, f"{prefix}{suffix}")
-    if os.path.exists(fullpth):
-        raise FilesystemError(f"temporary(): file exists: {fullpth}")
-    return fullpth
 
 @cache
 def TemporaryNamedFile(temppath, mode='wb',

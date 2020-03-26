@@ -13,7 +13,7 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import λ, ENCODING
 from clu.constants.exceptions import FilesystemError
-from clu.fs.misc import differentfile, u8str
+from clu.fs.misc import differentfile, temporary, u8str
 from clu.typology import isnotpath
 from clu.exporting import Exporter
 
@@ -256,17 +256,37 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     
-    # from clu.testing.utils import inline
+    from clu.testing.utils import inline
     
-    # @inline
+    @inline
     def test_one():
-        pass # INSERT TESTING CODE HERE, pt. I
+        """ Subclass BaseFSName and TemporaryFileWrapper """
+        
+        class TemporaryFileName(TemporaryFileWrapper, BaseFSName):
+            
+            def __init__(self, prefix='', suffix='tmp', mode='wb', delete=True):
+                file = open(temporary(prefix=prefix, suffix=suffix), mode=mode)
+                super().__init__(file,
+                                 file.name,
+                                 delete=delete)
+            
+            @property
+            def name(self):
+                return self.file.name
+            
+            @name.setter
+            def name(self, value):
+                pass
+            
+            def to_string(self):
+                return self.name
+        
+        with TemporaryFileName() as tf:
+            assert os.path.isfile(tf.name)
+        
+        assert not os.path.exists(tf.name)
     
-    #@inline.diagnostic
-    def show_me_some_values():
-        pass # INSERT DIAGNOSTIC CODE HERE
-    
-    # return inline.test(100)
+    return inline.test(100)
 
 if __name__ == '__main__':
     sys.exit(test())

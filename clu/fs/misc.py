@@ -182,6 +182,40 @@ def modeflags(mode, delete=True):
     return flags
 
 @export
+def temporary(suffix='', prefix='', parent=None, **kwargs):
+    """ Wrapper around `tempfile.mktemp()` that allows full overriding of the
+        prefix and suffix by the caller -- that is to say, no random elements
+        are used in the returned filename if both a prefix and a suffix are
+        supplied.
+        
+        To avoid problems, the function will throw a FilesystemError if it is
+        called with arguments that result in the computation of a filename
+        that already exists.
+    """
+    from clu.constants.exceptions import FilesystemError
+    from tempfile import mktemp, gettempdir
+    
+    directory = os.fspath(kwargs.pop('dir', parent) or gettempdir())
+    if suffix:
+        if not suffix.startswith(os.extsep):
+            suffix = f"{os.extsep}{suffix}"
+    
+    tempmade = mktemp(prefix=prefix, suffix=suffix, dir=directory)
+    tempsplit = os.path.splitext(os.path.basename(tempmade))
+    
+    if not suffix:
+        suffix = tempsplit[1][1:]
+    if not prefix or kwargs.pop('randomized', False):
+        prefix, _ = os.path.splitext(tempsplit[0]) # WTF, HAX!
+    
+    fullpth = os.path.join(directory, f"{prefix}{suffix}")
+    
+    if os.path.exists(fullpth):
+        raise FilesystemError(f"temporary(): file exists: {fullpth}")
+    
+    return fullpth
+
+@export
 def u8encode(source):
     """ Encode a source as bytes using the UTF-8 codec """
     return bytes(source, encoding=ENCODING)

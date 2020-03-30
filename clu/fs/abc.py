@@ -14,6 +14,8 @@ abstract = abc.abstractmethod
 from clu.constants.consts import λ, ENCODING
 from clu.constants.exceptions import FilesystemError
 from clu.fs.misc import differentfile, temporary, u8str
+from clu.predicates import ancestral_union
+from clu.repr import strfields
 from clu.typology import isnotpath
 from clu.exporting import Exporter
 
@@ -91,14 +93,12 @@ class BaseFSName(collections.abc.Hashable,
                  os.PathLike,
                  metaclass=TypeLocker):
     
+    fields = ('name', 'exists')
+    
     @property
     @abstract
     def name(self):
         """ The instances’ target path. """
-        ...
-    
-    @abstract
-    def to_string(self):
         ...
     
     @property
@@ -178,6 +178,11 @@ class BaseFSName(collections.abc.Hashable,
     def close(self):
         """ Stub method -- always returns True: """
         return True
+    
+    def to_string(self):
+        return strfields(self,
+               ancestral_union('fields', type(self)),
+                         try_callables=False)
     
     def inner_repr(self):
         return self.to_string()

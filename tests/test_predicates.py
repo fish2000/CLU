@@ -40,10 +40,10 @@ class TestPredicates(object):
         from clu.predicates import ancestral_union
         from clu.fs.filesystem import Directory, TemporaryDirectory
         
-        fields = ('name', 'old', 'new', 'exists',
+        fields = ('name', 'exists', 'old', 'new',
                   'will_change', 'did_change', 'will_change_back', 'did_change_back')
         
-        morefields = ('name', 'old', 'new', 'exists',
+        morefields = ('name', 'exists', 'old', 'new',
                       'will_change', 'did_change', 'will_change_back', 'did_change_back',
                       'destroy', 'prefix', 'suffix', 'parent', 'change')
         

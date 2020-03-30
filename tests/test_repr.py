@@ -121,13 +121,14 @@ class TestRepr(object):
     
     def test_stringify_directory_instance(self, dirname):
         from clu.fs.filesystem import Directory
+        from clu.predicates import ancestral_union
         from clu.repr import stringify, chop_instance_repr
         data = dirname.subdirectory('data')
         
-        assert chop_instance_repr(dirname) == chop_instance_repr(stringify(dirname, Directory.fields))
-        assert chop_instance_repr(data)    == chop_instance_repr(stringify(data,    Directory.fields))
-        assert chop_instance_repr(dirname) == chop_instance_repr(stringify(dirname, None))
-        assert chop_instance_repr(data)    == chop_instance_repr(stringify(data,    None))
+        assert chop_instance_repr(dirname) == chop_instance_repr(stringify(dirname, ancestral_union('fields', Directory)))
+        assert chop_instance_repr(data)    == chop_instance_repr(stringify(data,    ancestral_union('fields', Directory)))
+        # assert chop_instance_repr(dirname) == chop_instance_repr(stringify(dirname, None))
+        # assert chop_instance_repr(data)    == chop_instance_repr(stringify(data,    None))
     
     def test_stringify(self):
         from clu.repr import stringify, chop_instance_repr

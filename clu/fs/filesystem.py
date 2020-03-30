@@ -17,7 +17,6 @@ import zipfile
 from clu.constants.consts import ENCODING, PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.predicates import attr, allattrs, isexpandable, anyof
-from clu.repr import strfields
 from clu.sanitizer import utf8_encode
 from clu.typology import isnotpath, isvalidpath
 from clu.fs.abc import BaseFSName, TemporaryFileWrapper
@@ -282,7 +281,7 @@ class TemporaryName(BaseFSName, contextlib.AbstractContextManager):
         Unless you say not to. Really it's your call dogg, I could give AF
     """
     
-    fields = ('name', 'exists', 'destroy',
+    fields = ('destroy',
               'mode', 'binary_mode',
              'flags', 'prefix',
                       'suffix',
@@ -492,10 +491,6 @@ class TemporaryName(BaseFSName, contextlib.AbstractContextManager):
         if self.destroy:
             self.close()
         return exc_type is None
-    
-    def to_string(self):
-        """ Stringify the TemporaryName instance. """
-        return strfields(self, type(self).fields, try_callables=False)
 
 non_dotfile_matcher = re_matcher(r"^[^\.]")
 
@@ -511,9 +506,9 @@ class Directory(BaseFSName,
         on exit. Plus a few convenience functions for listing and whatnot.
     """
     
-    fields = ('name', 'old', 'new', 'exists',
-              'will_change',        'did_change',
-              'will_change_back',   'did_change_back')
+    fields = ('old',  'new',
+              'will_change',      'did_change',
+              'will_change_back', 'did_change_back')
     
     zip_suffix = f"{os.extsep}zip"
     
@@ -947,10 +942,6 @@ class Directory(BaseFSName,
                                          source=source,
                                        excludes=excludes).keys()
     
-    def to_string(self):
-        """ Stringify the Directory instance. """
-        return strfields(self, type(self).fields, try_callables=False)
-    
     @wraps(dict.items)
     def items(self):
         return clu.dicts.OrderedItemsView(self)
@@ -1045,13 +1036,10 @@ class TemporaryDirectory(Directory):
         a context manager (the C++ orig used RAII).
     """
     
-    fields = ('name', 'old', 'new', 'exists',
-              'destroy', 'prefix', 
+    fields = ('destroy', 'prefix', 
                          'suffix',
                          'parent',
-                   'change',
-              'will_change',      'did_change',
-              'will_change_back', 'did_change_back')
+                         'change')
     
     def __init__(self, prefix="TemporaryDirectory-", suffix="",
                                                      parent=None,

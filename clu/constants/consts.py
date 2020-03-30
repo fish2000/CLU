@@ -105,8 +105,8 @@ else:
     NUMPY = bool(numpy)
 
 # The PATH environment variable, with a sensible default:
-PYTHON_BIN = os.path.join(sysconfig.get_path('data'), 'bin')
-DEFAULT_PATH = os.pathsep.join(filter(os.path.exists, (PYTHON_BIN,
+PYTHON_BIN = path(os.path.join(sysconfig.get_path('data'), 'bin'))
+DEFAULT_PATH = os.pathsep.join(filter(os.path.exists, (os.fspath(PYTHON_BIN),
                                                        "/usr/local/bin",
                                                        "/bin",  "/usr/bin",
                                                        "/sbin", "/usr/sbin"))) # type: ignore

@@ -787,7 +787,7 @@ def initialize_new_types(appname, appspace):
     return Module, Finder, Loader
 
 @export
-def initialize_types(appname, appspace='app'):
+def initialize_types(appname, appspace=consts.DEFAULT_APPSPACE):
     """ Initialize subtypes of FinderBase, LoaderBase, and ModuleBase,
         configured for a specific “appname” and “appspace” (the latter
         of which defaults to ‘app’).
@@ -1128,7 +1128,7 @@ def test():
         m = Module(consts.APPNAME)
         assert m
         assert m.appname == consts.APPNAME
-        assert m.appspace == 'app'
+        assert m.appspace == consts.DEFAULT_APPSPACE
         assert m.__name__ == 'clu.app.clu'
         assert nameof(m) == consts.APPNAME
     
@@ -1179,7 +1179,7 @@ def test():
             pass
         
         assert m.appname == consts.APPNAME
-        assert m.appspace == 'app'
+        assert m.appspace == consts.DEFAULT_APPSPACE
         assert m.__name__ == 'clu.app.clu'
         assert nameof(m) == consts.APPNAME
         

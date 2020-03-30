@@ -45,6 +45,9 @@ DEBUG = bool(int(os.environ.get('DEBUG', '0'), base=10))
 # Flag for deleting temporary files:
 DELETE_FLAG = getattr(os, 'O_TEMPORARY', 0)
 
+# Default “appspace”, for class-based module imports:
+DEFAULT_APPSPACE = sys.intern('app')
+
 # Default terminal width:
 DEFAULT_TERMINAL_WIDTH = int(os.environ.get('COLUMNS', '100'), base=10)
 
@@ -208,6 +211,7 @@ __all__ = ('APPNAME',
            'CPYTHON',
            'DEBUG',
            'DELETE_FLAG',
+           'DEFAULT_APPSPACE',
            'DEFAULT_PATH',
            'DEFAULT_TERMINAL_WIDTH',
            'DOLLA',

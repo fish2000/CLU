@@ -18,8 +18,6 @@ sns = types.SimpleNamespace
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-DEFAULT_APPSPACE = 'app'
-
 class AppMeta(MetaModule):
     
     @property
@@ -36,7 +34,7 @@ class AppBase(ModuleBase, metaclass=AppMeta):
     def __init_subclass__(cls, **kwargs):
         # 1) Process default class keywords:
         if 'appspace' not in kwargs:
-            kwargs['appspace'] = DEFAULT_APPSPACE
+            kwargs['appspace'] = consts.DEFAULT_APPSPACE
         basepath = kwargs.pop('basepath', None)
         cls.basepath = basepath or attr_search('basepath', *mro(cls))
         
@@ -97,7 +95,7 @@ class AppBase(ModuleBase, metaclass=AppMeta):
 @export
 class Application(AppBase, appname=consts.APPNAME,
                           basepath=consts.BASEPATH,
-                          appspace=DEFAULT_APPSPACE):
+                          appspace=consts.DEFAULT_APPSPACE):
     pass
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
@@ -116,7 +114,7 @@ def test():
         assert test_app
         assert test_app._exporter is Exporter
         assert test_app.appname == consts.APPNAME
-        assert test_app.appspace == DEFAULT_APPSPACE
+        assert test_app.appspace == consts.DEFAULT_APPSPACE
         
         # Scond, instance it via import hook:
         from clu.app import Application as app
@@ -124,7 +122,7 @@ def test():
         assert app
         assert app._exporter is Exporter
         assert app.appname == consts.APPNAME
-        assert app.appspace == DEFAULT_APPSPACE
+        assert app.appspace == consts.DEFAULT_APPSPACE
     
     @inline
     def test_two():
@@ -138,14 +136,14 @@ def test():
         
         assert shmapp
         assert shmapp.appname == 'flynn'
-        assert shmapp.appspace == 'app'
+        assert shmapp.appspace == consts.DEFAULT_APPSPACE
         
         # Scond, instance it via import hook:
         from flynn.app import Shmapplication as shmodule
         
         assert shmodule
         assert shmodule.appname == 'flynn'
-        assert shmodule.appspace == 'app'
+        assert shmodule.appspace == consts.DEFAULT_APPSPACE
     
     @inline.diagnostic
     def show_app_class_attribs():
@@ -158,7 +156,7 @@ def test():
         print("APPSPACE:", Application.appspace)
         
         print("consts.APPNAME:", consts.APPNAME)
-        print("DEFAULT_APPSPACE:", DEFAULT_APPSPACE)
+        print("consts.DEFAULT_APPSPACE:", consts.DEFAULT_APPSPACE)
     
     @inline.diagnostic
     def show_spec_cache():

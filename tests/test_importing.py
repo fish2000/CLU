@@ -187,11 +187,11 @@ class TestImporting(object):
                     export(self.iheard,  name='iheard')
                     export(self.youlike, name='youlike')
                     # assert module attributes:
-                    assert cls.appname == 'clu'
-                    assert cls.appspace == 'app'
+                    assert cls.appname == consts.APPNAME
+                    assert cls.appspace == consts.DEFAULT_APPSPACE
                     assert cls.name == 'DerivedWithExecute'
-                    assert cls.prefix == 'clu.app'
-                    assert cls.qualname == 'clu.app.DerivedWithExecute'
+                    assert cls.prefix == f'{consts.APPNAME}.{consts.DEFAULT_APPSPACE}'
+                    assert cls.qualname == f'{consts.APPNAME}.{consts.DEFAULT_APPSPACE}.DerivedWithExecute'
                     # calling up not technically necessary RN:
                     super().__execute__()
             
@@ -246,7 +246,7 @@ class TestImporting(object):
         m = Module(consts.APPNAME)
         assert m
         assert m.appname == consts.APPNAME
-        assert m.appspace == 'app'
+        assert m.appspace == consts.DEFAULT_APPSPACE
         assert m.__name__ == 'clu.app.clu'
         assert nameof(m) == consts.APPNAME
         

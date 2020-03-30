@@ -121,6 +121,16 @@ def all_registered_modules():
     """ Return a generator over the instances of all registered class-based modules """
     yield from iterchain(modules.values() for modules in Registry.monomers.values())
 
+# Given a qualified name e.g. “clu.app.Module”, extract the appspace (“app” in the example):
+get_appspace = lambda string: string.rpartition(consts.QUALIFIER)[0].partition(consts.QUALIFIER)[-1]
+
+@export
+def all_registered_appspaces():
+    """ Return a generator of strings listing all registered “appspaces” """
+    yield from frozenset(map(get_appspace,
+                             iterchain(modules.keys() \
+                                   for modules in Registry.monomers.values())))
+
 @export
 def modules_for_appname(appname):
     """ Return a generator over the instances of an apps’ registered class-based modules """
@@ -136,6 +146,12 @@ def modules_for_appname(appname):
         yield from modules.values()
     except RuntimeError:
         yield from modules.values()
+
+@export
+def appspaces_for_appname(appname):
+    """ Return a generator over the “appspaces” belonging to a given registered app """
+    modules = Registry.monomers.get(appname, {})
+    yield from frozenset(map(get_appspace, modules.keys()))
 
 @export
 class Registry(abc.ABC, metaclass=MetaRegistry):
@@ -272,7 +288,7 @@ class FinderBase(clu.abstract.AppName,
                 return cls.spec(fullname)
             return None
         appname, appspace, *remainders = fullname.split(consts.QUALIFIER, 2)
-        if appname == cls.appname and appspace in polymers.all_appspaces():
+        if appname == cls.appname and appspace in appspaces_for_appname(appname):
             return cls.spec(fullname)
         return None
     
@@ -337,7 +353,7 @@ class LoaderBase(clu.abstract.AppName,
                 if spec.name == cls.appname:
                     return self.package_module(spec.name)
                 appname, appspace, *remainders = spec.name.split(consts.QUALIFIER, 2)
-                if appname == cls.appname and appspace in polymers.all_appspaces():
+                if appname == cls.appname and appspace in appspaces_for_appname(appname):
                     return self.package_module(spec.name)
             return None
         return None
@@ -1070,9 +1086,11 @@ class ProxyModule(ModuleBase):
             typename = type(self).__name__
             raise AttributeError(f"‘{typename}’ access failure for «{key}»") from exc
 
-export(Module, name='Module')
-export(Finder, name='Finder')
-export(Loader, name='Loader')
+export(Module,          name='Module')
+export(Finder,          name='Finder')
+export(Loader,          name='Loader')
+
+export(get_appspace,    name='get_appspace',    doc="get_appspace(string) → Given a qualified name e.g. “clu.app.Module”, extract the appspace (“app” in the example)")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

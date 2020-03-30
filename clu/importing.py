@@ -933,7 +933,7 @@ class ProxyModule(ModuleBase):
         (as above) – like so:
             
             >>> Module, Finder, Loader = initialize_types(my_appname)
-            >>> class MyProxy(ProxyModule[Module]):
+            >>> class myproxy(ProxyModule[Module]):
             >>>     # …etc
         
         Here’s a basic example of a ProxyModule subtype definition:

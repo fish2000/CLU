@@ -250,10 +250,22 @@ class MetaTypeRepr(abc.ABCMeta):
             return f"<class “{qualname}”>"
         return f"<class “{qualname}” from “{appname}”>"
 
+class MetaNameAndSpaces(MetaTypeRepr):
+    
+    """ A metaclass that adds an “appspaces” iterable class property """
+    
+    @property
+    def appspaces(cls):
+        appname = getattr(cls, 'appname', None)
+        if appname is not None:
+            yield from appspaces_for_appname(appname)
+        else:
+            yield from tuple()
+
 @export
 class FinderBase(clu.abstract.AppName,
                  importlib.abc.MetaPathFinder,
-                 metaclass=MetaTypeRepr):
+                 metaclass=MetaNameAndSpaces):
     
     """ The base class for all class-based module finders.
         
@@ -292,7 +304,7 @@ class FinderBase(clu.abstract.AppName,
                 return cls.spec(fullname)
             return None
         appname, appspace, *remainders = fullname.split(consts.QUALIFIER, 2)
-        if appname == cls.appname and appspace in appspaces_for_appname(appname):
+        if appname == cls.appname and appspace in cls.appspaces:
             return cls.spec(fullname)
         return None
     
@@ -323,7 +335,7 @@ class FinderBase(clu.abstract.AppName,
 @export
 class LoaderBase(clu.abstract.AppName,
                  importlib.abc.Loader,
-                 metaclass=MetaTypeRepr):
+                 metaclass=MetaNameAndSpaces):
     
     """ The base class for all class-based module loaders.
         
@@ -357,7 +369,7 @@ class LoaderBase(clu.abstract.AppName,
                 if spec.name == cls.appname:
                     return self.package_module(spec.name)
                 appname, appspace, *remainders = spec.name.split(consts.QUALIFIER, 2)
-                if appname == cls.appname and appspace in appspaces_for_appname(appname):
+                if appname == cls.appname and appspace in cls.appspaces:
                     return self.package_module(spec.name)
             return None
         return None

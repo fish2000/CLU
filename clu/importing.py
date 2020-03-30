@@ -127,9 +127,10 @@ get_appspace = lambda string: string.rpartition(consts.QUALIFIER)[0].partition(c
 @export
 def all_registered_appspaces():
     """ Return a generator of strings listing all registered “appspaces” """
-    yield from frozenset(map(get_appspace,
+    yield from frozenset(filter(None,
+                         map(get_appspace,
                              iterchain(modules.keys() \
-                                   for modules in Registry.monomers.values())))
+                                   for modules in Registry.monomers.values()))))
 
 @export
 def modules_for_appname(appname):
@@ -151,7 +152,7 @@ def modules_for_appname(appname):
 def appspaces_for_appname(appname):
     """ Return a generator over the “appspaces” belonging to a given registered app """
     modules = Registry.monomers.get(appname, {})
-    yield from frozenset(map(get_appspace, modules.keys()))
+    yield from frozenset(filter(None, map(get_appspace, modules.keys())))
 
 @export
 class Registry(abc.ABC, metaclass=MetaRegistry):

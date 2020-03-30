@@ -159,10 +159,6 @@ class Registry(abc.ABC, metaclass=MetaRegistry):
             # Register this subclass if the names are good:
             if cls.qualname not in Registry.monomers[cls.appname]:
                 Registry.monomers[cls.appname][cls.qualname] = cls
-            # Register the root class for this subclass,
-            # also name-wellness permitting:
-            # if cls.prefix not in Registry.monomers[cls.appname]:
-            #     Registry.monomers[cls.appname][cls.qualname] = ???
     
     @classmethod
     def __class_getitem__(cls, key):

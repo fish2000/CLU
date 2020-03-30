@@ -459,6 +459,14 @@ class TemporaryName(BaseFSName, contextlib.AbstractContextManager):
             handle.flush()
         return self.exists
     
+    def symlink(self, *args, **kwargs):
+        """ Symlinking to TemporaryName instances is disabled –
+            why do you want to symlink to something that is about
+            to delete itself?? That is just asking for a whole bunch of
+            dangling references dogg.
+        """
+        raise FilesystemError("can’t symlink to a TemporaryName")
+    
     def do_not_destroy(self):
         """ Mark this TemporaryName instance as one that should not be automatically
             destroyed upon the scope exit for the instance.

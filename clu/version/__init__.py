@@ -194,6 +194,10 @@ class VersionInfo(VersionAncestor):
         """ Stringify the VersionInfo (q.v. “to_string(…)” supra.) """
         return self.to_string()
     
+    def __repr__(self):
+        """ Repr-cize the VersionInfo (q.v. “to_string(…)” supra.) """
+        return self.to_string()
+    
     def __bytes__(self):
         """ Bytes-ify the VersionInfo (q.v. “to_string(…)” supra.) """
         return bytes(self.to_string(), encoding='UTF-8')

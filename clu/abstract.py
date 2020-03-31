@@ -305,10 +305,11 @@ class AppName(abc.ABC):
         """ Translate the “appname” class-keyword into an “appname” read-only
             descriptor value
         """
+        from clu.predicates import mro, attr_search
         if 'appspace' in kwargs:
             del kwargs['appspace']
         super(AppName, cls).__init_subclass__(**kwargs)
-        cls.appname = ValueDescriptor(appname)
+        cls.appname = ValueDescriptor(appname or attr_search('appname', *mro(cls)))
     
     def __init__(self, *args, **kwargs):
         """ Stub __init__(…) method, throwing a lookup error for subclasses

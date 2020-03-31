@@ -66,10 +66,7 @@ class AppBase(ModuleBase, metaclass=AppMeta):
             return cls.finder, cls.loader
         
         LoaderCls = newtype('Loader', LoaderBase, appname=cls.appname)
-        attrspace = sns(__loader__=LoaderCls,
-                          loader=LoaderCls())
-        FinderCls = newtype('Finder', FinderBase, attributes=attrspace,
-                                                  appname=cls.appname)
+        FinderCls = newtype('Finder', FinderBase, appname=cls.appname)
         return FinderCls, LoaderCls
     
     @classmethod
@@ -145,7 +142,7 @@ def test():
         assert shmodule.appname == 'flynn'
         assert shmodule.appspace == consts.DEFAULT_APPSPACE
     
-    @inline.diagnostic
+    # @inline.diagnostic
     def show_app_class_attribs():
         pout.v(Application)
         

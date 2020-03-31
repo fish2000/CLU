@@ -10,6 +10,7 @@ iterchain = chain.from_iterable
 dataclass = dataclass_fn(repr=False)
 
 import abc
+import collections.abc
 import clu.abstract
 import clu.dicts
 import importlib
@@ -31,7 +32,11 @@ except ImportError:
 from clu.constants import consts
 from clu.extending import Extensible
 from clu.naming import nameof, dotpath_split, dotpath_join, qualified_name
-from clu.predicates import anyattrs, attr, attr_search, item_search, mro, tuplize
+
+from clu.predicates import (anyattrs, attr,
+                            attr_search, item_search,
+                            mro, none_function, tuplize)
+
 from clu.repr import stringify, hexid
 from clu.typespace import types
 from clu.typology import ismodule, ismapping, isstring, subclasscheck
@@ -43,8 +48,9 @@ NoDefault = consts.NoDefault
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-# The module-subclass registry dictionary:
+# The module-subclass and loader-subclass registry dictionaries:
 monomers = DefaultDict(weakref.WeakValueDictionary)
+linkages = weakref.WeakValueDictionary()
 
 class MetaRegistry(Extensible):
     
@@ -263,74 +269,57 @@ class MetaNameAndSpaces(MetaTypeRepr):
             yield from tuple()
 
 @export
-class FinderBase(clu.abstract.AppName,
-                 importlib.abc.MetaPathFinder,
-                 metaclass=MetaNameAndSpaces):
+class ArgumentSink(collections.abc.Callable,
+                   collections.abc.Hashable,
+                   clu.abstract.ReprWrapper,
+                   metaclass=MetaTypeRepr):
     
-    """ The base class for all class-based module finders.
+    """ ArgumentSink is a class that stores the arguments with
+        which it is initialized, for either later retrieval or
+        subsequent functional application.
         
-        One must subclass this class once per app, specifying
-        an “appname” – the name of the app. Q.v. the function
-        “initialize_types(…)” sub. to easily set these up for
-        your own app.
+        To wit:
         
-        The class method “FinderBase.find_spec(…)” caches its
-        returned instances of “ModuleSpec” using a ‘zict.LRU’
-        buffer, which is shared across all of the installed
-        “FinderBase” subclasses – meaning that if a spec has
-        been cached for one installed app via this mechanism,
-        it will be found by the first Finder subclass that
-        shows up in “sys.meta_path” to field a query for it (!)
+            >>> sink = ArgumentSink('yo', 'dogg', iheard="you like")
+            >>> assert sink.args == ('yo', 'dogg')
+            >>> assert sink.kwargs == dict(iheard="you like")
+            >>> sink(stringify) # prints “str(iheard=you like) @ 0x10bd”
     """
+    __slots__ = ('args', 'kwargs')
     
-    specs = {}
-    cache = zict.LRU(64, specs)
-    
-    @classmethod
-    def spec(cls, fullname):
-        out = cls.cache[fullname] = ModuleSpec(fullname, cls.loader)
-        return out
-    
-    @classmethod
-    def find_spec(cls, fullname, path=None, target=None):
-        """ Return a ModuleSpec for a qualified module name –
-            creating an instance anew if necessary, and returning
-            an existing one from the cache if available.
+    def __new__(cls, *args, **kwargs):
+        """ Create a new ArgumentSink, with arbitrary positional
+            and/or keyword arguments
         """
-        if fullname in cls.cache:
-            return cls.cache[fullname]
-        if consts.QUALIFIER not in fullname:
-            if fullname == cls.appname:
-                return cls.spec(fullname)
-            return None
-        appname, appspace, *remainders = fullname.split(consts.QUALIFIER, 2)
-        if appname == cls.appname and appspace in cls.appspaces:
-            return cls.spec(fullname)
-        return None
+        instance = object.__new__(cls)
+        instance.args = args
+        instance.kwargs = kwargs
+        return instance
     
-    @classmethod
-    def invalidate_caches(cls):
-        """ Clear both the Finder’s internal ModuleSpec instance
-            cache, and its associated Loader instances’ memoization
-            cache for the “create_module(…)” method (q.v. method
-            implementation sub.)
+    def __call__(self, function):
+        """ Apply the sinks’ arguments to a function – or, indeed,
+            any callable – returning the result
         """
-        cls.loader.create_module.cache_clear()
-        cls.cache.clear()
-        return None
+        return function(*self.args, **self.kwargs)
     
-    @classmethod
-    def iter_modules(cls):
-        """ This “non-standard API method”§ yields ‘pkgutil.ModuleInfo’
-            instances for each registered class-module in the finder
-            subclasses’ given app.
-            
-            § q.v. boxed notation sub., Python documentation,
-              https://docs.python.org/3/library/pkgutil.html#pkgutil.iter_modules
-        """
-        yield from (pkgutil.ModuleInfo(cls, module.qualname, ispkg=False) \
-                                        for module \
-                                         in modules_for_appname(cls.appname))
+    def __hash__(self):
+        return hash(frozenset(self.args)) \
+             & hash(frozenset(self.kwargs.items()))
+    
+    def inner_repr(self):
+        return f"args=“{self.args!r}”, kwargs=“{self.kwargs!r}”"
+    
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.args   == other.args \
+           and self.kwargs == other.kwargs
+    
+    def __ne__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.args   != other.args \
+            or self.kwargs != other.kwargs
 
 @export
 class LoaderBase(clu.abstract.AppName,
@@ -348,6 +337,29 @@ class LoaderBase(clu.abstract.AppName,
         instances of “types.Module” using the ‘functools.lru_cache’
         function decorator.
     """
+    
+    @classmethod
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        appname = getattr(cls, 'appname', None)
+        if appname:
+            if appname not in linkages:
+                linkages[appname] = cls
+        cls.instances = weakref.WeakValueDictionary()
+    
+    def __new__(cls, *args, **kwargs):
+        
+        key = ArgumentSink(*args, **kwargs)
+        
+        if key in cls.instances:
+            return cls.instances[key]
+        
+        try:
+            cls.instances[key] = instance = super().__new__(cls, *args, **kwargs)
+        except TypeError:
+            cls.instances[key] = instance = super().__new__(cls)
+        
+        return instance
     
     @staticmethod
     def package_module(name):
@@ -415,35 +427,83 @@ class LoaderBase(clu.abstract.AppName,
         return f"<loader “{qualname}” from “{appname}” {consts.REPR_DELIMITER} {location}>"
 
 @export
-class ArgumentSink(object):
+class FinderBase(clu.abstract.AppName,
+                 importlib.abc.MetaPathFinder,
+                 metaclass=MetaNameAndSpaces):
     
-    """ ArgumentSink is a class that stores the arguments with
-        which it is initialized, for either later retrieval or
-        subsequent functional application.
+    """ The base class for all class-based module finders.
         
-        To wit:
+        One must subclass this class once per app, specifying
+        an “appname” – the name of the app. Q.v. the function
+        “initialize_types(…)” sub. to easily set these up for
+        your own app.
         
-            >>> sink = ArgumentSink('yo', 'dogg', iheard="you like")
-            >>> assert sink.args == ('yo', 'dogg')
-            >>> assert sink.kwargs == dict(iheard="you like")
-            >>> sink(stringify) # prints “str(iheard=you like) @ 0x10bd”
+        The class method “FinderBase.find_spec(…)” caches its
+        returned instances of “ModuleSpec” using a ‘zict.LRU’
+        buffer, which is shared across all of the installed
+        “FinderBase” subclasses – meaning that if a spec has
+        been cached for one installed app via this mechanism,
+        it will be found by the first Finder subclass that
+        shows up in “sys.meta_path” to field a query for it (!)
     """
-    __slots__ = ('args', 'kwargs')
     
-    def __new__(cls, *args, **kwargs):
-        """ Create a new ArgumentSink, with arbitrary positional
-            and/or keyword arguments
-        """
-        instance = object.__new__(cls)
-        instance.args = args
-        instance.kwargs = kwargs
-        return instance
+    specs = {}
+    cache = zict.LRU(64, specs)
     
-    def __call__(self, function):
-        """ Apply the sinks’ arguments to a function – or, indeed,
-            any callable – returning the result
+    @classmethod
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        appname = getattr(cls, 'appname', None)
+        if appname in linkages:
+            LoaderCls = linkages[appname]
+            cls.__loader__ = LoaderCls
+            cls.loader = LoaderCls()
+    
+    @classmethod
+    def spec(cls, fullname):
+        out = cls.cache[fullname] = ModuleSpec(fullname, cls.loader)
+        return out
+    
+    @classmethod
+    def find_spec(cls, fullname, path=None, target=None):
+        """ Return a ModuleSpec for a qualified module name –
+            creating an instance anew if necessary, and returning
+            an existing one from the cache if available.
         """
-        return function(*self.args, **self.kwargs)
+        if fullname in cls.cache:
+            return cls.cache[fullname]
+        if consts.QUALIFIER not in fullname:
+            if fullname == cls.appname:
+                return cls.spec(fullname)
+            return None
+        appname, appspace, *remainders = fullname.split(consts.QUALIFIER, 2)
+        if appname == cls.appname and appspace in cls.appspaces:
+            return cls.spec(fullname)
+        return None
+    
+    @classmethod
+    def invalidate_caches(cls):
+        """ Clear both the Finder’s internal ModuleSpec instance
+            cache, and its associated Loader instances’ memoization
+            cache for the “create_module(…)” method (q.v. method
+            implementation sub.)
+        """
+        cls.loader.create_module.cache_clear()
+        cls.cache.clear()
+        return None
+    
+    @classmethod
+    def iter_modules(cls):
+        """ This “non-standard API method”§ yields ‘pkgutil.ModuleInfo’
+            instances for each registered class-module in the finder
+            subclasses’ given app.
+            
+            § q.v. boxed notation sub., Python documentation,
+              https://docs.python.org/3/library/pkgutil.html#pkgutil.iter_modules
+        """
+        yield from (pkgutil.ModuleInfo(cls, module.qualname, ispkg=False) \
+                                        for module \
+                                         in modules_for_appname(cls.appname))
 
 class MetaModule(MetaRegistry):
     
@@ -592,9 +652,11 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         even bother with ’em.
     """
     
-    # The appname and appspace default to None:
+    # The ‘appname’, ‘appspace’, and ‘__loader__’ class attributes
+    # all default to None:
     appname = None
     appspace = None
+    __loader__ = None
     
     # Block access to the registry’s underlying data:
     monomers = clu.abstract.ValueDescriptor({})
@@ -607,6 +669,7 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         ancestors = mro(cls)
         cls.appname  = appname  or attr_search('appname',  *ancestors)
         cls.appspace = appspace or attr_search('appspace', *ancestors)
+        cls.__loader__ = linkages.get(cls.appname, none_function)()
         super(ModuleBase, cls).__init_subclass__(**kwargs)
     
     @classmethod
@@ -762,12 +825,12 @@ def installed_appnames():
             appnames.add(finder.appname)
     return appnames
 
-def initialize_module(appname, appspace, loader):
+def initialize_module(appname, appspace):
     """ Private helper for “initialize_types(…)” """
     
     class Module(ModuleBase, appname=appname,
                              appspace=appspace):
-        __loader__ = loader
+        pass
     
     return Module
 
@@ -778,12 +841,9 @@ def initialize_new_types(appname, appspace):
         pass
     
     class Finder(FinderBase, appname=appname):
-        __loader__ = Loader
-        loader = Loader()
+        pass
     
-    Module = initialize_module(appname,
-                               appspace,
-                               Finder.loader)
+    Module = initialize_module(appname, appspace)
     
     return Module, Finder, Loader
 
@@ -818,7 +878,7 @@ def initialize_types(appname, appspace=consts.DEFAULT_APPSPACE):
         Module = perapp.modules.get(appspace, None)
         
         if Module is None:
-            Module = initialize_module(appname, appspace, perapp.finder.loader)
+            Module = initialize_module(appname, appspace)
             polymers.add_module(appname=appname,
                                appspace=appspace,
                                  module=Module)
@@ -1397,7 +1457,7 @@ def test():
         
         for specname in sorted(FinderBase.specs.keys()):
             spec = FinderBase.specs[specname]
-            string = pformat(spec.__dict__, indent=4)
+            string = pformat(spec.__dict__, indent=4, width=consts.SEPARATOR_WIDTH)
             cached = getattr(spec, 'cached', None)
             hasloc = getattr(spec, 'has_location', None)
             parent = getattr(spec, 'parent', None)
@@ -1420,9 +1480,28 @@ def test():
             monos = dict(monomers[appname])
             monocount = len(monos)
             monoplural = (monocount == 1) and "monomer" or "monomers"
-            string = pformat(monos, indent=4)
+            string = pformat(monos, indent=4, width=consts.SEPARATOR_WIDTH)
             print()
             print(f"    «{appname}» ({monocount} {monoplural}):")
+            print(f"{string}")
+    
+    @inline.diagnostic
+    def show_linkages():
+        """ Show all registered Loader subclasses """
+        appnames = tuple(linkages.keys())
+        appcount = len(appnames)
+        plural = (appcount == 1) and "app" or "apps"
+        print(f"LINKAGES ({appcount} {plural} total):")
+        
+        for appname in appnames:
+            LoaderCls = linkages[appname]
+            qname = qualified_name(LoaderCls)
+            instancedict = dict(LoaderCls.instances)
+            instancecount = len(LoaderCls.instances)
+            instanceplural = (instancecount == 1) and "instance" or "instances"
+            string = pformat(instancedict, indent=4, width=consts.SEPARATOR_WIDTH)
+            print()
+            print(f"    «{appname}» ({qname}, {instancecount} {instanceplural}):")
             print(f"{string}")
     
     @inline.diagnostic
@@ -1437,7 +1516,7 @@ def test():
             perapp = polymers[appname]
             modcount = len(perapp.modules)
             modplural = (modcount == 1) and "module" or "modules"
-            string = pformat(perapp.__dict__, indent=4)
+            string = pformat(perapp.__dict__, indent=4, width=consts.SEPARATOR_WIDTH)
             print()
             print(f"    «{appname}» ({modcount} {modplural}):")
             print(f"{string}")

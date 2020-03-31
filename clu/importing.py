@@ -256,18 +256,6 @@ class MetaTypeRepr(abc.ABCMeta):
             return f"<class “{qualname}”>"
         return f"<class “{qualname}” from “{appname}”>"
 
-class MetaNameAndSpaces(MetaTypeRepr):
-    
-    """ A metaclass that adds an “appspaces” iterable class property """
-    
-    @property
-    def appspaces(cls):
-        appname = getattr(cls, 'appname', None)
-        if appname is not None:
-            yield from appspaces_for_appname(appname)
-        else:
-            yield from tuple()
-
 @export
 class ArgumentSink(collections.abc.Callable,
                    collections.abc.Hashable,
@@ -321,6 +309,18 @@ class ArgumentSink(collections.abc.Callable,
         return self.args   != other.args \
             or self.kwargs != other.kwargs
 
+class MetaNameAndSpaces(MetaTypeRepr):
+    
+    """ A metaclass that adds an “appspaces” iterable class property """
+    
+    @property
+    def appspaces(cls):
+        appname = getattr(cls, 'appname', None)
+        if appname is not None:
+            yield from appspaces_for_appname(appname)
+        else:
+            yield from tuple()
+
 @export
 class LoaderBase(clu.abstract.AppName,
                  importlib.abc.Loader,
@@ -340,6 +340,9 @@ class LoaderBase(clu.abstract.AppName,
     
     @classmethod
     def __init_subclass__(cls, **kwargs):
+        """ Initialize a new LoaderBase subclass, registering it
+            if it proves to possess a unique “appname” string.
+        """
         super().__init_subclass__(**kwargs)
         appname = getattr(cls, 'appname', None)
         if appname:
@@ -348,27 +351,38 @@ class LoaderBase(clu.abstract.AppName,
         cls.instances = weakref.WeakValueDictionary()
     
     def __new__(cls, *args, **kwargs):
-        
+        """ Create a new Loader instance.
+            
+            N.B. no initialization arguments are necessary.
+        """
+        # Create an ArgumentSink matching the loader’s
+        # initialization arguments:
         key = ArgumentSink(*args, **kwargs)
         
+        # If a loader already matches these arguments,
+        # return it immediately:
         if key in cls.instances:
             return cls.instances[key]
         
+        # Create and register a new loader, as per the
+        # arguments with which to initialize this new
+        # loader instance:
         try:
             cls.instances[key] = instance = super().__new__(cls, *args, **kwargs)
         except TypeError:
             cls.instances[key] = instance = super().__new__(cls)
         
+        # Return the newly created instance:
         return instance
     
     @staticmethod
     def package_module(name):
-        """ Convenience method, returning an empty package module """
+        """ Convenience method, returning an empty package module. """
         return Package(name, f"Package (filler) module {name}")
     
     @cache
     def create_module(self, spec):
-        """ Create a new class-based module from a spec instance """
+        """ Create a new class-based module from a spec instance. """
         cls = type(self)
         if Registry.has_appname(cls.appname):
             if spec.name in Registry[cls.appname]:
@@ -452,15 +466,21 @@ class FinderBase(clu.abstract.AppName,
     
     @classmethod
     def __init_subclass__(cls, **kwargs):
+        """ Initialize a new FinderBase subclass – assigning to it
+            a loader class, and an instance of same, corresponding
+            to the “appname” string of this new FinderBase subclass.
+        """
         super().__init_subclass__(**kwargs)
         appname = getattr(cls, 'appname', None)
-        if appname in linkages:
-            LoaderCls = linkages[appname]
-            cls.__loader__ = LoaderCls
-            cls.loader = LoaderCls()
+        cls.__loader__ = linkages.get(appname, none_function)
+        cls.loader = cls.__loader__()
     
     @classmethod
     def spec(cls, fullname):
+        """ Create, cache, and return a new ModuleSpec, corresponding
+            to a given dotpath (née “fullname”) and using the Finder’s
+            embedded loader instance.
+        """
         out = cls.cache[fullname] = ModuleSpec(fullname, cls.loader)
         return out
     
@@ -601,7 +621,9 @@ class MetaModule(MetaRegistry):
         return cls
 
 @export
-class ModuleAlias(object):
+class ModuleAlias(collections.abc.Hashable,
+                  clu.abstract.ReprWrapper,
+                  metaclass=MetaTypeRepr):
     
     """ A ModuleAlias is created when subscripting the ModuleBase
         type, or a subtype thereof, with another ModuleBase subtype,
@@ -614,17 +636,38 @@ class ModuleAlias(object):
     __slots__ = ('origin', 'specializer')
     
     def __init__(self, origin, specializer):
+        """ Initialize a ModuleAlias, with an origin class and a specializer type """
         if not issubclass(origin, ModuleBase):
             raise TypeError('Specialization requires a Module type')
-        if not issubclass(specializer, ModuleBase):
-            raise TypeError('Specialization requires a Module type')
+        if specializer is not None:
+            if not issubclass(specializer, ModuleBase):
+                raise TypeError('Specialization requires a Module type')
         self.origin = origin 
         self.specializer = specializer
+    
+    def __hash__(self):
+        return hash(self.origin) \
+             & hash(self.specializer)
     
     def __mro_entries__(self, bases):
         return tuplize(self.origin,
                        self.specializer)
-
+    
+    def inner_repr(self):
+        return f"origin={self.origin!r}, specializer={self.specializer!r}"
+    
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.origin      == other.origin \
+           and self.specializer == other.specializer
+    
+    def __ne__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.origin      != other.origin \
+            or self.specializer != other.specializer
+    
 DO_NOT_INCLUDE = { '__abstractmethods__',
                    '__execute__',
                    '_abc_impl', '_executed', 'monomers' }

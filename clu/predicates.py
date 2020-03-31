@@ -7,7 +7,7 @@ from functools import lru_cache, partial, wraps
 
 iterchain = chain.from_iterable
 
-from clu.constants.consts import λ, φ, pytuple, NoDefault, QUALIFIER # type: ignore
+from clu.constants.consts import λ, φ, pytuple, NoDefault, QUALIFIER
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

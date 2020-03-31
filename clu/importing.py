@@ -41,7 +41,7 @@ from clu.repr import stringify, hexid
 from clu.typespace import types
 from clu.typology import ismodule, ismapping, isstring, subclasscheck
 from clu.exporting import Registry as ExporterRegistry
-from clu.exporting import ExporterBase, Exporter
+from clu.exporting import ExporterBase, Exporter, thismodule
 
 NoDefault = consts.NoDefault
 
@@ -868,25 +868,28 @@ def installed_appnames():
             appnames.add(finder.appname)
     return appnames
 
-def initialize_module(appname, appspace):
+def initialize_module(appname, appspace, module):
     """ Private helper for “initialize_types(…)” """
     
-    class Module(ModuleBase, appname=appname,
-                             appspace=appspace):
-        pass
+    class Module(ModuleBase,
+                 appname=appname,
+                 appspace=appspace):
+        __module__ = module
     
     return Module
 
-def initialize_new_types(appname, appspace):
+def initialize_new_types(appname, appspace, module):
     """ Private helper for “initialize_types(…)” """
     
-    class Loader(LoaderBase, appname=appname):
-        pass
+    class Loader(LoaderBase,
+                 appname=appname):
+        __module__ = module
     
-    class Finder(FinderBase, appname=appname):
-        pass
+    class Finder(FinderBase,
+                 appname=appname):
+        __module__ = module
     
-    Module = initialize_module(appname, appspace)
+    Module = initialize_module(appname, appspace, module)
     
     return Module, Finder, Loader
 
@@ -910,7 +913,9 @@ def initialize_types(appname, appspace=consts.DEFAULT_APPSPACE):
         perapp = polymers[appname]
     
     except KeyError:
-        Module, Finder, Loader = initialize_new_types(appname, appspace)
+        Module, Finder, Loader = initialize_new_types(appname,
+                                                      appspace,
+                                                      module=thismodule())
         polymers.store(appname, loader=Loader,
                                 finder=Finder,
                         **{ appspace : Module })
@@ -921,7 +926,9 @@ def initialize_types(appname, appspace=consts.DEFAULT_APPSPACE):
         Module = perapp.modules.get(appspace, None)
         
         if Module is None:
-            Module = initialize_module(appname, appspace)
+            Module = initialize_module(appname,
+                                       appspace,
+                                       module=thismodule())
             polymers.add_module(appname=appname,
                                appspace=appspace,
                                  module=Module)
@@ -1219,11 +1226,39 @@ def test():
     
     from clu.testing.utils import inline
     from pprint import pprint, pformat
+    from clu.naming import moduleof
     
     @inline.precheck
     def show_python_executable():
         """ Show the Python executable """
         print("PYTHON:", sys.executable)
+    
+    @inline.precheck
+    def show_module_from_frame():
+        """ Use `inspect.currentframe()` to find the parent module """
+        parentframe = inspect.currentframe().f_back.f_back.f_back
+        parentname = parentframe.f_code.co_name
+        module = inspect.getmodule(parentframe)
+        print("Frame:", parentframe)
+        print("name:", parentname)
+        print("module:", module)
+        print("module name:", nameof(module))
+        print("qualified module name:", qualified_name(module))
+        print("module of module:", moduleof(module))
+    
+    @inline.precheck
+    def show_module_wtf_hax():
+        def mod():
+            lam = lambda: None
+            return moduleof(lam)
+        print("module:", mod())
+    
+    @inline.precheck
+    def show_module_fucking_seriously():
+        from clu.exporting import module
+        module_from = globals().get('exporter', ExporterBase()).dotpath
+        print("module from:", module_from)
+        print("module():", module())
     
     @inline
     def test_one():

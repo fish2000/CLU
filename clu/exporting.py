@@ -22,7 +22,7 @@ iterchain = itertools.chain.from_iterable
 
 from clu.constants.consts import (λ, φ, # type: ignore
                                   APPNAME, BASEPATH, BUILTINS,
-                                  QUALIFIER,
+                                  EXPORTER_NAME, QUALIFIER,
                                   NoDefault, pytuple)
 from clu.constants.exceptions import BadDotpathWarning, ExportError, ExportWarning
 
@@ -810,6 +810,9 @@ class Exporter(ExporterBase, basepath=BASEPATH, appname=APPNAME):
 
 exporter = Exporter(path=__file__)
 
+# GLOBAL INSPECTION: thismodule() will return the module in which it is called:
+thismodule = lambda: inspect.currentframe().f_back.f_globals.get(EXPORTER_NAME, ExporterBase()).dotpath
+
 with exporter as export:
     
     export(itermodule)
@@ -822,6 +825,7 @@ with exporter as export:
     export(search_modules)
     export(determine_name)
     export(path_to_dotpath)
+    export(thismodule, name='thismodule', doc="thismodule() → return the name of the module in which the `thismodule()` function was called")
     
     # NO DOCS ALLOWED:
     export(Registry)

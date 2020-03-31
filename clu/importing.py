@@ -32,7 +32,7 @@ from clu.constants import consts
 from clu.extending import Extensible
 from clu.naming import nameof, dotpath_split, dotpath_join, qualified_name
 from clu.predicates import anyattrs, attr, attr_search, item_search, mro, tuplize
-from clu.repr import stringify
+from clu.repr import stringify, hexid
 from clu.typespace import types
 from clu.typology import ismodule, ismapping, isstring, subclasscheck
 from clu.exporting import Registry as ExporterRegistry
@@ -407,11 +407,12 @@ class LoaderBase(clu.abstract.AppName,
                 tuplize(type(self).appname))
     
     def __repr__(self):
-        qualname = qualified_name(self)
+        location = hexid(self)
+        qualname = qualified_name(type(self))
         appname = getattr(self, 'appname', None)
         if appname is None:
-            return f"<loader “{qualname}”>"
-        return f"<loader “{qualname}” from “{appname}”>"
+            return f"<loader “{qualname}” {consts.REPR_DELIMITER} {location}>"
+        return f"<loader “{qualname}” from “{appname}” {consts.REPR_DELIMITER} {location}>"
 
 @export
 class ArgumentSink(object):

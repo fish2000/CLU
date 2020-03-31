@@ -1255,10 +1255,10 @@ def test():
     
     @inline.precheck
     def show_module_fucking_seriously():
-        from clu.exporting import module
+        from clu.exporting import thismodule
         module_from = globals().get('exporter', ExporterBase()).dotpath
         print("module from:", module_from)
-        print("module():", module())
+        print("module():", thismodule())
     
     @inline
     def test_one():

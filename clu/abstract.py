@@ -5,6 +5,7 @@ from reprlib import recursive_repr
 import abc
 import contextlib
 import collections.abc
+import os
 
 abstract = abc.abstractmethod
 recursive = recursive_repr(fillvalue="…")
@@ -289,7 +290,9 @@ class BasePath(Slotted):
             with the requisite methods defined for access.
         """
         if 'basepath' not in attributes:
-            attributes['basepath'] = ValueDescriptor(basepath)
+            attributes['basepath'] = ValueDescriptor(basepath  \
+                                       and os.fspath(basepath) \
+                                                  or basepath)
         
         return super(BasePath, metacls).__new__(metacls, name,
                                                          bases,

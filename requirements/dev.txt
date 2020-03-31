@@ -2,7 +2,7 @@
 -r docs.txt
 -r typecheck.txt
 blessings>=1.7
-bpython>=0.18
+bpython>=0.19
 bumpversion>=0.5.3
 check-manifest>=0.40
 Click>=7.0

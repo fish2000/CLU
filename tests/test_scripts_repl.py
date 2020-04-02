@@ -68,10 +68,12 @@ class TestScriptsREPL(object):
     @pytest.mark.parametrize('modulename', mods)
     def test_repl_star_export(self, modulename):
         from clu.naming import qualified_import
+        from clu.predicates import ispublic
         from clu.scripts.repl import star_export
         
         module = qualified_import(modulename)
         star_export(modulename, namespace=locals())
         
         for thingname in dir(module):
-            assert thingname in locals()
+            if ispublic(thingname):
+                assert thingname in locals()

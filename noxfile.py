@@ -23,7 +23,7 @@ def checkmanifest(session):
     nox.param('clu.version',      id='version'),
     nox.param('clu.scripts.repl', id='repl')))
 def checkmodule(session, module):
-    """ Show CLU consts, modules, or versioning """
+    """ Check CLU consts, modules, REPL, or versioning """
     session.install("-r", "requirements/install.txt")
     if module == 'clu':
         session.install("-r", "requirements/nox/tests.txt")

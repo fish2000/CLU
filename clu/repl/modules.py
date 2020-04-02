@@ -175,9 +175,9 @@ def compare_module_lookups_for_all_things(*modules, **options):
     failure_rate = 100 * (float(mismatch_count) / float(total))
     assert failure_rate < 10.0 # percent
     
-    return Results(idx, modulenames, tuple(results)), \
-           Mismatches(total,         tuple(mismatches),
-                                           failure_rate)
+    return Results(idx,  modulenames, tuple(results)), \
+           Mismatches(mismatch_count, tuple(mismatches),
+                                            failure_rate)
 
 export(notpyname,                   name='notpyname',       doc="notpyname(string) → boolean predicate, returns True unless string is a __dunder__ name, when it returns False")
 export(isplural,                    name='isplural',        doc="isplural(integer) → returns an 's' unless the integer argument is 1, in which case it returns an empty string")

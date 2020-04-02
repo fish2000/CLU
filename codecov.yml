@@ -8,7 +8,7 @@ codecov:
 coverage:
   precision: 2
   round: down
-  range: "70...100"
+  range: "60...100"
 
 parsers:
   gcov:
@@ -25,3 +25,6 @@ comment:
 
 ignore:
   - "docs"
+  - "python_clu.egg_info"
+  - "requirements"
+  - "scratch"

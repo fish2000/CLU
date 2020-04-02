@@ -279,7 +279,7 @@ class ArgumentSink(collections.abc.Callable,
         """ Create a new ArgumentSink, with arbitrary positional
             and/or keyword arguments
         """
-        instance = object.__new__(cls)
+        instance = super().__new__(cls)
         instance.args = args
         instance.kwargs = kwargs
         return instance
@@ -654,7 +654,7 @@ class ModuleAlias(collections.abc.Hashable,
                        self.specializer)
     
     def inner_repr(self):
-        return f"origin={self.origin!r}, specializer={self.specializer!r}"
+        return f"origin=“{self.origin!r}”, specializer=“{self.specializer!r}”"
     
     def __eq__(self, other):
         if not isinstance(other, type(self)):

@@ -18,14 +18,17 @@ def checkmanifest(session):
 
 @nox.session
 @nox.parametrize('module', (
-    nox.param('clu.constants',  id='consts'),
-    nox.param('clu',            id='modules'),
-    nox.param('clu.version',    id='version')))
+    nox.param('clu.constants',    id='consts'),
+    nox.param('clu',              id='modules'),
+    nox.param('clu.version',      id='version'),
+    nox.param('clu.scripts.repl', id='repl')))
 def checkmodule(session, module):
     """ Show CLU consts, modules, or versioning """
     session.install("-r", "requirements/install.txt")
     if module == 'clu':
         session.install("-r", "requirements/nox/tests.txt")
+    elif module == 'clu.scripts.repl':
+        session.install("-r", "requirements/nox/repl.txt")
     session.run('python', '-m', module)
 
 @nox.session

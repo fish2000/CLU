@@ -16,6 +16,7 @@ omit =
     clu/scripts/show-modules.py
     clu/scripts/xdg-runtime.py
     clu/testing/hook.py
+    clu/testing/obsolete.py
     clu/testing/pytest.py
 
 dynamic_context = test_function
@@ -39,6 +40,7 @@ omit =
     clu/scripts/show-modules.py
     clu/scripts/xdg-runtime.py
     clu/testing/hook.py
+    clu/testing/obsolete.py
     clu/testing/pytest.py
 
 show_missing = False

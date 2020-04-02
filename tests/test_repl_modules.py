@@ -77,6 +77,10 @@ class TestReplModules(object):
         for thingname in dir(module):
             assert modmap[thingname] == getattr(module, thingname)
         
+        # calculate “most”:
+        most = max(len(thingname) for thingname in dir(module))
+        assert most == modmap.most()
+        
         frozenthings = frozenset(module.__all__)
         
         assert frozenthings.issuperset(modmap.keys())

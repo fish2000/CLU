@@ -3,7 +3,25 @@ from __future__ import print_function
 
 import pytest
 
+characters = ("a", '2', "c", '3', "p", '0')
+
 class TestColumize(object):
+    
+    @pytest.mark.parametrize('character', characters)
+    def test_format_percenter(self, character):
+        from clu.repl.columnize import Percenter
+        fmt = Percenter('_________%s')
+        
+        assert fmt(character) == f"_________{character}"
+        assert fmt.render(character) == f"_________{character}"
+    
+    @pytest.mark.parametrize('character', characters)
+    def test_format_strmethod(self, character):
+        from clu.repl.columnize import StrMethod
+        fmt = StrMethod('_________{}')
+        
+        assert fmt(character) == f"_________{character}"
+        assert fmt.render(character) == f"_________{character}"
     
     def test_columnize_basic(self):
         """ Basic “columnize(¬)” sanity and status testing. """

@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-# import pytest
-
 class TestDispatch(object):
     
     """ Run the tests for the “clu.dispatch” module """
     
-    def test_exithandle(self, testdir, consts):
+    def test_exithandle(self, consts, environment, testdir):
+        environment['PYTHONPATH'] = f".:{consts.PROJECT_PATH}:{consts.BASEPATH}"
         testdir.syspathinsert(consts.PROJECT_PATH)
         testdir.syspathinsert(consts.BASEPATH)
+        
         testdir.makeconftest("""
             pytest_plugins = "clu.testing.pytest"
         """)
         
         path = testdir.makepyfile("""
-            import sys
-            sys.path.insert(0, "%s")
-            sys.path.insert(0, "%s")
-            
             def test():
                 from clu.dispatch import (exithandle,
                                           signal_for,
@@ -60,9 +56,9 @@ class TestDispatch(object):
                 return 0
             
             if __name__ == '__main__':
+                import sys
                 sys.exit(test())
-        """ % (consts.PROJECT_PATH,
-               consts.BASEPATH))
+        """)
         
         result = testdir.runpython(path)
         

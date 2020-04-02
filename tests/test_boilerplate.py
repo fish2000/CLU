@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-snippet = """
-import sys
-sys.path.insert(0, "%s")
-sys.path.insert(0, "%s")
-"""
-
 class TestBoilerplate(object):
     
     """ Run the tests for the “clu.repl.cli.boilerplate” module """
@@ -30,21 +24,19 @@ class TestBoilerplate(object):
         assert "INSERT DIAGNOSTIC CODE HERE" in output
         assert "return inline.test(100)" in output
     
-    def test_boilerplate_code(self, testdir, consts):
+    def test_boilerplate_code(self, consts, environment, testdir):
         """ Actually run the boilerplate code, ensuring that it’ll basically work """
         from clu.repl.cli.boilerplate import boilerplate
         
+        environment['PYTHONPATH'] = f".:{consts.PROJECT_PATH}:{consts.BASEPATH}"
         testdir.syspathinsert(consts.PROJECT_PATH)
         testdir.syspathinsert(consts.BASEPATH)
+        
         testdir.makeconftest("""
             pytest_plugins = "clu.testing.pytest"
         """)
         
-        code = boilerplate.replace("from __future__ import print_function",
-                                    snippet % (consts.PROJECT_PATH,
-                                               consts.BASEPATH))
-        
-        path = testdir.makepyfile(code)
+        path = testdir.makepyfile(boilerplate)
         result = testdir.runpython(path)
         assert len(result.outlines) > 0
         

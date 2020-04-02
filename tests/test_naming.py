@@ -3,7 +3,6 @@ from __future__ import print_function
 
 import pytest
 
-from clu.constants import consts
 from clu.constants.exceptions import Nondeterminism
 
 yo_dogg_rename = lambda: print("Yo dogg.")
@@ -178,27 +177,6 @@ class TestNaming(object):
         assert px1 == path_to_prefix(pp, end="≠")
         assert px2 == path_to_prefix(pp, sep="•", end="≠")
     
-    @pytest.mark.skipif(consts.PYPY, reason="Failure on PyPy")
-    @pytest.mark.nondeterministic
-    def test_qualified_name_constants(self, clumods, consts):
-        """ » Checking “qualified_name(¬) on items from clu.constants …” """
-        from clu.naming import qualified_name
-        
-        names = ('BASEPATH', 'HOSTNAME', 'VERBOTEN', 'SCRIPT_PATH', 'TEST_PATH')
-        constants = (getattr(consts, name) for name in names)
-        
-        # for name, const in zip(names, constants):
-        #     qname = qualified_name(const)
-        #     assert qname == f'clu.constants.consts.{name}'
-        
-        """ This commented-out bit fails because “clu.__title__” (defined in clu/__init__.py)
-            is the same string – and interning makes them into the same object. """
-        # qname = qualified_name(consts.APPNAME)
-        # try:
-        #     assert qname == 'clu.constants.consts.APPNAME'
-        # except AssertionError:
-        #     raise Nondeterminism(f"Nondeterminism in qualified_name(consts.APPNAME) → {qname}")
-    
     def test_qualified_name_instances(self):
         """ » Checking “qualified_name(¬) on instances of objects …” """
         
@@ -249,7 +227,6 @@ class TestNaming(object):
     def test_qualified_import(self):
         """ » Checking “qualified_import(¬) …” """
         from clu.naming import qualified_import, qualified_name
-        # is_python2_dead     = qualified_import('clu.repl.banners.is_python2_dead')
         
         print_python_banner = qualified_import('clu.repl.banners.print_python_banner')
         print_warning       = qualified_import('clu.repl.banners.print_warning')
@@ -268,13 +245,6 @@ class TestNaming(object):
             assert qname == 'clu.repl.banners.print_warning'
         except AssertionError:
             raise Nondeterminism(f"Nondeterminism in qualified_name(print_warning) → {qname}")
-        
-        """ N.B. this “is_python2_dead” business seems to be the point of failure: """
-        # qname = qualified_name(is_python2_dead)
-        # try:
-        #     assert qname == 'clu.repl.is_python2_dead'
-        # except AssertionError:
-        #     raise Nondeterminism(f"Nondeterminism in qualified_name(is_python2_dead) → {qname}")
         
         qname = qualified_name(Text)
         try:

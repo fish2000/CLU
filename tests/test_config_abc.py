@@ -3,9 +3,6 @@ from __future__ import print_function
 
 import pytest
 
-# @pytest.fixture(scope='module')
-# def fosets():
-
 class TestConfigABC(object):
     
     def test_FlatOrderedSet_equality_operator(self):

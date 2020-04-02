@@ -10,6 +10,11 @@ nox.options.keywords = "not codecov"
 nox.options.reuse_existing_virtualenvs = True
 nox.options.stop_on_first_error = True
 
+# Skip manifest check if we’re not running in a Git repo:
+from clu.version.git_version import are_we_gitted
+if not are_we_gitted():
+    nox.options.keywords += " and not checkmanifest"
+
 @nox.session
 def checkmanifest(session):
     """ Check CLU’s MANIFEST.in against the Git HEAD """

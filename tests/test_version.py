@@ -18,24 +18,29 @@ class TestVersion(object):
         release = 'release' in vstring
         assert anyof(snapshot, release)
     
-    def test_git_version_function(self, cluversion):
+    # @pytest.mark.skipif(not are_we_gitted(), reason="Must run within a Git repo")
+    def test_git_version_function(self, cluversion, gitrun):
         from clu.version.git_version import git_version_tags
         from clu.fs.filesystem import td
         
-        version = cluversion.to_string()
-        
         vtags0 = git_version_tags()
-        assert vtags0 is not None
-        assert vtags0.startswith(f'v{version}')
+        
+        if gitrun:
+            version = cluversion.to_string()
+            assert vtags0 is not None
+            assert vtags0.startswith(f'v{version}')
+        else:
+            assert vtags0 is None
         
         vtags1 = git_version_tags(directory=td())
         assert vtags1 is None
     
-    def test_are_we_gitted_function(self):
+    # @pytest.mark.skipif(not are_we_gitted(), reason="Must run within a Git repo")
+    def test_are_we_gitted_function(self, gitrun):
         from clu.version.git_version import are_we_gitted
         from clu.fs.filesystem import td
         
-        assert are_we_gitted()
+        assert gitrun or (not are_we_gitted())
         assert not are_we_gitted(directory=td())
      
     def test_cluversion_and_VersionInfo(self, consts, cluversion):

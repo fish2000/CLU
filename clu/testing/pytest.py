@@ -125,6 +125,14 @@ def consts():
     yield consts_module
 
 @pytest.fixture(scope='session')
+def gitrun():
+    """ Boolean fixture indicating whether or not this session
+        is running within a Git repo (vs. like a tarball or somesuch).
+    """
+    from clu.version.git_version import are_we_gitted
+    yield are_we_gitted()
+
+@pytest.fixture(scope='session')
 def greektext():
     """ Greek-text fixture: yield a dictionary with several lorem-ipsum-ish
         blocks of text.

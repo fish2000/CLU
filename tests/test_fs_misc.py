@@ -8,7 +8,7 @@ import pytest
 
 class TestFsMisc(object):
     
-    """ Run the tests for the clu.fs.misc module. """
+    """ Run the tests for the “clu.fs.misc” module. """
     
     def test_temporary(self, temporarydir):
         from clu.fs.misc import temporary

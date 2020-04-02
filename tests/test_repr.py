@@ -63,11 +63,12 @@ class TestRepr(object):
     def test_chop_instance_repr(self, dirname, consts):
         from clu.repr import chop_instance_repr
         data = dirname.subdirectory('data')
+        basepath = str(consts.BASEPATH)
         
-        assert chop_instance_repr(dirname)       == "Directory(name=“/Users/fish/Dropbox/CLU/clu/tests”, exists=«True»)"
-        assert chop_instance_repr(data)          == "Directory(name=“/Users/fish/Dropbox/CLU/clu/tests/data”, exists=«True»)"
-        assert chop_instance_repr(repr(dirname)) == "Directory(name=“/Users/fish/Dropbox/CLU/clu/tests”, exists=«True»)"
-        assert chop_instance_repr(repr(data))    == "Directory(name=“/Users/fish/Dropbox/CLU/clu/tests/data”, exists=«True»)"
+        assert chop_instance_repr(dirname)       == f"Directory(name=“{basepath}/tests”, exists=«True»)"
+        assert chop_instance_repr(data)          == f"Directory(name=“{basepath}/tests/data”, exists=«True»)"
+        assert chop_instance_repr(repr(dirname)) == f"Directory(name=“{basepath}/tests”, exists=«True»)"
+        assert chop_instance_repr(repr(data))    == f"Directory(name=“{basepath}/tests/data”, exists=«True»)"
         assert repr(dirname).startswith(chop_instance_repr(dirname))
         assert repr(data).startswith(chop_instance_repr(data))
         

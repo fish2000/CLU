@@ -52,7 +52,7 @@ def module_export(modulename, namespace):
     except ValueError:
         module = importlib.import_module(modulename)
     name = nameof(module)
-    namespace[name] = module
+    namespace[modulename] = namespace[name] = module
 
 # Warm up sys.modules and friends:
 
@@ -73,7 +73,6 @@ starmods = ('clu.repl.ansi',
             'clu.config.env',
             'clu.config.keymap',
             'clu.config.proxy',
-            'clu.application',
             'clu.dicts', 'clu.enums', 'clu.exporting', 'clu.extending', 'clu.shelving.redat',
             'clu.importing', 'clu.mathematics', 'clu.naming', 'clu.predicates', 'clu.typology',
             'clu.fs.abc', 'clu.fs.filesystem', 'clu.fs.misc', 'clu.repr', 'clu.stdio',
@@ -81,7 +80,9 @@ starmods = ('clu.repl.ansi',
             'clu.testing.utils',
             'clu.version', 'clu.version.git_version')
 
-mods = ('clu.all',
+mods = ('clu',
+        'clu.all',
+        'clu.abstract',
         'clu.constants.consts',
         'clu.constants.polyfills',
         'clu.config.base',
@@ -124,13 +125,13 @@ for mod in mods:
 # Additionals and corner-cases – imports requiring their own
 # bespoke import-statement forms:
 
-import clu.abstract
 import collections.abc
-
-from clu.testing.utils import pout, inline
-
 from PIL import Image
 from pprint import pprint, pformat
+
+# These two imports trigger module-level __getattr__ actions:
+
+from clu.testing.utils import pout, inline
 
 # Not quite sure where to put this, for now:
 
@@ -183,8 +184,7 @@ else:
 
 # Remove duplicate and invalid sys.paths:
 
-from clu.fs.pypath import remove_invalid_paths
-remove_invalid_paths()
+pypath.remove_invalid_paths()
 
 # Print the Python banner and/or warnings, messages, and other tripe:
 

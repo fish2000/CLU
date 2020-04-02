@@ -5,8 +5,8 @@ import pytest
 
 class TestColumize(object):
     
-    def test_basic(self):
-        """Basic sanity and status testing."""
+    def test_columnize_basic(self):
+        """ Basic “columnize(¬)” sanity and status testing. """
         from clu.repl.columnize import columnize
         
         assert "1, 2, 3\n"      == columnize(['1', '2', '3'], display_width=10, separator=', ')
@@ -58,8 +58,6 @@ class TestColumize(object):
                                                                     vertical_display=False,
                                                                     separator=', ')
         
-        # self.maxDiff = None
-        
         assert \
             "     0,  1,  2,  3,  4,  5,  6,  7\n" +    \
             "     8,  9, 10, 11, 12, 13, 14, 15\n" +    \
@@ -73,6 +71,10 @@ class TestColumize(object):
                                                                 vertical_display=False,
                                                                 separator=', ',
                                                                 line_prefix='    ')
+    
+    def test_columnize_intermediate(self):
+        """ Intermediate “columnize(¬)” sanity and status testing. """
+        from clu.repl.columnize import columnize
         
         data = (
             "one",       "two",         "three",
@@ -85,12 +87,15 @@ class TestColumize(object):
             "twentytwo", "twentythree", "twentyfour",
             "twentyfive","twentysix",   "twentyseven")
         
-        # assert \
-        #     "one         two        three        four        five         six       \n" + \
-        #     "seven       eight      nine         ten        eleven       twelve    \n" + \
-        #     "thirteen    fourteen   fifteen      sixteen    seventeen    eightteen \n" + \
-        #     "nineteen    twenty     twentyone    twentytwo  twentythree  twentyfour\n" + \
-        #     "twentyfive  twentysix  twentyseven\n" == columnize(data, vertical_display=False)
+        assert \
+            "one         two        three        four       five         six       \n" + \
+            "seven       eight      nine         ten        eleven       twelve    \n" + \
+            "thirteen    fourteen   fifteen      sixteen    seventeen    eightteen \n" + \
+            "nineteen    twenty     twentyone    twentytwo  twentythree  twentyfour\n" + \
+            "twentyfive  twentysix  twentyseven\n" == columnize(data,
+                                                                display_width=71,
+                                                                vertical_display=False,
+                                                                ljust=True)
         
         # assert \
         #     "one    five   nine    thirteen  seventeen  twentyone    twentyfive \n" + \
@@ -133,24 +138,21 @@ class TestColumize(object):
 
 """ == columnize(list(range(12)), **{ 'display_width' : 9, 'standard_display' : True })
     
-    
-    def test_colfmt(self):
+    def test_columnize_format_percenter(self):
         from clu.repl.columnize import columnize
         assert '    0    1    2    3' == columnize([0, 1, 2, 3], display_width=7,
                                                            vertical_display=False,
                                                            **{ 'format' : '%5d', 'line_suffix' : '' })
     
-    def test_lineprefix(self):
+    def test_columnize_line_prefix(self):
         from clu.repl.columnize import columnize
         assert '>>>       0\n>>>       1\n>>>       2\n>>>       3\n' == columnize([0, 1, 2, 3],
                                                                                    vertical_display=False,
                                                                                    **{ 'format' : '%5d', 'display_width' : 16, 'line_prefix' : '>>>   ' })
     
-    def test_lineprefix_just_wide_enough(self):
+    def test_columnize_line_prefix_just_wide_enough(self):
         from clu.repl.columnize import columnize
         assert '>>>10  12\n>>>11  13\n' == columnize([10, 11, 12, 13], **{ 'line_prefix' : '>>>', 'display_width' : 9 })
-    
-    # @mock.patch.dict('os.environ', {'COLUMNS': '87'}, clear=True)
     
     @pytest.mark.parametrize('columns', range(75, 95, 2))
     def test_computed_display_width_environment_COLUMNS(self, columns, environment):

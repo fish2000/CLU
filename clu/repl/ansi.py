@@ -640,7 +640,7 @@ class DocFormat(clu.abstract.Format):
     para = StagedFormat(wrap, body)
     null = StagedFormat(wrap, ANSISanitizer())
     
-    __slots__ = 'iohandle'
+    __slots__ = ('iohandle', '__doc__')
     
     def __init__(self, iohandle=std.OUT):
         self.iohandle = iohandle
@@ -708,9 +708,8 @@ class DocFormat(clu.abstract.Format):
         
         self.putln(count=2)
 
-@export
-def ansidoc(*things):
-    """ ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
+def old_ansidoc(*things):
+    """ old_ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
     # Start output
     flush_all()
     print()
@@ -755,12 +754,15 @@ def ansidoc(*things):
         print()
         flush_all()
 
-export(print_separator,     name='print_separator', doc="print_separator(filler='-') → print ‘filler’ character consts.SEPARATOR_WIDTH times")
-export(wrapper_kws,         name='wrapper_kws',     doc="wrapper_kws(**kwargs) → prepare default arguments for instancing a “textwrap.TextWrapper”")
-export(ANSIFormatBase,      name='ANSIFormatBase')
+ansidoc = DocFormat()
 
+export(ANSIFormatBase,      name='ANSIFormatBase')
 export(SEPARATOR_WIDTH,     name='SEPARATOR_WIDTH')
 export(EIGHTY_PERCENT,      name='EIGHTY_PERCENT')
+
+export(print_separator,     name='print_separator', doc="print_separator(filler='-') → print ‘filler’ character consts.SEPARATOR_WIDTH times")
+export(wrapper_kws,         name='wrapper_kws',     doc="wrapper_kws(**kwargs) → prepare default arguments for instancing a “textwrap.TextWrapper”")
+export(ansidoc,             name='ansidoc',         doc="ansidoc(*things) → Print the docstring value for each thing, in ANSI color")
 
 # NO DOCS ALLOWED:
 export(Text)
@@ -783,8 +785,6 @@ def test():
     
     @inline
     def test_two():
-        # ansidoc(Enum)
-        # ansidoc(ansidoc)
         ansidoc(Exporter)
         ansidoc(product)
     

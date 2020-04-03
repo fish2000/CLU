@@ -107,7 +107,7 @@ scalar_types = frozenset(getattr(numpy, 'ScalarType',
 
 try:
     from six import string_types
-except (ImportError, SyntaxError):
+except (ImportError, SyntaxError): # pragma: no cover
     string_types = tuple(uniquify(str, unicode))
 
 bytes_types = (bytes, bytearray)

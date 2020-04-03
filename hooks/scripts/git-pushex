@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+# 
+# git-pushex: “git push” wrapper,
+# with support for post-push hooks
+# 
+# By Alexander Böhn <https://github.com/fish2000>
+# © 2012 - 2037 OST, LLC and FVHS GmbH.
+#   All rights reserved.
+# 
+# Based on this bash function: https://git.io/JvFSa
 
 # Configuration / Settings / What have you:
 if [ "$1" ]; then

@@ -30,6 +30,7 @@ precision = 2
 exclude_lines =
     pragma: no cover
     if DEBUG
+    if consts\.DEBUG
     if verbose
     if __name__ == .__main__.:
     def __reduce__

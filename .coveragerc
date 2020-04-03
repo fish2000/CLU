@@ -9,7 +9,7 @@ omit =
     clu/testing/hook.py
     clu/testing/obsolete.py
 
-dynamic_context = test_function
+# dynamic_context = test_function
 
 source = clu
 branch = True
@@ -30,13 +30,12 @@ precision = 2
 
 exclude_lines =
     pragma: no cover
-    ...
     if DEBUG
     if verbose
-    if __name__ == .__main__.:
     def __reduce__
     except TypeError:
     raise NotImplementedError
+    \.\.\.
 
 [html]
 directory = "coverage_html"

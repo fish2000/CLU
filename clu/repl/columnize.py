@@ -293,7 +293,6 @@ def demo():
         out = columnize(*args, **kwargs)
         print(line_character * WIDTH)
         print(out)
-        # print()
     
     columnprint(list(range(12)), **{ 'display_width' : 6, 'standard_display' : True })
     columnprint(list(range(12)), **{ 'display_width' : 10, 'standard_display' : True })

@@ -63,6 +63,7 @@ def inline(session, module):
 @nox.session
 def codecov(session):
     """ Run `codecov`, updating CLU’s statistics on codecov.io """
+    from clu import all
     from clu.fs.filesystem import TemporaryName
     coveragefile = TemporaryName(prefix='coverage-',
                                  suffix='bin',
@@ -80,34 +81,32 @@ def codecov(session):
     
     # Run command modules:
     for modulename in ('clu.constants',
+                       'clu.constants.consts',
                        'clu',
                        'clu.version',
+                       'clu.repl.columnize',
                        'clu.scripts.repl'):
         session.run('coverage',
                     'run', '--append', '-m', modulename,
                     silent=True)
     
     # Run each inline-test function:
-    from clu import all
     for modulename in all.inline_tests():
         session.run('coverage',
                     'run', '--append', '-m', modulename,
                      silent=True)
     
-    # '--cov-report=xml:coverage.xml',
     # Run “pytest” with the “pytest-cov” plugin:
+    coveragefile.copy('.coverage') # pytest-cov ignores COVERAGE_FILE
     session.run('pytest', '-p', 'pytest_cov', '--cov=clu',
                                               '--cov-append',
+                                              '--cov-report=xml:coverage.xml',
                                               '--no-cov-on-fail',
                                               'tests/')
     
-    # Combine and report:
-    session.run('coverage', 'xml', '-o', 'coverage.xml')
-    
     # Run ‘codecov’ to upload the results to codecov.io:
-    coveragefile.copy('.coverage')
     session.run('codecov', '--required')
     
     # Destroy temporary coverage data files:
     coveragefile.close()
-    session.run('rm', '.coverage')
+    session.run('/bin/rm', '.coverage', external=True)

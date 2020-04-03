@@ -23,6 +23,7 @@ dynamic_context = test_function
 
 source = clu
 branch = True
+cover_pylib = True
 parallel = False
 
 [report]
@@ -49,12 +50,13 @@ precision = 2
 
 exclude_lines =
     pragma: no cover
+    ...
     if DEBUG
+    if verbose
     if __name__ == .__main__.:
-    def test
-    def show
     def inner_repr
     def __reduce__
+    except TypeError
     raise NotImplementedError
 
 [html]

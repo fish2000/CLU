@@ -1325,6 +1325,9 @@ def test():
         print("mro(m):")
         pprint(mro(m))
         print()
+        
+    class FindMe(Module):
+        pass
     
     @inline
     def test_three_point_five():
@@ -1332,9 +1335,6 @@ def test():
         finder = Finder()
         assert type(finder.loader) is Loader
         assert type(finder) in sys.meta_path
-        
-        class FindMe(Module):
-            pass
         
         spec0 = finder.find_spec('clu.app.FindMe', [])
         assert spec0.name == 'clu.app.FindMe'
@@ -1347,6 +1347,11 @@ def test():
         
         spec1 = finder.find_spec('clu.app.FindMe', [])
         assert spec1.name == 'clu.app.FindMe'
+        
+        registered = Registry.for_qualname('clu.app.FindMe')
+        assert registered == FindMe
+        # print("registered:", registered, hex(id(registered)))
+        # print("FindMe:", FindMe, hex(id(FindMe)))
     
     @inline
     def test_four():

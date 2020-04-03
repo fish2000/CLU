@@ -68,7 +68,20 @@ def codecov(session):
     session.install("-r", "requirements/install.txt")
     session.install("-r", "requirements/nox/repl.txt")
     session.install("-r", "requirements/nox/codecov.txt")
+    
+    # Run each inline-test function:
+    from clu import all
+    for modulename in all.inline_tests():
+        session.run('coverage', 'run', '--append', '-m', modulename)
+    
+    # Run “pytest” with the “pytest-cov” plugin:
     session.run('pytest', '-p', 'pytest_cov', '--cov=clu',
+                                              '--cov-append',
                                               '--cov-report=xml:coverage.xml',
-                                              '--no-cov-on-fail', 'tests/')
-    session.run('codecov')
+                                              '--no-cov-on-fail',
+                                              'tests/')
+    
+    # Run ‘codecov’ to upload the results to codecov.io:
+    session.run('codecov', '--required',
+                           '--file',
+                           'coverage.xml')

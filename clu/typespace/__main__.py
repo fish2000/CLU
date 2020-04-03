@@ -1,5 +1,5 @@
 
-import sys
+import sys # pragma: no cover
 
 def test():
     

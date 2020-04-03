@@ -25,28 +25,36 @@ class CDBSubBase(abc.ABC, metaclass=abc.ABCMeta):
     
     @abstract
     def push(self, filepth, command, directory=None,
-                                     destination=None): ...
+                                     destination=None):
+        ...
     
     @abstract
-    def __len__(self): ...
+    def __len__(self):
+        ...
     
     @abstract
-    def __getitem__(self, key): ...
+    def __getitem__(self, key):
+        ...
     
     @abstract
-    def to_string(self): ...
+    def to_string(self):
+        ...
     
     @abstract
-    def __repr__(self): ...
+    def __repr__(self):
+        ...
     
     @abstract
-    def __str__(self): ...
+    def __str__(self):
+        ...
     
     @abstract
-    def __bytes__(self): ...
+    def __bytes__(self):
+        ...
     
     @abstract
-    def __bool__(self): ...
+    def __bool__(self):
+        ...
 
 @export
 class CDBBase(CDBSubBase, collections.abc.Sequence,
@@ -117,13 +125,11 @@ class CDBBase(CDBSubBase, collections.abc.Sequence,
     def __bool__(self):
         return True
 
-CDBSubBase.register(CDBBase)
-
 @export
 class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
     
     fields = ('filename', 'length', 'exists')
-    filename = f'compilation_database{os.extsep}json'
+    filename = f'compilation_database.json'
     splitname = os.path.splitext(filename)
     
     @classmethod
@@ -196,8 +202,6 @@ class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
                        exc_val=None,
                        exc_tb=None):
         self.write()
-
-CDBSubBase.register(CDBJsonFile)
 
 export(CDBError)
 

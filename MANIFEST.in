@@ -31,16 +31,19 @@ include tox.ini
 
 recursive-include clu *
 recursive-include docs *
+recursive-include hooks *
 recursive-include requirements *.txt
 recursive-include scratch *.py *.ipynb
-recursive-include tests *.py *.jpg *.png *.toml *.json
+recursive-include tests *.py *.jpg *.png *.toml *.json .tm_properties
 
 exclude .coverage
+exclude .envrc
 exclude .noxresults.json
 exclude coverage.xml
 
 recursive-exclude clu *.pyc *~ *.so .DS_Store
 recursive-exclude docs *.pyc *~ *.so .DS_Store
+recursive-exclude hooks *.pyc *~ *.so .DS_Store
 recursive-exclude requirements *.pyc *~ *.so .DS_Store
 recursive-exclude scratch *.pyc *~ *.so .DS_Store
 recursive-exclude tests *.pyc *~ *.so .DS_Store

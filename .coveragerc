@@ -9,8 +9,6 @@ omit =
     clu/testing/hook.py
     clu/testing/obsolete.py
 
-# dynamic_context = test_function
-
 source = clu
 branch = True
 cover_pylib = True
@@ -24,7 +22,8 @@ omit =
     clu/testing/hook.py
     clu/testing/obsolete.py
 
-show_missing = False
+skip_empty = True
+show_missing = True
 ignore_errors = True
 precision = 2
 
@@ -32,6 +31,7 @@ exclude_lines =
     pragma: no cover
     if DEBUG
     if verbose
+    if __name__ == .__main__.:
     def __reduce__
     except TypeError:
     raise NotImplementedError

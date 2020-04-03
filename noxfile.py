@@ -84,6 +84,8 @@ def codecov(session):
                        'clu.constants.consts',
                        'clu',
                        'clu.version',
+                       'clu.fs.appdirectories',
+                       'clu.repl.banners',
                        'clu.repl.columnize',
                        'clu.scripts.repl'):
         session.run('coverage',

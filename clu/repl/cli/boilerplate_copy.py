@@ -4,7 +4,7 @@ import sys, os
 
 from clu.repl.cli.boilerplate import boilerplate_command
 
-def boilerplate_copy_command():
+def boilerplate_copy_command(): # pragma: no cover
     import xerox
     return boilerplate_command(function=xerox.copy)
 

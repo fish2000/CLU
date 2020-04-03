@@ -28,7 +28,7 @@ class FakeNumpy(object):
 # Try to get `auto` from `enum`, falling back to the polyfill:
 try:
     from enum import auto
-except (ImportError, SyntaxError):
+except (ImportError, SyntaxError): # pragma: no cover
     auto = AutoType()
 
 # Deal with some “missing” Python 3 things:
@@ -44,7 +44,7 @@ except NameError:
 
 try:
     from importlib.util import cache_from_source
-except (ImportError, SyntaxError):
+except (ImportError, SyntaxError): # pragma: no cover
     # As far as I can tell, this is what Python 2.x does:
     cache_from_source = lambda pth: f'{pth}c'
 
@@ -62,7 +62,7 @@ except (ImportError, SyntaxError):
 
 try:
     from pathlib import Path
-except (ImportError, SyntaxError):
+except (ImportError, SyntaxError): # pragma: no cover
     try:
         from pathlib2 import Path
     except (ImportError, SyntaxError):
@@ -70,12 +70,12 @@ except (ImportError, SyntaxError):
 
 try:
     import numpy
-except (ImportError, SyntaxError):
+except (ImportError, SyntaxError): # pragma: no cover
     numpy = None
 
 try:
     from functools import reduce
-except (ImportError, SyntaxError):
+except (ImportError, SyntaxError): # pragma: no cover
     pass
 
 __all__ = ('Enum', 'EnumMeta', 'unique',

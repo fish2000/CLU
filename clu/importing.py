@@ -825,7 +825,7 @@ class PolymerType(dict):
                               appname=appname)
         return self[appname]
     
-    def add_module(self, appname, appspace, module):
+    def add_module(self, module, appname, appspace):
         """ Add a “clu.importing.ModuleBase” subtype to a given
             ‘PerApp’ record already existent in the PolymerType
             dictionary index.
@@ -929,9 +929,8 @@ def initialize_types(appname, appspace=consts.DEFAULT_APPSPACE):
             Module = initialize_module(appname,
                                        appspace,
                                        module=thismodule())
-            polymers.add_module(appname=appname,
-                               appspace=appspace,
-                                 module=Module)
+            polymers.add_module(Module, appname=appname,
+                                       appspace=appspace)
     
     if appname not in installed_appnames():
         sys.meta_path.append(Finder)

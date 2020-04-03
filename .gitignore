@@ -39,3 +39,5 @@ tmtags
 tmtagsHistory
 
 docs/_build
+
+!tests/yodogg/.tm_properties

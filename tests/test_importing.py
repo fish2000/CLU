@@ -127,9 +127,6 @@ class TestImporting(object):
                         raise AttributeError(f"‘{typename}’ proxy module has no attribute ‘{key}’")
             
             class testing0_overridden_consts(PutativeProxyModule):
-                # def __execute__(self):
-                #     self.add_targets(overrides, consts)
-                #     super().__execute__()
                 targets = (overrides, consts)
             
             from clu.app import testing0_overridden_consts as overridden
@@ -250,8 +247,9 @@ class TestImporting(object):
         assert m.__name__ == 'clu.app.clu'
         assert nameof(m) == consts.APPNAME
         
-        assert len(Registry.monomers) > 0
-        assert len(m.monomers) == 0
+        assert len(Registry.monomers) > 0   # full registry dict-of-dicts
+        assert len(Module.monomers) == 0    # dummy class property, empty dict
+        assert not hasattr(m, 'monomers')   # no instance property available
     
     def test_derived_modules(self):
         from clu.importing import ModuleBase, Module
@@ -296,26 +294,172 @@ class TestImporting(object):
         assert not d.yodogg()
         assert O.yodogg() == 'Yo Dogg'
     
-    def test_finder_and_loader_methods(self):
+    def test_polymertype_cache_methods(self, consts):
         from clu.importing import Finder, Loader, Module
+        from clu.importing import ModuleBase, PolymerType
+        from clu.importing import initialize_new_types
+        from clu.typology import iterlen
+        from clu.exporting import thismodule
+        
+        polymers = PolymerType()
+        
+        polymers.store(consts.APPNAME,    loader=Loader,
+                                          finder=Finder,
+                   **{ consts.DEFAULT_APPSPACE : Module }) # key: appspace,
+                                                           # value: module class
+        
+        # Check that lengths are 1:
+        assert len(polymers) == 1
+        assert len(polymers[consts.APPNAME].modules) == 1
+        assert iterlen(polymers.all_appspaces()) == 1
+        
+        assert polymers.get_finder(consts.APPNAME) is Finder
+        assert polymers.get_loader(consts.APPNAME) is Loader
+        
+        new_appspace = 'new'
+        
+        NewModule, NewFinder, NewLoader = initialize_new_types(consts.APPNAME,
+                                                               appspace=new_appspace,
+                                                               module=thismodule())
+        
+        # polymers.store(consts.APPNAME, loader=NewLoader,
+        #                                finder=NewFinder,
+        #                    **{ new_appspace : NewModule })
+        polymers.add_module(NewModule,
+                            appname=consts.APPNAME,
+                            appspace=new_appspace)
+        
+        # Check that some lengths have increaced:
+        assert len(polymers) == 1
+        assert len(polymers[consts.APPNAME].modules) == 2
+        assert iterlen(polymers.all_appspaces()) == 2
+        
+        perapp = polymers[consts.APPNAME]
+        
+        assert perapp.appname == consts.APPNAME
+        assert iterlen(perapp.appspaces()) == 2
+        assert perapp.loader is Loader
+        assert perapp.finder is Finder
+        assert perapp.modules[consts.DEFAULT_APPSPACE] is Module
+        assert perapp.modules[new_appspace] is NewModule
+        assert all(issubclass(m, ModuleBase) for m in perapp.modules.values())
+    
+    def test_installed_appnames(self, consts):
+        from clu.importing import installed_appnames
+        assert consts.APPNAME in installed_appnames()
+    
+    @pytest.mark.TODO
+    def test_curiously_recurring_modulebase_subtypes(self, consts):
+        # TODO: add method-inheritance resolution checks
+        from clu.importing import Finder, Loader, Module
+        from clu.importing import ModuleBase
+        from clu.importing import initialize_module
+        modulename = "tests.test_importing"
+        
+        class TemplatedType(ModuleBase):
+            __module__ = modulename
+        
+        AuxModule = initialize_module(consts.APPNAME,
+                                      appspace='aux',
+                                      module=modulename)
+        
+        class application_t(TemplatedType[Module]):
+            __module__ = modulename
+        
+        class auxilliary_t(TemplatedType[AuxModule]):
+            __module__ = modulename
+        
+        from clu.app import application_t as application
+        from clu.aux import auxilliary_t as auxilliary
+        
+        assert isinstance(application, TemplatedType)
+        assert isinstance(auxilliary,  TemplatedType)
+        assert isinstance(application, Module)
+        assert isinstance(auxilliary,  AuxModule)
+        
+        assert application.appname  == consts.APPNAME
+        assert auxilliary.appname   == consts.APPNAME
+        assert application.appspace == consts.DEFAULT_APPSPACE
+        assert auxilliary.appspace  == 'aux'
+        
+        from clu.predicates import attr_across, pyattr_across
+        
+        assert pyattr_across('module', Module, Finder, Loader) == ('clu.importing', 'clu.importing', 'clu.importing')
+        
+        # names = pyattr_across('module', application,
+        #                                 application_t,
+        #                                 auxilliary,
+        #                                 auxilliary_t)
+        
+        # assert len(names) == 4
+        
+        names = attr_across('__module__', application,
+                                          application_t,
+                                          auxilliary,
+                                          auxilliary_t)
+        
+        assert names == (modulename,) * 4
+        assert len(frozenset(names)) == 1
+        assert set(names).pop() == modulename
+        
+        assert application.__module__ == modulename
+        assert application_t.__module__ == modulename
+        assert auxilliary.__module__ == modulename
+        assert auxilliary_t.__module__ == modulename
+    
+    def test_finder_and_loader_methods(self):
+        from clu.importing import Registry, ModuleSpec
+        from clu.importing import Finder, Loader, Module
+        import importlib.machinery
         import sys
         
+        # FinderBase subclasses created with a call to
+        # “initialize_types(…)” will furnish references
+        # to the LoaderBase subclass of the same appname,
+        # and are registered with “sys.meta_path”:
+        assert Finder.__loader__ is Loader
+        assert type(Finder.loader) is Loader
+        assert Finder in sys.meta_path
+        
+        # Finder instances are practically the same
+        # as specific FinderBase subclasses, in terms
+        # of their utility – their properties and methods
+        # are largely identical:
         finder = Finder()
+        assert finder.__loader__ is Loader
         assert type(finder.loader) is Loader
         assert type(finder) in sys.meta_path
         
         class findme(Module):
             pass
         
+        # “finder.find_spec(…)” returns our bespoke subclass
+        # of importlib.machinery.ModuleSpec:
         spec = finder.find_spec('clu.app.findme', [])
         assert spec.name == 'clu.app.findme'
+        assert type(spec) is ModuleSpec
+        assert isinstance(spec,       importlib.machinery.ModuleSpec)
+        assert issubclass(ModuleSpec, importlib.machinery.ModuleSpec)
         
+        # Calling “loader.create_module(spec)” followed by
+        # “loader.exec_module(module)” follows the codepath
+        # used when importing via an import statement:
         module = finder.loader.create_module(spec)
+        finder.loader.exec_module(module)
+        assert getattr(module, '_executed', False)
         assert type(module) is findme
         assert repr(module) == "<class-module ‘clu.app.findme’>"
         
-        # …calling “module_repr(…)” directly doesn’t know about the location:
-        # assert finder.loader.module_repr(module) == "<class-module ‘clu.app.findme’>"
+        # Registry lookup returns the Module subclass, as written:
+        registered = Registry.for_qualname('clu.app.findme')
+        assert registered == findme
+        assert issubclass(findme, Module)
+        assert issubclass(registered, Module)
+        
+        # Importing the subclass instances the class-module:
+        from clu.app import findme as found
+        assert isinstance(found, findme)
+        assert isinstance(found, Module)
     
     def test_derived_import(self):
         from clu.importing import Module, Registry, DO_NOT_INCLUDE

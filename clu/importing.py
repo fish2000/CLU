@@ -180,9 +180,9 @@ class Registry(abc.ABC, metaclass=MetaRegistry):
         super(Registry, cls).__init_subclass__(**kwargs)
         
         # We were called with a class for which the values
-        # of appname, appspace, and __name__ have been assigned:
+        # of appname, appspace, and __name__ have been assigned –
+        # let’s register this subclass if the names are good:
         if cls.appname and cls.appspace and nameof(cls):
-            # Register this subclass if the names are good:
             if cls.qualname not in Registry.monomers[cls.appname]:
                 Registry.monomers[cls.appname][cls.qualname] = cls
     
@@ -563,6 +563,11 @@ class MetaModule(MetaRegistry):
         return dotpath_join(cls.prefix,
                             cls.name)
     
+    @property
+    def monomers(cls):
+        # Block access to the registry’s underlying data:
+        return {}
+    
     @classmethod
     def __prepare__(metacls, name, bases, **kwargs):
         """ Prepare the class-module namespace with an injected
@@ -701,9 +706,6 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
     appspace = None
     __loader__ = None
     
-    # Block access to the registry’s underlying data:
-    monomers = clu.abstract.ValueDescriptor({})
-    
     @classmethod
     def __init_subclass__(cls, appname=None, appspace=None, **kwargs):
         """ Properly set the “appname” and “appspace” class attributes
@@ -756,7 +758,7 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
     
     @property
     def name(self):
-        return nameof(self)
+        return type(self).name
     
     @property
     def prefix(self):
@@ -1290,8 +1292,6 @@ def test():
         assert o
         assert d
         assert O
-        
-        # from clu.app import DerivedModule as dd
     
     @inline
     def test_three():
@@ -1308,13 +1308,8 @@ def test():
         m = Module(consts.APPNAME)
         
         assert len(Registry.monomers) > 0
-        
-        try:
-            assert len(m.monomers) == 0
-        except AttributeError:
-            pass
-        else:
-            pass
+        assert len(Module.monomers) == 0
+        assert not hasattr(m, 'monomers')
         
         assert m.appname == consts.APPNAME
         assert m.appspace == consts.DEFAULT_APPSPACE
@@ -1352,8 +1347,6 @@ def test():
         # the test function runs:
         registered = Registry.for_qualname('clu.app.FindMe')
         assert registered == FindMe
-        # print("registered:", registered, hex(id(registered)))
-        # print("FindMe:", FindMe, hex(id(FindMe)))
     
     @inline
     def test_four():
@@ -1392,9 +1385,6 @@ def test():
         print()
         
         assert type(derived.exporter).__name__ == 'Exporter'
-        
-        # Registry.unregister(derived.appname,
-        #                     derived.qualname)
     
     @inline
     def test_five():

@@ -10,10 +10,10 @@ rebuild: clean-build-artifacts cython
 dist: twine-upload
 
 upload: clean-build-artifacts bump dist
-	git push
+	git pushex
 
 bigupload: clean-build-artifacts bigbump dist
-	git push
+	git pushex
 
 clean-pyc:
 	find $(PROJECT_BASE) -name \*.pyc -print -delete

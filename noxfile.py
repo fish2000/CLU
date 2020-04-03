@@ -82,6 +82,4 @@ def codecov(session):
                                               'tests/')
     
     # Run ‘codecov’ to upload the results to codecov.io:
-    session.run('codecov', '--required',
-                           '--file',
-                           'coverage.xml')
+    session.run('codecov', '--required')

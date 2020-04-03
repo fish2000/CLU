@@ -784,6 +784,11 @@ def test():
         print_ansi_centered('I heard you like non-ANSI-formatted text')
     
     @inline
+    def test_one_point_five():
+        old_ansidoc(Exporter)
+        old_ansidoc(product)
+    
+    @inline
     def test_two():
         ansidoc(Exporter)
         ansidoc(product)

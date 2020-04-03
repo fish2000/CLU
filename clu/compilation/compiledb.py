@@ -2,30 +2,36 @@
 from __future__ import print_function
 
 import abc
+# import clu.abstract
 import collections.abc
 import contextlib
 import json
-import os
+import sys, os
 
-from abc import abstractmethod as abstract
+abstract = abc.abstractmethod
 
 from clu.constants.consts import ENCODING
 from clu.constants.exceptions import CDBError
+from clu.fs.abc import BaseFSName
 from clu.fs.filesystem import TemporaryName, Directory, rm_rf
 from clu.fs.misc import u8str
-from clu.predicates import tuplize
-from clu.repr import stringify
+# from clu.predicates import tuplize
+from clu.repr import strfields
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 @export
-class CDBSubBase(abc.ABC, metaclass=abc.ABCMeta):
+class CDBSubBase(BaseFSName, collections.abc.Sequence):
     
     @abstract
-    def push(self, filepth, command, directory=None,
-                                     destination=None):
+    def push(self, filepath, command, directory=None,
+                                      destination=None):
+        ...
+    
+    @abstract
+    def __iter__(self):
         ...
     
     @abstract
@@ -36,12 +42,12 @@ class CDBSubBase(abc.ABC, metaclass=abc.ABCMeta):
     def __getitem__(self, key):
         ...
     
-    @abstract
-    def to_string(self):
-        ...
+    # @abstract
+    # def to_string(self):
+    #     ...
     
     @abstract
-    def __repr__(self):
+    def inner_repr(self):
         ...
     
     @abstract
@@ -57,10 +63,9 @@ class CDBSubBase(abc.ABC, metaclass=abc.ABCMeta):
         ...
 
 @export
-class CDBBase(CDBSubBase, collections.abc.Sequence,
-                          collections.abc.Sized):
+class CDBBase(CDBSubBase):
     
-    fields = tuplize('length')
+    fields = tuple()
     
     def __init__(self):
         self.clear()
@@ -82,22 +87,15 @@ class CDBBase(CDBSubBase, collections.abc.Sequence,
             })
         self.entries[source] = entry
     
-    def rollout(self):
-        out = []
-        for k, v in self.entries.items():
-            out.append(v)
-        return out
-    
-    @property
-    def length(self):
-        return len(self.entries)
-    
     def clear(self):
         self.entries = {} # type: dict
         return self
     
+    def __iter__(self):
+        yield from self.entries.values()
+    
     def __len__(self):
-        return self.length
+        return len(self.entries)
     
     def __getitem__(self, key):
         try:
@@ -110,11 +108,15 @@ class CDBBase(CDBSubBase, collections.abc.Sequence,
                         return entry
         raise KeyError(f"not found: {key}")
     
-    def to_string(self):
-        return stringify(self, type(self).fields)
+    def inner_repr(self):
+        return strfields(self, type(self).fields)
     
-    def __repr__(self):
-        return stringify(self, type(self).fields)
+    def rollout(self):
+        # out = []
+        # for k, v in self.entries.items():
+        #     out.append(v)
+        # return out
+        return list(self)
     
     def __str__(self):
         return u8str(json.dumps(self.rollout()))
@@ -128,20 +130,18 @@ class CDBBase(CDBSubBase, collections.abc.Sequence,
 @export
 class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
     
-    fields = ('filename', 'length', 'exists')
-    filename = f'compilation_database.json'
+    fields = ('filename', 'name', 'exists')
+    filename = 'compilation_database.json'
     splitname = os.path.splitext(filename)
     
     @classmethod
     def in_directory(cls, directory):
-        return cls.filename in Directory(pth=directory)
+        return cls.filename in Directory(directory)
     
     def __init__(self, directory=None):
-        super(CDBJsonFile, self).__init__()
-        if not directory:
-            directory = os.getcwd()
-        self.directory = Directory(pth=directory)
-        self.target = self.directory.subpath(self.filename)
+        super().__init__()
+        self.contextdir = Directory(directory)
+        self.target = self.contextdir.subpath(self.filename)
         self.read_from = None
         self.written_to = None
     
@@ -153,14 +153,14 @@ class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
     def exists(self):
         return os.path.isfile(self.name)
     
-    def read(self, pth=None):
-        readpth = pth or self.target
-        if not readpth:
+    def read(self, path=None):
+        readpath = path or self.target
+        if not readpath:
             raise CDBError("no path value from which to read")
-        readpth = os.fspath(readpth)
-        if not os.path.exists(readpth):
+        readpath = os.fspath(readpath)
+        if not os.path.exists(readpath):
             raise CDBError("no file from which to read")
-        with open(readpth, mode="r") as handle:
+        with open(readpath, mode="r") as handle:
             try:
                 cdblist = json.load(handle)
             except json.JSONDecodeError as json_error:
@@ -169,28 +169,28 @@ class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
                 for cdbentry in cdblist:
                     key = cdbentry.get('file')
                     self.entries[key] = dict(cdbentry)
-        self.read_from = readpth
+        self.read_from = readpath
         return self
     
-    def write(self, pth=None):
+    def write(self, path=None):
         with TemporaryName(prefix=self.splitname[0],
                            suffix=self.splitname[1][1:]) as tn:
             with open(tn.name, mode='w') as handle:
                 handle.write(str(self))
-            if pth is None:
+            if path is None:
                 if self.exists:
                     rm_rf(self.name)
                 tn.copy(self.name)
                 self.written_to = self.name
             else:
-                writepth = os.fspath(pth)
-                if os.path.isdir(writepth):
+                writepath = os.fspath(path)
+                if os.path.isdir(writepath):
                     raise CDBError("can't overwrite a directory")
-                if os.path.isfile(writepth) or \
-                   os.path.islink(writepth):
-                    rm_rf(writepth)
-                tn.copy(writepth)
-                self.written_to = writepth
+                if os.path.isfile(writepath) or \
+                   os.path.islink(writepath):
+                    rm_rf(writepath)
+                tn.copy(writepath)
+                self.written_to = writepath
         return self
     
     def __enter__(self):
@@ -207,3 +207,25 @@ export(CDBError)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
+
+def test():
+    
+    from clu.testing.utils import inline
+    
+    @inline
+    def test_one():
+        cdb = CDBJsonFile()
+        assert cdb
+    
+    #@inline
+    def test_two():
+        pass # INSERT TESTING CODE HERE, pt. II
+    
+    #@inline.diagnostic
+    def show_me_some_values():
+        pass # INSERT DIAGNOSTIC CODE HERE
+    
+    return inline.test(100)
+
+if __name__ == '__main__':
+    sys.exit(test())

@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-echo $PROJECT_BASE
+pushd $PROJECT_BASE
+    
+    nox -s codecov
+    
+popd

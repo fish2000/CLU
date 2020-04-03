@@ -69,7 +69,6 @@ main() {
         fi
         
         if (( $debug )); then
-            # echo "Looking for ${hook_type} scripts to run… found ${number_of_symlinks}"
             echo "Running ${number_of_symlinks} scripts for hook: ${hook_type}"
         fi
         
@@ -82,7 +81,6 @@ main() {
                 if (( $debug )); then
                     echo "running hook: ${scriptname}"
                 fi
-                
                 
                 if (( $silent )); then
                     eval $file &> /dev/null

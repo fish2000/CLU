@@ -1,15 +1,6 @@
 #!/usr/bin/env bash
 
-# echo "YO DOGG!"
-# exit
-
-# if [ -z "${1}" ]; then
-#      "Usage: git pushex <remote-name>"
-#      return 1
-# fi;
-
 # Configuration / Settings / What have you:
-# upstream="${1:-'origin'}"
 if [ "$1" ]; then
     upstream="${1:-'origin'}"
 else
@@ -34,7 +25,6 @@ else
 fi
 
 # Run the post-push hook, if available:
-# test $? -eq 0 && test -x "${postpush}" && exec "${postpush}" "${branch}" "$@"
 if (( $? == 0 )); then
     if [[ -x $postpush ]]; then
         exec "${postpush}" "${branch}" "$@"

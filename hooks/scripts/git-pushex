@@ -7,10 +7,8 @@ else
     upstream=""
 fi
 
-gitdir="$(git rev-parse --git-dir)"
-branch="$(git rev-parse --symbolic --abbrev-ref $(git symbolic-ref HEAD))"
-
 # Hook script locations:
+gitdir="$(git rev-parse --git-dir)"
 prepush="${gitdir}/hooks/pre-push"
 postpush="${gitdir}/hooks/post-push"
 
@@ -19,6 +17,7 @@ postpush="${gitdir}/hooks/post-push"
 
 # Execute the push operation:
 if [[ $upstream != "" ]]; then
+    branch="$(git rev-parse --symbolic --abbrev-ref $(git symbolic-ref HEAD))"
     git push "${upstream}" "${branch}"
 else
     git push --all

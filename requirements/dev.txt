@@ -22,8 +22,6 @@ ptpython>=3.0.0
 python-dateutil>=2.8.0
 pythonpy>=0.4.10
 pytz>=2019.3
-readme-renderer>=24.0
-readme-renderer[md]
 requests>=2.20.0
 requests-toolbelt>=0.9.0
 setproctitle>=1.1.0

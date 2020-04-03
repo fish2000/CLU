@@ -3,21 +3,11 @@ source = clu
 
 [run]
 omit =
-    */__init__.py
     clu/__version__.py
-    clu/constants/data.py
-    clu/constants/exceptions.py
-    clu/constants/polyfills.py
-    clu/csv.py
-    clu/repl/banners.py
-    clu/fs/sourcetree.py
     clu/scripts/forkumask.py
-    clu/scripts/show-consts.py
-    clu/scripts/show-modules.py
     clu/scripts/xdg-runtime.py
     clu/testing/hook.py
     clu/testing/obsolete.py
-    clu/testing/pytest.py
 
 dynamic_context = test_function
 
@@ -28,21 +18,11 @@ parallel = False
 
 [report]
 omit =
-    */__init__.py
     clu/__version__.py
-    clu/constants/data.py
-    clu/constants/exceptions.py
-    clu/constants/polyfills.py
-    clu/csv.py
-    clu/repl/banners.py
-    clu/fs/sourcetree.py
     clu/scripts/forkumask.py
-    clu/scripts/show-consts.py
-    clu/scripts/show-modules.py
     clu/scripts/xdg-runtime.py
     clu/testing/hook.py
     clu/testing/obsolete.py
-    clu/testing/pytest.py
 
 show_missing = False
 ignore_errors = True
@@ -54,9 +34,8 @@ exclude_lines =
     if DEBUG
     if verbose
     if __name__ == .__main__.:
-    def inner_repr
     def __reduce__
-    except TypeError
+    except TypeError:
     raise NotImplementedError
 
 [html]

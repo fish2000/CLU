@@ -1348,6 +1348,9 @@ def test():
         spec1 = finder.find_spec('clu.app.FindMe', [])
         assert spec1.name == 'clu.app.FindMe'
         
+        # If “FindMe” is defined inline, this next assert fails –
+        # not the first time, but one of the 2..100 other times
+        # the test function runs:
         registered = Registry.for_qualname('clu.app.FindMe')
         assert registered == FindMe
         # print("registered:", registered, hex(id(registered)))

@@ -39,8 +39,8 @@ def checkmodule(session, module):
 @nox.session
 def pytest(session):
     """ Run CLU’s entire unit-test suite with `pytest` """
-    session.env['MACOSX_DEPLOYMENT_TARGET']         = '10.14'
-    session.env['PYTEST_DISABLE_PLUGIN_AUTOLOAD']   = '1'
+    session.env['MACOSX_DEPLOYMENT_TARGET']       = '10.14'
+    session.env['PYTEST_DISABLE_PLUGIN_AUTOLOAD'] = '1'
     session.install("-r", "requirements/install.txt")
     session.install("-r", "requirements/nox/repl.txt")
     session.run('pytest')
@@ -63,23 +63,51 @@ def inline(session, module):
 @nox.session
 def codecov(session):
     """ Run `codecov`, updating CLU’s statistics on codecov.io """
-    session.env['MACOSX_DEPLOYMENT_TARGET']         = '10.14'
-    session.env['PYTEST_DISABLE_PLUGIN_AUTOLOAD']   = '1'
+    from clu.fs.filesystem import TemporaryName
+    coveragefile = TemporaryName(prefix='coverage-',
+                                 suffix='bin',
+                                 randomized=True)
+    
+    session.env['MACOSX_DEPLOYMENT_TARGET']       = '10.14'
+    session.env['PYTEST_DISABLE_PLUGIN_AUTOLOAD'] = '1'
+    session.env['COVERAGE_FILE'] = coveragefile.do_not_destroy()
     session.install("-r", "requirements/install.txt")
     session.install("-r", "requirements/nox/repl.txt")
     session.install("-r", "requirements/nox/codecov.txt")
     
+    # Erase existing data:
+    session.run('coverage', 'erase')
+    
+    # Run command modules:
+    for modulename in ('clu.constants',
+                       'clu',
+                       'clu.version',
+                       'clu.scripts.repl'):
+        session.run('coverage',
+                    'run', '--append', '-m', modulename,
+                    silent=True)
+    
     # Run each inline-test function:
     from clu import all
     for modulename in all.inline_tests():
-        session.run('coverage', 'run', '--append', '-m', modulename)
+        session.run('coverage',
+                    'run', '--append', '-m', modulename,
+                     silent=True)
     
+    # '--cov-report=xml:coverage.xml',
     # Run “pytest” with the “pytest-cov” plugin:
     session.run('pytest', '-p', 'pytest_cov', '--cov=clu',
                                               '--cov-append',
-                                              '--cov-report=xml:coverage.xml',
                                               '--no-cov-on-fail',
                                               'tests/')
     
+    # Combine and report:
+    session.run('coverage', 'xml', '-o', 'coverage.xml')
+    
     # Run ‘codecov’ to upload the results to codecov.io:
+    coveragefile.copy('.coverage')
     session.run('codecov', '--required')
+    
+    # Destroy temporary coverage data files:
+    coveragefile.close()
+    session.run('rm', '.coverage')

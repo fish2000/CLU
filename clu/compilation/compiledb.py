@@ -10,7 +10,7 @@ import sys, os
 
 abstract = abc.abstractmethod
 
-from clu.constants.consts import ENCODING
+from clu.constants import consts
 from clu.constants.exceptions import CDBError
 from clu.fs.abc import BaseFSName
 from clu.fs.filesystem import TemporaryName, Directory, rm_rf
@@ -42,12 +42,13 @@ class CDBSubBase(BaseFSName, collections.abc.Sequence):
     def __getitem__(self, key):
         ...
     
-    # @abstract
-    # def to_string(self):
-    #     ...
-    
     @abstract
     def inner_repr(self):
+        ...
+    
+    @abstract
+    def to_json(self):
+        """ Dump the contents of the CDB as a JSON UTF-8 string. """
         ...
     
     @abstract
@@ -57,39 +58,16 @@ class CDBSubBase(BaseFSName, collections.abc.Sequence):
     @abstract
     def __bytes__(self):
         ...
-    
-    @abstract
-    def __bool__(self):
-        ...
 
 @export
 class CDBBase(CDBSubBase):
     
-    fields = tuple()
-    
     def __init__(self):
+        """ Initialize the CDB base type.
+            
+            The CDBBase ancestor type takes no constructor arguments.
+        """
         self.clear()
-    
-    def push(self, source, command, directory=None,
-                                    destination=None):
-        if not source:
-            raise CDBError("a file source is required per entry")
-        
-        entry = {
-            'directory'     : os.fspath(directory or os.getcwd()),
-            'command'       : u8str(command),
-            'file'          : source
-        }
-        
-        if destination:
-            entry.update({
-                'output'    : destination
-            })
-        self.entries[source] = entry
-    
-    def clear(self):
-        self.entries = {} # type: dict
-        return self
     
     def __iter__(self):
         yield from self.entries.values()
@@ -106,42 +84,99 @@ class CDBBase(CDBSubBase):
                 for entry in self.entries:
                     if entry['file'] == skey:
                         return entry
-        raise KeyError(f"not found: {key}")
+        raise KeyError(key)
+    
+    def push(self, source, command, directory=None,
+                                    destination=None):
+        """ Add an entry to the CDB. """
+        if not source:
+            raise CDBError("a file source is required per entry")
+        
+        entry = {
+            'directory'     : os.fspath(directory or os.getcwd()),
+            'command'       : u8str(command),
+            'file'          : source
+        }
+        
+        if destination:
+            entry.update({
+                'output'    : destination
+            })
+        self.entries[source] = entry
+    
+    def clear(self):
+        """ Reset the CDB’s “entries” mapping to a fresh empty dict. """
+        self.entries = {}
+        return self
+    
+    def rollout(self):
+        """ Call to “roll” the CDB values out into a new list. """
+        return list(self)
     
     def inner_repr(self):
         return strfields(self, type(self).fields)
     
-    def rollout(self):
-        # out = []
-        # for k, v in self.entries.items():
-        #     out.append(v)
-        # return out
-        return list(self)
+    def to_json(self):
+        return json.dumps(self.rollout())
     
     def __str__(self):
-        return u8str(json.dumps(self.rollout()))
+        return self.to_json()
     
     def __bytes__(self):
-        return bytes(json.dumps(self.rollout()), encoding=ENCODING)
+        return bytes(self.to_json(), encoding=consts.ENCODING)
     
     def __bool__(self):
-        return True
+        # N.B. Can’t use BaseFSName.__bool__(…) as it will
+        # always be Falsey for any instances that haven’t
+        # yet been written to disk:
+        return bool(self.entries)
 
 @export
 class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
     
-    fields = ('filename', 'name', 'exists')
+    fields = ('filename',
+              'contextdir',
+              'target') # ‘name’ and ‘exists’ come from BaseFSName
+    
     filename = 'compilation_database.json'
     splitname = os.path.splitext(filename)
     
     @classmethod
     def in_directory(cls, directory):
+        """ The compilation database filename is a constant –
+            use this function to check if a file by that name
+            exists in a given directory (which may be passed
+            as string data, bytes data, or an instance of the
+            “os.PathLike” ABC).
+            
+            Like so:
+                
+                >>> builddir = pathlib.Path('/var/tmp/build')
+                >>> if CDBJsonFile.in_directory(builddir):
+                >>>     # …do something!
+        """
         return cls.filename in Directory(directory)
     
-    def __init__(self, directory=None):
+    def __init__(self, directory=None, hidden=False):
+        """ Initialize a JSON-backed compilation database (CDB).
+            
+            Pass a path-like instance as “directory” to specify where
+            on the filesystem the CDB should be created. The default
+            directory is whatever the current working directory happens
+            to be when you initialize the CDB instance.
+            
+            The filename of a JSON compilation database is hardcoded
+            to “compilation_database.json” – this is part of the LLVM
+            specification for such things.  Optionally, you may specify
+            a “hidden=True” argument in order to prefix this filename
+            with a dot, thus hiding it as per the long-standing UNIX-ish
+            custom. Doing so may be somehow “non-conformant”, though;
+            you have been warned.
+        """
         super().__init__()
         self.contextdir = Directory(directory)
-        self.target = self.contextdir.subpath(self.filename)
+        filename = hidden and f"{consts.QUALIFIER}{self.filename}" or self.filename
+        self.target = self.contextdir.subpath(filename)
         self.read_from = None
         self.written_to = None
     
@@ -155,16 +190,19 @@ class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
     
     def read(self, path=None):
         readpath = path or self.target
+        
         if not readpath:
             raise CDBError("no path value from which to read")
+        
         readpath = os.fspath(readpath)
         if not os.path.exists(readpath):
             raise CDBError("no file from which to read")
+        
         with open(readpath, mode="r") as handle:
             try:
                 cdblist = json.load(handle)
             except json.JSONDecodeError as json_error:
-                raise CDBError(str(json_error))
+                raise CDBError("JSON decoder error") from json_error
             else:
                 for cdbentry in cdblist:
                     key = cdbentry.get('file')
@@ -176,7 +214,7 @@ class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
         with TemporaryName(prefix=self.splitname[0],
                            suffix=self.splitname[1][1:]) as tn:
             with open(tn.name, mode='w') as handle:
-                handle.write(str(self))
+                handle.write(self.to_json())
             if path is None:
                 if self.exists:
                     rm_rf(self.name)
@@ -194,7 +232,7 @@ class CDBJsonFile(CDBBase, contextlib.AbstractContextManager):
         return self
     
     def __enter__(self):
-        if os.path.isfile(self.target):
+        if self.exists:
             self.read()
         return self
     
@@ -214,7 +252,18 @@ def test():
     
     @inline
     def test_one():
-        cdb = CDBJsonFile()
+        from clu.fs.filesystem import td
+        tmp = td()
+        
+        cdb = CDBJsonFile(directory=tmp)
+        assert os.path.samefile(tmp, cdb.contextdir)
+        assert not cdb # no entries yet
+        assert not os.path.isfile(cdb.name)
+        assert not cdb.exists
+        
+        print("CDB file path:", cdb.name)
+        
+        cdb.push('yo_dogg.cc', 'clang++ -o yo_dogg.o -pipe -Wall -pedantic')
         assert cdb
     
     #@inline

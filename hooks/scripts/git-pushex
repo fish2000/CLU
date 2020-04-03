@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# echo "YO DOGG!"
+# exit
+
+# if [ -z "${1}" ]; then
+#      "Usage: git pushex <remote-name>"
+#      return 1
+# fi;
+
+# Configuration / Settings / What have you:
+# upstream="${1:-'origin'}"
+if [ "$1" ]; then
+    upstream="${1:-'origin'}"
+else
+    upstream=""
+fi
+
+gitdir="$(git rev-parse --git-dir)"
+branch="$(git rev-parse --symbolic --abbrev-ref $(git symbolic-ref HEAD))"
+
+# Hook script locations:
+prepush="${gitdir}/hooks/pre-push"
+postpush="${gitdir}/hooks/post-push"
+
+# Run the pre-push hook, if available:
+# test -x "${prepush}" && exec "${prepush}" "${branch}" "$@"
+
+# Execute the push operation:
+if [[ $upstream != "" ]]; then
+    git push "${upstream}" "${branch}"
+else
+    git push --all
+fi
+
+# Run the post-push hook, if available:
+# test $? -eq 0 && test -x "${postpush}" && exec "${postpush}" "${branch}" "$@"
+if (( $? == 0 )); then
+    if [[ -x $postpush ]]; then
+        exec "${postpush}" "${branch}" "$@"
+    fi
+fi

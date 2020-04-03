@@ -2,15 +2,16 @@
 
 # Autohook
 # A very, very small Git hook manager with focus on automation
+# 
 # Author:   Nik Kantar <http://nkantar.com>
-# Version:  2.1.1
+# Version:  2.1.2
 # Website:  https://github.com/nkantar/Autohook
-
+# 
+# Addition of “post-push” hook by Alexander Bôhn <http://github.com/fish2000>
 
 echo() {
     builtin echo "[Autohook] $@";
 }
-
 
 install() {
     hook_types=(
@@ -20,6 +21,7 @@ install() {
         "post-checkout"
         "post-commit"
         "post-merge"
+        "post-push"
         "post-receive"
         "post-rewrite"
         "post-update"
@@ -32,65 +34,79 @@ install() {
         "prepare-commit-msg"
         "update"
     )
-
+    
     repo_root=$(git rev-parse --show-toplevel)
-    hooks_dir="$repo_root/.git/hooks"
+    hooks_dir="${repo_root}/.git/hooks"
     autohook_linktarget="../../hooks/autohook.sh"
-    for hook_type in "${hook_types[@]}"
-    do
-        hook_symlink="$hooks_dir/$hook_type"
+    
+    for hook_type in "${hook_types[@]}"; do
+        hook_symlink="${hooks_dir}/${hook_type}"
         ln -s $autohook_linktarget $hook_symlink
     done
 }
 
-
 main() {
     calling_file=$(basename $0)
-
-    if [[ $calling_file == "autohook.sh" ]]
-    then
+    debug=${AUTOHOOK_DEBUG:-0}
+    silent=${AUTOHOOK_SILENT:-0}
+    
+    if [[ $calling_file == "autohook.sh" ]]; then
         command=$1
-        if [[ $command == "install" ]]
-        then
+        if [[ $command == "install" ]]; then
             install
         fi
     else
         repo_root=$(git rev-parse --show-toplevel)
         hook_type=$calling_file
-        symlinks_dir="$repo_root/hooks/$hook_type"
-        files=("$symlinks_dir"/*)
+        symlinks_dir="${repo_root}/hooks/${hook_type}"
+        files=("${symlinks_dir}"/*)
         number_of_symlinks="${#files[@]}"
-        if [[ $number_of_symlinks == 1 ]]
-        then
-            if [[ "$(basename ${files[0]})" == "*" ]]
-            then
+        
+        if [[ $number_of_symlinks == 1 ]]; then
+            if [[ "$(basename ${files[0]})" == "*" ]]; then
                 number_of_symlinks=0
             fi
         fi
-        echo "Looking for $hook_type scripts to run...found $number_of_symlinks!"
-        if [[ $number_of_symlinks -gt 0 ]]
-        then
+        
+        if (( $debug )); then
+            # echo "Looking for ${hook_type} scripts to run… found ${number_of_symlinks}"
+            echo "Running ${number_of_symlinks} scripts for hook: ${hook_type}"
+        fi
+        
+        if [[ $number_of_symlinks -gt 0 ]]; then
             hook_exit_code=0
-            for file in "${files[@]}"
-            do
+            
+            for file in "${files[@]}"; do
                 scriptname=$(basename $file)
-                echo "BEGIN $scriptname"
-                eval $file &> /dev/null
-                script_exit_code=$?
-                if [[ $script_exit_code != 0 ]]
-                then
-                  hook_exit_code=$script_exit_code
+                
+                if (( $debug )); then
+                    echo "running hook: ${scriptname}"
                 fi
-                echo "FINISH $scriptname"
+                
+                
+                if (( $silent )); then
+                    eval $file &> /dev/null
+                else
+                    eval $file
+                fi
+                
+                script_exit_code=$?
+                if [[ $script_exit_code != 0 ]]; then
+                    hook_exit_code=$script_exit_code
+                fi
+                
+                if (( $debug )); then
+                    echo "hook run complete: ${scriptname}"
+                fi
             done
-            if [[ $hook_exit_code != 0 ]]
-            then
-              echo "A $hook_type script yielded negative exit code $hook_exit_code"
+            
+            if [[ $hook_exit_code != 0 ]]; then
+              echo "A ${hook_type} script yielded negative exit code ${hook_exit_code}"
               exit $hook_exit_code
             fi
+            
         fi
     fi
 }
-
 
 main "$@"

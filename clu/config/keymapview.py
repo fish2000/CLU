@@ -90,7 +90,7 @@ class KeyMapKeysView(KeyMapViewBase,
     """ A KeyMap key view. """
     
     @classmethod
-    def _from_iterable(cls, iterable):
+    def _from_iterable(cls, iterable): # pragma: no cover
         # Required by the “collections.abc.Set” API:
         return set(iterable)
     
@@ -110,7 +110,7 @@ class KeyMapItemsView(KeyMapViewBase,
     """ A KeyMap items view. """
     
     @classmethod
-    def _from_iterable(cls, iterable):
+    def _from_iterable(cls, iterable): # pragma: no cover
         # Required by the “collections.abc.Set” API:
         return set(iterable)
     
@@ -172,7 +172,7 @@ class NamespaceWalkerKeysView(NamespaceWalkerViewBase,
     """ A keys view specifically tailored to NamespaceWalker types. """
     
     @classmethod
-    def _from_iterable(cls, iterable):
+    def _from_iterable(cls, iterable): # pragma: no cover
         # Required by the “collections.abc.Set” API:
         return set(iterable)
     
@@ -196,7 +196,7 @@ class NamespaceWalkerItemsView(NamespaceWalkerViewBase,
     """ An items view specifically tailored to NamespaceWalker types. """
     
     @classmethod
-    def _from_iterable(cls, iterable):
+    def _from_iterable(cls, iterable): # pragma: no cover
         # Required by the “collections.abc.Set” API:
         return set(iterable)
     

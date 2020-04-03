@@ -9,7 +9,8 @@ import sys
 
 from clu.config.abc import FrozenKeyMap, KeyMap
 from clu.naming import qualified_name
-from clu.predicates import typeof, tuplize
+from clu.predicates import typeof, none_function
+from clu.typespace import types
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -31,28 +32,57 @@ class KeyMapView(FrozenKeyMap, clu.abstract.ReprWrapper,
                                clu.abstract.Cloneable,
                                contextlib.AbstractContextManager):
     
-    __slots__ = tuplize('referent')
+    __slots__ = 'referent'
     
     @classmethod
     def get_basetype(cls):
         return getattr(cls, 'basetype', FrozenKeyMap)
     
+    @classmethod
+    def check_basetype(cls, instance):
+        return isinstance(instance, cls.get_basetype())
+    
     def __new__(cls, keymap):
         instance = super().__new__(cls)
-        instance.referent = lambda: None
+        instance.referent = none_function
         return instance
     
-    def __init__(self, keymap):
-        if not keymap:
+    def __init__(self, operand):
+        """ Initialize a new KeyMapView, with one required argument – that is:
+            
+                1) an instance of “BaseType” or a descendant thereof;
+                2) a weakref pointing to such an instance; or
+                3) an instance of KeyMapView or KeyMapProxy, or a descendant
+                   thereof – any instance holding “referent” weakref member
+                   pointing to a “BaseType” or descendant instance will do
+            
+            … TypeError will raise if the provided operand isn’t any kind
+              of anything, w/r/t these criteria.
+        
+        """
+        
+        if not operand:
             raise ValueError("A valid keymap instance is required")
-        basetype = type(self).get_basetype()
-        if not isinstance(keymap, basetype):
-            qualname = qualified_name(basetype)
-            raise TypeError(f"A keymap instance descending from “{qualname}” is required")
-        if type(getattr(keymap, 'referent', None)) is weakref.ReferenceType:
-            self.referent = weakref.ref(keymap.referent())
+        
+        cls = type(self)
+        BaseType = cls.get_basetype()
+        
+        # Does the operand contain a “referent” weakref (á la another KeyMapView)?
+        if isinstance(getattr(operand, 'referent', None), types.Reference):
+            self.referent = weakref.ref(operand.referent())
+        
+        # Is the operand itself a weakref?
+        elif isinstance(operand, types.Reference) and cls.check_basetype(operand()):
+            self.referent = weakref.ref(operand())
+        
+        # Is the operand an instance of the BaseType (or a descendant of same)?
+        elif cls.check_basetype(operand):
+            self.referent = weakref.ref(operand)
+        
+        # It isn’t any kind of anything:
         else:
-            self.referent = weakref.ref(keymap)
+            qualname = qualified_name(BaseType)
+            raise TypeError(f"An operand descending from “{qualname}” is required")
     
     @selfcheck
     def get_reftype(self):
@@ -149,12 +179,19 @@ def test():
             kmap = keymap_type(fixture_fn())
             prox = proxy_type(kmap)
             
+            # A keymap is equal to a view/proxy on that keymap:
             assert kmap == prox
             assert len(kmap) == len(prox)
             
+            # Ensure the “clone(…)” method works as advertised:
+            assert kmap == prox.clone()
+            assert kmap.clone() == prox
+            
+            # Check each namespace across the keymap and proxy:
             for ns0, ns1 in zip(kmap.namespaces(), prox.namespaces()):
                 assert ns0 == ns1
             
+            # Check the iterable output across the keymap and proxy:
             for iter0, iter1 in zip(kmap, prox):
                 assert iter0 == iter1
                 assert iter0 in kmap
@@ -162,6 +199,7 @@ def test():
                 assert iter1 in kmap
                 assert iter1 in prox
             
+            # Check the keys of both the keymap and the proxy:
             for keys0, keys1 in zip(kmap.keys(), prox.keys()):
                 assert keys0 == keys1
                 key0, ns0 = unpack_ns(keys0)
@@ -169,12 +207,14 @@ def test():
                 assert kmap.get(key0, *ns0) == prox.get(key1, *ns1)
                 assert kmap.get(key1, *ns1) == prox.get(key0, *ns0)
             
+            # Check each of the item tuples of the keymap and the proxy:
             for items0, items1 in zip(kmap.items(), prox.items()):
                 key0, val0 = items0
                 key1, val1 = items1
                 assert key0 == key1
                 assert val0 == val1
             
+            # Check the values across the keymap and the proxy:
             for val0, val1 in zip(kmap.values(), prox.values()):
                 assert val0 == val1
         
@@ -195,6 +235,15 @@ def test():
         def test_fn():
             nonlocal proxy_type2
             
+            # Instantiate:
+            #
+            #   • a keymap populated from the fixture function,
+            #   • a view/proxy instance on that keymap, and
+            #   • a second view/proxy instance constructed from
+            #       the first.
+            #
+            # … these view/proxy types might be the same, or they
+            #   might be totally different.
             kmap = keymap_type(fixture_fn())
             prox0 = proxy_type0(kmap)
             prox1 = proxy_type1(prox0)
@@ -205,17 +254,49 @@ def test():
                 else:
                     proxy_type2 = lambda: proxy_type0(kmap)
             
+            # Check that commutative equality holds, across
+            # the two view/proxy instances and their referent
+            # KeyMap referent instances – KeyMap ABC ancestors
+            # don’t specify equality, so these operators will
+            # be calling default implementations:
             assert kmap == prox0
             assert kmap == prox1
             assert prox0 == prox1
             
+            # Check that the referent instances and the
+            # weakrefs themselves are equivalent across
+            # both instances:
             assert prox0.referent() == prox1.referent()
             assert prox0.referent == prox1.referent
+            
+            # Ensure both are Truthy – the weakrefs are valid:
             assert bool(prox0)
             assert bool(prox1)
             
+            # Entering the view/proxy context provides
+            # a dereferenced handle on the instances’ referent:
+            with prox0 as dereferenced:
+                assert dereferenced
+                assert dereferenced == prox1.referent()
+                assert prox1.check_basetype(dereferenced)
+                assert isinstance(dereferenced, prox1.get_basetype())
+            
+            # Entering the view/proxy context provides
+            # a dereferenced handle on the instances’ referent:
+            with prox1 as dereferenced:
+                assert dereferenced
+                assert dereferenced == prox0.referent()
+                assert prox0.check_basetype(dereferenced)
+                assert isinstance(dereferenced, prox0.get_basetype())
+            
+            # Check the weakref count – N.B. according to its docs,
+            # this function is “only for testing” and not
+            # actual use, and you can see why:
             assert weakref.getweakrefcount(kmap) > 0 # this isn’t 2 somehow
             
+            # Go through the equality checks with a new instance
+            # of “proxy_type2()” – which actually is a factory function,
+            # q.v. abnove and not a type:
             prox2 = proxy_type2()
             assert kmap == prox2
             assert prox0 == prox2
@@ -240,6 +321,39 @@ def test():
     # N.B. These two take FUCKING FOREVER to run:
     # inline.add_function(test_one_fn(Nested,     KeyMapView,  nestedmaps), 'test_five')
     # inline.add_function(test_one_fn(Nested,     KeyMapProxy, nestedmaps), 'test_five_point_five')
+    
+    @inline
+    def test_six():
+        """ View/Proxy error conditions """
+        try:
+            KeyMapView(None)
+        except ValueError as exc:
+            assert "valid keymap instance" in str(exc)
+        
+        try:
+            KeyMapProxy(None)
+        except ValueError as exc:
+            assert "valid keymap instance" in str(exc)
+        
+        from clu.config.abc import FlatOrderedSet
+        
+        try:
+            # Passing an empty FlatOrderedSet raises ValueError,
+            # as above – the empty FlatOrderedSet is Falsey,
+            # soooooooooo:
+            KeyMapView(FlatOrderedSet('a', 'b'))
+        except TypeError as exc:
+            assert "operand descending from" in str(exc)
+            assert "clu.config.abc.FrozenKeyMap" in str(exc)
+        
+        try:
+            # Passing an empty FlatOrderedSet raises ValueError,
+            # as above – the empty FlatOrderedSet is Falsey,
+            # soooooooooo:
+            KeyMapProxy(FlatOrderedSet('a', 'b'))
+        except TypeError as exc:
+            assert "operand descending from" in str(exc)
+            assert "clu.config.abc.KeyMap" in str(exc)
     
     @inline.diagnostic
     def show_fixture_cache_stats():

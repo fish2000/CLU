@@ -202,7 +202,7 @@ class Nested(FrozenNested, KeyMap):
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
-from clu.testing.utils import inline, format_environment
+from clu.testing.utils import inline
 
 @inline.fixture
 def nestedmaps():
@@ -238,6 +238,13 @@ def flatdict():
         nskey = pack_ns(key, *namespaces)
         out[nskey] = value
     return out
+
+@inline.fixture
+def arbitrary():
+    return {
+        'yo'     : 'dogg',
+        'iheard' : 'you like dict literals'
+    }
 
 def test():
     
@@ -309,22 +316,22 @@ def test():
     @inline
     def test_four():
         """ FrozenNested contains namespaced key """
-        nested = FrozenNested(tree=nestedmaps())
+        nested = FrozenNested(tree=nestedmaps(), **arbitrary())
         
         for mappingpath in mapwalk(nested.tree):
             *namespaces, key, value = mappingpath
             nskey = pack_ns(key, *namespaces)
-            assert nskey in nested
+            assert nskey in nested or nskey in arbitrary()
     
     @inline
     def test_four_pt_five():
         """ Nested (mutable) contains namespaced key """
-        nested = Nested(tree=nestedmaps())
+        nested = Nested(tree=nestedmaps(), **arbitrary())
         
         for mappingpath in mapwalk(nested.tree):
             *namespaces, key, value = mappingpath
             nskey = pack_ns(key, *namespaces)
-            assert nskey in nested
+            assert nskey in nested or nskey in arbitrary()
     
     @inline
     def test_five():
@@ -344,12 +351,6 @@ def test():
         flat = nested.flatten()
         renested = flat.nestify()
         assert renested == nested
-    
-    @inline.diagnostic
-    def show_environment():
-        """ Show environment variables """
-        for envline in format_environment():
-            print(envline)
     
     @inline.diagnostic
     def show_fixture_cache_stats():

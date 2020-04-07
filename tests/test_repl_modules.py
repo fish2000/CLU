@@ -12,11 +12,12 @@ mods = ('clu.all',
         'clu.config.ns',
         'clu.csv',
         'clu.fs.appdirectories',
+        'clu.fs.pypath',
         'clu.keyvalue',
         'clu.dispatch',
-        'clu.sanitizer',
-        'clu.fs.pypath',
-        'clu.scripts.ansicolors')
+        'clu.scripts.ansicolors',
+        'clu.scripts.boilerplate',
+        'clu.sanitizer')
 
 class TestReplModules(object):
     
@@ -65,24 +66,71 @@ class TestReplModules(object):
         assert all(type(record) is Mismatch for record in mismatches.mismatch_records)
     
     @pytest.mark.parametrize('modulename', mods)
-    def test_modulemap(self, consts, modulename):
-        from clu.naming import qualified_import
+    def test_modulemap(self, modulename):
+        from clu.naming import nameof, qualified_import
         from clu.repl.modules import ModuleMap
+        from copy import copy, deepcopy
         
         module = qualified_import(modulename)
-        modmap = ModuleMap(module)
         
-        assert len(modmap) == len(module.__all__)
+        try:
+            modmap = ModuleMap(module)
         
-        for thingname in dir(module):
-            assert modmap[thingname] == getattr(module, thingname)
+        except ValueError as exc:
+            assert "one or more things" in str(exc)
         
-        # calculate “most”:
-        most = max(len(thingname) for thingname in dir(module))
-        assert most == modmap.most()
+        else:
+            assert len(modmap) == len(module.__all__)
+            
+            for thingname in dir(module):
+                assert modmap[thingname] == getattr(module, thingname)
+            for thingname in reversed(modmap):
+                assert modmap[thingname] == getattr(module, thingname)
+            
+            # calculate “most”:
+            most = max(len(thingname) for thingname in dir(module))
+            assert most == modmap.most()
+            
+            # set membership check for modmap.keys():
+            frozenthings = frozenset(module.__all__)
+            
+            assert frozenthings.issuperset(modmap.keys())
+            assert frozenthings.issubset(modmap.keys())
+            
+            # set membership check for modmap.items():
+            frozenpairs = frozenset(zip(modmap.keys(), modmap.values()))
+            
+            assert frozenpairs.issuperset(modmap.items())
+            assert frozenpairs.issubset(modmap.items())
+            
+            # repr checks:
+            assert repr(dict(modmap)) in repr(modmap)
+            assert repr(modmap).startswith(nameof(ModuleMap))
+            
+            # copy/clone checks:
+            assert copy(modmap) == modmap
+            assert deepcopy(modmap) == modmap
+            assert modmap.clone() == modmap
+    
+    def test_modulemap_error_conditions(self, consts):
+        from clu.repl.modules import ModuleMap
         
-        frozenthings = frozenset(module.__all__)
+        with pytest.raises(TypeError) as exc:
+            ModuleMap(None)
+        assert "valid module required" in str(exc.value)
         
-        assert frozenthings.issuperset(modmap.keys())
-        assert frozenthings.issubset(modmap.keys())
+        with pytest.raises(TypeError) as exc:
+            ModuleMap(True)
+        assert "module instance required" in str(exc.value)
         
+        constmap = ModuleMap(consts)
+        
+        # dunder attribute that exists in consts:
+        with pytest.raises(KeyError) as exc:
+            constmap['__dir__']
+        assert "__dir__" in str(exc.value)
+        
+        # non-dunder attribute that does not exist in consts:
+        with pytest.raises(KeyError) as exc:
+            constmap['YO_DOGG']
+        assert "YO_DOGG" in str(exc.value)

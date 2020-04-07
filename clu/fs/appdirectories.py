@@ -168,7 +168,9 @@ class AppDirs(collections.abc.Hashable):
     def __hash__(self):
         return hash(self.to_string()) & \
                hash(self.appname) & \
-               hash(self.version_info.to_string())
+               hash(self.version_info \
+                and self.version_info.to_string() \
+                 or 'None')
     
     @property
     def user_data_dir(self):
@@ -790,6 +792,7 @@ def test():
         
         print_separator()
         current = system.is_current and "(CURRENT SYSTEM)" or ""
+        assert hash(system)
         print(f"-- System: {system.to_string()} {current}")
         # print()
         

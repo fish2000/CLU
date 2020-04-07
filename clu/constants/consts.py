@@ -11,10 +11,10 @@ import sys, os, re
 # back to string-interning with “sys.intern”:
 try:
     from clu.constants.polyfills import Path as path
-except (ImportError, SyntaxError):
+except (ImportError, SyntaxError): # pragma: no cover
     path = sys.intern
 else:
-    if not callable(path):
+    if not callable(path):  # pragma: no cover
         path = sys.intern
 
 # Define the “pytuple” shortcut lambda:
@@ -32,6 +32,9 @@ BASEPATH = path(
 # Possible names for builtin modules:
 builtins = ('builtins', 'builtin', 'main')
 BUILTINS = pytuple(*builtins) + builtins
+
+# q.v. STRINGPAIR sub.:
+BYTEPAIR = b"{!s} : {!s}"
 
 # Determine if we’re running in bpython:
 BPYTHON = '__console__' in sys.modules
@@ -77,14 +80,14 @@ try:
     __IPYTHON__
 except NameError:
     IPYTHON = False
-else:
+else: # pragma: no cover
     IPYTHON = True
 
 # Determine if we’re on Jython (hint, not likely):
 JYTHON = sys.platform.casefold().startswith('java')
 
 # The __name__ of a lambda function:
-lam = lambda: None
+lam = lambda: None # pragma: no cover
 λ = LAMBDA = sys.intern(getattr(lam, '__qualname__',
                         getattr(lam, '__name__',
                                      "<lambda>")))
@@ -99,7 +102,7 @@ NAMESPACE_SEP = sys.intern(os.pathsep)
 # A boolean value for “numpy” availability – False if it’s not present:
 try:
     from clu.constants.polyfills import numpy
-except (ImportError, SyntaxError):
+except (ImportError, SyntaxError): # pragma: no cover
     NUMPY = False
 else:
     NUMPY = bool(numpy)
@@ -156,7 +159,7 @@ TEST_PATH = path(os.path.join(BASEPATH, 'tests'))
 TEXTMATE = 'TM_PYTHON' in os.environ
 
 # For terminal pretty-printing:
-if TEXTMATE:
+if TEXTMATE: # pragma: no cover
     SEPARATOR_WIDTH = DEFAULT_TERMINAL_WIDTH
 
 else:
@@ -176,7 +179,7 @@ else:
     try:
         SEPARATOR_WIDTH = terminal_width()
     
-    except IOError:
+    except IOError: # pragma: no cover
         SEPARATOR_WIDTH = DEFAULT_TERMINAL_WIDTH
 
 # WTF HAX:
@@ -196,7 +199,7 @@ WHITESPACE = re.compile(r'\s+')
 class NoDefault(object):
     """ A singleton object to signify a lack of an argument. """
     __slots__ = tuple() # type: tuple
-    def __new__(cls, *a, **k):
+    def __new__(cls, *a, **k): # pragma: no cover
         return cls
 
 # Manually rename `pytuple(…)` per mechanism of “clu.exporting.Exporter”:
@@ -207,6 +210,7 @@ pytuple.__doc__ = "pytuple(*attrs) → turns ('do', 're', 'mi') into ('__do__', 
 __all__ = ('APPNAME',
            'BASEPATH',
            'BUILTINS',
+           'BYTEPAIR',
            'BPYTHON',
            'CPYTHON',
            'DEBUG',
@@ -271,6 +275,9 @@ def print_all():
             printout(const_name, SEP.join(f"“{g!s}”" for g in G[const_name]))
         elif type(G[const_name]) is str:
             printout(const_name, f"“{G[const_name]}”")
+        elif type(G[const_name]) is bytes:
+            value = str(G[const_name], encoding=ENCODING)
+            printout(const_name, f"b“{value}”")
         else:
             printout(const_name, G[const_name])
     

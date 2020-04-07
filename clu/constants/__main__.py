@@ -39,7 +39,7 @@ def show():
     SEP = ",\n" + (" " * (most + 5))
     
     # Inline function to truncate long members:
-    def truncate(iterable):
+    def truncate(iterable): # pragma: no cover
         for item in (str(itx) for itx in iterable):
             if len(item) > rest:
                 yield f"“{item[:rest]}…”"

@@ -129,7 +129,7 @@ EXTENSION_SUFFIXES = tuple(suffix.lstrip(QUALIFIER) \
 
 isbuiltin = lambda thing: moduleof(thing) == 'builtins'
 
-suffix = lambda filename: QUALIFIER in filename \
+suffix = lambda filename: (filename is not None and QUALIFIER in filename) \
             and filename.rpartition(QUALIFIER)[-1] \
              or ''
 
@@ -148,7 +148,7 @@ def isnativemodule(module):
     if not ismodule(module):
         return False
     
-    # Step two: return truly when “__loader__” is set:
+    # Step two: return Truthy when “__loader__” is set:
     if isinstance(getpyattr(module, 'loader'),
                   importlib.machinery.ExtensionFileLoader):
         return True
@@ -190,6 +190,8 @@ def isinspectable(thing):
 def dotpath_join(base, *addenda):
     """ Join dotpath elements together as one, á la os.path.join(…) """
     if base is None or base == '':
+        if not addenda:
+            return None
         return dotpath_join(*addenda)
     for addendum in addenda:
         if addendum is not None:

@@ -35,7 +35,7 @@ from clu.naming import nameof, dotpath_split, dotpath_join, qualified_name
 
 from clu.predicates import (anyattrs, attr,
                             attr_search, item_search,
-                            mro, none_function, tuplize)
+                            mro, typeof, none_function, tuplize)
 
 from clu.repr import stringify, hexid
 from clu.typespace import types
@@ -626,7 +626,8 @@ class MetaModule(MetaRegistry):
         return cls
 
 @export
-class ModuleAlias(collections.abc.Hashable,
+class ModuleAlias(collections.abc.Callable,
+                  collections.abc.Hashable,
                   clu.abstract.ReprWrapper,
                   metaclass=MetaTypeRepr):
     
@@ -642,13 +643,13 @@ class ModuleAlias(collections.abc.Hashable,
     
     def __init__(self, origin, specializer):
         """ Initialize a ModuleAlias, with an origin class and a specializer type """
-        if not issubclass(origin, ModuleBase):
+        if not subclasscheck(origin, ModuleBase):
             raise TypeError('Specialization requires a Module type')
         if specializer is not None:
-            if not issubclass(specializer, ModuleBase):
+            if not subclasscheck(specializer, ModuleBase):
                 raise TypeError('Specialization requires a Module type')
-        self.origin = origin 
-        self.specializer = specializer
+        self.origin = typeof(origin)
+        self.specializer = typeof(specializer)
     
     def __hash__(self):
         return hash(self.origin) \
@@ -658,8 +659,11 @@ class ModuleAlias(collections.abc.Hashable,
         return tuplize(self.origin,
                        self.specializer)
     
+    def __call__(self, bases=tuple(), *args, **kwargs):
+        return self.__mro_entries__(chain(bases, args))
+    
     def inner_repr(self):
-        return f"origin=“{self.origin!r}”, specializer=“{self.specializer!r}”"
+        return f"origin=‘{self.origin!r}’, specializer=’{self.specializer!r}’"
     
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -766,8 +770,9 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
     
     @property
     def qualname(self):
-        return dotpath_join(self.prefix,
-                            self.name)
+        cls = type(self)
+        return dotpath_join(cls.prefix,
+                            cls.name)
     
     def __reduce__(self):
         return (Registry.for_qualname,

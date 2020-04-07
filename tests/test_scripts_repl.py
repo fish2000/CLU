@@ -14,13 +14,14 @@ mods = ('clu.all',
         'clu.fs.appdirectories',
         'clu.keyvalue',
         'clu.dispatch',
+        'clu.scripts.boilerplate',
         'clu.sanitizer',
         'clu.fs.pypath',
         'clu.scripts.ansicolors')
 
 class TestScriptsREPL(object):
     
-    """ Run the tests for the clu.scripts.repl module. """
+    """ Run the tests for the “clu.scripts.repl” module. """
     
     @pytest.mark.TODO
     def test_repl_module(self, consts, environment, testdir):
@@ -35,25 +36,34 @@ class TestScriptsREPL(object):
         output = "\n".join(result.outlines)
         assert 'DEBUG MODE INITIATED' in output
     
-    def test_repl_explain(self):
-        # “dir(clu.all)” dependably contains but 3 function names:
-        import clu.all
+    @pytest.mark.parametrize('modulename', mods)
+    def test_repl_explain(self, modulename):
         from clu.scripts.repl import explain
-        
+        from clu.naming import suffix, qualified_import
         from contextlib import redirect_stdout
         import io
         
+        module = qualified_import(modulename)
+        thingcount = len(dir(module))
+        
         iosink = io.StringIO()
         with redirect_stdout(iosink):
-            explain(clu.all)
+            explain(module)
         
         output = iosink.getvalue()
+        iosink.truncate(0)
         iosink.close()
         
         assert 'Module instance' in output
-        assert '3 sub-things' in output
+        assert suffix(modulename) in output
+        if thingcount == 0:
+            assert "contains no “dir(…)” results" in output
+        elif thingcount == 1:
+            assert "contains one sub-thing" in output
+        else:
+            assert f'{thingcount} sub-things' in output
         
-        for thingname in dir(clu.all):
+        for thingname in dir(module):
             assert thingname in output
     
     @pytest.mark.parametrize('modulename', mods)

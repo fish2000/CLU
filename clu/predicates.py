@@ -82,7 +82,7 @@ nopyattrs   = negate(anypyattrs)
 
 # Calling “typeof(…)” on a thing returns either its type, or – if it is
 # a classtype – the thing itself:
-typeof      = lambda thing: nopyattr(thing, 'mro') and type(thing) or thing
+typeof      = lambda thing: (thing is not None and nopyattr(thing, 'mro')) and type(thing) or thing
 
 # Things with a __len__(…) method “have length”:
 haslength   = lambda thing: haspyattr(thing, 'len')

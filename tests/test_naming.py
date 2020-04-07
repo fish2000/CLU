@@ -10,7 +10,50 @@ i_heard_rename = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) fo
 
 class TestNaming(object):
     
-    """ Run the tests for the clu.naming module. """
+    """ Run the tests for the “clu.naming” module. """
+    
+    def test_dotpath_join(self):
+        from clu.naming import dotpath_join
+        
+        assert dotpath_join(None) is None
+        assert dotpath_join(None, None) is None
+        
+        assert dotpath_join(None, 'yodogg') == 'yodogg'
+        assert dotpath_join(None, 'yo.dogg') == 'yo.dogg'
+        
+        assert dotpath_join('yo', 'dogg') == 'yo.dogg'
+        assert dotpath_join(None, 'yo', 'dogg') == 'yo.dogg'
+        
+        assert dotpath_join('yo', 'dogg', 'i.heard') == 'yo.dogg.i.heard'
+        assert dotpath_join(None, 'yo', 'dogg', 'i.heard') == 'yo.dogg.i.heard'
+        assert dotpath_join('yo', 'dogg', 'i.heard...') == 'yo.dogg.i.heard'
+        assert dotpath_join('...yo', 'dogg', 'i.heard...') == 'yo.dogg.i.heard'
+    
+    def test_dotpath_split(self):
+        from clu.naming import dotpath_split
+        
+        assert type(dotpath_split(None)) is tuple
+        assert dotpath_split(None) == (None, None)
+        
+        assert type(dotpath_split('yodogg')) is tuple
+        assert dotpath_split('yodogg') == ('yodogg', None)
+        
+        assert type(dotpath_split('yo.dogg')) is tuple
+        assert dotpath_split('yo.dogg') == ('dogg', 'yo')
+        
+        assert type(dotpath_split('yo.dogg.i.heard')) is tuple
+        assert dotpath_split('yo.dogg.i.heard') == ('heard', 'yo.dogg.i')
+    
+    def test_suffix(self):
+        from clu.naming import suffix
+        
+        assert not suffix(None)
+        assert not suffix('yodogg')
+        
+        assert suffix(None) == ''
+        assert suffix('yodogg') == ''
+        assert suffix('yo.dogg') == 'dogg'
+        assert suffix('yo.dogg.i.heard') == 'heard'
     
     def test_renamer(self, consts):
         """ N.B. compare this to the “legacy callable” q.v. test sub. """

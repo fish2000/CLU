@@ -163,8 +163,8 @@ class DoubleDutchFunction(collections.abc.Callable):
     
     def __call__(self, argument0, argument1, *args, **kwargs):
         try:
-            function = self.registry[typeof(argument0),
-                                     typeof(argument1)]
+            function = self.registry[type(argument0),
+                                     type(argument1)]
         except KeyError:
             function = self.__wrapped__
         return function(argument0,

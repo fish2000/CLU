@@ -28,8 +28,6 @@ def are_we_gitted(directory=None):
 @export
 def git_version_tags(directory=None):
     """ Get the Git version tags """
-    if not are_we_gitted(directory=directory):
-        return None
     with Directory(pth=directory):
         try:
             return back_tick(GIT_TAGS)

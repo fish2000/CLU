@@ -249,10 +249,11 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
+    # from pprint import pprint
     
     @inline
     def test_one():
-        from clu.fs.filesystem import td
+        from clu.fs.filesystem import TemporaryName, td
         tmp = td()
         
         cdb = CDBJsonFile(directory=tmp)
@@ -265,6 +266,30 @@ def test():
         
         cdb.push('yo_dogg.cc', 'clang++ -o yo_dogg.o -pipe -Wall -pedantic')
         assert cdb
+        
+        print("JSON:", cdb.to_json())
+        
+        prefix, suffix = cdb.splitname
+        
+        # with TemporaryName(prefix=prefix,
+        #                    suffix=suffix[1:],
+        #                    randomized=True) as tfn:
+        #
+        #     cdb.write(path=tfn.name)
+        #
+        #     assert cdb
+        #     assert os.path.isfile(cdb.name)
+        #     assert cdb.exists
+        #
+        # assert not cdb
+        # assert not os.path.isfile(cdb.name)
+        # assert not cdb.exists
+        
+        cdb.write(f"/tmp/{CDBJsonFile.filename}")
+        # assert cdb
+        # assert os.path.isfile(cdb.name)
+        # assert cdb.exists
+        print("cdb.written_to:", cdb.written_to)
     
     #@inline
     def test_two():

@@ -202,8 +202,8 @@ unwrap      = lambda thing: dunder_or(thing, 'wrapped')
 origin      = lambda thing: typeof(dunder_or(thing, 'origin'))
 rmro        = reverse(mro)
 
-isancestor  = lambda cls, ancestor=object: isclasstype(cls) and (ancestor in mro(cls))
-isorigin    = lambda cls, original=object: isclasstype(cls) and isancestor(origin(cls), typeof(original))
+isancestor  = lambda cls, ancestor=object:   ancestor in mro(cls)
+isorigin    = lambda cls, originator=object: isancestor(origin(cls), ancestor=typeof(originator))
 
 ispublic    = lambda string: not ispyname(string) and not ismifflin(string)
 
@@ -319,14 +319,7 @@ class Partial(partial):
             super(Partial, self).__init__() # type: ignore
         
         # Name the Partial instance, as if it’s a phi-type:
-        qname = or_none(self, '__qualname__')
-        if qname:
-            setattr(self, '__qualname__',
-                    qname.replace(
-                    getattr(self, '__name__'), φ))
-        else:
-            self.__qualname__ = φ
-        self.__name__ = φ
+        self.__name__ = self.__qualname__ = φ
     
     @property
     def predicate(self):

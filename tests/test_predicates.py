@@ -5,11 +5,11 @@ import pytest
 
 class TestPredicates(object):
     
-    """ Run the tests for the clu.predicates module. """
+    """ Run the tests for the “clu.predicates” module. """
     
-    def test_try_items_and_item_search(self):
-        from clu.predicates import try_items, item_search
-        from collections import defaultdict as DefaultDict
+    @pytest.fixture(scope='module')
+    def arbitrary(self):
+        """ Fixture function providing an arbitrary pair of directories """
         
         dict_one = {
             'yo'    : "dogg",
@@ -24,10 +24,83 @@ class TestPredicates(object):
             'is'    : "ISSSSS",
             'up'    : "UP?" }
         
+        yield dict_one, dict_two
+    
+    def test_finditem_finditems(self, arbitrary):
+        from clu.predicates import finditem, finditems
+        dict_one, dict_two = arbitrary
+        
+        assert finditem('yo', *arbitrary) == dict_one
+        assert finditem('i', *arbitrary) == dict_one
+        assert finditem('you', *arbitrary) == dict_one
+        assert finditem('dict', *arbitrary) == dict_one
+        
+        assert finditem('so', *arbitrary) == dict_two
+        assert finditem('yeah', *arbitrary) == dict_two
+        assert finditem('what', *arbitrary) == dict_two
+        assert finditem('is', *arbitrary) == dict_two
+        assert finditem('up', *arbitrary) == dict_two
+        
+        assert finditems('yo', *arbitrary) == (dict_one,)
+        assert finditems('i', *arbitrary) == (dict_one,)
+        assert finditems('you', *arbitrary) == (dict_one,)
+        assert finditems('dict', *arbitrary) == (dict_one,)
+        
+        assert finditems('so', *arbitrary) == (dict_two,)
+        assert finditems('yeah', *arbitrary) == (dict_two,)
+        assert finditems('what', *arbitrary) == (dict_two,)
+        assert finditems('is', *arbitrary) == (dict_two,)
+        assert finditems('up', *arbitrary) == (dict_two,)
+    
+    def test_hasitem_noitem_anyitems_allitems(self, arbitrary):
+        from clu.predicates import hasitem, noitem, anyitems, allitems
+        dict_one, dict_two = arbitrary
+        
+        for key in dict_one.keys():
+            assert hasitem(dict_one, key)
+            assert noitem(dict_two, key)
+        
+        for key in dict_two.keys():
+            assert noitem(dict_one, key)
+            assert hasitem(dict_two, key)
+        
+        assert anyitems(dict_one, *dict_one.keys())
+        assert allitems(dict_one, *dict_one.keys())
+        assert not anyitems(dict_two, *dict_one.keys())
+        
+        assert anyitems(dict_two, *dict_two.keys())
+        assert allitems(dict_two, *dict_two.keys())
+        assert not anyitems(dict_one, *dict_two.keys())
+    
+    def test_case_sort_predicates(self, consts):
+        from clu.predicates import case_sort, lowers, uppers
+        dirconsts = dir(consts)
+        
+        assert sorted(dirconsts)[0]                  == 'APPNAME'
+        assert sorted(dirconsts)[-3:]                == ['pytuple', 'λ', 'φ']
+        
+        assert sorted(dirconsts, key=lowers)[0]      == 'APPNAME'
+        assert sorted(dirconsts, key=lowers)[-4:]    == ['λ', 'φ', 'NoDefault', 'pytuple']
+        assert sorted(dirconsts, key=uppers)[:4]     == ['pytuple', 'λ', 'φ', 'NoDefault']
+        assert sorted(dirconsts, key=case_sort)[:2]  == ['NoDefault', 'pytuple']
+        assert sorted(dirconsts, key=case_sort)[-3:] == ['WHITESPACE', 'λ', 'φ']
+    
+    def test_try_items_and_item_search(self, arbitrary):
+        from clu.predicates import try_items, item_search
+        from collections import defaultdict as DefaultDict
+        dict_one, dict_two = arbitrary
+        
         assert item_search('yo', dict_one, dict_two) == "dogg"
         assert item_search('so', dict_one, dict_two) == "SOOOOO"
         assert try_items('yo', dict_one, dict_two) == "dogg"
         assert try_items('so', dict_one, dict_two) == "SOOOOO"
+        
+        with pytest.raises(KeyError) as exc:
+            try_items('WTF', dict_one, dict_two)
+        assert "WTF" in str(exc)
+        assert "not found in" in str(exc)
+        
+        assert try_items('WTF', dict_one, dict_two, default='HAX') == 'HAX'
         
         dict_default = DefaultDict(lambda: "WTF")
         
@@ -188,17 +261,24 @@ class TestPredicates(object):
         # TODO: expand both this test, and what
         # this predicate does – e.g. special-case for
         # “typing._SpecialForm” or whatever the fuck
-        from clu.predicates import origin
+        # … because “classtype(typing.Dict)” == False
+        # … !!!!!!!!!!!
+        from clu.predicates import origin, isorigin
         import typing as tx
         
         assert origin(tx.Dict) is dict
         assert origin(tx.Dict[str, tx.Any]) is dict
         assert origin(dict) is dict
         assert origin({}) is dict
+        
+        assert isorigin(tx.Dict,            originator=dict)
+        assert isorigin(tx.Dict[str, str],  originator=dict)
+        assert isorigin(dict,               originator=dict)
+        assert isorigin({},                 originator=dict)
     
-    @pytest.mark.TODO
     def test_isancestor_and_isorigin(self):
         from clu.predicates import isancestor
+        from clu.predicates import isorigin
         from clu.predicates import newtype
         
         A = newtype('A')
@@ -219,15 +299,11 @@ class TestPredicates(object):
         assert isancestor(C, ancestor=B)
         assert isancestor(D, ancestor=C)
         
-        # THIS DOES NOT QUITE WORK.
-        # TODO: make it work
-        # from clu.predicates import isorigin
-        # import typing as tx
-        # assert isorigin(tx.Dict,            original=dict)
-        # assert isorigin(dict,                 original=tx.Dict)
-        # assert isorigin(tx.Dict[str, str],  original=dict)
-        # assert isorigin(dict,               original=dict)
-        # assert isorigin({},                 original=dict)
+        import typing as tx
+        assert isorigin(tx.Dict,            originator=dict)
+        assert isorigin(tx.Dict[str, str],  originator=dict)
+        assert isorigin(dict,               originator=dict)
+        assert isorigin({},                 originator=dict)
     
     def test_newtype(self):
         from clu.predicates import isclass, ismetaclass, metaclass
@@ -294,9 +370,8 @@ class TestPredicates(object):
         from clu.fs.misc import gethomedir
         from clu.predicates import isclasstype, pyattr
         from clu.predicates import attr, attrs, stattr, stattrs
-        # TODO: test *_search and *_across static accessors:
-        # from clu.predicates import (attr_search, attr_across,
-        #                           stattr_search, stattr_across)
+        # TODO: more thoroughly test *_search and *_across static accessors:
+        from clu.predicates import stattr_search, stattr_across
         
         # Non-data descriptor wrapping a R/O value:
         from clu.abstract import ValueDescriptor
@@ -429,6 +504,18 @@ class TestPredicates(object):
         # N.B. Dictish.hax is a ValueDescriptor instance:
         atts = ('yo', 'dogg', 'hax')
         assert stattrs(Dictish, *atts) != stattrs(Dictish(), *atts) == attrs(Dictish(), *atts)
+        
+        # These would return Falsey (a None) if the key wasn’t found:
+        assert stattr_search('wtf', Slotted, Slotted())
+        assert stattr_search('wtf', Dictish, Dictish())
+        assert stattr_search('hax', Slotted, Slotted())
+        assert stattr_search('hax', Dictish, Dictish())
+        
+        # These would also return Falsey (an empty tuple) if the key wasn’t found:
+        assert stattr_across('wtf', Slotted, Slotted())
+        assert stattr_across('wtf', Dictish, Dictish())
+        assert stattr_across('hax', Slotted, Slotted())
+        assert stattr_across('hax', Dictish, Dictish())
     
     def test_resolve_accessor(self):
         from clu.predicates import resolve
@@ -737,6 +824,14 @@ class TestPredicates(object):
         # in use in clu.typology:
         istypelist = apply_to(isclasstype, all)
         maketypelist = apply_to(typeof, uniquify)
+        
+        assert istypelist.predicate == isclasstype
+        assert istypelist.function == all
+        assert maketypelist.predicate == typeof
+        assert maketypelist.function == uniquify
+        
+        assert repr(istypelist).startswith(f"<function {consts.φ}")
+        assert repr(maketypelist).startswith(f"<function {consts.φ}")
         
         assert istypelist(consts.SINGLETON_TYPES)
         assert istypelist(numeric_types)

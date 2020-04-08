@@ -307,7 +307,6 @@ class TestNaming(object):
         except AssertionError:
             raise Nondeterminism(f"Nondeterminism in qualified_name(Weight) → {qname}")
     
-    @pytest.mark.nondeterministic
     def test_moduleof_failure_rate(self, clumods):
         """ » Checking `moduleof(…)` against `pickle.whichmodule(…)` …"""
         from clu.exporting import Exporter

@@ -2,6 +2,10 @@
 source = clu
 
 [run]
+include = 
+    clu/*
+    clu/**
+
 omit =
     clu/__version__.py
     clu/scripts/legacy/*
@@ -19,6 +23,10 @@ cover_pylib = True
 parallel = False
 
 [report]
+include = 
+    clu/*
+    clu/**
+
 omit =
     clu/__version__.py
     clu/scripts/legacy/*

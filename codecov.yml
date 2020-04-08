@@ -13,9 +13,11 @@ coverage:
     project:
       default:
         target: auto
+        threshold: 1%
         base: auto
         branches:
           - master
+        if_no_uploads: error
         only_pulls: false
         paths:
           - "clu"

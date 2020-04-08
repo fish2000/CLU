@@ -1,7 +1,5 @@
 [paths]
-source =
-    clu
-    /Users/fish/Dropbox/CLU/clu
+source = clu
 
 [run]
 omit =
@@ -9,10 +7,12 @@ omit =
     clu/scripts/legacy/*
     clu/testing/hook.py
     clu/testing/obsolete.py
+    docs/**
+    hooks/**
+    scratch/*
+    tests/**
 
-source = 
-    clu
-    /Users/fish/Dropbox/CLU/clu
+source = clu
 
 branch = True
 cover_pylib = True
@@ -24,6 +24,10 @@ omit =
     clu/scripts/legacy/*
     clu/testing/hook.py
     clu/testing/obsolete.py
+    docs/**
+    hooks/**
+    scratch/*
+    tests/**
 
 skip_empty = True
 show_missing = True

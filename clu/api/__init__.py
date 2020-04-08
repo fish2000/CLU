@@ -35,7 +35,7 @@ class CommandBase(ModuleBase):
     
     @abstract
     def execute(self):
-        
+        pass
 
 class Command(CommandBase[Module]):
     commandstr = "command" # …a reserved word?
@@ -51,8 +51,7 @@ class CLUI(click.MultiCommand):
     
     def get_command(self, context, key):
         dotpath = dotpath_join(consts.APPNAME, API_APPSPACE, key)
-        
-
+        return dotpath
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -63,23 +62,15 @@ def test():
     
     @inline
     def test_one():
-        """ Check “pad_csv(…)” against the pre-padded value """
-        pass
+        """ Command import test """
+        from clu.commands import Command as command
+        assert command
     
-    # @inline
+    @inline
     def test_two():
-        """ Check “max_segments(…)” """
-        pass
-    
-    # @inline
-    def test_three():
-        """ check “pad_line(…)” """
-        pass
-    
-    # @inline.diagnostic
-    def check_pad_csv():
-        """ Print the “pad_csv(…)” results and the pre-padded value """
-        pass
+        """ Sanity-check CLUI """
+        clui = CLUI()
+        assert clui
     
     return inline.test(100)
 

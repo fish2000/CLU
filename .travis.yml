@@ -3,16 +3,23 @@
 dist: xenial
 language: python
 
+branches:
+  only:
+    - master
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
+
+git:
+  quiet: true
+  submodules: false
+
 python:
-  - "3.5"
-  - "3.6"
   - "3.7"
-  - "3.7-dev"
-  - "3.8-dev"
-  - "pypy3.6"
+  - "3.8"
+  - "3.9-dev"
+  - "pypy3.7"
 
 install:
-  - pip install -r requirements/dev.txt
+  - pip install -r requirements/install.txt
 
 # - pip install -U .
 

@@ -98,10 +98,11 @@ def codecov(session):
                     'run', '--append', '-m', modulename,
                      silent=True)
     
+    # pytest-cov ignores COVERAGE_FILE:
+    coveragefile.copy('.coverage')
+    
     # Run “pytest” with the “pytest-cov” plugin:
-    coveragefile.copy('.coverage') # pytest-cov ignores COVERAGE_FILE
-    session.run('pytest', '-p', 'pytest_cov', '--cov=clu',
-                                              '--cov-append',
+    session.run('pytest', '-p', 'pytest_cov', '--cov-append',
                                               '--cov-report=xml:coverage.xml',
                                               '--no-cov-on-fail',
                                               'tests/')

@@ -1,5 +1,7 @@
 [paths]
-source = clu
+source =
+    clu
+    /Users/fish/Dropbox/CLU/clu
 
 [run]
 omit =
@@ -9,7 +11,10 @@ omit =
     clu/testing/hook.py
     clu/testing/obsolete.py
 
-source = clu
+source = 
+    clu
+    /Users/fish/Dropbox/CLU/clu
+
 branch = True
 cover_pylib = True
 parallel = False

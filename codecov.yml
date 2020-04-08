@@ -9,6 +9,17 @@ coverage:
   precision: 2
   round: down
   range: "60...100"
+  status:
+    project:
+      default:
+        target: auto
+        base: auto
+        branches:
+          - master
+        only_pulls: false
+        paths:
+          - "clu"
+          - "clu/"
 
 parsers:
   gcov:

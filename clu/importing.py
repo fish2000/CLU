@@ -164,6 +164,16 @@ def appspaces_for_appname(appname):
                map(get_appspace, modules.keys())))
 
 @export
+def modules_for_appname_and_appspace(appname, appspace):
+    modules = Registry.monomers.get(appname, {})
+    dotpath = dotpath_join(appname, appspace)
+    if dotpath:
+        yield from (module for module in modules.values() \
+             if str(module.qualname).startswith(dotpath))
+    else:
+        yield from tuple()
+
+@export
 class Registry(abc.ABC, metaclass=MetaRegistry):
     
     """ The Registry mixin handles the registration of all

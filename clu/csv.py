@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import sys
+
 from clu.mathematics import Σ
 from clu.exporting import Exporter
 
@@ -78,9 +80,6 @@ def test():
         """ check “pad_line(…)” """
         line = "yo,dogg"
         pd = (('''"",''') * 98).rstrip(',')
-        
-        # print(pd)
-        # print(pad_line(line, 100))
         assert pad_line(line, 100).endswith(pd)
     
     @inline.diagnostic
@@ -94,5 +93,4 @@ def test():
     return inline.test(100)
 
 if __name__ == '__main__':
-    import sys
     sys.exit(test())

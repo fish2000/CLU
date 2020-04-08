@@ -836,7 +836,7 @@ with exporter as export:
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
-def test():
+def everything():
     from pprint import pprint
     print("» LOCALS:")
     pprint(locals())
@@ -845,6 +845,39 @@ def test():
     print("» GLOBALS:")
     pprint(globals())
     print()
+
+def test():
+    
+    from clu.testing.utils import inline
+    from clu.constants import consts
+    
+    @inline.precheck
+    def check_everything():
+        """ Print all locals and globals for the module """
+        everything()
+    
+    @inline
+    def test_one():
+        """ Sanity-check “thismodule()” """
+        assert thismodule() == 'clu.exporting'
+    
+    @inline
+    def test_two():
+        """ Check the “itermodule(…)” and “itermoduleids(…)” functions """
+        from clu.typology import iterlen
+        
+        assert iterlen(itermodule(consts)) == len(consts.__all__)
+        assert iterlen(itermoduleids(consts)) == len(consts.__all__)
+        
+        # pairs = tuple(zip((const, getattr(consts, const)) for const in dir(consts)))
+        # assert tuple(pairs) == tuple(itermodule(consts))
+        # assert len(pairs) == len(consts.__all__)
+        pairs = dict(zip(dir(consts), (getattr(consts, const) for const in dir(consts))))
+        assert pairs == dict(itermodule(consts))
+        idpairs = dict(zip(dir(consts), (id(getattr(consts, const)) for const in dir(consts))))
+        assert idpairs == dict(itermoduleids(consts))
+    
+    return inline.test(100)
 
 if __name__ == '__main__':
     test()

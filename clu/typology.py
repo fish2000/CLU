@@ -35,21 +35,27 @@ from clu.typespace import types
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
+def ilen(iterable):
+    """ ilen(iterable) → Return the number of items in “iterable”. Internal
+        helper for the “clu.typology.iterlen(…)” function.”
+        
+        This will consume iterables without a “__len__()” method – be careful!
+    """
+    # Stolen from “more-itertools”: http://bit.ly/2LUZqCx
+    counter = count()
+    collections.deque(zip(iterable, counter), maxlen=0)
+    return next(counter)
+
 @export
 def iterlen(iterable):
     """ iterlen(iterable) → Return the number of items in “iterable.”
         
         This will consume iterables without a “__len__()” method – be careful!
     """
-    # Stolen from “more-itertools”: http://bit.ly/2LUZqCx
     try:
         return len(iterable)
-    except TypeError as exc:
-        if 'has no len' in str(exc):
-            counter = count()
-            collections.deque(zip(iterable, counter), maxlen=0)
-            return next(counter)
-        raise
+    except TypeError:
+        return ilen(iterable)
 
 samelength = lambda a, b: operator.eq(iterlen(a), iterlen(b))
 differentlength = lambda a, b: operator.ne(iterlen(a), iterlen(b))

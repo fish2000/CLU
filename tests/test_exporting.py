@@ -12,7 +12,17 @@ i_heard_lambda = lambda *wat: print("I heard you like %s" % ", ".join(repr(w) fo
 
 class TestExporting(object):
     
-    """ Run the tests for the clu.exporting module. """
+    """ Run the tests for the “clu.exporting” module. """
+    
+    def test_thismodule(self, consts):
+        from clu.exporting import Exporter, thismodule
+        assert thismodule() is None
+        
+        globals()[consts.EXPORTER_NAME] = Exporter(dotpath='yo.dogg')
+        assert thismodule() == 'yo.dogg'
+        
+        del globals()[consts.EXPORTER_NAME]
+        assert thismodule() is None
     
     def test_exporterbase_subclass_package(self, dirname):
         from clu.exporting import Registry

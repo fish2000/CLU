@@ -10,7 +10,6 @@ abstract = abc.abstractmethod
 from clu.constants import consts
 from clu.importing import ModuleBase, initialize_types
 from clu.importing import modules_for_appname_and_appspace
-# from clu.importing import Finder, Loader
 from clu.naming import dotpath_join
 from clu.predicates import attr
 from clu.exporting import Exporter

@@ -1,3 +1,4 @@
+Click>=7.0
 colorama>=0.4.0
 dataclasses>=0.6; python_version < '3.7'
 dbx-stopwatch>=1.6

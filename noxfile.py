@@ -102,7 +102,8 @@ def codecov(session):
     coveragefile.copy('.coverage')
     
     # Run “pytest” with the “pytest-cov” plugin:
-    session.run('pytest', '-p', 'pytest_cov', '--cov-append',
+    session.run('pytest', '-p', 'pytest_cov', '--cov=clu',
+                                              '--cov-append',
                                               '--cov-report=xml:coverage.xml',
                                               '--no-cov-on-fail',
                                               'tests/')

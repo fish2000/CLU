@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-# import pytest
-
 class TestAll(object):
     
     """ Run the tests for the “clu.all” module. """

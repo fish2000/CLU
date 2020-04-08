@@ -100,7 +100,7 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     
-    from clu.testing.utils import inline, pout
+    from clu.testing.utils import inline
     
     @inline
     def test_one():
@@ -144,6 +144,8 @@ def test():
     
     # @inline.diagnostic
     def show_app_class_attribs():
+        from clu.testing.utils import pout
+        
         pout.v(Application)
         
         stuff = dir(Application)

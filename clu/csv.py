@@ -30,3 +30,69 @@ export(pad_csv,         name='pad_csv',         doc="pad_csv(«uneven CSV data»
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
+
+padded = """
+10,3,"",""
+11,5,13,""
+1,14,15,8
+1,2,4,""
+10,3,"",""
+4,"","",""
+9,4,6,""
+4,0,1,14
+7,14,11,3
+1,"","",""
+""".lstrip()
+
+unpadded = """
+10,3
+11,5,13
+1,14,15,8
+1,2,4
+10,3
+4
+9,4,6
+4,0,1,14
+7,14,11,3
+1
+""".lstrip()
+
+def test():
+    
+    from clu.testing.utils import inline
+    
+    @inline
+    def test_one():
+        """ Check “pad_csv(…)” against the pre-padded value """
+        result = pad_csv(unpadded)
+        assert padded.strip() == result.strip()
+    
+    @inline
+    def test_two():
+        """ Check “max_segments(…)” """
+        maxseg = max_segments(unpadded)
+        assert maxseg == max_segments(padded)
+    
+    @inline
+    def test_three():
+        """ check “pad_line(…)” """
+        line = "yo,dogg"
+        pd = (('''"",''') * 98).rstrip(',')
+        
+        # print(pd)
+        # print(pad_line(line, 100))
+        assert pad_line(line, 100).endswith(pd)
+    
+    @inline.diagnostic
+    def check_pad_csv():
+        """ Print the “pad_csv(…)” results and the pre-padded value """
+        result = pad_csv(unpadded)
+        print(result)
+        print()
+        print(padded)
+    
+    return inline.test(100)
+
+if __name__ == '__main__':
+    import sys
+    sys.exit(test())

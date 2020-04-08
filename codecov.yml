@@ -36,6 +36,5 @@ comment:
 
 ignore:
   - "docs"
-  - "python_clu.egg_info"
   - "requirements"
   - "scratch"

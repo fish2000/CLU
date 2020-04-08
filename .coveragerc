@@ -6,8 +6,7 @@ source =
 [run]
 omit =
     clu/__version__.py
-    clu/scripts/forkumask.py
-    clu/scripts/xdg-runtime.py
+    clu/scripts/legacy/*
     clu/testing/hook.py
     clu/testing/obsolete.py
 
@@ -22,8 +21,7 @@ parallel = False
 [report]
 omit =
     clu/__version__.py
-    clu/scripts/forkumask.py
-    clu/scripts/xdg-runtime.py
+    clu/scripts/legacy/*
     clu/testing/hook.py
     clu/testing/obsolete.py
 

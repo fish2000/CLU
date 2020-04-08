@@ -889,6 +889,7 @@ class Directory(BaseFSName,
     def importables(self, subdir, suffix='py',
                                   source=None,
                                   excludes=('-', '+', 'pytest',
+                                                      'legacy',
                                                       'obsolete',
                                                       'repl.py')):
         """ List the importable file-based modules found within “subdir”,

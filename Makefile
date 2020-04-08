@@ -24,14 +24,10 @@ clean-cython:
 clean-build-artifacts:
 	rm -rf build dist python_$(PROJECT_NAME).egg-info
 
-clean-test-artifacts: clean-pyc
+clean-test-artifacts:
 	rm -rf  $(PROJECT_ROOT)/.pytest_cache \
-			$(PROJECT_ROOT)/.hypothesis \
 			$(PROJECT_BASE)/.pytest_cache \
-			$(PROJECT_BASE)/.hypothesis \
-			$(PROJECT_BASE)/.nox \
-			$(PROJECT_BASE)/.tox
-
+			$(PROJECT_BASE)/.nox
 clean-type-caches:
 	rm -rf $(PROJECT_VENV)/var/cache/mypy_cache
 	rm -rf $(PROJECT_VENV)/var/cache/pytype
@@ -56,7 +52,6 @@ bigbump:
 
 check: clean-test-artifacts
 	check-manifest -v
-	python setup.py check -m -s
 	travis lint .travis.yml
 
 mypy:
@@ -67,9 +62,6 @@ pytype:
 
 pytest:
 	python -m pytest -p clu.testing.pytest
-
-tox:
-	tox
 
 nox:
 	nox --report $(PROJECT_BASE)/.noxresults.json
@@ -85,12 +77,6 @@ test-configuration:
 
 version:
 	python -m clu.version
-
-consts-old:
-	DEBUG=1 PYTHONPATH="." $(PROJECT_BASE)/clu/scripts/show-consts.py
-
-modules-old:
-	DEBUG=1 PYTHONPATH="." $(PROJECT_BASE)/clu/scripts/show-modules.py
 
 consts:
 	python -m clu.constants
@@ -130,7 +116,7 @@ coverage:
 
 .PHONY: cython sdist wheel twine-upload bump bigbump
 
-.PHONY: check pytest tox nox renox
+.PHONY: check pytest nox renox
 .PHONY: test test-all
 
 .PHONY: version consts-old modules-old consts modules

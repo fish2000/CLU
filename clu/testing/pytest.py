@@ -66,7 +66,7 @@ def pytest_configure(config):
         "TODO: mark a test as suggesting work needing to be done.")
 
 @pytest.hookimpl(trylast=True)
-def pytest_sessionfinish(session, exitstatus):
+def pytest_sessionfinish(session, exitstatus): # pragma: no cover
     """ Hook function to bind an exit handle – using “clu.dispatch”
         via the ‘@exithandle’ decorator – that removes any remaining
         temporary-file artifacts that may be hanging out in the

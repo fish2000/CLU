@@ -32,6 +32,11 @@ def strip_ns(nskey):
     return nskey.rpartition(NAMESPACE_SEP)[-1]
 
 @export
+def split_ns(namespaced):
+    """ Split a namespaced string into its components """
+    return str(namespaced).split(NAMESPACE_SEP)
+
+@export
 def startswith_ns(putative, prefix):
     """ Boolean predicate to compare a pair of namespace iterables,
         returning True if the first starts with the second.
@@ -52,6 +57,7 @@ def validate_ns(*namespaces):
             raise ValueError(f"Invalid namespace: “{namespace}”")
         if NAMESPACE_SEP in namespace:
             raise ValueError(f"Namespace contains separator: “{namespace}”")
+    return True
 
 @export
 def unpack_ns(nskey):
@@ -63,7 +69,7 @@ def unpack_ns(nskey):
         If the key is not namespaced (like e.g. “wat”) the “unpack_ns(…)”
         call will return the tuple ('wat', tuple()).
     """
-    *namespaces, key = nskey.split(NAMESPACE_SEP)
+    *namespaces, key = split_ns(nskey)
     return key, namespaces
 
 @export
@@ -174,18 +180,94 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
+    from clu.config.keymap import Flat
+    from pprint import pprint
+    import re, textwrap
+    
+    flat = Flat()
+    
+    javaprop_re = re.compile(r"^(?P<name>[\w\.]+): “(?P<value>.*)”", re.IGNORECASE | re.MULTILINE)
+    java_source = textwrap.dedent("""
+    package ost.%s;
+    
+    import java.util.Enumeration;
+    import java.util.Properties;
+    
+    public class ShowJavaSystemProperties {
+    
+        public static void main(String... args) {
+            Properties properties = System.getProperties();
+            Enumeration names = properties.propertyNames();
+            while (names.hasMoreElements()) {
+                String name = (String) names.nextElement();
+                String value = properties.getProperty(name);
+                System.out.println(name + ": “" + value + "”");
+            }
+        }
+    
+    }
+    """ % exporter.dotpath)
+    
+    @inline.precheck
+    def load_java_system_properties():
+        """ Load the Java JDK’s system properties """
+        from clu.fs.filesystem import back_tick, TemporaryName
+        from clu.naming import dotpath_to_prefix
+        
+        with TemporaryName(prefix="show-java-system-properties-",
+                           suffix="java",
+                           randomized=True) as java_file:
+            java_file.write(java_source)
+            java_path = java_file.realpath()
+            output = back_tick(f"java {java_path}")
+        
+        assert not java_file.exists
+        
+        for line in output.splitlines():
+            match = javaprop_re.match(line)
+            if match:
+                # BEWARE: dotpath_to_prefix(…) does a casefold():
+                name = dotpath_to_prefix(match.group('name'),
+                                         sep=NAMESPACE_SEP, end='')
+                value = match.group('value')
+                flat[name] = value
+        
+        pprint(flat)
+    
+    @inline.precheck
+    def show_java_system_properties():
+        """ Show the namespaced Java system properties """
+        count = flat.namespace_count()
+        plural = count == 1 and '' or 's'
+        
+        print(f"* {count} namespace{plural} total:")
+        print()
+        
+        for namespace in flat.namespaces():
+            namespaces = split_ns(namespace)
+            print(f"+ {namespace}:")
+            # pprint(flat.submap(*split_ns(namespace)), indent=4)
+            for nskey, value in flat.items(*namespaces):
+                # key = strip_ns(nskey)
+                # key = nskey.replace(namespace, '', 1).replace(NAMESPACE_SEP, '', 1)
+                key = nskey.replace(prefix_for(*namespaces), '', 1)
+                print(f"    {key} : “{value}”")
+            print()
+        
+        print("- «unprefixed»:")
+        pprint(flat.submap(unprefixed=True), indent=4)
     
     @inline
     def test_one():
-        pass # INSERT TESTING CODE HERE, pt. I
+        """ Validate a Flat keymap’s namespaces """
+        for namespace in flat.namespaces():
+            assert validate_ns(*split_ns(namespace))
     
-    #@inline
+    @inline
     def test_two():
-        pass # INSERT TESTING CODE HERE, pt. II
-    
-    #@inline.diagnostic
-    def show_me_some_values():
-        pass # INSERT DIAGNOSTIC CODE HERE
+        """ Validate a FrozenFlat keymap’s namespaces """
+        for namespace in flat.freeze().namespaces():
+            assert validate_ns(*split_ns(namespace))
     
     return inline.test(100)
 

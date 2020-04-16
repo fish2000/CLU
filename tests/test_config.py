@@ -44,7 +44,7 @@ class TestConfigKeyMaps(object):
                                         'wat:yo', 'wat:yoyo', 'nodogg:yo', 'nodogg:yoyo')
         assert tuple(nested.values()) == ('dogg', 'you like', 'dicts', 'we put dicts in your dicts',
                                           'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
-        assert tuple(nested.namespaces()) == ('nodogg', 'wat')
+        assert frozenset(nested.namespaces()) == frozenset(('nodogg', 'wat'))
         
         assert type(nested.keys()) is NamespaceWalkerKeysView
         assert type(nested.values()) is NamespaceWalkerValuesView
@@ -56,7 +56,7 @@ class TestConfigKeyMaps(object):
                                       'wat:yo', 'wat:yoyo', 'nodogg:yo', 'nodogg:yoyo')
         assert tuple(flat.values()) == ('dogg', 'you like', 'dicts', 'we put dicts in your dicts',
                                         'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
-        assert tuple(flat.namespaces()) == ('nodogg', 'wat')
+        assert frozenset(flat.namespaces()) == frozenset(('nodogg', 'wat'))
         
         assert flat.dictionary == dictionary
         

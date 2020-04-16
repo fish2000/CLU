@@ -54,7 +54,7 @@ class KeyMapViewBase(collections.abc.Sequence,
         self.prefix = prefix_for(*namespaces)
     
     @property
-    def _mapping(self):
+    def _mapping(self): # pragma: no cover
         """ For compatibility with “collections.abc” stuff """
         return self.mapping
     

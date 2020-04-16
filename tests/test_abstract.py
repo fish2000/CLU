@@ -8,6 +8,8 @@ import os
 
 import pytest
 
+abstract = abc.abstractmethod
+
 @pytest.fixture(scope='module')
 def strings():
     yield ('yo', 'dogg', 'iheard', 'youlike')
@@ -102,6 +104,48 @@ class TestAbstractMetas(object):
 class TestAbstractABCs(object):
     
     """ Run the tests for the clu.abstract module’s abstract base classes. """
+    
+    @pytest.mark.TODO
+    def test_abc_Unhashable(self):
+        import collections.abc
+        
+        class Ancestor(abc.ABC, metaclass=clu.abstract.Slotted):
+            
+            @abstract
+            def __hash__(self):
+                ...
+        
+        class HashMe(Ancestor):
+            
+            def __hash__(self):
+                return hash(type(self))
+        
+        class DontHashMe(HashMe, clu.abstract.Unhashable):
+            pass
+        
+        class Rando(clu.abstract.Unhashable):
+            pass
+        
+        # class Unrelated(abc.ABC):
+        #     pass
+        
+        assert hash(HashMe())
+        assert isinstance(HashMe(), collections.abc.Hashable)
+        assert not isinstance(HashMe(), clu.abstract.Unhashable)
+        
+        with pytest.raises(TypeError) as exc:
+            hash(DontHashMe())
+        assert "unhashable type" in str(exc)
+        assert "DontHashMe" in str(exc)
+        assert not isinstance(DontHashMe(), collections.abc.Hashable)
+        assert isinstance(DontHashMe(), clu.abstract.Unhashable)
+        
+        assert not isinstance(Rando(), collections.abc.Hashable)
+        assert isinstance(Rando(), clu.abstract.Unhashable)
+        
+        # TODO: make it work for random, unrelated ABC classes:
+        # assert not isinstance(Unrelated(), collections.abc.Hashable)
+        # assert isinstance(Unrelated(), clu.abstract.Unhashable)
     
     def test_abc_Cloneable(self):
         

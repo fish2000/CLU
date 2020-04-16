@@ -48,6 +48,63 @@ class NonSlotted(abc.ABCMeta):
                                                            attributes,
                                                          **kwargs)
 
+# def _check_methods(C, *methods):
+#     mro = C.__mro__
+#     for method in methods:
+#         for B in mro:
+#             if method in B.__dict__:
+#                 if B.__dict__[method] is None:
+#                     return NotImplemented
+#                 break
+#         else:
+#             return NotImplemented
+#     return True
+
+# def throw(ExcClass, message=None):
+#     """ A lazy version of the “raise” statement """
+#     raise ExcClass(message)
+
+class UnhashableMeta(Slotted):
+    
+    """ A slotted metaclass that ensures its classes, and all
+        subclasses, will *not* be hashable types.
+    """
+    
+    def __new__(metacls, name, bases, attributes, **kwargs):
+        """ Override for `abc.ABCMeta.__new__(…)` setting up a
+            derived slotted un-hashable class.
+        """
+        if '__hash__' in attributes:
+            attributes.pop('__hash__')
+        
+        # unhashable_hash_method = lambda: throw(TypeError, f'unhashable type: {name}')
+        # attributes['__hash__'] = staticmethod(unhashable_hash_method)
+        attributes['__hash__'] = None
+        
+        return super(UnhashableMeta, metacls).__new__(metacls, name,
+                                                               bases,
+                                                               attributes,
+                                                             **kwargs)
+
+class Unhashable(abc.ABC, metaclass=UnhashableMeta):
+    
+    @classmethod
+    def __subclasshook__(cls, subcls):
+        # if cls is collections.abc.Hashable:
+        #     # has_hash_method = _check_methods(subcls, "__hash__")
+        #     # if has_hash_method is not NotImplemented:
+        #     try:
+        #         cls.__hash__()
+        #     except TypeError as exc:
+        #         if "unhashable type" in str(exc):
+        #             return False
+        #     return False
+        if cls is Unhashable:
+            return getattr(subcls, '__hash__', None) is None
+        elif cls is collections.abc.Hashable:
+            return False
+        return NotImplemented
+
 class Format(collections.abc.Callable, metaclass=Slotted):
     
     """ An abstract class representing something that formats something
@@ -367,6 +424,7 @@ else:
         pass
 
 __all__ = ('Slotted', 'NonSlotted',
+           'UnhashableMeta', 'Unhashable',
            'Format', 'NonFormat', 'SlottedFormat', 'Sanitizer',
            'Cloneable',
            'ReprWrapper', 'SlottedRepr', 'MappingViewRepr',

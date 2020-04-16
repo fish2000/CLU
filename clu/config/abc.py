@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from functools import lru_cache
 
 import abc
 import clu.abstract
@@ -16,7 +17,8 @@ from clu.config.keymapview import KeyMapKeysView, KeyMapItemsView, KeyMapValuesV
 from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsView
 from clu.config.keymapview import NamespaceWalkerValuesView
 
-from clu.predicates import (isexpandable, iscontainer, isnotnone,
+from clu.predicates import (unwrap,
+                            isexpandable, iscontainer, isnotnone,
                             always, uncallable)
 
 from clu.typology import iterlen, ismapping
@@ -24,6 +26,8 @@ from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
+
+cache = lambda function: lru_cache(maxsize=128, typed=True)(function)
 
 # SUB-BASE AND ABSTRACT BASE CLASSES:
 
@@ -63,6 +67,10 @@ class FrozenKeyMapBase(collections.abc.Mapping,
     def __getitem__(self, nskey):
         ...
     
+    @abstract
+    def __hash__(self):
+        ...
+    
     def __reversed__(self):
         yield from reversed(tuple(self))
     
@@ -76,7 +84,8 @@ class FrozenKeyMapBase(collections.abc.Mapping,
 
 @export
 class KeyMapBase(FrozenKeyMapBase,
-                 collections.abc.MutableMapping):
+                 collections.abc.MutableMapping,
+                 clu.abstract.Unhashable):
     
     """ Abstract sub-base interface class for mutable namespaced mappings.
         
@@ -162,7 +171,14 @@ class FrozenKeyMap(FrozenKeyMapBase):
             return self.submap(unprefixed=unprefixed).values()
         return KeyMapValuesView(self, *namespaces)
     
-    def namespaces(self):
+    def __hash__(self):
+        return hash(tuple(self.values()))
+    
+    @cache
+    def _get_namespace_foset(self):
+        return FlatOrderedSet(get_ns(nskey) for nskey in sorted(self) if NAMESPACE_SEP in nskey)
+    
+    def _namespaces(self): # pragma: no cover
         """ Iterate over all of the namespaces defined in the mapping.
             
             This is the generic implementation. It depends on “__iter__(…)”,
@@ -170,6 +186,12 @@ class FrozenKeyMap(FrozenKeyMapBase):
         """
         nss = { get_ns(nskey) for nskey in self if NAMESPACE_SEP in nskey }
         yield from sorted(nss)
+    
+    def namespaces(self):
+        yield from self._get_namespace_foset()
+    
+    def namespace_count(self):
+        return len(self._get_namespace_foset())
 
 @export
 class KeyMap(KeyMapBase, FrozenKeyMap):
@@ -240,6 +262,8 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
                 self[key] = value
         if updates:
             self.update(dictish=updates)
+    
+    _get_namespace_foset = lambda self: unwrap(super()._get_namespace_foset)(self)
 
 # INTERIM ABSTRACT BASE: NamespaceWalker
 
@@ -303,13 +327,17 @@ class NamespaceWalker(FrozenKeyMap):
             out.set(key, value, *namespaces)
         return out
     
-    def namespaces(self):
+    def _namespaces(self): # pragma: no cover
         """ Iterate over all of the namespaces defined in the mapping. """
         nss = set()
         for *namespaces, key, value in self.walk():
             if namespaces:
                 nss.add(concatenate_ns(*namespaces))
         yield from sorted(nss)
+    
+    # @cache
+    def _get_namespace_foset(self):
+        return FlatOrderedSet(concatenate_ns(*ns) for *ns, _, _ in self.walk() if ns)
     
     def keys(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all keys in the mapping,
@@ -396,6 +424,11 @@ class FlatOrderedSet(collections.abc.Set,
     __slots__ = ('things', 'predicate')
     
     @classmethod
+    def _from_iterable(cls, iterable): # pragma: no cover
+        # Required by the “collections.abc.Set” API:
+        return cls(*iterable)
+    
+    @classmethod
     def is_a(cls, instance):
         return isinstance(instance, (cls, FlatOrderedSet)) or \
                isinstance(getattr(instance, 'things', None),
@@ -449,7 +482,7 @@ class FlatOrderedSet(collections.abc.Set,
         return len(self.things) > 0
     
     def __hash__(self):
-        return hash(self.things) & hash(id(self.things))
+        return self._hash()
     
     def __eq__(self, other):
         if type(self).is_a(other):

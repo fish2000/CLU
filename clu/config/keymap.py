@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import clu.abstract
 import collections
+import collections.abc
 import copy
 import sys
 

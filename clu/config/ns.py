@@ -236,7 +236,7 @@ def test():
     
     @inline.precheck
     def show_java_system_properties():
-        """ Show the namespaced Java system properties """
+        """ Show namespaced Java system properties """
         count = flat.namespace_count()
         plural = count == 1 and '' or 's'
         

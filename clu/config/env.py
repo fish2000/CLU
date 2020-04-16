@@ -9,7 +9,7 @@ import sys
 
 from clu.constants.consts import APPNAME, NoDefault
 from clu.config.abc import KeyMap, NamespaceWalker
-from clu.config.ns import pack_ns, prefix_env, unpack_env, nskey_to_env
+from clu.config.ns import pack_ns, prefix_env, unpack_env, nskey_from_env, nskey_to_env
 from clu.predicates import tuplize, listify
 from clu.typology import iterlen
 from clu.exporting import Exporter
@@ -96,7 +96,9 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
     
     def clone(self, deep=False, memo=None):
         copier = deep and copy.deepcopy or copy.copy
-        return type(self)(tree=copier(self.tree))
+        out = type(self)(appname=self.appname)
+        out.environment = copier(self.environment)
+        return out
 
 @export
 class Environ(FrozenEnviron, KeyMap, contextlib.AbstractContextManager):
@@ -205,21 +207,30 @@ def test():
     def test_two():
         """ Environ with “os.environ” and custom-dict backends """
         env = Environ()
+        fenv = env.freeze()
         nenv = env.flatten().nestify()
+        
         wat = Environ(environment={ nskey_to_env('clu', nskey) : value \
                                     for nskey, value \
                                      in nenv.flatten().items() })
+        
         assert env == wat
+        assert fenv == wat
         assert env.flatten() == nenv
+        
         assert len(env.envkeys()) >= len(env)
         assert len(wat.envkeys()) == len(wat)
+        
+        env.setenv('wtf', 'hax')
+        assert 'wtf' not in wat
+        env.unsetenv('wtf')
     
     @inline
     def test_three():
         """ FrozenEnviron low-level API """
         env = FrozenEnviron()
         
-        for key in env.envkeys():
+        for key in env.clone().envkeys():
             assert env.hasenv(key)
             assert env.getenv(key) == os.getenv(key)
         
@@ -231,9 +242,7 @@ def test():
             assert len(env) == before
             assert not env.hasenv('CLU_CTX_YODOGG')
             assert os.getenv('CLU_CTX_YODOGG') == 'I heard you are frozen'
-            # print("CLU_CTX_YODOGG:", os.getenv('CLU_CTX_YODOGG'))
         finally:
-            # os.unsetenv('CLU_CTX_YODOGG')
             del os.environ['CLU_CTX_YODOGG']
     
     @inline
@@ -253,6 +262,26 @@ def test():
         
         assert os.getenv('CLU_CTX_YODOGG') is None
         assert len(os.environ) == before
+    
+    @inline
+    def test_four():
+        """ Check “prefix_env(…)” edge-case handling """
+        # not appname, not namespaces:
+        assert prefix_env(None) == ''
+        
+        # not appname:
+        assert prefix_env(None, 'do', 're', 'mi') == 'DO_RE_MI_'
+        
+        # not namespaces:
+        assert prefix_env('yodogg') == 'YODOGG_'
+        
+        # yes to both:
+        assert prefix_env('yodogg', 'do', 're', 'mi') == 'YODOGG_DO_RE_MI_'
+        
+        # nskey_from_env(…) checks:
+        assert nskey_from_env('YODOGG_DO_RE_MI_KEY') == ('yodogg', 'do:re:mi:key')
+        assert nskey_from_env('YODOGG_KEY') == ('yodogg', 'key')
+        assert nskey_from_env('YODOGG_') == ('yodogg', '')
     
     @inline.diagnostic
     def show_environment():

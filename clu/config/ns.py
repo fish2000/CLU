@@ -53,10 +53,10 @@ def startswith_ns(putative, prefix):
 def validate_ns(*namespaces):
     """ Raise a ValueError if any of the given namespaces are invalid. """
     for namespace in namespaces:
-        if not namespace.isidentifier():
-            raise ValueError(f"Invalid namespace: “{namespace}”")
         if NAMESPACE_SEP in namespace:
-            raise ValueError(f"Namespace contains separator: “{namespace}”")
+            raise ValueError(f"namespace contains separator: “{namespace}”")
+        if not namespace.isidentifier():
+            raise ValueError(f"invalid namespace: “{namespace}”")
     return True
 
 @export
@@ -267,6 +267,19 @@ def test():
         """ Validate a FrozenFlat keymap’s namespaces """
         for namespace in flat.freeze().namespaces():
             assert validate_ns(*split_ns(namespace))
+    
+    @inline
+    def test_three():
+        """ Check “validate_ns(…)” error conditions """
+        try:
+            validate_ns("yo dogg")
+        except ValueError as exc:
+            assert "invalid namespace" in str(exc)
+        
+        try:
+            validate_ns("yo:dogg")
+        except ValueError as exc:
+            assert "namespace contains separator" in str(exc)
     
     return inline.test(100)
 

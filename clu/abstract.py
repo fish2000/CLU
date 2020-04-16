@@ -48,22 +48,6 @@ class NonSlotted(abc.ABCMeta):
                                                            attributes,
                                                          **kwargs)
 
-# def _check_methods(C, *methods):
-#     mro = C.__mro__
-#     for method in methods:
-#         for B in mro:
-#             if method in B.__dict__:
-#                 if B.__dict__[method] is None:
-#                     return NotImplemented
-#                 break
-#         else:
-#             return NotImplemented
-#     return True
-
-# def throw(ExcClass, message=None):
-#     """ A lazy version of the “raise” statement """
-#     raise ExcClass(message)
-
 class UnhashableMeta(Slotted):
     
     """ A slotted metaclass that ensures its classes, and all
@@ -76,9 +60,6 @@ class UnhashableMeta(Slotted):
         """
         if '__hash__' in attributes:
             attributes.pop('__hash__')
-        
-        # unhashable_hash_method = lambda: throw(TypeError, f'unhashable type: {name}')
-        # attributes['__hash__'] = staticmethod(unhashable_hash_method)
         attributes['__hash__'] = None
         
         return super(UnhashableMeta, metacls).__new__(metacls, name,
@@ -90,19 +71,10 @@ class Unhashable(abc.ABC, metaclass=UnhashableMeta):
     
     @classmethod
     def __subclasshook__(cls, subcls):
-        # if cls is collections.abc.Hashable:
-        #     # has_hash_method = _check_methods(subcls, "__hash__")
-        #     # if has_hash_method is not NotImplemented:
-        #     try:
-        #         cls.__hash__()
-        #     except TypeError as exc:
-        #         if "unhashable type" in str(exc):
-        #             return False
-        #     return False
         if cls is Unhashable:
             return getattr(subcls, '__hash__', None) is None
-        elif cls is collections.abc.Hashable:
-            return False
+        # elif cls is collections.abc.Hashable:
+        #     return False
         return NotImplemented
 
 class Format(collections.abc.Callable, metaclass=Slotted):
@@ -236,11 +208,11 @@ class MappingViewRepr(ReprWrapper):
         “self._mapping” value – of which most MappingView types make use.
     """
     
-    def inner_repr(self):
+    def inner_repr(self): # pragma: no cover
         """ Return the repr string for “self._mapping” """
         return repr(self._mapping)
 
-evict_announcer = lambda key, value: print(f"Cache dropped: {key}")
+evict_announcer = lambda key, value: print(f"Cache dropped: {key}") # pragma: no cover
 
 class BaseDescriptor(abc.ABC):
     
@@ -259,7 +231,6 @@ class DataDescriptor(BaseDescriptor):
         ...
     
     def __delete__(self, instance):
-        # raise NotImplementedError("DataDescriptor.__delete__()")
         pass
 
 class NamedDescriptor(DataDescriptor):
@@ -289,7 +260,7 @@ class CacheDescriptor(DataDescriptor, ReprWrapper):
     def __set__(self, instance, value):
         self.lru = value
     
-    def inner_repr(self):
+    def inner_repr(self): # pragma: no cover
         return repr(self.lru)[1:-1]
 
 class Descriptor(NamedDescriptor, SlottedRepr):
@@ -312,7 +283,7 @@ class Descriptor(NamedDescriptor, SlottedRepr):
         if value != self.value:
             raise ValueError("cannot alter {self.name} value")
     
-    def alternative_inner_repr(self):
+    def alternative_inner_repr(self): # pragma: no cover
         from clu.repr import strfield
         value = strfield(self.value)
         return f"name={self.name}, value={value}"
@@ -400,7 +371,7 @@ class ManagedContext(contextlib.AbstractContextManager):
         self.teardown()
         return exc_type is None
 
-if consts.PYTHON_VERSION >= 3.7:
+if consts.PYTHON_VERSION >= 3.7: # pragma: no cover
     
     class AsyncManagedContext(ManagedContext,
                               contextlib.AbstractAsyncContextManager):

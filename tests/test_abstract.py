@@ -121,7 +121,9 @@ class TestAbstractABCs(object):
                 return hash(type(self))
         
         class DontHashMe(HashMe, clu.abstract.Unhashable):
-            pass
+            
+            def __hash__(self):
+                return hash(type(self))
         
         class Rando(clu.abstract.Unhashable):
             pass

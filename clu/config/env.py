@@ -87,7 +87,7 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
         """ Get a view on the dictionary keys from the backend environment. """
         return self.environment.keys()
     
-    def inner_repr(self):
+    def inner_repr(self): # pragma: no cover
         """ Return some readable meta-information about this instance """
         prefix = prefix_env(self.appname)
         nscount = iterlen(self.namespaces())
@@ -176,6 +176,30 @@ def test():
         for *namespaces, key, value in envwalk('clu', os.environ.copy()):
             nskey = pack_ns(key, *namespaces)
             assert nskey in env
+    
+    @inline
+    def test_one_pt_five():
+        """ FrozenEnviron and “envwalk(…)” with ‘updates’ kwargs """
+        updates = { 'yo' : 'dogg', 'iheard' : 'you like' }
+        env = FrozenEnviron(**updates)
+        
+        for *namespaces, key, value in envwalk('clu', os.environ.copy()):
+            nskey = pack_ns(key, *namespaces)
+            assert nskey in env
+        
+        # getenv(…) key check:
+        for key in updates.keys():
+            assert env.getenv(key) == updates[key]
+        
+        # bad-key getenv(…) without default -
+        # raises a KeyError:
+        try:
+            env.getenv('wat')
+        except KeyError as exc:
+            assert 'wat' in str(exc)
+        
+        # bad-key getenv(…) with default:
+        assert env.getenv('WTF', 'HAX') == 'HAX'
     
     @inline
     def test_two():

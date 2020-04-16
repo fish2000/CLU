@@ -246,12 +246,11 @@ def test():
         for namespace in flat.namespaces():
             namespaces = split_ns(namespace)
             print(f"+ {namespace}:")
-            # pprint(flat.submap(*split_ns(namespace)), indent=4)
             for nskey, value in flat.items(*namespaces):
-                # key = strip_ns(nskey)
-                # key = nskey.replace(namespace, '', 1).replace(NAMESPACE_SEP, '', 1)
+                bare_key = strip_ns(nskey)
                 key = nskey.replace(prefix_for(*namespaces), '', 1)
                 print(f"    {key} : “{value}”")
+                assert key.endswith(bare_key)
             print()
         
         print("- «unprefixed»:")

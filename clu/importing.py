@@ -170,8 +170,6 @@ def modules_for_appname_and_appspace(appname, appspace):
     if dotpath:
         yield from (module for module in modules.values() \
              if str(module.qualname).startswith(dotpath))
-    else:
-        yield from tuple()
 
 @export
 class Registry(abc.ABC, metaclass=MetaRegistry):
@@ -328,8 +326,6 @@ class MetaNameAndSpaces(MetaTypeRepr):
         appname = getattr(cls, 'appname', None)
         if appname is not None:
             yield from appspaces_for_appname(appname)
-        else:
-            yield from tuple()
 
 @export
 class LoaderBase(clu.abstract.AppName,
@@ -816,7 +812,7 @@ class PerApp:
         """ Return a generator over this app’s defined appspaces """
         yield from self.modules.keys()
     
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return stringify(self,
                     type(self).fields,
                          try_callables=False)
@@ -1263,13 +1259,6 @@ def test():
         print("module of module:", moduleof(module))
     
     @inline.precheck
-    def show_module_wtf_hax():
-        def mod():
-            lam = lambda: None
-            return moduleof(lam)
-        print("module:", mod())
-    
-    @inline.precheck
     def show_module_fucking_seriously():
         from clu.exporting import thismodule
         module_from = globals().get('exporter', ExporterBase()).dotpath
@@ -1387,6 +1376,8 @@ def test():
         
         assert isinstance(derived, Module)
         assert derived.yo == 'dogg'
+        assert derived.yodogg() == "I heard you like"
+        assert derived.nodogg() is None
         
         for attname in dir(derived):
             assert hasattr(derived, attname)
@@ -1453,6 +1444,8 @@ def test():
         assert not hasattr(overridden, 'targets')       # lowercase: fallback raises KeyError
         assert not hasattr(overridden, 'target_dicts')  # lowercase: fallback raises KeyError
         assert hasattr(overridden, '_targets')          # attribute found normally
+        
+        assert dir(overridden)
     
     @inline
     def test_five_point_eight():
@@ -1483,6 +1476,8 @@ def test():
         assert not hasattr(overridden, 'target_dicts')
         assert hasattr(overridden, '_targets')
         
+        assert dir(overridden)
+    
     @inline
     def test_six():
         """ Polymer-type caching and “initialize_types(…)” checks """

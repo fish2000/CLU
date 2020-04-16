@@ -23,6 +23,7 @@ class TestImporting(object):
         assert subscript != ModuleAlias(Module, ProxyModule)
         assert not (subscript == None)
         assert subscript != None
+        assert hash(subscript) == hash(ModuleAlias(ProxyModule, Module))
         
         reprstring = "ModuleAlias(origin=‘<class-module “ProxyModule”>’, " \
                      "specializer=’<class-module “clu.app.Module”>’)"
@@ -361,8 +362,18 @@ class TestImporting(object):
         assert len(polymers[consts.APPNAME].modules) == 1
         assert iterlen(polymers.all_appspaces()) == 1
         
+        # Check get_finder(…) and get_loader(…)
         assert polymers.get_finder(consts.APPNAME) is Finder
         assert polymers.get_loader(consts.APPNAME) is Loader
+        
+        # Check error conditions for get_finder(…) and get_loader(…)
+        with pytest.raises(ValueError) as exc:
+            polymers.get_finder('WTF')
+        assert "no PerApp instance" in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            polymers.get_loader('WTF')
+        assert "no PerApp instance" in str(exc.value)
         
         new_appspace = 'new'
         
@@ -381,6 +392,31 @@ class TestImporting(object):
         assert len(polymers) == 1
         assert len(polymers[consts.APPNAME].modules) == 2
         assert iterlen(polymers.all_appspaces()) == 2
+        
+        # Check error conditions for add_module(…)
+        with pytest.raises(ValueError) as exc:
+            polymers.add_module(NewModule,
+                                appname=consts.APPNAME,
+                                appspace=None)
+        assert "an appspace is required" in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            polymers.add_module(None,
+                                appname=consts.APPNAME,
+                                appspace=new_appspace)
+        assert "a module is required" in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            polymers.add_module(NewModule,
+                                appname='WTF',
+                                appspace=new_appspace)
+        assert "no PerApp instance" in str(exc.value)
+        
+        with pytest.raises(NameError) as exc:
+            polymers.add_module(NewModule,
+                                appname=consts.APPNAME,
+                                appspace=new_appspace)
+        assert "module already exists in" in str(exc.value)
         
         perapp = polymers[consts.APPNAME]
         

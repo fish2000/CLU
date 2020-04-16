@@ -147,11 +147,10 @@ class Environ(FrozenEnviron, KeyMap, contextlib.AbstractContextManager):
     def __exit__(self, exc_type=None,
                        exc_val=None,
                        exc_tb=None):
-        if self.stash:
-            try:
-                self.environment.clear()
-            finally:
-                self.environment.update(self.stash)
+        try:
+            self.environment.clear()
+        finally:
+            self.environment.update(self.stash or {})
         self.stash = None
         return exc_type is None
 

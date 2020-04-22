@@ -10,10 +10,10 @@ class AutoType(object):
         does not exist in PyPy 2 for some reason)
     """
     
-    def __init__(self):
+    def __init__(self): # pragma: no cover
         self.count = 0
     
-    def __call__(self, increment=1):
+    def __call__(self, increment=1): # pragma: no cover
         out = int(self.count)
         self.count += increment
         return out
@@ -22,7 +22,7 @@ class FakeNumpy(object):
     
     FAKE = True
     
-    def get_include(self):
+    def get_include(self): # pragma: no cover
         return '.'
 
 # Try to get `auto` from `enum`, falling back to the polyfill:
@@ -34,12 +34,12 @@ except (ImportError, SyntaxError): # pragma: no cover
 # Deal with some “missing” Python 3 things:
 try:
     unicode
-except NameError:
+except NameError: # pragma: no cover
     unicode = str
 
 try:
     long
-except NameError:
+except NameError: # pragma: no cover
     long = int
 
 try:
@@ -50,7 +50,7 @@ except (ImportError, SyntaxError): # pragma: no cover
 
 try:
     from functools import lru_cache
-except (ImportError, SyntaxError):
+except (ImportError, SyntaxError): # pragma: no cover
     def lru_cache(**keywrds):
         """ No-op dummy decorator for lesser Pythons """
         def inside(function):

@@ -220,6 +220,55 @@ class TestFsAppdirectories(object):
     ### END OF PARAMETRIZATION W.I.P. ###
     ### END OF PARAMETRIZATION W.I.P. ###
     
+    def test_System_from_string_unknown(self):
+        from clu.constants.enums import SYSTEM
+        assert System.match(SYSTEM) is SYSTEM
+        assert System.match(bytes(SYSTEM)) is SYSTEM
+        assert System.match(SYSTEM).os_name == SYSTEM.os_name
+        
+        with pytest.raises(ValueError) as exc:
+            System.from_string('wat')
+        assert "not found" in str(exc.value)
+        assert '“wat”' in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            System.match('wat')
+        assert "not found" in str(exc.value)
+        assert '“wat”' in str(exc.value)
+        
+        with pytest.raises(ValueError) as exc:
+            System.match(b'wat')
+        assert "not found" in str(exc.value)
+        assert '“wat”' in str(exc.value)
+    
+    def test_CSIDL_names(self):
+        from clu.constants.enums import CSIDL
+        
+        assert CSIDL.for_name('APPDATA') is CSIDL.APPDATA
+        assert CSIDL.for_name('COMMON_APPDATA') is CSIDL.COMMON_APPDATA
+        assert CSIDL.for_name('LOCAL_APPDATA') is CSIDL.LOCAL_APPDATA
+        
+        assert CSIDL.for_name('CSIDL_APPDATA') is CSIDL.APPDATA
+        assert CSIDL.for_name('CSIDL_COMMON_APPDATA') is CSIDL.COMMON_APPDATA
+        assert CSIDL.for_name('CSIDL_LOCAL_APPDATA') is CSIDL.LOCAL_APPDATA
+        
+        assert hash(CSIDL.for_name('CSIDL_APPDATA')) == hash(CSIDL.APPDATA)
+        assert hash(CSIDL.for_name('CSIDL_COMMON_APPDATA')) == hash(CSIDL.COMMON_APPDATA)
+        assert hash(CSIDL.for_name('CSIDL_LOCAL_APPDATA')) == hash(CSIDL.LOCAL_APPDATA)
+        
+        with pytest.raises(LookupError) as exc:
+            CSIDL.for_name('wat')
+        assert "No CSIDL found" in str(exc.value)
+        assert '“wat”' in str(exc.value)
+        
+        assert str(CSIDL.APPDATA) == 'CSIDL_APPDATA'
+        assert str(CSIDL.COMMON_APPDATA) == 'CSIDL_COMMON_APPDATA'
+        assert str(CSIDL.LOCAL_APPDATA) == 'CSIDL_LOCAL_APPDATA'
+        
+        assert bytes(CSIDL.APPDATA) == b'CSIDL_APPDATA'
+        assert bytes(CSIDL.COMMON_APPDATA) == b'CSIDL_COMMON_APPDATA'
+        assert bytes(CSIDL.LOCAL_APPDATA) == b'CSIDL_LOCAL_APPDATA'
+    
     def test_LINUX_yes_version_no_author(self, arbitrary,
                                                environment):
         home = environment.get('HOME', gethomedir())

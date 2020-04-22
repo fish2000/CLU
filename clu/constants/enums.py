@@ -2,8 +2,7 @@
 from __future__ import print_function
 from functools import lru_cache
 
-import sys
-import platform
+import platform, sys
 
 from clu.constants.consts import ENCODING
 from clu.constants.polyfills import Enum, unique
@@ -26,7 +25,7 @@ class System(Enum):
     @onecache
     def determine(cls):
         """ Determine the System value for the current platform """
-        if sys.platform.startswith('java'):
+        if sys.platform.startswith('java'): # pragma: no cover
             os_name = platform.java_ver()[3][0]
             for system in cls:
                 if os_name.startswith(system.os_name):
@@ -40,7 +39,7 @@ class System(Enum):
         for system in cls:
             if system.sys_name == folded:
                 return system
-        raise ValueError(f"System not found: {string!s}")
+        raise ValueError(f"System not found: “{string!s}”")
     
     @classmethod
     def match(cls, value):
@@ -136,7 +135,7 @@ class CSIDL(Enum):
             if folded in (nm.casefold() for nm in (csidl.name,
                                                    csidl.fullname)):
                 return csidl
-        raise LookupError(f"No CSIDL found named {name!s}")
+        raise LookupError(f"No CSIDL found named “{name!s}”")
     
     def __init__(self, *args):
         self.shell_folder_name, self.const = args
@@ -144,7 +143,7 @@ class CSIDL(Enum):
     @property
     def fullname(self):
         """ A CSIDL’s “full name” – which is basically of the form “CSIDL_NAME_STRING” """
-        return "%s_%s" (type(self).__name__, self.name)
+        return "%s_%s" % (type(self).__name__, self.name)
     
     def to_string(self):
         """ A given CSIDL’s full name """
@@ -159,9 +158,6 @@ class CSIDL(Enum):
     
     def __bytes__(self):
         return bytes(self.to_string(), encoding=ENCODING)
-    
-    def __index__(self):
-        return self.to_int()
     
     def __hash__(self):
         return hash(self.to_string())

@@ -117,6 +117,10 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     
+    # Coverage to 100% doggie!
+    unregister_all()
+    unregister(unregister_all)
+    
     assert not trigger()
     assert signal_for(-666) == signal.SIG_DFL
     

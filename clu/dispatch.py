@@ -23,7 +23,7 @@ signals = (signal.SIGHUP,
 def wraphandler(function):
     """ Wrap a signal handler in a system-exit function """
     @wraps(function)
-    def wrapper(*args):
+    def wrapper(*args): # pragma: no cover
         atexit.unregister(function)
         out = not function(*args)
         sys.exit(int(out))
@@ -93,23 +93,22 @@ def nhandles():
 @export
 def trigger(send=signal.SIGSTOP, frame=None):
     """ Run and unregister all exit handle functions without exiting """
-    if bindhandles.last is not None:
-        handles = bindhandles.last.clone()
-        unregister_all()
-        out = True
-        for handle in handles:
-            try:
-                out &= handle(send, frame)
-            except SystemExit: # pragma: no cover
-                pass
-        return out
-    return False
+    if bindhandles.last is None:
+        return False
+    handles = bindhandles.last.clone()
+    unregister_all()
+    out = True
+    for handle in handles:
+        try:
+            out &= handle(send, frame)
+        except SystemExit: # pragma: no cover
+            pass
+    return out
 
 @export
 def shutdown(send=signal.SIGSTOP, frame=None):
     """ Run all exit handles, and commence an orderly shutdown """
-    if callable(bindhandles.last):
-        atexit.unregister(bindhandles.last)
+    atexit.unregister(bindhandles.last)
     out = not trigger(send, frame)
     sys.exit(int(out))
 
@@ -117,6 +116,9 @@ def shutdown(send=signal.SIGSTOP, frame=None):
 __all__, __dir__ = exporter.all_and_dir()
 
 def test():
+    
+    assert not trigger()
+    assert signal_for(-666) == signal.SIG_DFL
     
     @exithandle
     def xhandle0(signum, frame=None):
@@ -131,6 +133,16 @@ def test():
         sig = signal_for(signum)
         print(f"Received signal: {sig.name} ({sig.value})")
         return True
+    
+    @exithandle
+    def xhandle2(signum, frame=None): # pragma: no cover
+        print("Entering xhandle1")
+        sig = signal_for(signum)
+        print(f"Received signal: {sig.name} ({sig.value})")
+        return True
+    
+    # unregister:
+    assert unregister(xhandle2) is xhandle2
     
     # Won’t register an already-registered handle:
     exithandle(xhandle1)

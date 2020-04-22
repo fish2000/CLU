@@ -124,7 +124,16 @@ def search_for_name(thing):
         subordinate internal function, `search_by_id(…)`,
         uses the LRU cache from `functools`.
     """
-    return search_by_id(id(thing))[1]
+    # N.B. we catch RuntimeErrors and recursively re-attempt the
+    # call, retrying as many times as are necessary, due to suprious
+    # and infuriating “dict changed size during iteration” errors
+    # that certain package modules – whose names I *could* mention here,
+    # ahem – are prone to induce during their initial assumptive
+    # import-everything tree-walk behavior… UGH.
+    try:
+        return search_by_id(id(thing))[1]
+    except RuntimeError: # pragma: no cover
+        return search_for_name(thing)
 
 def search_for_module(thing):
     """ Attempt to find the module containing “thing”, using the
@@ -137,7 +146,16 @@ def search_for_module(thing):
         subordinate internal function, `search_by_id(…)`,
         uses the LRU cache from `functools`.
     """
-    return search_by_id(id(thing))[0]
+    # N.B. we catch RuntimeErrors and recursively re-attempt the
+    # call, retrying as many times as are necessary, due to suprious
+    # and infuriating “dict changed size during iteration” errors
+    # that certain package modules – whose names I *could* mention here,
+    # ahem – are prone to induce during their initial assumptive
+    # import-everything tree-walk behavior… UGH.
+    try:
+        return search_by_id(id(thing))[0]
+    except RuntimeError: # pragma: no cover
+        return search_for_module(thing)
 
 def search_modules(thing, *modules):
     """ Find the name of a thing, according to what it is called

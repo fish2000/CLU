@@ -43,7 +43,7 @@ BPYTHON = '__console__' in sys.modules
 CPYTHON = platform.python_implementation().casefold() == 'cpython'
 
 # Are we debuggin out?
-DEBUG = bool(int(os.environ.get('DEBUG', '0'), base=10))
+DEBUG = bool(int(os.environ.get('DEBUG', '0') or '0', base=10))
 
 # Flag for deleting temporary files:
 DELETE_FLAG = getattr(os, 'O_TEMPORARY', 0)
@@ -52,7 +52,10 @@ DELETE_FLAG = getattr(os, 'O_TEMPORARY', 0)
 DEFAULT_APPSPACE = sys.intern('app')
 
 # Default terminal width:
-DEFAULT_TERMINAL_WIDTH = int(os.environ.get('COLUMNS', '100'), base=10)
+default_terminal_width = '100'
+DEFAULT_TERMINAL_WIDTH = int(os.environ.get('COLUMNS',
+                             default_terminal_width) \
+                          or default_terminal_width, base=10)
 
 # Dollar-sign string (for use in regexing):
 DOLLA = sys.intern('$')

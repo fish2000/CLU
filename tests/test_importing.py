@@ -54,6 +54,42 @@ class TestImporting(object):
             ModuleAlias(Module, 'wat')
         assert "Specialization requires a Module type" in str(exc.value)
     
+    def test_modulealias_respecialization_reprs(self):
+        from clu.importing import ModuleAlias, ModuleBase, Module
+        
+        reprstring = "<class “clu.importing.ModuleAlias”>"
+        
+        assert repr(ModuleAlias) == reprstring
+        
+        reprstring = "ModuleAlias(origin=‘<class-module “ModuleBase”>’, " \
+                     "specializer=’<class-module “clu.app.Module”>’) @ 0x"
+        
+        assert repr(ModuleBase[Module]).startswith(reprstring)
+        assert repr(ModuleBase[Module][Module]).startswith(reprstring)
+        assert repr(ModuleAlias[ModuleBase, Module]).startswith(reprstring)
+        assert repr(ModuleAlias(ModuleBase, Module)).startswith(reprstring)
+        assert repr(ModuleAlias[ModuleBase][Module]).startswith(reprstring)
+        assert repr(ModuleAlias[ModuleBase, None][Module]).startswith(reprstring)
+        assert repr(ModuleAlias(ModuleBase, None)[Module]).startswith(reprstring)
+        
+        reprstring = "ModuleAlias(origin=‘<class-module “clu.app.Module”>’, " \
+                     "specializer=’None’) @ 0x"
+        
+        assert repr(Module[None]).startswith(reprstring)
+        assert repr(ModuleAlias[Module]).startswith(reprstring)
+        assert repr(ModuleAlias[Module, None]).startswith(reprstring)
+        assert repr(ModuleAlias(Module, None)).startswith(reprstring)
+        assert repr(ModuleAlias[Module, None][None]).startswith(reprstring)
+        assert repr(ModuleAlias(Module, None)[None]).startswith(reprstring)
+        
+        with pytest.raises(TypeError) as exc:
+            assert repr(ModuleAlias[None, None]).startswith(reprstring)
+        assert "Specialization requires a Module type" in str(exc.value)
+        
+        with pytest.raises(TypeError) as exc:
+            assert repr(ModuleAlias[None][Module, None]).startswith(reprstring)
+        assert "Specialization requires a Module type" in str(exc.value)
+    
     def test_proxy_module_for_reals(self, consts):
         from clu.importing import ProxyModule, Module, Registry
         

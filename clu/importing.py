@@ -35,7 +35,8 @@ from clu.naming import nameof, dotpath_split, dotpath_join, qualified_name
 
 from clu.predicates import (anyattrs, attr,
                             attr_search, item_search,
-                            mro, typeof, none_function, tuplize)
+                            mro, typeof, none_function,
+                            isexpandable, tuplize)
 
 from clu.repr import stringify, hexid
 from clu.typespace import types
@@ -647,6 +648,18 @@ class ModuleAlias(collections.abc.Callable,
     
     __slots__ = ('origin', 'specializer')
     
+    @classmethod
+    def __class_getitem__(cls, key):
+        """ Subscripting ModuleAlias or one of its subtypes returns an
+            instance of ModuleAlias (q.v. class definition supra.),
+            used to “specialize” ModuleAlias subtypes by inserting the
+            specialization type into the ModuleBase subtypes’ MRO.
+        """
+        if isexpandable(key):
+            origin, specializer, *leftovers = key
+            return cls(origin, specializer)
+        return cls(typeof(key), None)
+    
     def __init__(self, origin, specializer):
         """ Initialize a ModuleAlias, with an origin class and a specializer type """
         if not subclasscheck(origin, ModuleBase):
@@ -656,6 +669,10 @@ class ModuleAlias(collections.abc.Callable,
                 raise TypeError('Specialization requires a Module type')
         self.origin = typeof(origin)
         self.specializer = typeof(specializer)
+    
+    def __getitem__(self, key):
+        """ Re-specialize a ModuleAlias instance """
+        return type(self)(self.origin, typeof(key))
     
     def __hash__(self):
         return hash(self.origin) \

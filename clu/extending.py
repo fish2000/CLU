@@ -122,7 +122,7 @@ class DoubleDutchRegistry(clu.abstract.ReprWrapper,
     def __getitem__(self, clspair):
         try:
             return self.cache[clspair]
-        except KeyError:
+        except KeyError: # pragma: no cover
             cls0, cls1 = clspair
             for cc0, cc1 in pairmro(cls0, cls1):
                 if (cc0, cc1) in self:
@@ -331,10 +331,11 @@ def test():
             return f"INTS: {x}, {y}"
         
         @yodogg.domain(str, str)
-        def yodogg(x, y):
+        def yodogg(x, y): # pragma: no cover
             return f"WAT: {x}, {y}"
         
         assert yodogg.remove(str)
+        assert not yodogg.remove(complex)
         
         @yodogg.annotated
         def yodogg(x: str, y: str):
@@ -350,7 +351,8 @@ def test():
         print("DEFAULTING »", yodogg(object(), object()))
         
         print()
-        print("REGISTRY »", repr(yodogg.registry))
+        regcount = len(yodogg.registry)
+        print(f"REGISTRY ({regcount} items) »", repr(yodogg.registry))
     
     # Run aggregate inline tests:
     return inline.test(100)

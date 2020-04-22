@@ -84,6 +84,7 @@ def codecov(session):
                        'clu.constants.consts',
                        'clu',
                        'clu.version',
+                       'clu.dispatch',
                        'clu.fs.appdirectories',
                        'clu.repl.banners',
                        'clu.repl.columnize',

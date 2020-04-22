@@ -79,9 +79,11 @@ def unregister(function):
 @export
 def unregister_all():
     """ Unregister *all* previously-registered exit handle functions """
-    global exithandles
-    exithandles[:] = list()
-    bindhandles()
+    local_exithandles = list(exithandles)
+    for function in local_exithandles:
+        exithandles.remove(function)
+    if len(local_exithandles) > 0:
+        bindhandles()
 
 @export
 def nhandles():
@@ -98,7 +100,7 @@ def trigger(send=signal.SIGSTOP, frame=None):
         for handle in handles:
             try:
                 out &= handle(send, frame)
-            except SystemExit:
+            except SystemExit: # pragma: no cover
                 pass
         return out
     return False
@@ -114,7 +116,7 @@ def shutdown(send=signal.SIGSTOP, frame=None):
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
-def test(): # pragma: no cover
+def test():
     
     @exithandle
     def xhandle0(signum, frame=None):
@@ -152,4 +154,5 @@ def test(): # pragma: no cover
     return 0
 
 if __name__ == '__main__':
-    sys.exit(test())
+    assert test() == 0
+    shutdown()

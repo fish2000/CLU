@@ -966,7 +966,7 @@ class Directory(BaseFSName,
     def __reversed__(self):
         if self.exists:
             with os.scandir(os.path.realpath(self.name)) as iterscan:
-                yield from (k.name for k in reversed(iterscan))
+                yield from (k.name for k in reversed(tuple(iterscan)))
     
     def __len__(self):
         if not self.exists:

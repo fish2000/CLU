@@ -29,10 +29,10 @@ class OrderedMappingView(collections.abc.MappingView,
         and “collections.abc.Reversible”
     """
     
-    def __reversed__(self):
+    def __reversed__(self): # pragma: no cover
         yield from reversed(self._mapping)
     
-    def __getitem__(self, idx):
+    def __getitem__(self, idx): # pragma: no cover
         return tuple(self)[idx]
 
 @export
@@ -187,28 +187,28 @@ class ChainRepr(Repr):
     def repr_dict(self, mapping, level):
         return self.primerepr(mapping, level)
     
-    def repr_UserDict(self, mapping, level):
+    def repr_UserDict(self, mapping, level): # pragma: no cover
         return self.primerepr(mapping, level)
     
-    def repr_Directory(self, mapping, level):
+    def repr_Directory(self, mapping, level): # pragma: no cover
         return mapping.inner_repr()
     
-    def repr_TemporaryDirectory(self, mapping, level):
+    def repr_TemporaryDirectory(self, mapping, level): # pragma: no cover
         return mapping.inner_repr()
     
-    def repr_SimpleNamespace(self, mapping, level):
+    def repr_SimpleNamespace(self, mapping, level): # pragma: no cover
         return self.primerepr(asdict(mapping), level)
     
-    def repr_Namespace(self, mapping, level):
+    def repr_Namespace(self, mapping, level): # pragma: no cover
         return self.primerepr(asdict(mapping), level)
     
-    def repr_defaultdict(self, mapping, level):
+    def repr_defaultdict(self, mapping, level): # pragma: no cover
         return self.primerepr(mapping, level)
     
-    def repr_OrderedDict(self, mapping, level):
+    def repr_OrderedDict(self, mapping, level): # pragma: no cover
         return self.primerepr(mapping, level)
     
-    def repr_mappingproxy(self, mapping, level):
+    def repr_mappingproxy(self, mapping, level): # pragma: no cover
         return self.primerepr(mapping, level)
     
     def repr_ChainMap(self, chainmap, level):
@@ -240,7 +240,7 @@ class ChainMap(collections.abc.MutableMapping,
     __slots__ = ('maps', '__weakref__')
     
     @classmethod
-    def fromkeys(cls, iterable, *args, **overrides):
+    def fromkeys(cls, iterable, *args, **overrides): # pragma: no cover
         """ Create a new ChainMap instance, using keys plucked from
             “iterable”, and values harvested from the subsequent
             variadic arguments.
@@ -248,7 +248,7 @@ class ChainMap(collections.abc.MutableMapping,
         return cls(dict.fromkeys(iterable, *args), **overrides)
     
     @classmethod
-    def fromitems(cls, *iterables, **overrides):
+    def fromitems(cls, *iterables, **overrides): # pragma: no cover
         """ Create a new ChainMap instance, using key-value pairs
             obtained from one or more iterables, with any keyword
             arguments serving as optional overrides.
@@ -562,14 +562,13 @@ def merge(*dicts, **overrides):
     """ Merge all dictionary arguments into a new `dict` instance, using any
         keyword arguments as item overrides in the final `dict` instance returned
     """
-    if 'cls' in overrides:
-        raise NameError('Cannot override the `cls` value')
-    return merge_as(*dicts, cls=dict, **overrides)
+    cls = overrides.pop('cls', dict)
+    return merge_as(*dicts, cls=cls, **overrides)
 
 # DICT STUFF: asdict(…)
 
 @export
-def asdict(thing):
+def asdict(thing): # pragma: no cover
     """ asdict(thing) → returns either thing, thing.__dict__, or dict(thing) as necessary """
     from clu.predicates import haspyattr, or_none
     from clu.typology import ismapping
@@ -716,7 +715,7 @@ def test():
         """ Nested map source for ChainMap """
         from clu.config.keymap import nestedmaps
         
-        chainN = ChainMap(nestedmaps())
+        chainN = ChainMap(nestedmaps(), {})
         
         print("REPR»CHAINÑ:")
         print()
@@ -728,8 +727,10 @@ def test():
         """ Compatibility checks with “collections.ChainMap” """
         from clu.config.keymap import flatdict, Flat
         
-        chain0 = ChainMap(dict_arbitrary(), Flat(flatdict()))
-        chainO = collections.ChainMap(dict_arbitrary(), Flat(flatdict()))
+        overrides = { 'WTF' : 'HAX' }
+        
+        chain0 = ChainMap(dict_arbitrary(), Flat(flatdict()), **overrides)
+        chainO = collections.ChainMap(dict_arbitrary(), Flat(flatdict()), overrides)
         
         assert len(chain0) == len(chainO)
         
@@ -798,19 +799,38 @@ def test():
         print(repr(chain0))
         print()
     
+    @inline
+    def test_eight():
+        """ Check OrderedMappingView reversals """
+        for key0, key1 in zip(reversed(fsdata().keys()), reversed(fsdata())):
+            assert key0 == key1
+        
+        for val0, key1 in zip(reversed(fsdata().values()), reversed(fsdata())):
+            assert val0 == fsdata()[key1]
+        
+        for items0, key1 in zip(reversed(fsdata().items()), reversed(fsdata())):
+            key0, val0 = items0
+            assert key0 == key1
+            assert val0 == fsdata()[key1]
+    
+    @inline
+    def test_nine():
+        """ Check OrderedMappingView indexing """
+        for idx, key in enumerate(fsdata().keys()):
+            val = fsdata()[key]
+            assert key == fsdata().keys()[idx]
+            assert val == fsdata().values()[idx]
+            key0, val0 = fsdata().items()[idx]
+            assert key == key0
+            assert val == val0
+    
     @inline.diagnostic
     def restore_environment():
         """ Restore environment from stashed values """
         os.environ = stash
     
-    # @inline.diagnostic
-    # def show_environment():
-    #     """ Show environment variables """
-    #     for envline in format_environment():
-    #         print(envline)
-    
     # Run all inline tests, return POSIX status
-    return inline.test(100)
+    return inline.test(10)
 
 if __name__ == '__main__':
     sys.exit(test())

@@ -268,6 +268,9 @@ class TestFsAppdirectories(object):
         assert bytes(CSIDL.APPDATA) == b'CSIDL_APPDATA'
         assert bytes(CSIDL.COMMON_APPDATA) == b'CSIDL_COMMON_APPDATA'
         assert bytes(CSIDL.LOCAL_APPDATA) == b'CSIDL_LOCAL_APPDATA'
+        
+        for csidl in CSIDL:
+            assert csidl.to_int() == CSIDL.for_name(csidl.to_string()).const == int(csidl)
     
     def test_LINUX_yes_version_no_author(self, arbitrary,
                                                environment):

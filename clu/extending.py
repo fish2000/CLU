@@ -105,9 +105,10 @@ def pair(one, two):
 Ω = pair
 
 @export
-class DoubleDutchRegistry(clu.abstract.SlottedRepr,
+class DoubleDutchRegistry(clu.abstract.ReprWrapper,
                           collections.abc.MutableMapping,
-                          collections.abc.Sized):
+                          collections.abc.Sized,
+                          metaclass=clu.abstract.Slotted):
     
     __slots__ = ('registry', 'cache')
     
@@ -115,11 +116,8 @@ class DoubleDutchRegistry(clu.abstract.SlottedRepr,
         self.registry = {} # type: dict
         self.cache    = zict.LRU(64, self.registry)
     
-    def __len__(self):
-        return len(self.registry)
-    
     def __contains__(self, clspair):
-        return clspair in self.registry
+        return clspair in self.cache
     
     def __getitem__(self, clspair):
         try:
@@ -127,7 +125,7 @@ class DoubleDutchRegistry(clu.abstract.SlottedRepr,
         except KeyError:
             cls0, cls1 = clspair
             for cc0, cc1 in pairmro(cls0, cls1):
-                if (cc0, cc1) in self.cache:
+                if (cc0, cc1) in self:
                     return self.cache[(cc0, cc1)]
             else:
                 raise
@@ -138,8 +136,32 @@ class DoubleDutchRegistry(clu.abstract.SlottedRepr,
     def __delitem__(self, clspair):
         del self.cache[clspair]
     
+    def __len__(self):
+        return len(self.cache)
+    
     def __iter__(self):
         yield from self.cache.keys()
+    
+    def keyname(self, key):
+        cls0, cls1 = key
+        return f"{cls0.__name__!s}, {cls1.__name__!s}"
+    
+    def funcname(self, key):
+        function = self.cache[key]
+        name = attr(function, '__qualname__', '__name__')
+        signature = inspect.signature(function)
+        return f"{name!s}{signature!s}"
+    
+    def inner_repr(self):
+        from pprint import pformat
+        most = max(len(self.keyname(key)) for key in self)
+        # cacheout = { self.keyname(key) : self.cache[key] for key in self }
+        # return "\n%s" % pformat(cacheout, indent=4)
+        out = ""
+        for key in self:
+            out += "    %s : %s \n" % (self.keyname(key).ljust(most),
+                                       self.funcname(key))
+        return f"{{ \n{out} }}"
 
 ASSIGNMENTS = pytuple('name', 'qualname', 'doc')
 UPDATES = tuple() # type: tuple
@@ -171,6 +193,16 @@ class DoubleDutchFunction(collections.abc.Callable):
                         argument1,
                        *args,
                       **kwargs)
+    
+    def __contains__(self, clspair):
+        return self.registry.__contains__(clspair)
+    
+    def remove(self, cls0, cls1=None):
+        clspair = (typeof(cls0), typeof(cls1 or cls0))
+        if clspair in self:
+            del self.registry[clspair]
+            return True
+        return False
     
     def domain(self, cls0, cls1):
         def decoration(function):
@@ -287,17 +319,8 @@ def test():
         
         assert Ω('yo', 'dogg').pack() == "yo:dogg"
     
-    # @inline
-    def test_four():
-        print()
-        
-        pout.v(__all__)
-        pout.v(__dir__())
-        pout.v(exporter)
-    
     @inline
-    def test_five():
-        print()
+    def test_four():
         
         @doubledutch
         def yodogg(x, y):
@@ -309,6 +332,12 @@ def test():
         
         @yodogg.domain(str, str)
         def yodogg(x, y):
+            return f"WAT: {x}, {y}"
+        
+        assert yodogg.remove(str)
+        
+        @yodogg.annotated
+        def yodogg(x: str, y: str):
             return f"STRS: {x}, {y}"
         
         @yodogg.annotated

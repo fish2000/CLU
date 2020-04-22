@@ -54,8 +54,6 @@ class System(Enum):
         """
         if type(value) is cls:
             return value
-        if Enum in type(value).__mro__:
-            return value
         if type(value) in (bytes, bytearray):
             return cls.from_string(str(value, encoding=ENCODING))
         return cls.from_string(value) # Assume string as last resort
@@ -158,6 +156,9 @@ class CSIDL(Enum):
     
     def __bytes__(self):
         return bytes(self.to_string(), encoding=ENCODING)
+    
+    def __int__(self):
+        return self.to_int()
     
     def __hash__(self):
         return hash(self.to_string())

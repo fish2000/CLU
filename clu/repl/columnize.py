@@ -54,7 +54,13 @@ def computed_display_width():
         • Falls back to “consts.SEPARATOR_WIDTH”,
         • Failing that, returns 80 (an altogether reasonable number).
     """
-    return int(os.environ.get('COLUMNS', consts.SEPARATOR_WIDTH)) or 80
+    # N.B. the first “or” may seem redundant. But some REPL apps, IME,
+    # will irritatingly set a zero-length-string value for $COLUMNS…
+    # which that’s why that is there: for exactly those varieties
+    # of head-scratchingly imbecilic situations. Yes.
+    return int(os.environ.get('COLUMNS', consts.SEPARATOR_WIDTH) \
+                                      or consts.SEPARATOR_WIDTH) \
+                                      or 80
 
 default_opts = {
     'standard_display' : False,  # Check if file has changed since last time
@@ -122,7 +128,8 @@ def columnize(array, display_width=computed_display_width(), **opts):
             o['line_suffix']        = ",\n"
     
     fmt = o.get('format')
-    if not isinstance(fmt, clu.abstract.Format):
+    
+    if not isinstance(fmt, clu.abstract.Format): # pragma: no cover
         if isinstance(fmt, type(None)):
             fmt = opts.get('format')
         if isinstance(fmt, (bytes, bytearray)):

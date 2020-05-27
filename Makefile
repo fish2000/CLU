@@ -45,10 +45,10 @@ twine-upload: cython sdist wheel
 	twine upload -s $(PROJECT_BASE)/dist/*
 
 bump:
-	bumpversion --verbose patch
+	bump2version --verbose patch
 
 bigbump:
-	bumpversion --verbose minor
+	bump2version --verbose minor
 
 check: clean-test-artifacts
 	check-manifest -v

@@ -57,7 +57,7 @@ class TestImporting(object):
     def test_modulealias_respecialization_reprs(self):
         from clu.importing import ModuleAlias, ModuleBase, Module
         
-        reprstring = "<class “clu.importing.ModuleAlias”>"
+        reprstring = "<class “clu.importing.base.ModuleAlias”>"
         
         assert repr(ModuleAlias) == reprstring
         
@@ -382,7 +382,7 @@ class TestImporting(object):
     def test_polymertype_cache_methods(self, consts):
         from clu.importing import Finder, Loader, Module
         from clu.importing import ModuleBase, PolymerType
-        from clu.importing import initialize_new_types
+        from clu.importing.base import initialize_new_types
         from clu.typology import iterlen
         from clu.exporting import thismodule
         
@@ -504,7 +504,9 @@ class TestImporting(object):
         
         from clu.predicates import attr_across, pyattr_across
         
-        assert pyattr_across('module', Module, Finder, Loader) == ('clu.importing', 'clu.importing', 'clu.importing')
+        assert pyattr_across('module', Module, Finder, Loader) == ('clu.importing.base',
+                                                                   'clu.importing.base',
+                                                                   'clu.importing.base')
         
         # names = pyattr_across('module', application,
         #                                 application_t,

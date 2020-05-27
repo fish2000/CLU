@@ -381,6 +381,8 @@ class ANSIFormat(clu.abstract.Format,
         suffix = prefix and self.RESET_ALL or ""
         return f"{prefix}{string!s}{suffix}"
 
+ansi_sanitizer_re = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
 @export
 class ANSISanitizer(clu.abstract.Sanitizer):
     
@@ -389,9 +391,9 @@ class ANSISanitizer(clu.abstract.Sanitizer):
             
             Any arguments passed will be unceremoniously swallowed.
         """
-        # q.v. https://stackoverflow.com/a/14693789/298171 for the regex
-        self.regex = re.compile(
-                     r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        # q.v. https://stackoverflow.com/a/14693789/298171 for the origin
+        # of the regex (supra.) –
+        self.regex = ansi_sanitizer_re
 
 @export
 def print_ansi(text, **kwargs):
@@ -683,30 +685,28 @@ class DocFormat(clu.abstract.Format):
         return self.putln()
     
     def render(self, thing):
-        # cls = type(self)
-        thingname = nameof(thing)
+        head = f"__doc__ for “{nameof(thing)}”"
         doc = inspect.getdoc(thing) or "«¡no docstring found!»"
-        sig = signature(thing) or ""
-        paras = paragraphize(doc)
-        self.putln()
+        sig = signature(thing)
+        start = int(not isinspectable(thing)) * 2
+        paragraphs = paragraphize(doc)[start:]
         
-        self.putcenter(f"__doc__ for “{thingname}”",
-                       color=self.get('head'))
+        self.putln()
+        self.putcenter(head, color=self.get('head'))
         self.putln()
         
         if sig:
             self.putcode(sig)
             self.putln(count=int(not self.isatty))
         
-        start = int(not isinspectable(thing)) * 2
-        for paragraph in paras[start:]:
+        for paragraph in paragraphs:
             self.putpara(paragraph)
+        
+        self.putln(count=2)
     
     def __call__(self, *things):
         for thing in things:
             self.render(thing)
-        
-        self.putln(count=2)
 
 def old_ansidoc(*things):
     """ old_ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
@@ -718,7 +718,7 @@ def old_ansidoc(*things):
         # Process each things’ name and doc
         thingname = nameof(thing)
         doc = inspect.getdoc(thing) or "«¡no docstring found!»"
-        sig = signature(thing) or ""
+        sig = signature(thing)
         paras = paragraphize(doc)
         
         print_ansi_centered(f"__doc__ for “{thingname}”",

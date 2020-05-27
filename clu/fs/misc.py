@@ -98,7 +98,7 @@ def extension(path, dotted=False):
     return out.lstrip(QUALIFIER)
 
 @export
-def swapext(path, new_extension):
+def swapext(path, new_extension=None):
     """ Swap the file extension of the path with a newly specified one –
         if no extension is present, the newly specified extension will be
         amended to the path; the new extension can provide or omit its
@@ -113,10 +113,10 @@ def swapext(path, new_extension):
             >>> swapext('/yo/dogg', 'odb')
             '/yo/dogg.odb'
     """
-    bulk = os.path.splitext(path)[0]
+    bulk = os.path.splitext(u8str(path))[0]
     if new_extension is None:
         return bulk
-    return QUALIFIER.join((bulk, new_extension.lstrip(QUALIFIER)))
+    return QUALIFIER.join((bulk, u8str(new_extension).lstrip(QUALIFIER)))
 
 @export
 def filesize(path):

@@ -94,7 +94,7 @@ pythonpy==0.4.11
 pytype==2019.12.17
 pytz==2019.3
 pytzdata==2019.3
-PyYAML==5.3
+PyYAML==5.4
 pyzmq==18.1.1
 qtconsole==4.6.0
 recommonmark==0.6.0

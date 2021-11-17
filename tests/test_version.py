@@ -25,7 +25,7 @@ class TestVersion(object):
         
         vtags0 = git_version_tags()
         
-        if gitrun:
+        if vtags0:
             version = cluversion.to_string()
             assert vtags0 is not None
             assert vtags0.startswith(f'v{version}')

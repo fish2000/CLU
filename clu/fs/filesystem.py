@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from distutils.spawn import find_executable
 from functools import lru_cache, wraps
 
 cache = lambda function: lru_cache(maxsize=128, typed=True)(function)

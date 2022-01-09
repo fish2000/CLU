@@ -63,7 +63,7 @@ class TestMathematics(object):
         assert isdtype(complex)
         assert isdtype(numpy.float32)
         assert isdtype(numpy.float64)
-        assert isdtype(numpy.floating)
+        # assert isdtype(numpy.floating) <- this is depreciated in numpy
         assert isdtype(numpy.double)
         assert not isdtype(numpy.array)
         

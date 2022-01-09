@@ -34,9 +34,13 @@ def itermodule(module):
         contained in a given module (although it’ll probably work
         for classes and instances too – anything `dir()`-able.)
     """
+    # the `getattr(…)` call below uses a default value of zero
+    # to supress weird bugs that can arise when iterating through
+    # the contents of third-party modules that do “clever” things
+    # when their modules execute or whatever.
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
-    values = (getattr(module, key) for key in keys)
+    values = (getattr(module, key, 0) for key in keys)
     yield from zip(keys, values)
 
 def moduleids(module):
@@ -53,9 +57,13 @@ def itermoduleids(module):
         tuples for all things comntained in a given module – q.v.
         `itermodule(…)` implementation supra.
     """
+    # the `getattr(…)` call below uses a default value of zero
+    # to supress weird bugs that can arise when iterating through
+    # the contents of third-party modules that do “clever” things
+    # when their modules execute or whatever.
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
-    ids = (id(getattr(module, key)) for key in keys)
+    ids = (id(getattr(module, key, 0)) for key in keys)
     yield from zip(keys, ids)
 
 # This goes against all logic and reason, but it fucking seems

@@ -64,18 +64,6 @@ def script_path():
     return SCRIPT_PATH
 
 @export
-def which(binary_name, pathvar=None):
-    """ Deduces the path corresponding to an executable name,
-        as per the UNIX command `which`. Optionally takes an
-        override for the $PATH environment variable.
-        Always returns a string - an empty one for those
-        executables that cannot be found.
-    """
-    return find_executable(binary_name, pathvar or which.pathvar) or ""
-
-which.pathvar = PATH
-
-@export
 def back_tick(command,  as_str=True,
                        ret_err=False,
                      raise_err=None, **kwargs):
@@ -989,6 +977,36 @@ class Directory(BaseFSName,
     
     def __rtruediv__(self, filepath):
         return self.directory(filepath).subdirectory(self)
+
+@export
+def which(binary_name, pathvar=None, pathsep=None):
+    """ Deduces the path corresponding to an executable name,
+        as per the UNIX command `which`. Optionally takes an
+        override for the $PATH environment variable.
+        Always returns a string - an empty one for those
+        executables that cannot be found.
+    """
+    # The original version of this relied on the `find_executable(…)`
+    # function from `distutils.spawn` – it’s been rewritten to use the
+    # CLU internals (which is actually faster, and also betterer).
+    if not pathvar:
+        pathvar = which.pathvar
+    
+    # Allow specification of weird path separators:
+    if not pathsep:
+        pathsep = os.pathsep
+    
+    # The “filter(None, …)” clause removes nonexistant paths, as path
+    # instances evaluated in boolean context have a value that reflects
+    # whether or not they exist:
+    for path in filter(None, (Directory(p) for p in pathvar.split(pathsep))):
+        if binary_name in path:
+            return path.subpath(binary_name)
+    
+    # Empty string indicates failure, bubkiss, nada:
+    return ''
+
+which.pathvar = PATH
 
 @export
 class cd(Directory):

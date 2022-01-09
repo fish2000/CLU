@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Load the CLU plugin for `pytest`:
-pytest_plugins = "clu.testing.pytest"
+#pytest_plugins = "clu.testing.pytest"
 
 # Directories to exclude (using “norecursedirs”):
 excludes = ('.git', '.svn', '.hg', '.nox', '.tox', 'CVS',

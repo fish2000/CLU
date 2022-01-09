@@ -37,7 +37,7 @@ def itermodule(module):
     # the `getattr(…)` call below uses a default value of `False`
     # to supress weird bugs that can arise when iterating through
     # the contents of third-party modules that do “clever” things
-    # when their modules execute or whatever.
+    # when their module code executes or whatever.
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
     values = (getattr(module, key, False) for key in keys)
@@ -60,7 +60,7 @@ def itermoduleids(module):
     # the `getattr(…)` call below uses a default value of zero
     # to supress weird bugs that can arise when iterating through
     # the contents of third-party modules that do “clever” things
-    # when their modules execute or whatever.
+    # when their module code executes or whatever.
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
     ids = (id(getattr(module, key, 0)) for key in keys)

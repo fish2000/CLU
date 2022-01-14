@@ -536,7 +536,7 @@ class ANSICodeHighlighter(clu.abstract.SlottedFormat):
 
 @export
 class PygmentsHighlighter(clu.abstract.Format):
-    
+     
     __slots__ = ('lexer', 'formatter')
     
     def __init__(self, language='python',

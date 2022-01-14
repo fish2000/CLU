@@ -29,18 +29,22 @@ from clu.constants.exceptions import BadDotpathWarning, ExportError, ExportWarni
 # Q.v. `search_by_id(…)` function sub.
 cache = lambda function: lru_cache(maxsize=128, typed=False)(function)
 
+# Not what you are looking for
+NotYourThing = object()
+NotYourID = id(NotYourThing)
+
 def itermodule(module):
     """ Get an iterable of `(name, thing)` tuples for all things
         contained in a given module (although it’ll probably work
         for classes and instances too – anything `dir()`-able.)
     """
-    # the `getattr(…)` call below uses a default value of `False`
+    # the `getattr(…)` call below uses a default of `NotYourThing`
     # to supress weird bugs that can arise when iterating through
     # the contents of third-party modules that do “clever” things
     # when their module code executes or whatever.
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
-    values = (getattr(module, key, False) for key in keys)
+    values = (getattr(module, key, NotYourThing) for key in keys)
     yield from zip(keys, values)
 
 def moduleids(module):
@@ -57,13 +61,13 @@ def itermoduleids(module):
         tuples for all things comntained in a given module – q.v.
         `itermodule(…)` implementation supra.
     """
-    # the `getattr(…)` call below uses a default value of zero
-    # to supress weird bugs that can arise when iterating through
-    # the contents of third-party modules that do “clever” things
-    # when their module code executes or whatever.
+    # the `getattr(…)` call below uses a default value of the id
+    # of `NotYourThing` to supress weird bugs that can arise when
+    # iterating through the contents of third-party modules that
+    # do “clever” things when their module code executes or whatever.
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
-    ids = (id(getattr(module, key, 0)) for key in keys)
+    ids = (id(getattr(module, key, NotYourID)) for key in keys)
     yield from zip(keys, ids)
 
 # This goes against all logic and reason, but it fucking seems

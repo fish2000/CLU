@@ -192,6 +192,8 @@ faintly you came tapping, tapping at my chamber door?
 """
 
 # Python version figlet banners – using the figlet “Colossal” typeface:
+# $ echo "python3.11" | figlet -w 120 -k -f colossal | pbcopy
+
 banners = {}
 
 banners['python3.x'] = """

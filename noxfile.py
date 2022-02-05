@@ -40,14 +40,14 @@ def checkmodule(session, module):
 def pytest(session):
     """ Run CLU’s entire unit-test suite with `pytest` """
     session.env['MACOSX_DEPLOYMENT_TARGET']       = '10.14'
-    session.env['PYTEST_DISABLE_PLUGIN_AUTOLOAD'] = '1'
+    # session.env['PYTEST_DISABLE_PLUGIN_AUTOLOAD'] = '1'
     session.install("-r", "requirements/install.txt")
     session.install("-r", "requirements/nox/repl.txt")
-    session.run('pytest')
+    session.run('pytest', '--no-delete-temps')
 
 def parametrized_inline_tests():
-    from clu import all
-    for dotpath in all.inline_tests():
+    import clu.all
+    for dotpath in clu.all.inline_tests():
         yield nox.param(dotpath,
                      id=dotpath.lstrip('clu').lstrip('.'))
 

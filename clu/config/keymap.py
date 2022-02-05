@@ -9,7 +9,6 @@ import sys
 
 from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
 from clu.config.ns import unpack_ns, pack_ns
-from clu.predicates import tuplize
 from clu.typology import ismapping
 from clu.exporting import Exporter
 
@@ -24,7 +23,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
     
     """ A concrete immutable – or frozen – KeyMap class with a flat internal topology. """
     
-    __slots__ = tuplize('dictionary')
+    __slots__ = 'dictionary'
     
     def __init__(self, dictionary=None, **updates):
         """ Initialize a flat KeyMap instance from a target dictionary.
@@ -124,7 +123,7 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
         or, if you will, a nested – internal topology.
     """
     
-    __slots__ = tuplize('tree')
+    __slots__ = 'tree'
     
     def __init__(self, tree=None, **updates):
         """ Initialize an articulated (née “nested”) KeyMap instance from a

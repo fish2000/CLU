@@ -259,7 +259,7 @@ class StringField(FieldBase):
 @export
 class PathField(StringField):
     
-    __slots__ = tuplize('requisite')
+    __slots__ = 'requisite'
     
     def __init__(self, default=None,
                        validator=None,
@@ -498,7 +498,7 @@ maybefieldbase  = optional(FieldBase)
 @export
 class ListField(FieldBase):
     
-    __slots__ = tuplize('value')
+    __slots__ = 'value'
     
     def __init__(self, default=list,
                        value=None,
@@ -539,7 +539,7 @@ class ListField(FieldBase):
 @export
 class TupleField(FieldBase):
     
-    __slots__ = tuplize('value')
+    __slots__ = 'value'
     
     def __init__(self, default=tuple,
                        value=None,
@@ -580,7 +580,7 @@ class TupleField(FieldBase):
 @export
 class SetField(FieldBase):
     
-    __slots__ = tuplize('value')
+    __slots__ = 'value'
     
     def __init__(self, default=set,
                        value=None,
@@ -621,7 +621,7 @@ class SetField(FieldBase):
 @export
 class FrozenSetField(FieldBase):
     
-    __slots__ = tuplize('value')
+    __slots__ = 'value'
     
     def __init__(self, default=frozenset,
                        value=None,
@@ -662,7 +662,7 @@ class FrozenSetField(FieldBase):
 @export
 class DictField(FieldBase):
     
-    __slots__ = tuplize('value')
+    __slots__ = 'value'
     
     def __init__(self, default=dict,
                        key=None,

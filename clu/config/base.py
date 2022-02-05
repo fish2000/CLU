@@ -15,7 +15,7 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, PROJECT_NAME, NoDefault
 from clu.constants.consts import ENVIRONS_SEP, NAMESPACE_SEP
-from clu.predicates import isiterable, tuplize
+from clu.predicates import isiterable
 from clu.typology import iterlen, ismapping
 from clu.exporting import Exporter
 
@@ -333,7 +333,7 @@ class EnvBase(NamespacedMutableMapping,
         class keyword and furnishes a read-only descriptor based on that
         keywords’ value.
     """
-    __slots__ = tuplize('environment')
+    __slots__ = 'environment'
     
     @classmethod
     def prefix(cls, namespace=None):

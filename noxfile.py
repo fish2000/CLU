@@ -63,7 +63,7 @@ def inline(session, module):
 @nox.session
 def codecov(session):
     """ Run `codecov`, updating CLU’s statistics on codecov.io """
-    from clu import all
+    import clu.all
     from clu.fs.filesystem import TemporaryName
     coveragefile = TemporaryName(prefix='coverage-',
                                  suffix='bin',
@@ -95,7 +95,7 @@ def codecov(session):
                     silent=True)
     
     # Run each inline-test function:
-    for modulename in all.inline_tests():
+    for modulename in clu.all.inline_tests():
         session.run('coverage',
                     'run', '--append', '-m', modulename,
                      silent=True)

@@ -743,7 +743,7 @@ class Directory(BaseFSName,
             Note that the “followlinks” default here is True, whereas
             the underlying function defaults to False for that argument.
         """
-        return os.walk(self.name, followlinks=followlinks)
+        yield from os.walk(self.name, followlinks=followlinks)
     
     def walkback(self, followlinks=True):
         """ Iterator over reverse-walked directories and files.

@@ -757,7 +757,7 @@ class Directory(BaseFSName,
             in-situ doesn’t do anything, because think about it.
         """
         directory = self
-        while directory.name != '/':
+        while True:
             with os.scandir(directory.realpath()) as iterscan:
                 dirs = []
                 files = []
@@ -767,6 +767,8 @@ class Directory(BaseFSName,
                     else:
                         files.append(direntry.name)
                 yield directory, dirs, files
+            if directory.name == '/':
+                break
             directory = directory.parent()
     
     def flatten(self, destination, suffix=None, new_suffix=None):

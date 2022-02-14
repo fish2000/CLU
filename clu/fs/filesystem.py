@@ -767,8 +767,8 @@ class Directory(BaseFSName,
             dirs = []
             files = []
             with os.scandir(directory.realpath()) as iterscan:
-                sortedscan = sorted(iterscan, key=is_dir_predicate)
-                for is_dir, group in groupby(sortedscan, key=is_dir_predicate):
+                for is_dir, group in groupby(sorted(iterscan, key=is_dir_predicate),
+                                                              key=is_dir_predicate):
                     if is_dir:
                         dirs = list(group)
                     else:

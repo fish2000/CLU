@@ -745,6 +745,30 @@ class Directory(BaseFSName,
         """
         return os.walk(self.name, followlinks=followlinks)
     
+    def walkback(self, followlinks=True):
+        """ Iterator over reverse-walked directories and files.
+            
+            N.B. Since I had to implement this myself, “followlinks”
+            doesn’t do anything yet. This is because I am lazy and
+            I lack intellectual rigor.
+            
+            The return triple resemples that yielded by “os.walk(…)” –
+            but unlike that function, modifying the directory listing
+            in-situ doesn’t do anything, because think about it.
+        """
+        directory = self
+        while directory.name != '/':
+            with os.scandir(directory.realpath()) as iterscan:
+                dirs = []
+                files = []
+                for direntry in iterscan:
+                    if direntry.is_dir():
+                        dirs.append(direntry.name)
+                    else:
+                        files.append(direntry.name)
+                yield directory, dirs, files
+            directory = directory.parent()
+    
     def flatten(self, destination, suffix=None, new_suffix=None):
         """ Copy the entire directory tree, all contents included, to a new
             destination path – with all files residing within the same directory

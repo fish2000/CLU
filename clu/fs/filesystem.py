@@ -756,16 +756,23 @@ class Directory(BaseFSName,
             but unlike that function, modifying the directory listing
             in-situ doesn’t do anything, because think about it.
         """
+        from itertools import groupby
+        
+        # Use a boolean predicate to group entries:
         directory = self
+        is_dir_predicate = lambda direntry: direntry.is_dir()
+        
+        # Recurse upwards until we hit the filesystem root:
         while True:
+            dirs = []
+            files = []
             with os.scandir(directory.realpath()) as iterscan:
-                dirs = []
-                files = []
-                for direntry in iterscan:
-                    if direntry.is_dir():
-                        dirs.append(direntry.name)
+                sortedscan = sorted(iterscan, key=is_dir_predicate)
+                for is_dir, group in groupby(sortedscan, key=is_dir_predicate):
+                    if is_dir:
+                        dirs = list(group)
                     else:
-                        files.append(direntry.name)
+                        files = list(group)
                 yield directory, dirs, files
             if directory.name == '/':
                 break

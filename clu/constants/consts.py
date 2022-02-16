@@ -142,6 +142,13 @@ QUALIFIER = sys.intern(os.extsep)
 # Delimiter for repr-strings indicating instance IDs:
 REPR_DELIMITER = sys.intern('@')
 
+try:
+    # Determine the root path for the current filesystem:
+    ROOT_PATH = sys.intern(path(BASEPATH).absolute().root)
+except (AttributeError, SyntaxError): # pragma: no cover
+    # Fall back to the Unix default
+    ROOT_PATH = sys.intern('/')
+
 # List of Python’s built-in singleton types:
 NoneType = type(None)
 EllipsisType = type(Ellipsis)
@@ -202,7 +209,7 @@ WHITESPACE = re.compile(r'\s+')
 class NoDefault(object):
     """ A singleton object to signify a lack of an argument. """
     __slots__ = tuple() # type: tuple
-    def __new__(cls, *a, **k): # pragma: no cover
+    def __new__(cls, *args, **kwargs): # pragma: no cover
         return cls
 
 # Manually rename `pytuple(…)` per mechanism of “clu.exporting.Exporter”:
@@ -241,6 +248,7 @@ __all__ = ('APPNAME',
            'PYTHON_VERSION',
            'QUALIFIER',
            'REPR_DELIMITER',
+           'ROOT_PATH',
            'SEPARATOR_WIDTH',
            'SINGLETON_TYPES',
            'STRINGPAIR',

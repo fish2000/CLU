@@ -22,7 +22,7 @@ iterchain = itertools.chain.from_iterable
 
 from clu.constants.consts import (λ, φ, # type: ignore
                                   APPNAME, BASEPATH, BUILTINS,
-                                  EXPORTER_NAME, QUALIFIER,
+                                  EXPORTER_NAME, QUALIFIER, ROOT_PATH,
                                   NoDefault, pytuple)
 from clu.constants.exceptions import BadDotpathWarning, ExportError, ExportWarning
 
@@ -238,9 +238,6 @@ replaceable_endings  = tuple(f"{pre}{suf}" \
                                                   ending_suffixes))
 replaceable_endings += ending_suffixes
 
-# Derive the filesystem’s root path representation:
-root_path = Path(BASEPATH).absolute().root
-
 def path_to_dotpath(path, relative_to=None):
     """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
         to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
@@ -257,7 +254,7 @@ def path_to_dotpath(path, relative_to=None):
     # Relativize the path to either the “relative_to” arg
     # …or – if that’s not a thing – the filesystem root,
     # and replace path separators with dots:
-    relpath = os.path.relpath(path, start=relative_to or root_path)
+    relpath = os.path.relpath(path, start=relative_to or ROOT_PATH)
     dotpath = relpath.replace(os.path.sep, QUALIFIER)
     
     # Trim off any remaining “.py” suffixes,

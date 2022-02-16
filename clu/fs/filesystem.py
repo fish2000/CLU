@@ -13,7 +13,7 @@ import shutil
 import sys, re, os
 import zipfile
 
-from clu.constants.consts import ENCODING, PATH, SCRIPT_PATH
+from clu.constants.consts import ENCODING, PATH, ROOT_PATH, SCRIPT_PATH
 from clu.constants.exceptions import ExecutionError, FilesystemError
 from clu.predicates import attr, allattrs, isexpandable, anyof
 from clu.sanitizer import utf8_encode
@@ -774,7 +774,7 @@ class Directory(BaseFSName,
                     else:
                         files = list(group)
                 yield directory, dirs, files
-            if directory.name == '/':
+            if directory.name == ROOT_PATH:
                 break
             directory = directory.parent()
     

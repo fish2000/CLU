@@ -22,6 +22,7 @@ from clu.fs.abc import BaseFSName, TemporaryFileWrapper
 from clu.fs.misc import differentfile, filesize, gethomedir, masked_permissions
 from clu.fs.misc import re_matcher, re_searcher, suffix_searcher, re_excluder
 from clu.fs.misc import swapext, u8str, extension, modeflags, temporary
+from clu.fs.misc import grouped
 from clu.exporting import Exporter, path_to_dotpath
 
 exporter = Exporter(path=__file__)
@@ -756,23 +757,21 @@ class Directory(BaseFSName,
             but unlike that function, modifying the directory listing
             in-situ doesn’t do anything, because think about it.
         """
-        from itertools import groupby
-        
         # Use a boolean predicate to group entries:
-        directory = self
         is_dir_predicate = lambda direntry: direntry.is_dir()
+        directory = self
         
         # Recurse upwards until we hit the filesystem root:
         while True:
             dirs = []
             files = []
             with os.scandir(directory.realpath()) as iterscan:
-                for is_dir, group in groupby(sorted(iterscan, key=is_dir_predicate),
-                                                              key=is_dir_predicate):
+                # Q.v. “grouped(…)” in clu.fs.misc supra:
+                for is_dir, group in grouped(iterscan, predicate=is_dir_predicate):
                     if is_dir:
-                        dirs = list(group)
+                        dirs = [thing.name for thing in group]
                     else:
-                        files = list(group)
+                        files = [thing.name for thing in group]
                 yield directory, dirs, files
             if directory.name == ROOT_PATH:
                 break

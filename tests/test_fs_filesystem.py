@@ -14,6 +14,9 @@ class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     
+    def test_walkback(self):
+        pass
+    
     def test_suffixes(self, dirname):
         from clu.fs.misc import extension
         

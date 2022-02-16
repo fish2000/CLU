@@ -10,6 +10,9 @@ class TestFsMisc(object):
     
     """ Run the tests for the “clu.fs.misc” module. """
     
+    def test_grouped(self):
+        pass
+    
     def test_temporary(self, temporarydir):
         from clu.fs.misc import temporary
         from clu.fs.filesystem import write_to_path

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from functools import lru_cache
+from itertools import groupby
 
 import sys, re, os
 
@@ -214,6 +215,18 @@ def temporary(suffix='', prefix='', parent=None, **kwargs):
         raise FilesystemError(f"temporary(): file exists: {fullpath}")
     
     return fullpath
+
+@export
+def grouped(iterator, predicate=true_function):
+    """ Sugar for calling “itertools.groupby(…)” as follows:
+        
+        >>> groupby(sorted(iterator, key=predicate), key=predicate)
+    
+        ... which that’s basically how you have to call it usefully.
+    """
+    yield from groupby(sorted(iterator, key=predicate),
+                                        key=predicate)
+    
 
 @export
 def u8encode(source):

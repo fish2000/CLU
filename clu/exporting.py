@@ -31,7 +31,7 @@ cache = lambda function: lru_cache(maxsize=128, typed=False)(function)
 
 # Not what you are looking for
 NotYourThing = object()
-NotYourID = id(NotYourThing)
+# NotYourID = id(NotYourThing)
 
 def itermodule(module):
     """ Get an iterable of `(name, thing)` tuples for all things
@@ -67,7 +67,7 @@ def itermoduleids(module):
     # do “clever” things when their module code executes or whatever.
     keys = tuple(key for key in dir(module) \
                       if key not in BUILTINS)
-    ids = (id(getattr(module, key, NotYourID)) for key in keys)
+    ids = (id(getattr(module, key, NotYourThing)) for key in keys)
     yield from zip(keys, ids)
 
 # This goes against all logic and reason, but it fucking seems

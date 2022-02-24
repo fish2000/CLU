@@ -776,6 +776,8 @@ class Directory(BaseFSName,
             if directory.name == ROOT_PATH:
                 break
             directory = directory.parent()
+            if directory == directory.parent():
+                break
     
     def flatten(self, destination, suffix=None, new_suffix=None):
         """ Copy the entire directory tree, all contents included, to a new

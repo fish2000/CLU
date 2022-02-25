@@ -219,6 +219,26 @@ class BaseFSName(collections.abc.Hashable,
         except FileNotFoundError:
             return True
     
+    def __lt__(self, filepath):
+        if filepath is None:
+            return NotImplemented
+        return len(self.name) < len(os.fspath(filepath))
+    
+    def __gt__(self, filepath):
+        if filepath is None:
+            return NotImplemented
+        return len(self.name) > len(os.fspath(filepath))
+    
+    def __le__(self, filepath):
+        if filepath is None:
+            return NotImplemented
+        return len(self.name) <= len(os.fspath(filepath))
+    
+    def __ge__(self, filepath):
+        if filepath is None:
+            return NotImplemented
+        return len(self.name) >= len(os.fspath(filepath))
+    
     def __hash__(self):
         return hash((self.name, self.exists))
 

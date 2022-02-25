@@ -14,8 +14,27 @@ class TestFsFilesystem(object):
     
     """ Run the tests for the clu.fs.filesystem module. """
     
-    def test_walkback(self):
-        pass
+    @pytest.mark.TODO
+    def test_walkback(self, consts, dirname):
+        # TODO: this probably falls apart if permissions are
+        # unexpectedly restrictive – particularly the check
+        # on the ROOT_PATH constant
+        directories = {}
+        predicate = lambda direntry: len(direntry[0].name)
+        
+        for root, dirs, files in dirname.walkback():
+            directories[Directory(root)] = (dirs, files)
+        
+        assert len(directories)
+        assert Directory(consts.ROOT_PATH) in directories
+        
+        for root, contents in sorted(directories.items(), key=predicate):
+            dirs, files = contents
+            for r, d, f in root.walk():
+                assert r == root
+                assert list(sorted(d)) == list(sorted(dirs))
+                assert list(sorted(f)) == list(sorted(files))
+                break
     
     def test_suffixes(self, dirname):
         from clu.fs.misc import extension

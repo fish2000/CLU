@@ -135,6 +135,9 @@ def format_environment(environment=None):
     if environment is None:
         environment = os.environ
     
+    if not environment:
+        return
+    
     most = max(len(key) for key in environment.keys()) + 2
     printer = pprint.PrettyPrinter(indent=(most + 6), width=WIDTH)
     wrapper = textwrap.TextWrapper(initial_indent='',
@@ -729,6 +732,11 @@ def test():
                 assert os.path.basename(f) in destination
         
         assert not temporarydir.exists
+    
+    @inline
+    def test_four_show_empty_env():
+        for envline in format_environment(environment={}):
+            print(envline)
     
     @inline.diagnostic
     def show_environment():

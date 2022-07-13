@@ -724,6 +724,21 @@ class Directory(BaseFSName,
             raise FilesystemError(f"mountpoint exists at subdirectory path: {path}")
         return self.directory(path)
     
+    def subdirectories(self, suffix=None, source=None):
+        """ List all subdirectories, as Directory instances.
+            The default is to use the process’ current working directory.
+            
+            Specify an optional “suffix” parameter to filter the list by a
+            particular file suffix (leading dots unnecessary but unharmful).
+        """
+        if not self.exists:
+            return tuple()
+        with os.scandir(self.realpath(source)) as iterscan:
+            return tuple(map(lambda direntry: self.directory(direntry),
+                         filter(suffix_searcher(suffix),
+                        (direntry.name for direntry in iterscan \
+                                        if direntry.is_dir()))))
+    
     def makedirs(self, subpath=None, mode=0o755):
         """ Creates any parts of the target directory path that don’t
             already exist, á la the `mkdir -p` shell command.

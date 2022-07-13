@@ -67,7 +67,7 @@ def script_path():
 def back_tick(command,  as_str=True,
                        ret_err=False,
                      raise_err=None, **kwargs):
-    f""" Run command `command`, returning stdout – or (stdout, stderr) if `ret_err`.
+    """ Run command `command`, returning stdout – or (stdout, stderr) if `ret_err`.
         
         Parameters
         ----------
@@ -78,8 +78,8 @@ def back_tick(command,  as_str=True,
         as_str : bool, optional
             Whether or not the values returned from ``proc.communicate()`` should
             be unicode-decoded from bytestrings (using the specified encoding, which
-            defaults to “{ENCODING}”) to strings before `back_tick(…)` returns.
-            Default is True.
+            falls back to the system default) to strings before the `back_tick(…)`
+            call returns. Default is True.
         ret_err : bool, optional
             If True, the return value is (stdout, stderr). If False, it is stdout.
             In either case `stdout` and `stderr` are strings containing output
@@ -92,7 +92,7 @@ def back_tick(command,  as_str=True,
             Default is None (exception-raising depends on the value of `ret_err`).
         encoding : str, optional
             The name of the encoding to use when decoding the command output per
-            the `as_str` value. Default is “{ENCODING}”.
+            the `as_str` value. Default is the system default (probably UTF-8).
         directory : str / Directory / path-like, optional
             The directory in which to execute the command. Default is None (in
             which case the process working directory, unchanged, will be used).
@@ -101,7 +101,7 @@ def back_tick(command,  as_str=True,
             Default is False.
         timeout : int, optional
             Number of seconds to wait for the executed command to complete before
-            forcibly killing its subprocess. Default is {DEFAULT_TIMEOUT} seconds.
+            forcibly killing its subprocess. Default is sixty (60) seconds.
         
         Returns
         -------

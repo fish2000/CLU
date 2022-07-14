@@ -724,18 +724,18 @@ class Directory(BaseFSName,
             raise FilesystemError(f"mountpoint exists at subdirectory path: {path}")
         return self.directory(path)
     
-    def subdirectories(self, suffix=None, source=None):
+    def subdirectories(self, pattern=None, source=None):
         """ List all subdirectories, as Directory instances.
             The default is to use the process’ current working directory.
             
-            Specify an optional “suffix” parameter to filter the list by a
-            particular file suffix (leading dots unnecessary but unharmful).
+            Specify an optional “pattern” parameter to filter the list
+            by a particular regex pattern, as applied to directory names.
         """
         if not self.exists:
             return tuple()
         with os.scandir(self.realpath(source)) as iterscan:
-            return tuple(map(lambda direntry: self.directory(direntry),
-                         filter(suffix_searcher(suffix),
+            return tuple(map(lambda dirname: self.directory(dirname),
+                         filter(re_searcher(pattern),
                         (direntry.name for direntry in iterscan \
                                         if direntry.is_dir()))))
     

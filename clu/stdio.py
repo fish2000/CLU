@@ -15,7 +15,7 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-dataclass = lambda function: export(dataclass_fn(repr=False)(function))
+dataclass = lambda classdef: export(dataclass_fn(repr=False)(classdef))
 cache = lambda function: export(lru_cache()(function))
 onecache = lambda function: export(lru_cache(maxsize=1)(function))
 

@@ -127,7 +127,8 @@ dict_types      = { dict, collections.defaultdict,
                           collections.ChainMap }
 
 namespace_types = { types.SimpleNamespace,
-                    types.Namespace }
+                    types.Namespace,
+                    types.Typespace }
 
 mapping_types   = { collections.abc.Mapping,
                     collections.abc.MutableMapping,

@@ -204,7 +204,7 @@ class Bucket(enum.Enum):
     @property
     def group_title(self):
         return str(self.value)
-    
+
 @export
 class InlineTester(collections.abc.Set,
                    collections.abc.Sequence,
@@ -228,6 +228,10 @@ class InlineTester(collections.abc.Set,
                 
                 @inline
                 def test_two():
+                    # ...
+                
+                @inline.runif(something == something_else)
+                def test_conditionally_run():
                     # ...
                 
                 @inline.diagnostic
@@ -441,6 +445,7 @@ class InlineTester(collections.abc.Set,
             self.prechecks.insert(0, begin_wrapper)
             self.diagnostics.insert(0, end_wrapper)
             return function
+        
         return decoration
     
     @property
@@ -456,6 +461,24 @@ class InlineTester(collections.abc.Set,
             
             self.fixtures[name] = wrapper = lru_cache(maxsize=16, typed=False)(function)
             return wrapper
+        
+        return decoration
+    
+    def runif(self, boolean):
+        """ Run a test function only if a boolean condition is true. Like so:
+            
+            @inline.runif(consts.TEXTMATE)
+            def test_in_textmate_only():
+                # … insert test code here …
+            
+        """
+        from clu.predicates import none_function
+        
+        def decoration(function):
+            if boolean:
+                return self.__call__(function)
+            return self.__call__(wraps(function)(none_function))
+        
         return decoration
     
     def test(self, exec_count=1, *args, **kwargs):

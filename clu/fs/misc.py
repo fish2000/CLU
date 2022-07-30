@@ -226,7 +226,6 @@ def grouped(iterator, predicate=true_function):
     """
     yield from groupby(sorted(iterator, key=predicate),
                                         key=predicate)
-    
 
 @export
 def u8encode(source):

@@ -570,9 +570,11 @@ def merge(*dicts, **overrides):
 @export
 def asdict(thing): # pragma: no cover
     """ asdict(thing) → returns either thing, thing.__dict__, or dict(thing) as necessary """
-    from clu.predicates import haspyattr, or_none
+    from clu.predicates import haspyattr, or_none, typeof
     from clu.typology import ismapping
     from clu.typespace.namespace import isnamespace
+    if typeof(thing) is thing:
+        return thing
     if ischainmap(thing):
         return set(iterchain(thing.maps))
     if isnamespace(thing):

@@ -7,7 +7,7 @@ import collections.abc
 import contextlib
 import sys
 
-from clu.constants.consts import STRINGPAIR, WHITESPACE, ENCODING, pytuple, NoDefault
+from clu.constants.consts import SINGLETON_TYPES, STRINGPAIR, WHITESPACE, ENCODING, pytuple, NoDefault
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -18,8 +18,8 @@ export = exporter.decorator()
 @export
 class NamespaceRepr(Repr):
     
-    """ Custom Repr-izer for SimpleNamespace and Namespace
-        mappings, which can recursively self-contain.
+    """ Custom Repr-izer for SimpleNamespace, Namespace and
+        Typespace mappings, which can recursively self-contain.
         
         q.v. cpython docs, http://bit.ly/2r1GQ4l supra.
     """
@@ -47,7 +47,7 @@ class NamespaceRepr(Repr):
     
     def primerepr(self, thing, level):
         """ The internal method for “core” repr production
-            of all namespace descendant types.
+            of all BaseNamespace descendant types.
         """
         if len(thing.__dict__) == 0:
             return "{}"
@@ -86,6 +86,14 @@ class NamespaceRepr(Repr):
         """
         return self.primerepr(thing, level)
     
+    def repr_Typespace(self, thing, level):
+        """ Return the “core” repr for a specific instance of
+            “clu.typespace.namespace.Typespace” – just the
+            stringification of the key-value pairs, without
+            the typename or instance-id adornment.
+        """
+        return self.primerepr(thing, level)
+    
     def shortrepr(self, thing):
         """ Return the “short” repr of a namespace instance –
             all whitespace will be condensed to single spaces
@@ -112,7 +120,7 @@ class BaseNamespace(collections.abc.Set,
                     clu.abstract.Cloneable,
                     metaclass=clu.abstract.Slotted):
     
-    """ The abstract base for SimpleNamespace and Namespace. """
+    """ The abstract base for SimpleNamespace, Namespace and Typespace. """
     
     __slots__ = pytuple('dict', 'weakref')
     
@@ -123,6 +131,10 @@ class BaseNamespace(collections.abc.Set,
             of mapping-ish types, to be merged with the namespace.
             
             Any loose keyword arguments will also be merged in.
+        
+            The BaseNamespace class also furnishes a `__missing__(…)`
+            method, which can be overridden by subclasses to provide
+            “collections.defaultdict”–like behaviors.
         """
         for mapping in (dict(arg) for arg in args):
             for key, value in mapping.items():
@@ -149,10 +161,14 @@ class BaseNamespace(collections.abc.Set,
         raise KeyError(key)
     
     def __eq__(self, other):
+        if type(other) in SINGLETON_TYPES:
+            return False
         from clu.dicts import asdict
         return self.__dict__ == asdict(other)
     
     def __ne__(self, other):
+        if type(other) in SINGLETON_TYPES:
+            return True
         from clu.dicts import asdict
         return self.__dict__ != asdict(other)
     
@@ -201,10 +217,6 @@ class Namespace(BaseNamespace,
         
         Since it implements a `get(…)` method, Namespace instances can be passed
         to `merge(…)` – q.v. `merge(…)` function definition supra.
-        
-        The Namespace class also furnishes a `__missing__(…)` method, which can
-        be overridden by subclasses to provide “collections.defaultdict”–like
-        behaviors.
     """
     
     def get(self, key, default=NoDefault):
@@ -232,7 +244,8 @@ class Namespace(BaseNamespace,
         # provided “key” isn’t dunderized!…
         from clu.predicates import ispyname
         if not ispyname(key):
-            subnamespace = type(self)()
+            # subnamespace = type(self)()
+            subnamespace = Namespace()
             self.__dict__[key] = subnamespace
             return subnamespace
         raise AttributeError(key)
@@ -277,6 +290,23 @@ class Namespace(BaseNamespace,
         return self
 
 @export
+class Typespace(Namespace):
+    
+    """ The Typespace class is instantiated to form the `clu.typespace.types` instance. """
+    
+    def __missing__(self, key):
+        """ Ensure compatibility with Python’s `types` module. """
+        if not key.endswith('Type'):
+            return super().__missing__(key)
+        return self[key.removesuffix('Type')]
+    
+    def __getattr__(self, key):
+        """ Ensure compatibility with Python’s `types` module. """
+        if not key.endswith('Type'):
+            return super().__getattr__(key)
+        return getattr(self, key.removesuffix('Type'))
+
+@export
 def isnamespace(thing):
     """ isnamespace(thing) → boolean predicate,
         True if the name of the type of “thing”
@@ -287,7 +317,8 @@ def isnamespace(thing):
     from clu.typology import subclasscheck
     return subclasscheck(thing, (BaseNamespace,
                                SimpleNamespace,
-                                     Namespace))
+                                     Namespace,
+                                     Typespace))
 
 with exporter as export:
     

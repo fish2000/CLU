@@ -7,6 +7,9 @@ import collections.abc
 import weakref
 import sys, re
 
+# Import-rename the original “types” module:
+import types as thetypes
+
 from clu.constants.consts import BASEPATH, APPNAME, VERBOTEN
 from clu.exporting import Exporter, path_to_dotpath
 
@@ -18,29 +21,28 @@ typed = re.compile(r"^(?P<typename>\w+)(?:Type)$")
 def prepare_types_ns(path, basepath):
     """ Prepare and return the “types” alias namespace """
     from clu.constants.polyfills import cache_from_source
-    from clu.typespace.namespace import SimpleNamespace, Namespace
+    from clu.typespace.namespace import SimpleNamespace, Namespace, Typespace
     from clu.predicates import pyattr
     
-    # Import-rename the original “types” module:
-    import types as thetypes
-    types = Namespace()
+    types = Typespace()
     
-    # Fill a Namespace with type aliases, minus the fucking 'Type' suffix --
+    # Fill a Typespace with type aliases, minus the fucking 'Type' suffix --
     # We know they are types because they are in the fucking “types” module, OK?
     # And those irritating four characters take up too much pointless space, if
     # you asked me, which you implicitly did by reading the comments in my code,
     # dogg.
     
-    for typename in dir(thetypes):
+    for typename in thetypes.__dict__.keys():
         if typename.endswith('Type'):
             setattr(types, typed.match(typename).group('typename'),
             getattr(thetypes, typename))
         elif typename not in VERBOTEN:
             setattr(types, typename, getattr(thetypes, typename))
     
-    # Substitute our own SimpleNamespace class, instead of the provided version:
+    # Substitute our own namespace classes, instead of the stock Python versions:
     setattr(types, 'SimpleNamespace',   SimpleNamespace)
     setattr(types, 'Namespace',         Namespace)
+    setattr(types, 'Typespace',         Typespace)
     
     # Add the array.ArrayType base type as “Array”:
     setattr(types, 'Array',             array.ArrayType)
@@ -144,7 +146,7 @@ def modulize(name, namespace, docs=None,
     # Return our new module instance:
     return module
 
-export(types,           name='types',       doc=""" A Namespace instance containing aliases into the `types` module,
+export(types,           name='types',       doc=""" A Typespace instance containing aliases into the `types` module,
                                                     sans the irritating and lexically unnecessary “Type” suffix --
                                                     e.g. `types.ModuleType` can be accessed as just `types.Module`
                                                     from this Namespace, which is less pointlessly redundant and far
@@ -157,7 +159,7 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
-    from clu.constants.consts import pytuple
+    from clu.constants.consts import TEXTMATE, pytuple
     
     @inline
     def test_one():
@@ -187,23 +189,32 @@ def test():
         for typename in dir(types):
             if typename not in verboten:
                 assert types[typename] == getattr(moretypes, typename)
-                # print("UNEQUAL:", typename, types[typename], moretypes[typename])
     
-    @inline
+    # Modulization doesn’t work when running in TextMate:
+    @inline.runif(not TEXTMATE)
     def test_three():
         """ Check modulization """
         moretypes = prepare_types_ns(path=__file__, basepath=BASEPATH)
         modulize('moretypes', moretypes, "A module containing aliases into the `types` module")
-        
-        # from pprint import pprint
-        # pprint([key for key in sys.modules.keys() if key.startswith('clu')])
-        
+    
         from clu.typespace import moretypes
-        
+        from clu.typespace.namespace import Namespace
+    
         for typename in dir(types):
             if typename not in verboten:
-                assert types[typename] == getattr(moretypes, typename)
-                # print("UNEQUAL:", typename, types[typename], getattr(moretypes, typename))
+                assert getattr(types, typename) == getattr(moretypes, typename, Namespace())
+                print("EQUAL:", typename, getattr(types, typename), getattr(moretypes, typename, Namespace()))
+    
+    @inline
+    def test_four():
+        """ Compatibility with standard-library “types” module members """
+        import types as moretypes
+        from clu.typespace.namespace import Namespace
+        
+        for typename in dir(moretypes):
+            if typename not in verboten:
+                if types[typename] != getattr(moretypes, typename, Namespace()):
+                    print("UNEQUAL:", typename, types[typename], getattr(moretypes, typename, Namespace()))
     
     return inline.test(100)
 

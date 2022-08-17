@@ -883,7 +883,7 @@ def test():
         """ Print all locals and globals for the module """
         everything()
     
-    @inline
+    @inline.runif(not consts.TEXTMATE)
     def test_one():
         """ Sanity-check “thismodule()” """
         assert thismodule() == 'clu.exporting'

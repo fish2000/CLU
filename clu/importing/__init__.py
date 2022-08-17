@@ -13,10 +13,18 @@ from clu.importing.base import ModuleSpec, LoaderBase, FinderBase
 from clu.importing.base import MetaModule, ModuleAlias, ModuleBase, DO_NOT_INCLUDE
 from clu.importing.base import installed_appnames, initialize_module
 from clu.importing.base import PerApp, PolymerType, initialize_types
-
 from clu.importing.proxy import ProxyModule
+from clu.exporting import Exporter
+
+exporter = Exporter(path=__file__)
 
 Module, Finder, Loader = initialize_types(consts.APPNAME)
+
+with exporter as export:
+    
+    export(Module, name="Module", doc="CLU’s base class for class-modules")
+    export(Finder, name="Finder", doc="CLU’s base class for class-module finders")
+    export(Loader, name="Loader", doc="CLU’s base class for class-module loaders")
 
 __all__ = ('monomers', 'linkages', 'polymers',
            'all_registered_appnames', 'all_registered_modules', 'all_registered_appspaces',
@@ -26,7 +34,8 @@ __all__ = ('monomers', 'linkages', 'polymers',
            'installed_appnames', 'initialize_module',
            'Module', 'Finder', 'Loader',
            'PerApp', 'PolymerType', 'initialize_types',
-           'ProxyModule')
+           'ProxyModule',
+           'exporter')
 
 def test():
     
@@ -43,7 +52,7 @@ def test():
         """ Show the Python executable """
         print("PYTHON:", sys.executable)
     
-    @inline.precheck
+    # @inline.precheck
     def show_module_from_frame():
         """ Use `inspect.currentframe()` to find the parent module """
         parentframe = inspect.currentframe().f_back.f_back.f_back

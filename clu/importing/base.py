@@ -976,7 +976,8 @@ def test():
     from clu.testing.utils import inline
     from pprint import pprint, pformat
     from clu.naming import moduleof
-    from clu.importing import Module
+    
+    Module, Finder, Loader = initialize_types('clu', 'app')
     
     @inline.precheck
     def show_python_executable():
@@ -1035,62 +1036,62 @@ def test():
         assert d
         assert O
     
-    # @inline
-    # def test_three():
-    #     """ Class-module registry basics """
-    #
-    #     print("all_registered_appnames():")
-    #     pprint(tuple(all_registered_appnames()))
-    #     print()
-    #
-    #     print("all_registered_modules():")
-    #     pprint(tuple(all_registered_modules()))
-    #     print()
-    #
-    #     m = Module(consts.APPNAME)
-    #
-    #     assert len(Registry.monomers) > 0
-    #     assert len(Module.monomers) == 0
-    #     assert not hasattr(m, 'monomers')
-    #
-    #     assert m.appname == consts.APPNAME
-    #     assert m.appspace == consts.DEFAULT_APPSPACE
-    #     assert m.__name__ == 'clu.app.clu'
-    #     assert nameof(m) == consts.APPNAME
-    #
-    #     print("mro(m):")
-    #     pprint(mro(m))
-    #     print()
+    @inline
+    def test_three():
+        """ Class-module registry basics """
+
+        print("all_registered_appnames():")
+        pprint(tuple(all_registered_appnames()))
+        print()
+
+        print("all_registered_modules():")
+        pprint(tuple(all_registered_modules()))
+        print()
+
+        m = Module(consts.APPNAME)
+
+        assert len(Registry.monomers) > 0
+        assert len(Module.monomers) == 0
+        assert not hasattr(m, 'monomers')
+
+        assert m.appname == consts.APPNAME
+        assert m.appspace == consts.DEFAULT_APPSPACE
+        assert m.__name__ == 'clu.app.clu'
+        assert nameof(m) == consts.APPNAME
+
+        print("mro(m):")
+        pprint(mro(m))
+        print()
     
-    # class FindMe(Module):
-    #     pass
-    
-    # @inline
-    # def test_three_point_five():
-    #     """ System import hooks, specs and finders """
-    #     finder = Finder()
-    #     assert type(finder.loader) is Loader
-    #     assert type(finder) in sys.meta_path
-    #
-    #     spec0 = finder.find_spec('clu.app.FindMe', [])
-    #     assert spec0.name == 'clu.app.FindMe'
-    #
-    #     module0 = finder.loader.create_module(spec0)
-    #     assert isinstance(module0, (FindMe, Module))
-    #
-    #     module1 = finder.loader.create_module(spec0)
-    #     assert isinstance(module1, (FindMe, Module))
-    #
-    #     spec1 = finder.find_spec('clu.app.FindMe', [])
-    #     assert spec1.name == 'clu.app.FindMe'
-    #
-    #     # If “FindMe” is defined inline, this next assert fails –
-    #     # not the first time, but one of the 2..100 other times
-    #     # the test function runs:
-    #     registered = Registry.for_qualname('clu.app.FindMe')
-    #     assert registered == FindMe
+    class FindMe(Module):
+        pass
     
     @inline
+    def test_three_point_five():
+        """ System import hooks, specs and finders """
+        
+        finder = Finder()
+        assert type(finder.loader) is Loader
+        # assert type(finder) in sys.meta_path
+        print('sys.meta_path:')
+        pprint(sys.meta_path)
+
+        spec0 = finder.find_spec('clu.app.FindMe', [])
+        assert spec0.name == 'clu.app.FindMe'
+
+        module0 = finder.loader.create_module(spec0)
+        assert isinstance(module0, (FindMe, ModuleBase))
+
+        module1 = finder.loader.create_module(spec0)
+        assert isinstance(module1, (FindMe, ModuleBase))
+
+        spec1 = finder.find_spec('clu.app.FindMe', [])
+        assert spec1.name == 'clu.app.FindMe'
+        
+        registered = Registry.for_qualname('clu.app.FindMe')
+        assert nameof(registered) == nameof(FindMe)
+    
+    @inline.runif(consts.TEXTMATE)
     def test_four():
         """ Class-module subclass properties, methods, and exporting """
         
@@ -1130,33 +1131,33 @@ def test():
         
         assert type(derived.exporter).__name__ == 'Exporter'
     
-    # @inline
-    # def test_five():
-    #     """ Polymer-type caching and “initialize_types(…)” checks """
-    #
-    #     Module0, Finder0, Loader0 = initialize_types(consts.APPNAME)
-    #
-    #     assert Finder is Finder0
-    #     assert Loader is Loader0
-    #     assert Module is Module0
-    #     assert Finder0.__loader__ is Loader0
-    #     assert isinstance(Module0.__loader__, Loader0)
-    #     assert isinstance(Finder0.loader, Loader0)
-    #
-    #     Module1, Finder1, Loader1 = initialize_types(consts.APPNAME, appspace='aux')
-    #
-    #     assert Finder is Finder1
-    #     assert Loader is Loader1
-    #     assert Module is not Module1 # DIFFERENT!!!
-    #     assert Finder1.__loader__ is Loader1
-    #     assert isinstance(Module1.__loader__, Loader1)
-    #     assert isinstance(Finder1.loader, Loader1)
-    #
-    #     from clu.aux import Module as aux_module # Note how this is the things’ actual name,
-    #                                              # “Module”, and not just what we called it,
-    #                                              # «Module1» …ooof.
-    #
-    #     assert type(aux_module) is Module1
+    @inline.runif(consts.TEXTMATE)
+    def test_five():
+        """ Polymer-type caching and “initialize_types(…)” checks """
+
+        Module0, Finder0, Loader0 = initialize_types(consts.APPNAME)
+
+        assert Finder is Finder0
+        assert Loader is Loader0
+        assert Module is Module0
+        assert Finder0.__loader__ is Loader0
+        assert isinstance(Module0.__loader__, Loader0)
+        assert isinstance(Finder0.loader, Loader0)
+
+        Module1, Finder1, Loader1 = initialize_types(consts.APPNAME, appspace='aux')
+
+        assert Finder is Finder1
+        assert Loader is Loader1
+        assert Module is not Module1 # DIFFERENT!!!
+        assert Finder1.__loader__ is Loader1
+        assert isinstance(Module1.__loader__, Loader1)
+        assert isinstance(Finder1.loader, Loader1)
+
+        from clu.aux import Module as aux_module # Note how this is the things’ actual name,
+                                                 # “Module”, and not just what we called it,
+                                                 # «Module1» …ooof.
+
+        assert type(aux_module) is Module1
     
     @inline
     def test_five_point_five():

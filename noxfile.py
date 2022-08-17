@@ -25,10 +25,11 @@ def checkmanifest(session):
 @nox.parametrize('module', (
     nox.param('clu.constants',    id='consts'),
     nox.param('clu',              id='modules'),
+    nox.param('clu.importing',    id='importing'),
     nox.param('clu.version',      id='version'),
     nox.param('clu.scripts.repl', id='repl')))
 def checkmodule(session, module):
-    """ Check CLU consts, modules, REPL, or versioning """
+    """ Check CLU consts, modules, importing, REPL, or version """
     session.install("-r", "requirements/install.txt")
     if module == 'clu':
         session.install("-r", "requirements/nox/tests.txt")
@@ -49,7 +50,7 @@ def parametrized_inline_tests():
     import clu.all
     for dotpath in clu.all.inline_tests():
         yield nox.param(dotpath,
-                     id=dotpath.lstrip('clu').lstrip('.'))
+                     id=dotpath.removeprefix('clu.'))
 
 @nox.session
 @nox.parametrize('module', tuple(parametrized_inline_tests()))

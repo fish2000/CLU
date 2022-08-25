@@ -235,7 +235,9 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         return value
     
     def popitem(self):
-        """ Pop a value off of the mapping and return it.
+        """ Pop a key/value pair off of the mapping and return
+            them as a tuple. KeyError is raised if the mapping
+            is empty.
             
             This may or may not be deterministc and/or random,
             depending on the underlying implementation.

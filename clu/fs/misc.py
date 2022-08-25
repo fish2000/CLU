@@ -61,7 +61,7 @@ def re_suffix(string):
     """
     if not string:
         return None
-    return rf"{string.casefold().lstrip(QUALIFIER).rstrip(DOLLA)}{DOLLA}"
+    return rf"{string.casefold().removeprefix(QUALIFIER).removesuffix(DOLLA)}{DOLLA}"
 
 @export
 def suffix_searcher(string):
@@ -96,7 +96,7 @@ def extension(path, dotted=False):
     out = os.path.splitext(u8str(path))[-1]
     if dotted:
         return out
-    return out.lstrip(QUALIFIER)
+    return out.removeprefix(QUALIFIER)
 
 @export
 def swapext(path, new_extension=None):
@@ -117,7 +117,7 @@ def swapext(path, new_extension=None):
     bulk = os.path.splitext(u8str(path))[0]
     if new_extension is None:
         return bulk
-    return QUALIFIER.join((bulk, u8str(new_extension).lstrip(QUALIFIER)))
+    return QUALIFIER.join((bulk, u8str(new_extension).removeprefix(QUALIFIER)))
 
 @export
 def filesize(path):

@@ -225,7 +225,7 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
     
     def pop(self, key, *namespaces, default=NoDefault):
         """ Pop a (possibly namespaced) value off the mapping
-            and eitehr return it or a default if it doesn’t
+            and either return it or a default if it doesn’t
             exist – raising a KeyError if no default is given.
         """
         value = self.get(key, *namespaces, default=default)

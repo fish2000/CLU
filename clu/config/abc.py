@@ -234,6 +234,29 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         self.delete(key, *namespaces)
         return value
     
+    def popitem(self):
+        """ Pop a value off of the mapping and return it.
+            
+            This may or may not be deterministc and/or random,
+            depending on the underlying implementation.
+        """
+        # Get an iterator for the KeyMap:
+        iterator = iter(self)
+        
+        # Advance the iterator once, getting a single (possibly
+        # namespaced) key from the KeyMap, and raisting a KeyError
+        # if there wasn’t anything found:
+        try:
+            nskey = next(iterator)
+        except StopIteration:
+            raise KeyError('popitem(): KeyMap is empty')
+        
+        # Get the corresponding value, delete it, and return
+        # the key/value pair as a tuple:
+        value = self[nskey]
+        del self[nskey]
+        return nskey, value
+    
     def clear(self, *namespaces, unprefixed=False):
         """ Remove all items from the mapping – either in totality,
             or only those matching a specific namespace.
@@ -324,7 +347,7 @@ class NamespaceWalker(FrozenKeyMap):
             cls = Flat
         out = cls()
         for *namespaces, key, value in self.walk():
-            out.set(key, value, *namespaces)
+            out[pack_ns(key, *namespaces)] = value
         return out
     
     def _namespaces(self): # pragma: no cover

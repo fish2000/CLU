@@ -224,9 +224,10 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         del self[nskey]
     
     def pop(self, key, *namespaces, default=NoDefault):
-        """ Pop a (possibly namespaced) value off the mapping
-            and either return it or a default if it doesn’t
-            exist – raising a KeyError if no default is given.
+        """ Pop a (possibly namespaced) value off of the mapping
+            and return either that value, or a default value
+            if it doesn’t exist – raising a KeyError if no
+            default value is given.
         """
         value = self.get(key, *namespaces, default=default)
         if value == default or value is default:

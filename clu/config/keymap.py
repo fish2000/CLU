@@ -162,6 +162,27 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
     def clone(self, deep=False, memo=None):
         copier = deep and copy.deepcopy or copy.copy
         return type(self)(tree=copier(self.tree))
+    
+    def __contains__(self, nskey):
+        key, namespaces = unpack_ns(nskey)
+        if not namespaces:
+            return key in self.tree
+        d = self.tree
+        for namespace in namespaces:
+            try:
+                d = d[namespace]
+            except KeyError:
+                return False
+        return key in d
+    
+    def __getitem__(self, nskey):
+        key, namespaces = unpack_ns(nskey)
+        if not namespaces:
+            return self.tree[key]
+        d = self.tree
+        for namespace in namespaces:
+            d = d[namespace]
+        return d[key]
 
 @export
 class Nested(FrozenNested, KeyMap):

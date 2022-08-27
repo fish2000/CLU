@@ -678,14 +678,13 @@ class ModuleAlias(collections.abc.Callable,
              & hash(self.specializer)
     
     def __mro_entries__(self, bases):
-        return tuplize(self.origin,
-                       self.specializer)
+        return self.origin, self.specializer
     
     def __call__(self, bases=tuple(), *args, **kwargs):
         return self.__mro_entries__(chain(bases, args))
     
     def inner_repr(self):
-        return f"origin=‘{self.origin!r}’, specializer=’{self.specializer!r}’"
+        return f"origin=‘{self.origin!r}’, specializer=‘{self.specializer!r}’"
     
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -698,6 +697,14 @@ class ModuleAlias(collections.abc.Callable,
             return NotImplemented
         return self.origin      != other.origin \
             or self.specializer != other.specializer
+    
+    @property
+    def __origin__(self):
+        return self.origin
+    
+    @property
+    def __args__(self):
+        return self.origin, self.specializer
     
 DO_NOT_INCLUDE = { '__abstractmethods__',
                    '__execute__',

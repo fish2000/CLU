@@ -34,9 +34,9 @@ class TestImporting(object):
         assert type(unspecialized) is ModuleAlias
         assert unspecialized.origin is ProxyModule
         assert unspecialized.specializer is None
-        # assert unspecialized.__mro_entries__((object,)) == (ProxyModule,)
-        # assert unspecialized(object) == (ProxyModule,) # calls __mro_entries__(…)
-        assert unspecialized.__args__ == (ProxyModule, None)
+        assert unspecialized.__mro_entries__((object,)) == (ProxyModule,)
+        assert unspecialized(object) == (ProxyModule,) # calls __mro_entries__(…)
+        assert unspecialized.__args__ == (ProxyModule,)
         assert unspecialized.__origin__ == ProxyModule
         
         assert unspecialized == ModuleAlias(ProxyModule, None)

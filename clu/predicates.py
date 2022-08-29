@@ -471,6 +471,10 @@ def noneof(*items):
     """ noneof(*items) → Return the result of “not any(…)” on all non-`None` arguments """
     return negate(any)(item for item in items if item is not None)
 
+# This allows “slots_for(…)”, below, to deal with slots defined with one string, á la:
+# >>> __slots__ = 'string'
+normalize = lambda thing: isnormative(thing) and tuplize(thing) or thing
+
 @cache
 def slots_for(cls):
     """ slots_for(cls) → get the summation of the `__slots__` tuples for a class and its ancestors """
@@ -478,8 +482,8 @@ def slots_for(cls):
     if nopyattrs(cls, 'mro', 'bases'):
         return slots_for(type(cls))
     mro = pyattr(cls, 'mro', 'bases', default=tuplize(object))
-    return tuple(iterchain(
-                 getpyattr(ancestor, 'slots', tuple()) \
+    return tuple(iterchain(normalize(
+                 getpyattr(ancestor, 'slots', tuple())) \
                        for ancestor in reversed(mro)))
 
 # MODULE EXPORTS:
@@ -594,6 +598,7 @@ export(uppers,          name='uppers',          doc="uppers(string) → Sorting 
 export(isnotnone,       name='isnotnone',       doc="isnotnone(thing) → boolean predicate, return True if “thing” is not None")
 export(ancestral,       name='ancestral',       doc="ancestral(atx, cls[, default]) → shortcut for “attr_across(atx, *rmro(cls)[, default])”")
 export(ancestral_union, name='ancestral_union', doc="ancestral_union(atx, cls[, default]) → shortcut for “uniquify(iterchain(attr_across(atx, *mro(cls)[, default])))”")
+export(normalize,       name='normalize',       doc="normalize(thing) → tuplizes strings but lets other iterables pass through unchanged")
 
 export(thing_has,       name='thing_has',       doc="thing_has(thing, attribute) → boolean predicate, True if `thing` has “attribute” (in either `__dict__` or `__slots__`)")
 export(class_has,       name='class_has',       doc="class_has(cls, attribute) → boolean predicate, True if `cls` is a class type and has “attribute” (in either `__dict__` or `__slots__`)")

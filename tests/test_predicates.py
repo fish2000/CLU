@@ -781,6 +781,9 @@ class TestPredicates(object):
                 self.you: str = "YOU"
                 self.like: str = "LIKE SLOTS"
         
+        class DervicedPlusAStringDeclaredSlot(DerivedSlottedNoSlots):
+            __slots__ = 'yo_dogg'
+        
         assert slots_for(Slotted)   == ('yo', 'dogg', 'wtf')
         assert slots_for(Slotted()) == ('yo', 'dogg', 'wtf')
         
@@ -794,6 +797,9 @@ class TestPredicates(object):
                                                      'i', 'heard', 'you', 'like')
         assert slots_for(DerivedPlusSomeSlots()) == ('yo', 'dogg', 'wtf',
                                                      'i', 'heard', 'you', 'like')
+        
+        assert slots_for(DervicedPlusAStringDeclaredSlot)   == ('yo', 'dogg', 'wtf', 'yo_dogg')
+        assert slots_for(DervicedPlusAStringDeclaredSlot()) == ('yo', 'dogg', 'wtf', 'yo_dogg')
         
         # Non-slotted types passed to “slots_for(…)” yield an empty tuple:
         assert slots_for(Dictish)   == tuple()

@@ -270,10 +270,8 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
             return None
         if not namespaces:
             return super().clear()
-        prefix = prefix_for(*namespaces)
-        for nskey in self:
-            if nskey.startswith(prefix):
-                del self[nskey]
+        for nskey in self.submap(*namespaces).keys():
+            del self[nskey]
         return None
     
     def update(self, dictish=NoDefault, **updates):

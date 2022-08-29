@@ -61,9 +61,8 @@ class KeyMapViewBase(collections.abc.Sequence,
     def __len__(self):
         if not self.prefix:
             return len(self.mapping)
-        return len([nskey \
-                for nskey in self.mapping \
-                 if nskey.startswith(self.prefix)])
+        return iterlen(nskey for nskey in self.mapping \
+                    if nskey.startswith(self.prefix))
     
     def __getitem__(self, idx):
         return tuple(self)[idx]

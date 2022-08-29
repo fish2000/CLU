@@ -2,8 +2,6 @@
 from __future__ import print_function
 
 import clu.abstract
-import collections
-import collections.abc
 import copy
 import sys
 
@@ -88,15 +86,12 @@ class Flat(FrozenFlat, KeyMap):
     def __delitem__(self, nskey):
         del self.dictionary[nskey]
 
-def DefaultTree(*args, **kwargs):
-    """ Initialize a recursive DefaultDict pseudo-tree. """
-    return collections.defaultdict(DefaultTree, *args, **kwargs)
-
-def dictify(tree):
-    """ Recursively convert a nested mapping to standard dicts. """
-    if ismapping(tree):
-        return { key : dictify(tree[key]) for key in tree }
-    return tree
+@export
+def dictify(treeish):
+    """ Recursively convert a possibly nested mapping to standard dicts. """
+    if ismapping(treeish):
+        return { key : dictify(value) for key, value in treeish.items() }
+    return treeish
 
 @export
 def mapwalk(mapping, pre=None):
@@ -137,7 +132,7 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
             tree = getattr(tree, 'tree')
         elif hasattr(tree, 'nestify'):
             tree = getattr(tree.nestify(), 'tree')
-        self.tree = DefaultTree(tree or {})
+        self.tree = dictify(tree or {})
         if updates:
             self.tree.update(**updates)
     
@@ -204,7 +199,8 @@ class Nested(FrozenNested, KeyMap):
                 try:
                     d = d[namespace]
                 except KeyError:
-                    d = d[namespace] = type(d)()
+                    d[namespace] = type(d)()
+                    d = d[namespace]
             d[key] = value
     
     def __delitem__(self, nskey):
@@ -308,6 +304,19 @@ def test():
         
         flat = FrozenFlat(flat_dict)
         nested = Nested(flat)
+        
+        print("FLAT:")
+        pprint(flat)
+        print()
+        
+        print("NESTED:")
+        pprint(nested)
+        print()
+        
+        print("NESTED FLATTEN:")
+        pprint(nested.flatten())
+        print()
+        
         assert nested.flatten() == flat
         assert nested.flatten().dictionary == flatdict()
         assert nested == flat

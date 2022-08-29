@@ -132,7 +132,7 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
             tree = getattr(tree, 'tree')
         elif hasattr(tree, 'nestify'):
             tree = getattr(tree.nestify(), 'tree')
-        self.tree = dictify(tree or {})
+        self.tree = dictify(dict(tree or {}))
         if updates:
             self.tree.update(**updates)
     

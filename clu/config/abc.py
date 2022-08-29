@@ -282,8 +282,8 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         if dictish is not NoDefault:
             if hasattr(dictish, 'items'):
                 dictish = dictish.items()
-            for key, value in dictish:
-                self[key] = value
+            for nskey, value in dictish:
+                self[nskey] = value
         if updates:
             self.update(dictish=updates)
     
@@ -344,12 +344,9 @@ class NamespaceWalker(FrozenKeyMap):
     def flatten(self, cls=None):
         """ Dearticulate an articulated KeyMap instance into one that is flat. """
         if cls is None:
-            from clu.config.keymap import Flat
-            cls = Flat
-        out = cls()
-        for *namespaces, key, value in self.walk():
-            out[pack_ns(key, *namespaces)] = value
-        return out
+            from clu.config.keymap import FrozenFlat
+            cls = FrozenFlat
+        return cls({ pack_ns(key, *namespaces) : value for *namespaces, key, value in self.walk() })
     
     def _namespaces(self): # pragma: no cover
         """ Iterate over all of the namespaces defined in the mapping. """

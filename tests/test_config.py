@@ -50,7 +50,7 @@ class TestConfigKeyMaps(object):
         assert type(nested.values()) is NamespaceWalkerValuesView
         assert type(nested.items()) is NamespaceWalkerItemsView
         
-        flat = nested.flatten().freeze()
+        flat = nested.flatten()
         
         assert tuple(flat.keys()) == ('yo', 'i_heard', 'nested', 'so',
                                       'wat:yo', 'wat:yoyo', 'nodogg:yo', 'nodogg:yoyo')
@@ -64,7 +64,7 @@ class TestConfigKeyMaps(object):
         assert type(flat.values()) is KeyMapValuesView
         assert type(flat.items()) is KeyMapItemsView
         
-        renestified = flat.nestify().freeze()
+        renestified = flat.nestify()
         
         assert renestified.tree == tree
         assert renestified == flat

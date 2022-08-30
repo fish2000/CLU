@@ -15,12 +15,16 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
+# CODEC PREDICATES: suss out what things are KeyMaps:
+
 iskeymap = lambda putative: subclasscheck(putative, FrozenFlat, Flat, FrozenNested, Nested)
 isflatkeymap = lambda putative: subclasscheck(putative, FrozenFlat, Flat)
 isnestedkeymap = lambda putative: subclasscheck(putative, FrozenNested, Nested)
 isfrozenkeymap = lambda putative: subclasscheck(putative, FrozenNested, FrozenFlat) and \
                               not subclasscheck(putative, KeyMap)
 ismutablekeymap = lambda putative: subclasscheck(putative, Nested, Flat)
+
+# CODEC INTERNAL REPRESENTATION: convert things to and from “annotated dicts”:
 
 def annotated_dict_for(thing):
     return { '__qualname__' : qualified_name(typeof(thing)),
@@ -30,10 +34,15 @@ def instance_for(annotated_dict):
     cls = qualified_import(annotated_dict['__qualname__'])
     return cls(annotated_dict['__dict__'])
 
+# JSON CODEC SUBCLASSES:
+
 @export
 class Encoder(json.JSONEncoder):
     
     def default(self, obj):
+        """ Intercept our objects and dict-ify them as our
+            so-called “annotated dicts” before serialization
+        """
         if iskeymap(obj):
             return annotated_dict_for(obj)
         return super().default(self, obj)
@@ -45,6 +54,9 @@ class Decoder(json.JSONDecoder):
         super().__init__(object_hook=self.object_hook, *args, **kwargs)
     
     def object_hook(self, obj):
+        """ Look for annotated dicts, and reconstitute them
+            as represented objects as necessary
+        """
         if isinstance(obj, dict) and allitems(obj, *pytuple('qualname', 'dict')):
             return instance_for(obj)
         return obj
@@ -66,6 +78,7 @@ def test():
     
     @inline
     def test_annotated_dict_for():
+        """ Convert KeyMap instances to “annotated dicts” """
         flat = Flat(flatdict())
         nested = Nested(nestedmaps())
         
@@ -88,6 +101,7 @@ def test():
     
     @inline
     def test_instance_for():
+        """ Convert “annotated dicts” back to KeyMap instances """
         anndict_flat = {
             '__qualname__'  : 'clu.config.keymap.Flat',
             '__dict__'      : flatdict() }
@@ -113,6 +127,7 @@ def test():
     
     @inline
     def test_json_encode_decode():
+        """ Round-trip KeyMap instances through JSON """
         flat = Flat(flatdict())
         nested = Nested(nestedmaps())
         

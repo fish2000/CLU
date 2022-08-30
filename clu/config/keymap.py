@@ -97,6 +97,9 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
     def clone(self, deep=False, memo=None):
         copier = deep and copy.deepcopy or copy.copy
         return type(self)(dictionary=copier(self.dictionary))
+    
+    def to_dict(self):
+        return copy.deepcopy(self.dictionary)
 
 @export
 class Flat(FrozenFlat, KeyMap):
@@ -187,6 +190,9 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
     def clone(self, deep=False, memo=None):
         copier = deep and copy.deepcopy or copy.copy
         return type(self)(tree=copier(self.tree))
+    
+    def to_dict(self):
+        return copy.deepcopy(self.tree)
     
     def __contains__(self, nskey):
         key, namespaces = unpack_ns(nskey)

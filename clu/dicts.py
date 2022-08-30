@@ -575,22 +575,22 @@ def asdict(thing): # pragma: no cover
     from clu.typespace.namespace import isnamespace
     if typeof(thing) is thing:
         return thing
-    if ischainmap(thing):
-        return set(iterchain(thing.maps))
     if isnamespace(thing):
         return dict(thing.__dict__)
-    if ismapping(thing):
-        return dict(thing)
-    if callable(or_none(thing, 'items')):
-        return dict(thing.items())
-    if haspyattr(thing, 'dict'):
-        return asdict(thing.__dict__)
     if hasattr(thing, '_asdict'):
         return asdict(thing._asdict())
     if hasattr(thing, 'to_dict'):
         return asdict(thing.to_dict())
     if hasattr(thing, 'dict'):
         return asdict(thing.dict)
+    if ischainmap(thing):
+        return set(iterchain(thing.maps))
+    if ismapping(thing):
+        return dict(thing)
+    if callable(or_none(thing, 'items')):
+        return dict(thing.items())
+    if haspyattr(thing, 'dict'):
+        return asdict(thing.__dict__)
     if isinstance(thing, dict):
         return thing
     return dict(thing)

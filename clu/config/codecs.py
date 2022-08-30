@@ -6,6 +6,7 @@ import sys
 from clu.constants.consts import pytuple
 from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
 from clu.config.keymap import FrozenFlat, Flat, FrozenNested, Nested
+from clu.dicts import asdict
 from clu.naming import qualified_import, qualified_name
 from clu.predicates import allitems, typeof
 from clu.typology import subclasscheck
@@ -23,7 +24,7 @@ ismutablekeymap = lambda putative: subclasscheck(putative, Nested, Flat)
 
 def annotated_dict_for(thing):
     return { '__qualname__' : qualified_name(typeof(thing)),
-             '__dict__'     : dict(thing) }
+             '__dict__'     : asdict(thing) }
 
 def instance_for(annotated_dict):
     cls = qualified_import(annotated_dict['__qualname__'])
@@ -69,11 +70,15 @@ def test():
         assert allitems(anndict_nested, *pytuple('qualname', 'dict'))
         
         # print("flat qualname:", qualified_name(Flat))
+        # print("anndict_nested['__dict__']:")
+        # pprint(anndict_nested['__dict__'])
+        # print("nestedmaps():")
+        # pprint(nestedmaps())
         
         assert anndict_flat['__qualname__'] == qualified_name(Flat)
         assert anndict_nested['__qualname__'] == qualified_name(Nested)
         assert anndict_flat['__dict__'] == flatdict()
-        assert anndict_nested['__dict__'] == flatdict()
+        assert anndict_nested['__dict__'] == nestedmaps()
     
     @inline
     def test_instance_for():

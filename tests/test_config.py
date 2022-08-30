@@ -46,6 +46,15 @@ class TestConfigKeyMaps(object):
                                           'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
         assert frozenset(nested.namespaces()) == frozenset(('nodogg', 'wat'))
         
+        assert tuple(nested.submap('wat').keys()) == ('wat:yo', 'wat:yoyo')
+        assert tuple(nested.submap('nodogg').keys()) == ('nodogg:yo', 'nodogg:yoyo')
+        assert tuple(nested.submap('wat').values()) == ('dogggggg', 'dogggggggggg')
+        assert tuple(nested.submap('nodogg').values()) == ('dogggggg', 'dogggggggggg')
+        assert tuple(nested.keys('wat')) == ('wat:yo', 'wat:yoyo')
+        assert tuple(nested.keys('nodogg')) == ('nodogg:yo', 'nodogg:yoyo')
+        assert tuple(nested.values('wat')) == ('dogggggg', 'dogggggggggg')
+        assert tuple(nested.values('nodogg')) == ('dogggggg', 'dogggggggggg')
+        
         assert type(nested.keys()) is NamespaceWalkerKeysView
         assert type(nested.values()) is NamespaceWalkerValuesView
         assert type(nested.items()) is NamespaceWalkerItemsView
@@ -57,6 +66,15 @@ class TestConfigKeyMaps(object):
         assert tuple(flat.values()) == ('dogg', 'you like', 'dicts', 'we put dicts in your dicts',
                                         'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
         assert frozenset(flat.namespaces()) == frozenset(('nodogg', 'wat'))
+        
+        assert tuple(flat.submap('wat').keys()) == ('wat:yo', 'wat:yoyo')
+        assert tuple(flat.submap('nodogg').keys()) == ('nodogg:yo', 'nodogg:yoyo')
+        assert tuple(flat.submap('wat').values()) == ('dogggggg', 'dogggggggggg')
+        assert tuple(flat.submap('nodogg').values()) == ('dogggggg', 'dogggggggggg')
+        assert tuple(flat.keys('wat')) == ('wat:yo', 'wat:yoyo')
+        assert tuple(flat.keys('nodogg')) == ('nodogg:yo', 'nodogg:yoyo')
+        assert tuple(flat.values('wat')) == ('dogggggg', 'dogggggggggg')
+        assert tuple(flat.values('nodogg')) == ('dogggggg', 'dogggggggggg')
         
         assert flat.dictionary == dictionary
         

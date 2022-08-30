@@ -6,7 +6,7 @@ import copy
 import sys
 
 from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
-from clu.config.ns import unpack_ns, pack_ns
+from clu.config.ns import concatenate_ns, unpack_ns, pack_ns
 from clu.typology import ismapping
 from clu.exporting import Exporter
 
@@ -25,6 +25,23 @@ def flatwalk(mapping):
     for nskey in mapping.keys():
         key, namespaces = unpack_ns(nskey)
         yield namespaces + [key, mapping[nskey]]
+
+@export
+def articulate(mapping):
+    """ Articulate a flat mapping with namespaced keys into
+        one that is nested.
+    """
+    tree = {}
+    for *namespaces, key, value in flatwalk(mapping):
+        d = tree
+        for namespace in namespaces:
+            try:
+                d = d[namespace]
+            except KeyError:
+                d[namespace] = {}
+                d = d[namespace]
+        d[key] = value
+    return tree
 
 @export
 class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
@@ -57,17 +74,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         """ Articulate a flattened KeyMap instance out into one that is nested. """
         if cls is None:
             cls = FrozenNested
-        tree = {}
-        for *namespaces, key, value in flatwalk(self.dictionary):
-            d = tree
-            for namespace in namespaces:
-                try:
-                    d = d[namespace]
-                except KeyError:
-                    d[namespace] = {}
-                    d = d[namespace]
-            d[key] = value
-        return cls(tree=tree)
+        return cls(tree=articulate(self.dictionary))
     
     def __iter__(self):
         yield from self.dictionary
@@ -162,14 +169,17 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
     
     def submap(self, *namespaces, unprefixed=False):
         """ Return a standard dict containing only the namespaced items. """
-        # The “unprefixed” codepath is optimized here, the rest
-        # delegates up to the ancestor implementation:
         if unprefixed:
             return { key : value for key, value in self.tree.items() \
                                   if not ismapping(value) }
         if not namespaces:
             return dict(self)
-        return super().submap(*namespaces)
+        if not concatenate_ns(*namespaces) in self.namespaces():
+            return {}
+        d = self.tree
+        for namespace in namespaces:
+            d = d[namespace]
+        return { pack_ns(key, *namespaces) : value for key, value in d.items() }
     
     def inner_repr(self):
         return repr(self.tree)

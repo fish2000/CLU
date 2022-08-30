@@ -92,6 +92,12 @@ class FrozenKeyMapBase(collections.abc.Mapping,
     
     def __bool__(self):
         return len(self) > 0
+    
+    def __getstate__(self):
+        return self.to_dict()
+    
+    def __setstate__(self, instance_dict):
+        self.__init__(instance_dict)
 
 @export
 class KeyMapBase(FrozenKeyMapBase,

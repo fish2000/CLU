@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import json
+import pickle
 import sys
 
 from clu.constants.consts import pytuple
@@ -82,6 +83,12 @@ def json_encode(things):
 @export
 def json_decode(string):
     return decoder.decode(string)
+
+def pickle_encode(things):
+    return pickle.dumps(things)
+
+def pickle_decode(string):
+    return pickle.loads(string)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -184,6 +191,22 @@ def test():
         assert reconstituted_env == env
         assert len(env) > 0
         assert len(reconstituted_env) == len(env)
+    
+    @inline
+    def test_pickle_encode_decode():
+        """ Round-trip KeyMap instances through pickling """
+        flat = Flat(flatdict())
+        nested = Nested(nestedmaps())
+        
+        flat_pickle = pickle_encode(flat)
+        nested_pickle = pickle_encode(nested)
+        
+        reconstituted_flat = pickle_decode(flat_pickle)
+        reconstituted_nested = pickle_decode(nested_pickle)
+        
+        assert reconstituted_flat == reconstituted_nested
+        assert reconstituted_flat == flat
+        assert reconstituted_nested == nested
     
     # Run all inline tests:
     return inline.test(100)

@@ -27,6 +27,7 @@ ismutablekeymap = lambda putative: subclasscheck(putative, Nested, Flat, Environ
 
 # CODEC INTERNAL REPRESENTATION: convert things to and from “annotated dicts”:
 
+@export
 def annotated_dict_for(thing):
     thing_t = typeof(thing)
     out = { '__qualname__' : qualified_name(thing_t) }
@@ -36,6 +37,7 @@ def annotated_dict_for(thing):
         out['__list__'] = list(thing)
     return out
 
+@export
 def instance_for(annotated_dict):
     cls = qualified_import(annotated_dict['__qualname__'])
     inner_dict = item(annotated_dict, '__dict__', '__list__')
@@ -59,7 +61,8 @@ class Encoder(json.JSONEncoder):
 class Decoder(json.JSONDecoder):
     
     def __init__(self, *args, **kwargs):
-        super().__init__(object_hook=self.object_hook, *args, **kwargs)
+        kwargs['object_hook'] = self.object_hook
+        super().__init__(*args, **kwargs)
     
     def object_hook(self, obj):
         """ Look for annotated dicts, and reconstitute them
@@ -69,13 +72,16 @@ class Decoder(json.JSONDecoder):
             return instance_for(obj)
         return obj
 
+encoder = Encoder(indent=4)
+decoder = Decoder()
+
 @export
 def json_encode(things):
-    return Encoder(indent=4).encode(things)
+    return encoder.encode(things)
 
 @export
 def json_decode(string):
-    return Decoder().decode(string)
+    return decoder.decode(string)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -160,16 +166,19 @@ def test():
         assert reconstituted_nested == nested
     
     @inline
-    def test_json_encode_decode_env():
-        """ Round-trip environment KeyMaps through JSON """
+    def test_json_encode_decode_fenv():
+        """ Round-trip frozen environments through JSON """
         fenv = FrozenEnviron(appname='project')
         fenv_json = json_encode(fenv)
         reconstituted_fenv = json_decode(fenv_json)
         assert reconstituted_fenv == fenv
         assert len(fenv) > 0
         assert len(reconstituted_fenv) == len(fenv)
-        
-        env = FrozenEnviron(appname='project')
+    
+    @inline
+    def test_json_encode_decode_env():
+        """ Round-trip environments through JSON """
+        env = Environ(appname='project')
         env_json = json_encode(env)
         reconstituted_env = json_decode(env_json)
         assert reconstituted_env == env

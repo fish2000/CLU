@@ -163,6 +163,11 @@ class Environ(FrozenEnviron, KeyMap, contextlib.AbstractContextManager):
             self.environment.update(self.stash or {})
         self.stash = None
         return exc_type is None
+    
+    def to_dict(self):
+        """ Used by `clu.config.codecs` to serialize the keymap """
+        return { 'environment'  : None, # reconstitution uses os.environ
+                 'appname'      : self.appname }
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

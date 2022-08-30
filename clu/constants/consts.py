@@ -37,8 +37,6 @@ BUILTINS = pytuple(*builtins) + builtins
 BYTEPAIR = b"{!s} : {!s}"
 
 # Determine if we’re running in bpython:
-# BPYTHON = '__console__' in sys.modules
-# BPYTHON = any(filter(lambda segment: 'bpython' in segment.lower(), sys.argv))
 BPYTHON = any('bpython' in key for key in sys.modules) # https://stackoverflow.com/a/42818291/298171
 
 # Determine if we’re on CPython:

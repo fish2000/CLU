@@ -46,14 +46,20 @@ class FrozenKeyMapBase(collections.abc.Mapping,
     """
     __slots__ = pytuple('weakref')
     
+    @classmethod
     @abstract
-    def namespaces(self):
-        """ Iterate over all of the namespaces defined in the mapping. """
+    def from_dict(cls, instance_dict):
+        """ Used by `clu.config.codecs` to deserialize keymaps """
         ...
     
     @abstract
     def to_dict(self):
         """ Used by `clu.config.codecs` to serialize the keymap """
+        ...
+    
+    @abstract
+    def namespaces(self):
+        """ Iterate over all of the namespaces defined in the mapping. """
         ...
     
     @abstract
@@ -126,6 +132,11 @@ class FrozenKeyMap(FrozenKeyMapBase):
         and ‘__bool__’ which generally is less so. Q.v. the “FrozenKeyMapBase” source
         supra. for further deets, my doggie
     """
+    
+    @classmethod
+    def from_dict(cls, instance_dict):
+        """ Used by `clu.config.codecs` to deserialize keymaps """
+        return cls(instance_dict)
     
     def get(self, key, *namespaces, default=NoDefault):
         """ Retrieve a (possibly namespaced) value for a given key.

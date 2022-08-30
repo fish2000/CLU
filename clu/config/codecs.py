@@ -167,12 +167,14 @@ def test():
         reconstituted_fenv = json_decode(fenv_json)
         assert reconstituted_fenv == fenv
         assert len(fenv) > 0
+        assert len(reconstituted_fenv) == len(fenv)
         
         env = FrozenEnviron(appname='project')
         env_json = json_encode(env)
         reconstituted_env = json_decode(env_json)
         assert reconstituted_env == env
         assert len(env) > 0
+        assert len(reconstituted_env) == len(env)
     
     # Run all inline tests:
     return inline.test(100)

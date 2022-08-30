@@ -10,7 +10,6 @@ import sys
 from clu.constants.consts import APPNAME, NoDefault
 from clu.config.abc import KeyMap, NamespaceWalker
 from clu.config.ns import pack_ns, prefix_env, unpack_env, nskey_from_env, nskey_to_env
-from clu.predicates import listify
 from clu.typology import iterlen
 from clu.exporting import Exporter
 
@@ -30,7 +29,7 @@ def envwalk(appname, mapping):
     for envkey in (ek for ek in mapping.keys() if ek.startswith(app_prefix)):
         an, key, namespaces = unpack_env(envkey)
         assert an == appname
-        yield listify(namespaces) + listify(key, mapping[envkey])
+        yield namespaces + [key, mapping[envkey]]
 
 @export
 class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,

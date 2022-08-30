@@ -16,6 +16,17 @@ export = exporter.decorator()
 # CONCRETE SUBCLASSES: FrozenFlat and Flat
 
 @export
+def flatwalk(mapping):
+    """ Iteratively walk a flat mapping with namespaced keys,
+        as found in a FrozenFlat or Flat instance.
+        
+        Based on https://stackoverflow.com/a/12507546/298171
+    """
+    for nskey in mapping.keys():
+        key, namespaces = unpack_ns(nskey)
+        yield namespaces + [key, mapping[nskey]]
+
+@export
 class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
                                clu.abstract.Cloneable):
     
@@ -45,10 +56,18 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
     def nestify(self, cls=None):
         """ Articulate a flattened KeyMap instance out into one that is nested. """
         if cls is None:
-            cls = Nested
-        out = cls()
-        out.update(self.dictionary)
-        return out
+            cls = FrozenNested
+        tree = {}
+        for *namespaces, key, value in flatwalk(self.dictionary):
+            d = tree
+            for namespace in namespaces:
+                try:
+                    d = d[namespace]
+                except KeyError:
+                    d[namespace] = {}
+                    d = d[namespace]
+            d[key] = value
+        return cls(tree=tree)
     
     def __iter__(self):
         yield from self.dictionary
@@ -96,6 +115,7 @@ def dictify(treeish):
 @export
 def mapwalk(mapping, pre=None):
     """ Iteratively walk a nested mapping.
+        
         Based on https://stackoverflow.com/a/12507546/298171
     """
     pre = pre and pre[:] or []
@@ -199,7 +219,7 @@ class Nested(FrozenNested, KeyMap):
                 try:
                     d = d[namespace]
                 except KeyError:
-                    d[namespace] = type(d)()
+                    d[namespace] = {}
                     d = d[namespace]
             d[key] = value
     

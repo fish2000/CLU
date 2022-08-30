@@ -41,6 +41,12 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
     
     __slots__ = ('environment', 'appname')
     
+    @classmethod
+    def from_dict(cls, instance_dict):
+        """ Used by `clu.config.codecs` to deserialize keymaps """
+        return cls(environment=instance_dict['environment'],
+                       appname=instance_dict['appname'])
+    
     def __init__(self, environment=None, appname=None, **updates):
         """ Initialize a FrozenKeyMap instance wrapping an environment-variable
             dictionary from a target dictionary, with a supplied appname.
@@ -98,6 +104,11 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
         out = type(self)(appname=self.appname)
         out.environment = copier(self.environment)
         return out
+    
+    def to_dict(self):
+        """ Used by `clu.config.codecs` to serialize the keymap """
+        return { 'environment'  : copy.deepcopy(self.environment),
+                 'appname'      : self.appname }
 
 @export
 class Environ(FrozenEnviron, KeyMap, contextlib.AbstractContextManager):

@@ -99,6 +99,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         return type(self)(dictionary=copier(self.dictionary))
     
     def to_dict(self):
+        """ Used by `clu.config.codecs` to serialize the keymap """
         return copy.deepcopy(self.dictionary)
 
 @export
@@ -192,6 +193,7 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
         return type(self)(tree=copier(self.tree))
     
     def to_dict(self):
+        """ Used by `clu.config.codecs` to serialize the keymap """
         return copy.deepcopy(self.tree)
     
     def __contains__(self, nskey):

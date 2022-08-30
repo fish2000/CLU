@@ -52,6 +52,11 @@ class FrozenKeyMapBase(collections.abc.Mapping,
         ...
     
     @abstract
+    def to_dict(self):
+        """ Used by `clu.config.codecs` to serialize the keymap """
+        ...
+    
+    @abstract
     def __iter__(self):
         ...
     
@@ -192,6 +197,10 @@ class FrozenKeyMap(FrozenKeyMapBase):
     
     def namespace_count(self):
         return len(self._get_namespace_foset())
+    
+    def to_dict(self):
+        """ Used by `clu.config.codecs` to serialize the keymap """
+        return dict(self)
 
 @export
 class KeyMap(KeyMapBase, FrozenKeyMap):

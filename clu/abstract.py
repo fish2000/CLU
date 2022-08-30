@@ -73,8 +73,6 @@ class Unhashable(abc.ABC, metaclass=UnhashableMeta):
     def __subclasshook__(cls, subcls):
         if cls is Unhashable:
             return getattr(subcls, '__hash__', None) is None
-        # elif cls is collections.abc.Hashable:
-        #     return False
         return NotImplemented
 
 class Format(collections.abc.Callable, metaclass=Slotted):

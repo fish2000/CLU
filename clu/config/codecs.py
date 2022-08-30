@@ -5,10 +5,11 @@ import sys
 
 from clu.constants.consts import pytuple
 from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
+from clu.config.env import FrozenEnviron, Environ
 from clu.config.keymap import FrozenFlat, Flat, FrozenNested, Nested
 from clu.dicts import asdict
 from clu.naming import qualified_import, qualified_name
-from clu.predicates import allitems, typeof
+from clu.predicates import allitems, item, typeof
 from clu.typology import subclasscheck
 from clu.exporting import Exporter
 
@@ -17,22 +18,29 @@ export = exporter.decorator()
 
 # CODEC PREDICATES: suss out what things are KeyMaps:
 
-iskeymap = lambda putative: subclasscheck(putative, FrozenFlat, Flat, FrozenNested, Nested)
+iskeymap = lambda putative: subclasscheck(putative, FrozenFlat, Flat, FrozenNested, Nested, FrozenEnviron, Environ)
 isflatkeymap = lambda putative: subclasscheck(putative, FrozenFlat, Flat)
 isnestedkeymap = lambda putative: subclasscheck(putative, FrozenNested, Nested)
-isfrozenkeymap = lambda putative: subclasscheck(putative, FrozenNested, FrozenFlat) and \
+isfrozenkeymap = lambda putative: subclasscheck(putative, FrozenNested, FrozenFlat, FrozenEnviron) and \
                               not subclasscheck(putative, KeyMap)
-ismutablekeymap = lambda putative: subclasscheck(putative, Nested, Flat)
+ismutablekeymap = lambda putative: subclasscheck(putative, Nested, Flat, Environ)
 
 # CODEC INTERNAL REPRESENTATION: convert things to and from “annotated dicts”:
 
 def annotated_dict_for(thing):
-    return { '__qualname__' : qualified_name(typeof(thing)),
-             '__dict__'     : asdict(thing) }
+    thing_t = typeof(thing)
+    out = { '__qualname__' : qualified_name(thing_t) }
+    if hasattr(thing_t, 'to_dict'):
+        out['__dict__'] = asdict(thing)
+    else:
+        out['__list__'] = list(thing)
+    return out
 
 def instance_for(annotated_dict):
     cls = qualified_import(annotated_dict['__qualname__'])
-    return cls(annotated_dict['__dict__'])
+    inner_dict = item(annotated_dict, '__dict__', '__list__')
+    return hasattr(cls, 'from_dict') and cls.from_dict(inner_dict) \
+                                      or cls(inner_dict)
 
 # JSON CODEC SUBCLASSES:
 
@@ -45,7 +53,7 @@ class Encoder(json.JSONEncoder):
         """
         if iskeymap(obj):
             return annotated_dict_for(obj)
-        return super().default(self, obj)
+        return super().default(obj)
 
 @export
 class Decoder(json.JSONDecoder):
@@ -150,6 +158,15 @@ def test():
         assert reconstituted_flat == reconstituted_nested
         assert reconstituted_flat == flat
         assert reconstituted_nested == nested
+    
+    @inline
+    def test_json_encode_decode_env():
+        """ Round-trip environment KeyMap instances through JSON """
+        fenv = FrozenEnviron(appname='project')
+        fenv_json = json_encode(fenv)
+        reconstituted_fenv = json_decode(fenv_json)
+        assert reconstituted_fenv == fenv
+        assert len(fenv) > 0
     
     # Run all inline tests:
     return inline.test(100)

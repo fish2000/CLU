@@ -168,7 +168,7 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
         yield from mapwalk(self.tree)
     
     def submap(self, *namespaces, unprefixed=False):
-        """ Return a standard dict containing only the namespaced items. """
+        """ Return a flattened dict containing only the namespaced items. """
         if unprefixed:
             return { key : value for key, value in self.tree.items() \
                                   if not ismapping(value) }

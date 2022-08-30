@@ -136,7 +136,7 @@ class FrozenKeyMap(FrozenKeyMapBase):
         return default
     
     def submap(self, *namespaces, unprefixed=False):
-        """ Return a standard dict containing only the namespaced items. """
+        """ Return a flattened dict containing only the namespaced items. """
         if unprefixed:
             return { nskey : self[nskey] for nskey in self if NAMESPACE_SEP not in nskey }
         if not namespaces:

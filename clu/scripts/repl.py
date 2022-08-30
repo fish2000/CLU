@@ -192,7 +192,9 @@ pypath.remove_invalid_paths()
 if __name__ == '__main__':
     # In theory, this will *not* run when repl.py
     # is loaded into a REPL using a “-i” flag:
-    if not consts.IPYTHON:
+    if consts.IPYTHON or consts.BPYTHON:
+        print()
+    else:
         print(__doc__)
 
 from clu.repl.banners import print_banner

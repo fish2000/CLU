@@ -6,7 +6,7 @@ import sys, os
 sys.path.append(os.path.dirname(__file__))
 
 # Recycle, reduce, reuse:
-nox.options.keywords = "not codecov"
+nox.options.keywords = "not coverage"
 nox.options.reuse_existing_virtualenvs = True
 nox.options.stop_on_first_error = True
 
@@ -23,11 +23,10 @@ def checkmanifest(session):
 
 @nox.session
 @nox.parametrize('module', (
-    nox.param('clu.constants',    id='consts'),
-    nox.param('clu',              id='modules'),
-    nox.param('clu.importing',    id='importing'),
-    nox.param('clu.version',      id='version'),
-    nox.param('clu.scripts.repl', id='repl')))
+    nox.param('clu.constants',      id='consts'),
+    nox.param('clu',                id='modules'),
+    nox.param('clu.version',        id='version'),
+    nox.param('clu.scripts.repl',   id='repl')))
 def checkmodule(session, module):
     """ Check CLU consts, modules, importing, REPL, or version """
     session.install("-r", "requirements/install.txt")
@@ -62,7 +61,7 @@ def inline(session, module):
     session.run('python', '-m', module)
 
 @nox.session
-def codecov(session):
+def coverage(session):
     """ Run `codecov`, updating CLU’s statistics on codecov.io """
     import clu.all
     from clu.fs.filesystem import TemporaryName
@@ -83,6 +82,7 @@ def codecov(session):
     # Run command modules:
     for modulename in ('clu.constants',
                        'clu.constants.consts',
+                       'clu.config.codecs',
                        'clu',
                        'clu.version',
                        'clu.dispatch',

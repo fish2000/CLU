@@ -61,9 +61,11 @@ class Decoder(json.JSONDecoder):
             return instance_for(obj)
         return obj
 
+@export
 def json_encode(things):
     return Encoder(indent=4).encode(things)
 
+@export
 def json_decode(string):
     return Decoder().decode(string)
 

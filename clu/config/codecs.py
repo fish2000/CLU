@@ -35,7 +35,7 @@ class Encoder(json.JSONEncoder):
     
     def default(self, obj):
         if iskeymap(obj):
-            return annotated_dict_for(thing)
+            return annotated_dict_for(obj)
         return super().default(self, obj)
 
 @export
@@ -48,6 +48,12 @@ class Decoder(json.JSONDecoder):
         if isinstance(obj, dict) and allitems(obj, *pytuple('qualname', 'dict')):
             return instance_for(obj)
         return obj
+
+def json_encode(things):
+    return Encoder(indent=4).encode(things)
+
+def json_decode(string):
+    return Decoder().decode(string)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -104,6 +110,29 @@ def test():
         # pprint(instance_nested.tree)
         # print("nestedmaps():")
         # pprint(nestedmaps())
+    
+    @inline
+    def test_json_encode_decode():
+        flat = Flat(flatdict())
+        nested = Nested(nestedmaps())
+        
+        flat_json = json_encode(flat)
+        nested_json = json_encode(nested)
+        
+        # print("flat_json:")
+        # print(flat_json)
+        # print()
+        
+        # print("nested_json:")
+        # print(nested_json)
+        # print()
+        
+        reconstituted_flat = json_decode(flat_json)
+        reconstituted_nested = json_decode(nested_json)
+        
+        assert reconstituted_flat == reconstituted_nested
+        assert reconstituted_flat == flat
+        assert reconstituted_nested == nested
     
     # Run all inline tests:
     return inline.test(100)

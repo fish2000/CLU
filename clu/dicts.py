@@ -202,6 +202,9 @@ class ChainRepr(Repr):
     def repr_Namespace(self, mapping, level): # pragma: no cover
         return self.primerepr(asdict(mapping), level)
     
+    def repr_Typespace(self, mapping, level): # pragma: no cover
+        return self.primerepr(asdict(mapping), level)
+    
     def repr_defaultdict(self, mapping, level): # pragma: no cover
         return self.primerepr(mapping, level)
     

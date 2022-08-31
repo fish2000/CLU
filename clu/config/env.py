@@ -36,7 +36,22 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
                                      clu.abstract.Cloneable):
     
     """ A concrete immutable – or frozen – KeyMap class wrapping a
-        frozen copy of an environment-variable dictionary.
+        frozen copy of an environment-variable dictionary. Like
+        e.g., for an appname of “yodogg” and a namespace value of
+        “iheard”, the environment variable prefix would work out
+        such that a variable with a key value of “youlike” would
+        look like this:
+            
+            YODOGG_IHEARD_YOULIKE
+                         
+            ^^^^^^ ^^^^^^ ^^^^^^^
+               |      |      |
+               |      |      +––––– mapping key (uppercased)
+               |      +–––––––––––– namespaces (uppercased, one value)
+               +––––––––––––––––––– app name (uppercased)
+        
+        … This namespaced key can be accessed from an instance
+        of FrozenEnviron as “yodogg:iheard:youlike”.
     """
     
     __slots__ = ('environment', 'appname')

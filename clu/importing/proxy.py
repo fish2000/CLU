@@ -42,7 +42,7 @@ class ChainModuleMap(clu.dicts.ChainMap):
         it be called upon (hence the name “fallbacks”).
     """
     
-    __slots__ = tuplize('fallbacks')
+    __slots__ = 'fallbacks'
     
     def __init__(self, *dicts, fallbacks=None, **overrides):
         super().__init__(*dicts, **overrides)

@@ -273,7 +273,7 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         iterator = iter(self)
         
         # Advance the iterator once, getting a single (possibly
-        # namespaced) key from the KeyMap, and raisting a KeyError
+        # namespaced) key from the KeyMap, and raising a KeyError
         # if there wasn’t anything found:
         try:
             nskey = next(iterator)

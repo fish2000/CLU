@@ -51,7 +51,8 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
                +––––––––––––––––––– app name (uppercased)
         
         … This namespaced key can be accessed from an instance
-        of FrozenEnviron as “yodogg:iheard:youlike”.
+        of FrozenEnviron, initialized with an appname of “yodogg”,
+        as “iheard:youlike”.
     """
     
     __slots__ = ('environment', 'appname')

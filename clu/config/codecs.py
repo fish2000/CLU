@@ -105,17 +105,24 @@ def test():
     from clu.config.keymap import nestedmaps, flatdict, arbitrary
     from pprint import pprint
     
+    @inline.fixture
+    def flat_ordered_set():
+        return FlatOrderedSet('yo', 'dogg', 'i_heard', 'you_like')
+    
     @inline
     def test_annotated_dict_for():
         """ Convert KeyMap instances to “annotated dicts” """
         flat = Flat(flatdict())
         nested = Nested(nestedmaps())
+        foset = flat_ordered_set()
         
         anndict_flat = annotated_dict_for(flat)
         anndict_nested = annotated_dict_for(nested)
+        anndict_foset = annotated_dict_for(foset)
         
         assert allitems(anndict_flat, *pytuple('qualname', 'dict'))
         assert allitems(anndict_nested, *pytuple('qualname', 'dict'))
+        assert allitems(anndict_foset, *pytuple('qualname', 'list'))
         
         # print("flat qualname:", qualified_name(Flat))
         # print("anndict_nested['__dict__']:")
@@ -125,8 +132,10 @@ def test():
         
         assert anndict_flat['__qualname__'] == qualified_name(Flat)
         assert anndict_nested['__qualname__'] == qualified_name(Nested)
+        assert anndict_foset['__qualname__'] == qualified_name(FlatOrderedSet)
         assert anndict_flat['__dict__'] == flatdict()
         assert anndict_nested['__dict__'] == nestedmaps()
+        assert anndict_foset['__list__'] == flat_ordered_set()
     
     @inline
     def test_instance_for():
@@ -137,17 +146,23 @@ def test():
         anndict_nested = {
             '__qualname__'  : 'clu.config.keymap.Nested',
             '__dict__'      : nestedmaps() }
+        anndict_foset = {
+            '__qualname__'  : 'clu.config.abc.FlatOrderedSet',
+            '__list__'      : list(flat_ordered_set()) }
         
         instance_flat = instance_for(anndict_flat)
         instance_nested = instance_for(anndict_nested)
+        instance_foset = instance_for(anndict_foset)
         
         assert typeof(instance_flat) == Flat
         assert typeof(instance_nested) == Nested
+        assert typeof(instance_foset) == FlatOrderedSet
         
         assert instance_flat == instance_nested
         
         assert instance_flat.dictionary == flatdict()
         assert instance_nested.tree == nestedmaps()
+        assert instance_foset.things == flat_ordered_set().things
         
         # print("instance_nested.tree:")
         # pprint(instance_nested.tree)
@@ -159,9 +174,11 @@ def test():
         """ Round-trip KeyMap instances through JSON """
         flat = Flat(flatdict())
         nested = Nested(nestedmaps())
+        foset = flat_ordered_set()
         
         flat_json = json_encode(flat)
         nested_json = json_encode(nested)
+        foset_json = json_encode(foset)
         
         # print("flat_json:")
         # print(flat_json)
@@ -173,10 +190,12 @@ def test():
         
         reconstituted_flat = json_decode(flat_json)
         reconstituted_nested = json_decode(nested_json)
+        reconstituted_foset = json_decode(foset_json)
         
         assert reconstituted_flat == reconstituted_nested
         assert reconstituted_flat == flat
         assert reconstituted_nested == nested
+        assert reconstituted_foset == foset
     
     @inline
     def test_json_encode_decode_fenv():
@@ -203,16 +222,20 @@ def test():
         """ Round-trip KeyMap instances through pickling """
         flat = Flat(flatdict())
         nested = Nested(nestedmaps())
+        foset = flat_ordered_set()
         
         flat_pickle = pickle_encode(flat)
         nested_pickle = pickle_encode(nested)
+        foset_pickle = pickle_encode(foset)
         
         reconstituted_flat = pickle_decode(flat_pickle)
         reconstituted_nested = pickle_decode(nested_pickle)
+        reconstituted_foset = pickle_decode(foset_pickle)
         
         assert reconstituted_flat == reconstituted_nested
         assert reconstituted_flat == flat
         assert reconstituted_nested == nested
+        assert reconstituted_foset == foset
     
     # Run all inline tests:
     return inline.test(100)

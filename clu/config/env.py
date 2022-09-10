@@ -43,7 +43,7 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
         look like this:
             
             YODOGG_IHEARD_YOULIKE
-                         
+        
             ^^^^^^ ^^^^^^ ^^^^^^^
                |      |      |
                |      |      +––––– mapping key (uppercased)

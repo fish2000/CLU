@@ -6,7 +6,7 @@ import pickle
 import sys
 
 from clu.constants.consts import pytuple
-from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
+from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker, FlatOrderedSet
 from clu.config.env import FrozenEnviron, Environ
 from clu.config.keymap import FrozenFlat, Flat, FrozenNested, Nested
 from clu.dicts import asdict
@@ -26,6 +26,7 @@ isnestedkeymap = lambda putative: subclasscheck(putative, FrozenNested, Nested)
 isfrozenkeymap = lambda putative: subclasscheck(putative, FrozenNested, FrozenFlat, FrozenEnviron) and \
                               not subclasscheck(putative, KeyMap)
 ismutablekeymap = lambda putative: subclasscheck(putative, Nested, Flat, Environ)
+isfoset = lambda putative: subclasscheck(putative, FlatOrderedSet)
 
 # CODEC INTERNAL REPRESENTATION: convert things to and from “annotated dicts”:
 
@@ -57,6 +58,8 @@ class Encoder(json.JSONEncoder):
         """
         if iskeymap(obj):
             return annotated_dict_for(obj)
+        elif isfoset(obj):
+            return annotated_dict_for(obj)
         return super().default(obj)
 
 @export
@@ -71,6 +74,8 @@ class Decoder(json.JSONDecoder):
             as represented objects as necessary
         """
         if isinstance(obj, dict) and allitems(obj, *pytuple('qualname', 'dict')):
+            return instance_for(obj)
+        elif isinstance(obj, dict) and allitems(obj, *pytuple('qualname', 'list')):
             return instance_for(obj)
         return obj
 

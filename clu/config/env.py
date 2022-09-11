@@ -191,13 +191,7 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline, format_environment
-    from clu.config.keymap import nestedmaps
     from pprint import pprint
-    
-    @inline.precheck
-    def show_nestedmaps():
-        print("Nested maps fixture output:")
-        pprint(nestedmaps())
     
     @inline
     def test_one():
@@ -315,24 +309,8 @@ def test():
     @inline.diagnostic
     def show_environment():
         """ Show environment variables """
-        for envline in format_environment():
+        for envline in format_environment(Environ()):
             print(envline)
-    
-    @inline.diagnostic
-    def show_fixture_cache_stats():
-        """ Show the per-fixture-function cache stats """
-        from clu.config.keymap import inline as keymap_inline
-        from clu.dicts import merge_fast_two
-        
-        fixtures = merge_fast_two(inline.fixtures,
-                           keymap_inline.fixtures)
-        total = len(fixtures)
-        
-        for idx, name in enumerate(fixtures.keys()):
-            if idx > 0:
-                print()
-            print(f"FUNCTION CACHE INFO: {name} ({idx+1} of {total})")
-            print(fixtures[name].cache_info())
     
     # Run all inline tests:
     return inline.test(100)

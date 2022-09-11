@@ -135,6 +135,9 @@ def format_environment(environment=None):
     if environment is None:
         environment = os.environ
     
+    if hasattr(environment, 'environment'):
+        environment = environment.environment
+    
     if not environment:
         return
     
@@ -151,7 +154,7 @@ def format_environment(environment=None):
     pformat = lambda thing: format_environment.outdenter.sub(r"\g<bracket>",
                                                  printer.pformat(thing))
     
-    for key, value in environment.items():
+    for key, value in sorted(environment.items()):
         jkey = f"{key}".ljust(most)
         begin = f"» {jkey} : "
         if key.endswith('PATH') and os.pathsep in value:

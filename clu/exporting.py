@@ -640,7 +640,7 @@ class ExporterBase(collections.abc.MutableMapping,
             except AttributeError:
                 pass
             else:
-                # Only pursue the Nº4 attempt if Nº2 didn’t fail –
+                # Only pursue the Nº4 attempt if Nº3 didn’t fail –
                 # …reset __module__ for phi-types:
                 if dname == φ and self.dotpath is not None:
                     target.__module__ = str(self.dotpath)

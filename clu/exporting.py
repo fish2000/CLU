@@ -892,13 +892,13 @@ def test():
         everything()
     
     @inline.runif(not consts.TEXTMATE)
-    def test_one():
+    def test_thismodule():
         """ Sanity-check “thismodule()” """
         assert thismodule() == 'clu.exporting'
     
     @inline
-    def test_two():
-        """ Check the “itermodule(…)” and “itermoduleids(…)” functions """
+    def test_itermodule_itermoduleids():
+        """ Test “itermodule(…)” and “itermoduleids(…)” """
         from clu.typology import iterlen
         
         assert iterlen(itermodule(consts)) == len(consts.__all__)
@@ -911,6 +911,30 @@ def test():
         assert pairs == dict(itermodule(consts))
         idpairs = dict(zip(dir(consts), (id(getattr(consts, const)) for const in dir(consts))))
         assert idpairs == dict(itermoduleids(consts))
+    
+    @inline
+    def test_modulespace():
+        """ Test the “Modulespace” shortcut class """
+        modspace = Modulespace()
+        import sys, os, io
+        
+        assert modspace.sys == sys
+        assert modspace.os == os
+        assert modspace.io == io
+    
+    @inline
+    def test_search_for_name():
+        """ Test “search_for_name(…)” """
+        from clu.testing import utils
+        inlinetester_name = search_for_name(utils.InlineTester)
+        assert utils.InlineTester.__name__ == inlinetester_name
+    
+    @inline
+    def test_search_for_module():
+        """ Test “search_for_module(…)” """
+        from clu.testing import utils
+        inlinetester_module = search_for_module(utils.InlineTester)
+        assert utils == inlinetester_module
     
     return inline.test(100)
 

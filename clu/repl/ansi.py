@@ -685,7 +685,7 @@ class DocFormat(clu.abstract.Format):
         return self.putln()
     
     def render(self, thing):
-        head = f"__doc__ for “{nameof(thing)}”"
+        head = f"__doc__ for “{qualified_name(thing)}”"
         doc = inspect.getdoc(thing) or "«¡no docstring found!»"
         sig = signature(thing)
         start = int(not isinspectable(thing)) * 2
@@ -716,7 +716,7 @@ def old_ansidoc(*things):
     
     for thing in things:
         # Process each things’ name and doc
-        thingname = nameof(thing)
+        thingname = qualified_name(thing)
         doc = inspect.getdoc(thing) or "«¡no docstring found!»"
         sig = signature(thing)
         paras = paragraphize(doc)

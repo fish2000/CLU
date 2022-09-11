@@ -623,10 +623,11 @@ class ExporterBase(collections.abc.MutableMapping,
             except AttributeError:
                 pass
             
-            # Attempt Nº2: update __name__ and set __lambda_name__ if necessary –
-            # …to recall the lambda’s genesis:
+            # Attempt Nº2: update __name__ and __code__.co_name, and set
+            # __lambda_name__ if necessary – to recall the lambda’s genesis:
             try:
                 target.__name__ = named
+                target.__code__ = target.__code__.replace(co_name=named)
                 target.__lambda_name__ = getattr(target, '__lambda_name__', dname)
             except AttributeError:
                 pass

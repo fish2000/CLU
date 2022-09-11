@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from functools import lru_cache
 
 import abc
 import clu.abstract
@@ -18,7 +17,7 @@ from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsV
 from clu.config.keymapview import NamespaceWalkerValuesView
 
 from clu.naming import qualified_import, qualified_name, nameof
-from clu.predicates import (unwrap, typeof,
+from clu.predicates import (typeof,
                             isexpandable, iscontainer, isnotnone,
                             always, uncallable)
 
@@ -27,8 +26,6 @@ from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
-
-cache = lambda function: lru_cache(maxsize=128, typed=True)(function)
 
 # SUB-BASE AND ABSTRACT BASE CLASSES:
 
@@ -197,7 +194,6 @@ class FrozenKeyMap(FrozenKeyMapBase):
     def __hash__(self):
         return hash(tuple(self.values()))
     
-    @cache
     def _get_namespace_foset(self):
         return FlatOrderedSet(get_ns(nskey) for nskey in sorted(self) if NAMESPACE_SEP in nskey)
     
@@ -313,8 +309,6 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
                 self[nskey] = value
         if updates:
             self.update(dictish=updates)
-    
-    _get_namespace_foset = lambda self: unwrap(super()._get_namespace_foset)(self)
 
 # INTERIM ABSTRACT BASE: NamespaceWalker
 
@@ -383,7 +377,6 @@ class NamespaceWalker(FrozenKeyMap):
                 nss.add(concatenate_ns(*namespaces))
         yield from sorted(nss)
     
-    # @cache
     def _get_namespace_foset(self):
         return FlatOrderedSet(concatenate_ns(*ns) for *ns, _, _ in self.walk() if ns)
     

@@ -313,13 +313,13 @@ def test():
         pprint(nestedmaps())
     
     @inline
-    def test_one():
+    def test_mapwalk():
         """ Simple “mapwalk(…)” content """
         dictderive = tuple(mapwalk(nestedmaps()))
         return dictderive
     
     @inline
-    def test_two():
+    def test_mapwalk_content():
         """ Verbose “mapwalk(…)” content check """
         for mappingpath in mapwalk(nestedmaps()):
             *namespaces, key, value = mappingpath
@@ -331,7 +331,7 @@ def test():
             print()
     
     @inline
-    def test_three():
+    def test_frozenflat_nested_eq():
         """ FrozenFlat and Nested equivalence """
         flat_dict = {}
         
@@ -345,24 +345,24 @@ def test():
         flat = FrozenFlat(flat_dict)
         nested = Nested(flat)
         
-        print("FLAT:")
-        pprint(flat)
-        print()
+        # print("FLAT:")
+        # pprint(flat)
+        # print()
         
-        print("NESTED:")
-        pprint(nested)
-        print()
+        # print("NESTED:")
+        # pprint(nested)
+        # print()
         
-        print("NESTED FLATTEN:")
-        pprint(nested.flatten())
-        print()
+        # print("NESTED FLATTEN:")
+        # pprint(nested.flatten())
+        # print()
         
         assert nested.flatten() == flat
         assert nested.flatten().dictionary == flatdict()
         assert nested == flat
     
     @inline
-    def test_three_pt_five():
+    def test_flat_frozenflat_nested_eq():
         """ Flat, FrozenFlat and Nested equivalence """
         flat_dict = {}
         
@@ -384,7 +384,7 @@ def test():
         assert flattened.dictionary == flatdict()
     
     @inline
-    def test_four():
+    def test_frozennested_contains():
         """ FrozenNested contains namespaced key """
         nested = FrozenNested(tree=nestedmaps(), **arbitrary())
         
@@ -394,8 +394,8 @@ def test():
             assert nskey in nested or nskey in arbitrary()
     
     @inline
-    def test_four_pt_five():
-        """ Nested (mutable) contains namespaced key """
+    def test_nested_contains():
+        """ Nested contains namespaced key """
         nested = Nested(tree=nestedmaps(), **arbitrary())
         
         for mappingpath in mapwalk(nested.tree):
@@ -404,7 +404,7 @@ def test():
             assert nskey in nested or nskey in arbitrary()
     
     @inline
-    def test_five():
+    def test_frozennested_flat_eq():
         """ FrozenNested and Flat roundtrip commutativity """
         nested = FrozenNested(tree=nestedmaps())
         flat = Flat(nested)
@@ -412,8 +412,8 @@ def test():
         assert flat == nested
     
     @inline
-    def test_five_pt_five():
-        """ Nested (mutable) and FrozenNested commutativity """
+    def test_nested_frozennested_eq():
+        """ Nested and FrozenNested commutativity """
         nested = Nested(tree=nestedmaps())
         frozen_nested = nested.freeze()
         assert frozen_nested == nested
@@ -421,6 +421,18 @@ def test():
         flat = nested.flatten()
         renested = flat.nestify()
         assert renested == nested
+    
+    @inline
+    def test_nested_submaps():
+        nested = Nested(tree=nestedmaps())
+        frozen_nested = nested.freeze()
+        
+        assert frozen_nested.submap() == dict(frozen_nested)
+        assert nested.submap('body') == frozen_nested.submap('body')
+        assert nested.submap('body', 'declare_i') == frozen_nested.submap('body', 'declare_i')
+        assert nested.submap('WTF', 'HAX') == {}
+        assert nested.submap(unprefixed=True) == { 'type' : 'Program' }
+        assert nested.submap() == dict(nested)
     
     @inline.diagnostic
     def show_fixture_cache_stats():

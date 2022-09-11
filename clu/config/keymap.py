@@ -199,14 +199,16 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
     def __contains__(self, nskey):
         key, namespaces = unpack_ns(nskey)
         if not namespaces:
-            return key in self.tree
+            # Test for mappings to prevent false positives:
+            return not ismapping(self.tree.get(key, {}))
         d = self.tree
         for namespace in namespaces:
             try:
                 d = d[namespace]
             except KeyError:
                 return False
-        return key in d
+        # Test for mappings to prevent false positives:
+        return not ismapping(d.get(key, {}))
     
     def __getitem__(self, nskey):
         key, namespaces = unpack_ns(nskey)

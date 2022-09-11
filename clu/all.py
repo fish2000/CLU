@@ -29,11 +29,11 @@ def import_all_modules(basepath, appname, exportername='exporter'):
     # Only include those modules whose exporter instance is
     # a subclass of “clu.exporting.ExporterBase” named as
     # “exportername” indicates, within the module in question:
-    for modname in chain(importables, cls_modules):
-        module = import_module(modname)
+    for dotpath in chain(importables, cls_modules):
+        module = import_module(dotpath)
         exporter = resolve(module, exportername)
         if isinstance(exporter, ExporterBase):
-            modules[modname] = module
+            modules[dotpath] = module
     
     return modules
 

@@ -181,8 +181,9 @@ def test():
     
     from clu.testing.utils import inline
     from clu.config.keymap import Flat
+    from clu.fs.filesystem import which
     from pprint import pprint
-    import re, textwrap
+    import os, re, textwrap
     
     flat = Flat()
     
@@ -257,19 +258,19 @@ def test():
         pprint(flat.submap(unprefixed=True), indent=4)
     
     @inline
-    def test_one():
+    def test_flat_validate_ns():
         """ Validate a Flat keymap’s namespaces """
         for namespace in flat.namespaces():
             assert validate_ns(*split_ns(namespace))
     
     @inline
-    def test_two():
+    def test_frozenflat_validate_ns():
         """ Validate a FrozenFlat keymap’s namespaces """
         for namespace in flat.freeze().namespaces():
             assert validate_ns(*split_ns(namespace))
     
     @inline
-    def test_three():
+    def test_validate_ns_errors():
         """ Check “validate_ns(…)” error conditions """
         try:
             validate_ns("yo dogg")
@@ -280,6 +281,10 @@ def test():
             validate_ns("yo:dogg")
         except ValueError as exc:
             assert "namespace contains separator" in str(exc)
+    
+    if not which('java'):
+        print("[WARNING] skipping `clu.config.ns` tests – `java` executable not found")
+        return os.EX_OK
     
     return inline.test(100)
 

@@ -11,7 +11,7 @@ from clu.config.env import FrozenEnviron, Environ
 from clu.config.keymap import FrozenFlat, Flat, FrozenNested, Nested
 from clu.dicts import asdict
 from clu.naming import qualified_import, qualified_name
-from clu.predicates import allitems, item, typeof
+from clu.predicates import allitems, haspyattr, hasitem, item, typeof
 from clu.typology import subclasscheck
 from clu.exporting import Exporter
 
@@ -32,12 +32,12 @@ isfoset = lambda putative: subclasscheck(putative, FlatOrderedSet)
 
 @export
 def annotated_dict_for(thing):
-    thing_t = typeof(thing)
-    out = { '__qualname__' : qualified_name(thing_t) }
-    if hasattr(thing_t, 'to_dict'):
+    cls = typeof(thing)
+    out = { '__qualname__' : qualified_name(cls) }
+    if hasattr(cls, 'to_dict'):
         out['__dict__'] = asdict(thing)
-    else:
-        out['__list__'] = list(thing)
+    elif hasattr(cls, 'to_list'):
+        out['__list__'] = thing.to_list()
     return out
 
 @export
@@ -60,6 +60,8 @@ class Encoder(json.JSONEncoder):
             return annotated_dict_for(obj)
         elif isfoset(obj):
             return annotated_dict_for(obj)
+        elif haspyattr(obj, 'lambda_name'):
+            return annotated_dict_for(obj)
         return super().default(obj)
 
 @export
@@ -77,6 +79,8 @@ class Decoder(json.JSONDecoder):
             return instance_for(obj)
         elif isinstance(obj, dict) and allitems(obj, *pytuple('qualname', 'list')):
             return instance_for(obj)
+        elif isinstance(obj, dict) and hasitem(obj, '__qualname__'):
+            return instance_for(obj)
         return obj
 
 encoder = Encoder(indent=4)
@@ -90,9 +94,11 @@ def json_encode(things):
 def json_decode(string):
     return decoder.decode(string)
 
+@export
 def pickle_encode(things):
     return pickle.dumps(things)
 
+@export
 def pickle_decode(string):
     return pickle.loads(string)
 
@@ -107,6 +113,7 @@ def test():
     
     @inline.fixture
     def flat_ordered_set():
+        # Using default predicate: clu.predicates.always(…)
         return FlatOrderedSet('yo', 'dogg', 'i_heard', 'you_like')
     
     @inline
@@ -122,7 +129,7 @@ def test():
         
         assert allitems(anndict_flat, *pytuple('qualname', 'dict'))
         assert allitems(anndict_nested, *pytuple('qualname', 'dict'))
-        assert allitems(anndict_foset, *pytuple('qualname', 'list'))
+        assert allitems(anndict_foset, *pytuple('qualname', 'dict'))
         
         # print("flat qualname:", qualified_name(Flat))
         # print("anndict_nested['__dict__']:")
@@ -135,7 +142,8 @@ def test():
         assert anndict_foset['__qualname__'] == qualified_name(FlatOrderedSet)
         assert anndict_flat['__dict__'] == flatdict()
         assert anndict_nested['__dict__'] == nestedmaps()
-        assert anndict_foset['__list__'] == flat_ordered_set()
+        assert anndict_foset['__dict__'] == { 'things'    : foset.things,
+                                              'predicate' : qualified_name(foset.predicate) }
     
     @inline
     def test_instance_for():
@@ -148,7 +156,7 @@ def test():
             '__dict__'      : nestedmaps() }
         anndict_foset = {
             '__qualname__'  : 'clu.config.abc.FlatOrderedSet',
-            '__list__'      : list(flat_ordered_set()) }
+            '__dict__'      : flat_ordered_set().to_dict() }
         
         instance_flat = instance_for(anndict_flat)
         instance_nested = instance_for(anndict_nested)
@@ -163,6 +171,7 @@ def test():
         assert instance_flat.dictionary == flatdict()
         assert instance_nested.tree == nestedmaps()
         assert instance_foset.things == flat_ordered_set().things
+        assert instance_foset == flat_ordered_set()
         
         # print("instance_nested.tree:")
         # pprint(instance_nested.tree)
@@ -187,6 +196,10 @@ def test():
         # print("nested_json:")
         # print(nested_json)
         # print()
+        
+        print("foset_json:")
+        print(foset_json)
+        print()
         
         reconstituted_flat = json_decode(flat_json)
         reconstituted_nested = json_decode(nested_json)

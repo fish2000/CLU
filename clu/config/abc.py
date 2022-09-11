@@ -17,7 +17,8 @@ from clu.config.keymapview import KeyMapKeysView, KeyMapItemsView, KeyMapValuesV
 from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsView
 from clu.config.keymapview import NamespaceWalkerValuesView
 
-from clu.predicates import (unwrap,
+from clu.naming import qualified_import, qualified_name, nameof
+from clu.predicates import (unwrap, typeof,
                             isexpandable, iscontainer, isnotnone,
                             always, uncallable)
 
@@ -466,7 +467,11 @@ class FlatOrderedSet(collections.abc.Set,
         One can optionally specify, as a keyword-only argument, a unary boolean
         function “predicate” that will be used to filter out any of the items
         used to initialize the FlatOrderedSet for which the predicate returns
-        a Falsey value. 
+        a Falsey value.
+        
+        N.B. FlatOrderedSet serialized via the “clu.config.codecs” regime
+        have to employ properly defined, non-lambda predicates in order to
+        roundtrip properly through JSON or the pickle protocol.
     """
     __slots__ = ('things', 'predicate')
     
@@ -474,6 +479,12 @@ class FlatOrderedSet(collections.abc.Set,
     def _from_iterable(cls, iterable): # pragma: no cover
         # Required by the “collections.abc.Set” API:
         return cls(*iterable)
+    
+    @classmethod
+    def from_dict(cls, instance_dict):
+        """ Used by `clu.config.codecs` to deserialize FlatOrderedSets """
+        return cls(*instance_dict['things'],
+                    predicate=qualified_import(instance_dict['predicate']))
     
     @classmethod
     def is_a(cls, instance):
@@ -523,7 +534,10 @@ class FlatOrderedSet(collections.abc.Set,
     def __getitem__(self, idx):
         if isinstance(idx, int):
             return self.things[idx]
-        return type(self)(*self.things[idx], predicate=self.predicate)
+        elif isinstance(idx, slice):
+            return type(self)(*self.things[idx], predicate=self.predicate)
+        badtype = nameof(typeof(idx))
+        raise TypeError(f"FlatOrderedSet indices must be integers or slices, not {badtype}")
     
     def __bool__(self):
         return len(self.things) > 0
@@ -561,6 +575,12 @@ class FlatOrderedSet(collections.abc.Set,
         # which are superfluous as “inner_repr(…)” will
         # add its own parens by default
         return repr(self.things)[1:-1]
+    
+    def to_dict(self):
+        """ Used by `clu.config.codecs` to serialize FlatOrderedSets """
+        return { 'things'    : self.things,
+                 'predicate' : qualified_name(self.predicate) }
+    
 
 # CONCRETE CALLABLE SUBTYPES: functional_and, functional_set
 

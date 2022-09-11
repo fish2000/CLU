@@ -608,9 +608,11 @@ class ExporterBase(collections.abc.MutableMapping,
             if named is None:
                 raise ExportError(type(self).messages['noname'] % id(thing))
             
-            # Retrieve the things’ ostensible __name__ and __qualname__ attribute values:
+            # Retrieve the things’ ostensible __name__, __qualname__, and
+            # __code__ attribute values:
             dname = getattr(thing, '__name__')
             qname = getattr(target, '__qualname__')
+            fcode = getattr(target, '__code__', None)
             
             # ATTEMPT TO RENAME!!!…
             # VIA FULL-FLOW MULTI-STAGED COMBUSTION:
@@ -623,16 +625,22 @@ class ExporterBase(collections.abc.MutableMapping,
             except AttributeError:
                 pass
             
-            # Attempt Nº2: update __name__ and __code__.co_name, and set
-            # __lambda_name__ if necessary – to recall the lambda’s genesis:
+            # Attempt Nº2: update __code__.co_name, by replacing __code__:
+            try:
+                if fcode:
+                    target.__code__ = fcode.replace(co_name=named)
+            except AttributeError:
+                pass    
+            
+            # Attempt Nº3: update __name__ and set __lambda_name__ if necessary
+            # …to recall the lambda’s genesis:
             try:
                 target.__name__ = named
-                target.__code__ = target.__code__.replace(co_name=named)
                 target.__lambda_name__ = getattr(target, '__lambda_name__', dname)
             except AttributeError:
                 pass
             else:
-                # Only pursue the Nº3 attempt if Nº2 didn’t fail –
+                # Only pursue the Nº4 attempt if Nº2 didn’t fail –
                 # …reset __module__ for phi-types:
                 if dname == φ and self.dotpath is not None:
                     target.__module__ = str(self.dotpath)

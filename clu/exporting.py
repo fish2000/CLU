@@ -928,6 +928,8 @@ def test():
         from clu.testing import utils
         inlinetester_name = search_for_name(utils.InlineTester)
         assert utils.InlineTester.__name__ == inlinetester_name
+        bucket_name = search_for_name(utils.Bucket)
+        assert utils.Bucket.__name__ == bucket_name
     
     @inline
     def test_search_for_module():
@@ -935,6 +937,15 @@ def test():
         from clu.testing import utils
         inlinetester_module = search_for_module(utils.InlineTester)
         assert utils == inlinetester_module
+        bucket_module = search_for_module(utils.Bucket)
+        assert utils == bucket_module
+        format_environment_module = search_for_module(utils.format_environment)
+        assert utils == format_environment_module
+    
+    @inline.diagnostic
+    def show_search_by_id_cache_info():
+        print("SEARCH-BY-ID CACHE INFO:")
+        print(Exporter.cache_info())
     
     return inline.test(100)
 

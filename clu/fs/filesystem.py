@@ -768,7 +768,7 @@ class Directory(BaseFSName,
             doesn’t do anything yet. This is because I am lazy and
             I lack intellectual rigor.
             
-            The return triple resemples that yielded by “os.walk(…)” –
+            The return triple resembles that yielded by “os.walk(…)” –
             but unlike that function, modifying the directory listing
             in-situ doesn’t do anything, because think about it.
         """

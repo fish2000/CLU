@@ -130,6 +130,8 @@ import collections.abc
 from PIL import Image
 from pprint import pprint, pformat
 
+ppt = lambda thing: pprint(tuple(thing))
+
 # These two imports trigger module-level __getattr__ actions:
 
 from clu.testing.utils import pout, inline

@@ -557,17 +557,26 @@ class FlatOrderedSet(collections.abc.Set,
     
     def __add__(self, operand):
         if type(self).is_a(operand):
-            return type(self)(*self.things, *operand.things)
+            return type(self)(*self.things, *operand.things, predicate=self.predicate)
         elif isinstance(operand, collections.abc.Sequence):
-            return type(self)(*self.things, *tuple(operand))
+            return type(self)(*self.things, *tuple(operand), predicate=self.predicate)
         return NotImplemented
     
     def __radd__(self, operand):
         if type(self).is_a(operand):
-            return type(self)(*operand.things, *self.things)
+            return type(self)(*operand.things, *self.things, predicate=self.predicate)
         elif isinstance(operand, collections.abc.Sequence):
-            return type(self)(*tuple(operand), *self.things)
+            return type(self)(*tuple(operand), *self.things, predicate=self.predicate)
         return NotImplemented
+    
+    def sort(self, key=None, reverse=False):
+        """ Return a new FlatOrderedSet with the contents sorted,
+            as per the usage of `builtins.sorted(…)`
+        """
+        return type(self)(sorted(self.things,
+                                 key=key,
+                                 reverse=reverse),
+                                 predicate=self.predicate)
     
     def clone(self, deep=False, memo=None):
         # Q.v. https://stackoverflow.com/a/48550898/298171

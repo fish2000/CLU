@@ -53,3 +53,19 @@ class TestConfigABC(object):
         assert fos0 + ('iheard', 'youlike') == fos2
         assert fos1 + fos2 == FlatOrderedSet('iheard', 'youlike', 'yo', 'dogg')
         assert fos1 + fos0 == FlatOrderedSet('iheard', 'youlike', 'yo', 'dogg')
+    
+    def test_FlatOrderedSet_sort(self):
+        # N.B. could use tests with the “key” argument
+        from clu.config.abc import FlatOrderedSet
+        stuff = FlatOrderedSet(None, "a", "b", FlatOrderedSet("c", None, "a", "d"))
+        summary = FlatOrderedSet("a", "b", "c", "d")
+        out_of_order = FlatOrderedSet("b", "d", "a", "c")
+        
+        assert stuff.sort() == summary.sort()
+        assert stuff.sort() == out_of_order.sort()
+        assert stuff == out_of_order.sort()
+        assert stuff.sort().things == tuple(sorted(out_of_order.things))      
+          
+        assert stuff.sort(reverse=True) == summary.sort(reverse=True)
+        assert stuff.sort(reverse=True) == out_of_order.sort(reverse=True)
+        assert stuff.sort(reverse=True).things == tuple(sorted(out_of_order.things, reverse=True))

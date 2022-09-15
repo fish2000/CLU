@@ -153,7 +153,7 @@ def modules_for_appname(appname):
     try:
         yield from modules.values()
     except RuntimeError:
-        yield from modules.values()
+        yield from modules_for_appname(appname)
 
 @export
 def appspaces_for_appname(appname):

@@ -162,7 +162,7 @@ def test():
     from clu.constants.consts import TEXTMATE, pytuple
     
     @inline
-    def test_one():
+    def test_types_typespace():
         """ Check the typespace (the “types” namespace) """
         import types as thetypes
         
@@ -182,7 +182,7 @@ def test():
     verboten = VERBOTEN + pytuple('doc', 'name', 'qualname')
     
     @inline
-    def test_two():
+    def test_prepare_types_ns():
         """ Check the output of the “prepare_types_ns(…)” function """
         moretypes = prepare_types_ns(path=__file__, basepath=BASEPATH)
         
@@ -192,7 +192,7 @@ def test():
     
     # Modulization doesn’t work when running in TextMate:
     @inline.runif(not TEXTMATE)
-    def test_three():
+    def test_modulize():
         """ Check modulization """
         moretypes = prepare_types_ns(path=__file__, basepath=BASEPATH)
         modulize('moretypes', moretypes, "A module containing aliases into the `types` module")
@@ -206,7 +206,7 @@ def test():
                 print("EQUAL:", typename, getattr(types, typename), getattr(moretypes, typename, Namespace()))
     
     @inline
-    def test_four():
+    def test_types_module_compat():
         """ Compatibility with standard-library “types” module members """
         import types as moretypes
         from clu.typespace.namespace import Namespace

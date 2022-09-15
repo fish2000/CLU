@@ -354,7 +354,7 @@ def test():
                "nested : 'dicts', so : 'we put dicts in your dicts' })"
     
     @inline
-    def test_one():
+    def test_recursive_namespaces():
         """ Implicit recursive namespaces """
         ROOT = Namespace()
         
@@ -381,7 +381,7 @@ def test():
         return ROOT
     
     @inline
-    def test_two():
+    def test_simplenamespace_basics():
         """ SimpleNamespace sanity checks """
         from clu.repr import chop_instance_repr
         
@@ -393,7 +393,7 @@ def test():
         pass
     
     @inline
-    def test_three():
+    def test_namespace_missing():
         """ Namespace subclass “__missing__(…)” check """
         
         class MissingNamespace(Namespace):
@@ -408,7 +408,7 @@ def test():
             assert bool(exc)
     
     @inline
-    def test_four():
+    def test_simplenamespace_compat():
         """ Compatibility with standard-library “types.SimpleNamespace” """
         import types
         

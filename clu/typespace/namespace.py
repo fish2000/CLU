@@ -233,6 +233,12 @@ class Namespace(BaseNamespace,
             return self.__dict__.pop(key)
         return self.__dict__.pop(key, default)
     
+    def popitem(self):
+        """ Remove and return a single key-value pair from the namespace,
+            raising a KeyError if the namespace is empty.
+        """
+        return self.__dict__.popitem()
+    
     def update(self, dictish=None, **updates):
         """ Update the namespace with key/value pairs and/or an iterator;
             q.v. `dict.update(…)` docstring supra.

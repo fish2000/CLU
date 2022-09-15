@@ -542,6 +542,12 @@ class ExporterBase(collections.abc.MutableMapping,
             return self.__exports__.pop(key)
         return self.__exports__.pop(key, default)
     
+    def popitem(self):
+        """ Remove and return a single key-value pair, raising a KeyError
+            if the exporter is empty
+        """
+        return self.__exports__.popitem()
+    
     def update(self, dictish=NoDefault, **updates):
         """ Update the exporter with key/value pairs and/or an iterator;
             q.v. `dict.update(…)` docstring supra.

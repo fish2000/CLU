@@ -1012,7 +1012,7 @@ def test():
         print("module():", thismodule())
     
     @inline
-    def test_one():
+    def test_class_module_basics():
         """ Class-module basics """
         
         m = Module(consts.APPNAME)
@@ -1023,7 +1023,7 @@ def test():
         assert nameof(m) == consts.APPNAME
     
     @inline
-    def test_two():
+    def test_class_module_subtypes():
         """ Class-module subtype basics """
         
         class OtherModule(ModuleBase):
@@ -1044,7 +1044,7 @@ def test():
         assert O
     
     @inline
-    def test_three():
+    def test_class_module_registry():
         """ Class-module registry basics """
 
         print("all_registered_appnames():")
@@ -1074,7 +1074,7 @@ def test():
         pass
     
     @inline
-    def test_three_point_five():
+    def test_sys_metapath_hooks_specs():
         """ System import hooks, specs and finders """
         
         finder = Finder()
@@ -1099,7 +1099,7 @@ def test():
         assert nameof(registered) == nameof(FindMe)
     
     @inline.runif(consts.TEXTMATE)
-    def test_four():
+    def test_class_module_with_exports():
         """ Class-module subclass properties, methods, and exporting """
         
         class Derived(Module):
@@ -1139,7 +1139,7 @@ def test():
         assert type(derived.exporter).__name__ == 'Exporter'
     
     @inline.runif(consts.TEXTMATE)
-    def test_five():
+    def test_module_type_caching():
         """ Polymer-type caching and “initialize_types(…)” checks """
 
         Module0, Finder0, Loader0 = initialize_types(consts.APPNAME)
@@ -1167,7 +1167,7 @@ def test():
         assert type(aux_module) is Module1
     
     @inline
-    def test_five_point_five():
+    def test_perapp_module_cache():
         """ “PerApp” dataclass and module cache check """
         
         for appname in all_registered_appnames():

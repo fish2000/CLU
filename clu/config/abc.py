@@ -252,6 +252,9 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
             if it doesn’t exist – raising a KeyError if no
             default value is given.
         """
+        # NoDefault never escapes to userland – the call to
+        # get(…) will raise the KeyError if NoDefault was passed
+        # (Q.v. “get(¬)” definition supra.)
         value = self.get(key, *namespaces, default=default)
         if value == default or value is default:
             return value

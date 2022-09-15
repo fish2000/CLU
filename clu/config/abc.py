@@ -555,6 +555,20 @@ class FlatOrderedSet(collections.abc.Set,
             return self.things != tuple(other)
         return NotImplemented
     
+    def __add__(self, operand):
+        if type(self).is_a(operand):
+            return type(self)(*self.things, *operand.things)
+        elif isinstance(operand, collections.abc.Sequence):
+            return type(self)(*self.things, *tuple(operand))
+        return NotImplemented
+    
+    def __radd__(self, operand):
+        if type(self).is_a(operand):
+            return type(self)(*operand.things, *self.things)
+        elif isinstance(operand, collections.abc.Sequence):
+            return type(self)(*tuple(operand), *self.things)
+        return NotImplemented
+    
     def clone(self, deep=False, memo=None):
         # Q.v. https://stackoverflow.com/a/48550898/298171
         cls = type(self)

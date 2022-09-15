@@ -41,3 +41,15 @@ class TestConfigABC(object):
         assert chop_instance_repr(stuff) == chop_instance_repr(summary)
         assert chop_instance_repr(stuff) == "FlatOrderedSet('a', 'b', 'c', 'd')"
         assert chop_instance_repr(summary) == "FlatOrderedSet('a', 'b', 'c', 'd')"
+    
+    def test_FlatOrderedSet_addition(self):
+        from clu.config.abc import FlatOrderedSet
+        fos0 = FlatOrderedSet('yo', 'dogg')
+        fos1 = FlatOrderedSet('iheard', 'youlike')
+        fos2 = FlatOrderedSet('yo', 'dogg', 'iheard', 'youlike')
+        
+        assert fos0 + fos1 == fos2
+        assert fos0 + fos2 == fos2
+        assert fos0 + ('iheard', 'youlike') == fos2
+        assert fos1 + fos2 == FlatOrderedSet('iheard', 'youlike', 'yo', 'dogg')
+        assert fos1 + fos0 == FlatOrderedSet('iheard', 'youlike', 'yo', 'dogg')

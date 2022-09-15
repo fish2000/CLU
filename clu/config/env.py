@@ -194,7 +194,7 @@ def test():
     from pprint import pprint
     
     @inline
-    def test_one():
+    def test_envwalk():
         """ FrozenEnviron and “envwalk(…)” namespaced-key check """
         env = FrozenEnviron()
         
@@ -203,7 +203,7 @@ def test():
             assert nskey in env
     
     @inline
-    def test_one_pt_five():
+    def test_envwalk_arbitrary_kwargs():
         """ FrozenEnviron and “envwalk(…)” with ‘updates’ kwargs """
         updates = { 'yo' : 'dogg', 'iheard' : 'you like' }
         env = FrozenEnviron(**updates)
@@ -227,7 +227,7 @@ def test():
         assert env.getenv('WTF', 'HAX') == 'HAX'
     
     @inline
-    def test_two():
+    def test_arbitrary_dict():
         """ Environ with “os.environ” and custom-dict backends """
         env = Environ()
         fenv = env.freeze()
@@ -249,7 +249,7 @@ def test():
         env.unsetenv('wtf')
     
     @inline
-    def test_three():
+    def test_frozenenviron_low_level():
         """ FrozenEnviron low-level API """
         env = FrozenEnviron()
         
@@ -269,7 +269,7 @@ def test():
             del os.environ['CLU_CTX_YODOGG']
     
     @inline
-    def test_three_pt_five():
+    def test_environ_contextmanager():
         """ Environ (mutable) context-manager API """
         before = len(os.environ)
         assert os.getenv('CLU_CTX_YODOGG') is None
@@ -287,7 +287,7 @@ def test():
         assert len(os.environ) == before
     
     @inline
-    def test_four():
+    def test_prefix_env():
         """ Check “prefix_env(…)” edge-case handling """
         # not appname, not namespaces:
         assert prefix_env(None) == ''

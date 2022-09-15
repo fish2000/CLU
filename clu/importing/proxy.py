@@ -327,7 +327,7 @@ def test():
         print("module():", thismodule())
     
     @inline
-    def test_five():
+    def test_proxy_module_values():
         """ Proxy-module properties and value resolution """
         
         overrides = dict(APPNAME='yodogg',
@@ -350,7 +350,7 @@ def test():
         assert hasattr(overridden, '_targets')
     
     @inline
-    def test_five_point_five():
+    def test_proxy_module_fallback():
         """ Proxy-module fallback callable check """
         
         overrides = dict(APPNAME='yodogg',
@@ -382,7 +382,7 @@ def test():
         assert dir(overridden)
     
     @inline
-    def test_five_point_eight():
+    def test_proxy_module_hybrid():
         """ Proxy-module hybrid definition check """
         
         overrides = dict(APPNAME='yodogg',

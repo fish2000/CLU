@@ -93,7 +93,6 @@ class NodeBase(collections.abc.Hashable,
         instance.node_parent = parent
         instance.node_name = str(name)
         instance.node_value = value
-        # instance.child_nodes = list()
         instance.child_nodes = {}
         
         if children:
@@ -119,19 +118,12 @@ class NodeBase(collections.abc.Hashable,
                 raise ValueError(f"Children must be Node types, not {badtype}")
             if child in self.child_nodes:
                 raise ValueError(f"WTF: Node “{child!s}” is already a child")
-            # self.child_nodes.append(child)
             self.child_nodes[str(child)] = child
     
     def add_child(self, name, value=None):
         self._append_nodes(type(self)(parent=self, name=name, value=value))
     
     def get_child(self, key):
-        # if self.child_nodes.count(key):
-        #     return self.child_nodes[self.child_nodes.index(key)]
-        # for child in self.child_nodes:
-        #     if key == child.node_name:
-        #         return child
-        # raise KeyError(key)
         return self.child_nodes[key]
     
     def leaves(self):
@@ -147,9 +139,6 @@ class NodeBase(collections.abc.Hashable,
     
     def __iter__(self):
         yield from self.child_nodes.values()
-    
-    # def __getitem__(self, key):
-    #     return self.child_nodes[key]
     
     def __getitem__(self, idx):
         if isinstance(idx, (int, slice)):

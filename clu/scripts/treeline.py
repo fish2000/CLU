@@ -207,7 +207,11 @@ class RootNode(NodeBase):
                                        *children,
                                         value=None) # value isn’t necessary
         return instance
-        
+    
+    @property
+    def value(self):
+        """ A root node has no value, by definition """
+        return None
 
 class Node(NodeBase):
     
@@ -386,6 +390,9 @@ def test():
         # The follwing tree-repr stuff is copied from the test function
         # “test_node_rootnode_repr_sorted()” above:
         def node_repr(node):
+            if not node.is_leafnode():
+                child_count = len(node)
+                return f"• {node!s} → [{child_count}]"
             if not node.value:
                 return f"• {node!s}"
             return f"• {node!s} = {node.value}"

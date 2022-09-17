@@ -95,14 +95,15 @@ class NodeBase(collections.abc.Hashable,
     
     @property
     def value(self):
-        return self.node_value
+        return self.is_leafnode and self.node_value or None
     
     # @value.setter
     # def value(self, assignee):
     #     self.node_value = assignee
     
+    @property
     def is_leafnode(self):
-        return bool(len(self.child_nodes))
+        return not bool(len(self.child_nodes))
     
     def _append_nodes(self, *children):
         for child in children:
@@ -116,6 +117,14 @@ class NodeBase(collections.abc.Hashable,
     def add_child(self, name, value=None):
         self._append_nodes(type(self)(parent=self, name=name, value=value))
     
+    def get_child(self, key):
+        # if self.child_nodes.count(key):
+        #     return self.child_nodes[self.child_nodes.index(key)]
+        for child in self.child_nodes:
+            if key == child.node_name:
+                return child
+        raise KeyError(key)
+    
     def __len__(self):
         return len(self.child_nodes)
     
@@ -126,11 +135,7 @@ class NodeBase(collections.abc.Hashable,
         if isinstance(idx, (int, slice)):
             return self.child_nodes[idx]
         elif isnormative(idx):
-            strkey = str(idx)
-            for child in self.child_nodes:
-                if strkey == str(child):
-                    return child
-            raise KeyError(strkey)
+            return self.get_child(str(idx))
         thistype = nameof(typeof(self))
         badtype = nameof(typeof(idx))
         raise TypeError(f"{thistype} indices must be integers or slices, not {badtype}")

@@ -235,11 +235,11 @@ def test():
                 return f"• {node!s}"
             return f"• {node!s} = {node.value}"
         
-        def tree_repr(root_node, level):
+        def tree_repr(node, level):
             with level:
-                yield level.indent(node_repr(root_node))
-                for node in root_node:
-                    yield from tree_repr(node, level)
+                yield level.indent(node_repr(node))
+                for child in node:
+                    yield from tree_repr(child, level)
         
         for line in tree_repr(root, Level()):
             print(line)
@@ -266,14 +266,14 @@ def test():
                 return f"• {node!s}"
             return f"• {node!s} = {node.value}"
         
-        def tree_repr(root_node, level):
+        def tree_repr(node, level):
             with level:
-                yield level.indent(node_repr(root_node))
-                for node in root_node.leaves():
+                yield level.indent(node_repr(node))
+                for leaf in node.leaves():
                     with level:
-                        yield level.indent(node_repr(node))
-                for node in root_node.namespaces():
-                    yield from tree_repr(node, level)
+                        yield level.indent(node_repr(leaf))
+                for child in node.namespaces():
+                    yield from tree_repr(child, level)
         
         for line in tree_repr(root, Level()):
             print(line)

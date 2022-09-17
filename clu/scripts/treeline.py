@@ -340,25 +340,51 @@ def test():
     
     @inline
     def test_parse_command_line():
+        """ Transform a command into a node tree """
         
+        # Create an empty tree:
         root = RootNode()
-        node = root
         
-        def argument_to_node(arg, parent):
+        def parse_argument_to_child_node(arg, parent):
+            """ Function to parse an argument into its values,
+                and then add a node with those corresponding values
+                to a provided parent node – then returning this
+                parent node (if we created a leaf) or our freshly
+                created node (if we created a namespace).
+                … this allows us to keep attaching stuff to whatever
+                gets returned here, wherever we are in the process
+                of parsing the command line
+            """
+            # Examine the argument:
             if arg.startswith('--'):
                 if '=' in arg:
+                    # It’s a leaf with a value specified:
                     name, value = arg.removeprefix('--').split('=')
                 else:
+                    # It’s a leaf with no value provided:
                     name, value = arg.removeprefix('--'), None
             else:
+                # It’s a namespace:
                 name, value = arg, None
-            # return Node(parent=parent, name=name, value=value)
+            
+            # Add and recover a new node, containing the values
+            # we parsed out:
             node = parent.add_child(name=name, value=value)
+            
+            # Return the node if it’s a namespace, otherwise
+            # hand back the original parent:
             return arg.startswith('--') and parent or node
         
+        # Starting with the root node, go through the list of
+        # namespaced argument flags and whatnot, parsing each
+        # in turn, advancing the “node” in question to namespaces
+        # as we encounter and create them:
+        node = root
         for argument in nsflags:
-            node = argument_to_node(argument, node)
-    
+            node = parse_argument_to_child_node(argument, parent=node)
+        
+        # The follwing tree-repr stuff is copied from the test function
+        # “test_node_rootnode_repr_sorted()” above:
         def node_repr(node):
             if not node.value:
                 return f"• {node!s}"
@@ -375,6 +401,8 @@ def test():
     
         for line in tree_repr(root, Level()):
             print(line)
+        
+        print()
     
     return inline.test(100)
 

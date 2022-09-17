@@ -50,22 +50,22 @@ class Level(contextlib.AbstractContextManager,
     
     """ A context manager to babysit indent levels. """
     
-    slots = ('level', 'tab')
+    slots = ('value', 'tab')
     
     def __init__(self, initial_value=0, tab=SPACETABS):
-        self.level = initial_value
+        self.value = initial_value
         self.tab = tab
     
     def indent(self, string):
-        return self.level * self.tab + string
+        return self.value * self.tab + string
     
     def __enter__(self):
-        self.level += 1
+        self.value += 1
         return self
     
     def __exit__(self, exc_type=None, exc_val=None, exc_tb=None):
         # N.B. return False to throw, True to supress
-        self.level -= 1
+        self.value -= 1
         return exc_type is None
 
 class NodeBase(collections.abc.Hashable,

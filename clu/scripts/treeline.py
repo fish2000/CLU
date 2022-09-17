@@ -265,8 +265,8 @@ def test():
             with level:
                 yield level.indent(node_repr(root_node))
                 for node in root_node.leaves():
-                    # yield level.indent(node_repr(node))
-                    yield from tree_repr(node, level)
+                    with level:
+                        yield level.indent(node_repr(node))
                 for node in root_node.namespaces():
                     yield from tree_repr(node, level)
         

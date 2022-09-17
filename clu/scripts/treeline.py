@@ -158,8 +158,10 @@ class NodeBase(collections.abc.Hashable,
         raise TypeError(message)
     
     def __hash__(self):
-        # So nice it’s twice!
-        return hash(self.name) & hash(self.name) & hash(id(self))
+        # So nice it’s thrice!
+        return hash(self.name) \
+             & hash(self.name) \
+             & hash(id(self))
     
     def __str__(self):
         return self.name

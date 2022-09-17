@@ -223,7 +223,9 @@ class Node(NodeBase):
         return instance
 
 # Used in RootNode._append_nodes(…):
-acceptable_types = NodeBase.__mro__ + (RootNode, Node)
+acceptable_types = set(NodeBase.__mro__)
+acceptable_types.add(Node)
+acceptable_types.add(RootNode)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

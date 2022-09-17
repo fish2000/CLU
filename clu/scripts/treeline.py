@@ -270,8 +270,8 @@ def test():
         
         assert emptynode[0].name == "i_heard"
         assert emptynode[0].value == "you like"
-        assert emptynode['i_heard'].name == "i_heard"       # SLOW
-        assert emptynode['i_heard'].value == "you like"     # SLOW
+        assert emptynode['i_heard'].name == "i_heard"
+        assert emptynode['i_heard'].value == "you like"
         assert emptynode[1].name == "dogg"
         assert emptynode[1].value == "ALL_TYPES_OF_SHIT"
     

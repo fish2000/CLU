@@ -43,7 +43,7 @@ command = "clu-command WRITE " \
 
 executable, action, *nsflags = command.split(" ")
 
-SPACETABS = "    "
+SPACETABS = " " * 2
 
 @export
 class Level(contextlib.AbstractContextManager,
@@ -76,6 +76,8 @@ class Level(contextlib.AbstractContextManager,
 class NodeBase(collections.abc.Hashable,
                metaclass=clu.abstract.Slotted):
     
+    """ The base class for all tree nodes. """
+    
     __slots__ = ('node_parent', 'node_name',
                                 'node_value',
                  'child_nodes')
@@ -90,9 +92,9 @@ class NodeBase(collections.abc.Hashable,
         except TypeError:
             instance = super().__new__(cls)
         
-        instance.node_parent = parent
         instance.node_name = str(name)
         instance.node_value = value
+        instance.node_parent = parent
         instance.child_nodes = {}
         
         if children:
@@ -113,18 +115,33 @@ class NodeBase(collections.abc.Hashable,
     
     def _append_nodes(self, *children):
         for child in children:
-            if type(self) not in type(child).__mro__:
+            if type(child) is RootNode:
+                raise ValueError(f"Children must be standard nodes – not root nodes")
+            if type(child) not in acceptable_types:
                 badtype = nameof(typeof(child))
                 raise ValueError(f"Children must be Node types, not {badtype}")
-            if child in self.child_nodes:
-                raise ValueError(f"WTF: Node “{child!s}” is already a child")
-            self.child_nodes[str(child)] = child
+            if child in set(self.child_nodes.values()):
+                thistype = nameof(typeof(self))
+                raise ValueError(f"WTF: {thistype} “{child!s}” is already a child")
+            self.child_nodes[child.name] = child
     
     def add_child(self, name, value=None):
-        self._append_nodes(type(self)(parent=self, name=name, value=value))
+        self._append_nodes(Node(parent=self, name=name, value=value))
     
     def get_child(self, key):
         return self.child_nodes[key]
+    
+    def leaf(self, leafname):
+        node = self.get_child(leafname)
+        if not node.is_leafnode():
+            raise KeyError(leafname)
+        return node
+    
+    def namespace(self, nsname):
+        node = self.get_child(nsname)
+        if node.is_leafnode():
+            raise KeyError(nsname)
+        return node
     
     def leaves(self):
         yield from filter(lambda node: node.is_leafnode(),
@@ -156,6 +173,9 @@ class NodeBase(collections.abc.Hashable,
              & hash(self.name) \
              & hash(id(self))
     
+    def __bool__(self):
+        return True # ?!
+    
     def __str__(self):
         return self.name
     
@@ -168,6 +188,42 @@ class NodeBase(collections.abc.Hashable,
         if child_count:
             out += f" → [{child_count}]"
         return out
+
+class RootNode(NodeBase):
+    
+    """ A root node, anchoring a tree.
+        
+        There may only be one of these in a tree, and it must be
+        the trees’ root node (like duh). When building up a tree
+        from scratch, you instantiate a RootNode and use its methods
+        to craft the tree in place. 
+    """
+    
+    def __new__(cls, name, *children):
+        instance = super().__new__(cls, None,       # no parent
+                                        name,       # if you insist
+                                       *children,
+                                        value=None) # value isn’t necessary
+        return instance
+        
+
+class Node(NodeBase):
+    
+    """ A standard tree node. """
+    
+    def __new__(cls, parent, name, *children, value=None):
+        
+        if not parent:
+            raise ValueError("Nodes require a valid parent node")
+        
+        instance = super().__new__(cls, parent,
+                                        name,
+                                       *children,
+                                        value=value) # type: ignore
+        return instance
+
+# Used in RootNode._append_nodes(…):
+acceptable_types = NodeBase.__mro__ + (RootNode, Node)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -186,6 +242,7 @@ def test():
     
     @inline
     def test_nodebase_basics():
+        """ Check some of the basic NodeBase functions """
         emptynode = NodeBase(parent=None, name='yo')
         print("EMPTY NODE: {emptynode!s}")
         print(repr(emptynode))
@@ -212,6 +269,7 @@ def test():
     
     @inline
     def test_nodebase_repr_simple():
+        """ Test a tree of raw NodeBase instances """
         root = NodeBase(parent=None, name='root')
         root.add_child('yo')
         root.add_child('dogg')
@@ -242,15 +300,16 @@ def test():
         print()
     
     @inline
-    def test_nodebase_repr_sorted():
-        root = NodeBase(parent=None, name='root')
+    def test_node_rootnode_repr_sorted():
+        """ Test an anchored tree of Node instances """
+        root = RootNode(name='root')
         root.add_child('yo')
         root.add_child('dogg')
         root.add_child('i_heard')
         root.add_child('you_like')
         
-        nsX = NodeBase(parent=root, name="ns0")
-        nsY = NodeBase(parent=root, name="ns1")
+        nsX = Node(parent=root, name="ns0")
+        nsY = Node(parent=root, name="ns1")
         root._append_nodes(nsX, nsY)
         
         nsX.add_child('namespaced')

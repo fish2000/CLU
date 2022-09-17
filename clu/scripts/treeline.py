@@ -43,6 +43,8 @@ command = "clu-command WRITE " \
 
 executable, action, *nsflags = command.split(" ")
 
+SPACETABS = "    "
+
 class Level(contextlib.AbstractContextManager,
             metaclass=clu.abstract.Slotted):
     
@@ -50,7 +52,7 @@ class Level(contextlib.AbstractContextManager,
     
     slots = ('level', 'tab')
     
-    def __init__(self, initial_value=0, tab="    "):
+    def __init__(self, initial_value=0, tab=SPACETABS):
         self.level = initial_value
         self.tab = tab
     
@@ -65,17 +67,21 @@ class Level(contextlib.AbstractContextManager,
         # N.B. return False to throw, True to supress
         self.level -= 1
         return exc_type is None
-    
 
 class NodeBase(collections.abc.Hashable,
                metaclass=clu.abstract.Slotted):
     
-    __slots__ = ('node_parent', 'node_name', 'node_value', 'child_nodes')
+    __slots__ = ('node_parent', 'node_name',
+                                'node_value',
+                 'child_nodes')
     
     def __new__(cls, parent, name, *children, value=None):
         
         try:
-            instance = super().__new__(cls, parent, name, *children, value=value) # type: ignore
+            instance = super().__new__(cls, parent,
+                                            name,
+                                           *children,
+                                            value=value) # type: ignore
         except TypeError:
             instance = super().__new__(cls)
         
@@ -95,13 +101,12 @@ class NodeBase(collections.abc.Hashable,
     
     @property
     def value(self):
-        return self.is_leafnode and self.node_value or None
+        return self.is_leafnode() and self.node_value or None
     
     # @value.setter
     # def value(self, assignee):
     #     self.node_value = assignee
     
-    @property
     def is_leafnode(self):
         return not bool(len(self.child_nodes))
     
@@ -125,6 +130,12 @@ class NodeBase(collections.abc.Hashable,
                 return child
         raise KeyError(key)
     
+    def leaves(self):
+        yield from filter(lambda node: node.is_leafnode(), self.child_nodes)
+    
+    def namespaces(self):
+        yield from filter(lambda node: not node.is_leafnode(), self.child_nodes)
+    
     def __len__(self):
         return len(self.child_nodes)
     
@@ -138,7 +149,8 @@ class NodeBase(collections.abc.Hashable,
             return self.get_child(str(idx))
         thistype = nameof(typeof(self))
         badtype = nameof(typeof(idx))
-        raise TypeError(f"{thistype} indices must be integers or slices, not {badtype}")
+        message = f"{thistype} indices must be integers, slices, or strings – not {badtype}"
+        raise TypeError(message)
     
     def __hash__(self):
         # So nice it’s twice!
@@ -199,7 +211,7 @@ def test():
         assert emptynode[1].value == "ALL_TYPES_OF_SHIT"
     
     @inline
-    def test_nodebase_repr():
+    def test_nodebase_repr_simple():
         root = NodeBase(parent=None, name='root')
         root.add_child('yo')
         root.add_child('dogg')
@@ -212,8 +224,6 @@ def test():
         
         nsX.add_child('namespaced')
         nsY.add_child('commands')
-        
-        # level = Level()
         
         def node_repr(node):
             if not node.value:
@@ -231,9 +241,39 @@ def test():
     
         print()
     
-    #@inline.diagnostic
-    def show_me_some_values():
-        pass # INSERT DIAGNOSTIC CODE HERE
+    @inline
+    def test_nodebase_repr_sorted():
+        root = NodeBase(parent=None, name='root')
+        root.add_child('yo')
+        root.add_child('dogg')
+        root.add_child('i_heard')
+        root.add_child('you_like')
+        
+        nsX = NodeBase(parent=root, name="ns0")
+        nsY = NodeBase(parent=root, name="ns1")
+        root._append_nodes(nsX, nsY)
+        
+        nsX.add_child('namespaced')
+        nsY.add_child('commands')
+        
+        def node_repr(node):
+            if not node.value:
+                return f"• {node!s}"
+            return f"• {node!s} = {node.value}"
+        
+        def tree_repr(root_node, level):
+            with level:
+                yield level.indent(node_repr(root_node))
+                for node in root_node.leaves():
+                    # yield level.indent(node_repr(node))
+                    yield from tree_repr(node, level)
+                for node in root_node.namespaces():
+                    yield from tree_repr(node, level)
+        
+        for line in tree_repr(root, Level()):
+            print(line)
+    
+        print()
     
     return inline.test(100)
 

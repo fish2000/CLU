@@ -272,8 +272,8 @@ def test():
                 for leaf in node.leaves():
                     with level:
                         yield level.indent(node_repr(leaf))
-                for child in node.namespaces():
-                    yield from tree_repr(child, level)
+                for namespace in node.namespaces():
+                    yield from tree_repr(namespace, level)
         
         for line in tree_repr(root, Level()):
             print(line)

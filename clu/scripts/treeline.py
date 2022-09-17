@@ -93,7 +93,8 @@ class NodeBase(collections.abc.Hashable,
         instance.node_parent = parent
         instance.node_name = str(name)
         instance.node_value = value
-        instance.child_nodes = list()
+        # instance.child_nodes = list()
+        instance.child_nodes = {}
         
         if children:
             self._append_nodes(*children)
@@ -108,10 +109,6 @@ class NodeBase(collections.abc.Hashable,
     def value(self):
         return self.is_leafnode() and self.node_value or None
     
-    # @value.setter
-    # def value(self, assignee):
-    #     self.node_value = assignee
-    
     def is_leafnode(self):
         return not bool(len(self.child_nodes))
     
@@ -122,7 +119,8 @@ class NodeBase(collections.abc.Hashable,
                 raise ValueError(f"Children must be Node types, not {badtype}")
             if child in self.child_nodes:
                 raise ValueError(f"WTF: Node “{child!s}” is already a child")
-            self.child_nodes.append(child)
+            # self.child_nodes.append(child)
+            self.child_nodes[str(child)] = child
     
     def add_child(self, name, value=None):
         self._append_nodes(type(self)(parent=self, name=name, value=value))
@@ -130,26 +128,32 @@ class NodeBase(collections.abc.Hashable,
     def get_child(self, key):
         # if self.child_nodes.count(key):
         #     return self.child_nodes[self.child_nodes.index(key)]
-        for child in self.child_nodes:
-            if key == child.node_name:
-                return child
-        raise KeyError(key)
+        # for child in self.child_nodes:
+        #     if key == child.node_name:
+        #         return child
+        # raise KeyError(key)
+        return self.child_nodes[key]
     
     def leaves(self):
-        yield from filter(lambda node: node.is_leafnode(), self.child_nodes)
+        yield from filter(lambda node: node.is_leafnode(),
+                          self.child_nodes.values())
     
     def namespaces(self):
-        yield from filter(lambda node: not node.is_leafnode(), self.child_nodes)
+        yield from filter(lambda node: not node.is_leafnode(),
+                          self.child_nodes.values())
     
     def __len__(self):
         return len(self.child_nodes)
     
     def __iter__(self):
-        yield from self.child_nodes
+        yield from self.child_nodes.values()
+    
+    # def __getitem__(self, key):
+    #     return self.child_nodes[key]
     
     def __getitem__(self, idx):
         if isinstance(idx, (int, slice)):
-            return self.child_nodes[idx]
+            return tuple(self.child_nodes.values())[idx]
         elif isnormative(idx):
             return self.get_child(str(idx))
         thistype = nameof(typeof(self))

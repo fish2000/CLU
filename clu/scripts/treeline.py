@@ -126,7 +126,9 @@ class NodeBase(collections.abc.Hashable,
             self.child_nodes[child.name] = child
     
     def add_child(self, name, value=None):
-        self._append_nodes(Node(parent=self, name=name, value=value))
+        node = Node(parent=self, name=name, value=value)
+        self._append_nodes(node)
+        return node
     
     def get_child(self, key):
         return self.child_nodes[key]
@@ -199,7 +201,7 @@ class RootNode(NodeBase):
         to craft the tree in place. 
     """
     
-    def __new__(cls, name, *children):
+    def __new__(cls, *children, name='root'):
         instance = super().__new__(cls, None,       # no parent
                                         name,       # if you insist
                                        *children,
@@ -304,7 +306,7 @@ def test():
     @inline
     def test_node_rootnode_repr_sorted():
         """ Test an anchored tree of Node instances """
-        root = RootNode(name='root')
+        root = RootNode()
         root.add_child('yo')
         root.add_child('dogg')
         root.add_child('i_heard')
@@ -335,6 +337,44 @@ def test():
             print(line)
     
         print()
+    
+    @inline
+    def test_parse_command_line():
+        
+        root = RootNode()
+        node = root
+        
+        def argument_to_node(arg, parent):
+            if arg.startswith('--'):
+                if '=' in arg:
+                    name, value = arg.removeprefix('--').split('=')
+                else:
+                    name, value = arg.removeprefix('--'), None
+            else:
+                name, value = arg, None
+            # return Node(parent=parent, name=name, value=value)
+            node = parent.add_child(name=name, value=value)
+            return arg.startswith('--') and parent or node
+        
+        for argument in nsflags:
+            node = argument_to_node(argument, node)
+    
+        def node_repr(node):
+            if not node.value:
+                return f"• {node!s}"
+            return f"• {node!s} = {node.value}"
+    
+        def tree_repr(node, level):
+            yield level.indent(node_repr(node))
+            for leaf in node.leaves():
+                with level:
+                    yield level.indent(node_repr(leaf))
+            for namespace in node.namespaces():
+                with level:
+                    yield from tree_repr(namespace, level)
+    
+        for line in tree_repr(root, Level()):
+            print(line)
     
     return inline.test(100)
 

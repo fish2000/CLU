@@ -45,6 +45,7 @@ executable, action, *nsflags = command.split(" ")
 
 SPACETABS = "    "
 
+@export
 class Level(contextlib.AbstractContextManager,
             metaclass=clu.abstract.Slotted):
     
@@ -59,6 +60,9 @@ class Level(contextlib.AbstractContextManager,
     def indent(self, string):
         return self.value * self.tab + string
     
+    def __int__(self):
+        return self.value
+    
     def __enter__(self):
         self.value += 1
         return self
@@ -68,6 +72,7 @@ class Level(contextlib.AbstractContextManager,
         self.value -= 1
         return exc_type is None
 
+@export
 class NodeBase(collections.abc.Hashable,
                metaclass=clu.abstract.Slotted):
     

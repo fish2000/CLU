@@ -7,6 +7,7 @@ import contextlib
 import sys
 
 from clu.config.abc import NamespaceWalker
+from clu.config.ns import unpack_ns
 from clu.naming import qualified_name, nameof
 from clu.predicates import typeof, isnormative
 from clu.exporting import Exporter
@@ -130,6 +131,9 @@ class NodeBase(collections.abc.Hashable,
         node = Node(parent=self, name=name, value=value)
         self._append_nodes(node)
         return node
+    
+    def has_child(self, key):
+        return key in self.child_nodes
     
     def get_child(self, key):
         return self.child_nodes[key]
@@ -340,6 +344,10 @@ def parse_argument_to_child_node(arg, parent):
 
 @export
 def treewalk(node, pre=None):
+    """ Iteratively walk a node tree.
+        
+        Based on https://stackoverflow.com/a/12507546/298171
+    """
     pre = pre and pre[:] or []
     if node.is_leafnode():
         yield pre + [node.name, node.value]
@@ -385,10 +393,22 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
         pass
     
     def __contains__(self, nskey):
-        pass
+        key, namespaces = unpack_ns(nskey)
+        node = self.tree
+        # if not namespaces:
+        #     return node[key]
+        for namespace in namespaces:
+            node = node.namespace(namespace)
+        return node.has_child(key)
     
     def __getitem__(self, nskey):
-        pass
+        key, namespaces = unpack_ns(nskey)
+        node = self.tree
+        # if not namespaces:
+        #     return node[key]
+        for namespace in namespaces:
+            node = node.namespace(namespace)
+        return node.get_child(key)
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

@@ -75,7 +75,7 @@ starmods = ('clu.repl.ansi',
             'clu.config.proxy',
             'clu.dicts', 'clu.enums', 'clu.exporting', 'clu.extending', 'clu.shelving.redat',
             'clu.importing', 'clu.mathematics', 'clu.naming', 'clu.predicates', 'clu.typology',
-            'clu.fs.abc', 'clu.fs.filesystem', 'clu.fs.misc', 'clu.repr', 'clu.stdio',
+            'clu.fs.abc', 'clu.fs.filesystem', 'clu.fs.misc', 'clu.repr', 'clu.scripts.treeline', 'clu.stdio',
             'clu.typespace.namespace',
             'clu.testing.utils',
             'clu.version', 'clu.version.git_version')

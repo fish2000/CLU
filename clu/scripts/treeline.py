@@ -224,6 +224,43 @@ class RootNode(NodeBase):
     def value(self):
         """ A root node has no value, by definition """
         return None
+    
+    @staticmethod
+    def parse_argument_to_child(argument, parent):
+        """ Static method for parsing an argument into its values,
+            and adding a node with those corresponding values
+            to a provided parent node – then returning this
+            parent node (if we created a leaf) or our freshly
+            created node (if we created a namespace).
+            … this allows us to keep attaching stuff to whatever
+            gets returned here, wherever we are in the process
+            of parsing the command line
+        """
+        # Examine the argument:
+        if argument.startswith('--'):
+            if '=' in argument:
+                # It’s a leaf with a value specified:
+                name, value = argument.removeprefix('--').split('=')
+            else:
+                # It’s a leaf with no value provided:
+                name, value = argument.removeprefix('--'), None
+        else:
+            # It’s a namespace:
+            name, value = argument, None
+    
+        # Add and recover a new node, containing the values
+        # we parsed out:
+        node = parent.add_child(name=name, value=value)
+    
+        # Return the node if it’s a namespace, otherwise
+        # hand back the original parent:
+        return argument.startswith('--') and parent or node
+    
+    def populate_with_arguments(self, *arguments):
+        """ Populate the root node from a sequence of command-line arguments """
+        node = self
+        for argument in arguments:
+            node = self.parse_argument_to_child(argument, parent=node)
 
 @export
 class Node(NodeBase):
@@ -245,6 +282,58 @@ class Node(NodeBase):
 acceptable_types = set(NodeBase.__mro__)
 acceptable_types.add(Node)
 acceptable_types.add(RootNode)
+
+@export
+def node_repr(node):
+    """ Print a pithy string representation of a node """
+    if not node.is_leafnode():
+        child_count = len(node)
+        return f"• {node!s} → [{child_count}]"
+    if not node.value:
+        return f"• {node!s}"
+    return f"• {node!s} = {node.value}"
+
+@export
+def tree_repr(node, level):
+    """ Recursively walk, stringify, and print a node tree """
+    yield level.indent(node_repr(node))
+    for leaf in node.leaves():
+        with level:
+            yield level.indent(node_repr(leaf))
+    for namespace in node.namespaces():
+        with level:
+            yield from tree_repr(namespace, level)
+
+@export
+def parse_argument_to_child_node(arg, parent):
+    """ Function to parse an argument into its values,
+        and then add a node with those corresponding values
+        to a provided parent node – then returning this
+        parent node (if we created a leaf) or our freshly
+        created node (if we created a namespace).
+        … this allows us to keep attaching stuff to whatever
+        gets returned here, wherever we are in the process
+        of parsing the command line
+    """
+    # Examine the argument:
+    if arg.startswith('--'):
+        if '=' in arg:
+            # It’s a leaf with a value specified:
+            name, value = arg.removeprefix('--').split('=')
+        else:
+            # It’s a leaf with no value provided:
+            name, value = arg.removeprefix('--'), None
+    else:
+        # It’s a namespace:
+        name, value = arg, None
+    
+    # Add and recover a new node, containing the values
+    # we parsed out:
+    node = parent.add_child(name=name, value=value)
+    
+    # Return the node if it’s a namespace, otherwise
+    # hand back the original parent:
+    return arg.startswith('--') and parent or node
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -320,25 +409,6 @@ def test():
     
         print()
     
-    def node_repr(node):
-        """ Print a pithy string representation of a node """
-        if not node.is_leafnode():
-            child_count = len(node)
-            return f"• {node!s} → [{child_count}]"
-        if not node.value:
-            return f"• {node!s}"
-        return f"• {node!s} = {node.value}"
-
-    def tree_repr(node, level):
-        """ Recursively walk, stringify, and print a node tree """
-        yield level.indent(node_repr(node))
-        for leaf in node.leaves():
-            with level:
-                yield level.indent(node_repr(leaf))
-        for namespace in node.namespaces():
-            with level:
-                yield from tree_repr(namespace, level)
-    
     @inline
     def test_node_rootnode_repr_sorted():
         """ Test an anchored tree of Node instances """
@@ -367,36 +437,6 @@ def test():
         # Create an empty tree:
         root = RootNode()
         
-        def parse_argument_to_child_node(arg, parent):
-            """ Function to parse an argument into its values,
-                and then add a node with those corresponding values
-                to a provided parent node – then returning this
-                parent node (if we created a leaf) or our freshly
-                created node (if we created a namespace).
-                … this allows us to keep attaching stuff to whatever
-                gets returned here, wherever we are in the process
-                of parsing the command line
-            """
-            # Examine the argument:
-            if arg.startswith('--'):
-                if '=' in arg:
-                    # It’s a leaf with a value specified:
-                    name, value = arg.removeprefix('--').split('=')
-                else:
-                    # It’s a leaf with no value provided:
-                    name, value = arg.removeprefix('--'), None
-            else:
-                # It’s a namespace:
-                name, value = arg, None
-            
-            # Add and recover a new node, containing the values
-            # we parsed out:
-            node = parent.add_child(name=name, value=value)
-            
-            # Return the node if it’s a namespace, otherwise
-            # hand back the original parent:
-            return arg.startswith('--') and parent or node
-        
         # Starting with the root node, go through the list of
         # namespaced argument flags and whatnot, parsing each
         # in turn, advancing the “node” in question to namespaces
@@ -412,6 +452,7 @@ def test():
     
     @inline
     def test_assemble_subcommand():
+        """ Reassemble the model command-line invocation """
         
         # The root node is named for the model command:
         root = RootNode(name="WRITE")
@@ -461,6 +502,26 @@ def test():
         print("FULL ASSEMBLED COMMAND:")
         print(full_command)
         print()
+        
+        for line in tree_repr(root, Level()):
+            print(line)
+        
+        print()
+    
+    @inline
+    def test_roundtrip_command_line():
+        """ Parse and subsequently reassemble the command """
+        
+        # Create an empty tree:
+        root = RootNode(name="WRITE")
+        
+        # Populate it from the model command line:
+        root.populate_with_arguments(*nsflags)
+        
+        # Re-assemble the full model command recursively:
+        full_command = root.assemble_subcommand(recursive=True)
+        
+        assert full_command in command
         
         for line in tree_repr(root, Level()):
             print(line)

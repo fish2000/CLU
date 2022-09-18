@@ -133,6 +133,17 @@ class NodeBase(collections.abc.Hashable,
     def get_child(self, key):
         return self.child_nodes[key]
     
+    def assemble_subcommand(self, recursive=False):
+        if self.is_leafnode():
+            name, value = self.name, self.value
+            if value is None:
+                return f"--{name}"
+            return f"--{name}={value!s}"
+        iterable = recursive and self or self.leaves()
+        assembler = lambda node: node.assemble_subcommand(recursive=recursive)
+        nsflags = " ".join(map(assembler, iterable))
+        return f"{self.name} {nsflags}"
+    
     def leaf(self, leafname):
         node = self.get_child(leafname)
         if not node.is_leafnode():
@@ -307,6 +318,25 @@ def test():
     
         print()
     
+    def node_repr(node):
+        """ Print a pithy string representation of a node """
+        if not node.is_leafnode():
+            child_count = len(node)
+            return f"• {node!s} → [{child_count}]"
+        if not node.value:
+            return f"• {node!s}"
+        return f"• {node!s} = {node.value}"
+
+    def tree_repr(node, level):
+        """ Recursively walk, stringify, and print a node tree """
+        yield level.indent(node_repr(node))
+        for leaf in node.leaves():
+            with level:
+                yield level.indent(node_repr(leaf))
+        for namespace in node.namespaces():
+            with level:
+                yield from tree_repr(namespace, level)
+    
     @inline
     def test_node_rootnode_repr_sorted():
         """ Test an anchored tree of Node instances """
@@ -323,23 +353,9 @@ def test():
         nsX.add_child('namespaced')
         nsY.add_child('commands')
         
-        def node_repr(node):
-            if not node.value:
-                return f"• {node!s}"
-            return f"• {node!s} = {node.value}"
-        
-        def tree_repr(node, level):
-            yield level.indent(node_repr(node))
-            for leaf in node.leaves():
-                with level:
-                    yield level.indent(node_repr(leaf))
-            for namespace in node.namespaces():
-                with level:
-                    yield from tree_repr(namespace, level)
-        
         for line in tree_repr(root, Level()):
             print(line)
-    
+        
         print()
     
     @inline
@@ -387,25 +403,63 @@ def test():
         for argument in nsflags:
             node = parse_argument_to_child_node(argument, parent=node)
         
-        # The follwing tree-repr stuff is copied from the test function
-        # “test_node_rootnode_repr_sorted()” above:
-        def node_repr(node):
-            if not node.is_leafnode():
-                child_count = len(node)
-                return f"• {node!s} → [{child_count}]"
-            if not node.value:
-                return f"• {node!s}"
-            return f"• {node!s} = {node.value}"
+        for line in tree_repr(root, Level()):
+            print(line)
+        
+        print()
     
-        def tree_repr(node, level):
-            yield level.indent(node_repr(node))
-            for leaf in node.leaves():
-                with level:
-                    yield level.indent(node_repr(leaf))
-            for namespace in node.namespaces():
-                with level:
-                    yield from tree_repr(namespace, level)
-    
+    @inline
+    def test_assemble_subcommand():
+        
+        # The root node is named for the model command:
+        root = RootNode(name="WRITE")
+        
+        # Add child leaves and namespaces to match
+        # the model command:
+        root.add_child('key0', 'yo')
+        root.add_child('key1', 'dogg')
+        root.add_child('key2', 'i_heard')
+        
+        ns0 = root.add_child('ns0')
+        ns0.add_child('key3', 'you_like')
+        
+        ns1 = ns0.add_child('ns1')
+        ns2 = ns1.add_child('ns2')
+        ns2.add_child('key4', 'tree')
+        ns2.add_child('key5', 'structures')
+        
+        # Assemble subcommands for namespaces:
+        root_command = root.assemble_subcommand()
+        ns0_command = ns0.assemble_subcommand()
+        ns2_command = ns2.assemble_subcommand()
+        
+        # Trim off “root” prefix before inspecting this first one:
+        # assert root_command[5:] in command
+        assert root_command in command
+        assert ns0_command in command
+        assert ns2_command in command
+        
+        print("ROOT COMMAND:")
+        print(root_command)
+        print()
+        
+        print("NS0 SUBCOMMAND:")
+        print(ns0_command)
+        print()
+        
+        print("NS2 SUBCOMMAND:")
+        print(ns2_command)
+        print()
+        
+        # Assemble full command recursively:
+        full_command = root.assemble_subcommand(recursive=True)
+        
+        assert full_command in command
+        
+        print("FULL ASSEMBLED COMMAND:")
+        print(full_command)
+        print()
+        
         for line in tree_repr(root, Level()):
             print(line)
         

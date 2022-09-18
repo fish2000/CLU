@@ -339,6 +339,15 @@ def parse_argument_to_child_node(arg, parent):
 # NodeTreeMap – a NamespaceWalker-derived KeyMap hosting a node tree
 
 @export
+def treewalk(node, pre=None):
+    pre = pre and pre[:] or []
+    if node.is_leafnode():
+        yield pre + [node.name, node.value]
+    else:
+        for child in node:
+            yield from treewalk(child, pre + [node.name])
+
+@export
 class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
                                    clu.abstract.Cloneable):
     
@@ -361,8 +370,7 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
         # N.B. – deal with updates here
     
     def walk(self):
-        # insert tree-walking call here – q.v. tree_repr(…) supra.
-        pass
+        yield from treewalk(self.tree)
     
     def submap(self):
         pass

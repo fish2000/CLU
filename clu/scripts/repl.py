@@ -94,6 +94,7 @@ mods = ('clu',
         'clu.keyvalue',
         'clu.dispatch', 'clu.sanitizer', 'clu.fs.pypath',
         'clu.scripts.ansicolors',
+        'clu.scripts.treeline',
         'clu.typespace.types', # not technically a module!
         'sys', 'os', 'io', 're', 'abc',
         'argparse', 'collections', 'contextlib', 'copy',

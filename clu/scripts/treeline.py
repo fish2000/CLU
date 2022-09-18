@@ -115,6 +115,9 @@ class NodeBase(collections.abc.Hashable,
     def is_leafnode(self):
         return not bool(len(self.child_nodes))
     
+    def is_rootnode(self):
+        return False
+    
     def _append_nodes(self, *children):
         for child in children:
             if type(child) is RootNode:
@@ -229,6 +232,9 @@ class RootNode(NodeBase):
     def value(self):
         """ A root node has no value, by definition """
         return None
+    
+    def is_rootnode(self):
+        return True
     
     @staticmethod
     def parse_argument_to_child(argument, parent):
@@ -351,6 +357,9 @@ def treewalk(node, pre=None):
     pre = pre and pre[:] or []
     if node.is_leafnode():
         yield pre + [node.name, node.value]
+    elif node.is_rootnode():
+        for child in node:
+            yield from treewalk(child, pre)
     else:
         for child in node:
             yield from treewalk(child, pre + [node.name])
@@ -371,20 +380,18 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
         if hasattr(tree, 'tree'):
             tree = getattr(tree, 'tree')
         # “mnq gvfc” – Nellie
-        if type(tree) not in acceptable_types:
-            badtype = nameof(typeof(tree))
-            raise TypeError(f"NodeTreeMap requires a Node instance, not type {badtype}")
+        if tree is not None:
+            if type(tree) not in acceptable_types:
+                badtype = nameof(typeof(tree))
+                raise TypeError(f"NodeTreeMap requires a Node instance, not type {badtype}")
         self.tree = tree
         # N.B. – deal with updates here
     
     def walk(self):
         yield from treewalk(self.tree)
     
-    def submap(self):
-        pass
-    
     def inner_repr(self):
-        pass
+        return repr(self.tree)
     
     def clone(self, deep=False, memo=None):
         pass
@@ -547,8 +554,6 @@ def test():
         ns0_command = ns0.assemble_subcommand()
         ns2_command = ns2.assemble_subcommand()
         
-        # Trim off “root” prefix before inspecting this first one:
-        # assert root_command[5:] in command
         assert root_command in command
         assert ns0_command in command
         assert ns2_command in command
@@ -596,6 +601,29 @@ def test():
         
         for line in tree_repr(root, Level()):
             print(line)
+        
+        print()
+    
+    @inline
+    def test_nodetreemap_basics():
+        """ Check the basic functions of NodeTreeMap """
+        
+        # Fill a tree, per the command line:
+        root = RootNode()
+        root.populate_with_arguments(*nsflags)
+        
+        # Stick it in a NodeTreeMap:
+        # ntm = NodeTreeMap(tree=RootNode())
+        itemlist = []
+        ntm = NodeTreeMap(tree=root)
+        for nskey, value in ntm.items():
+            itemlist.append((nskey, value))
+        pprint(itemlist)
+        
+        print()
+        
+        # pprint(ntm.flatten().submap('root'))
+        pprint(ntm.flatten().submap())
         
         print()
     

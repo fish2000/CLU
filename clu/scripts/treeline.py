@@ -202,6 +202,7 @@ class NodeBase(collections.abc.Hashable,
             out += f" → [{child_count}]"
         return out
 
+@export
 class RootNode(NodeBase):
     
     """ A root node, anchoring a tree.
@@ -224,6 +225,7 @@ class RootNode(NodeBase):
         """ A root node has no value, by definition """
         return None
 
+@export
 class Node(NodeBase):
     
     """ A standard tree node. """

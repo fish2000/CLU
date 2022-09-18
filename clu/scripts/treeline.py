@@ -6,6 +6,7 @@ import collections.abc
 import contextlib
 import sys
 
+from clu.config.abc import NamespaceWalker
 from clu.naming import qualified_name, nameof
 from clu.predicates import typeof, isnormative
 from clu.exporting import Exporter
@@ -334,6 +335,52 @@ def parse_argument_to_child_node(arg, parent):
     # Return the node if it’s a namespace, otherwise
     # hand back the original parent:
     return arg.startswith('--') and parent or node
+
+# NodeTreeMap – a NamespaceWalker-derived KeyMap hosting a node tree
+
+@export
+class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
+                                   clu.abstract.Cloneable):
+    
+    """ NodeTreeMap – a NamespaceWalker-derived KeyMap hosting a node tree """
+    
+    __slots__ = 'tree'
+    
+    def __init__(self, tree=None, **updates):
+        try:
+            super().__init__(**updates)
+        except TypeError:
+            super().__init__()
+        if hasattr(tree, 'tree'):
+            tree = getattr(tree, 'tree')
+        # “mnq gvfc” – Nellie
+        if type(tree) not in acceptable_types:
+            badtype = nameof(typeof(tree))
+            raise TypeError(f"NodeTreeMap requires a Node instance, not type {badtype}")
+        self.tree = tree
+        # N.B. – deal with updates here
+    
+    def walk(self):
+        # insert tree-walking call here – q.v. tree_repr(…) supra.
+        pass
+    
+    def submap(self):
+        pass
+    
+    def inner_repr(self):
+        pass
+    
+    def clone(self, deep=False, memo=None):
+        pass
+    
+    def to_dict(self):
+        pass
+    
+    def __contains__(self, nskey):
+        pass
+    
+    def __getitem__(self, nskey):
+        pass
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()

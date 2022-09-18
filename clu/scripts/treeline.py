@@ -395,8 +395,6 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
     def __contains__(self, nskey):
         key, namespaces = unpack_ns(nskey)
         node = self.tree
-        # if not namespaces:
-        #     return node[key]
         for namespace in namespaces:
             node = node.namespace(namespace)
         return node.has_child(key)
@@ -404,8 +402,6 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
     def __getitem__(self, nskey):
         key, namespaces = unpack_ns(nskey)
         node = self.tree
-        # if not namespaces:
-        #     return node[key]
         for namespace in namespaces:
             node = node.namespace(namespace)
         return node.get_child(key)

@@ -53,7 +53,7 @@ class Level(contextlib.AbstractContextManager,
     
     """ A context manager to babysit indent levels. """
     
-    slots = ('value', 'tab')
+    __slots__ = ('value', 'tab')
     
     def __init__(self, initial_value=0, tab=SPACETABS):
         self.value = initial_value

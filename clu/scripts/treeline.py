@@ -4,6 +4,7 @@ from __future__ import print_function
 import clu.abstract
 import collections.abc
 import contextlib
+import shlex
 import sys
 
 from clu.config.abc import NamespaceWalker
@@ -43,7 +44,7 @@ command = "clu-command WRITE " \
           "--key3=you_like ns1 ns2 " \
           "--key4=tree --key5=structures"
 
-executable, action, *nsflags = command.split(" ")
+executable, action, *nsflags = shlex.split(command)
 
 SPACETABS = " " * 2
 

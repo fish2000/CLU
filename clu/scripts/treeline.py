@@ -636,18 +636,14 @@ def test():
         root.populate_with_arguments(*nsflags)
         
         # Stick it in a NodeTreeMap:
-        # ntm = NodeTreeMap(tree=RootNode())
         itemlist = []
         ntm = NodeTreeMap(tree=root)
         for nskey, value in ntm.items():
             itemlist.append((nskey, value))
         pprint(itemlist)
-        
         print()
         
-        # pprint(ntm.flatten().submap('root'))
         pprint(ntm.flatten().submap())
-        
         print()
     
     return inline.test(100)

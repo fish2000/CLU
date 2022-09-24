@@ -112,10 +112,31 @@ class NodeBase(collections.abc.Hashable,
     
     @property
     def name(self):
+        """ The name of this node. """
         return self.node_name
     
     @property
+    def nsname(self):
+        """ The fully namespaced name of this node. Namespaces are enumerated
+            from the root upward.
+        """
+        if self.is_rootnode():
+            return self.node_name
+        parent = self
+        namespaces = []
+        while True:
+            parent = parent.node_parent
+            if parent.is_rootnode():
+                break
+            namespaces.append(parent.node_name)
+        if not namespaces:
+            return self.node_name
+        nskey = ':'.join(reversed(namespaces)) + f':{self.node_name}'
+        return nskey
+    
+    @property
     def value(self):
+        """ The value of this node. """
         return self.is_leafnode() and self.node_value or None
     
     def is_leafnode(self):
@@ -127,6 +148,7 @@ class NodeBase(collections.abc.Hashable,
         return False
     
     def _append_nodes(self, *children):
+        """ Append some nodes as children to this node. """
         for child in children:
             if type(child) is RootNode:
                 raise ValueError(f"Children must be standard nodes – not root nodes")
@@ -139,7 +161,7 @@ class NodeBase(collections.abc.Hashable,
             self.child_nodes[child.name] = child
     
     def add_child(self, name, value=None):
-        """ Add a child node.
+        """ Add a child node to this node.
             
             Specify a name, and optionally a value for the node.
         """
@@ -147,15 +169,23 @@ class NodeBase(collections.abc.Hashable,
         self._append_nodes(node)
         return node
     
-    def has_child(self, key):
-        """ Return True if a child exists for a given name,
+    def has_child(self, nskey):
+        """ Return True if a child exists for a (possibly namespaced) name,
             otherwise False.
         """
-        return key in self.child_nodes
+        key, namespaces = unpack_ns(nskey)
+        node = self
+        for namespace in namespaces:
+            node = node.namespace(namespace)
+        return key in node.child_nodes
     
-    def get_child(self, key):
-        """ Retrieve a child node of a given name """
-        return self.child_nodes[key]
+    def get_child(self, nskey):
+        """ Retrieve a child node of a (possibly namespaced) given name. """
+        key, namespaces = unpack_ns(nskey)
+        node = self
+        for namespace in namespaces:
+            node = node.namespace(namespace)
+        return node.child_nodes[key]
     
     def assemble_subcommand(self, recursive=False):
         """ Reassemble the command-line string for a given node.
@@ -174,26 +204,31 @@ class NodeBase(collections.abc.Hashable,
         return f"{self.name} {nsflags}"
     
     def leaf(self, leafname):
-        """ Retrieve a child leafnode of a given name """
+        """ Retrieve a child leafnode of a given name from this node. """
         node = self.get_child(leafname)
         if not node.is_leafnode():
             raise KeyError(leafname)
         return node
     
     def namespace(self, nsname):
-        """ Retrieve a child namespace of a given name """
+        """ Retrieve a child namespace of a given name from this node. """
         node = self.get_child(nsname)
         if node.is_leafnode():
             raise KeyError(nsname)
         return node
     
     def leaves(self):
-        """ Iterator over child leafnodes """
+        """ Iterator over this nodes’ child leafnodes. """
         yield from filter(leaf_predicate, self.child_nodes.values())
     
     def namespaces(self):
-        """ Iterator over child namespaces """
+        """ Iterator over this nodes’ child namespaces. """
         yield from filterfalse(leaf_predicate, self.child_nodes.values())
+    
+    def to_dict(self):
+        return { 'name' : self.name,
+                'value' : self.value,
+               'parent' : self.node_parent.name }
     
     def __len__(self):
         return len(self.child_nodes)
@@ -253,7 +288,7 @@ class RootNode(NodeBase):
     
     @property
     def value(self):
-        """ A root node has no value, by definition """
+        """ A root node has no value, by definition. """
         return None
     
     def is_rootnode(self):
@@ -268,7 +303,7 @@ class RootNode(NodeBase):
             created node (if we created a namespace).
             … this allows us to keep attaching stuff to whatever
             gets returned here, wherever we are in the process
-            of parsing the command line
+            of parsing the command line.
         """
         # Examine the argument:
         if argument.startswith('--'):
@@ -291,7 +326,7 @@ class RootNode(NodeBase):
         return argument.startswith('--') and parent or node
     
     def populate_with_arguments(self, *arguments):
-        """ Populate the root node from a sequence of command-line arguments """
+        """ Populate the root node from a sequence of command-line arguments. """
         node = self
         for argument in arguments:
             node = self.parse_argument_to_child(argument, parent=node)
@@ -319,7 +354,7 @@ acceptable_types.add(RootNode)
 
 @export
 def node_repr(node):
-    """ Print a pithy string representation of a node """
+    """ Print a pithy string representation of a node. """
     if not node.is_leafnode():
         child_count = len(node)
         return f"• {node!s} → [{child_count}]"
@@ -329,7 +364,7 @@ def node_repr(node):
 
 @export
 def tree_repr(node, level):
-    """ Recursively walk, stringify, and print a node tree """
+    """ Recursively walk, stringify, and print a node tree. """
     yield level.indent(node_repr(node))
     for leaf in node.leaves():
         with level:
@@ -347,7 +382,7 @@ def parse_argument_to_child_node(arg, parent):
         created node (if we created a namespace).
         … this allows us to keep attaching stuff to whatever
         gets returned here, wherever we are in the process
-        of parsing the command line
+        of parsing the command line.
     """
     # Examine the argument:
     if arg.startswith('--'):
@@ -419,22 +454,14 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
     def clone(self, deep=False, memo=None):
         pass
     
-    def to_dict(self):
-        pass
+    # def to_dict(self):
+    #     pass
     
     def __contains__(self, nskey):
-        key, namespaces = unpack_ns(nskey)
-        node = self.tree
-        for namespace in namespaces:
-            node = node.namespace(namespace)
-        return node.has_child(key)
+        return self.tree.has_child(nskey)
     
     def __getitem__(self, nskey):
-        key, namespaces = unpack_ns(nskey)
-        node = self.tree
-        for namespace in namespaces:
-            node = node.namespace(namespace)
-        return node.get_child(key)
+        return self.tree.get_child(nskey).value
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -645,6 +672,50 @@ def test():
         
         pprint(ntm.flatten().submap())
         print()
+    
+    @inline
+    def test_nodetree_namespaced_names():
+        """ Check node namespaced names """
+        
+        # Fill a tree, per the command line:
+        root = RootNode()
+        root.populate_with_arguments(*nsflags)
+        
+        assert root.get_child('key0').nsname == 'key0'
+        assert root.get_child('key0').value == 'yo'
+        assert root.get_child('key1').nsname == 'key1'
+        assert root.get_child('key1').value == 'dogg'
+        assert root.get_child('key2').nsname == 'key2'
+        assert root.get_child('key2').value == 'i_heard'
+        
+        assert root.get_child('ns0:key3').name == 'key3'
+        assert root.get_child('ns0:key3').nsname == 'ns0:key3'
+        assert root.get_child('ns0:key3').value == 'you_like'
+        
+        assert root.get_child('ns0:ns1:ns2:key4').name == 'key4'
+        assert root.get_child('ns0:ns1:ns2:key4').nsname == 'ns0:ns1:ns2:key4'
+        assert root.get_child('ns0:ns1:ns2:key4').value == 'tree'
+        assert root.get_child('ns0:ns1:ns2:key5').name == 'key5'
+        assert root.get_child('ns0:ns1:ns2:key5').nsname == 'ns0:ns1:ns2:key5'
+        assert root.get_child('ns0:ns1:ns2:key5').value == 'structures'
+        
+        assert root.has_child('ns0:key3')
+        assert root.has_child('ns0:ns1:ns2:key4')
+        assert root.has_child('ns0:ns1:ns2:key5')
+        
+        ntm = NodeTreeMap(tree=root)
+        
+        assert ntm['key0'] == 'yo'
+        assert ntm['key1'] == 'dogg'
+        assert ntm['key2'] == 'i_heard'
+        
+        assert ntm['ns0:key3'] == 'you_like'
+        assert ntm['ns0:ns1:ns2:key4'] == 'tree'
+        assert ntm['ns0:ns1:ns2:key5'] == 'structures'
+        
+        assert 'ns0:key3' in ntm
+        assert 'ns0:ns1:ns2:key4' in ntm
+        assert 'ns0:ns1:ns2:key5' in ntm
     
     return inline.test(100)
 

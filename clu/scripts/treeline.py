@@ -205,14 +205,14 @@ class NodeBase(collections.abc.Hashable,
     
     def leaf(self, leafname):
         """ Retrieve a child leafnode of a given name from this node. """
-        node = self.get_child(leafname)
+        node = self.child_nodes[leafname]
         if not node.is_leafnode():
             raise KeyError(leafname)
         return node
     
     def namespace(self, nsname):
         """ Retrieve a child namespace of a given name from this node. """
-        node = self.get_child(nsname)
+        node = self.child_nodes[nsname]
         if node.is_leafnode():
             raise KeyError(nsname)
         return node
@@ -623,11 +623,11 @@ def test():
         # Assemble full command recursively:
         full_command = root.assemble_subcommand(recursive=True)
         
-        assert full_command in command
-        
         print("FULL ASSEMBLED COMMAND:")
         print(full_command)
         print()
+        
+        assert full_command in command
         
         for line in tree_repr(root, Level()):
             print(line)

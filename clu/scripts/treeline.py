@@ -7,6 +7,8 @@ import contextlib
 import shlex
 import sys
 
+from itertools import filterfalse
+
 from clu.config.abc import NamespaceWalker
 from clu.config.ns import unpack_ns
 from clu.naming import qualified_name, nameof
@@ -75,6 +77,9 @@ class Level(contextlib.AbstractContextManager,
         self.value -= 1
         return exc_type is None
 
+# Boolean predicate to filter leafnodes:
+leaf_predicate = lambda node: node.is_leafnode()
+
 @export
 class NodeBase(collections.abc.Hashable,
                metaclass=clu.abstract.Slotted):
@@ -114,9 +119,11 @@ class NodeBase(collections.abc.Hashable,
         return self.is_leafnode() and self.node_value or None
     
     def is_leafnode(self):
+        """ Return True if this node is a leafnode, otherwise False. """
         return not bool(len(self.child_nodes))
     
     def is_rootnode(self):
+        """ Return True if this node is a root node, otherwise False. """
         return False
     
     def _append_nodes(self, *children):
@@ -132,17 +139,30 @@ class NodeBase(collections.abc.Hashable,
             self.child_nodes[child.name] = child
     
     def add_child(self, name, value=None):
+        """ Add a child node.
+            
+            Specify a name, and optionally a value for the node.
+        """
         node = Node(parent=self, name=name, value=value)
         self._append_nodes(node)
         return node
     
     def has_child(self, key):
+        """ Return True if a child exists for a given name,
+            otherwise False.
+        """
         return key in self.child_nodes
     
     def get_child(self, key):
+        """ Retrieve a child node of a given name """
         return self.child_nodes[key]
     
     def assemble_subcommand(self, recursive=False):
+        """ Reassemble the command-line string for a given node.
+            
+            Optionally, recurse through the child nodes, adding
+            their values to the command-line string.
+        """
         if self.is_leafnode():
             name, value = self.name, self.value
             if value is None:
@@ -154,24 +174,26 @@ class NodeBase(collections.abc.Hashable,
         return f"{self.name} {nsflags}"
     
     def leaf(self, leafname):
+        """ Retrieve a child leafnode of a given name """
         node = self.get_child(leafname)
         if not node.is_leafnode():
             raise KeyError(leafname)
         return node
     
     def namespace(self, nsname):
+        """ Retrieve a child namespace of a given name """
         node = self.get_child(nsname)
         if node.is_leafnode():
             raise KeyError(nsname)
         return node
     
     def leaves(self):
-        yield from filter(lambda node: node.is_leafnode(),
-                          self.child_nodes.values())
+        """ Iterator over child leafnodes """
+        yield from filter(leaf_predicate, self.child_nodes.values())
     
     def namespaces(self):
-        yield from filter(lambda node: not node.is_leafnode(),
-                          self.child_nodes.values())
+        """ Iterator over child namespaces """
+        yield from filterfalse(leaf_predicate, self.child_nodes.values())
     
     def __len__(self):
         return len(self.child_nodes)

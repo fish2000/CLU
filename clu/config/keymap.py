@@ -27,12 +27,13 @@ def flatwalk(mapping):
         yield namespaces + [key, mapping[nskey]]
 
 @export
-def articulate(mapping):
-    """ Articulate a flat mapping with namespaced keys into
-        one that is nested.
+def articulate(mapping, walker=flatwalk):
+    """ Articulate a given mapping with namespaced keys into
+        one that is nested. By default, use the “flatwalk(…)”
+        walking function.
     """
     tree = {}
-    for *namespaces, key, value in flatwalk(mapping):
+    for *namespaces, key, value in walker(mapping):
         d = tree
         for namespace in namespaces:
             try:

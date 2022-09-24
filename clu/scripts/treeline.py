@@ -10,7 +10,8 @@ import sys
 from itertools import filterfalse
 
 from clu.config.abc import NamespaceWalker
-from clu.config.ns import unpack_ns
+from clu.config.keymap import articulate, FrozenNested
+from clu.config.ns import get_ns_and_key, split_ns, unpack_ns
 from clu.naming import qualified_name, nameof
 from clu.predicates import typeof, isnormative
 from clu.exporting import Exporter
@@ -430,7 +431,41 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
     
     __slots__ = 'tree'
     
+    @classmethod
+    def from_dict(cls, instance_dict):
+        """ Used by `clu.config.codecs` to deserialize NodeTreeMaps """
+        # Create a new NodeTreeMap instance with an empty
+        # node tree – and an interim FrozenNested instance
+        # using the instance dict data:
+        instance = cls(tree=RootNode())
+        interim = FrozenNested.from_dict(instance_dict)
+        
+        # instance.update(interim)
+        # Go through the namespaces, creating them within
+        # the new instance as needed:
+        for namespace in interim.namespaces():
+            node = instance.tree
+            for nsfragment in split_ns(namespace):
+                try:
+                    node = node.namespace(nsfragment)
+                except KeyError:
+                    node = node.add_child(nsfragment)
+        
+        # With namespaces in places, go through the items,
+        # using the newly created namespaces to anchor
+        # namespaced items as needed:
+        for nskey, value in interim.items():
+            ns, key = get_ns_and_key(nskey)
+            if not ns:
+                instance.tree.add_child(key, value)
+            else:
+                instance.tree.get_child(ns).add_child(key, value)
+        
+        # Return the new instance:
+        return instance
+    
     def __init__(self, tree=None, **updates):
+        """ Initialize a NodeTreeMap, hosting a given node tree """
         try:
             super().__init__(**updates)
         except TypeError:
@@ -454,13 +489,19 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
     def clone(self, deep=False, memo=None):
         pass
     
-    # def to_dict(self):
-    #     pass
+    def to_dict(self):
+        """ Used by `clu.config.codecs` to serialize the NodeTreeMap """
+        # Using clu.config.keymap.articulate(…) to build the dict –
+        # This sets up an instance dict matching a Nested KeyMap’s
+        # internal layout:
+        return articulate(self.tree, walker=treewalk)
     
     def __contains__(self, nskey):
+        # Delegate to the root node of the internal node tree:
         return self.tree.has_child(nskey)
     
     def __getitem__(self, nskey):
+        # Delegate to the root node of the internal node tree:
         return self.tree.get_child(nskey).value
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
@@ -716,6 +757,27 @@ def test():
         assert 'ns0:key3' in ntm
         assert 'ns0:ns1:ns2:key4' in ntm
         assert 'ns0:ns1:ns2:key5' in ntm
+    
+    @inline
+    def test_roundtrip_nodetree_dict():
+        """ Check NodeTreeMap to/from dict functions """
+        
+        # Fill a tree, per the command line:
+        root = RootNode()
+        root.populate_with_arguments(*nsflags)
+        ntm = NodeTreeMap(tree=root)
+        
+        instance_dict = ntm.to_dict()
+        instance = NodeTreeMap.from_dict(instance_dict)
+        
+        # pprint(ntm.flatten().submap())
+        # pprint(instance.flatten().submap())
+        
+        # pprint(tuple(ntm.namespaces()))
+        # pprint(tuple(instance.namespaces()))
+        
+        assert ntm == instance
+        assert ntm.to_dict() == instance.to_dict()
     
     return inline.test(100)
 

@@ -92,6 +92,14 @@ def get_ns(nskey):
     return nskey.rpartition(NAMESPACE_SEP)[0]
 
 @export
+def get_ns_and_key(nskey):
+    """ Get the namespace and key portion of a namespaced key, as a packed
+        string and a bare key, respectively.
+    """
+    rpartition = nskey.rpartition(NAMESPACE_SEP)
+    return rpartition[0], rpartition[-1]
+
+@export
 def compare_ns(iterone, itertwo):
     """ Boolean predicate to compare a pair of namespace iterables, value-by-value """
     for one, two in zip_longest(iterone,

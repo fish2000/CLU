@@ -1,5 +1,5 @@
 .. CLU documentation master file, created by
-   sphinx-quickstart on Tue Dec 31 02:50:54 2019.
+   sphinx-quickstart on Sat Sep 24 15:47:37 2022.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -18,3 +18,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+

@@ -11,7 +11,7 @@ from itertools import filterfalse
 
 from clu.config.abc import NamespaceWalker
 from clu.config.keymap import articulate, FrozenNested
-from clu.config.ns import get_ns_and_key, split_ns, unpack_ns
+from clu.config.ns import get_ns_and_key, split_ns, unpack_ns, pack_ns
 from clu.naming import qualified_name, nameof
 from clu.predicates import typeof, isnormative
 from clu.exporting import Exporter
@@ -132,8 +132,7 @@ class NodeBase(collections.abc.Hashable,
             namespaces.append(parent.node_name)
         if not namespaces:
             return self.node_name
-        nskey = ':'.join(reversed(namespaces)) + f':{self.node_name}'
-        return nskey
+        return pack_ns(self.node_name, *reversed(namespaces))
     
     @property
     def value(self):

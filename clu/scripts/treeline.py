@@ -579,7 +579,7 @@ def test():
         print()
     
     @inline
-    def test_node_rootnode_repr_sorted():
+    def test_rootnode_repr_sorted():
         """ Test an anchored tree of Node instances """
         root = RootNode()
         root.add_child('yo')
@@ -715,7 +715,7 @@ def test():
         print()
     
     @inline
-    def test_nodetree_namespaced_names():
+    def test_nodetree_namespaces():
         """ Check node namespaced names """
         
         # Fill a tree, per the command line:
@@ -777,7 +777,25 @@ def test():
         # pprint(tuple(instance.namespaces()))
         
         assert ntm == instance
-        assert ntm.to_dict() == instance.to_dict()
+        assert instance_dict == instance.to_dict()
+    
+    @inline
+    def test_roundtrip_nodetree_json():
+        """ Check NodeTreeMap to/from json functions """
+        from clu.config.codecs import json_encode, json_decode
+        
+        # Fill a tree, per the command line:
+        root = RootNode()
+        root.populate_with_arguments(*nsflags)
+        ntm = NodeTreeMap(tree=root)
+        
+        ntm_json = json_encode(ntm)
+        ntm_reconstituted = json_decode(ntm_json)
+        
+        assert ntm == ntm_reconstituted
+        
+        print(ntm_json)
+        print()
     
     return inline.test(100)
 

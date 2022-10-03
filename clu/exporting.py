@@ -1014,6 +1014,7 @@ def test():
             with exporter.data(path=tempfile.name) as database:
                 assert database['yo'] == 'dogg'
                 assert database['i_heard'] == 'you like dicts'
+                assert len(database) == 2
         
         assert not os.path.exists(tempname)
     

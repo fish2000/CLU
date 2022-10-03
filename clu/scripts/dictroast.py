@@ -121,15 +121,16 @@ def main(argv=None):
         print(f"¶ MUST BE ONE OF: «{actions}»")
         return os.EX_CONFIG
     
-    if action.casefold() == 'write':
+    action = action.casefold()
+    if action == 'write':
         # Update the dict:
         print("… UPDATING DICTIONARY FROM COMMAND")
         update_dict(ntm)
-    elif action.casefold() == 'read':
+    elif action == 'read':
         # Print specified keys:
         keys = ", ".join(ntm.keys())
         print(f"… READING DICTIONARY KEYS: «{keys}»")
-    elif action.casefold() == 'status':
+    elif action == 'status':
         # Do something status-y:
         pass
     

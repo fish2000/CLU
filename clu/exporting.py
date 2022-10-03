@@ -182,6 +182,14 @@ def search_modules(thing, *modules):
                     return module, key
     return None, None
 
+@cache
+def stringhash(string):
+    """ Expediently hash a string to another string """
+    import hashlib
+    digester = hashlib.sha256()
+    digester.update(bytes(string, encoding='UTF-8'))
+    return digester.hexdigest()
+
 def determine_name(thing, name=None, try_repr=False):
     """ Private module function to find a name for a thing. """
     # Shortcut everything if a name was explictly specified:
@@ -511,6 +519,13 @@ class ExporterBase(collections.abc.MutableMapping,
                     pass
                 else:
                     self.__exports__.update(d)
+    
+    @property
+    def hash(self):
+        """ Return a stringified hash value corresponding to this
+            particular exporter instances’ dotpath.
+        """
+        return stringhash(self.dotpath)
     
     def exports(self):
         """ Get a new dictionary instance filled with the exports. """
@@ -947,6 +962,13 @@ def test():
         assert utils == bucket_module
         format_environment_module = search_for_module(utils.format_environment)
         assert utils == format_environment_module
+    
+    @inline
+    def test_hash():
+        """ Test the string-hashing of the exporters’ dotpath """
+        expo = Exporter(path=__file__)
+        assert expo.hash == exporter.hash
+        print(expo.hash)
     
     @inline.diagnostic
     def show_search_by_id_cache_info():

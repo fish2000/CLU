@@ -206,11 +206,20 @@ VERBOTEN += ('Namespace', 'SimpleNamespace')
 # Regex for picking up whitespace:
 WHITESPACE = re.compile(r'\s+')
 
-class NoDefault(object):
+class MetaNoDefault(type):
+    """ A metaclasss to make a type Falsey. """
+    def __bool__(cls):
+        return False
+
+class NoDefault(metaclass=MetaNoDefault):
     """ A singleton object to signify a lack of an argument. """
     __slots__ = tuple() # type: tuple
+    
     def __new__(cls, *args, **kwargs): # pragma: no cover
         return cls
+    
+    def __bool__(self):
+        return False
 
 # Manually rename `pytuple(…)` per mechanism of “clu.exporting.Exporter”:
 pytuple.__lambda_name__ = λ # type: ignore

@@ -12,6 +12,7 @@ import contextlib
 import importlib
 import inspect
 import itertools
+import shelve
 import sys, os
 import warnings
 import weakref
@@ -527,6 +528,36 @@ class ExporterBase(collections.abc.MutableMapping,
         """
         return stringhash(self.dotpath)
     
+    @property
+    def datafile(self):
+        """ Return a unique filename for this instance """
+        from clu.fs.appdirectories import AppDirs
+        from clu.constants.exceptions import FilesystemError
+        
+        # Initialize an AppDirs instance:
+        appdirs = AppDirs(appname=APPNAME)
+        
+        # Ensure the user config directory exists:
+        try:
+            appdirs.user_config.makedirs()
+        except FilesystemError:
+            pass
+        
+        # Construct database filename:
+        return Path(appdirs.user_config / self.hash + ".pkl")
+    
+    @contextlib.contextmanager
+    def data(self, path=NoDefault):
+        """ Context manager for opening a shelving database, corresponding
+            to this particular exporter instances’ dotpath.
+        """
+        if path is NoDefault:
+            path = self.datafile
+        
+        # Yield out a proper shelving database instance:
+        with shelve.open(os.fspath(path), writeback=True) as shelving:
+            yield shelving
+    
     def exports(self):
         """ Get a new dictionary instance filled with the exports. """
         out = {} # type: dict
@@ -969,6 +1000,22 @@ def test():
         expo = Exporter(path=__file__)
         assert expo.hash == exporter.hash
         print(expo.hash)
+    
+    @inline
+    def test_shelving():
+        """ Test the arbitrary data-shelving context manager """
+        from clu.fs.filesystem import TemporaryName
+        
+        with TemporaryName(randomized=True, suffix='pkl') as tempfile:
+            tempname = tempfile.name
+            with exporter.data(path=tempfile.name) as database:
+                database['yo'] = 'dogg'
+                database['i_heard'] = 'you like dicts'
+            with exporter.data(path=tempfile.name) as database:
+                assert database['yo'] == 'dogg'
+                assert database['i_heard'] == 'you like dicts'
+        
+        assert not os.path.exists(tempname)
     
     @inline.diagnostic
     def show_search_by_id_cache_info():

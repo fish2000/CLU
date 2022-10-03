@@ -795,6 +795,28 @@ def test():
         print(ntm_json)
         print()
     
+    @inline
+    def test_nodetree_halfviz():
+        """ Generate Halfviz from a node tree """
+        # Fill a tree, per the command line:
+        root = RootNode()
+        root.populate_with_arguments(*nsflags)
+        
+        def edge_repr(parent, node):
+            return f"{parent.name} -> {node.name}"
+        
+        def tree_repr(parent, node, level):
+            with level:
+                if parent:
+                    yield level.indent(edge_repr(parent, node))
+                for child in node:
+                    yield from tree_repr(node, child, level)
+        
+        for line in tree_repr(None, root, Level()):
+            print(line)
+        
+        print()
+    
     return inline.test(100)
 
 if __name__ == '__main__':

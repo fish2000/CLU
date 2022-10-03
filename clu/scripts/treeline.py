@@ -373,37 +373,6 @@ def tree_repr(node, level):
         with level:
             yield from tree_repr(namespace, level)
 
-@export
-def parse_argument_to_child_node(arg, parent):
-    """ Function to parse an argument into its values,
-        and then add a node with those corresponding values
-        to a provided parent node – then returning this
-        parent node (if we created a leaf) or our freshly
-        created node (if we created a namespace).
-        … this allows us to keep attaching stuff to whatever
-        gets returned here, wherever we are in the process
-        of parsing the command line.
-    """
-    # Examine the argument:
-    if arg.startswith('--'):
-        if '=' in arg:
-            # It’s a leaf with a value specified:
-            name, value = arg.removeprefix('--').split('=')
-        else:
-            # It’s a leaf with no value provided:
-            name, value = arg.removeprefix('--'), None
-    else:
-        # It’s a namespace:
-        name, value = arg, None
-    
-    # Add and recover a new node, containing the values
-    # we parsed out:
-    node = parent.add_child(name=name, value=value)
-    
-    # Return the node if it’s a namespace, otherwise
-    # hand back the original parent:
-    return arg.startswith('--') and parent or node
-
 # NodeTreeMap – a NamespaceWalker-derived KeyMap hosting a node tree
 
 @export
@@ -602,6 +571,36 @@ def test():
     def test_parse_command_line():
         """ Transform a command into a node tree """
         
+        def parse_argument_to_child_node(arg, parent):
+            """ Function to parse an argument into its values,
+                and then add a node with those corresponding values
+                to a provided parent node – then returning this
+                parent node (if we created a leaf) or our freshly
+                created node (if we created a namespace).
+                … this allows us to keep attaching stuff to whatever
+                gets returned here, wherever we are in the process
+                of parsing the command line.
+            """
+            # Examine the argument:
+            if arg.startswith('--'):
+                if '=' in arg:
+                    # It’s a leaf with a value specified:
+                    name, value = arg.removeprefix('--').split('=')
+                else:
+                    # It’s a leaf with no value provided:
+                    name, value = arg.removeprefix('--'), None
+            else:
+                # It’s a namespace:
+                name, value = arg, None
+    
+            # Add and recover a new node, containing the values
+            # we parsed out:
+            node = parent.add_child(name=name, value=value)
+    
+            # Return the node if it’s a namespace, otherwise
+            # hand back the original parent:
+            return arg.startswith('--') and parent or node
+                
         # Create an empty tree:
         root = RootNode()
         

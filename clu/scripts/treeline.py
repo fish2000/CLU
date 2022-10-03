@@ -491,19 +491,19 @@ def test():
     def test_nodebase_basics():
         """ Check some of the basic NodeBase functions """
         emptynode = NodeBase(parent=None, name='yo')
-        print("EMPTY NODE: {emptynode!s}")
+        print(f"EMPTY NODE: {emptynode!s}")
         print(repr(emptynode))
         print()
         
         datanode = NodeBase(parent=None, name='dogg', value="ALL_TYPES_OF_SHIT")
-        print("DATA NODE: {datanode!s}")
+        print(f"DATA NODE: {datanode!s}")
         print(repr(datanode))
         print()
         
         emptynode.add_child('i_heard', value="you like")
         emptynode._append_nodes(datanode)
         
-        print("EMPTY NODE REDUX: {emptynode!s}")
+        print(f"EMPTY NODE REDUX: {emptynode!s}")
         print(repr(emptynode))
         print()
         

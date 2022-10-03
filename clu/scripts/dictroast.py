@@ -125,12 +125,19 @@ def main(argv=None):
     action = action.casefold()
     if action == 'write':
         # Update the dict:
-        print("… UPDATING DICTIONARY FROM COMMAND")
+        print("… UPDATING DICTIONARY FROM WRITE COMMAND")
         update_dict(ntm)
     elif action == 'read':
+        # Ensure we have keys to read:
+        if len(ntm.keys()) < 1:
+            print("¶ NO KEYS SPECIFIED FOR READ COMMAND")
+            return os.EX_CONFIG
         # Print specified keys:
-        keys = ", ".join(ntm.keys())
-        print(f"… READING DICTIONARY KEYS: «{keys}»")
+        nskeys = ", ".join(ntm.keys())
+        print(f"… READING NAMESPACED DICTIONARY KEYS: «{nskeys}»")
+        printout = lambda name, value: print("» %25s : %s" % (name, value))
+        for nskey in ntm.keys():
+            printout(nskey, ntm[nskey] or '«NONE»')
     elif action == 'status':
         # Do something status-y:
         pass

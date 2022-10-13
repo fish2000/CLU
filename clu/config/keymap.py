@@ -75,7 +75,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         """ Articulate a flattened KeyMap instance out into one that is nested. """
         if cls is None:
             cls = FrozenNested
-        return cls(tree=articulate(self.dictionary))
+        return cls(tree=articulate(self.dictionary), walker=flatwalk)
     
     def __iter__(self):
         yield from self.dictionary

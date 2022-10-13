@@ -289,6 +289,12 @@ class RootNode(NodeBase):
                                         value=None) # value isn’t necessary
         return instance
     
+    @classmethod
+    def populate(cls, *arguments):
+        instance = cls()
+        instance.populate_with_arguments(*arguments)
+        return instance
+    
     @property
     def value(self):
         """ A root node has no value, by definition. """
@@ -333,6 +339,7 @@ class RootNode(NodeBase):
         node = self
         for argument in arguments:
             node = self.parse_argument_to_child(argument, parent=node)
+        return self
 
 @export
 class Node(NodeBase):
@@ -701,8 +708,7 @@ def test():
         """ Check the basic functions of NodeTreeMap """
         
         # Fill a tree, per the command line:
-        root = RootNode()
-        root.populate_with_arguments(*nsflags)
+        root = RootNode.populate(*nsflags)
         
         # Stick it in a NodeTreeMap:
         itemlist = []
@@ -720,8 +726,7 @@ def test():
         """ Check node namespaced names """
         
         # Fill a tree, per the command line:
-        root = RootNode()
-        root.populate_with_arguments(*nsflags)
+        root = RootNode.populate(*nsflags)
         
         assert root.get_child('key0').nsname == 'key0'
         assert root.get_child('key0').value == 'yo'
@@ -764,8 +769,7 @@ def test():
         """ Check NodeTreeMap to/from dict functions """
         
         # Fill a tree, per the command line:
-        root = RootNode()
-        root.populate_with_arguments(*nsflags)
+        root = RootNode.populate(*nsflags)
         ntm = NodeTreeMap(tree=root)
         
         instance_dict = ntm.to_dict()
@@ -786,8 +790,7 @@ def test():
         from clu.config.codecs import json_encode, json_decode
         
         # Fill a tree, per the command line:
-        root = RootNode()
-        root.populate_with_arguments(*nsflags)
+        root = RootNode.populate(*nsflags)
         ntm = NodeTreeMap(tree=root)
         
         ntm_json = json_encode(ntm)
@@ -802,8 +805,7 @@ def test():
     def test_nodetree_halfviz():
         """ Generate Halfviz from a node tree """
         # Fill a tree, per the command line:
-        root = RootNode()
-        root.populate_with_arguments(*nsflags)
+        root = RootNode.populate(*nsflags)
         
         def edge_repr(parent, node):
             return f"{parent.name} -> {node.name}"

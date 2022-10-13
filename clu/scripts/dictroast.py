@@ -8,7 +8,7 @@ import sys, os
 from pprint import pprint
 
 from clu.scripts import treeline
-from clu.predicates import listify
+from clu.predicates import attrs, listify
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -80,9 +80,8 @@ def flags_to_nodetreemap(*flags):
     """ Parse script flag arguments into a node tree, and store
         them in a new NodeTreeMap instance
     """
-    root = treeline.RootNode()
-    root.populate_with_arguments(*flags)
-    return treeline.NodeTreeMap(tree=root)
+    TreeMap, RootNode = attrs(treeline, 'NodeTreeMap', 'RootNode')
+    return TreeMap(tree=RootNode.populate(*flags))
 
 def main(argv=None):
     """ The primary script entry point """
@@ -181,5 +180,5 @@ test_command = "clu-command WRITE " \
 # test_command = "clu-command FAIL"
 
 if __name__ == '__main__':
-    sys.exit(main(shlex.split(test_command)))
-    # sys.exit(main(sys.argv))
+    # sys.exit(main(shlex.split(test_command)))
+    sys.exit(main(sys.argv))

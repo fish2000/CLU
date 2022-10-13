@@ -60,7 +60,7 @@ class Level(contextlib.AbstractContextManager,
     __slots__ = ('value', 'tab')
     
     def __init__(self, initial_value=0, tab=SPACETABS):
-        self.value = initial_value
+        self.value = abs(initial_value)
         self.tab = tab
     
     def indent(self, string):

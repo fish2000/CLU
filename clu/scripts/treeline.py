@@ -69,6 +69,9 @@ class Level(contextlib.AbstractContextManager,
     def __int__(self):
         return self.value
     
+    def __index__(self):
+        return self.value
+    
     def __enter__(self):
         self.value += 1
         return self

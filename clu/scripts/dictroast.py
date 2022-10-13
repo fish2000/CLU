@@ -157,24 +157,6 @@ def main(argv=None):
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
-def test():
-    
-    from clu.testing.utils import inline
-    
-    @inline
-    def test_one():
-        pass # INSERT TESTING CODE HERE, pt. I
-    
-    #@inline
-    def test_two():
-        pass # INSERT TESTING CODE HERE, pt. II
-    
-    #@inline.diagnostic
-    def show_me_some_values():
-        pass # INSERT DIAGNOSTIC CODE HERE
-    
-    return inline.test(100)
-
 test_command = "clu-command READ " \
                "--key0 --key1 --key2 ns0 " \
                "--key3 ns1 ns2 " \

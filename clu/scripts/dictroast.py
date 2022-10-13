@@ -14,7 +14,7 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-valid_actions = { 'read', 'write', 'status' }
+valid_actions = { 'read', 'write', 'status', 'nop' }
 
 def get_dict():
     """ Retrieve a copy of the database for this file """
@@ -109,13 +109,6 @@ def main(argv=None):
         print(line)
     print()
     
-    # Print command history:
-    print("COMMAND HISTORY:")
-    # pprint(get_command_history(), indent=4)
-    for idx, line in enumerate(get_command_history()):
-        print(f"• {idx} {line}")
-    print()
-    
     if action.casefold() not in valid_actions:
         actions = ", ".join(sorted(map(lambda term: term.upper(), valid_actions)))
         print(f"¶ INVALID ACTION: “{action}”")
@@ -141,13 +134,27 @@ def main(argv=None):
     elif action == 'status':
         # Do something status-y:
         pass
+    elif action == 'nop':
+        # Do nothing:
+        pass
     
     print()
     
     # Update the command history:
     push_command(command)
     
+    # Print the last ten lines of command history:
+    history = get_command_history()
+    length = len(history)
+    lastlength = (length >= 10) and 'TEN' or f'{length}'
+    startat = (length >= 10) and (length - 9) or 0
+    print(f"COMMAND HISTORY (LAST {lastlength} LINES, OF {length} TOTAL):")
+    for idx, line in enumerate(history[-10:]):
+        print(f"• {idx + startat} {line}")
+    print()
+    
     # Print current dict:
+    print("CURRENT DICTIONARY:")
     pprint(get_dict())
     print()
     
@@ -171,6 +178,5 @@ test_command = "clu-command WRITE " \
 # test_command = "clu-command FAIL"
 
 if __name__ == '__main__':
-    # sys.exit(test())
     # sys.exit(main(shlex.split(test_command)))
     sys.exit(main(sys.argv))

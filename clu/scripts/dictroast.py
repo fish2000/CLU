@@ -16,12 +16,14 @@ export = exporter.decorator()
 
 valid_actions = { 'read', 'write', 'status', 'nop' }
 
+@export
 def get_dict():
     """ Retrieve a copy of the database for this file """
     with exporter.data() as database:
         out = dict(database.get('tree', {}))
     return out
 
+@export
 def update_dict(updates):
     """ Update the files’ database from a new dictionary """
     with exporter.data() as database:
@@ -31,12 +33,14 @@ def update_dict(updates):
         out = dict(database.get('tree', {}))
     return out
 
+@export
 def get_command_history():
     """ Retrieve a copy of the command history for this file """
     with exporter.data() as database:
         out = listify(database.get('history', []))
     return out
 
+@export
 def push_command(command):
     """ Add a new command to the end of the files’ command history """
     with exporter.data() as database:

@@ -145,10 +145,9 @@ def main(argv=None):
     print()
     
     # Update the command history:
-    push_command(command)
+    history = push_command(command)
     
     # Print the last ten lines of command history:
-    history = get_command_history()
     length = len(history)
     lastlength = (length >= 10) and 'TEN' or f'{length}'
     startat = (length >= 10) and (length - 9) or 0
@@ -182,5 +181,5 @@ test_command = "clu-command WRITE " \
 # test_command = "clu-command FAIL"
 
 if __name__ == '__main__':
-    # sys.exit(main(shlex.split(test_command)))
-    sys.exit(main(sys.argv))
+    sys.exit(main(shlex.split(test_command)))
+    # sys.exit(main(sys.argv))

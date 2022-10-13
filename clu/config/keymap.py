@@ -118,10 +118,14 @@ class Flat(FrozenFlat, KeyMap):
         del self.dictionary[nskey]
 
 @export
-def dictify(treeish):
-    """ Recursively convert a possibly nested mapping to standard dicts. """
+def dictify(treeish, cls=dict):
+    """ Recursively convert a possibly nested mapping to dicts.
+        
+        Standard Python dicts will be created by default; specify
+        a custom class with the “cls” argument to use your own.
+    """
     if ismapping(treeish):
-        return { key : dictify(value) for key, value in treeish.items() }
+        return cls({ key : dictify(value) for key, value in treeish.items() })
     return treeish
 
 @export
@@ -164,7 +168,7 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
             tree = getattr(tree, 'tree')
         elif hasattr(tree, 'nestify'):
             tree = getattr(tree.nestify(), 'tree')
-        self.tree = dictify(dict(tree or {}))
+        self.tree = dictify(dict(tree or {}), cls=dict)
         if updates:
             self.tree.update(**updates)
     

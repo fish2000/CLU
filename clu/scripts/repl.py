@@ -77,8 +77,7 @@ starmods = ('clu.repl.ansi',
             'clu.importing', 'clu.mathematics', 'clu.naming', 'clu.predicates', 'clu.typology',
             'clu.fs.abc', 'clu.fs.filesystem', 'clu.fs.misc', 'clu.repr', 'clu.scripts.treeline', 'clu.stdio',
             'clu.typespace.namespace',
-            'clu.testing.utils',
-            'clu.version', 'clu.version.git_version')
+            'clu.testing.utils')
 
 mods = ('clu',
         'clu.all',
@@ -96,6 +95,7 @@ mods = ('clu',
         'clu.scripts.ansicolors',
         'clu.scripts.treeline',
         'clu.typespace.types', # not technically a module!
+        'clu.version', 'clu.version.git_version',
         'sys', 'os', 'io', 're', 'abc',
         'argparse', 'collections', 'contextlib', 'copy',
         'datetime', 'functools', 'importlib', 'inspect',

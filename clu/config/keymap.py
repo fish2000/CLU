@@ -125,7 +125,7 @@ def dictify(treeish, cls=dict):
         a custom class with the “cls” argument to use your own.
     """
     if ismapping(treeish):
-        return cls({ key : dictify(value) for key, value in treeish.items() })
+        return cls({ key : dictify(value, cls=cls) for key, value in treeish.items() })
     return treeish
 
 @export

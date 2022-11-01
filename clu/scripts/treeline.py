@@ -88,6 +88,7 @@ leaf_predicate = lambda node: node.is_leafnode()
 @export
 class NodeBase(collections.abc.Hashable,
                clu.abstract.Cloneable,
+               clu.abstract.ReprWrapper,
                metaclass=clu.abstract.Slotted):
     
     """ The base class for all tree nodes. """
@@ -277,7 +278,7 @@ class NodeBase(collections.abc.Hashable,
     def __str__(self):
         return self.name
     
-    def __repr__(self):
+    def inner_repr(self):
         child_count = len(self.child_nodes)
         out = f"Node({self.node_name})"
         if self.node_value:
@@ -328,6 +329,9 @@ class RootNode(NodeBase):
         cloner = lambda node: node.clone(deep=deep)
         replica._append_nodes(*map(cloner, iterable))
         return replica
+    
+    def inner_repr(self):
+        return self.assemble_subcommand(recursive=True)
     
     @staticmethod
     def parse_argument_to_child(argument, parent):
@@ -880,16 +884,19 @@ def test():
         for line in tree_repr(root, Level()):
             print(line)
         
+        print(repr(root))
         print()
         
         for line in tree_repr(toor, Level()):
             print(line)
         
+        print(repr(toor))
         print()
         
         for line in tree_repr(roor, Level()):
             print(line)
         
+        print(repr(roor))
         print()
     
     return inline.test(100)

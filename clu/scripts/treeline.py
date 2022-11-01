@@ -355,11 +355,11 @@ class RootNode(NodeBase):
         else:
             # It’s a namespace:
             name, value = argument, None
-    
+        
         # Add and recover a new node, containing the values
         # we parsed out:
         node = parent.add_child(name=name, value=value)
-    
+        
         # Return the node if it’s a namespace, otherwise
         # hand back the original parent:
         return argument.startswith('--') and parent or node

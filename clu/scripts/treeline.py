@@ -174,7 +174,7 @@ class NodeBase(collections.abc.Hashable,
             Specify a name, and optionally a value for the node.
         """
         node = Node(parent=self, name=name, value=value)
-        self._append_nodes(node)
+        self.child_nodes[node.name] = node
         return node
     
     def has_child(self, nskey):

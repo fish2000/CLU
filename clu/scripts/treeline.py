@@ -121,8 +121,8 @@ class NodeBase(collections.abc.Hashable,
     
     @property
     def nsname(self):
-        """ The fully namespaced name of this node. Namespaces are enumerated
-            from the root upward.
+        """ The fully namespaced name of the current node. Namespaces are
+            enumerated from the current node on upward to the root.
         """
         if self.is_rootnode():
             return self.node_name
@@ -429,7 +429,7 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
                 except KeyError:
                     node = node.add_child(nsfragment)
         
-        # With namespaces in places, go through the items,
+        # With namespaces in place, go through the items,
         # using the newly created namespaces to anchor
         # namespaced items as needed:
         for nskey, value in interim.items():

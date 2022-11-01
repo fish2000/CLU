@@ -535,7 +535,7 @@ class ExporterBase(collections.abc.MutableMapping,
         from clu.constants.exceptions import FilesystemError
         
         # Initialize an AppDirs instance:
-        appdirs = AppDirs(appname=APPNAME)
+        appdirs = AppDirs(appname=type(self).appname)
         
         # Ensure the user config directory exists:
         try:

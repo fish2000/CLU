@@ -161,6 +161,8 @@ class NodeBase(collections.abc.Hashable,
             if child in set(self.child_nodes.values()):
                 thistype = nameof(typeof(self))
                 raise ValueError(f"WTF: {thistype} “{child!s}” is already a child")
+            if child.node_parent != self:
+                child.node_parent = self
             self.child_nodes[child.name] = child
     
     def add_child(self, name, value=None):

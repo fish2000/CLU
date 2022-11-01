@@ -241,7 +241,7 @@ class NodeBase(collections.abc.Hashable,
         """ Clone the current node, its leafnodes, and possibly
             all of its children, recursively.
         """
-        replica = type(self)(name=self.node_name,
+        replica = type(self)(name=str(self.node_name),
                              value=copy.copy(self.node_value),
                              parent=True)
         iterable = deep and self or self.leaves()
@@ -323,7 +323,7 @@ class RootNode(NodeBase):
         """ Clone the root node, its leafnodes, and possibly
             all of its children, recursively.
         """
-        replica = type(self)(name=self.node_name)
+        replica = type(self)(name=str(self.node_name))
         iterable = deep and self or self.leaves()
         cloner = lambda node: node.clone(deep=deep)
         replica._append_nodes(*map(cloner, iterable))

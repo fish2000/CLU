@@ -4,6 +4,7 @@ from __future__ import print_function
 import clu.abstract
 import collections.abc
 import contextlib
+import copy
 import shlex
 import sys
 
@@ -86,6 +87,7 @@ leaf_predicate = lambda node: node.is_leafnode()
 
 @export
 class NodeBase(collections.abc.Hashable,
+               clu.abstract.Cloneable,
                metaclass=clu.abstract.Slotted):
     
     """ The base class for all tree nodes. """
@@ -235,6 +237,18 @@ class NodeBase(collections.abc.Hashable,
                 'value' : self.value,
                'parent' : self.node_parent.name }
     
+    def clone(self, deep=False, memo=None):
+        """ Clone the current node, its leafnodes, and possibly
+            all of its children, recursively.
+        """
+        replica = type(self)(name=self.node_name,
+                             value=copy.copy(self.node_value),
+                             parent=True)
+        iterable = deep and self or self.leaves()
+        cloner = lambda node: node.clone(deep=deep)
+        replica._append_nodes(*map(cloner, iterable))
+        return replica
+    
     def __len__(self):
         return len(self.child_nodes)
     
@@ -304,6 +318,16 @@ class RootNode(NodeBase):
     
     def is_rootnode(self):
         return True
+    
+    def clone(self, deep=False, memo=None):
+        """ Clone the root node, its leafnodes, and possibly
+            all of its children, recursively.
+        """
+        replica = type(self)(name=self.node_name)
+        iterable = deep and self or self.leaves()
+        cloner = lambda node: node.clone(deep=deep)
+        replica._append_nodes(*map(cloner, iterable))
+        return replica
     
     @staticmethod
     def parse_argument_to_child(argument, parent):
@@ -467,7 +491,10 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
         return repr(self.tree)
     
     def clone(self, deep=False, memo=None):
-        pass
+        """ Replicate the node tree map, possibly recursively """
+        replica = type(self)()
+        replica.tree = self.tree.clone(deep=deep)
+        return replica
     
     def to_dict(self):
         """ Used by `clu.config.codecs` to serialize the NodeTreeMap """
@@ -820,6 +847,47 @@ def test():
                     yield from tree_repr(node, child, level)
         
         for line in tree_repr(None, root, Level()):
+            print(line)
+        
+        print()
+    
+    @inline
+    def test_nodetree_clone():
+        """ Clone a node tree """
+        # Fill a tree, per the command line:
+        root = RootNode.populate(*nsflags)
+        toor = root.clone(deep=True)
+        roor = root.clone()
+        
+        # custom node_repr(…) to show node IDs:
+        def node_repr(node):
+            if not node.is_leafnode():
+                child_count = len(node)
+                return f"• {node!s} → [{child_count}] ({id(node)})"
+            if not node.value:
+                return f"• {node!s} ({hash(node)})"
+            return f"• {node!s} = {node.value} ({id(node)})"
+
+        def tree_repr(node, level):
+            yield level.indent(node_repr(node))
+            for leaf in node.leaves():
+                with level:
+                    yield level.indent(node_repr(leaf))
+            for namespace in node.namespaces():
+                with level:
+                    yield from tree_repr(namespace, level)
+        
+        for line in tree_repr(root, Level()):
+            print(line)
+        
+        print()
+        
+        for line in tree_repr(toor, Level()):
+            print(line)
+        
+        print()
+        
+        for line in tree_repr(roor, Level()):
             print(line)
         
         print()

@@ -486,7 +486,17 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
                 badtype = nameof(typeof(tree))
                 raise TypeError(f"NodeTreeMap requires a Node instance, not type {badtype}")
         self.tree = tree
-        # N.B. – deal with updates here
+        # N.B. – assume updates is a basic KeyMap:
+        if updates:
+            for nskey, value in updates.items():
+                key, namespace = unpack_ns(nskey)
+                node = self.tree
+                for nsfragment in namespace:
+                    try:
+                        node = node.namespace(nsfragment)
+                    except KeyError:
+                        node = node.add_child(nsfragment)
+                node.add_child(key, value)
     
     def walk(self):
         yield from treewalk(self.tree)

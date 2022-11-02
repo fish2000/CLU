@@ -170,7 +170,16 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
             tree = getattr(tree.nestify(), 'tree')
         self.tree = dictify(dict(tree or {}), cls=dict)
         if updates:
-            self.tree.update(**updates)
+            for nskey, value in updates.items():
+                key, namespaces = unpack_ns(nskey)
+                d = self.tree
+                for namespace in namespaces:
+                    try:
+                        d = d[namespace]
+                    except KeyError:
+                        d[namespace] = {}
+                        d = d[namespace]
+                d[key] = value
     
     def walk(self):
         """ Iteratively walk the nested KeyMap’s tree of dicts. """
@@ -391,12 +400,12 @@ def test():
     @inline
     def test_frozennested_contains():
         """ FrozenNested contains namespaced key """
-        nested = FrozenNested(tree=nestedmaps(), **arbitrary())
+        nested = FrozenNested(tree=nestedmaps())
         
         for mappingpath in mapwalk(nested.tree):
             *namespaces, key, value = mappingpath
             nskey = pack_ns(key, *namespaces)
-            assert nskey in nested or nskey in arbitrary()
+            assert nskey in nested
     
     @inline
     def test_nested_contains():

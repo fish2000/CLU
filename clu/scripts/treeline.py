@@ -234,9 +234,13 @@ class NodeBase(collections.abc.Hashable,
         yield from filterfalse(leaf_predicate, self.child_nodes.values())
     
     def to_dict(self):
-        return { 'name' : self.name,
-                'value' : self.value,
-               'parent' : self.node_parent.name }
+        """ Recursively dict-ify this node and any children it may have """
+        out = { 'name' : self.name }
+        if self.value:
+            out['value'] = self.value
+        if (not self.is_leafnode()) and len(self):
+            out['children'] = tuple(child.to_dict() for child in self)
+        return out
     
     def clone(self, deep=False, memo=None):
         """ Clone the current node, its leafnodes, and possibly
@@ -908,6 +912,14 @@ def test():
         
         print(repr(roor))
         print()
+    
+    @inline
+    def test_nodetree_to_dict():
+        """ Recursively dict-ify a node tree """
+        # Fill a tree, per the command line:
+        root = RootNode.populate(*nsflags)
+        dicts = root.to_dict()
+        pprint(dicts)
     
     return inline.test(100)
 

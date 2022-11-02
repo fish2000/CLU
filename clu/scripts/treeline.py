@@ -87,6 +87,7 @@ leaf_predicate = lambda node: node.is_leafnode()
 
 @export
 class NodeBase(collections.abc.Hashable,
+               collections.abc.Iterable,
                clu.abstract.Cloneable,
                clu.abstract.ReprWrapper,
                metaclass=clu.abstract.Slotted):

@@ -87,7 +87,7 @@ leaf_predicate = lambda node: node.is_leafnode()
 
 @export
 class NodeBase(collections.abc.Hashable,
-               collections.abc.Iterable,
+               collections.abc.Collection,
                clu.abstract.Cloneable,
                clu.abstract.ReprWrapper,
                metaclass=clu.abstract.Slotted):
@@ -270,6 +270,9 @@ class NodeBase(collections.abc.Hashable,
         badtype = nameof(typeof(idx))
         message = f"{thistype} indices must be integers, slices, or strings – not {badtype}"
         raise TypeError(message)
+    
+    def __contains__(self, nskey):
+        return self.has_child(nskey)
     
     def __hash__(self):
         # So nice it’s thrice!

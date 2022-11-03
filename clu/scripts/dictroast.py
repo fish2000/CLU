@@ -118,28 +118,28 @@ def main(argv=None):
         print(f"¶ MUST BE ONE OF: «{actions}»")
         return os.EX_CONFIG
     
-    action = action.casefold()
-    if action == 'write':
-        # Update the dict:
-        print("… UPDATING DICTIONARY FROM WRITE COMMAND")
-        update_dict(ntm)
-    elif action == 'read':
-        # Ensure we have keys to read:
-        if len(ntm.keys()) < 1:
-            print("¶ NO KEYS SPECIFIED FOR READ COMMAND")
-            return os.EX_CONFIG
-        # Print specified keys:
-        nskeys = ", ".join(ntm.keys())
-        print(f"… READING NAMESPACED DICTIONARY KEYS: «{nskeys}»")
-        printout = lambda name, value: print("» %25s : %s" % (name, value))
-        for nskey in ntm.keys():
-            printout(nskey, ntm[nskey] or '«NONE»')
-    elif action == 'status':
-        # Do something status-y:
-        pass
-    elif action == 'nop':
-        # Do nothing:
-        pass
+    match action.casefold():
+        case 'write':
+            # Update the dict:
+            print("… UPDATING DICTIONARY FROM WRITE COMMAND")
+            update_dict(ntm)
+        case 'read':
+            # Ensure we have keys to read:
+            if len(ntm.keys()) < 1:
+                print("¶ NO KEYS SPECIFIED FOR READ COMMAND")
+                return os.EX_CONFIG
+            # Print specified keys:
+            nskeys = ", ".join(ntm.keys())
+            print(f"… READING NAMESPACED DICTIONARY KEYS: «{nskeys}»")
+            printout = lambda name, value: print("» %25s : %s" % (name, value))
+            for nskey in ntm.keys():
+                printout(nskey, ntm[nskey] or '«NONE»')
+        case 'status':
+            # Do something status-y:
+            pass
+        case 'nop':
+            # Do nothing:
+            pass
     
     print()
     

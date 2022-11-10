@@ -509,6 +509,16 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
     def walk(self):
         yield from treewalk(self.tree)
     
+    def submap(self, *namespaces, unprefixed=False):
+        if unprefixed:
+            return { node.name : self[node.name] for node in self.tree.leaves() }
+        if not namespaces:
+            return self.flatten(cls=dict)
+        node = self.tree
+        for namespace in namespaces:
+            node = node.namespace(namespace)
+        return { child.name : self[child.nsname] for child in node.leaves() }
+    
     def inner_repr(self):
         return repr(self.tree)
     

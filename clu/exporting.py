@@ -22,7 +22,7 @@ chain = itertools.chain
 iterchain = itertools.chain.from_iterable
 
 from clu.constants.consts import (λ, φ, # type: ignore
-                                  APPNAME, BASEPATH, BUILTINS,
+                                  APPNAME, BASEPATH, BUILTINS, ENCODING,
                                   EXPORTER_NAME, QUALIFIER, ROOT_PATH,
                                   NoDefault, pytuple)
 from clu.constants.exceptions import BadDotpathWarning, ExportError, ExportWarning
@@ -32,7 +32,6 @@ cache = lambda function: lru_cache(maxsize=128, typed=False)(function)
 
 # Not what you are looking for
 NotYourThing = object()
-# NotYourID = id(NotYourThing)
 
 def itermodule(module):
     """ Get an iterable of `(name, thing)` tuples for all things
@@ -188,7 +187,7 @@ def stringhash(string):
     """ Expediently hash a string to another string """
     import hashlib
     digester = hashlib.sha256()
-    digester.update(bytes(string, encoding='UTF-8'))
+    digester.update(bytes(string, encoding=ENCODING))
     return digester.hexdigest()
 
 def determine_name(thing, name=None, try_repr=False):
@@ -521,14 +520,12 @@ class ExporterBase(collections.abc.MutableMapping,
                 else:
                     self.__exports__.update(d)
     
-    @property
     def hash(self):
         """ Return a stringified hash value corresponding to this
             particular exporter instances’ dotpath.
         """
-        return stringhash(self.dotpath)
+        return self.dotpath and stringhash(self.dotpath) or None
     
-    @property
     def datafile(self):
         """ Return a unique filename for this instance """
         from clu.fs.appdirectories import AppDirs
@@ -544,7 +541,10 @@ class ExporterBase(collections.abc.MutableMapping,
             pass
         
         # Construct database filename:
-        return Path(appdirs.user_config / self.hash + ".pkl")
+        selfhash = self.hash()
+        if not selfhash:
+            raise AttributeError("Could not hash the exporter instances’ dotpath")
+        return Path(appdirs.user_config / selfhash + ".pkl")
     
     @contextlib.contextmanager
     def data(self, path=NoDefault):
@@ -552,7 +552,7 @@ class ExporterBase(collections.abc.MutableMapping,
             to this particular exporter instances’ dotpath.
         """
         if path is NoDefault:
-            path = self.datafile
+            path = self.datafile()
         
         # Yield out a proper shelving database instance:
         with shelve.open(os.fspath(path), writeback=True) as shelving:
@@ -998,8 +998,8 @@ def test():
     def test_hash():
         """ Test the string-hashing of the exporters’ dotpath """
         expo = Exporter(path=__file__)
-        assert expo.hash == exporter.hash
-        print(expo.hash)
+        assert expo.hash() == exporter.hash()
+        print(expo.hash())
     
     @inline
     def test_shelving():
@@ -1022,6 +1022,11 @@ def test():
     def show_search_by_id_cache_info():
         print("SEARCH-BY-ID CACHE INFO:")
         print(Exporter.cache_info())
+    
+    @inline.diagnostic
+    def show_stringhash_cache_info():
+        print("STRINGHASH CACHE INFO:")
+        print(stringhash.cache_info())
     
     return inline.test(100)
 

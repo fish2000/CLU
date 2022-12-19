@@ -26,7 +26,10 @@ fields = frozenset(FIELDS)
 string_types = { type(lit) for lit in ('', u'', r'') }
 byte_types = { bytes, bytearray } - string_types # On py2, bytes == str
 dict_types = { dict, OrderedDict }
-comparable = dict_types | { VersionAncestor }
+comparable = dict_types | byte_types | string_types | { VersionAncestor }
+
+dict_types_tuple = tuple(dict_types)
+comparable_tuple = tuple(comparable)
 
 # utility conversion functions:
 def intify(arg):
@@ -46,11 +49,13 @@ def strify(arg):
 def dictify(arg):
     if arg is None:
         return None
+    if isinstance(arg, (str, bytes)):
+        return VersionInfo(from_value=arg).to_dict()
     if hasattr(arg, '_asdict'):
         return arg._asdict()
     if hasattr(arg, 'to_dict'):
         return arg.to_dict()
-    if isinstance(arg, tuple(dict_types)):
+    if isinstance(arg, dict_types_tuple):
         return arg
     return dict(arg)
 
@@ -85,7 +90,7 @@ def comparator(operator):
     """ Wrap a VersionInfo binary op method in a typechecker """
     @wraps(operator)
     def wrapper(self, other):
-        if not isinstance(other, tuple(comparable)):
+        if not isinstance(other, comparable_tuple):
             return NotImplemented
         return operator(self, other)
     return wrapper

@@ -60,6 +60,11 @@ class TestVersion(object):
         assert cluversion  > VersionInfo(b'0.0.1')
         assert cluversion != VersionInfo(b'0.0.1')
         
+        assert cluversion  < "9.0.0"
+        assert cluversion  > "0.0.1"
+        assert cluversion  < b"9.0.0"
+        assert cluversion  > b"0.0.1"
+        
         assert bool(cluversion)
         assert not bool(VersionInfo('‽.‽.‽'))
     
@@ -79,6 +84,14 @@ class TestVersion(object):
         assert version_info >= VersionInfo(__version__)
         assert version_info  > VersionInfo(b'0.0.1')
         assert version_info != VersionInfo(b'0.0.1')
+        
+        assert version_info  < "9.0.0"
+        assert version_info  > "0.0.1"
+        assert version_info  < b"9.0.0"
+        assert version_info  > b"0.0.1"
+        
+        assert version_info  < "9.0"
+        assert version_info  > "0.1"
         
         assert bool(version_info)
         assert not bool(VersionInfo('‽.‽.‽'))

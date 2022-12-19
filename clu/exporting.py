@@ -9,6 +9,7 @@ import clu.abstract
 import collections
 import collections.abc
 import contextlib
+import hashlib
 import importlib
 import inspect
 import itertools
@@ -185,7 +186,6 @@ def search_modules(thing, *modules):
 @cache
 def stringhash(string):
     """ Expediently hash a string to another string """
-    import hashlib
     digester = hashlib.sha256()
     digester.update(bytes(string, encoding=ENCODING))
     return digester.hexdigest()
@@ -910,6 +910,7 @@ with exporter as export:
     export(search_for_name)
     export(search_for_module)
     export(search_modules)
+    export(stringhash)
     export(determine_name)
     export(path_to_dotpath)
     export(thismodule, name='thismodule', doc="thismodule() → return the name of the module in which the `thismodule()` function was called")

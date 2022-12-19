@@ -262,14 +262,16 @@ class NodeBase(collections.abc.Hashable,
         yield from self.child_nodes.values()
     
     def __getitem__(self, idx):
-        if isinstance(idx, (int, slice)):
-            return tuple(self.child_nodes.values())[idx]
-        elif isnormative(idx):
-            return self.get_child(str(idx))
-        thistype = nameof(typeof(self))
-        badtype = nameof(typeof(idx))
-        message = f"{thistype} indices must be integers, slices, or strings – not {badtype}"
-        raise TypeError(message)
+        match idx:
+            case int() | slice():
+                return tuple(self.child_nodes.values())[idx]
+            case _ if isnormative(idx):
+                return self.get_child(str(idx))
+            case _:
+                thistype = nameof(typeof(self))
+                badtype = nameof(typeof(idx))
+                message = f"{thistype} indices must be integers, slices, or strings – not {badtype}"
+                raise TypeError(message)
     
     def __contains__(self, nskey):
         return self.has_child(nskey)
@@ -396,9 +398,7 @@ class Node(NodeBase):
         return instance
 
 # Used in RootNode._append_nodes(…):
-acceptable_types = set(NodeBase.__mro__)
-acceptable_types.add(Node)
-acceptable_types.add(RootNode)
+acceptable_types = { NodeBase, RootNode, Node }
 
 @export
 def node_repr(node):

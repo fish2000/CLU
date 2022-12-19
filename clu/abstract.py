@@ -30,6 +30,33 @@ class Slotted(abc.ABCMeta):
                                                         attributes,
                                                       **kwargs)
 
+class SlotMatch(Slotted):
+    
+    """ A metaclass that ensures its classes, and all subclasses,
+        will be slotted types with “__match_args__” set to the
+        sum of the “__slots__” values for this and all ancestors.
+    """
+    
+    def __new__(metacls, name, bases, attributes, **kwargs):
+        """ Override for `abc.ABCMeta.__new__(…)` setting up a
+            derived slotted class with “__match_args__” set.
+        """
+        from clu.predicates import slots_for
+        
+        # Ensure the new class will have a “__match_args__” attribute
+        if '__match_args__' not in attributes:
+            attributes['__match_args__'] = tuple()
+        
+        # Create the new class via “super(…)” – calling “Slotted.__new__(…)”
+        cls = super(SlotMatch, metacls).__new__(metacls, name, # type: ignore
+                                                         bases,
+                                                         attributes,
+                                                       **kwargs)
+        
+        # Set “__match_args__” using “slots_for(…)” and return
+        cls.__match_args__ = slots_for(cls)
+        return cls
+
 class NonSlotted(abc.ABCMeta):
     
     """ A metaclass that ensures its classes, and all subclasses,
@@ -369,30 +396,7 @@ class ManagedContext(contextlib.AbstractContextManager):
         self.teardown()
         return exc_type is None
 
-if consts.PYTHON_VERSION >= 3.7: # pragma: no cover
-    
-    class AsyncManagedContext(ManagedContext,
-                              contextlib.AbstractAsyncContextManager):
-        
-        async def __aenter__(self):
-            self.setup()
-            if hasattr(self, '__await__'):
-                if callable(self.__await__):
-                    await self
-            return self
-        
-        async def __aexit__(self, exc_type=None,
-                                  exc_val=None,
-                                  exc_tb=None):
-            self.teardown()
-            return exc_type is None
-
-else:
-    
-    class AsyncManagedContext(ManagedContext):
-        pass
-
-__all__ = ('Slotted', 'NonSlotted',
+__all__ = ('Slotted', 'SlotMatch', 'NonSlotted',
            'UnhashableMeta', 'Unhashable',
            'Format', 'NonFormat', 'SlottedFormat', 'Sanitizer',
            'Cloneable',
@@ -401,6 +405,6 @@ __all__ = ('Slotted', 'NonSlotted',
            'BaseDescriptor', 'DataDescriptor', 'NamedDescriptor',
            'CacheDescriptor', 'Descriptor', 'ValueDescriptor',
            'BasePath', 'AppName',
-           'ManagedContext', 'AsyncManagedContext')
+           'ManagedContext')
 
 __dir__ = lambda: list(__all__)

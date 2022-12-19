@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-find_hex_id = lambda function: repr(function).split()[-1].rstrip('>')
+find_hex_id = lambda function: repr(function).split()[-1].removesuffix('>')
 
-test_lambda = lambda: 'yo dogg'
-test_hex_id = find_hex_id(test_lambda)
+# Fucking pytest actually tries to execute this lambda if it starts with “test”:
+_testing_lambda = lambda: 'yo dogg'
+_testing_hex_id = find_hex_id(_testing_lambda)
 
 class TestRepr(object):
     
@@ -178,21 +179,21 @@ class TestRepr(object):
         from clu.constants.consts import λ
         from clu.exporting import Exporter
         
-        test_lambda_qualname = lambda: 'yo dogg'
-        test_hex_id_qualname = find_hex_id(test_lambda_qualname)
+        testing_lambda_qualname = lambda: 'yo dogg'
+        testing_hex_id_qualname = find_hex_id(testing_lambda_qualname)
         
         test_classname = type(self).__name__
         test_funcname = self.test_repr_lambdas.__func__.__name__
         test_qualname = f"{test_classname}.{test_funcname}.<locals>"
         
-        assert repr(test_lambda) == f"<function {λ} at {test_hex_id}>"
-        assert repr(test_lambda_qualname) == f"<function {test_qualname}.{λ} at {test_hex_id_qualname}>"
+        assert repr(_testing_lambda) == f"<function {λ} at {_testing_hex_id}>"
+        assert repr(testing_lambda_qualname) == f"<function {test_qualname}.{λ} at {testing_hex_id_qualname}>"
         
         exporter = Exporter()
         export = exporter.decorator()
         
-        export(test_lambda)                         # renames using determined name of lambda
-        export(test_lambda_qualname, 'yo_dogg')     # renames using provided string name
+        export(_testing_lambda)                        # renames using determined name of lambda
+        export(testing_lambda_qualname, 'yo_dogg')     # renames using provided string name
         
-        assert repr(test_lambda) == f"<function test_lambda at {test_hex_id}>"
-        assert repr(test_lambda_qualname) == f"<function TestRepr.test_repr_lambdas.<locals>.yo_dogg at {test_hex_id_qualname}>"
+        assert repr(_testing_lambda) == f"<function _testing_lambda at {_testing_hex_id}>"
+        assert repr(testing_lambda_qualname) == f"<function TestRepr.test_repr_lambdas.<locals>.yo_dogg at {testing_hex_id_qualname}>"

@@ -46,6 +46,74 @@ class TestAbstractMetas(object):
         assert DerivedTwo.__slots__ == tuple()
         assert DerivedThree.__slots__ == ('iheard', 'youlike')
     
+    def test_metaclass_SlotMatch(self):
+        from clu.predicates import haspyattr
+        
+        class Base(abc.ABC, metaclass=clu.abstract.SlotMatch):
+            pass
+        
+        class Derived(Base):
+            __slots__ = ('yo', 'dogg')
+            def __init__(self, yo, dogg):
+                self.yo = str(yo)
+                self.dogg = str(dogg)
+        
+        class Yowza(Base):
+            pass
+        
+        assert Base.__slots__ == tuple()
+        assert Base.__match_args__ == tuple()
+        assert Derived.__slots__ == ('yo', 'dogg')
+        assert Derived.__match_args__ == ('yo', 'dogg')
+        assert Yowza.__slots__ == tuple()
+        assert Yowza.__match_args__ == tuple()
+        
+        def dogg_matcher(thing):
+            match thing:
+                case Derived(yo="", dogg=""):
+                    assert thing.yo == ""
+                    assert thing.dogg == ""
+                    assert haspyattr(thing, 'slots')
+                    assert haspyattr(thing, 'match_args')
+                case Derived(yo="", dogg=dogg):
+                    assert thing.yo == ""
+                    assert type(thing.dogg) is str
+                    assert haspyattr(thing, 'slots')
+                    assert haspyattr(thing, 'match_args')
+                case Derived(yo=yo, dogg=""):
+                    assert type(thing.yo) is str
+                    assert thing.dogg == ""
+                    assert haspyattr(thing, 'slots')
+                    assert haspyattr(thing, 'match_args')
+                case Derived(yo=yo, dogg=dogg):
+                    assert type(thing.yo) is str
+                    assert type(thing.dogg) is str
+                    assert haspyattr(thing, 'slots')
+                    assert haspyattr(thing, 'match_args')
+                case Base():
+                    assert not hasattr(thing, 'yo')
+                    assert not hasattr(thing, 'dogg')
+                    assert haspyattr(thing, 'slots')
+                    assert haspyattr(thing, 'match_args')
+                case _:
+                    assert haspyattr(thing, 'slots')
+                    assert haspyattr(thing, 'match_args')
+        
+        dogg_matcher(Base())
+        dogg_matcher(Derived("", ""))
+        dogg_matcher(Derived("i", ""))
+        dogg_matcher(Derived("", "heard"))
+        dogg_matcher(Derived("i", "heard"))
+        dogg_matcher(Yowza())
+        
+        dogg_matcher(Base)
+        dogg_matcher(Derived)
+        dogg_matcher(Yowza)
+        
+        # This will fail (a plain object lacks the attributes asserted
+        # in the default case of the matcher):
+        #dogg_matcher(object())
+    
     def test_metaclass_NonSlotted(self):
         from clu.predicates import getpyattr, slots_for
         

@@ -23,7 +23,7 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-NEED_NAME = PYTHON_VERSION < 3.6
+NEED_NAME = PYTHON_VERSION < "3.6"
 
 class Nestifier(abc.ABC):
     

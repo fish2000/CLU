@@ -17,6 +17,9 @@ else:
     if not callable(path):  # pragma: no cover
         path = sys.intern
 
+# Get VersionInfo from clu.version:
+from clu.version import VersionInfo
+
 # Define the “pytuple” shortcut lambda:
 pytuple = lambda *attrs: tuple(f'__{atx}__' for atx in attrs)
 
@@ -132,9 +135,9 @@ PY3 = sys.version_info.major > 2
 # Determine if we’re on PyPy:
 PYPY = hasattr(sys, 'pypy_version_info')
 
-# A float representation of the Python version:
-PYTHON_VERSION = float("%s%s%s" % (sys.version_info.major, os.extsep,
-                                   sys.version_info.minor))
+# The current Python major/minor version:
+PYTHON_VERSION = VersionInfo("%s%s%s" % (sys.version_info.major, os.extsep,
+                                         sys.version_info.minor))
 
 # Qualifier for qualified-name operations:
 QUALIFIER = sys.intern(os.extsep)

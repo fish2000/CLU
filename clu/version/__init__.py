@@ -64,7 +64,8 @@ def compare_keys(dict1, dict2):
     """ Blatantly based on code from “semver”: https://git.io/fhb98 """
     
     for key in ('major', 'minor', 'patch'):
-        result = cmp(dict1.get(key), dict2.get(key))
+        result = cmp(dict1.get(key) or 0,
+                     dict2.get(key) or 0)
         if result:
             return result
     

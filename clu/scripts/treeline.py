@@ -486,8 +486,7 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
             super().__init__(**updates)
         except TypeError:
             super().__init__()
-        if hasattr(tree, 'tree'):
-            tree = getattr(tree, 'tree')
+        tree = getattr(tree, 'tree', tree)
         # “mnq gvfc” – Nellie
         if tree is not None:
             if type(tree) not in acceptable_types:

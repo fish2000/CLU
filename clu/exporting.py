@@ -555,7 +555,7 @@ class ExporterBase(collections.abc.MutableMapping,
             path = self.datafile()
         
         # Yield out a proper shelving database instance:
-        with shelve.open(os.fspath(path), writeback=True) as shelving:
+        with contextlib.closing(shelve.open(os.fspath(path), writeback=True)) as shelving:
             yield shelving
     
     def exports(self):

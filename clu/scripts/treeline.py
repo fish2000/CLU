@@ -422,6 +422,13 @@ def tree_repr(node, level):
             yield from tree_repr(namespace, level)
 
 @export
+def tree_print(node, *args, initial_value=0, tab=SPACETABS, **kwargs):
+    """ Print, line-by-line, the results of “tree_repr(node, …)”. """
+    for line in tree_repr(node, Level(initial_value=initial_value,
+                                                tab=tab)):
+        print(line, *args, **kwargs)
+
+@export
 def treewalk(node, pre=None):
     """ Iteratively walk a node tree.
         
@@ -611,9 +618,7 @@ def test():
                 for child in node:
                     yield from tree_repr(child, level)
         
-        for line in tree_repr(root, Level()):
-            print(line)
-    
+        tree_print(root)
         print()
     
     @inline
@@ -632,9 +637,7 @@ def test():
         nsX.add_child('namespaced')
         nsY.add_child('commands')
         
-        for line in tree_repr(root, Level()):
-            print(line)
-        
+        tree_print(root)
         print()
     
     @inline
@@ -682,9 +685,7 @@ def test():
         for argument in nsflags:
             node = parse_argument_to_child_node(argument, parent=node)
         
-        for line in tree_repr(root, Level()):
-            print(line)
-        
+        tree_print(root)
         print()
     
     @inline
@@ -738,9 +739,7 @@ def test():
         
         assert full_command in command
         
-        for line in tree_repr(root, Level()):
-            print(line)
-        
+        tree_print(root)
         print()
     
     @inline
@@ -758,9 +757,7 @@ def test():
         
         assert full_command in command
         
-        for line in tree_repr(root, Level()):
-            print(line)
-        
+        tree_print(root)
         print()
     
     @inline
@@ -877,9 +874,7 @@ def test():
                 for child in node:
                     yield from tree_repr(node, child, level)
         
-        for line in tree_repr(None, root, Level()):
-            print(line)
-        
+        tree_print(root)
         print()
     
     @inline
@@ -908,20 +903,17 @@ def test():
                 with level:
                     yield from tree_repr(namespace, level)
         
-        for line in tree_repr(root, Level()):
-            print(line)
+        tree_print(root)
         
         print(repr(root))
         print()
         
-        for line in tree_repr(toor, Level()):
-            print(line)
+        tree_print(toor)
         
         print(repr(toor))
         print()
         
-        for line in tree_repr(roor, Level()):
-            print(line)
+        tree_print(roor)
         
         print(repr(roor))
         print()

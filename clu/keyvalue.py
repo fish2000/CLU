@@ -58,7 +58,7 @@ class CLUInterface(AppDirs):
                 self.migrate_from_previous()
         
         # Configure zicts for key-value I/O:
-        self.zfile = zict.File(str(self.datadir), mode='a')
+        self.zfile = zict.File(str(self.datadir))
         self.zutf8 = zict.Func(dump=attr(plistlib, 'dumps', 'writePlistToString'),
                                load=attr(plistlib, 'loads', 'readPlistFromString'),
                                d=self.zfile)

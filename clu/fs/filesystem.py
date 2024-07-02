@@ -676,12 +676,11 @@ class Directory(BaseFSName,
             Specify an optional “suffix” parameter to filter the list by a
             particular file suffix (leading dots unnecessary but unharmful).
         """
-        if not self.exists:
-            return tuple()
-        with os.scandir(self.realpath(source)) as iterscan:
-            return tuple(filter(suffix_searcher(suffix),
-                         filter(non_dotfile_matcher,
-                        (direntry.name for direntry in iterscan))))
+        if self.exists:
+            with os.scandir(self.realpath(source)) as iterscan:
+                yield from filter(suffix_searcher(suffix),
+                           filter(non_dotfile_matcher,
+                                 (direntry.name for direntry in iterscan)))
     
     def ls_la(self, suffix=None, source=None):
         """ List all files, including files whose name starts with a dot.
@@ -697,11 +696,10 @@ class Directory(BaseFSName,
             commands I ever learned, and it reads better than `ls_a()` which
             I think looks awkward and goofy.)
         """
-        if not self.exists:
-            return tuple()
-        with os.scandir(self.realpath(source)) as iterscan:
-            return tuple(filter(suffix_searcher(suffix),
-                        (direntry.name for direntry in iterscan)))
+        if self.exists:
+            with os.scandir(self.realpath(source)) as iterscan:
+                yield from filter(suffix_searcher(suffix),
+                                 (direntry.name for direntry in iterscan))
     
     def subpath(self, subpath, source=None, requisite=False):
         """ Returns the path to a subpath of the instances’ target path. """
@@ -731,13 +729,12 @@ class Directory(BaseFSName,
             Specify an optional “pattern” parameter to filter the list
             by a particular regex pattern, as applied to directory names.
         """
-        if not self.exists:
-            return tuple()
-        with os.scandir(self.realpath(source)) as iterscan:
-            return tuple(map(lambda dirname: self.directory(dirname),
-                         filter(re_searcher(pattern),
-                        (direntry.name for direntry in iterscan \
-                                        if direntry.is_dir()))))
+        if self.exists:
+            with os.scandir(self.realpath(source)) as iterscan:
+                yield from map(lambda dirname: self.directory(dirname),
+                               filter(re_searcher(pattern),
+                                     (direntry.name for direntry in iterscan \
+                                                     if direntry.is_dir())))
     
     def makedirs(self, subpath=None, mode=0o755):
         """ Creates any parts of the target directory path that don’t
@@ -943,7 +940,7 @@ class Directory(BaseFSName,
             dotpaths.update(path_to_dotpath(os.path.join(root, filename),
                                             relative_to=self.name)
                             for filename in filenames)
-        return sorted(dotpaths)
+        yield from sorted(dotpaths)
     
     def suffix_histogram(self, subdir=None,
                                source=None,

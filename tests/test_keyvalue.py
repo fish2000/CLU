@@ -7,6 +7,7 @@ class TestKeyValue(object):
     
     def test_keyvalue_cluinterface_basics(self, environment,
                                                 temporarydir):
+        from clu.typology import iterlen
         from clu.keyvalue import CLUInterface
         from tempfile import gettempdir
         
@@ -14,7 +15,7 @@ class TestKeyValue(object):
         
         assert temporarydir.exists
         assert temporarydir.name.startswith(gettempdir())
-        assert len(interface) == 0
+        assert iterlen(interface) == 0
         
         dict_one = { 'compress_level' : 9,
                            'optimize' : True,
@@ -23,8 +24,8 @@ class TestKeyValue(object):
         
         interface.update(dict_one)
         
-        assert len(temporarydir.ls()) == 4
-        assert len(interface) == 4
+        assert iterlen(temporarydir.ls()) == 4
+        assert iterlen(interface) == 4
         
         assert interface['compress_level'] == 9
         assert interface['optimize']       == True
@@ -33,18 +34,19 @@ class TestKeyValue(object):
         
         with CLUInterface(datadir=temporarydir) as sidehustle:
             
-            assert len(sidehustle) == 4
+            assert iterlen(sidehustle) == 4
             
             assert sidehustle['compress_level'] == 9
             assert sidehustle['optimize']       == True
             assert sidehustle['format']         == "png"
             assert sidehustle['yo']             == "dogg"
         
-        assert len(temporarydir.ls()) == 4
+        assert iterlen(temporarydir.ls()) == 4
     
     def test_keyvalue_cluinterface_long_text(self, environment,
                                                    temporarydir,
                                                    greektext):
+        from clu.typology import iterlen
         from clu.keyvalue import CLUInterface
         from tempfile import gettempdir
         
@@ -52,13 +54,13 @@ class TestKeyValue(object):
         
         assert temporarydir.exists
         assert temporarydir.name.startswith(gettempdir())
-        assert len(interface) == 0
+        assert iterlen(interface) == 0
         
         # Add the greek-text fixture dict:
         interface.update(greektext)
         
-        assert len(temporarydir.ls()) == 4
-        assert len(interface) == 4
+        assert iterlen(temporarydir.ls()) == 4
+        assert iterlen(interface) == 4
         
         assert interface['lorem']   == greektext['lorem']
         assert interface['faust']   == greektext['faust']
@@ -67,11 +69,11 @@ class TestKeyValue(object):
         
         with CLUInterface(datadir=temporarydir) as sidehustle:
             
-            assert len(sidehustle) == 4
+            assert iterlen(sidehustle) == 4
             
             assert sidehustle['lorem']   == greektext['lorem']
             assert sidehustle['faust']   == greektext['faust']
             assert sidehustle['thoreau'] == greektext['thoreau']
             assert sidehustle['poe']     == greektext['poe']
         
-        assert len(temporarydir.ls()) == 4
+        assert iterlen(temporarydir.ls()) == 4

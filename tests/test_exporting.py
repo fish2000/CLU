@@ -101,17 +101,18 @@ class TestExporting(object):
         assert 'yolocal' not in Registry.all_appnames()
     
     def test_exporter_instance_registry(self, clumods, consts):
+        from clu.typology import iterlen
         from clu.exporting import path_to_dotpath, Exporter
         from clu.fs.filesystem import Directory
         from clu.importing import modules_for_appname, Module
-        from clu.predicates import haspyattr
+        from clu.predicates import haspyattr, tuplize
         
         # Walk the importables:
-        submodules = Directory(consts.BASEPATH).importables(consts.APPNAME)
+        submodules = tuple(Directory(consts.BASEPATH).importables(consts.APPNAME))
         clsmodules = tuple(clsmodule.qualname for clsmodule in modules_for_appname(consts.APPNAME))
         
         # Sanity-check the number of modules:
-        assert len(clumods) <= len(submodules) + len(clsmodules)
+        assert iterlen(clumods) <= iterlen(submodules) + iterlen(clsmodules)
         
         # Check the Exporter instance against the module instance:
         for modname, module in clumods.items():
@@ -129,6 +130,7 @@ class TestExporting(object):
             assert set(Exporter[modname].all_tuple()).issubset(module.__dir__())
     
     def test_combine_real_world_exporters_2(self):
+        from clu.typology import iterlen
         from clu.predicates import exporter as exporter0
         from clu.typology import exporter as exporter1
         from clu.fs.filesystem import exporter as exporter2
@@ -141,7 +143,7 @@ class TestExporting(object):
         exporter_sum += exporter2
         
         # Check length:
-        assert len(exporter_sum) == len(exporter0) + len(exporter1) + len(exporter2)
+        assert iterlen(exporter_sum) == iterlen(exporter0) + iterlen(exporter1) + iterlen(exporter2)
         
         # Check key membership:
         for key in exporter_sum.keys():
@@ -155,6 +157,7 @@ class TestExporting(object):
         assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter2.all_tuple()))
     
     def test_combine_real_world_exporters_1(self):
+        from clu.typology import iterlen
         from clu.predicates import exporter as exporter0
         from clu.typology import exporter as exporter1
         from clu.exporting import Exporter
@@ -165,7 +168,7 @@ class TestExporting(object):
         exporter_sum += exporter1
         
         # Check length:
-        assert len(exporter_sum) == len(exporter0) + len(exporter1)
+        assert iterlen(exporter_sum) == iterlen(exporter0) + iterlen(exporter1)
         
         # Check key membership:
         for key in exporter_sum.keys():
@@ -177,6 +180,7 @@ class TestExporting(object):
         assert frozenset(exporter_sum.all_tuple()).issuperset(frozenset(exporter1.all_tuple()))
     
     def test_combine_real_world_exporters_0(self):
+        from clu.typology import iterlen
         from clu.predicates import exporter as exporter0
         from clu.typology import exporter as exporter1
         
@@ -184,7 +188,7 @@ class TestExporting(object):
         exporter_sum = exporter0 + exporter1
         
         # Check length:
-        assert len(exporter_sum) == len(exporter0) + len(exporter1)
+        assert iterlen(exporter_sum) == iterlen(exporter0) + iterlen(exporter1)
         
         # Check key membership:
         for key in exporter_sum.keys():

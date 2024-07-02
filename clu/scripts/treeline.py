@@ -421,8 +421,6 @@ def tree_repr(node, level):
         with level:
             yield from tree_repr(namespace, level)
 
-# NodeTreeMap – a NamespaceWalker-derived KeyMap hosting a node tree
-
 @export
 def treewalk(node, pre=None):
     """ Iteratively walk a node tree.
@@ -438,6 +436,8 @@ def treewalk(node, pre=None):
     else:
         for child in node:
             yield from treewalk(child, pre + [node.name])
+
+# NodeTreeMap – a NamespaceWalker-derived KeyMap hosting a node tree
 
 @export
 class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,

@@ -83,6 +83,9 @@ def flags_to_nodetreemap(*flags):
     TreeMap, RootNode = attrs(treeline, 'NodeTreeMap', 'RootNode')
     return TreeMap(tree=RootNode.populate(*flags))
 
+# Simple printy-outy function for dict-ish things:
+printout = lambda name, value: print("» %25s : %s" % (name, value))
+
 def main(argv=None):
     """ The primary script entry point """
     # Default to `sys.argv` if we’re called without any
@@ -108,8 +111,7 @@ def main(argv=None):
     print()
     
     # Print parsed command dict:
-    for line in treeline.tree_repr(ntm.tree, treeline.Level()):
-        print(line)
+    treeline.tree_print(ntm.tree)
     print()
     
     if action.casefold() not in valid_actions:
@@ -131,7 +133,6 @@ def main(argv=None):
             # Print specified keys:
             nskeys = ", ".join(ntm.keys())
             print(f"… READING NAMESPACED DICTIONARY KEYS: «{nskeys}»")
-            printout = lambda name, value: print("» %25s : %s" % (name, value))
             for nskey in ntm.keys():
                 printout(nskey, ntm[nskey] or '«NONE»')
         case 'status':

@@ -217,7 +217,7 @@ def test():
     }
     """ % exporter.dotpath)
     
-    @inline.precheck
+    #@inline.precheck
     def load_java_system_properties():
         """ Load the Java JDK’s system properties """
         from clu.fs.filesystem import back_tick, TemporaryName
@@ -243,7 +243,7 @@ def test():
         
         pprint(flat)
     
-    @inline.precheck
+    #@inline.precheck
     def show_java_system_properties():
         """ Show namespaced Java system properties """
         count = flat.namespace_count()

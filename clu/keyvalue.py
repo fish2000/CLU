@@ -125,15 +125,15 @@ class CLUInterface(AppDirs):
     
     def keys(self):
         """ Return an iterable with all of the keys in this key-value store. """
-        return self.zfunc.keys()
+        yield from self.zfunc.keys()
     
     def values(self):
         """ Return an iterable with all of the values in this key-value store. """
-        return self.zfunc.values()
+        yield from self.zfunc.values()
     
     def items(self):
         """ Return an iterable yielding (key, value) for all items in this key-value store. """
-        return self.zfunc.items()
+        yield from self.zfunc.items()
     
     def as_dict(self):
         """ Return a plain dict with the key-value stores’ contents. """
@@ -245,17 +245,17 @@ def update(dictish=NoDefault, **updates):
 @export
 def keys():
     """ Return an iterable with all of the keys in the key-value store. """
-    return interface.keys()
+    yield from interface.keys()
 
 @export
 def values():
     """ Return an iterable with all of the values in the key-value store. """
-    return interface.values()
+    yield from interface.values()
 
 @export
 def items():
     """ Return an iterable yielding (key, value) for all items in the key-value store. """
-    return interface.items()
+    yield from interface.items()
 
 # NO DOCS ALLOWED:
 export(interface,           name='interface')

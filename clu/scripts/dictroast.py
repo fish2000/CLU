@@ -17,14 +17,14 @@ export = exporter.decorator()
 valid_actions = { 'read', 'write', 'status', 'nop' }
 
 @export
-def get_dict():
+def get_dict(exporter=exporter):
     """ Retrieve a copy of the database for this file """
     with exporter.data() as database:
         out = dict(database.get('tree', {}))
     return out
 
 @export
-def update_dict(updates):
+def update_dict(updates, exporter=exporter):
     """ Update the files’ database from a new dictionary """
     with exporter.data() as database:
         if 'tree' not in database:
@@ -34,14 +34,14 @@ def update_dict(updates):
     return out
 
 @export
-def get_command_history():
+def get_command_history(exporter=exporter):
     """ Retrieve a copy of the command history for this file """
     with exporter.data() as database:
         out = listify(database.get('history', []))
     return out
 
 @export
-def push_command(command):
+def push_command(command, exporter=exporter):
     """ Add a new command to the end of the files’ command history """
     with exporter.data() as database:
         if 'history' not in database:
@@ -50,7 +50,7 @@ def push_command(command):
         out = listify(database.get('history', []))
     return out
 
-def _initialize():
+def _initialize(exporter=exporter):
     """ Set up the database with empty entries for the command tree
         and the history stack. Only call this once: when running
         the script for the first time!!

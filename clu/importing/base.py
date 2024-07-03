@@ -13,6 +13,7 @@ import abc
 import collections.abc
 import clu.abstract
 import clu.dicts
+import copy
 import importlib
 import importlib.abc
 import importlib.machinery
@@ -288,8 +289,8 @@ class ArgumentSink(collections.abc.Callable,
             and/or keyword arguments
         """
         instance = super().__new__(cls)
-        instance.args = args
-        instance.kwargs = kwargs
+        instance.args = copy.deepcopy(args)
+        instance.kwargs = copy.deepcopy(kwargs)
         return instance
     
     def __call__(self, function):

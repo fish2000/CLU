@@ -12,7 +12,7 @@ import zict # type: ignore
 
 iterchain = chain.from_iterable
 
-from clu.constants.consts import CPYTHON, pytuple
+from clu.constants.consts import CPYTHON, QUALIFIER, pytuple
 from clu.predicates import typeof, tuplize, attr
 from clu.exporting import Exporter
 
@@ -148,8 +148,8 @@ class DoubleDutchRegistry(clu.abstract.ReprWrapper,
     
     def funcname(self, key):
         function = self.cache[key]
-        name = attr(function, '__qualname__', '__name__')
-        signature = inspect.signature(function)
+        name = attr(function, '__name__', '__qualname__')
+        signature = str(inspect.signature(function)).strip('[]').split(QUALIFIER)[0]
         return f"{name!s}{signature!s}"
     
     def inner_repr(self):
@@ -347,15 +347,13 @@ def test():
             return f"FLTS: {x}, {y}"
         
         default_return = yodogg(object(), object())
-        
-        print("DEFAULTING »", default_return)
-        
         assert default_return is None
         assert yodogg(10, 20).startswith("INTS")
         assert yodogg('yo', 'dogg').startswith("STRS")
         assert yodogg(3.14, 2.78).startswith("FLTS")
         
         print()
+        
         regcount = len(yodogg.registry)
         print(f"REGISTRY ({regcount} items) »", repr(yodogg.registry))
     

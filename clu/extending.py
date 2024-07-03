@@ -153,10 +153,7 @@ class DoubleDutchRegistry(clu.abstract.ReprWrapper,
         return f"{name!s}{signature!s}"
     
     def inner_repr(self):
-        from pprint import pformat
         most = max(len(self.keyname(key)) for key in self)
-        # cacheout = { self.keyname(key) : self.cache[key] for key in self }
-        # return "\n%s" % pformat(cacheout, indent=4)
         out = ""
         for key in self:
             out += "    %s : %s \n" % (self.keyname(key).ljust(most),

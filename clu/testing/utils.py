@@ -223,7 +223,7 @@ class InlineTester(collections.abc.Set,
                 
                 @inline.precheck
                 def before_everything_else():
-                   # ...
+                    # ...
                 
                 @inline
                 def test_one():
@@ -239,9 +239,9 @@ class InlineTester(collections.abc.Set,
                 
                 @inline.diagnostic
                 def apres_testing():
-                   # ...
+                    # ...
             
-            return inline.test() # ‡
+                return inline.test() # ‡
             
             if __name__ == '__main__':
                 sys.exit(test())

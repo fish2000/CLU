@@ -260,19 +260,18 @@ __all__, __dir__ = exporter.all_and_dir()
 
 def test():
     
-    from clu.config.abc import FlatOrderedSet as FOSet
-    from clu.config.base import NamespacedMutableMapping as NaMutMap
+    from clu.config.abc import KeyMap, FlatOrderedSet as FOSet
     from clu.testing.utils import pout, inline
     
     @inline
-    def test_one():
+    def test_pairs_and_products():
         pair = []
         product = []
         
-        for tup in ω(FOSet, NaMutMap):
+        for tup in ω(FOSet, KeyMap):
             pair.append(tuple(str(el) for el in tup))
         
-        for itp in dot_product(FOSet.__mro__, NaMutMap.__mro__):
+        for itp in dot_product(FOSet.__mro__, KeyMap.__mro__):
             product.append(tuple(str(el) for el in itp))
         
         # pout.v(pair[:10], product[:10])
@@ -286,9 +285,9 @@ def test():
         assert pair == product
     
     @inline
-    def test_two():
-        pairs    = list(ω(FOSet, NaMutMap))
-        products = list(dot_product(FOSet.mro(), NaMutMap.mro()))
+    def test_pair_mro():
+        pairs    = list(ω(FOSet, KeyMap))
+        products = list(dot_product(FOSet.mro(), KeyMap.mro()))
         
         print()
         print("PAIRS    »", len(pairs))
@@ -297,7 +296,7 @@ def test():
         assert set(pairs) == set(products) # REALLY.
     
     @inline
-    def test_three():
+    def test_extend_pairtype():
         
         class __extend__(ΩΩ(int, int)): # type: ignore
             
@@ -320,7 +319,7 @@ def test():
         assert Ω('yo', 'dogg').pack() == "yo:dogg"
     
     @inline
-    def test_four():
+    def test_doubledutch_function():
         
         @doubledutch
         def yodogg(x, y):

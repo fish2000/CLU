@@ -344,10 +344,14 @@ def test():
         def yodogg(x: float, y: float):
             return f"FLTS: {x}, {y}"
         
-        print(yodogg(10, 20))
-        print(yodogg('yo', 'dogg'))
-        print(yodogg(3.14, 2.78))
-        print("DEFAULTING »", yodogg(object(), object()))
+        default_return = yodogg(object(), object())
+        
+        print("DEFAULTING »", default_return)
+        
+        assert default_return is None
+        assert yodogg(10, 20).startswith("INTS")
+        assert yodogg('yo', 'dogg').startswith("STRS")
+        assert yodogg(3.14, 2.78).startswith("FLTS")
         
         print()
         regcount = len(yodogg.registry)

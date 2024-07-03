@@ -333,6 +333,8 @@ def test():
         def yodogg(x, y): # pragma: no cover
             return f"WAT: {x}, {y}"
         
+        assert yodogg('yo', 'dogg').startswith("WAT")
+        
         assert yodogg.remove(str)
         assert not yodogg.remove(complex)
         

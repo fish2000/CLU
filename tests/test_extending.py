@@ -53,8 +53,7 @@ class TestExtending(object):
         assert pair('yo', 'dogg').pack() == "yo:dogg"
     
     def test_pairmro0(self):
-        from clu.config.abc import FlatOrderedSet as FOSet
-        from clu.config.base import NamespacedMutableMapping as NaMutMap
+        from clu.config.abc import KeyMap, FlatOrderedSet as FOSet
         from clu.extending import pairmro
         from itertools import chain, product as dot_product
         
@@ -63,10 +62,10 @@ class TestExtending(object):
         pair = []
         product = []
         
-        for tup in pairmro(FOSet, NaMutMap):
+        for tup in pairmro(FOSet, KeyMap):
             pair.append(tuple(str(el) for el in tup))
         
-        for itp in dot_product(FOSet.__mro__, NaMutMap.__mro__):
+        for itp in dot_product(FOSet.__mro__, KeyMap.__mro__):
             product.append(tuple(str(el) for el in itp))
         
         sorter = lambda t: ''.join(iterchain(t))
@@ -78,13 +77,12 @@ class TestExtending(object):
         assert pair == product
     
     def test_pairmro1(self):
-        from clu.config.abc import FlatOrderedSet as FOSet
-        from clu.config.base import NamespacedMutableMapping as NaMutMap
+        from clu.config.abc import KeyMap, FlatOrderedSet as FOSet
         from clu.extending import pairmro
         from itertools import product as dot_product
         
-        pairs    = list(pairmro(FOSet, NaMutMap))
-        products = list(dot_product(FOSet.mro(), NaMutMap.mro()))
+        pairs    = list(pairmro(FOSet, KeyMap))
+        products = list(dot_product(FOSet.mro(), KeyMap.mro()))
         
         assert set(pairs) == set(products) # REALLY.
     

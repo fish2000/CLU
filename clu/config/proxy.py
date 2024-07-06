@@ -162,7 +162,7 @@ def test():
     
     from clu.testing.utils import inline
     from clu.config.ns import unpack_ns
-    from clu.config.keymap import FrozenFlat, Flat
+    from clu.config.keymap import FrozenFlat, Flat, Nested
     from clu.config.keymap import nestedmaps, flatdict
     from pprint import pprint
     
@@ -311,19 +311,19 @@ def test():
         return test_fn
     
     # Add inline test functions using the metafunction test generators:
-    inline.add_function(test_one_fn(FrozenFlat, KeyMapView,  flatdict),   'test_one')
-    inline.add_function(test_two_fn(FrozenFlat, KeyMapView,  flatdict),   'test_two')
-    inline.add_function(test_one_fn(Flat,       KeyMapView,  flatdict),   'test_three')
-    inline.add_function(test_one_fn(Flat,       KeyMapProxy, flatdict),   'test_three_point_five')
+    inline.add_function(test_one_fn(FrozenFlat, KeyMapView,  flatdict),   'test_one_frozenflat_keymapview')
+    inline.add_function(test_two_fn(FrozenFlat, KeyMapView,  flatdict),   'test_two_frozenflat_keymapview')
+    inline.add_function(test_one_fn(Flat,       KeyMapView,  flatdict),   'test_one_flat_keymapview')
+    inline.add_function(test_one_fn(Flat,       KeyMapProxy, flatdict),   'test_one_flat_keymapproxy')
     inline.add_function(test_two_fn(Flat,       KeyMapProxy, flatdict,
-                                                KeyMapView),              'test_four')
+                                                KeyMapView),              'test_two_flat_keymapproxy')
     
     # N.B. These two take FUCKING FOREVER to run:
-    # inline.add_function(test_one_fn(Nested,     KeyMapView,  nestedmaps), 'test_five')
-    # inline.add_function(test_one_fn(Nested,     KeyMapProxy, nestedmaps), 'test_five_point_five')
+    inline.add_function(test_one_fn(Nested,     KeyMapView,  nestedmaps), 'test_one_nested_keymapview')
+    inline.add_function(test_one_fn(Nested,     KeyMapProxy, nestedmaps), 'test_one_nested_keymapproxy')
     
     @inline
-    def test_six():
+    def test_view_proxy_exceptions():
         """ View/Proxy error conditions """
         try:
             KeyMapView(None)

@@ -197,10 +197,6 @@ def test():
     flat = Flat(flatdict())
     nested = Nested(nestedmaps())
     
-    # dotpath_to_prefix()
-    # split_ns(), strip_ns()
-    # flat.namespace_count(), flat.submap(…)
-    
     @inline
     def test_flat_validate_ns():
         """ Validate a Flat keymap’s namespaces """

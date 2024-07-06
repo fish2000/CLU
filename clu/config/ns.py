@@ -188,82 +188,18 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
-    from clu.config.keymap import Flat
+    from clu.config.keymap import Flat, Nested
+    from clu.config.keymap import nestedmaps, flatdict, arbitrary
     from clu.fs.filesystem import which
     from pprint import pprint
     import os, re, textwrap
     
-    flat = Flat()
+    flat = Flat(flatdict())
+    nested = Nested(nestedmaps())
     
-    javaprop_re = re.compile(r"^(?P<name>[\w\.]+): “(?P<value>.*)”", re.IGNORECASE | re.MULTILINE)
-    java_source = textwrap.dedent("""
-    package ost.%s;
-    
-    import java.util.Enumeration;
-    import java.util.Properties;
-    
-    public class ShowJavaSystemProperties {
-    
-        public static void main(String... args) {
-            Properties properties = System.getProperties();
-            Enumeration names = properties.propertyNames();
-            while (names.hasMoreElements()) {
-                String name = (String) names.nextElement();
-                String value = properties.getProperty(name);
-                System.out.println(name + ": “" + value + "”");
-            }
-        }
-    
-    }
-    """ % exporter.dotpath)
-    
-    #@inline.precheck
-    def load_java_system_properties():
-        """ Load the Java JDK’s system properties """
-        from clu.fs.filesystem import back_tick, TemporaryName
-        from clu.naming import dotpath_to_prefix
-        
-        with TemporaryName(prefix="show-java-system-properties-",
-                           suffix="java",
-                           randomized=True) as java_file:
-            java_file.write(java_source)
-            java_path = java_file.realpath()
-            output = back_tick(f"java {java_path}")
-        
-        assert not java_file.exists
-        
-        for line in output.splitlines():
-            match = javaprop_re.match(line)
-            if match:
-                # BEWARE: dotpath_to_prefix(…) does a casefold():
-                name = dotpath_to_prefix(match.group('name'),
-                                         sep=NAMESPACE_SEP, end='')
-                value = match.group('value')
-                flat[name] = value
-        
-        pprint(flat)
-    
-    #@inline.precheck
-    def show_java_system_properties():
-        """ Show namespaced Java system properties """
-        count = flat.namespace_count()
-        plural = count == 1 and '' or 's'
-        
-        print(f"* {count} namespace{plural} total:")
-        print()
-        
-        for namespace in flat.namespaces():
-            namespaces = split_ns(namespace)
-            print(f"+ {namespace}:")
-            for nskey, value in flat.items(*namespaces):
-                bare_key = strip_ns(nskey)
-                key = nskey.replace(prefix_for(*namespaces), '', 1)
-                print(f"    {key} : “{value}”")
-                assert key.endswith(bare_key)
-            print()
-        
-        print("- «unprefixed»:")
-        pprint(flat.submap(unprefixed=True), indent=4)
+    # dotpath_to_prefix()
+    # split_ns(), strip_ns()
+    # flat.namespace_count(), flat.submap(…)
     
     @inline
     def test_flat_validate_ns():
@@ -275,6 +211,18 @@ def test():
     def test_frozenflat_validate_ns():
         """ Validate a FrozenFlat keymap’s namespaces """
         for namespace in flat.freeze().namespaces():
+            assert validate_ns(*split_ns(namespace))
+    
+    @inline
+    def test_nested_validate_ns():
+        """ Validate a Nested keymap’s namespaces """
+        for namespace in nested.namespaces():
+            assert validate_ns(*split_ns(namespace))
+    
+    @inline
+    def test_frozennested_validate_ns():
+        """ Validate a FrozenNested keymap’s namespaces """
+        for namespace in nested.freeze().namespaces():
             assert validate_ns(*split_ns(namespace))
     
     @inline
@@ -290,9 +238,50 @@ def test():
         except ValueError as exc:
             assert "namespace contains separator" in str(exc)
     
-    if not which('java'):
-        print("[WARNING] skipping `clu.config.ns` tests – `java` executable not found")
-        return os.EX_OK
+    namespaces = ('yo', 'dogg')
+    key = 'i_heard'
+    nskey = "yo:dogg:i_heard"
+    value = "you like this sort of thing"
+    
+    @inline
+    def test_concatenate_ns():
+        assert concatenate_ns(*namespaces) == "yo:dogg"
+    
+    @inline
+    def test_prefix_for():
+        assert prefix_for(*namespaces) == "yo:dogg:"
+    
+    @inline
+    def test_strip_ns():
+        assert strip_ns(nskey) == "i_heard"
+    
+    @inline
+    def test_split_ns():
+        assert tuple(split_ns(nskey)) == ('yo', 'dogg', 'i_heard')
+    
+    @inline
+    def test_startswith_ns():
+        assert startswith_ns(namespaces, ('yo', 'dogg'))
+    
+    @inline
+    def test_unpack_ns():
+        assert unpack_ns(nskey) == ('i_heard', ['yo', 'dogg'])
+    
+    @inline
+    def test_pack_ns():
+        assert pack_ns(key, *namespaces) == "yo:dogg:i_heard"
+    
+    @inline
+    def test_get_ns():
+        assert get_ns(nskey) == "yo:dogg"
+    
+    @inline
+    def test_get_ns_and_key():
+        assert get_ns_and_key(nskey) == ("yo:dogg", 'i_heard')
+    
+    @inline
+    def test_compare_ns():
+        assert compare_ns(namespaces, ('yo', 'dogg'))
     
     return inline.test(100)
 

@@ -13,7 +13,7 @@ import zict # type: ignore
 iterchain = chain.from_iterable
 
 from clu.constants.consts import CPYTHON, QUALIFIER, pytuple
-from clu.predicates import typeof, tuplize, attr
+from clu.predicates import typeof, tuplize, attr, pyattr
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -148,7 +148,7 @@ class DoubleDutchRegistry(clu.abstract.ReprWrapper,
     
     def funcname(self, key):
         function = self.cache[key]
-        name = attr(function, '__name__', '__qualname__')
+        name = pyattr(function, 'name', 'qualname')
         signature = str(inspect.signature(function)).strip('[]').split(QUALIFIER)[0]
         return f"{name!s}{signature!s}"
     

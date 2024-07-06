@@ -265,16 +265,16 @@ def test():
         pair = []
         product = []
         
-        for tup in ω(FOSet, KeyMap):
-            pair.append(tuple(str(el) for el in tup))
+        for mro_tuple in ω(FOSet, KeyMap):
+            pair.append(tuple(str(element) for element in mro_tuple))
         
-        for itp in dot_product(FOSet.__mro__, KeyMap.__mro__):
-            product.append(tuple(str(el) for el in itp))
+        for mro_tuple in dot_product(FOSet.__mro__, KeyMap.__mro__):
+            product.append(tuple(str(element) for element in mro_tuple))
         
         # pout.v(pair[:10], product[:10])
         
-        sorter = lambda t: ''.join(iterchain(t))
-        retros = lambda t: ''.join(reversed(list(iterchain(t))))
+        sorter = lambda two_tuple: ''.join(iterchain(two_tuple))
+        retros = lambda two_tuple: ''.join(reversed(list(iterchain(two_tuple))))
         
         assert sorted(pair, key=sorter) == sorted(product, key=sorter)
         assert sorted(pair, key=retros) == sorted(product, key=retros)
@@ -299,8 +299,8 @@ def test():
             
             __name__ = "Coordinate"
             
-            def ratio(xy):
-                x, y = xy
+            def ratio(point_tuple):
+                x, y = point_tuple
                 return x / y
         
         assert Ω(2, 3).ratio() == 2 / 3
@@ -309,8 +309,8 @@ def test():
             
             __name__ = "NamespacedKey"
             
-            def pack(tup):
-                ns, key = tup
+            def pack(two_tuple):
+                ns, key = two_tuple
                 return f"{ns}:{key}"
         
         assert Ω('yo', 'dogg').pack() == "yo:dogg"

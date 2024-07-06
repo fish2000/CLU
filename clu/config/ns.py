@@ -235,8 +235,8 @@ def test():
             assert "namespace contains separator" in str(exc)
     
     namespaces = ('yo', 'dogg')
-    key = 'i_heard'
-    nskey = "yo:dogg:i_heard"
+    key = 'iheard'
+    nskey = "yo:dogg:iheard"
     value = "you like this sort of thing"
     
     @inline
@@ -249,11 +249,11 @@ def test():
     
     @inline
     def test_strip_ns():
-        assert strip_ns(nskey) == "i_heard"
+        assert strip_ns(nskey) == "iheard"
     
     @inline
     def test_split_ns():
-        assert tuple(split_ns(nskey)) == ('yo', 'dogg', 'i_heard')
+        assert tuple(split_ns(nskey)) == ('yo', 'dogg', 'iheard')
     
     @inline
     def test_startswith_ns():
@@ -261,11 +261,11 @@ def test():
     
     @inline
     def test_unpack_ns():
-        assert unpack_ns(nskey) == ('i_heard', ['yo', 'dogg'])
+        assert unpack_ns(nskey) == ('iheard', ['yo', 'dogg'])
     
     @inline
     def test_pack_ns():
-        assert pack_ns(key, *namespaces) == "yo:dogg:i_heard"
+        assert pack_ns(key, *namespaces) == "yo:dogg:iheard"
     
     @inline
     def test_get_ns():
@@ -273,11 +273,38 @@ def test():
     
     @inline
     def test_get_ns_and_key():
-        assert get_ns_and_key(nskey) == ("yo:dogg", 'i_heard')
+        assert get_ns_and_key(nskey) == ("yo:dogg", 'iheard')
     
     @inline
     def test_compare_ns():
         assert compare_ns(namespaces, ('yo', 'dogg'))
+    
+    appname = 'testing'
+    envkey = "TESTING_YO_DOGG_IHEARD"
+    
+    @inline
+    def test_concatenate_env():
+        assert concatenate_env(*namespaces) == "YO_DOGG"
+    
+    @inline
+    def test_prefix_env():
+        assert prefix_env(appname, *namespaces) == "TESTING_YO_DOGG_"
+    
+    @inline
+    def test_pack_env():
+        assert pack_env(appname, key, *namespaces) == "TESTING_YO_DOGG_IHEARD"
+    
+    @inline
+    def test_unpack_env():
+        assert unpack_env(envkey) == (appname, key, list(namespaces))
+    
+    @inline
+    def test_nskey_from_env():
+        assert nskey_from_env(envkey) == (appname, pack_ns(key, *namespaces))
+    
+    @inline
+    def test_nskey_to_env():
+        assert nskey_to_env(appname, nskey) == "TESTING_YO_DOGG_IHEARD"
     
     return inline.test(100)
 

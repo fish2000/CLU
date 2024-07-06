@@ -254,6 +254,7 @@ def test():
     @inline
     def test_split_ns():
         assert tuple(split_ns(nskey)) == ('yo', 'dogg', 'iheard')
+        assert split_ns(nskey) == ['yo', 'dogg', 'iheard']
     
     @inline
     def test_startswith_ns():
@@ -261,10 +262,12 @@ def test():
     
     @inline
     def test_unpack_ns():
+        assert unpack_ns(nskey) == (key, list(namespaces))
         assert unpack_ns(nskey) == ('iheard', ['yo', 'dogg'])
     
     @inline
     def test_pack_ns():
+        assert pack_ns(key, *namespaces) == nskey
         assert pack_ns(key, *namespaces) == "yo:dogg:iheard"
     
     @inline
@@ -285,6 +288,8 @@ def test():
     @inline
     def test_concatenate_env():
         assert concatenate_env(*namespaces) == "YO_DOGG"
+        assert concatenate_env(*chain(tuplize(appname), namespaces)) == "TESTING_YO_DOGG"
+        assert concatenate_env(*chain(tuplize(appname), namespaces, tuplize(key))) == "TESTING_YO_DOGG_IHEARD"
     
     @inline
     def test_prefix_env():
@@ -297,10 +302,12 @@ def test():
     @inline
     def test_unpack_env():
         assert unpack_env(envkey) == (appname, key, list(namespaces))
+        assert unpack_env(envkey) == ('testing', 'iheard', ['yo', 'dogg'])
     
     @inline
     def test_nskey_from_env():
         assert nskey_from_env(envkey) == (appname, pack_ns(key, *namespaces))
+        assert nskey_from_env(envkey) == ('testing', "yo:dogg:iheard")
     
     @inline
     def test_nskey_to_env():

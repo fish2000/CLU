@@ -147,6 +147,7 @@ class TestConfigKeyMaps(object):
     
     def test_toml_and_file_direct(self, dirname):
         from clu.config.formats import TomlFile
+        from clu.predicates import tuplize
         
         cfgs = dirname.subdirectory('data').subdirectory('config')
         
@@ -162,7 +163,7 @@ class TestConfigKeyMaps(object):
         assert toml_file.filesuffix == 'toml'
         assert toml_file.filepath.endswith(toml_file.filesuffix)
         
-        assert tuple(toml_file.namespaces()) == ('debugging', 'userinfo')
+        assert tuple(toml_file.namespaces()) == ('userinfo', 'debugging')
         assert toml_file['project'] == 'clu'
         assert toml_file['description'] is not None
         assert toml_file['description_content_type'] == 'text/markdown'
@@ -211,7 +212,7 @@ class TestConfigKeyMaps(object):
         assert toml_file.filesuffix == 'toml'
         assert toml_file.filepath.endswith(toml_file.filesuffix)
         
-        assert tuple(toml_file.namespaces()) == ('debugging', 'userinfo')
+        assert tuple(toml_file.namespaces()) == ('userinfo', 'debugging')
         assert toml_file['project'] == 'clu'
         assert toml_file['description'] is not None
         assert toml_file['description_content_type'] == 'text/markdown'

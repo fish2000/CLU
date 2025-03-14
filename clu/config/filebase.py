@@ -9,8 +9,7 @@ import sys
 abstract = abc.abstractmethod
 
 from clu.constants.enums import System, SYSTEM
-# from clu.config.abc import FrozenKeyMap
-from clu.config.base import NamespacedMutableMapping
+from clu.config.keymap import Nested
 from clu.fs.appdirectories import AppDirs
 from clu.fs.filesystem import TemporaryName, Directory
 from clu.fs.misc import extension, filesize
@@ -138,7 +137,7 @@ class FileName(clu.abstract.AppName, metaclass=abc.ABCMeta):
         return Directory(root_dir.realpath()).subpath(file_name)
 
 @export
-class FileBase(NamespacedMutableMapping, FileName): # type: ignore
+class FileBase(Nested, FileName): # type: ignore
     
     """ The FileBase abstract base class furnishes two methods:
         

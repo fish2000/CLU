@@ -9,8 +9,8 @@ if not hasattr(__builtins__, 'cmp'):
 
 from collections import OrderedDict, namedtuple as NamedTuple
 from functools import wraps
-from pkg_resources import parse_version as pkg_resources_parse_version # type: ignore
-from pkg_resources.extern.packaging.version import Version as PkgResourcesVersion
+from packaging.version import Version as PackagingVersion
+from packaging.version import parse as packaging_parse_version
 
 from clu.version.read_version import read_version_file
 
@@ -161,8 +161,8 @@ class VersionInfo(VersionAncestor):
                 self.pre, self.build)
     
     def to_packaging_version(self):
-        """ aka an instance of `pkg_resources.extern.packaging.version.Version` """
-        return pkg_resources_parse_version(self.to_string())
+        """ aka an instance of `packaging.version.Version` """
+        return packaging_parse_version(self.to_string())
     
     def __new__(cls, from_value=None, major='‽', minor='‽',
                                       patch='‽', pre='‽',
@@ -171,7 +171,7 @@ class VersionInfo(VersionAncestor):
         if from_value is not None:
             if type(from_value) in string_types:
                 return cls.from_string(from_value)
-            elif type(from_value) is PkgResourcesVersion:
+            elif type(from_value) is PackagingVersion:
                 return cls.from_string(str(from_value))
             elif type(from_value) in byte_types:
                 return cls.from_string(from_value.decode('UTF-8'))

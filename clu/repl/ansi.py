@@ -25,8 +25,6 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-# colorama.init()
-
 print_separator = lambda filler='-': print(filler * SEPARATOR_WIDTH)
 
 @export

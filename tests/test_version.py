@@ -45,7 +45,7 @@ class TestVersion(object):
      
     def test_cluversion_and_VersionInfo(self, consts, cluversion):
         from clu.version import VersionInfo, read_version_file
-        from pkg_resources.extern.packaging.version import Version as PkgResourcesVersion
+        from packaging.version import Version as PackagingVersion
         
         __version__ = read_version_file(consts.PROJECT_PATH)
         version_info = VersionInfo(__version__)
@@ -53,8 +53,8 @@ class TestVersion(object):
         assert cluversion  < VersionInfo("9.0.0")
         assert cluversion == VersionInfo(version_info)
         assert cluversion == VersionInfo(__version__)
-        assert cluversion == VersionInfo(PkgResourcesVersion(__version__))
-        assert cluversion == VersionInfo(str(PkgResourcesVersion(__version__)))
+        assert cluversion == VersionInfo(PackagingVersion(__version__))
+        assert cluversion == VersionInfo(str(PackagingVersion(__version__)))
         assert cluversion <= VersionInfo(__version__)
         assert cluversion >= VersionInfo(__version__)
         assert cluversion  > VersionInfo(b'0.0.1')
@@ -70,7 +70,7 @@ class TestVersion(object):
     
     def test_VersionInfo(self, consts):
         from clu.version import VersionInfo, read_version_file
-        from pkg_resources.extern.packaging.version import Version as PkgResourcesVersion
+        from packaging.version import Version as PackagingVersion
         
         __version__ = read_version_file(consts.PROJECT_PATH)
         version_info = VersionInfo(__version__)
@@ -78,8 +78,8 @@ class TestVersion(object):
         assert version_info  < VersionInfo("9.0.0")
         assert version_info == VersionInfo(version_info)
         assert version_info == VersionInfo(__version__)
-        assert version_info == VersionInfo(PkgResourcesVersion(__version__))
-        assert version_info == VersionInfo(str(PkgResourcesVersion(__version__)))
+        assert version_info == VersionInfo(PackagingVersion(__version__))
+        assert version_info == VersionInfo(str(PackagingVersion(__version__)))
         assert version_info <= VersionInfo(__version__)
         assert version_info >= VersionInfo(__version__)
         assert version_info  > VersionInfo(b'0.0.1')

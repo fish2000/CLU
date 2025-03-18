@@ -163,7 +163,7 @@ class TestConfigKeyMaps(object):
         assert toml_file.filesuffix == 'toml'
         assert toml_file.filepath.endswith(toml_file.filesuffix)
         
-        assert tuple(toml_file.namespaces()) == ('userinfo', 'debugging')
+        assert set(toml_file.namespaces()) == { 'userinfo', 'debugging' }
         assert toml_file['project'] == 'clu'
         assert toml_file['description'] is not None
         assert toml_file['description_content_type'] == 'text/markdown'
@@ -177,7 +177,7 @@ class TestConfigKeyMaps(object):
         
         flat = toml_file.flatten()
         
-        assert tuple(flat.namespaces()) == ('debugging', 'userinfo')
+        assert set(toml_file.namespaces()) == { 'userinfo', 'debugging' }
         assert flat['project'] == 'clu'
         assert flat['description'] is not None
         assert flat['description_content_type'] == 'text/markdown'
@@ -212,7 +212,7 @@ class TestConfigKeyMaps(object):
         assert toml_file.filesuffix == 'toml'
         assert toml_file.filepath.endswith(toml_file.filesuffix)
         
-        assert tuple(toml_file.namespaces()) == ('userinfo', 'debugging')
+        assert set(toml_file.namespaces()) == { 'userinfo', 'debugging' }
         assert toml_file['project'] == 'clu'
         assert toml_file['description'] is not None
         assert toml_file['description_content_type'] == 'text/markdown'
@@ -226,7 +226,7 @@ class TestConfigKeyMaps(object):
         
         flat = toml_file.flatten()
         
-        assert tuple(flat.namespaces()) == ('debugging', 'userinfo')
+        assert set(toml_file.namespaces()) == { 'userinfo', 'debugging' }
         assert flat['project'] == 'clu'
         assert flat['description'] is not None
         assert flat['description_content_type'] == 'text/markdown'

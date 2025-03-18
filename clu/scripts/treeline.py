@@ -804,6 +804,7 @@ def test():
         assert root.get_child('ns0:ns1:ns2:key5').value == 'structures'
         
         assert root.has_child('ns0:key3')
+        assert not root.has_child('ns0:key666')
         assert root.has_child('ns0:ns1:ns2:key4')
         assert root.has_child('ns0:ns1:ns2:key5')
         

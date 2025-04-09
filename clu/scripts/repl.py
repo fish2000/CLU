@@ -160,6 +160,9 @@ def explain(thing, width=None):
     elif subcount == 1:
         contents += "contains one sub-thing"
         print(contents)
+    elif subcount == 100:
+        contents += "contains one hundred sub-things"
+        print(contents)
     else:
         contents += f"contains {subcount} sub-things"
         print(contents)

@@ -1,6 +1,6 @@
 exclude *.pyc *~ *.so .DS_Store
 
-include .bumpversion.cfg
+include .bumpversion.toml
 include .coveragerc
 include .editorconfig
 include .gitchangelog.rc

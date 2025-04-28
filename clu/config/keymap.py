@@ -71,11 +71,11 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         if updates:
             self.dictionary.update(**updates)
     
-    def nestify(self, cls=None):
+    def nestify(self, cls=None, walker=flatwalk):
         """ Articulate a flattened KeyMap instance out into one that is nested. """
         if cls is None:
             cls = FrozenNested
-        return cls(tree=articulate(self.dictionary, walker=flatwalk))
+        return cls(tree=articulate(self.dictionary, walker=walker))
     
     def __iter__(self):
         yield from self.dictionary

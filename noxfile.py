@@ -13,7 +13,7 @@ nox.options.stop_on_first_error = True
 # Skip manifest check if we’re not running in a Git repo:
 from clu.version.git_version import are_we_gitted
 if not are_we_gitted():
-    nox.options.keywords += "not checkmanifest"
+    nox.options.keywords = "not checkmanifest"
 
 @nox.session
 def checkmanifest(session):

@@ -131,6 +131,7 @@ import collections.abc
 from PIL import Image
 from pprint import pprint, pformat
 
+pp = pprint
 ppt = lambda thing: pprint(tuple(thing))
 
 # These two imports trigger module-level __getattr__ actions:

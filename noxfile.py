@@ -93,7 +93,7 @@ def coverage(session):
                        'clu.scripts.repl'):
         session.run('coverage',
                     'run', '--append', '-m', modulename,
-                    silent=True)
+                     silent=True)
     
     # Run each inline-test function:
     for modulename in clu.all.inline_tests():

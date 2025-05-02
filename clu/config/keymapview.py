@@ -22,6 +22,7 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 typename = lambda thing: type(thing).__name__
+set_returner = lambda self, iterable: set(iterable)
 
 @export
 class KeyMapViewBase(collections.abc.Sequence,
@@ -88,10 +89,7 @@ class KeyMapKeysView(KeyMapViewBase,
     
     """ A KeyMap key view. """
     
-    @classmethod
-    def _from_iterable(cls, iterable): # pragma: no cover
-        # Required by the “collections.abc.Set” API:
-        return set(iterable)
+    _from_iterable = classmethod(set_returner)
     
     def __contains__(self, nskey):
         return nskey in self.mapping.submap(*self.namespaces)
@@ -108,10 +106,7 @@ class KeyMapItemsView(KeyMapViewBase,
     
     """ A KeyMap items view. """
     
-    @classmethod
-    def _from_iterable(cls, iterable): # pragma: no cover
-        # Required by the “collections.abc.Set” API:
-        return set(iterable)
+    _from_iterable = classmethod(set_returner)
     
     def __contains__(self, item):
         nskey, value = item
@@ -170,10 +165,7 @@ class NamespaceWalkerKeysView(NamespaceWalkerViewBase,
     
     """ A keys view specifically tailored to NamespaceWalker types. """
     
-    @classmethod
-    def _from_iterable(cls, iterable): # pragma: no cover
-        # Required by the “collections.abc.Set” API:
-        return set(iterable)
+    _from_iterable = classmethod(set_returner)
     
     def __contains__(self, nskey):
         for *namespaces, key, value in self.mapping.walk():
@@ -194,10 +186,7 @@ class NamespaceWalkerItemsView(NamespaceWalkerViewBase,
     
     """ An items view specifically tailored to NamespaceWalker types. """
     
-    @classmethod
-    def _from_iterable(cls, iterable): # pragma: no cover
-        # Required by the “collections.abc.Set” API:
-        return set(iterable)
+    _from_iterable = classmethod(set_returner)
     
     def __contains__(self, item):
         nskey, putative = item

@@ -3,7 +3,7 @@
 #    
 #    CLU -- Common Lightweight Utilities
 #    
-#    Copyright © 2012-2025 Alexander Böhn
+#    Copyright © 2012-2035 Alexander Böhn
 #    
 #    Permission is hereby granted, free of charge, to any person obtaining a copy 
 #    of this software and associated documentation files (the "Software"), to deal 

@@ -143,6 +143,15 @@ class Sanitizer(Format):
     def render(self, string):
         return self.regex.sub('', string)
 
+class Serializable(abc.ABC):
+    
+    @classmethod
+    def from_dict(cls, instance_dict):
+        ...
+    
+    def to_dict(self):
+        ...
+
 class Cloneable(abc.ABC):
     
     """ An abstract class representing something “clonable.” A cloneable

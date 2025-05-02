@@ -32,6 +32,7 @@ export = exporter.decorator()
 @export
 class FrozenKeyMapBase(collections.abc.Mapping,
                        collections.abc.Reversible,
+                       clu.abstract.Serializable,
                        metaclass=clu.abstract.Slotted):
     
     """ Abstract sub-base interface class for immutable namespaced mappings.

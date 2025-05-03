@@ -39,12 +39,10 @@ from clu.predicates import ispublic, listify
 from clu.repl import columnize
 
 # Set up the __all__ tuple:
-
 __all__ = list()
 
 # MODULE EXPORT FUNCTIONS: given a module name, export
 # either the module or its contents into a given namespace:
-
 def star_export(modulename, namespace, alltuple=__all__):
     """ Safely bind everything a module exports to a namespace. """
     try:
@@ -67,11 +65,9 @@ def module_export(modulename, namespace, alltuple=__all__):
     alltuple += listify(name)
 
 # Warm up sys.modules and friends:
-
 import_clu_modules()
 
 # Set up the GLOBALS namespace:
-
 GLOBALS = globals()
 
 starmods = ('clu.repl.ansi',
@@ -137,7 +133,6 @@ for mod in mods:
 
 # Additionals and corner-cases – imports requiring their own
 # bespoke import-statement forms:
-
 import collections.abc
 from PIL import Image
 from pprint import pprint, pformat
@@ -146,12 +141,12 @@ pp = pprint
 ppt = lambda thing: pprint(tuple(thing))
 
 # These two imports trigger module-level __getattr__ actions:
-
 from clu.testing.utils import pout, inline
+
+# Append to __all__:
 __all__ += ['pout', 'inline', 'pp', 'ppt']
 
 # Not quite sure where to put this, for now:
-
 _explain = lambda thing=None: print(columnize(dir(thing),
                                     display_width=consts.SEPARATOR_WIDTH,
                                             ljust=True))
@@ -220,15 +215,12 @@ if 'user:script' in cluenv:
 
 
 # Adjust __all__ again:
-
 __all__ += ['_explain', 'explain', 'cluenv']
 
 # Remove duplicate and invalid sys.paths:
-
 pypath.remove_invalid_paths()
 
 # Print the Python banner and/or warnings, messages, and other tripe:
-
 if __name__ == '__main__':
     # In theory, this will *not* run when repl.py
     # is loaded into a REPL using a “-i” flag:

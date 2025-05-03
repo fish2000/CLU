@@ -1057,7 +1057,7 @@ class cd(Directory):
     def __init__(self, pth):
         """ Change to a new directory (the target path `pth` must be specified).
         """
-        super(cd, self).__init__(pth)
+        super().__init__(pth)
 
 @export
 class wd(Directory):
@@ -1065,7 +1065,7 @@ class wd(Directory):
     def __init__(self):
         """ Initialize a Directory instance for the current working directory.
         """
-        super(wd, self).__init__(pth=None)
+        super().__init__(pth=None)
 
 @export
 class td(Directory):
@@ -1074,7 +1074,7 @@ class td(Directory):
         """ Initialize a Directory instance for the current temporary directory.
         """
         from tempfile import gettempdir
-        super(td, self).__init__(pth=gettempdir())
+        super().__init__(pth=gettempdir())
 
 @export
 class hd(Directory):
@@ -1082,7 +1082,7 @@ class hd(Directory):
     def __init__(self):
         """ Initialize a Directory instance for the current user’s home directory.
         """
-        super(hd, self).__init__(pth=gethomedir())
+        super().__init__(pth=gethomedir())
 
 @export
 class TemporaryDirectory(Directory):
@@ -1128,7 +1128,7 @@ class TemporaryDirectory(Directory):
         self.prefix = prefix
         self.suffix = suffix
         self.change = change
-        super(TemporaryDirectory, self).__init__(self._name)
+        super().__init__(self._name)
     
     @property
     def name(self):
@@ -1150,7 +1150,7 @@ class TemporaryDirectory(Directory):
     
     @wraps(Directory.ctx_prepare)
     def ctx_prepare(self):
-        change = super(TemporaryDirectory, self).ctx_prepare().change
+        change = super().ctx_prepare().change
         self.will_change = self.will_change_back = bool(self.will_change and change)
         return self
     
@@ -1166,7 +1166,7 @@ class TemporaryDirectory(Directory):
         """ Delete the directory pointed to by the TemporaryDirectory
             instance, and everything it contains. USE WITH CAUTION.
         """
-        out = super(TemporaryDirectory, self).close()
+        out = super().close()
         if self.exists:
             return rm_rf(self.name) and out
         return False
@@ -1184,11 +1184,11 @@ class TemporaryDirectory(Directory):
     def __enter__(self):
         if not self.exists:
             self.makedirs()
-        super(TemporaryDirectory, self).__enter__()
+        super().__enter__()
         return self
     
     def __exit__(self, exc_type=None, exc_val=None, exc_tb=None):
-        out = super(TemporaryDirectory, self).__exit__(exc_type, exc_val, exc_tb)
+        out = super().__exit__(exc_type, exc_val, exc_tb)
         if self.destroy:
             out &= self.close()
         return out

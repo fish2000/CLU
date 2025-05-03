@@ -188,6 +188,8 @@ def explain(thing, width=None):
           display_width=display_width,
                   ljust=True))
 
+__all__ += ['_explain', 'explain']
+
 try:
     from instakit.utils.static import asset
 except (ImportError, SyntaxError, TypeError): # pragma: no cover

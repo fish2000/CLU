@@ -93,8 +93,7 @@ changelog: remove-changelog
 	gitchangelog > CHANGELOG.md
 
 repl:
-	python -m bpython --config=$(PROJECT_ROOT)/.config/bpython/config.py3 \
-			-i $(PROJECT_BASE)/clu/scripts/repl.py
+	python -m bpython --config=$(PROJECT_ROOT)/.config/bpython/config.py3 -i $(PROJECT_BASE)/clu/scripts/repl.py
 
 ipy:
 	python -m IPython --autoindent --pylab --colors=LightBG \

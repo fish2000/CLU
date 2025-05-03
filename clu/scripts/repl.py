@@ -35,13 +35,17 @@ from clu.all import import_clu_modules
 from clu.config.env import Environ
 from clu.constants import consts
 from clu.naming import nameof, qualified_import
-from clu.predicates import ispublic
+from clu.predicates import ispublic, listify
 from clu.repl import columnize
+
+# Set up the __all__ tuple:
+
+__all__ = list()
 
 # MODULE EXPORT FUNCTIONS: given a module name, export
 # either the module or its contents into a given namespace:
 
-def star_export(modulename, namespace):
+def star_export(modulename, namespace, alltuple=__all__):
     """ Safely bind everything a module exports to a namespace. """
     try:
         module = qualified_import(modulename)
@@ -50,8 +54,9 @@ def star_export(modulename, namespace):
     for name in dir(module):
         if ispublic(name):
             namespace[name] = getattr(module, name)
+            alltuple += listify(name)
 
-def module_export(modulename, namespace):
+def module_export(modulename, namespace, alltuple=__all__):
     """ Safely bind a module to a namespace. """
     try:
         module = qualified_import(modulename)
@@ -59,14 +64,14 @@ def module_export(modulename, namespace):
         module = importlib.import_module(modulename)
     name = nameof(module)
     namespace[modulename] = namespace[name] = module
+    alltuple += listify(name)
 
 # Warm up sys.modules and friends:
 
 import_clu_modules()
 
-# Set up the GLOBAL namespace and the __all__ tuple:
+# Set up the GLOBALS namespace:
 
-__all__ = tuple()
 GLOBALS = globals()
 
 starmods = ('clu.repl.ansi',
@@ -143,6 +148,7 @@ ppt = lambda thing: pprint(tuple(thing))
 # These two imports trigger module-level __getattr__ actions:
 
 from clu.testing.utils import pout, inline
+__all__ += ['pout', 'inline', 'pp', 'ppt']
 
 # Not quite sure where to put this, for now:
 
@@ -188,7 +194,7 @@ except (ImportError, SyntaxError, TypeError): # pragma: no cover
     pass
 else:
     # Extend `__all__`:
-    __all__ += ('asset', 'image_paths', 'catimage')
+    __all__ += ['asset', 'image_paths', 'catimage']
     # Prepare a list of readily open-able image file paths:
     image_paths = list(map(
         lambda image_file: asset.path('img', image_file),
@@ -206,6 +212,7 @@ if 'user:script' in cluenv:
     if os.path.exists(user_script_path):
         user_script_globals = runpy.run_path(user_script_path)
         GLOBALS.update(user_script_globals)
+        __all__ += list(filter(ispublic, user_script_globals.keys()))
     else:
         message = "CLU_USER_SCRIPT needs to point to a Python file"
         warnings.simplefilter('always')

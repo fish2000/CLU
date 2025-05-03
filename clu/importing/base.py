@@ -186,7 +186,7 @@ class Registry(abc.ABC, metaclass=MetaRegistry):
             dictionary, indexed by the qualified name.
         """
         # Call up:
-        super(Registry, cls).__init_subclass__(**kwargs)
+        super().__init_subclass__(**kwargs)
         
         # We were called with a class for which the values
         # of appname, appspace, and __name__ have been assigned –
@@ -216,8 +216,8 @@ class ModuleSpec(importlib.machinery.ModuleSpec):
             are required arguments).
         """
         _, packagename = dotpath_split(name)
-        super(ModuleSpec, self).__init__(name, loader,
-                                         origin=packagename)
+        super().__init__(name, loader,
+                         origin=packagename)
     
     def __hash__(self):
         return hash(self.loader) \
@@ -234,7 +234,7 @@ class Package(types.Module):
     """
     
     def __init__(self, name, doc=None, path=None):
-        super(Package, self).__init__(name, doc)
+        super().__init__(name, doc)
         self.__path__ = path or []
     
     def __repr__(self):
@@ -593,9 +593,9 @@ class MetaModule(MetaRegistry):
         deferred_export.__doc__ = inspect.getdoc(ExporterBase.export)
         
         # Call up:
-        attributes = super(MetaModule, metacls).__prepare__(name,
-                                                            bases,
-                                                          **kwargs)
+        attributes = super().__prepare__(name,
+                                         bases,
+                                       **kwargs)
         
         # Return a new Namespace with the deferred export function
         # defined as “export”:
@@ -610,10 +610,10 @@ class MetaModule(MetaRegistry):
         deferred_export = attributes.pop('export', None)
         
         # Call up, creating and initializing the module class:
-        cls = super(MetaModule, metacls).__new__(metacls, name,
-                                                          bases,
-                                                          dict(attributes),
-                                                        **kwargs)
+        cls = super().__new__(metacls, name,
+                                       bases,
+                                       dict(attributes),
+                                     **kwargs)
         
         # If an appname is defined, try to install
         # an instance of the appropriate Exporter:
@@ -749,7 +749,7 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         cls.appname  = appname  or attr_search('appname',  *ancestors)
         cls.appspace = appspace or attr_search('appspace', *ancestors)
         cls.__loader__ = linkages.get(cls.appname, none_function)()
-        super(ModuleBase, cls).__init_subclass__(**kwargs)
+        super().__init_subclass__(**kwargs)
     
     @classmethod
     def __class_getitem__(cls, key):
@@ -767,7 +767,7 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         qualified_name = None
         if self.prefix:
             qualified_name = dotpath_join(self.prefix, name)
-        super(ModuleBase, self).__init__(qualified_name or name, doc)
+        super().__init__(qualified_name or name, doc)
     
     def __execute__(self):
         """ The “__execute__()” class-based module instance method is called
@@ -813,8 +813,7 @@ class ModuleBase(Package, Registry, metaclass=MetaModule):
         cls = type(self)
         if hasattr(cls, consts.EXPORTER_NAME):
             return getattr(cls, consts.EXPORTER_NAME).dir_function()()
-        names = chain(cls.__dict__.keys(),
-                      super(ModuleBase, self).__dir__())
+        names = chain(cls.__dict__.keys(), super().__dir__())
         return sorted(frozenset(names) - DO_NOT_INCLUDE)
 
 @dataclass

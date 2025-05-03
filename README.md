@@ -3,6 +3,9 @@ CLU – Common Lightweight Utilities (née Command-Line Utilities)
 
 [![codecov](https://codecov.io/gh/fish2000/CLU/branch/master/graph/badge.svg)](https://codecov.io/gh/fish2000/CLU)
 
+Install it right now! Type: `$ pip install -U python-clu`
+---------------------------------------------------------
+
 This is a packaged-up and sanely version-controlled version of [the Python tools I wrote for my REPLs](https://github.com/fish2000/homage/blob/master/.script-bin/replutilities.py), divided up into
 a bunch of subordinate packages:
 

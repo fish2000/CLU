@@ -188,8 +188,6 @@ def explain(thing, width=None):
           display_width=display_width,
                   ljust=True))
 
-__all__ += ['_explain', 'explain']
-
 try:
     from instakit.utils.static import asset
 except (ImportError, SyntaxError, TypeError): # pragma: no cover
@@ -219,6 +217,11 @@ if 'user:script' in cluenv:
         message = "CLU_USER_SCRIPT needs to point to a Python file"
         warnings.simplefilter('always')
         warnings.warn(stacklevel=2, message=message)
+
+
+# Adjust __all__ again:
+
+__all__ += ['_explain', 'explain', 'cluenv']
 
 # Remove duplicate and invalid sys.paths:
 

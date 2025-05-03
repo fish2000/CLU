@@ -114,7 +114,7 @@ class NodeBase(collections.abc.Hashable,
         instance.child_nodes = {}
         
         if children:
-            self._append_nodes(*children)
+            instance._append_nodes(*children)
         
         return instance
     

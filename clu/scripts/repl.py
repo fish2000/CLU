@@ -27,10 +27,16 @@ repl.py – THE RUBRICK:
 from __future__ import print_function
 
 import importlib
+import os.path
+import runpy
+import warnings
 
 from clu.all import import_clu_modules
+from clu.config.env import Environ
+from clu.constants import consts
 from clu.naming import nameof, qualified_import
 from clu.predicates import ispublic
+from clu.repl import columnize
 
 # MODULE EXPORT FUNCTIONS: given a module name, export
 # either the module or its contents into a given namespace:
@@ -189,6 +195,21 @@ else:
             asset.listfiles('img')))
     # I do this practically every time, so I might as well do it here:
     catimage = Image.open(image_paths[0])
+
+# Access CLU app environment variables:
+cluenv = Environ(appname='clu')
+
+# If you, the user, set up a CLU_USER_SCRIPT environment variable
+# before running this repl script, you can have it executed herein:
+if 'user:script' in cluenv:
+    user_script_path = cluenv['user:script']
+    if os.path.exists(user_script_path):
+        user_script_globals = runpy.run_path(user_script_path)
+        GLOBALS.update(user_script_globals)
+    else:
+        message = "CLU_USER_SCRIPT needs to point to a Python file"
+        warnings.simplefilter('always')
+        warnings.warn(stacklevel=2, message=message)
 
 # Remove duplicate and invalid sys.paths:
 

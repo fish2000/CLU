@@ -197,7 +197,7 @@ else:
     catimage = Image.open(image_paths[0])
 
 # Access CLU app environment variables:
-cluenv = Environ(appname='clu')
+cluenv = Environ(appname=consts.APPNAME)
 
 # If you, the user, set up a CLU_USER_SCRIPT environment variable
 # before running this repl script, you can have it executed herein:

@@ -201,7 +201,7 @@ class ProxyModule(ModuleBase):
             See the main class docstring for the deets.
         """
         # Call up, creating the instance:
-        instance = super(ProxyModule, cls).__new__(cls)
+        instance = super().__new__(cls)
         
         # Fill in our “slots” with empty structs:
         instance.__filters__ = []
@@ -238,7 +238,7 @@ class ProxyModule(ModuleBase):
             mappings.
         """
         # Super-initialize:
-        super(ProxyModule, self).__init__(name, doc=doc)
+        super().__init__(name, doc=doc)
         
         # Get a reference to the module class:
         cls = type(self)

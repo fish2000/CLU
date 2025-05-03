@@ -57,7 +57,7 @@ def mutate_syspath(container):
     for path in sys.path:
         if path in container:
             new_syspath.append(path)
-    sys.path = new_syspath
+    sys.path[:] = new_syspath
     return new_syspath
 
 @export

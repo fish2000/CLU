@@ -25,10 +25,10 @@ class Slotted(abc.ABCMeta):
         if '__slots__' not in attributes:
             attributes['__slots__'] = tuple()
         
-        return super(Slotted, metacls).__new__(metacls, name, # type: ignore
-                                                        bases,
-                                                        attributes,
-                                                      **kwargs)
+        return super().__new__(metacls, name, # type: ignore
+                                        bases,
+                                        attributes,
+                                      **kwargs)
 
 class SlotMatch(Slotted):
     
@@ -48,10 +48,10 @@ class SlotMatch(Slotted):
             attributes['__match_args__'] = tuple()
         
         # Create the new class via “super(…)” – calling “Slotted.__new__(…)”
-        cls = super(SlotMatch, metacls).__new__(metacls, name, # type: ignore
-                                                         bases,
-                                                         attributes,
-                                                       **kwargs)
+        cls = super().__new__(metacls, name, # type: ignore
+                                       bases,
+                                       attributes,
+                                     **kwargs)
         
         # Set “__match_args__” using “slots_for(…)” and return
         cls.__match_args__ = slots_for(cls)
@@ -70,10 +70,10 @@ class NonSlotted(abc.ABCMeta):
         if '__slots__' in attributes:
             attributes.pop('__slots__')
         
-        return super(NonSlotted, metacls).__new__(metacls, name,
-                                                           bases,
-                                                           attributes,
-                                                         **kwargs)
+        return super().__new__(metacls, name,
+                                        bases,
+                                        attributes,
+                                      **kwargs)
 
 class UnhashableMeta(Slotted):
     
@@ -89,10 +89,10 @@ class UnhashableMeta(Slotted):
             attributes.pop('__hash__')
         attributes['__hash__'] = None
         
-        return super(UnhashableMeta, metacls).__new__(metacls, name,
-                                                               bases,
-                                                               attributes,
-                                                             **kwargs)
+        return super().__new__(metacls, name,
+                                        bases,
+                                        attributes,
+                                      **kwargs)
 
 class Unhashable(abc.ABC, metaclass=UnhashableMeta):
     
@@ -344,7 +344,7 @@ class BasePath(Slotted):
     @classmethod
     def __prepare__(metacls, name, bases, basepath="/", **kwargs):
         """ Remove the “basepath” class keyword before calling up """
-        return super(BasePath, metacls).__prepare__(name, bases, **kwargs)
+        return super().__prepare__(name, bases, **kwargs)
     
     def __new__(metacls, name, bases, attributes, basepath="/", **kwargs):
         """ Override for `Slotted.__new__(…)` setting up a
@@ -356,10 +356,10 @@ class BasePath(Slotted):
                                        and os.fspath(basepath) \
                                                   or basepath)
         
-        return super(BasePath, metacls).__new__(metacls, name,
-                                                         bases,
-                                                         attributes,
-                                                       **kwargs)
+        return super().__new__(metacls, name,
+                                        bases,
+                                        attributes,
+                                      **kwargs)
 
 class AppName(abc.ABC):
     
@@ -373,7 +373,7 @@ class AppName(abc.ABC):
         from clu.predicates import mro, attr_search
         if 'appspace' in kwargs:
             del kwargs['appspace']
-        super(AppName, cls).__init_subclass__(**kwargs)
+        super().__init_subclass__(**kwargs)
         cls.appname = ValueDescriptor(appname or attr_search('appname', *mro(cls)))
     
     def __init__(self, *args, **kwargs):

@@ -35,11 +35,14 @@ from clu.all import import_clu_modules
 from clu.config.env import Environ
 from clu.constants import consts
 from clu.naming import nameof, qualified_import
-from clu.predicates import ispublic, listify
+from clu.predicates import ispublic, ismarkedprivate, listify
 from clu.repl import columnize
 
 # Set up the __all__ tuple:
 __all__ = list()
+
+# predicate for star-importing:
+ok_for_star_import = lambda name: ispublic(name) and ismarkedprivate(name)
 
 # MODULE EXPORT FUNCTIONS: given a module name, export
 # either the module or its contents into a given namespace:
@@ -50,7 +53,7 @@ def star_export(modulename, namespace, alltuple=__all__):
     except ValueError:
         module = importlib.import_module(modulename)
     for name in dir(module):
-        if ispublic(name):
+        if ok_for_star_import(name):
             namespace[name] = getattr(module, name)
             alltuple += listify(name)
 

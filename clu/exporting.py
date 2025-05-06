@@ -323,7 +323,7 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
             raise TypeError(f"appname already registered: {appname}")
         appnames.add(appname)
         classes[appname] = cls
-        super(Registry, cls).__init_subclass__(**kwargs) # type: ignore
+        super().__init_subclass__(**kwargs) # type: ignore
         cls.instances = weakref.WeakValueDictionary()
         cls.appname = clu.abstract.ValueDescriptor(appname)
     
@@ -869,7 +869,7 @@ class ExporterBase(collections.abc.MutableMapping,
                                                      'has_appname',
                                                      'for_appname',
                                                      'unregister'),
-                           super(ExporterBase, self).__dir__()))
+                           super().__dir__()))
 
 class Exporter(ExporterBase, basepath=BASEPATH, appname=APPNAME):
     

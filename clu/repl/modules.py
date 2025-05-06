@@ -258,7 +258,7 @@ def test():
         assert frozenconsts.issubset(constmap.keys())
         
         # Try reloading:
-        constmap.reload()
+        assert constmap.reload() != constmap.module
     
     return inline.test(100)
 

@@ -787,7 +787,7 @@ class Directory(BaseFSName,
                 yield directory, dirs, files
             if directory.name == ROOT_PATH:
                 break
-            directory = directory.parent()
+            directory = directory.parent(followlinks=followlinks)
     
     def flatten(self, destination, suffix=None, new_suffix=None):
         """ Copy the entire directory tree, all contents included, to a new

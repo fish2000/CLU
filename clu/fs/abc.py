@@ -136,12 +136,13 @@ class BaseFSName(collections.abc.Hashable,
             os.path.realpath(
             os.fspath(source or self.name)))
     
-    def parent(self):
+    def parent(self, followlinks=True):
         """ Sugar for `self.directory(os.path.abspath(os.path.dirname(self.name)))`
             …which, if you are curious, gets you the parent directory of the target
             instance, wrapped in a new `Directory` instance.
         """
-        return self.directory(os.path.abspath(os.path.dirname(self.name)))
+        realifier = followlinks and os.path.realpath or os.path.abspath
+        return self.directory(realifier(os.path.dirname(self.name)))
     
     def relparent(self, path):
         """ Relativize a path, relative to its directory parent, and return it

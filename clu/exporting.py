@@ -108,7 +108,7 @@ def search_by_id(thingID):
         
         This function implements `search_for_name(…)` – q.v.
         the calling function code sub., and is also used in the
-        implementation of `determine_module(…)`, - also q.v.
+        implementation of `search_for_module(…)`, - also q.v.
         the calling function code sub.
         
         Caching courtesy the `functools.lru_cache(…)` decorator.

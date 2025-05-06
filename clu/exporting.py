@@ -14,7 +14,7 @@ import importlib
 import inspect
 import itertools
 import shelve
-import sys, os
+import sys, os, re
 import warnings
 import weakref
 
@@ -232,6 +232,9 @@ def determine_name(thing, name=None, try_repr=False):
     # up returning None:
     return search_for_name(thing)
 
+# Regexp for matching dashes in dotpaths:
+dash_re = re.compile("\-")
+
 # N.B. Items in the “replaceable_endings” tuple that
 # possibly contain other such items should appear
 # *before* the items that they contain, e.g.:
@@ -246,7 +249,8 @@ replaceable_endings  = tuple(f"{pre}{suf}" \
                                                   ending_suffixes))
 replaceable_endings += ending_suffixes
 
-def path_to_dotpath(path, relative_to=None):
+def path_to_dotpath(path, relative_to=None,
+                          convert_dashes=True):
     """ Convert a file path (e.g. “/yo/dogg/iheard/youlike.py”)
         to a dotpath (á la “yo.dogg.iheard.youlike”) in what I
         would call a “quick and dirty” fashion.
@@ -274,11 +278,15 @@ def path_to_dotpath(path, relative_to=None):
     while dotpath.startswith(QUALIFIER):
         dotpath = dotpath[1:]
     
-    # Warn before returning, if the converted path
-    # should contain dashes:
     if '-' in dotpath:
-        warnings.warn(f"Dotpath contains dashes: “{dotpath}”",
-                        BadDotpathWarning, stacklevel=2)
+        if convert_dashes:
+            # Substitute underscores for any dashes found:
+            dotpath = dash_re.subn('_', dotpath)[0]
+        else:
+            # Warn before returning, if the converted path
+            # should contain dashes:
+            warnings.warn(f"Dotpath contains dashes: “{dotpath}”",
+                            BadDotpathWarning, stacklevel=2)
     
     return dotpath
 

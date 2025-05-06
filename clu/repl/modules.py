@@ -256,6 +256,9 @@ def test():
         # doesn’t export any dunder-named things:
         assert frozenconsts.issuperset(constmap.keys())
         assert frozenconsts.issubset(constmap.keys())
+        
+        # Try reloading:
+        constmap.reload()
     
     return inline.test(100)
 

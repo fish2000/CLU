@@ -614,7 +614,7 @@ class Directory(BaseFSName,
             setattr(self, 'old', old)
             setattr(self, 'new', old)
             return self
-        setattr(self, 'old', old is not None and old or self.target)
+        setattr(self, 'old', old or self.target)
         setattr(self, 'new', self.target)
         delattr(self, 'target')
         return self
@@ -635,7 +635,8 @@ class Directory(BaseFSName,
             cause invincibly undebuggable behavioral oddities to crop up
             in a variety of circumstances. 
         """
-        self.ctx_set_targets(old=old or os.getcwd())
+        if not self.prepared:
+            self.ctx_set_targets(old=old or os.getcwd())
         if os.path.isdir(self.new):
             self.will_change = differentfile(self.old, self.new)
         else:

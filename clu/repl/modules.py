@@ -153,7 +153,6 @@ def compare_module_lookups_for_all_things(*modules,
     mismatches = []
     results = []
     
-    # print(f"MODULE FUNCTION: {module_function}")
     clumodules = module_function(basepath, appname, exporter_name)
     assert clumodules
     
@@ -183,7 +182,6 @@ def compare_module_lookups_for_all_things(*modules,
     
     # In practice the failure rate seemed to be around 7.65 %
     failure_rate = 100 * (float(mismatch_idx) / float(total))
-    # print(f"FAILURE RATE: {failure_rate}")
     assert failure_rate < 10.0 # percent
     
     return Results(item_idx,  modulenames, tuple(results)), \
@@ -204,7 +202,6 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
-    from pprint import pprint
     
     @inline.fixture
     def predicate_modules():
@@ -220,7 +217,6 @@ def test():
         
         for idx, result in enumerate(results.result_records):
             assert result.idx == idx
-            # pprint(result)
         
         assert results.total > 100
         assert mismatches.total > 0
@@ -234,7 +230,6 @@ def test():
         
         for idx, result in enumerate(results.result_records):
             assert result.idx == idx
-            # pprint(result)
         
         assert results.total > 100
         assert mismatches.total > 0

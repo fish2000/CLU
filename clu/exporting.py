@@ -106,7 +106,7 @@ def search_by_id(thingID):
         `sys.modules.values()` (which is potentially completely
         fucking enormous).
         
-        This function implements `search_for_name(…)` – q.v.
+        This function helps implement `search_for_name(…)` – q.v.
         the calling function code sub., and is also used in the
         implementation of `search_for_module(…)`, - also q.v.
         the calling function code sub.

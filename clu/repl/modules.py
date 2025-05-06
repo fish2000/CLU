@@ -153,8 +153,8 @@ def compare_module_lookups_for_all_things(*modules,
     mismatches = []
     results = []
     
-    clumodules = module_function(basepath, appname, exporter_name)
-    assert clumodules
+    loaded_modules = module_function(basepath, appname, exporter_name)
+    assert loaded_modules
     
     modulenames = tuple(modules or Exporter.modulenames())
     

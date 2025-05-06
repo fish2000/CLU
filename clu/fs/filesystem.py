@@ -937,9 +937,10 @@ class Directory(BaseFSName,
             dirs[:] = list(filter(excluder, dirs))
             filenames = filter(excluder,
                         filter(searcher, files))
-            dotpaths.update(path_to_dotpath(os.path.join(root, filename),
-                                                         relative_to=self.name)
-                                            for filename in filenames)
+            dotpaths.update(path_to_dotpath(
+                            os.path.join(root, filename),
+                                         relative_to=self.name)
+                            for filename in filenames)
         yield from sorted(dotpaths)
     
     def suffix_histogram(self, subdir=None,

@@ -195,17 +195,18 @@ def try_items(itx, *things, default=NoDefault):
 
 # SOME COMMON SHORTCUTS:
 
-dunder_or   = lambda thing, atx: getpyattr(thing, atx, thing)
+dunder_or       = lambda thing, atx: getpyattr(thing, atx, thing)
 
-mro         = lambda thing: getpyattr(typeof(thing), 'mro')
-unwrap      = lambda thing: dunder_or(thing, 'wrapped')
-origin      = lambda thing: typeof(dunder_or(thing, 'origin'))
-rmro        = reverse(mro)
+mro             = lambda thing: getpyattr(typeof(thing), 'mro')
+unwrap          = lambda thing: dunder_or(thing, 'wrapped')
+origin          = lambda thing: typeof(dunder_or(thing, 'origin'))
+rmro            = reverse(mro)
 
-isancestor  = lambda cls, ancestor=object:   ancestor in mro(cls)
-isorigin    = lambda cls, originator=object: isancestor(origin(cls), ancestor=typeof(originator))
+isancestor      = lambda cls, ancestor=object:   ancestor in mro(cls)
+isorigin        = lambda cls, originator=object: isancestor(origin(cls), ancestor=typeof(originator))
 
-ispublic    = lambda string: not ispyname(string) and not ismifflin(string)
+ismarkedprivate = lambda string: not string.startswith('_')
+ispublic        = lambda string: not ispyname(string) and not ismifflin(string)
 
 @export
 class Base(object):
@@ -566,6 +567,7 @@ export(unwrap,          name='unwrap',          doc="unwrap(thing) → Return ei
 export(origin,          name='origin',          doc="origin(thing) → Return either `typeof(thing).__origin__` or `typeof(thing)` for a given `thing`")
 export(isancestor,      name='isancestor',      doc="isancestor(thing, ancestor=object) → boolean predicate, True if `ancestor` is found in “mro(thing)”")
 export(isorigin,        name='isorigin',        doc="isorigin(thing, original=object) → boolean predicate, True if `original` is an ancestor of “origin(thing)”")
+export(ismarkedprivate, name='ismarkedprivate', doc="ismarkedprivate(string)) → boolean predicate, True if `string` doesn’t begin with an _underscore")
 export(ispublic,        name='ispublic',        doc="ispublic(string) → boolean predicate, True if `string` is neither in __dunder__ or _sunder_ (née “_mifflin_”) form")
 
 export(predicate_nop,   name='predicate_nop',   doc="predicate_nop(thing) → boolean predicate that always returns `None`")

@@ -408,7 +408,7 @@ class ManagedContext(contextlib.AbstractContextManager):
 __all__ = ('Slotted', 'SlotMatch', 'NonSlotted',
            'UnhashableMeta', 'Unhashable',
            'Format', 'NonFormat', 'SlottedFormat', 'Sanitizer',
-           'Cloneable',
+           'Serializable', 'Cloneable',
            'ReprWrapper', 'SlottedRepr', 'MappingViewRepr',
            'evict_announcer',
            'BaseDescriptor', 'DataDescriptor', 'NamedDescriptor',

@@ -42,7 +42,7 @@ from clu.repl import columnize
 __all__ = list()
 
 # predicate for star-importing:
-ok_for_star_import = lambda name: ispublic(name) and ismarkedprivate(name)
+ok_for_star_import = lambda name: ispublic(name) and not ismarkedprivate(name)
 
 # MODULE EXPORT FUNCTIONS: given a module name, export
 # either the module or its contents into a given namespace:
@@ -210,7 +210,7 @@ if 'user:script' in cluenv:
     if os.path.exists(user_script_path):
         user_script_globals = runpy.run_path(user_script_path)
         GLOBALS.update(user_script_globals)
-        __all__ += list(filter(ispublic, user_script_globals.keys()))
+        __all__ += list(filter(ok_for_star_import, user_script_globals.keys()))
     else:
         message = "CLU_USER_SCRIPT needs to point to a Python file"
         warnings.simplefilter('always')

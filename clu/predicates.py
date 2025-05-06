@@ -205,7 +205,7 @@ rmro            = reverse(mro)
 isancestor      = lambda cls, ancestor=object:   ancestor in mro(cls)
 isorigin        = lambda cls, originator=object: isancestor(origin(cls), ancestor=typeof(originator))
 
-ismarkedprivate = lambda string: not string.startswith('_')
+ismarkedprivate = lambda string: string.startswith('_')
 ispublic        = lambda string: not ispyname(string) and not ismifflin(string)
 
 @export

@@ -139,7 +139,8 @@ def compare_module_lookups_for_all_things(*modules, **options):
     appname       = options.get('appname',       consts.APPNAME)
     exporter_name = options.get('exporter_name', consts.EXPORTER_NAME)
     
-    idx = 0
+    item_idx = 0
+    module_idx = 0
     total = 0
     mismatch_count = 0
     mismatches = []
@@ -155,7 +156,9 @@ def compare_module_lookups_for_all_things(*modules, **options):
     for modulename in modulenames:
         exports = Exporter[modulename].exports()
         total += len(exports)
-        results.append(Result(modulename, tuple(exports.keys()), idx))
+        results.append(Result(modulename,
+                        tuple(exports.keys()),
+                        module_idx))
         
         for name, thing in exports.items():
             whichmodule = pickle.whichmodule(thing, None)
@@ -169,13 +172,14 @@ def compare_module_lookups_for_all_things(*modules, **options):
                                            nameof(thing),
                                            mismatch_count))
                 mismatch_count += 1
-            idx += 1
+            item_idx += 1
+        module_idx += 1
     
     # In practice the failure rate seemed to be around 7.65 %
     failure_rate = 100 * (float(mismatch_count) / float(total))
     assert failure_rate < 10.0 # percent
     
-    return Results(idx,  modulenames, tuple(results)), \
+    return Results(item_idx,  modulenames, tuple(results)), \
            Mismatches(mismatch_count, tuple(mismatches),
                                             failure_rate)
 
@@ -193,6 +197,7 @@ __all__, __dir__ = exporter.all_and_dir()
 def test():
     
     from clu.testing.utils import inline
+    from pprint import pprint
     
     @inline.fixture
     def predicate_modules():
@@ -201,26 +206,34 @@ def test():
         return prefixd
     
     @inline
-    def test_one():
+    def test_compare_all():
         """ Basic checks for compare_module_lookups_for_all_things(…) """
         results, mismatches = compare_module_lookups_for_all_things()
+        
+        for idx, result in enumerate(results.result_records):
+            assert result.idx == idx
+            # pprint(result)
         
         assert results.total > 100
         assert mismatches.total > 0
         assert mismatches.failure_rate < 10.0
     
     @inline
-    def test_two():
+    def test_compare_all_with_varargs():
         """ With-vararg checks for compare_module_lookups_for_all_things(…) """
         results, mismatches = compare_module_lookups_for_all_things(
                              *predicate_modules())
         
+        for idx, result in enumerate(results.result_records):
+            assert result.idx == idx
+            # pprint(result)
+        
         assert results.total > 100
         assert mismatches.total > 0
         assert mismatches.failure_rate < 10.0
     
     @inline
-    def test_three():
+    def test_modulemap_with_clu_consts():
         """ Basic checks for ModuleMap adapter """
         constmap = ModuleMap(consts)
         
@@ -241,7 +254,7 @@ def test():
         assert frozenconsts.issuperset(constmap.keys())
         assert frozenconsts.issubset(constmap.keys())
     
-    return inline.test(50)
+    return inline.test(100)
 
 if __name__ == '__main__':
     sys.exit(test())

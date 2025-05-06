@@ -7,6 +7,7 @@ import collections.abc
 import clu.abstract
 import clu.dicts
 import clu.all
+import importlib
 import pickle
 import sys
 
@@ -65,7 +66,7 @@ class ModuleMap(collections.abc.Mapping,
         if not isinstance(module, (type(self), types.Module)):
             raise TypeError("module instance required")
         self.module = getattr(module, 'module', module)
-        self.reload()
+        self.reload(reload_module=False)
     
     def __iter__(self):
         yield from self.dir
@@ -97,7 +98,9 @@ class ModuleMap(collections.abc.Mapping,
     def items(self):
         return clu.dicts.OrderedItemsView(self)
     
-    def reload(self):
+    def reload(self, reload_module=True):
+        if reload_module:
+            self.module = importlib.reload(self.module)
         self.dir = tuple(sorted(filter(notpyname, dir(self.module)), key=lowers))
         length = len(self.dir)
         if length < 1:

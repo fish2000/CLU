@@ -759,11 +759,8 @@ class Directory(BaseFSName,
         yield from os.walk(self.name, followlinks=followlinks)
     
     def walkback(self, followlinks=True):
-        """ Iterator over reverse-walked directories and files.
-            
-            N.B. Since I had to implement this myself, “followlinks”
-            doesn’t do anything yet. This is because I am lazy and
-            I lack intellectual rigor.
+        """ Iterator over reverse-walked directories and files. Use
+            the `followlinks=True` flag to do what you think it does.
             
             The return triple resembles that yielded by “os.walk(…)” –
             but unlike that function, modifying the directory listing

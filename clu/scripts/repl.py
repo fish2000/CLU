@@ -137,7 +137,6 @@ for mod in mods:
 # Additionals and corner-cases – imports requiring their own
 # bespoke import-statement forms:
 import collections.abc
-from PIL import Image
 from pprint import pprint, pformat
 
 pp = pprint
@@ -187,6 +186,7 @@ def explain(thing, width=None):
                   ljust=True))
 
 try:
+    from PIL import Image
     from instakit.utils.static import asset
 except (ImportError, SyntaxError, TypeError): # pragma: no cover
     pass

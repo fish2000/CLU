@@ -256,8 +256,9 @@ def path_to_dotpath(path, relative_to=None,
         would call a “quick and dirty” fashion.
         
         Issues a BadDotpathWarning if the converted path contains
-        dashes – I don’t quite know what to do about something
-        like that besides warn, so erm. There you go.
+        dashes, and the “convert_datshes” flag is set to False
+        – I don’t quite know what to do about something like that
+        besides warn, so erm. There you go.
     """
     # Garbage in, garbage out:
     if path is None:

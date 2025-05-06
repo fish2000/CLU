@@ -120,8 +120,12 @@ class ModuleMap(collections.abc.Mapping,
     def inner_repr(self):
         return repr(dict(self))
 
+clu_importall = clu.all.import_all_modules
+
 @cache
-def compare_module_lookups_for_all_things(*modules, **options):
+def compare_module_lookups_for_all_things(*modules,
+                                           module_function=clu_importall,
+                                         **options):
     """ Iterate through each exported item, for each exported module,
         and look up the original module of the exported item with both:
             
@@ -142,16 +146,15 @@ def compare_module_lookups_for_all_things(*modules, **options):
     appname       = options.get('appname',       consts.APPNAME)
     exporter_name = options.get('exporter_name', consts.EXPORTER_NAME)
     
+    total = 0
     item_idx = 0
     module_idx = 0
-    total = 0
-    mismatch_count = 0
+    mismatch_idx = 0
     mismatches = []
     results = []
     
-    clumodules = clu.all.import_all_modules(basepath,
-                                            appname,
-                                            exporter_name)
+    # print(f"MODULE FUNCTION: {module_function}")
+    clumodules = module_function(basepath, appname, exporter_name)
     assert clumodules
     
     modulenames = tuple(modules or Exporter.modulenames())
@@ -173,18 +176,19 @@ def compare_module_lookups_for_all_things(*modules, **options):
                                            determination,
                                            modulename,
                                            nameof(thing),
-                                           mismatch_count))
-                mismatch_count += 1
+                                           mismatch_idx))
+                mismatch_idx += 1
             item_idx += 1
         module_idx += 1
     
     # In practice the failure rate seemed to be around 7.65 %
-    failure_rate = 100 * (float(mismatch_count) / float(total))
+    failure_rate = 100 * (float(mismatch_idx) / float(total))
+    # print(f"FAILURE RATE: {failure_rate}")
     assert failure_rate < 10.0 # percent
     
     return Results(item_idx,  modulenames, tuple(results)), \
-           Mismatches(mismatch_count, tuple(mismatches),
-                                            failure_rate)
+           Mismatches(mismatch_idx,        tuple(mismatches),
+                                                 failure_rate)
 
 export(notpyname,                   name='notpyname',       doc="notpyname(string) → boolean predicate, returns True unless string is a __dunder__ name, when it returns False")
 export(isplural,                    name='isplural',        doc="isplural(integer) → returns an 's' unless the integer argument is 1, in which case it returns an empty string")
@@ -204,7 +208,8 @@ def test():
     
     @inline.fixture
     def predicate_modules():
-        modules = ('predicates', 'typology', 'mathematics', 'naming')
+        modules = ('predicates', 'typology', 'mathematics', 'naming',
+                   'exporting', 'extending', 'all', 'enums')
         prefixd = tuple(f"clu.{nm}" for nm in modules)
         return prefixd
     

@@ -619,7 +619,7 @@ class Directory(BaseFSName,
         delattr(self, 'target')
         return self
     
-    def ctx_prepare(self):
+    def ctx_prepare(self, old=None):
         """ Prepares the member values of the Directory instance according
             to a requisite `self.target` directory-path value; the primary
             logic performed by this function determines whether or not it
@@ -635,7 +635,7 @@ class Directory(BaseFSName,
             cause invincibly undebuggable behavioral oddities to crop up
             in a variety of circumstances. 
         """
-        self.ctx_set_targets(old=os.getcwd())
+        self.ctx_set_targets(old=old or os.getcwd())
         if os.path.isdir(self.new):
             self.will_change = differentfile(self.old, self.new)
         else:

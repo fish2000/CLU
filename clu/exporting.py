@@ -319,10 +319,11 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
     def __init_subclass__(cls, appname=None, **kwargs):
         if not appname:
             appname = determine_name(cls)
-        if appname in classes:
-            raise TypeError(f"appname already registered: {appname}")
-        appnames.add(appname)
-        classes[appname] = cls
+        else:
+            if appname in classes:
+                raise TypeError(f"appname already registered: {appname}")
+            appnames.add(appname)
+            classes[appname] = cls
         super().__init_subclass__(**kwargs) # type: ignore
         cls.instances = weakref.WeakValueDictionary()
         cls.appname = clu.abstract.ValueDescriptor(appname)

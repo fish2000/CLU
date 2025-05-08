@@ -30,7 +30,7 @@ def determine_module(thing, name=None):
         return None
     
     import pickle
-    return pickle.whichmodule(thing, None) or name # type: ignore
+    return pickle.whichmodule(thing, name) # type: ignore
 
 """
 NAME AND MODULE SEARCH FUNCTIONS: the “nameof(…)” and “moduleof(…)”

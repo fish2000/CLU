@@ -38,7 +38,7 @@ from clu.naming import nameof, qualified_import
 from clu.predicates import ispublic, ismarkedprivate, listify
 from clu.repl import columnize
 
-# Set up the __all__ tuple:
+# Set up the __all__ list:
 __all__ = list()
 
 # predicate for star-importing:
@@ -46,7 +46,7 @@ ok_for_star_import = lambda name: ispublic(name) and not ismarkedprivate(name)
 
 # MODULE EXPORT FUNCTIONS: given a module name, export
 # either the module or its contents into a given namespace:
-def star_export(modulename, namespace, alltuple=__all__):
+def star_export(modulename, namespace, all=__all__):
     """ Safely bind everything a module exports to a namespace. """
     try:
         module = qualified_import(modulename)
@@ -55,9 +55,9 @@ def star_export(modulename, namespace, alltuple=__all__):
     for name in dir(module):
         if ok_for_star_import(name):
             namespace[name] = getattr(module, name)
-            alltuple += listify(name)
+            all += listify(name)
 
-def module_export(modulename, namespace, alltuple=__all__):
+def module_export(modulename, namespace, all=__all__):
     """ Safely bind a module to a namespace. """
     try:
         module = qualified_import(modulename)
@@ -65,7 +65,7 @@ def module_export(modulename, namespace, alltuple=__all__):
         module = importlib.import_module(modulename)
     name = nameof(module)
     namespace[modulename] = namespace[name] = module
-    alltuple += listify(name)
+    all += listify(name)
 
 # Warm up sys.modules and friends:
 import_clu_modules()

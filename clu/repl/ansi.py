@@ -45,7 +45,7 @@ class ANSI(AliasingEnumMeta):
         superkws = dict(kwargs)
         if 'source' in superkws:
             del superkws['source']
-        return super(ANSI, metacls).__prepare__(name, bases, **superkws)
+        return super().__prepare__(name, bases, **superkws)
     
     def __new__(metacls, name, bases, attributes, **kwargs):
         """ Override for `type.__new__(…)` setting up a derived
@@ -98,10 +98,10 @@ class ANSI(AliasingEnumMeta):
         attributes['__doc__']   = inspect.cleandoc(doc_string)
         attributes['to_string'] = to_string
         
-        return super(ANSI, metacls).__new__(metacls, name,
-                                                     bases,
-                                                     attributes,
-                                                   **kwargs)
+        return super().__new__(metacls, name,
+                                        bases,
+                                        attributes,
+                                      **kwargs)
     
     def for_name(cls, name):
         """ Get an enum member or alias member by name """
@@ -145,7 +145,7 @@ class ANSI(AliasingEnumMeta):
     
     def _missing_(cls, value):
         # Insert terminal256 lookup here
-        return super(ANSI, cls)._missing_(value)
+        return super()._missing_(value)
 
 @unique
 class Text(ANSIBase, metaclass=ANSI, source=colorama.Fore):

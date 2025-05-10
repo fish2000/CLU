@@ -230,6 +230,7 @@ ANSIFormatBase = NamedTuple('ANSIFormatBase', FIELDS)
 class ANSIFormat(clu.abstract.Format,
                  clu.abstract.Cloneable,
                  clu.abstract.ReprWrapper,
+                 clu.abstract.Serializable,
                  collections.abc.Hashable,
                  ANSIFormatBase):
     

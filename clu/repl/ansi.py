@@ -654,8 +654,6 @@ class DocFormat(clu.abstract.Format):
         cls = type(self)
         if not self.isatty:
             return cls.null
-        if not hasattr(cls, atx):
-            raise AttributeError(f"format not found: {atx!s}")
         return getattr(cls, atx)
     
     def put(self, string):

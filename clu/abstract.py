@@ -145,11 +145,23 @@ class Sanitizer(Format):
 
 class Serializable(abc.ABC):
     
+    """ An abstract class for something “serializable” – furnishing two
+        functions. A “from_dict(…)” class method takes a standard dict,
+        and returns a corresponding instance of the serializable class.
+        
+        The “to_dict(…)” instance method, by contrast, takes no arguments
+        and returns a plain dict based on the instance of the serializable
+        class. This dict is based on the class, and contains whatever the
+       “from_dict(…)” method expects.
+    """
+    
     @classmethod
     def from_dict(cls, instance_dict):
+        """ Returns an instance, per the plain dict passed """
         ...
     
     def to_dict(self):
+        """ Returns a plain dict, representing the instance """
         ...
 
 class Cloneable(abc.ABC):

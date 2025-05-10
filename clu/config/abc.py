@@ -442,6 +442,7 @@ class FlatOrderedSet(collections.abc.Set,
                      collections.abc.Reversible,
                      collections.abc.Hashable, clu.abstract.Cloneable,
                                                clu.abstract.ReprWrapper,
+                                               clu.abstract.Serializable,
                                                metaclass=clu.abstract.Slotted):
     
     """ FlatOrderedSet is a structure designed to coalesce any nested

@@ -62,7 +62,7 @@ BASE_PATH = os.path.join(
 # ENTRY POINTS
 ENTRY_POINTS = {
     'console_scripts'  : [    'clu-version = clu.repl.cli.print_version:print_version_command',
-                             'clu-ansidocs = clu.repl.cli.ansidocs:ansidocs_command'
+                             'clu-ansidocs = clu.repl.cli.ansidocs:ansidocs_command',
                           'clu-boilerplate = clu.repl.cli.boilerplate:boilerplate_command',
                            'clu-boilercopy = clu.repl.cli.boilerplate:boilerplate_copy_command'],
     'pytest11'         : [    'clu-testing = clu.testing.pytest']

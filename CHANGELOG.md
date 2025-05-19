@@ -1,9 +1,13 @@
 # Changelog
 
 
-## 0.12.5:pre5+g3b4ccc9 [SNAPSHOT]
+## v0.12.6 (2025-05-19)
 
 ### Other
+
+* Bumped version: 0.12.5 → 0.12.6. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * The ANSI docstring CLU command seems to be up to snuff. [Alexander Böhn]
 

@@ -3,7 +3,7 @@
 
 [![codecov](https://codecov.io/gh/fish2000/CLU/branch/master/graph/badge.svg)](https://codecov.io/gh/fish2000/CLU/)
 
-Install it right now! [Download][pypi-link] or type: `$ pip install -U python-clu`
+Install it right now! [Download][download-link] or type: `$ pip install -U python-clu`
 ------------------------------------------------------------------------------
 
 The deal with CLU is, it is a bunch of stuff. Like, a junk drawer… but a junk drawer
@@ -322,7 +322,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     (which we use) along with [our included noxfile][clu-noxfile].
 
 … AND MORE!!! There really are a ton of useful things in here and one day I will list them (but not today). 
-    Have fun with it!! [Download][pypi-link] CLU today and explore – if you want a full list of everything CLU
+    Have fun with it!! [Download][download-link] CLU today and explore – if you want a full list of everything CLU
     exports, install it and list them all in your terminal:
 
     $ pip install -U python-clu
@@ -339,7 +339,8 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     contributors, big and small!
 
 <!--- LINKS! LINKS! LINKS! -->
-[pypi-link]: https://files.pythonhosted.org/packages/aa/da/b52556dd89b45f2267e8fc8972b10dfaad196e849c51bf143297851713ce/python_clu-0.11.6.tar.gz
+[pypi-link]: https://pypi.org/project/python-clu/
+[download-link]: https://files.pythonhosted.org/packages/aa/da/b52556dd89b45f2267e8fc8972b10dfaad196e849c51bf143297851713ce/python_clu-0.11.6.tar.gz
 [homage-replutilities-link]: https://github.com/fish2000/homage/blob/master/.script-bin/replutilities.py
 [clu-tron-link]: https://tron.fandom.com/wiki/Clu
 

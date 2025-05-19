@@ -15,7 +15,7 @@ def version_string():
     semantic = f"{version.major}.{version.minor}.{version.patch}"
     
     if version.pre:
-        semantic += f"-{version.pre}"
+        semantic += f":pre{version.pre}"
         if version.build:
             semantic += f"+{version.build}"
         semantic += " [SNAPSHOT]"

@@ -1,13 +1,37 @@
 # Changelog
 
 
-## 0.12.4:pre12+g6e128ac [SNAPSHOT]
+## 0.12.5:pre5+g3b4ccc9 [SNAPSHOT]
+
+### Other
+
+* The ANSI docstring CLU command seems to be up to snuff. [Alexander Böhn]
+
+* Further along the prettyprinting path. [Alexander Böhn]
+
+* Started on a new CLU command to prettyprint ANSI docstrings. [Alexander Böhn]
+
+  … please bear with as we travel on this journey together
+
+* Gratuitously expanded the docstring for `negate(…)` in `clu.predicates` [Alexander Böhn]
+
+  … comparing the function to a child with oppositional-defiant disorder.
+    It makes a lot of sense, no?
+
+* Spruced up the ANSI inline tests. [Alexander Böhn]
+
+
+## v0.12.5 (2025-05-19)
 
 ### Add
 
 * Adding TOML module discussion screenshot. [Alexander Böhn]
 
 ### Other
+
+* Bumped version: 0.12.4 → 0.12.5. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * Starting to remove the legacy parts of `clu.config` [Alexander Böhn]
 

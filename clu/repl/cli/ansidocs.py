@@ -51,5 +51,5 @@ def ansidocs_command():
 if __name__ == '__main__':
     # sys.argv.append('clu.exporting.Exporter')
     # sys.argv.append('clu.repl.ansi.Text')
-    sys.argv.append('numpy.puke')
+    # sys.argv.append('numpy.puke')
     sys.exit(ansidocs_command())

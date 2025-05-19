@@ -40,6 +40,12 @@ False
 >>> uncallable = lambda thing: negate(callable)(thing) # see below!
 >>> os.path.differentfile = negate(os.path.samefile) # I’ll admit to having done this
 >>> misfnmatch = negate(shutil.fnmatch.fnmatch) # There are times when this makes sense
+
+### … Basically, `negate(…)` is like oppositional-defiant disorder for functions. Like,
+###   if your mom asks you “Do you want dinner?” she is passing you a lambda function for
+###   you to evaluate, returning True or False accordingly. But the ODD child of course
+###   does not simply return True or False – the ODD child will `negate(…)` their moms’
+###   lambda and pass it back to her. Totally.
 """
 
 # PREDICATE FUNCTIONS: boolean predicates for class types

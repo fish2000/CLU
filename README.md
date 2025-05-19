@@ -340,7 +340,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 
 <!--- LINKS! LINKS! LINKS! -->
 [pypi-link]: https://pypi.org/project/python-clu/
-[download-link]: https://files.pythonhosted.org/packages/c0/64/b1e51c8197ef3663a8596df56b62980ffcedaf62971c1e9d4c309865bf95/python_clu-0.12.3-py3-none-any.whl
+[download-link]: https://files.pythonhosted.org/packages/3e/af/4b0dfabe816cee7802cf6981f7f79770c4f05f8df4ac64fc6984789baaaa/python_clu-0.12.3.tar.gz
 [homage-replutilities-link]: https://github.com/fish2000/homage/blob/master/.script-bin/replutilities.py
 [clu-tron-link]: https://tron.fandom.com/wiki/Clu
 

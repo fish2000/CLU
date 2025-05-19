@@ -83,9 +83,10 @@ starmods = ('clu.repl.ansi',
             'clu.config.env',
             'clu.config.keymap',
             'clu.config.proxy',
-            'clu.dicts', 'clu.enums', 'clu.exporting', 'clu.extending', 'clu.shelving.redat',
-            'clu.importing', 'clu.mathematics', 'clu.naming', 'clu.predicates', 'clu.typology',
-            'clu.fs.abc', 'clu.fs.filesystem', 'clu.fs.misc', 'clu.repr', 'clu.scripts.treeline', 'clu.stdio',
+            'clu.dicts', 'clu.enums', 'clu.exporting',
+            'clu.importing', 'clu.naming', 'clu.predicates', 'clu.typology',
+            'clu.fs.abc', 'clu.fs.filesystem', 'clu.fs.misc', 'clu.repr',
+            'clu.scripts.treeline',
             'clu.typespace.namespace',
             'clu.testing.utils')
 
@@ -101,9 +102,12 @@ mods = ('clu',
         'clu.csv',
         'clu.fs.appdirectories',
         'clu.keyvalue',
+        'clu.mathematics',
         'clu.dispatch', 'clu.sanitizer', 'clu.fs.pypath',
+        'clu.extending', 'clu.shelving.redat',
         'clu.scripts.ansicolors',
         'clu.scripts.treeline',
+        'clu.stdio',
         'clu.typespace.types', # not technically a module!
         'clu.version', 'clu.version.git_version',
         'sys', 'os', 'io', 're', 'abc',
@@ -111,9 +115,8 @@ mods = ('clu',
         'datetime', 'functools', 'importlib', 'inspect',
         'itertools', 'math', 'operator', 'pathlib',
         'pickle', 'six', 'shutil', 'sysconfig', 'weakref',
-        'numpy', 'more_itertools', 'colorama', 'termcolor',
-        'xerox', 'zict', 'pytz', 'dateutil',
-        'termplotlib', 'termtables')
+        'numpy', 'more_itertools', 'colorama',
+        'xerox', 'zict')
 
 # “Star-import” all starmods – this is equivalent to doing:
 # 

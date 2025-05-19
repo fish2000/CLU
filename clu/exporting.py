@@ -545,10 +545,8 @@ class ExporterBase(collections.abc.MutableMapping,
         appdirs = AppDirs(appname=type(self).appname)
         
         # Ensure the user config directory exists:
-        try:
+        if not appdirs.user_config.exists:
             appdirs.user_config.makedirs()
-        except FilesystemError:
-            pass
         
         # Construct database filename:
         selfhash = self.hash()

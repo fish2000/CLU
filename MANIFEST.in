@@ -25,7 +25,6 @@ include noxfile.py
 include pyproject.toml
 include pytest.ini
 include pytype.cfg
-include setup.cfg
 include setup.py
 include tox.ini
 

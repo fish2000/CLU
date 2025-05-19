@@ -13,6 +13,7 @@ include codecov.yml
 include ABOUT.md
 include CHANGELOG.md
 include CLASSIFIERS.txt
+include CLU_Treatment.md
 include CODE_OF_CONDUCT.md
 include LICENSE.txt
 include README.md

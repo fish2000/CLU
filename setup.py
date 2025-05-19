@@ -139,6 +139,5 @@ setup(
     zip_safe=True,
     
     entry_points=ENTRY_POINTS,
-    install_requires=INSTALL_REQUIRES,
     include_dirs=include_dirs
 )

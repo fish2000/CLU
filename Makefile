@@ -1,6 +1,6 @@
 
 PROJECT_NAME = clu
-CLU_REPL_SCRIPT = $(PROJECT_BASE)/clu/scripts/repl.py
+CLU_REPL_SCRIPT = $(PROJECT_BASE)/$(PROJECT_NAME)/scripts/repl.py
 
 clean: clean-cython clean-build-artifacts clean-pyc
 
@@ -8,14 +8,10 @@ distclean: clean-cython clean-test-artifacts clean-build-artifacts
 
 rebuild: clean-build-artifacts cython
 
-dist: twine-upload
-
-upload: clean-build-artifacts bump dist
-	# git pushex
+upload: clean-build-artifacts changelog bump twine-upload
 	git push
 
-bigupload: clean-build-artifacts bigbump dist
-	# git pushex
+bigupload: clean-build-artifacts changelog bigbump twine-upload
 	git push
 
 clean-pyc:
@@ -28,9 +24,8 @@ clean-build-artifacts:
 	rm -rf build dist python_$(PROJECT_NAME).egg-info
 
 clean-test-artifacts:
-	rm -rf  $(PROJECT_ROOT)/.pytest_cache \
-			$(PROJECT_BASE)/.pytest_cache \
-			$(PROJECT_BASE)/.nox
+	rm -rf  $(PROJECT_ROOT)/.pytest_cache $(PROJECT_BASE)/.pytest_cache $(PROJECT_BASE)/.nox
+
 clean-type-caches:
 	rm -rf $(PROJECT_VENV)/var/cache/mypy_cache
 	rm -rf $(PROJECT_VENV)/var/cache/pytype
@@ -39,12 +34,12 @@ cython:
 	python setup.py build_ext --inplace
 
 sdist:
-	python setup.py sdist
+	python -m build
 
 wheel:
-	python setup.py bdist_wheel
+	python -m build -w
 
-twine-upload: cython sdist wheel
+twine-upload: sdist
 	twine upload -s $(PROJECT_BASE)/dist/*
 
 bump:
@@ -110,7 +105,7 @@ coverage:
 	python -m pytest -p pytest_cov --cov=$(PROJECT_NAME) tests/
 
 .PHONY: clean distclean rebuild
-.PHONY: dist upload bigupload
+.PHONY: upload bigupload
 .PHONY: clean-pyc clean-cython
 .PHONY: clean-build-artifacts clean-test-artifacts clean-pytest-artifacts
 

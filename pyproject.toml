@@ -1,16 +1,15 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools", "wheel", "build"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "python-clu"
 description = "Python-CLU: Common Lightweight Utilities"
 readme = "README.md"
-# license = 'MIT'
 license-files = ["LICENSE.txt"]
-keywords = ["setuptools", "command", "command-line",
+keywords = ["testing", "command", "command-line",
             "utilities", "modules", "REPL", "tools"]
-dynamic = ['classifiers', 'dependencies', 'version']
+dynamic = ['classifiers', 'dependencies', 'optional-dependencies', 'version']
 
 [[project.authors]]
 name = "Alexander Böhn"

@@ -31,7 +31,7 @@ clean-type-caches:
 	rm -rf $(PROJECT_VENV)/var/cache/pytype
 
 cython:
-	python setup.py build_ext --inplace
+	python -m setup build_ext --inplace
 
 sdist:
 	python -m build

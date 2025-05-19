@@ -259,7 +259,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     report – each test function only prints its output on the first run, the other 99 in this case are muted –
     that shows you the time totals, which will look like this:
     
-    [![CLU testrunner time totals](scratch/images/clu-testing-time-totals-example-small.jpg)](https://github.com/fish2000/CLU)
+    [![CLU testrunner time totals](scratch/images/clu-testing-time-totals-example-small.jpg)](https://github.com/fish2000/CLU/tree/master/scratch/images/clu-testing-time-totals-example.jpg)
     
     … which the astute will note is the output from a non-CLU module. [`clu.testing.utils`][clu.testing.utils]
     is very easy to integrate, as it doesn’t require any other part of CLU. Look over [our noxfile][clu-noxfile] for

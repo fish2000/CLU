@@ -332,7 +332,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 
 [![CLU module list](scratch/images/clu-module-list-example-small.jpg)](https://pypi.org/project/python-clu/)
 
-<a name="dagger">†</a> – the original code for some modules in CLU (e.g.
+<a name="dagger" style="text-decoration: none;">†</a> – the original code for some modules in CLU (e.g.
     [`clu.fs.appdirectories`][clu.fs.appdirectories], [`clu.repl.columnize`][clu.repl.columnize],
     [`clu.version.read_version`][clu.version.read_version]) was vendored in from third-party code.
     This has all been appropriately licensed and credits are inlined where due. Thanks to all CLU

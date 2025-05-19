@@ -1,7 +1,75 @@
 # Changelog
 
 
-## 0.12.3:pre13+g5d70474 [SNAPSHOT]
+## 0.12.4:pre12+g6e128ac [SNAPSHOT]
+
+### Add
+
+* Adding TOML module discussion screenshot. [Alexander Böhn]
+
+### Other
+
+* Starting to remove the legacy parts of `clu.config` [Alexander Böhn]
+
+  … fucking finally. These bits were an early draft of what became
+    the KeyMap system – they’ve been removed thoroughly from all the
+    farthest and darkest corners CLU has grown over the years. All
+    the legacy shit was pretty much only used in testing, and like
+    accedentally in some of the config file stuff. Good riddance I
+    say – the only thing that broke is a bunch of tests as old as the
+    legacy code itself. Yeah!
+
+* Updated the TOML file config reader (using native parsers) [Alexander Böhn]
+
+  … which can I ask, what the fuck is this dog’s breakfast with the
+    native TOML modules?! The standard-library pure-python thing is
+    just called “toml”. Fine, so far so good. Then, if you want
+    native TOML I/O, you have to install *two* native modules. The
+    one with “load(…)” and “loads(…)” is called ‘tomli’. Like, it’s
+    like “The ‘i’ is for input! Like accelerated input!” Sure. That’s
+    somewhat reasonable, it’d be nice if it was all in one module.
+    Because the other TOML native module has your “dump(…)” and your
+    “dumps(…)”, right, so what’s that one called though? Is it, by any
+    chance, ‘tomlo’? as in “The ‘o’ is for output”. Well no, that is
+    not the name of this module. In some sort of fit of solidarity
+    with ‘tomli’ the author of this shit decided to call it – wait
+    for it now…
+
+  			« tomli_w »
+
+  … yes you read that correctly. Not ‘tomlo’, not ‘tomlw’, none of
+    any sort of sense-making moniker, nor any moniker that doesn’t
+    make sense but at least was crafted with some sort of follow-able
+    logic. Nor, heaven forbid, would these modules be *combined* into
+    something sort of like the pure-python TOML thing, only native.
+    THAT WOULD BE WAY TOO MUCH TO ASK.
+
+  … so of course I did what I did in this commit, which was to firstly
+    import ‘tomli_w’ (The ‘w’ is for whatever!) as ‘tomlo’. And then
+    I stitched them together in a class called “toml” (crazy, right?)
+    that just had static alias methods to the native module functions.
+    Aesthetics are important, and they ain’t easy, it would seem. Yo.
+
+* Sometimes, I prefer to ask permission first. [Alexander Böhn]
+
+* Removed `setup.cfg` entry from `MANIFEST.in` [Alexander Böhn]
+
+* Minor `README.md` tweak. [Alexander Böhn]
+
+* Updated `README.md` with information on `clu.enums` and `clu.all` [Alexander Böhn]
+
+* EVEN MORE syntax-highlighted `README.md` code. [Alexander Böhn]
+
+* More syntax-highlighted	`README.md` code. [Alexander Böhn]
+
+* Trying out syntax-highlighted fenced code block in `README.md` [Alexander Böhn]
+
+* A few more addenda in `pyproject.toml` [Alexander Böhn]
+
+* Removed the old `setup.cfg` file. [Alexander Böhn]
+
+
+## v0.12.4 (2025-05-19)
 
 ### Add
 
@@ -10,6 +78,10 @@
   … because sometimes, I am lame
 
 ### Other
+
+* Bumped version: 0.12.3 → 0.12.4. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * More refinements to the whole `pyproject.toml` deal. [Alexander Böhn]
 

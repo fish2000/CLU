@@ -98,7 +98,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
             management, walking and reverse-walking, and much more.
     
     * [`fs.appdirectories`][clu.fs.appdirectories]: Started out as a pretty much wholesale duplication of the popular
-        [`appdirs`][appdirs-link] package[<sup>†</sup>](#dagger) – but it’s been kitted out with man CLUish things, e.g.
+        [`appdirs`][appdirs-link] package[<sup>†</sup>](#dagger) – but it’s been kitted out with many CLUish things, e.g.
         [`clu.fs.filesystem.Directory`][clu.fs.filesystem] instances. A solid upgrade in my opinion!
     
     * [`fs.misc`][clu.fs.misc]: a bunch of useful miscellany – noteworthy standouts include regex utility functions for

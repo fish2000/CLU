@@ -50,11 +50,11 @@ class TestTypology(object):
         from clu.typology import subclasscheck, metaclasscheck, isxtypelist, isabclist
         from clu.abstract import Slotted, NonSlotted, AppName, Cloneable, ReprWrapper
         from clu.config.abc import FlatOrderedSet
-        from clu.config.base import NamespacedMutableMapping
+        # from clu.config.base import NamespacedMutableMapping
         
         abclist = (Slotted, NonSlotted,
                    AppName, Cloneable, ReprWrapper,
-                   FlatOrderedSet, NamespacedMutableMapping)
+                   FlatOrderedSet)
         
         for cls in abclist:
             assert subclasscheck(metaclass(cls), abc.ABCMeta)

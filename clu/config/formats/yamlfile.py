@@ -5,7 +5,7 @@ import yaml
 
 from clu.constants.consts import PROJECT_NAME
 # from clu.config.keymap import FrozenNested
-from clu.config.base import Nested
+from clu.config.keymap import Nested
 from clu.config.filebase import FileBase
 from clu.exporting import Exporter
 

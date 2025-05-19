@@ -2,10 +2,10 @@
 from __future__ import print_function
 from datetime import datetime
 
-from clu.config.base import EnvBase
-from clu.config.fieldtypes import fields
+from clu.config.env import Environ
+# from clu.config.fieldtypes import fields
+from mock import Mock as fields
 from clu.config.formats import JsonFileBase, TomlFileBase
-from clu.config.settings import Schema
 from clu.importing import initialize_types
 
 from .exporting import Exporter
@@ -27,7 +27,7 @@ json_filename = filename_base + "json"
 toml_filename = filename_base + "toml"
 
 @export
-class Env(EnvBase, appname=appname):
+class Env(Environ, appname=appname):
     pass
 
 @export

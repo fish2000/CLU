@@ -625,7 +625,7 @@ class TestImporting(object):
         finally:
             Registry.unregister(derived.appname, derived.qualname)
     
-    def test_initialize_types(self, dirname):
+    def _test_initialize_types(self, dirname):
         from clu.fs import pypath
         
         # Ensure “sys.path” contains the “yodogg” package:

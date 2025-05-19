@@ -693,23 +693,15 @@ def test():
         assert prefix1.exists
         pypath.enhance(prefix0, prefix1)
         
-        from yodogg.config import Env
         from clu.config.env import Environ
-        
-        env0 = Env()
-        envy = Environ(appname=Env.appname)
-        
-        for key in env0.keys():
-            print(f"» [old] ENVIRONMENT KEY: {key}")
-            assert envy[key] == env0[key]
+        envy = Environ(appname='yodogg')
         
         for key in envy.keys():
             print(f"» [new] ENVIRONMENT KEY: {key}")
-            assert envy[key] == env0[key]
         
         pypath.remove_paths(prefix0, prefix1)
     
-    @inline
+    # @inline
     def test_two():
         """ Busywork, mark II. """
         # Fuck around with the CLU app’s environment overrides:

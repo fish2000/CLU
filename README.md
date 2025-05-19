@@ -1,7 +1,7 @@
 [Python-CLU][clu] – Common Lightweight Utilities (née Command-Line Utilities)
 ========================================================
 
-[![codecov](https://codecov.io/gh/fish2000/CLU/branch/master/graph/badge.svg)](https://codecov.io/gh/fish2000/CLU)
+[![codecov](https://codecov.io/gh/fish2000/CLU/branch/master/graph/badge.svg)](https://codecov.io/gh/fish2000/CLU/)
 
 Install it right now! [Download][pypi-link] or type: `$ pip install -U python-clu`
 ------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
             management, walking and reverse-walking, and much more.
     
     * [`fs.appdirectories`][clu.fs.appdirectories]: Started out as a pretty much wholesale duplication of the popular
-        [`appdirs`][appdirs-link] package<sup>†</sup> – but it’s been kitted out with man CLUish things, e.g.
+        [`appdirs`][appdirs-link] package<a href="#dagger"><sup>†</sup></a> – but it’s been kitted out with man CLUish things, e.g.
         [`clu.fs.filesystem.Directory`][clu.fs.filesystem] instances. A solid upgrade in my opinion!
     
     * [`fs.misc`][clu.fs.misc]: a bunch of useful miscellany – noteworthy standouts include regex utility functions for
@@ -141,7 +141,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 
 * [`repl`][clu.repl] and [`scripts`][clu.scripts]: Tools useful in Python REPL environments. In [`clu.repl`][clu.repl],
     there’s a while module full of ANSI printing and formatting utilities, many of them as classes, a [`columnize`][clu.repl.columnize]
-    function for, uh, printing things in columns<sup>†</sup>, and a [`modules`][clu.repl.modules] submodule
+    function for, uh, printing things in columns<a href="#dagger"><sup>†</sup></a>, and a [`modules`][clu.repl.modules] submodule
     focused on printing things about your project’s modules and submodules.
     
     [`clu.scripts`][clu.scripts] contains a [“repl.py”][clu.scripts.repl] file, which is meant to be loaded into an interactive interpreter like e.g.:
@@ -253,8 +253,20 @@ So do have a look around. Here’s an abridged breakdown of some things within:
         if __name__ == '__main__':
             sys.exit(test())
 
-    … there are other support tools in[ `clu.testing.utils`][clu.testing.utils], have a look. there’s also a
-    [`clu.testing.pytest`][clu.testing.pytest] submodule, with some currently-under-development
+    … running the module (with either `python -m yourapp.yourmodule` or, say, [Nox][nox-link]) will show
+    you each tests’ output. But see that `return inline.test(100)` line? That integer argument tells
+    the CLU testrunner how many times to run each test (we here like to go a hundred times). You’ll get a
+    report – each test function only prints its output on the first run, the other 99 in this case are muted –
+    that shows you the time totals, which will look like this:
+    
+    [![CLU testrunner time totals](scratch/images/clu-testing-time-totals-example-small.jpg)](https://github.com/fish2000/CLU)
+    
+    … which the astute will note is the output from a non-CLU module. [`clu.testing.utils`][clu.testing.utils]
+    is very easy to integrate, as it doesn’t require any other part of CLU. Look over [our noxfile][clu-noxfile] for
+    examples of how to run your inline tests as part of a larger suite.
+    
+    … there are other testing support tools in[ `clu.testing.utils`][clu.testing.utils], have a look. There’s
+    also a [`clu.testing.pytest`][clu.testing.pytest] submodule, with some currently-under-development
     [`pytest`][pytest-link] plugins.
 
 * [`mathematics`][clu.mathematics]: the future home for math-related stuff. All there is right now is a `clamp(…)` function that works with
@@ -281,12 +293,12 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     * Similar to the above, `pyattr(…)` does like `attr(…)` except `one` will be expanded to `__one__`, and
     `item(…)` searches over mapping keys rather than attribute names. 
     
-    Sweet, right? These functions, and others in the `predicates` module, are based on `accessor`, `aquirer`,
-    `searcher`, and `collator`, abstract functions that can themselves be used. In fact most of [`clu.predicates`][clu.predicates]
-    is written functional-style – that is to say they are built successively out of multiple `lambda` statements. If this
-    is not your taste, everything there has been documented thoroughly for your use and you shouldn’t have to
-    program in this style. But… if you _do_ enjoy a spot of FP, the primitives in the module perhaps will interest
-    you more than the more utilitarian contents.
+    Sweet, right? These functions, and others in the [`predicates`][clu.predicates] module, are based on `accessor`,
+    `aquirer`, `searcher`, and `collator` – abstract functions that can themselves be used. In fact most of
+    [`clu.predicates`][clu.predicates] is written in the functional style – that is to say they are built successively
+    out of multiple `lambda` statements. If this is not your taste, everything there has been documented thoroughly
+    for your use and you shouldn’t have to program in this style. But… if you _do_ enjoy a spot of FP, the primitives
+    in the module perhaps will interest you more than the more utilitarian contents.
 
 * [`sanitizer`][clu.sanitizer]: functions for cleaning up unicode. Right now there is just a list-based `sanitize(…)`
     function that tones down anything with high-value code points to the point where it can be safely `ascii`-ified. 
@@ -302,8 +314,12 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     primitives amongst other things. The (skeletal) [`git_version`][clu.version.git_version] subpackage has a
     couple of [Git-related][git-link] functions, but what you really want is in [`read_version`][clu.version.read_version]
     – therein you’ll find a `read_version_file(…)` function that uses the `ast` module to read one of those
-    `__version__.py` files I know you have lying around. Yes!<sup>†</sup>
+    `__version__.py` files I know you have lying around. Yes!<a href="#dagger"><sup>†</sup></a>
 
+* [The `pytest` testsuite][clu-testsuite]: CLU has a full set of [`pytest`][pytest-link]-compatible unit tests.
+    In addition to copious module-specific [CLU inline tests][clu.testing], you can run this test suite using
+    [`pytest`][pytest-link] – or, if you’d like to run *all* the tests, use the fantastic [Nox][nox-link] testrunner
+    (which we use) along with [our included noxfile][clu-noxfile].
 
 … AND MORE!!! There really are a ton of useful things in here and one day I will list them (but not today). 
     Have fun with it!! [Download][pypi-link] CLU today and explore – if you want a full list of everything CLU
@@ -316,9 +332,11 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 
 [![CLU module list](scratch/images/clu-module-list-example-small.jpg)](https://pypi.org/project/python-clu/)
 
-† – the original code for some modules in CLU (e.g. [`clu.fs.appdirectories`][clu.fs.appdirectories],
-    [`clu.repl.columnize`][clu.repl.columnize], [`clu.version.read_version`][clu.version.read_version]) was vendored in from third-party code. This has all been appropriately
-      licensed and credits are inlined where due. Thanks to all CLU contributors, big and small!
+<a name="dagger">†</a> – the original code for some modules in CLU (e.g.
+    [`clu.fs.appdirectories`][clu.fs.appdirectories], [`clu.repl.columnize`][clu.repl.columnize],
+    [`clu.version.read_version`][clu.version.read_version]) was vendored in from third-party code.
+    This has all been appropriately licensed and credits are inlined where due. Thanks to all CLU
+    contributors, big and small!
 
 <!--- LINKS! LINKS! LINKS! -->
 [pypi-link]: https://files.pythonhosted.org/packages/aa/da/b52556dd89b45f2267e8fc8972b10dfaad196e849c51bf143297851713ce/python_clu-0.11.6.tar.gz
@@ -335,6 +353,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 [ptpython-link]: https://github.com/prompt-toolkit/ptpython
 [semver-link]: https://pypi.org/project/semver/
 [pytest-link]: https://docs.pytest.org/en/stable/
+[nox-link]: https://nox.thea.codes/en/stable/
 [lego-link]: https://www.lego.com/
 [capsela-link]: https://hackaday.com/2017/09/15/retrotectactular-capsela-is-dead-long-live-capsela/
 [robotix-link]: https://en.wikipedia.org/wiki/Robotix
@@ -387,6 +406,9 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 [clu.version.VersionInfo]: https://github.com/fish2000/CLU/blob/9f64200a947dbdcbf7eca44b87d0d9efeb4c6de7/clu/version/__init__.py#L100-L248
 
 [clu]: https://github.com/fish2000/CLU
+[clu-testsuite]: https://github.com/fish2000/CLU/tree/master/tests
+[clu-noxfile]: https://github.com/fish2000/CLU/blob/master/noxfile.py
+
 [clu.abstract]: https://github.com/fish2000/CLU/tree/master/clu/abstract.py
 [clu.all]: https://github.com/fish2000/CLU/tree/master/clu/all.py
 [clu.application]: https://github.com/fish2000/CLU/tree/master/clu/application.py

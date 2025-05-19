@@ -26,14 +26,17 @@ def ansidocs_command():
     
     command = " ".join(sys.argv)
     executable, *dotpaths = shlex.split(command)
-    root = RootNode.populate(*dotpaths)
-    nodemap = NodeTreeMap(tree=root)
     
-    namespaces = tuple(nodemap.namespaces())
-    items = tuple(nodemap.items())
+    # root = RootNode.populate(*dotpaths)
+    # nodemap = NodeTreeMap(tree=root)
+    # namespaces = tuple(nodemap.namespaces())
+    # items = tuple(nodemap.items())
+    # print(f"NAMESPACES: {namespaces}")
+    # print(f"NODEMAP THINGS: {items}")
     
-    print(f"NAMESPACES: {namespaces}")
-    print(f"NODEMAP THINGS: {items}")
+    alldotpaths = " ".join(dotpaths)
+    print(f"EXECUTABLE: {executable}")
+    print(f"DOTPATHS: {alldotpaths}")
     
     # Return nice-nice for my POSI(X)ES:
     return os.EX_OK

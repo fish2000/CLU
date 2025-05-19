@@ -275,8 +275,11 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 * [`naming`][clu.naming]: functions for determining the names of things (even module constants and other random things
     that generally lack things like `__name__` attributes) and for the importing and exporting of things by
     “qualified names” – for instance, you can use `naming.qualified_import(…)` to import a class [`CurveSet`][instakit.processors.curves.CurveSet]
-    from its package [`instakit.processors.curves`][instakit.processors.curves] by doing `CurveSet = qualified_import('instakit.processors.curves.CurveSet')`,
-    which that may be handier for you than composing and hard-coding an `import` statement. See also the
+    from its package [`instakit.processors.curves`][instakit.processors.curves] by doing:
+    
+        CurveSet = qualified_import('instakit.processors.curves.CurveSet')
+    
+    … which that may be handier for you than composing and hard-coding an `import` statement. See also the
     `nameof(…)` and `moduleof(…)` functions, and the utility functions (e.g. `qualified_name(…)`) and
     predicates (e.g. `isnative(…)`). Most of these functions take literally anything for their argument.
 

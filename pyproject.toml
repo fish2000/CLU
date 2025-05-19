@@ -22,6 +22,7 @@ email = "fish2000@gmail.com"
 
 [project.scripts]
 clu-version = 'clu.repl.cli.print_version:print_version_command'
+clu-ansidocs = 'clu.repl.cli.ansidocs:ansidocs_command'
 clu-boilerplate = 'clu.repl.cli.boilerplate:boilerplate_command'
 clu-boilercopy = 'clu.repl.cli.boilerplate:boilerplate_copy_command'
 

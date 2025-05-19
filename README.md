@@ -98,7 +98,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
             management, walking and reverse-walking, and much more.
     
     * [`fs.appdirectories`][clu.fs.appdirectories]: Started out as a pretty much wholesale duplication of the popular
-        [`appdirs`][appdirs-link] package<a href="#dagger"><sup>†</sup></a> – but it’s been kitted out with man CLUish things, e.g.
+        [`appdirs`][appdirs-link] package[<sup>†</sup>](#dagger) – but it’s been kitted out with man CLUish things, e.g.
         [`clu.fs.filesystem.Directory`][clu.fs.filesystem] instances. A solid upgrade in my opinion!
     
     * [`fs.misc`][clu.fs.misc]: a bunch of useful miscellany – noteworthy standouts include regex utility functions for
@@ -141,7 +141,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 
 * [`repl`][clu.repl] and [`scripts`][clu.scripts]: Tools useful in Python REPL environments. In [`clu.repl`][clu.repl],
     there’s a while module full of ANSI printing and formatting utilities, many of them as classes, a [`columnize`][clu.repl.columnize]
-    function for, uh, printing things in columns<a href="#dagger"><sup>†</sup></a>, and a [`modules`][clu.repl.modules] submodule
+    function for, uh, printing things in columns[<sup>†</sup>](#dagger), and a [`modules`][clu.repl.modules] submodule
     focused on printing things about your project’s modules and submodules.
     
     [`clu.scripts`][clu.scripts] contains a [“repl.py”][clu.scripts.repl] file, which is meant to be loaded into an interactive interpreter like e.g.:
@@ -314,7 +314,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     primitives amongst other things. The (skeletal) [`git_version`][clu.version.git_version] subpackage has a
     couple of [Git-related][git-link] functions, but what you really want is in [`read_version`][clu.version.read_version]
     – therein you’ll find a `read_version_file(…)` function that uses the `ast` module to read one of those
-    `__version__.py` files I know you have lying around. Yes!<a href="#dagger"><sup>†</sup></a>
+    `__version__.py` files I know you have lying around. Yes![<sup>†</sup>](#dagger)
 
 * [The `pytest` testsuite][clu-testsuite]: CLU has a full set of [`pytest`][pytest-link]-compatible unit tests.
     In addition to copious module-specific [CLU inline tests][clu.testing], you can run this test suite using

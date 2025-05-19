@@ -13,14 +13,18 @@ def actually_print_ansidocs(dotpath):
     from clu.naming import qualified_import
     from clu.repl.ansi import DocFormat
     from importlib import import_module
+    ansidocs = DocFormat()
     
     # Attempt to import it:
     try:
         thing = qualified_import(dotpath)
     except ValueError:
         thing = import_module(dotpath)
+    except AttributeError as error:
+        error_string = str(error)
+        print(f"[ERROR] {error_string}", file=ansidocs.iohandle)
+        sys.exit(os.EX_CONFIG)
     
-    ansidocs = DocFormat()
     ansidocs(thing)
 
 def ansidocs_command():
@@ -35,6 +39,7 @@ def ansidocs_command():
         alldotpaths = " ".join(dotpaths)
         print(f"EXECUTABLE: {executable}")
         print(f"DOTPATHS: {alldotpaths}")
+        print()
     
     # The actual dirty work
     for dotpath in dotpaths:
@@ -46,4 +51,5 @@ def ansidocs_command():
 if __name__ == '__main__':
     # sys.argv.append('clu.exporting.Exporter')
     # sys.argv.append('clu.repl.ansi.Text')
+    sys.argv.append('numpy.puke')
     sys.exit(ansidocs_command())

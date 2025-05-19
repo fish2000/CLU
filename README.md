@@ -176,11 +176,12 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 * [`exporting`][clu.exporting]: This is kind of the heart of CLU. At the beginning of all internal CLU modules, you’ll find something
     using the `Exporter`, like this:
     
-        from clu.exporting import Exporter
-        
-        exporter = Exporter(path=__file__)
-        export = exporter.decorator()
+    ```python
+    from clu.exporting import Exporter
     
+    exporter = Exporter(path=__file__)
+    export = exporter.decorator()
+    ```
     … which I know, I know, the use of `__file__` there is kind of irritating. But that `exporter` instance is now
     registered with CLU, and whenever there’s a class or function you want made available outside the module,
     you can specify it like:

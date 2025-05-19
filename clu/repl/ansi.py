@@ -776,27 +776,31 @@ def test():
     from itertools import product
     
     @inline
-    def test_one():
+    def test_print_ansi():
+        """ No-nonsense check of “print_ansi(…)” """
         print_ansi('yo dogg')
         print_ansi_centered('I heard you like non-ANSI-formatted text')
     
     @inline
-    def test_one_point_five():
+    def test_legacy_ansidoc():
+        """ Try the legacy ANSIDoc functions """
         old_ansidoc(Exporter)
         old_ansidoc(product)
     
     @inline
-    def test_two():
+    def test_ansidoc():
+        """ Test the current (class-based) ANSIDoc function """
         ansidoc(Exporter)
         ansidoc(product)
     
     @inline
     def test_three():
+        """ Manual test of the DocFormat class """
         fmt = DocFormat()
         fmt(Exporter)
         fmt(product)
     
-    return inline.test()
+    return inline.test(10)
 
 if __name__ == '__main__':
     sys.exit(test())

@@ -1,3 +1,47 @@
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-clu"
+description = "Python-CLU: Common Lightweight Utilities"
+readme = "README.md"
+license-files = ["LICENSE.txt"]
+keywords = ["setuptools", "command", "command-line",
+            "utilities", "modules", "REPL", "tools"]
+dynamic = ['classifiers', 'dependencies', 'optional-dependencies', 'version']
+
+[[project.authors]]
+name = "Alexander Böhn"
+email = "fish2000@gmail.com"
+
+[project.scripts]
+clu-version = 'clu.repl.cli.print_version:print_version_command'
+clu-boilerplate = 'clu.repl.cli.boilerplate:boilerplate_command'
+clu-boilercopy = 'clu.repl.cli.boilerplate:boilerplate_copy_command'
+
+[project.entry-points.pytest11]
+clu-testing = 'clu.testing.pytest'
+
+[project.urls]
+homepage = "https://github.com/fish2000/CLU"
+repository = "https://github.com/fish2000/CLU"
+documentation = "https://github.com/fish2000/CLU/blob/master/README.md"
+source = "https://github.com/fish2000/CLU"
+tracker = "https://github.com/fish2000/CLU/issues"
+changelog = "https://github.com/fish2000/CLU/blob/master/CHANGELOG.md"
+download = "https://pypi.org/project/python-clu/"
+
+[tool.setuptools.dynamic]
+classifiers = { file = "CLASSIFIERS.txt" }
+dependencies = { file = "requirements/install.txt" }
+optional-dependencies = { all = { file = "requirements/dev.txt" } }
+# version = { attr = "clu.version_info" }
+version = { file = "clu/__version__.py" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["clu*"]
+
+[tool.pytest.ini_options]
+delete_temps = true

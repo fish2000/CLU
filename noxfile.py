@@ -22,6 +22,12 @@ def checkmanifest(session):
     session.run('python', '-m', 'check_manifest', '-v')
 
 @nox.session
+def checkpyproject(session):
+    """ Validate CLU’s pyproject.toml """
+    session.install("-r", "requirements/nox/pyproject.txt")
+    session.run('validate-pyproject', 'pyproject.toml')
+
+@nox.session
 @nox.parametrize('module', (
     nox.param('clu.constants',      id='consts'),
     nox.param('clu',                id='modules'),

@@ -1,5 +1,6 @@
 
 PROJECT_NAME = clu
+CLU_REPL_SCRIPT = $(PROJECT_BASE)/clu/scripts/repl.py
 
 clean: clean-cython clean-build-artifacts clean-pyc
 
@@ -93,19 +94,17 @@ changelog: remove-changelog
 	gitchangelog > CHANGELOG.md
 
 repl:
-	python -m bpython --config=$(PROJECT_ROOT)/.config/bpython/config.py3 -i $(PROJECT_BASE)/clu/scripts/repl.py
+	python -m bpython --config=$(PROJECT_ROOT)/.config/bpython/config.py3 -i $(CLU_REPL_SCRIPT)
 
 ipy:
-	python -m IPython --autoindent --pylab --colors=LightBG \
-			--config=$(PROJECT_ROOT)/.config/ipython/config3.py \
-			-i $(PROJECT_BASE)/clu/scripts/repl.py
+	python -m IPython --autoindent --pylab --colors=LightBG --config=$(PROJECT_ROOT)/.config/ipython/config3.py -i $(CLU_REPL_SCRIPT)
 
 ptpy:
-	python -m ptpython -i $(PROJECT_BASE)/clu/scripts/repl.py
+	python -m ptpython -i $(CLU_REPL_SCRIPT)
 
 # this loads the system IPython, not the virtualenv:
 ptipy:
-	ptipython -i $(PROJECT_BASE)/clu/scripts/repl.py
+	ptipython -i $(CLU_REPL_SCRIPT)
 
 coverage:
 	python -m pytest -p pytest_cov --cov=$(PROJECT_NAME) tests/

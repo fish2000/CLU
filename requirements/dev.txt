@@ -4,6 +4,7 @@
 -r typecheck.txt
 blessings>=1.7
 bpython>=0.19
+build
 bump-my-version
 check-manifest>=0.40
 coverage>=5.0.0
@@ -14,7 +15,7 @@ greenlet>=0.4.0
 ipython>=7.10.0
 jedi>=0.16.0
 lmdb>=0.8.0
-# nox>=2019.11.9
+nox
 parso>=0.6.1
 prompt-toolkit>=3.0.3
 ptpython>=3.0.0
@@ -29,7 +30,6 @@ termtables>=0.1.0
 tifffile>=2019.7.26
 twine>=3.1.0
 urllib3>=1.25.0
-# yajl>=0.3.2
 yapf>=0.29.0
 yolk1977>=0.1.0
 wcwidth>=0.1.8

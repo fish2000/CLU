@@ -1,7 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-import toml
+try:
+    import tomli
+    import tomli_w as tomlo
+except (ImportError, ModuleNotFoundError):
+    # print("Using Python toml module")
+    import toml
+else:
+    # print("Using native toml modules")
+    class toml:
+        dump = staticmethod(tomlo.dump)
+        load = staticmethod(tomli.load)
+        dumps = staticmethod(tomlo.dumps)
+        loads = staticmethod(tomli.loads)
 
 from clu.constants.consts import PROJECT_NAME
 # from clu.config.keymap import FrozenNested
@@ -89,12 +101,10 @@ def test():
     
     print(f"»        cls.appname = {toml_file.appname}")
     print(f"»       cls.filename = {toml_file.filename}")
-    print()
-    
-    print(f"»          self.tree = {pformat(toml_file.tree)}")
     print(f"»      self.filepath = {toml_file.filepath}")
     print(f"»    self.filesuffix = {toml_file.filesuffix}")
     print()
+    print(f"»          self.tree = {pformat(toml_file.tree)}")
     
     # TomlFile.find_file(user_dirs=set())
 

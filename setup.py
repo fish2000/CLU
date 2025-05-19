@@ -127,7 +127,7 @@ setup(
     
     keywords=" ".join(KEYWORDS),
     url=PROJECT_GH_URL, download_url=PROJECT_DL_URL,
-    license=LICENSE, platforms=['any'],
+    platforms=['any'],
     classifiers=CLASSIFIERS,
     
     packages=[package for package in find_packages() \

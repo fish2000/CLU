@@ -6,10 +6,11 @@ build-backend = "setuptools.build_meta"
 name = "python-clu"
 description = "Python-CLU: Common Lightweight Utilities"
 readme = "README.md"
+# license = 'MIT'
 license-files = ["LICENSE.txt"]
 keywords = ["setuptools", "command", "command-line",
             "utilities", "modules", "REPL", "tools"]
-dynamic = ['classifiers', 'dependencies', 'optional-dependencies', 'version']
+dynamic = ['classifiers', 'dependencies', 'version']
 
 [[project.authors]]
 name = "Alexander Böhn"
@@ -35,9 +36,9 @@ download = "https://pypi.org/project/python-clu/"
 [tool.setuptools.dynamic]
 classifiers = { file = "CLASSIFIERS.txt" }
 dependencies = { file = "requirements/install.txt" }
-optional-dependencies = { all = { file = "requirements/dev.txt" } }
-# version = { attr = "clu.version_info" }
-version = { file = "clu/__version__.py" }
+# optional-dependencies = { all = { file = "requirements/dev.txt" } }
+version = { attr = "clu.__version__" }
+# version = { file = "clu/__version__.py" }
 
 [tool.setuptools.packages.find]
 where = ["."]

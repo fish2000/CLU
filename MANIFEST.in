@@ -33,7 +33,7 @@ recursive-include clu *
 recursive-include docs *
 recursive-include hooks *
 recursive-include requirements *.txt
-recursive-include scratch *.py *.ipynb
+recursive-include scratch *.py *.ipynb *.jpg *.pxd
 recursive-include tests *.py *.jpg *.png *.toml *.json .tm_properties
 
 exclude .coverage

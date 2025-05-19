@@ -91,10 +91,10 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     [polyfills][clu.constants.polyfills] to allow certain dependencies from the Python standard library to work even
     when some of their moving parts are missing (i.e. Ye Olde Pythone 2.7, various PyPy implementations, etc).
 
-* [`all`][clu.all]: Herein you will find some verrrrry interesting “meta” functions for CLU. You have `import_all_modules(…)`,
-    which when provided your projects’ base path and appname, will return all the package names therein, whether
-    class-based modules defined through [`clu.exporting`][clu.exporting] or plain ol’ modules defined by files ending
-    in “.py”, basically. It’s awesome.
+* [`all`][clu.all]: Herein you will find some verrrrry interesting “meta” functions for CLU. You have the `import_all_modules(…)`
+    function, which when provided your projects’ base path and appname, will return all the package names therein,
+    whether class-based modules defined through [`clu.exporting`][clu.exporting] or plain ol’ modules defined by files
+    ending in “.py”, basically. It’s awesome.
     
     The companion function `import_clu_modules(¬)` is a shortcut just for everything within CLU, and `inline_tests(…)`
     yields an iterator over every CLU module that defines inline tests through [`clu.testing`][clu.testing]. These

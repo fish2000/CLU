@@ -48,20 +48,24 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     around lexically namespaced dictionaries called “KeyMaps”, which basic examples of which can be
     found in [`clu.config.keymap`][clu.config.keymap]. If your nested data looks like:
 
-        data = {
-            'yo' : {
-                'dogg' : {
-                    'i-heard' : {
-                        'you-like' : "nested data"
-                    }
+    ```python
+    data = {
+        'yo' : {
+            'dogg' : {
+                'i-heard' : {
+                    'you-like' : "nested data"
                 }
             }
         }
+    }
+    ```
     
     … and you assign it to a keymap, like e.g. `keyed = keymap.Nested(data).flatten()`, then you can
     use `keyed` like so:
     
-        assert keyed["yo:dogg:i-heard:you-like"] == "nested data"
+    ```python
+    assert keyed["yo:dogg:i-heard:you-like"] == "nested data"
+    ```
     
     … The `Flat` and `Nested` classes are cheap to construct and lightweight, and generally act like most
     [`dict`][dicts] instances in most of the expected ways. There is also an environment-variable [`keymap`][clu.config.keymap]
@@ -69,10 +73,12 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     `MYAPP_CONFIG_THINGY`, they can be accessed through `env.FrozenEnviron(appname='myapp')` or
     `env.Environ(appname='myapp')` like so:
     
-        appenv = Environ(appname='myapp')
-        assert appenv['config:thingy'] == "some value"
-        appenv['config:doohickey'] = "a different value" # sets MYAPP_CONFIG_DOOHICKEY
-                                                         # in the current env
+    ```python
+    appenv = Environ(appname='myapp')
+    assert appenv['config:thingy'] == "some value"
+    appenv['config:doohickey'] = "a different value" # sets MYAPP_CONFIG_DOOHICKEY
+                                                     # in the current env
+    ```
     
     … and there are plenty of tools for rolling your own `KeyMap`s in [`clu.config`][clu.config]: the
     [`proxy`][clu.config.proxy] subpackage has a `KeyMap` proxy class, [`ns`][clu.config.ns] has utility functions
@@ -125,7 +131,6 @@ So do have a look around. Here’s an abridged breakdown of some things within:
             return None
     
         export(yo, name='yo')
-    ```
     
     from clu.app import Derived as derived # TAKE NOTE!!!
     
@@ -133,6 +138,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     assert derived.yo == 'dogg'
     assert derived.yodogg() == "I heard you like"
     assert derived.nodogg() is None
+    ```
 
     … see that? just by subclassing [`clu.importing.base.Module`][clu.importing.base] you can create something
     instantly importable. Awesome, wouldn’t you say? I would say. We’re working out the best way to create the
@@ -205,7 +211,9 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     
     At the end of the module (but before your CLU tests, q.v. note _sub_.) you put:
     
-        __all__, __dir__ = exporter.all_and_dir()
+    ```python
+    __all__, __dir__ = exporter.all_and_dir()
+    ```
     
     … which makes things clear what is public and what is private to consumers of your code, without messing
     around with underscore prefixes, which I find coarse, and vulgar. You’re not just labeling things for export,
@@ -216,8 +224,10 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     For your own project, at some part in your code, all you have to do is: `from clu.exporting import ExporterBase`,
     and then subclass `ExporterBase` with your app’s name and base path. Like so:
     
-        class Exporter(ExporterBase, basepath="/your/project", appname="MyProject"):
-            pass
+    ```python
+    class Exporter(ExporterBase, basepath="/your/project", appname="MyProject"):
+        pass
+    ```
     
     … then import your own importer (or call it whatever you want) at the top of your own CLUish modules and
     instantiate per the example _supra_. See also [`clu.scripts.dictroast`][clu.scripts.dictroast] for other tricks your
@@ -227,38 +237,40 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     [`pytest`][pytest-link] – all you have to do is, after your line assigning `__all__` and `__dir__` at the end
     of the module proper, something like:
     
-        def test():
-            from clu.testing.utils import inline
-        
-            @inline.precheck
-            def before_everything_else():
-        	    """ This function runs once before testing """
-                # ...
-                
-            @inline
-            def first_test():
-                """ This test does one thing """
-                # ...
-                
-            @inline
-            def second_test():
-        	    """ This test does another thing """
-                # ...
-                
-            @inline.runif(something == something_else)
-            def test_conditionally_run():
-        	    """ This test only does something if `something` == `something_else` """
-                # ...
-                
-            @inline.diagnostic
-            def apres_testing():
-        	    """ This function runs once after testing """
-                # ...
-                
-            return inline.test(100)
-        
-        if __name__ == '__main__':
-            sys.exit(test())
+    ```python
+    def test():
+        from clu.testing.utils import inline
+    
+        @inline.precheck
+        def before_everything_else():
+    	    """ This function runs once before testing """
+            # ...
+            
+        @inline
+        def first_test():
+            """ This test does one thing """
+            # ...
+            
+        @inline
+        def second_test():
+    	    """ This test does another thing """
+            # ...
+            
+        @inline.runif(something == something_else)
+        def test_conditionally_run():
+    	    """ This test only does something if `something` == `something_else` """
+            # ...
+            
+        @inline.diagnostic
+        def apres_testing():
+    	    """ This function runs once after testing """
+            # ...
+            
+        return inline.test(100)
+    
+    if __name__ == '__main__':
+        sys.exit(test())
+    ```
 
     … running the module (with either `python -m yourapp.yourmodule` or, say, [Nox][nox-link]) will show
     you each tests’ output. But see that `return inline.test(100)` line? That integer argument tells
@@ -284,7 +296,9 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     “qualified names” – for instance, you can use `naming.qualified_import(…)` to import a class [`CurveSet`][instakit.processors.curves.CurveSet]
     from its package [`instakit.processors.curves`][instakit.processors.curves] by doing:
     
-        CurveSet = qualified_import('instakit.processors.curves.CurveSet')
+    ```python
+    CurveSet = qualified_import('instakit.processors.curves.CurveSet')
+    ```
     
     … which that may be handier for you than composing and hard-coding an `import` statement. See also the
     `nameof(…)` and `moduleof(…)` functions, and the utility functions (e.g. `qualified_name(…)`) and

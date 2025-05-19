@@ -1,7 +1,7 @@
 # Changelog
 
 
-## 0.12.3:pre9+gf812e85 [SNAPSHOT]
+## 0.12.3:pre13+g5d70474 [SNAPSHOT]
 
 ### Add
 
@@ -10,6 +10,16 @@
   … because sometimes, I am lame
 
 ### Other
+
+* More refinements to the whole `pyproject.toml` deal. [Alexander Böhn]
+
+* Fixed a few `pyproject.toml` build-related things. [Alexander Böhn]
+
+* Removed the CLU Treatment.md symlink. [Alexander Böhn]
+
+  … ooooooooof.
+
+* Seriously fleshing out `pyproject.toml` stuff. [Alexander Böhn]
 
 * The `clu-version` command’s prerelease string format is better. [Alexander Böhn]
 

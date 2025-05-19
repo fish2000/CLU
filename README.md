@@ -109,28 +109,30 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     
 * [`importing`][clu.importing]: a whole class-based-module system! Basically you can do this:
 
-        class Derived(clu.importing.base.Module):
-        
-            """ I heard you like docstrings """
-        
-            yo = 'dogg'
-        
-            @export
-            def yodogg(self):
-                return "I heard you like"
-        
-            @export
-            def nodogg(self):
-                return None
-        
-            export(yo, name='yo')
-        
-        from clu.app import Derived as derived # TAKE NOTE!!!
-        
-        assert isinstance(derived, Module)
-        assert derived.yo == 'dogg'
-        assert derived.yodogg() == "I heard you like"
-        assert derived.nodogg() is None
+    ```python
+    class Derived(clu.importing.base.Module):
+    
+        """ I heard you like docstrings """
+    
+        yo = 'dogg'
+    
+        @export
+        def yodogg(self):
+            return "I heard you like"
+    
+        @export
+        def nodogg(self):
+            return None
+    
+        export(yo, name='yo')
+    ```
+    
+    from clu.app import Derived as derived # TAKE NOTE!!!
+    
+    assert isinstance(derived, Module)
+    assert derived.yo == 'dogg'
+    assert derived.yodogg() == "I heard you like"
+    assert derived.nodogg() is None
 
     … see that? just by subclassing [`clu.importing.base.Module`][clu.importing.base] you can create something
     instantly importable. Awesome, wouldn’t you say? I would say. We’re working out the best way to create the
@@ -146,7 +148,9 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     
     [`clu.scripts`][clu.scripts] contains a [“repl.py”][clu.scripts.repl] file, which is meant to be loaded into an interactive interpreter like e.g.:
     
-        $ bpython -i «PATH_TO_CLU»/clu/scripts/repl.py
+    ```bash
+    $ bpython -i «PATH_TO_CLU»/clu/scripts/repl.py
+    ```
     
     … which will set all of CLU up for you to use interactively. N.B. if you have your own script you want to include
     but stil want to use CLU, you can set the `CLU_USER_SCRIPT` environment variable to the path to your own script,
@@ -186,16 +190,18 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     registered with CLU, and whenever there’s a class or function you want made available outside the module,
     you can specify it like:
     
-        @export
-        def public_function():
-            print("I’m so public")
-            
-        class PrivateAncestor:
-            """ I’m more private, don’t play with me """
-            
-        @export
-        class PublicThing(PrivateAncestor):
-            """ I’m very public, indeed, and available """
+    ```python
+    @export
+    def public_function():
+        print("I’m so public")
+        
+    class PrivateAncestor:
+        """ I’m more private, don’t play with me """
+        
+    @export
+    class PublicThing(PrivateAncestor):
+        """ I’m very public, indeed, and available """
+    ```
     
     At the end of the module (but before your CLU tests, q.v. note _sub_.) you put:
     

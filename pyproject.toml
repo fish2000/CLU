@@ -6,12 +6,17 @@ build-backend = "setuptools.build_meta"
 name = "python-clu"
 description = "Python-CLU: Common Lightweight Utilities"
 readme = "README.md"
+license = "LicenseRef-CLU-MIT"
 license-files = ["LICENSE.txt"]
 keywords = ["testing", "command", "command-line",
             "utilities", "modules", "REPL", "tools"]
 dynamic = ['classifiers', 'dependencies', 'optional-dependencies', 'version']
 
 [[project.authors]]
+name = "Alexander Böhn"
+email = "fish2000@gmail.com"
+
+[[project.maintainers]]
 name = "Alexander Böhn"
 email = "fish2000@gmail.com"
 

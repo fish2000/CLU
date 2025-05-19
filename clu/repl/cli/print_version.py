@@ -29,13 +29,22 @@ def print_version_command():
         in ancilliary human-readable copyright information
     """
     semantic = version_string()
-    copyright = f"CLU version {semantic} © 2010-2032 Alexander Böhn"
+    flags = ('--version-only', '-V')
     
-    # print it:
+    # check if we just want the version number:
+    for flag in flags:
+        if flag in sys.argv:
+            # Just print the number and return OK:
+            print(semantic)
+            return os.EX_OK
+    
+    # print the whole schpiel:
+    copyright = f"CLU version {semantic} © 2010-2032 Alexander Böhn"
     print(copyright)
     
     # Return nice-nice for my POSI(X)ES:
     return os.EX_OK
 
 if __name__ == '__main__':
+    # sys.argv += ['--version-only']
     sys.exit(print_version_command())

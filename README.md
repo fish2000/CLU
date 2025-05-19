@@ -1,4 +1,4 @@
-[Python-CLU][clu] – Common Lightweight Utilities (née Command-Line Utilities)
+[Python-CLU][clu] – Common Lightweight Utilities
 ========================================================
 
 [![codecov](https://codecov.io/gh/fish2000/CLU/branch/master/graph/badge.svg)](https://codecov.io/gh/fish2000/CLU/)

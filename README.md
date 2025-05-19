@@ -91,6 +91,15 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     [polyfills][clu.constants.polyfills] to allow certain dependencies from the Python standard library to work even
     when some of their moving parts are missing (i.e. Ye Olde Pythone 2.7, various PyPy implementations, etc).
 
+* [`all`][clu.all]: Herein you will find some verrrrry interesting “meta” functions for CLU. You have `import_all_modules(…)`,
+    which when provided your projects’ base path and appname, will return all the package names therein, whether
+    class-based modules defined through [`clu.exporting`][clu.exporting] or plain ol’ modules defined by files ending
+    in “.py”, basically. It’s awesome.
+    
+    The companion function `import_clu_modules(¬)` is a shortcut just for everything within CLU, and `inline_tests(…)`
+    yields an iterator over every CLU module that defines inline tests through [`clu.testing`][clu.testing]. These
+    are very useful within CLU; for your own project, write your own functions modeled after these! You can’t go wrong.
+
 * [`fs`][clu.fs]: Filesystem-related things. Submodules include:
     
     * [`fs.filesystem`][clu.fs.filesystem]: classes representing filesystem primitives like `Directory`,
@@ -176,6 +185,34 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     that these things are types because they are in the fucking [`types`][types] module and don’t need those overly verbose extra four characters
     there at the end. ALSO, there are additional useful types, from Python’s standard library and common packages,
     in the [`types` namespace][clu.typespace.namespace]. YOU’RE WELCOME!!
+
+* [`enums`][clu.enums]: Furnishes  `alias(…)` – which, spoiler alert, let you create aliases within your enums!
+    Oh yes. Like so:
+    
+    ```python
+    
+    from clu.enums import alias
+    
+    @unique
+    class Numbers(Enum):
+        ONE = 1
+        TWO = 2
+        THREE = 3
+        UNO = alias(ONE)
+        DOS = alias(TWO)
+        TRÉS = alias(THREE)
+    
+    assert Numbers.ONE == Numbers.UNO
+    assert Numbers.TWO == Numbers.DOS
+    assert Numbers.THREE == Numbers.TRÉS
+    
+    ```
+    
+    … aaaaand BOOM, there you go! The `alias` members of an enum don’t show up when iterating the
+    enum’s members, so they’re for your convenience. For a fantastic CLUish real-life example, have a look at
+    the [`clu.repl.ansi`][clu.repl.ansi] module, and [the enums it defines][clu.repl.ansi.enums] – these use a metaclass
+    to line the enum’s standard members up with some predefined class attributes defined in a third-party module;
+    we use `alias(…)` to provide more obvious lexical aliases of these attributes. Yes!
 
 * [`dicts`][clu.dicts]: Functions and classes for wrangling [`dict`s][dicts] (and actually [`Mapping`][collections.abc.Mapping]
     and [`MutableMapping`][collections.abc.MutableMapping] descendants in general). There are ABCs for
@@ -409,6 +446,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 
 [clu.repl]: https://github.com/fish2000/CLU/tree/master/clu/repl
 [clu.repl.ansi]: https://github.com/fish2000/CLU/tree/master/clu/repl/ansi.py
+[clu.repl.ansi.enums]: https://github.com/fish2000/CLU/blob/c5be3edcea7774b0d042b13125458fef6bd8a303/clu/repl/ansi.py#L150-L222
 [clu.repl.banners]: https://github.com/fish2000/CLU/tree/master/clu/repl/banners.py
 [clu.repl.columnize]: https://github.com/fish2000/CLU/tree/master/clu/repl/columnize.py
 [clu.repl.modules]: https://github.com/fish2000/CLU/tree/master/clu/repl/modules.py

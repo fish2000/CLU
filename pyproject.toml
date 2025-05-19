@@ -36,9 +36,8 @@ download = "https://pypi.org/project/python-clu/"
 [tool.setuptools.dynamic]
 classifiers = { file = "CLASSIFIERS.txt" }
 dependencies = { file = "requirements/install.txt" }
-# optional-dependencies = { all = { file = "requirements/dev.txt" } }
+optional-dependencies = { all = { file = "requirements/nox/tests.txt" } }
 version = { attr = "clu.__version__" }
-# version = { file = "clu/__version__.py" }
 
 [tool.setuptools.packages.find]
 where = ["."]

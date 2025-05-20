@@ -6,14 +6,15 @@ import os
 import sys
 import shlex
 
+from clu.repl.ansi import DocFormat
+ansidocs = DocFormat()
+
 def actually_print_ansidocs(dotpath):
     """ This function prints the ANSI docs directly to standard output,
         formatting accordingly (as in, no ANSI if we can’t ANSI)
     """
     from clu.naming import qualified_import
-    from clu.repl.ansi import DocFormat
     from importlib import import_module
-    ansidocs = DocFormat()
     
     # Attempt to import it:
     try:
@@ -25,6 +26,7 @@ def actually_print_ansidocs(dotpath):
         print(f"[ERROR] {error_string}", file=ansidocs.iohandle)
         sys.exit(os.EX_CONFIG)
     
+    # This goes directly to stdout:
     ansidocs(thing)
 
 def ansidocs_command():

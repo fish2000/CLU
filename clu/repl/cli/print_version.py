@@ -46,5 +46,4 @@ def print_version_command():
     return os.EX_OK
 
 if __name__ == '__main__':
-    # sys.argv += ['--version-only']
     sys.exit(print_version_command())

@@ -49,7 +49,4 @@ def ansidocs_command():
     return os.EX_OK
 
 if __name__ == '__main__':
-    # sys.argv.append('clu.exporting.Exporter')
-    # sys.argv.append('clu.repl.ansi.Text')
-    # sys.argv.append('numpy.puke')
     sys.exit(ansidocs_command())

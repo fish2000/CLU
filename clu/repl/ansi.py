@@ -493,12 +493,11 @@ def signature(thing):
     """
     try:
         return nameof(thing) + str(inspect.signature(thing))
-    except ValueError as exc:
-        if 'no signature found' in str(exc):
-            doc = inspect.getdoc(thing)
-            if doc:
-                return arrow_re.sub(arrow_sb,
-                                    doc.splitlines()[0].strip())
+    except (TypeError, ValueError):
+        doc = inspect.getdoc(thing)
+        if doc:
+            return arrow_re.sub(arrow_sb,
+                                doc.splitlines()[0].strip())
     return None
 
 @export

@@ -1,11 +1,11 @@
 Development Status :: 5 - Production/Stable
 Framework :: Pytest
+Framework :: Python-CLU
 Intended Audience :: Developers
 Topic :: Software Development
 Topic :: Software Development :: Testing
 Topic :: Utilities
 Operating System :: MacOS
-Operating System :: Microsoft :: Windows
 Operating System :: OS Independent
 Operating System :: POSIX
 Operating System :: Unix

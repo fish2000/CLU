@@ -292,6 +292,7 @@ uncallable      = negate(callable) # type: ignore
 hoist           = lambda thing: uncallable(thing) and wrap_value(thing) or thing
 
 pyname          = lambda thing: pyattr(thing, 'name', 'qualname')
+pyqualname      = lambda thing: pyattr(thing, 'qualname', 'name')
 pymodule        = lambda thing: pyattr(thing, 'module', 'package')
 
 the_expandables = (tuple, list, set, frozenset,
@@ -583,8 +584,9 @@ export(true_function,   name='true_function',   doc="true_function() → A funct
 export(false_function,  name='false_function',  doc="false_function() → A function that always returns False")
 export(uncallable,      name='uncallable',      doc="uncallable(thing) → boolean predicate, shortcut for `not callable(thing)`")
 export(hoist,           name='hoist',           doc="hoist(thing) → if “thing” isn’t already callable, turn it into a lambda that returns it as a value (using “wrap_value(…)”).")
-export(pyname,          name='pyname',          doc="pyname(thing) → Return either `__qualname__` or `__name__` from a given `thing`")
-export(pymodule,        name='pymodule',        doc="pymodule(thing) → Return either `__module__` or `__package__` from a given `thing`")
+export(pyname,          name='pyname',          doc="pyname(thing) → Return either `__qualname__` or `__name__` (in that order) from a given `thing`")
+export(pyqualname,      name='pyqualname',      doc="pyqualname(thing) → Return either `__name__` or `__qualname__` (in that order) from a given `thing`")
+export(pymodule,        name='pymodule',        doc="pymodule(thing) → Return either `__module__` or `__package__` (in that order) from a given `thing`")
 
 export(isexpandable,    name='isexpandable',    doc="isexpandable(thing) → boolean predicate, True if `thing` can be `*expanded`")
 export(isnormative,     name='isnormative',     doc="isnormative(thing) → boolean predicate, True if `thing` is a string-like or bytes-like iterable")

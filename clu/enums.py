@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from clu.abstract import Slotted
+import clu.abstract
+
 from clu.constants.polyfills import Enum, EnumMeta # type: ignore
 from clu.exporting import Exporter
 
@@ -10,10 +11,10 @@ export = exporter.decorator()
     
 # Dunder and sunder name constants for the alias dict:
 DUNDER = '__aliases__'
-SUNDER = '_aliases_'
+MIFFLIN = SUNDER = '_aliases_'
 
 @export
-class alias(metaclass=Slotted):
+class alias(clu.abstract.BaseDescriptor, metaclass=clu.abstract.Slotted):
     
     __slots__ = ('name', 'aliased')
     
@@ -66,7 +67,7 @@ class alias(metaclass=Slotted):
         return self.member_for_value(cls, self.aliased)
     
     def __set_name__(self, cls, name):
-        """ Register the alias within the __aliases__ dict in
+        """ Register the alias within the `__aliases__` dict in
             the class (if it has one).
             
             N.B. This only gets called on Python 3.6+
@@ -103,26 +104,26 @@ class alias(metaclass=Slotted):
 class AliasingEnumMeta(EnumMeta):
     
     def __new__(metacls, name, bases, attributes, **kwargs):
-        """ Ensure __aliases__ is a dictionary attribute on the new class.
+        """ Ensure `__aliases__` is a dictionary attribute on the new class.
             
             It is not strictly necessary to make this class an ancestor to
             your enums in order to use the `alias(…)` descriptor function,
             as defined above – if you do, the enums you define with it will
-            conveniently furnish the __aliases__ dictionary, which is like
-            the normal enum __members__ directory only with aliases. Yes.
+            conveniently furnish the `__aliases__` dictionary, which is like
+            the normal enum `__members__` directory only with aliases. Yes.
         """
         
         if '__aliases__' not in attributes:
             attributes['__aliases__'] = {}
         
-        return super(AliasingEnumMeta, metacls).__new__(metacls, name,
-                                                                 bases,
-                                                                 attributes,
-                                                               **kwargs)
+        return super().__new__(metacls, name,
+                                        bases,
+                                        attributes,
+                                      **kwargs)
 
 @export
 class AliasingEnum(Enum, metaclass=AliasingEnumMeta):
-    """ An Enum subclass intermediate, suitable for subclassing
+    """ An `Enum` subclass intermediate, suitable for subclassing
         itself, that uses `AliasingEnumMeta` as its metaclass.
         
         …Thus, any member aliases that one makes in concrete
@@ -133,4 +134,4 @@ class AliasingEnum(Enum, metaclass=AliasingEnumMeta):
     pass
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
-__all__, __dir__ = exporter.all_and_dir()
+__all__, __dir__ = exporter.all_and_dir('DUNDER', 'MIFFLIN', 'SUNDER')

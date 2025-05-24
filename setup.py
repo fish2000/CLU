@@ -28,8 +28,7 @@
 from __future__ import print_function
 from setuptools import setup, find_packages
 
-import os
-import sys
+import sys, os, io
 import sysconfig
 
 # CONSTANTS
@@ -40,11 +39,9 @@ AUTHOR_USER = 'fish2000'
 GITHUB = 'github.com'
 GMAIL = 'gmail.com'
 
-AUTHOR_EMAIL = '%s@%s' % (AUTHOR_USER, GMAIL)
-PROJECT_GH_URL = 'https://%s/%s/%s' % (GITHUB,
-                                       AUTHOR_USER,
-                                       PROJECT_NAME)
-PROJECT_DL_URL = '%s/zipball/master' % PROJECT_GH_URL
+AUTHOR_EMAIL = f'{AUTHOR_USER}@{GMAIL}'
+PROJECT_GH_URL = f'https://{GITHUB}/{AUTHOR_USER}/{PROJECT_NAME}'
+PROJECT_DL_URL = f'{PROJECT_GH_URL}/zipball/master'
 
 KEYWORDS = ('command',
             'utilities', PROJECT_NAME,
@@ -69,15 +66,14 @@ ENTRY_POINTS = {
 }
 
 def project_content(*filenames):
-    import io
     filepath = os.path.join(CWD, *filenames)
     if not os.path.isfile(filepath):
-        raise IOError("""File %s doesn't exist""" % filepath)
+        raise IOError(f"File {filepath} doesn't exist")
     out = ''
     with io.open(filepath, 'r') as handle:
         out += handle.read()
     if not out:
-        raise ValueError("""File %s couldn't be read""" % os.path.sep.join(filenames))
+        raise ValueError(f"File {filepath} couldn't be read")
     return out.strip()
 
 # PROJECT VERSION & METADATA

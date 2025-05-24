@@ -249,7 +249,7 @@ def dotpath_split(dotpath):
 
 @export
 def qualified_import(qualified):
-    """ Import a qualified thing-name.
+    """ Import a thing based on its full thing-name.
         e.g. 'instakit.processors.halftone.FloydSteinberg'
     """
     if QUALIFIER not in qualified:
@@ -267,16 +267,18 @@ def qualified_name_tuple(thing):
     """ Get the thing-name and module/package name for a class or module.
         e.g. ('FloydSteinberg', 'instakit.processors.halftone')
     """
-    return nameof(thing), moduleof(thing)
+    from clu.predicates import pyqualname
+    return pyqualname(thing) or nameof(thing), \
+                              moduleof(thing)
 
 @export
 def qualified_name(thing):
-    """ Get a qualified thing-name for a thing.
+    """ Get a full thing-name for a thing.
         e.g. 'instakit.processors.halftone.FloydSteinberg'
     """
     thing_name, module_name = qualified_name_tuple(thing)
-    qualname = dotpath_join(module_name, thing_name)
-    return qualname
+    fullname = dotpath_join(module_name, thing_name)
+    return fullname
 
 @export
 def dotpath_to_prefix(dotpath, sep='-', end='-'):

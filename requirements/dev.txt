@@ -11,7 +11,6 @@ coverage>=5.0.0
 curtsies>=0.3.1
 cython>=0.29.14
 gfm>=0.0.2
-greenlet>=0.4.0
 ipython>=7.10.0
 jedi>=0.16.0
 lmdb>=0.8.0

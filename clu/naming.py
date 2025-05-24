@@ -76,10 +76,20 @@ indication that you need to change something, dogg.
 
 @export
 def main_module_name(basepath=None):
+    """ Get the name of the current __main__ module (which may
+        very well just be “__main__”), but still.
+    """
     import __main__
-    if basepath is None:
+    from clu.predicates import attr
+    
+    # Default:
+    if not basepath:
         basepath = BASEPATH
-    return path_to_dotpath(__main__.__file__,
+    
+    # In some REPLs “__main__.__file__” is not set:
+    attribute_name = attr(__main__, '__file__',
+                                    '__spec__.name')
+    return path_to_dotpath(attribute_name,
                            relative_to=basepath)
 
 @export
@@ -234,7 +244,7 @@ def qualified_import(qualified):
         imported = importlib.import_module(qualified)
     except ModuleNotFoundError:
         head, tail = dotpath_split(qualified)
-        module = importlib.import_module(tail)
+        module = qualified_import(tail)
         imported = getattr(module, head)
     return imported
 

@@ -74,3 +74,10 @@ available at https://www.contributor-covenant.org/version/1/4/code-of-conduct.ht
 
 For answers to common questions about this code of conduct, see
 https://www.contributor-covenant.org/faq
+
+## The Main Thing
+
+Do not be dicks. If you or people you happen to like are dicks, they will have to go
+be dickish elsewhere, and in exrtreme cases you’ll be reported to the FBI or perhaps
+shot at dawn through the lungs, to prevent you from being such dickhead morons.
+OK? OK.

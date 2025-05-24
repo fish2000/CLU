@@ -436,7 +436,7 @@ def tuplize(*items):
 def uniquify(*items):
     """ uniquify(*items) → Return a generator yielding a unique set of all non-`None` arguments """
     seen = set() # type: set
-    for item in filter(isnotnone, items):
+    for item in filter(None, items):
         if item not in seen:
             seen.add(item)
             yield item

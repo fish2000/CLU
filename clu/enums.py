@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+from clu.abstract import Slotted
 from clu.constants.polyfills import Enum, EnumMeta # type: ignore
 from clu.exporting import Exporter
 
@@ -12,7 +13,7 @@ DUNDER = '__aliases__'
 SUNDER = '_aliases_'
 
 @export
-class alias(object):
+class alias(metaclass=Slotted):
     
     __slots__ = ('name', 'aliased')
     

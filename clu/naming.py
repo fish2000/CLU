@@ -177,12 +177,26 @@ def isnative(thing):
     """ isnative(thing) → boolean predicate, True if `thing`
         comes from a native-compiled (“extension”) module.
     """
-    module = moduleof(thing)
-    if module == 'builtins':
+    # Grab the name of the module of the thing:
+    module_name = moduleof(thing)
+    
+    # Not native:
+    if module_name == 'builtins':
         return False
-    return isnativemodule(
-           importlib.import_module(
-                            module))
+    
+    try:
+        # 99.99999999% of the time this should work
+        module = importlib.import_module(module_name)
+    except ModuleNotFoundError as error:
+        # This error indicates a native module, strangely:
+        if """named 'bin'""" in str(error):
+            return True
+    else:
+        # Delegate deciding about the module:
+        return isnativemodule(module)
+    
+    # We couldn’t figure this one out – so no false positives:
+    return False
 
 @export
 def isinspectable(thing):

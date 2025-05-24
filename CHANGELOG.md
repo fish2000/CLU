@@ -1,9 +1,51 @@
 # Changelog
 
 
-## 0.12.7:pre5+gf7f3ce2 [SNAPSHOT]
+## 0.12.8:pre8+g4f192b8 [SNAPSHOT]
+
+### Add
+
+* Added a `clu.predicates.pyqualname(…)` function. [Alexander Böhn]
+
+  … which of course does exactly what you think it does, in that it
+    privliges the “__qualname__” with what it returns for whatever
+    argument thing it is passed. Have fun you guys
 
 ### Other
+
+* Removed (fortunately vestigial) Click package dependency. [Alexander Böhn]
+
+* Expanded “getdoc” codepath in `clu.repl.ansi.signature(…)` [Alexander Böhn]
+
+* Using new `clu.predicates.pyqualname(…)` in `clu.naming.qualified_name(…)` [Alexander Böhn]
+
+  … this closes Issue #14! Q.v. https://github.com/fish2000/CLU/issues/14
+  … An upcoming release will demonstrate this through the “clu-ansidocs”
+    command
+
+* Special-cased `filter(…)` call should be fastest. [Alexander Böhn]
+
+  … tests do indicate as such, it appears, actually, now that you mention
+
+* More updates, cleanup, and addenda in `clu.enums` [Alexander Böhn]
+
+* The `clu.enums.alias(…)` class is now itself `clu.abstract.Slotted` [Alexander Böhn]
+
+  … as in, that is now its metaclass. This makes probably such zero
+    difference in anything in the universe it shames me to have even
+    brought this much attention to it here and now, and I really do
+    apologize, I do, yes.
+
+* Refactored `clu.naming.isnative(…)` around an edge case. [Alexander Böhn]
+
+
+## v0.12.8 (2025-05-24)
+
+### Other
+
+* Bumped version: 0.12.7 → 0.12.8. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * Fixes in `clu.naming.{qualified_import,main_module_mame}(…)` [Alexander Böhn]
 

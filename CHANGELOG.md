@@ -1,6 +1,37 @@
 # Changelog
 
 
+## 0.12.7:pre5+gf7f3ce2 [SNAPSHOT]
+
+### Other
+
+* Fixes in `clu.naming.{qualified_import,main_module_mame}(…)` [Alexander Böhn]
+
+  … “main_module_name(…)” was failing when called within bpython; now,
+    it’s cool
+  … “qualified_import(…)” calls itself recursively when an exception
+    is raised during an internal import call – this should mean its
+    own error-handling should keep runtime import errors from reaching
+    a user when it’s being called correctly (!)
+
+* Very slight, and likely premature, optimization. [Alexander Böhn]
+
+* Dead code cleanup. [Alexander Böhn]
+
+* Don’t want to leave that test-ish line in there. [Alexander Böhn]
+
+* A wee bit of error-handling in “clu-ansidocs” [Alexander Böhn]
+
+
+## v0.12.7 (2025-05-19)
+
+### Other
+
+* Bumped version: 0.12.6 → 0.12.7. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
+
+
 ## v0.12.6 (2025-05-19)
 
 ### Other

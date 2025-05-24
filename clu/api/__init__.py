@@ -2,7 +2,6 @@
 from __future__ import print_function
 
 import abc
-import click
 import sys
 
 abstract = abc.abstractmethod
@@ -39,19 +38,6 @@ class CommandBase(ModuleBase):
 class Command(CommandBase[Module]):
     commandstr = "command" # …a reserved word?
 
-class CLUI(click.MultiCommand):
-    
-    def iter_commands(self, context):
-        modules = modules_for_appname_and_appspace(consts.APPNAME, API_APPSPACE)
-        yield from (module.commandname for module in modules)
-    
-    def list_commands(self, context):
-        return list(self.iter_commands(context))
-    
-    def get_command(self, context, key):
-        dotpath = dotpath_join(consts.APPNAME, API_APPSPACE, key)
-        return dotpath
-
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 
@@ -60,16 +46,10 @@ def test():
     from clu.testing.utils import inline
     
     @inline
-    def test_one():
+    def test_command_imports():
         """ Command import test """
         from clu.commands import Command as command
         assert command
-    
-    @inline
-    def test_two():
-        """ Sanity-check CLUI """
-        clui = CLUI()
-        assert clui
     
     return inline.test(100)
 

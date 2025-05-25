@@ -1,6 +1,5 @@
 Development Status :: 5 - Production/Stable
 Framework :: Pytest
-Framework :: Python-CLU
 Intended Audience :: Developers
 Topic :: Software Development
 Topic :: Software Development :: Testing

@@ -1,9 +1,20 @@
 # Changelog
 
 
-## 0.12.9:pre6+geb75523 [SNAPSHOT]
+## 0.12.10:pre1+g4e2fdbd [SNAPSHOT]
 
 ### Other
+
+* Ahhhh my home-brewed classifier didn’t work, booooo. [Alexander Böhn]
+
+
+## v0.12.10 (2025-05-25)
+
+### Other
+
+* Bumped version: 0.12.9 → 0.12.10. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * Fixed `clu.naming.qualified_name_tuple(…)` to work for module objects. [Alexander Böhn]
 

@@ -1,7 +1,28 @@
 # Changelog
 
 
-## 0.12.8:pre8+g4f192b8 [SNAPSHOT]
+## 0.12.9:pre6+geb75523 [SNAPSHOT]
+
+### Other
+
+* Fixed `clu.naming.qualified_name_tuple(…)` to work for module objects. [Alexander Böhn]
+
+  … this involved special-casing the whole thing, but it was worth it,
+    as it just wasn’t fucking working for this entire case this whole
+    time, which is fucking embarrasing. Yes!
+
+* More requirement/REPL-import adjustments. [Alexander Böhn]
+
+* Code of Conduct clarification. [Alexander Böhn]
+
+* Classifier tidy-up. [Alexander Böhn]
+
+* Gentlemen prefer f-strings. [Alexander Böhn]
+
+* Updating straggling little info corners that didn’t get the memo. [Alexander Böhn]
+
+
+## v0.12.9 (2025-05-24)
 
 ### Add
 
@@ -12,6 +33,10 @@
     argument thing it is passed. Have fun you guys
 
 ### Other
+
+* Bumped version: 0.12.8 → 0.12.9. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * Removed (fortunately vestigial) Click package dependency. [Alexander Böhn]
 

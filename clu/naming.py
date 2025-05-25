@@ -32,7 +32,7 @@ def determine_module(thing, name=None):
     import pickle
     return pickle.whichmodule(thing, name) # type: ignore
 
-"""
+__doc__ = """
 NAME AND MODULE SEARCH FUNCTIONS: the “nameof(…)” and “moduleof(…)”
 functions each search through, in order:
   
@@ -267,7 +267,18 @@ def qualified_name_tuple(thing):
     """ Get the thing-name and module/package name for a class or module.
         e.g. ('FloydSteinberg', 'instakit.processors.halftone')
     """
-    from clu.predicates import pyqualname
+    from clu.predicates import pyqualname, pyname
+    from clu.typology import ismodule
+    
+    # Special case for figuring out module names:
+    if ismodule(thing):
+        putative = pyname(thing)
+        if QUALIFIER in putative:
+            partition = putative.rpartition(QUALIFIER)
+            return partition[-1:][0], partition[:-1][0]
+        else:
+            return putative, ''
+    
     return pyqualname(thing) or nameof(thing), \
                               moduleof(thing)
 

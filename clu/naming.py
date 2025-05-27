@@ -248,17 +248,17 @@ def dotpath_split(dotpath):
     return head, tail or None
 
 @export
-def qualified_import(qualified):
+def qualified_import(qualified, *, recurse=False):
     """ Import a thing based on its full thing-name.
         e.g. 'instakit.processors.halftone.FloydSteinberg'
     """
-    if QUALIFIER not in qualified:
+    if not recurse and QUALIFIER not in qualified:
         raise ValueError(f"qualified name required (got {qualified})")
     try:
         imported = importlib.import_module(qualified)
     except ModuleNotFoundError:
         head, tail = dotpath_split(qualified)
-        module = qualified_import(tail)
+        module = qualified_import(tail, recurse=True)
         imported = getattr(module, head)
     return imported
 

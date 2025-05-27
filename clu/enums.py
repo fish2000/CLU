@@ -94,7 +94,7 @@ class alias(clu.abstract.BaseDescriptor, metaclass=clu.abstract.Slotted):
             if it has a dictionary attribute “__aliases__”).
         """
         self.name = name
-        if hasattr(cls, '__aliases__'):
+        if hasattr(cls, DUNDER): # check for __aliases__
             if self.name in cls.__aliases__:
                 message = f"Enum already contains an alias named {self.name}"
                 raise AttributeError(message)
@@ -113,8 +113,8 @@ class AliasingEnumMeta(EnumMeta):
             the normal enum `__members__` directory only with aliases. Yes.
         """
         
-        if '__aliases__' not in attributes:
-            attributes['__aliases__'] = {}
+        if DUNDER not in attributes:
+            attributes[DUNDER] = {}
         
         return super().__new__(metacls, name,
                                         bases,

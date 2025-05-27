@@ -16,8 +16,6 @@ MIFFLIN = SUNDER = '_aliases_'
 @export
 class alias(clu.abstract.BaseDescriptor, metaclass=clu.abstract.Slotted):
     
-    __slots__ = ('name', 'aliased')
-    
     """ Alias one Enum class instance to another. To wit:
         
             @unique
@@ -47,6 +45,8 @@ class alias(clu.abstract.BaseDescriptor, metaclass=clu.abstract.Slotted):
         
         ISN’T ALL OF THAT FUCKING AWESOME?!?!? I think so. Yes!
     """
+    
+    __slots__ = ('name', 'aliased')
     
     def __init__(self, instance, name=None, cls=None):
         """ Set up the alias, passing an enum instance.

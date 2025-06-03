@@ -20,7 +20,7 @@ from clu.exporting import Exporter
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-"""
+__doc__ = """
 TREELINE – tree ± command-line
 
 • Turn a command like this:

@@ -20,7 +20,7 @@ def actually_print_ansidocs(dotpath):
     try:
         thing = qualified_import(dotpath, recurse=True)
     except ValueError:
-        thing = qualified_import(dotpath)
+        thing = actually_print_ansidocs(dotpath)
     except AttributeError as error:
         error_string = str(error)
         print(f"[ERROR] {error_string}", file=ansidocs.iohandle)
@@ -28,6 +28,7 @@ def actually_print_ansidocs(dotpath):
     
     # This goes directly to stdout:
     ansidocs(thing)
+    return thing
 
 def ansidocs_command():
     """ Print out the ANSI-ified docstring for the given thing(s) """

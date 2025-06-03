@@ -20,7 +20,7 @@ def actually_print_ansidocs(dotpath):
     try:
         thing = qualified_import(dotpath, recurse=True)
     except ValueError:
-        thing = import_module(dotpath)
+        thing = qualified_import(dotpath)
     except AttributeError as error:
         error_string = str(error)
         print(f"[ERROR] {error_string}", file=ansidocs.iohandle)

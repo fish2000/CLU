@@ -18,7 +18,7 @@ def actually_print_ansidocs(dotpath):
     
     # Attempt to import it:
     try:
-        thing = qualified_import(dotpath)
+        thing = qualified_import(dotpath, recurse=True)
     except ValueError:
         thing = import_module(dotpath)
     except AttributeError as error:

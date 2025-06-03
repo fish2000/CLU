@@ -1,9 +1,35 @@
 # Changelog
 
 
-## 0.12.10:pre1+g4e2fdbd [SNAPSHOT]
+## 0.12.11:pre6+gf6ef978 [SNAPSHOT]
 
 ### Other
+
+* Reaffirming the commands’ non-erroneousness AGAIN!! [Alexander Böhn]
+
+* Reaffirming the commands’ non-erroneousness. [Alexander Böhn]
+
+* Supress raising pointless `ValueError`s when running “clu-ansidocs” [Alexander Böhn]
+
+* Properly assigning `__doc__` string. [Alexander Böhn]
+
+* Small updates to `clu.enums` and `clu.naming.qualified_import(…)` [Alexander Böhn]
+
+  … “clu.enums” uses its DUNDER constant internally
+  … “clu.naming.qualified_import(…)” has an internally-used “recurse”
+     argument that basically disables the whole “qualified” check,
+     which by the way I am starting to see as totally unnecessary
+
+* Docstring MUST OCCUR FIRST!!! in a thing. [Alexander Böhn]
+
+
+## v0.12.11 (2025-05-25)
+
+### Other
+
+* Bumped version: 0.12.10 → 0.12.11. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * Ahhhh my home-brewed classifier didn’t work, booooo. [Alexander Böhn]
 

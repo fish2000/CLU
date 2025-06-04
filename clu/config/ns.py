@@ -2,29 +2,55 @@
 from __future__ import print_function
 from itertools import chain, zip_longest
 
+import re
 import sys
 
 from clu.constants.consts import ENVIRONS_SEP, NAMESPACE_SEP, NoDefault
-from clu.predicates import tuplize
+from clu.predicates import Partial, tuplize
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
-# NAMESPACE-MANIPULATION FUNCTION API:
+# Some REGULAR EXPRESSIONS, for CLEANING NAMESPACED KEYS:
+
+sepmatcher = re.compile(rf"({NAMESPACE_SEP})+", re.IGNORECASE)
+endmatcher = re.compile(rf"^({NAMESPACE_SEP}+)|({NAMESPACE_SEP}+)$", re.IGNORECASE)
+nilmatcher = re.compile(rf"(\s+)", re.MULTILINE)
+
+# Substitution functions using the above regexes (which are exported below):
+
+septrimmer = Partial(endmatcher.sub, '')
+spacenixer = Partial(nilmatcher.sub, '')
+sepreducer = Partial(sepmatcher.sub, NAMESPACE_SEP)
+
+# THE NAMESPACE-MANIPULATION FUNCTION API:
+
+@export
+def clean_ns(nskey):
+    """ Clean a namespaced key.
+        
+        This means reducing multiple namespace separators (“:”) to single
+        occurrences, stripping any separators off the ends of the string,
+        and trimming whitespace.
+    """
+    out = nskey.strip(NAMESPACE_SEP)
+    out = spacenixer(out)
+    out = sepreducer(out)
+    return out
 
 @export
 def concatenate_ns(*namespaces):
     """ Return the given namespace(s), concatenated with the
         namespace separator.
     """
-    return NAMESPACE_SEP.join(namespaces)
+    return NAMESPACE_SEP.join(filter(None, namespaces))
 
 @export
 def prefix_for(*namespaces):
     """ Return the prefix string for the given namespace(s) """
     ns = concatenate_ns(*namespaces)
-    return ns and f"{ns}{NAMESPACE_SEP}" or ns
+    return ns and f"{ns}{NAMESPACE_SEP}" or ''
 
 @export
 def strip_ns(nskey):
@@ -34,7 +60,7 @@ def strip_ns(nskey):
 @export
 def split_ns(namespaced):
     """ Split a namespaced string into its components """
-    return str(namespaced).split(NAMESPACE_SEP)
+    return clean_ns(namespaced).split(NAMESPACE_SEP)
 
 @export
 def startswith_ns(putative, prefix):
@@ -89,14 +115,14 @@ def pack_ns(key, *namespaces):
 @export
 def get_ns(nskey):
     """ Get the namespace portion of a namespaced key as a packed string. """
-    return nskey.rpartition(NAMESPACE_SEP)[0]
+    return clean_ns(nskey).rpartition(NAMESPACE_SEP)[0]
 
 @export
 def get_ns_and_key(nskey):
     """ Get the namespace and key portion of a namespaced key, as a packed
         string and a bare key, respectively.
     """
-    rpartition = nskey.rpartition(NAMESPACE_SEP)
+    rpartition = clean_ns(nskey).rpartition(NAMESPACE_SEP)
     return rpartition[0], rpartition[-1]
 
 @export
@@ -181,6 +207,10 @@ def nskey_to_env(appname, nskey):
     """
     key, namespaces = unpack_ns(nskey)
     return pack_env(appname, key, *namespaces)
+
+export(septrimmer,  name='septrimmer',  doc=f"septrimmer(string) → Strip leading and lagging namespace separators (“{NAMESPACE_SEP}”) from a namespaced key")
+export(spacenixer,  name='spacenixer',  doc=f"spacenixer(string) → Remove interstitial whitespace from a namespaced key")
+export(sepreducer,  name='sepreducer',  doc=f"sepreducer(string) → Reduce multiple interstitial namespace separators (“{NAMESPACE_SEP}”) to just one per occurence in a namespaced key")
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -281,6 +311,18 @@ def test():
     @inline
     def test_compare_ns():
         assert compare_ns(namespaces, ('yo', 'dogg'))
+    
+    baseline = 'yo:dogg:iheard:youlike'
+    dupes = 'yo:dogg::iheard:youlike'
+    dupes_and_end = 'yo:dogg::iheard:youlike:'
+    dupes_and_both_ends = ':yo:dogg::iheard:::youlike:'
+    
+    @inline
+    def test_clean_ns():
+        assert baseline == clean_ns(baseline)
+        assert baseline == clean_ns(dupes)
+        assert baseline == clean_ns(dupes_and_end)
+        assert baseline == clean_ns(dupes_and_both_ends)
     
     appname = 'testing'
     envkey = "TESTING_YO_DOGG_IHEARD"

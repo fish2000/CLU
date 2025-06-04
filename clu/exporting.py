@@ -233,7 +233,7 @@ def determine_name(thing, name=None, try_repr=False):
     return search_for_name(thing)
 
 # Regexp for matching dashes in dotpaths:
-dash_re = re.compile("\-")
+dash_re = re.compile("-")
 
 # N.B. Items in the “replaceable_endings” tuple that
 # possibly contain other such items should appear

@@ -62,6 +62,11 @@ class FrozenKeyMapBase(collections.abc.Mapping,
         ...
     
     @abstract
+    def submap(self, *namespaces, unprefixed=False):
+        """ Return a flattened dict containing only the namespaced items. """
+        ...
+    
+    @abstract
     def __iter__(self):
         ...
     

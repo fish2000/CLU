@@ -5,8 +5,7 @@ import clu.abstract
 import copy
 import sys
 
-from clu.config.abc import FrozenKeyMap, KeyMap, NamespaceWalker
-from clu.config.ns import concatenate_ns, unpack_ns, pack_ns
+from clu.config import abc, ns
 from clu.typology import ismapping
 from clu.exporting import Exporter
 
@@ -23,7 +22,7 @@ def flatwalk(mapping):
         Based on https://stackoverflow.com/a/12507546/298171
     """
     for nskey in mapping.keys():
-        key, namespaces = unpack_ns(nskey)
+        key, namespaces = ns.unpack_ns(nskey)
         yield namespaces + [key, mapping[nskey]]
 
 @export
@@ -45,8 +44,8 @@ def articulate(mapping, walker=flatwalk):
     return tree
 
 @export
-class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
-                               clu.abstract.Cloneable):
+class FrozenFlat(abc.FrozenKeyMap, clu.abstract.ReprWrapper,
+                                   clu.abstract.Cloneable):
     
     """ A concrete immutable – or frozen – KeyMap class with a flat internal topology. """
     
@@ -104,7 +103,7 @@ class FrozenFlat(FrozenKeyMap, clu.abstract.ReprWrapper,
         return copy.deepcopy(self.dictionary)
 
 @export
-class Flat(FrozenFlat, KeyMap):
+class Flat(FrozenFlat, abc.KeyMap):
     
     """ A concrete mutable KeyMap class with a flat internal topology. """
     
@@ -147,8 +146,8 @@ def mapwalk(mapping, pre=None):
 # CONCRETE SUBCLASSES: FrozenNested and Nested
 
 @export
-class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
-                                    clu.abstract.Cloneable):
+class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
+                                        clu.abstract.Cloneable):
     
     """ A concrete immutable – or frozen – KeyMap class with an articulated –
         or, if you will, a nested – internal topology.
@@ -171,7 +170,7 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
         self.tree = dictify(dict(tree or {}), cls=dict)
         if updates:
             for nskey, value in updates.items():
-                key, namespaces = unpack_ns(nskey)
+                key, namespaces = ns.unpack_ns(nskey)
                 d = self.tree
                 for namespace in namespaces:
                     try:
@@ -192,12 +191,12 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
                                   if not ismapping(value) }
         if not namespaces:
             return dict(self)
-        if not concatenate_ns(*namespaces) in self.namespaces():
+        if not ns.concatenate_ns(*namespaces) in self.namespaces():
             return {}
         d = self.tree
         for namespace in namespaces:
             d = d[namespace]
-        return { pack_ns(key, *namespaces) : value for key, value in d.items() }
+        return { ns.pack_ns(key, *namespaces) : value for key, value in d.items() }
     
     def inner_repr(self):
         return repr(self.tree)
@@ -211,7 +210,7 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
         return copy.deepcopy(self.tree)
     
     def __contains__(self, nskey):
-        key, namespaces = unpack_ns(nskey)
+        key, namespaces = ns.unpack_ns(nskey)
         if not namespaces:
             # Test for mappings to prevent false positives:
             return not ismapping(self.tree.get(key, {}))
@@ -225,7 +224,7 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
         return not ismapping(d.get(key, {}))
     
     def __getitem__(self, nskey):
-        key, namespaces = unpack_ns(nskey)
+        key, namespaces = ns.unpack_ns(nskey)
         if not namespaces:
             return self.tree[key]
         d = self.tree
@@ -234,7 +233,7 @@ class FrozenNested(NamespaceWalker, clu.abstract.ReprWrapper,
         return d[key]
 
 @export
-class Nested(FrozenNested, KeyMap):
+class Nested(FrozenNested, abc.KeyMap):
     
     """ A concrete mutable KeyMap class with an articulated (or nested)
         internal topology.
@@ -244,7 +243,7 @@ class Nested(FrozenNested, KeyMap):
         return FrozenNested(tree=copy.deepcopy(self.tree))
     
     def __setitem__(self, nskey, value):
-        key, namespaces = unpack_ns(nskey)
+        key, namespaces = ns.unpack_ns(nskey)
         if not namespaces:
             self.tree[key] = value
         else:
@@ -259,7 +258,7 @@ class Nested(FrozenNested, KeyMap):
     
     def __delitem__(self, nskey):
         if nskey in self:
-            key, namespaces = unpack_ns(nskey)
+            key, namespaces = ns.unpack_ns(nskey)
             if not namespaces:
                 del self.tree[key]
             else:
@@ -269,6 +268,42 @@ class Nested(FrozenNested, KeyMap):
                 del d[key]
         else:
             raise KeyError(nskey)
+
+@export
+class KeyedAccessor(metaclass=clu.abstract.Slotted):
+    
+    __slots__ = ('keymap', 'namespace')
+    
+    def __init__(self, keymap, namespace=""):
+        ourmap = hasattr(keymap, 'nestify') and keymap.nestify() or keymap
+        cls = type(keymap)
+        self.namespace = ns.split_ns(namespace)
+        self.keymap = cls(ourmap.submap(*self.namespace, unprefixed=bool(self.namespace)))
+    
+    def __getattr__(self, key):
+        """ Attribute access repacks the key """
+        nskey = ns.pack_ns(key, *self.namespace)
+        if nskey in self.keymap:
+            return self[nskey]
+        raise AttributeError(f"namespaced key {nskey} not present in keymap")
+    
+    def accessor(self, *addenda):
+        namespace = ns.concatenate_ns(*self.namespace, *addenda)
+        realigned = type(self)(keymap=self.keymap,
+                               namespaces=ns.concatenate_ns(*namespace))
+        return realigned
+    
+    def __contains__(self, nskey):
+        return nskey in self.keymap
+    
+    def __getitem__(self, nskey):
+        """ Unpack and return """
+        *addenda, key = ns.split_ns(nskey)
+        accessor = self.accessor(*addenda)
+        if nskey in accessor.keymap:
+            return accessor.keymap[nskey]
+        if ns.concatenate_ns(*addenda) in set(self.keymap.namespaces()):
+            return accessor
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -306,7 +341,7 @@ def flatdict():
     out = {}
     for mappingpath in mapwalk(nestedmaps()):
         *namespaces, key, value = mappingpath
-        nskey = pack_ns(key, *namespaces)
+        nskey = ns.pack_ns(key, *namespaces)
         out[nskey] = value
     return out
 
@@ -337,7 +372,7 @@ def test():
         """ Verbose “mapwalk(…)” content check """
         for mappingpath in mapwalk(nestedmaps()):
             *namespaces, key, value = mappingpath
-            nskey = pack_ns(key, *namespaces)
+            nskey = ns.pack_ns(key, *namespaces)
             print("NAMESPACES:", ", ".join(namespaces))
             print("KEY:", key)
             print("NSKEY:", nskey)
@@ -351,7 +386,7 @@ def test():
         
         for mappingpath in mapwalk(nestedmaps()):
             *namespaces, key, value = mappingpath
-            nskey = pack_ns(key, *namespaces)
+            nskey = ns.pack_ns(key, *namespaces)
             flat_dict[nskey] = value
         
         assert flat_dict == flatdict()
@@ -382,7 +417,7 @@ def test():
         
         for mappingpath in mapwalk(nestedmaps()):
             *namespaces, key, value = mappingpath
-            nskey = pack_ns(key, *namespaces)
+            nskey = ns.pack_ns(key, *namespaces)
             flat_dict[nskey] = value
         
         assert flat_dict == flatdict()
@@ -404,7 +439,7 @@ def test():
         
         for mappingpath in mapwalk(nested.tree):
             *namespaces, key, value = mappingpath
-            nskey = pack_ns(key, *namespaces)
+            nskey = ns.pack_ns(key, *namespaces)
             assert nskey in nested
     
     @inline
@@ -414,7 +449,7 @@ def test():
         
         for mappingpath in mapwalk(nested.tree):
             *namespaces, key, value = mappingpath
-            nskey = pack_ns(key, *namespaces)
+            nskey = ns.pack_ns(key, *namespaces)
             assert nskey in nested or nskey in arbitrary()
     
     @inline

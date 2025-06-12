@@ -50,9 +50,14 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
                |      +–––––––––––– namespaces (uppercased, one value)
                +––––––––––––––––––– app name (uppercased)
         
-        … This namespaced key can be accessed from an instance
-        of FrozenEnviron, initialized with an appname of “yodogg”,
-        as “iheard:youlike”.
+        … this corresponds to the namespaced key “iheard:youlike” from
+        an instance of “clu.config.env.Environ” initialized for the
+        appname “yodogg” (say). You can have multiple namespaces in an
+        environment key like the above – just add underscores. For
+        example, “YODOGG_I_HEARD_YOU_LIKE” differs from our given example
+        because it translates to the namespaced key “i:heard:you:like”,
+        which, you will note, is different.
+        
     """
     
     __slots__ = ('environment', 'appname')

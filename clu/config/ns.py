@@ -157,6 +157,14 @@ def prefix_env(appname, *namespaces):
                |      |      +––––– mapping key (uppercased)
                |      +–––––––––––– namespaces (uppercased, one value)
                +––––––––––––––––––– app name (uppercased)
+        
+        … this corresponds to the namespaced key “iheard:youlike” from
+        an instance of “clu.config.env.Environ” initialized for the
+        appname “yodogg” (say). You can have multiple namespaces in an
+        environment key like the above – just add underscores. For
+        example, “YODOGG_I_HEARD_YOU_LIKE” differs from our given example
+        because it translates to the namespaced key “i:heard:you:like”,
+        which, you will note, is different.
     """
     if not appname and not namespaces:
         return ''
@@ -182,6 +190,15 @@ def pack_env(appname, key, *namespaces):
                |      |      +––––– mapping key (uppercased)
                |      +–––––––––––– namespaces (uppercased, one value)
                +––––––––––––––––––– app name (uppercased)
+    
+        
+        … this corresponds to the namespaced key “iheard:youlike” from
+        an instance of “clu.config.env.Environ” initialized for the
+        appname “yodogg” (say). You can have multiple namespaces in an
+        environment key like the above – just add underscores. For
+        example, “YODOGG_I_HEARD_YOU_LIKE” differs from our given example
+        because it translates to the namespaced key “i:heard:you:like”,
+        which, you will note, is different.
     """
     prefix = prefix_env(appname, *namespaces)
     return f"{prefix}{key.upper()}"

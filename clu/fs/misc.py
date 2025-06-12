@@ -22,7 +22,7 @@ gethomedir      = lru_cache(maxsize=1)(lambda: os.path.expanduser("~"))
 isinvalidpath   = negate(isvalidpath)
 
 @cache
-def re_matcher(string):
+def re_matcher(string, *, flags=re.IGNORECASE | re.MULTILINE):
     """ Return a boolean function that will search for the given
         regular-expression within any strings with which it is called,
         returning True when the regex matches from the beginning of the
@@ -32,11 +32,11 @@ def re_matcher(string):
     """
     if not string:
         return true_function
-    match_function = re.compile(string, re.IGNORECASE).match
+    match_function = re.compile(string, flags).match
     return lambda searching: bool(match_function(searching))
 
 @cache
-def re_searcher(string):
+def re_searcher(string, *, flags=re.IGNORECASE | re.MULTILINE):
     """ Return a boolean function that will search for the given
         regular-expression within any strings with which it is called,
         returning True when the regex matches and False when it doesn’t.
@@ -51,7 +51,7 @@ def re_searcher(string):
     """
     if not string:
         return true_function
-    search_function = re.compile(string, re.IGNORECASE).search
+    search_function = re.compile(string, flags).search
     return lambda searching: bool(search_function(searching))
 
 @export
@@ -79,7 +79,7 @@ def suffix_searcher(string):
 
 @export
 @itervariadic
-def re_excluder(*excludes):
+def re_excluder(*excludes, flags=re.IGNORECASE | re.MULTILINE):
     """ Return a boolean function that will search for any of the given
         strings (provided as variadic arguments) and return False whenever
         any of them are found – True otherwise.
@@ -87,7 +87,7 @@ def re_excluder(*excludes):
     if len(excludes) < 1:
         return true_function
     exclude_re = '|'.join(re.escape(exclude) for exclude in excludes)
-    exclude_function = re.compile(f"(?P<XXX>{exclude_re})", re.IGNORECASE).search
+    exclude_function = re.compile(f"(?P<XXX>{exclude_re})", flags).search
     return lambda filename: not bool(exclude_function(filename))
 
 @export

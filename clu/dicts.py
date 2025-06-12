@@ -359,7 +359,7 @@ class ChainMap(collections.abc.MutableMapping,
         # Equivalent to collections.ChainMap.parents:
         return type(self)(*self.rest)
     
-    def unshift(self, map=None):
+    def unshift(self, mapping=None):
         """ Create and return a new ChainMap with a new map followed
             by all previous maps.
             
@@ -372,7 +372,7 @@ class ChainMap(collections.abc.MutableMapping,
             scene deleted from a kind of Pythonic Saw movie.
         """
         # Equivalent to collections.ChainMap.new_child(…)
-        return type(self)(map or {}, *self.maps)
+        return type(self)(mapping or {}, *self.maps)
     
     def __setitem__(self, key, value):
         self.top[key] = value

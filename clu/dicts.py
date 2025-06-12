@@ -285,10 +285,10 @@ class ChainMap(collections.abc.MutableMapping,
         maps = [] # type: list
         for d in dicts:
             if type(self).is_a(d):
-                for map in d.maps:
-                    if bool(map):
-                        if map not in maps:
-                            maps.append(map)
+                for mapping in d.maps:
+                    if bool(mapping):
+                        if mapping not in maps:
+                            maps.append(mapping)
             else:
                 if d not in maps:
                     maps.append(d)
@@ -308,13 +308,13 @@ class ChainMap(collections.abc.MutableMapping,
             return self.__missing__(key)
     
     def __len__(self):
-        return len(set(iterchain(map.keys() for map in self.maps)))
+        return len(set(iterchain(mapping.keys() for mapping in self.maps)))
     
     def __iter__(self):
-        yield from set(iterchain(map.keys() for map in self.maps))
+        yield from set(iterchain(mapping.keys() for mapping in self.maps))
     
     def __contains__(self, key):
-        return any(key in map for map in self.maps)
+        return any(key in mapping for mapping in self.maps)
     
     def __bool__(self):
         return any(self.maps)
@@ -438,7 +438,7 @@ class ChainMap(collections.abc.MutableMapping,
             return cls(copy(self.top),
                            *self.rest)
         return cls(deepcopy(self.top),
-                 *(deepcopy(map) for map in self.rest))
+                 *(deepcopy(mapping) for mapping in self.rest))
 
 class ChainMapPlusPlus(ChainMap):
     

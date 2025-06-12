@@ -12,6 +12,7 @@ import sys
 
 from clu.constants.consts import STRINGPAIR, WHITESPACE, NoDefault
 from clu.config.abc import FlatOrderedSet as FOSet
+from clu.naming import qualified_name
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -154,7 +155,7 @@ class ChainRepr(Repr):
             that comprise the ChainMap instance, and dispatch
             sub-repr method calls accordingly.
         """
-        from clu.naming import qualified_name
+        from clu.naming import isbuiltin, nameof
         from clu.testing.utils import multiple
         
         # Typename and map item counts:
@@ -170,9 +171,11 @@ class ChainRepr(Repr):
                          f"[{ts}{total}{ls}]"
         
         # Format all items:
-        items = (STRINGPAIR.format(qualified_name(type(mapping)),
-                                   self.primerepr(mapping, level - 1)) \
-                                   for mapping in chainmap.maps)
+        items = []
+        for mapping in chainmap.maps:
+            cls = type(mapping)
+            mapping_name = isbuiltin(cls) and nameof(cls) or qualified_name(cls)
+            items.append(STRINGPAIR.format(mapping_name, self.primerepr(mapping, level - 1)))
         
         # Compute indentation levels:
         ts = "    " * (int(self.maxlevel - level) + 1)
@@ -281,7 +284,6 @@ class ChainMap(collections.abc.MutableMapping,
             “collections.ChainMap”, will have their constituent dicts extracted
             and individually appended to the new ChainMaps’ internal list.
         """
-        extras = [dict(**overrides)]
         maps = [] # type: list
         for d in dicts:
             if type(self).is_a(d):
@@ -292,10 +294,9 @@ class ChainMap(collections.abc.MutableMapping,
             else:
                 if d not in maps:
                     maps.append(d)
-        if bool(extras[0]):
-            self.maps = list(chain(maps, extras))
-        else:
-            self.maps = maps
+        if bool(overrides):
+            maps.insert(0, dict(**overrides))
+        self.maps = maps
     
     def __missing__(self, key):
         raise KeyError(key)
@@ -308,10 +309,10 @@ class ChainMap(collections.abc.MutableMapping,
             return self.__missing__(key)
     
     def __len__(self):
-        return len(set(iterchain(mapping.keys() for mapping in self.maps)))
+        return len(frozenset(iterchain(mapping.keys() for mapping in self.maps)))
     
     def __iter__(self):
-        yield from set(iterchain(mapping.keys() for mapping in self.maps))
+        yield from frozenset(iterchain(mapping.keys() for mapping in self.maps))
     
     def __contains__(self, key):
         return any(key in mapping for mapping in self.maps)
@@ -538,27 +539,32 @@ def merge_fast(*dicts, **extras):
     return merged
 
 @export
-def merge_two(one, two, cls=dict):
+def merge_two(one, two, *, cls=dict, **overrides):
     """ Merge two dictionaries into an instance of the specified class.
         
         Based on this docopt example source: https://git.io/fjCZ6
     """
     from clu.predicates import typeof, item_search
     cls = typeof(cls or one)
-    keys = frozenset(one) | frozenset(two)
-    return cls((key, item_search(key, one, two)) for key in keys)
+    zero = dict(overrides)
+    keys = tuple(frozenset(zero.keys()) | frozenset(one.keys()) | frozenset(two.keys()))
+    vals = tuple(item_search(key, zero, one, two) for key in keys)
+    return cls(dict(zip(keys, vals)))
 
 @export
 def merge_as(*dicts, cls=dict, **overrides):
     """ Merge all dictionary arguments into a new instance of the specified class,
         passing all additional keyword arguments to the class constructor as overrides
     """
-    from clu.predicates import typeof
+    from clu.predicates import typeof, item_search
     cls = typeof(cls or (dicts and dicts[0] or dict))
-    merged = cls(**overrides)
+    dicts = [dict(overrides), *dicts]
+    keyset = set()
     for d in dicts:
-        merged = merge_two(merged, d, cls=cls)
-    return merged
+        keyset.update(frozenset(d.keys()))
+    keys = tuple(keyset)
+    vals = tuple(item_search(key, *dicts) for key in keys)
+    return cls(dict(zip(keys, vals)))
 
 @export
 def merge(*dicts, **overrides):
@@ -614,19 +620,18 @@ def test():
     from clu.fs.filesystem import Directory
     from clu.predicates import try_items
     from clu.testing.utils import inline
-    # from clu.testing.utils import format_environment
     import os
     
-    stash = {}
+    test.stash = {}
     
     @inline.fixture
     def dict_arbitrary():
         """ Return an arbitrary flat dictionary """
         return {
-            'yo'    : "dogg",
-            'i'     : "heard",
-            'you'   : "liked",
-            'dict'  : "chains"
+            'yo'        : "dogg",
+            'i'         : "heard",
+            'you'       : "liked",
+            'chains'    : "all up in your dict"
         }
     
     @inline.fixture
@@ -645,32 +650,11 @@ def test():
     @inline.precheck
     def stash_environment():
         """ Stash environment state before testing """
-        nonlocal stash
-        stash = os.environ.copy()
+        test.stash = os.environ.copy()
+        print(f"Environment stashed in {qualified_name(test.stash)}")
     
     @inline
-    def test_one():
-        """ Shallow clone membership check """
-        chain0 = ChainMap(dict_arbitrary(),
-                                  fsdata(),
-                             environment())
-        
-        chain1 = chain0.clone()
-        assert len(chain0) == len(chain1)
-        
-        for key in chain0.keys():
-            assert key in chain0
-            assert key in chain1
-            
-            # N.B. SLOW AS FUCK:
-            assert key in chain0.flatten()
-            
-            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
-            assert try_items(key, *chain0.maps, default=None) == chain0[key]
-            assert try_items(key, *chain0.maps, default=None) == chain1[key]
-    
-    @inline
-    def test_two():
+    def test_chainmap_deep_cloning():
         """ Deep clone membership check """
         chain0 = ChainMap(dict_arbitrary(),
                                   fsdata(),
@@ -691,7 +675,28 @@ def test():
             assert try_items(key, *chain0.maps, default=None) == chainX[key]
     
     @inline
-    def test_three():
+    def test_chainmap_shallow_cloning():
+        """ Shallow clone membership check """
+        chain0 = ChainMap(dict_arbitrary(),
+                                  fsdata(),
+                             environment())
+        
+        chain1 = chain0.clone()
+        assert len(chain0) == len(chain1)
+        
+        for key in chain0.keys():
+            assert key in chain0
+            assert key in chain1
+            
+            # N.B. SLOW AS FUCK:
+            # assert key in chain0.flatten()
+            
+            assert try_items(key, *chain0.maps, default=None) == try_items(key, *chain1.maps, default=None)
+            assert try_items(key, *chain0.maps, default=None) == chain0[key]
+            assert try_items(key, *chain0.maps, default=None) == chain1[key]
+    
+    @inline
+    def test_chainmap_equality():
         """ Equality comparisons across the board """
         from clu.config.keymap import flatdict, Flat
         from itertools import product
@@ -716,7 +721,7 @@ def test():
         print()
     
     @inline
-    def test_four_experimental():
+    def test_chainmap_nested_source():
         """ Nested map source for ChainMap """
         from clu.config.keymap import nestedmaps
         
@@ -728,7 +733,7 @@ def test():
         print()
     
     @inline
-    def test_five():
+    def test_chainmap_stdlib_interop():
         """ Compatibility checks with “collections.ChainMap” """
         from clu.config.keymap import flatdict, Flat
         
@@ -755,7 +760,7 @@ def test():
         print()
     
     @inline
-    def test_six_experimental():
+    def test_chainmap_stdlib_parity():
         """ Parity checks for experimental `ChainMapPlusPlus` """
         chain0 = ChainMapPlusPlus(dict_arbitrary(),
                                           fsdata(),
@@ -776,7 +781,7 @@ def test():
             assert try_items(key, *chain0.maps, default=None) == chain1[key]
     
     @inline
-    def test_seven_experimental():
+    def test_chainmapplusplus_equality():
         """ Equality comparisons with `ChainMapPlusPlus` """
         from clu.config.keymap import flatdict, Flat
         from itertools import product
@@ -805,7 +810,7 @@ def test():
         print()
     
     @inline
-    def test_eight():
+    def test_orderedmapview_reverse():
         """ Check OrderedMappingView reversals """
         for key0, key1 in zip(reversed(fsdata().keys()), reversed(fsdata())):
             assert key0 == key1
@@ -819,7 +824,7 @@ def test():
             assert val0 == fsdata()[key1]
     
     @inline
-    def test_nine():
+    def test_orderedmapview_idx():
         """ Check OrderedMappingView indexing """
         for idx, key in enumerate(fsdata().keys()):
             val = fsdata()[key]
@@ -832,10 +837,10 @@ def test():
     @inline.diagnostic
     def restore_environment():
         """ Restore environment from stashed values """
-        os.environ = stash
+        os.environ = test.stash
     
     # Run all inline tests, return POSIX status
-    return inline.test(10)
+    return inline.test(100)
 
 if __name__ == '__main__':
     sys.exit(test())

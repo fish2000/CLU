@@ -4,7 +4,7 @@ from __future__ import print_function
 import plistlib
 import zict # type: ignore
 
-from clu.constants.consts import ENCODING, NoDefault
+from clu.constants.consts import APPNAME, ENCODING, NoDefault
 from clu.constants.enums import System
 from clu.constants.exceptions import KeyValueError
 from clu.fs.appdirectories import AppDirs
@@ -43,8 +43,8 @@ class CLUInterface(AppDirs):
         import clu
         
         # …also, use the Linux directory layout:
-        super(CLUInterface, self).__init__(appname=appname or clu.__title__,
-                                           version=version or clu.__version__,
+        super(CLUInterface, self).__init__(appname=appname or APPNAME,
+                                           version=version or clu.version_info.to_string(),
                                             system=System.LINUX2)
         
         # Use passed-in “datadir” or “user_config”

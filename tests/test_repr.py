@@ -44,8 +44,8 @@ class TestRepr(object):
         assert strfield(byts)           == "“YO DOGG!”"
         assert strfield(dic)            == '{ yo=dogg }'
         assert strfield(ns)             == "{ yo : 'dogg' }"
-        assert strfield(cmap)           == "clu.dicts.ChainMap «1 map, 1 key» [ builtins.dict : { yo : 'dogg' } ]"
-        assert strfield(smap)           == "collections.ChainMap «1 map, 1 key» [ builtins.dict : { yo : 'dogg' } ]"
+        assert strfield(cmap)           == "clu.dicts.ChainMap «1 map, 1 key» [ dict : { yo : 'dogg' } ]"
+        assert strfield(smap)           == "collections.ChainMap «1 map, 1 key» [ dict : { yo : 'dogg' } ]"
         assert strfield(l)              == '[ “yo”, “dogg” ]'
         assert strfield(t)              == '[ “yo”, “dogg” ]'
         assert strfield(True)           == "«True»"

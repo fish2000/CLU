@@ -76,6 +76,7 @@ GLOBALS = globals()
 starmods = ('clu.repl.ansi',
             'clu.repl.columnize',
             'clu.repl.modules',
+            'clu.constants.data',
             'clu.config.abc',
             'clu.config.env',
             'clu.config.keymap',

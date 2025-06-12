@@ -1,10 +1,64 @@
 # -*- coding: utf-8 -*-
 
+# What are XDGs?
+
 XDGS = ('XDG_CONFIG_DIRS', 'XDG_DATA_HOME',
         'XDG_CONFIG_HOME', 'XDG_DATA_DIRS',
                           'XDG_CACHE_HOME',
                           'XDG_STATE_HOME',
                          'XDG_RUNTIME_DIR')
+
+# Some fuckaround dicts
+
+arbitrary = {
+    'yo'    : "dogg",
+    'i'     : "heard",
+    'you'   : "liked",
+    'dict'  : "chains"
+}
+
+nested = {
+	'body': {
+		'declare_i': {
+			'id': { 'name': 'i', 'type': 'Identifier' },
+            'init': { 'type': 'Literal', 'value': 2 },
+			'type': 'VariableDeclarator'
+		},
+        'kind': 'var',
+        'type': 'VariableDeclaration',
+        'declare_j': {
+			'id': { 'name': 'j', 'type': 'Identifier' },
+            'init': { 'type': 'Literal', 'value': 4 },
+            'type': 'VariableDeclarator'
+		},
+        'kind': 'var',
+        'type': 'VariableDeclaration',
+        'declare_answer': {
+			'id': { 'name': 'answer', 'type': 'Identifier' },
+            'init': {
+				'left': { 'name': 'i', 'type': 'Identifier' },
+				'operator': '*',
+				'right': { 'name': 'j', 'type': 'Identifier' },
+				'type': 'BinaryExpression'
+			},
+			'type': 'VariableDeclarator'
+		},
+		'kind': 'var',
+		'type': 'VariableDeclaration'
+	},
+	'type':	'Program'
+}
+
+flat = {
+	'key0': 'yo',
+	'key1': 'dogg',
+	'key2': 'i_heard',
+	'ns0:key3': 'you_like',
+	'ns0:ns1:ns2:key4': 'tree',
+	'ns0:ns1:ns2:key5': 'structures'
+}
+
+# Greek text
 
 GREEKOUT = {}
 

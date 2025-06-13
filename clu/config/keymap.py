@@ -384,6 +384,7 @@ def frozenclasses(check=True):
     """ Scan `sys.modules` for “frozen”-looking types """
     from clu.naming import qualified_name
     seen = set()
+    out = list()
     for module in sysmods():
         for key, value in itermodule(module):
             if key.startswith("rozen", 1):
@@ -392,13 +393,16 @@ def frozenclasses(check=True):
                     modname = qualified_name(module)
                     if modname == '__main__':
                         modname = exporter.dotpath
-                    yield (key, value, modname, thaw_name(key))
+                    out.append((key, value, modname, thaw_name(key)))
+    return tuple(out)
 
 @inline.fixture
 def frozenclassnames():
     """ Same as the `frozenclasses()` fixture but with just the names """
-    for quadruple in tuple(frozenclasses(check=True)):
-        yield (quadruple[0], quadruple[2], quadruple[3])
+    out = list()
+    for quadruple in frozenclasses(check=True):
+        out.append((quadruple[0], quadruple[2], quadruple[3]))
+    return tuple(out)
 
 @inline.fixture
 def arbitrary():

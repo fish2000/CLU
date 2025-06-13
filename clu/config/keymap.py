@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from functools import lru_cache
 
 import clu.abstract
 import copy
@@ -12,8 +11,6 @@ from clu.constants import consts
 from clu.predicates import tuplize, typeof
 from clu.typology import ismapping
 from clu.exporting import Exporter, sysmods, itermodule
-
-cache = lambda function: lru_cache(maxsize=16, typed=False)(function)
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -374,13 +371,13 @@ def flatdict():
     """ Flat-dictionary fixture function """
     out = {}
     for mappingpath in mapwalk(nestedmaps()):
-        *namespaces, key, value = mappingpath
-        nskey = ns.pack_ns(key, *namespaces)
+        *fragments, key, value = mappingpath
+        nskey = ns.pack_ns(key, *fragments)
         out[nskey] = value
     return out
 
 @inline.fixture
-def frozenclasses(check=True):
+def frozenclasses():
     """ Scan `sys.modules` for “frozen”-looking types """
     from clu.naming import qualified_name
     seen = set()
@@ -400,7 +397,7 @@ def frozenclasses(check=True):
 def frozenclassnames():
     """ Same as the `frozenclasses()` fixture but with just the names """
     out = list()
-    for quadruple in frozenclasses(check=True):
+    for quadruple in frozenclasses():
         out.append((quadruple[0], quadruple[2], quadruple[3]))
     return tuple(out)
 

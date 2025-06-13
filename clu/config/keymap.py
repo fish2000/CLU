@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from functools import lru_cache
 
 import clu.abstract
 import copy
-import sys
+import sys, re
 
 from clu.config import abc, ns
+from clu.constants import consts
 from clu.typology import ismapping
 from clu.exporting import Exporter
+
+cache = lambda function: lru_cache(maxsize=8, typed=False)(function)
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -42,6 +46,69 @@ def articulate(mapping, walker=flatwalk):
                 d = d[namespace]
         d[key] = value
     return tree
+
+@export
+def issimplemap(mapping):
+    if not ismapping(mapping):
+        return False
+    if not mapping:
+        return False
+    out = True
+    for nskey, value in mapping.items():
+        out &= (not ismapping(value))
+        out &= (not consts.NAMESPACE_SEP in nskey)
+        if out is False:
+            return out
+    return out
+
+@export
+def isflatmap(mapping):
+    """ Boolean predicate for determining if a mapping is flat –
+        that is to say, if it has no sub-mappings as top-level
+        tree values.
+        
+        N.B. We should enhance this to work recursively
+    """
+    if not ismapping(mapping):
+        return False
+    if not mapping:
+        return False
+    if any(consts.NAMESPACE_SEP in nskey for nskey in mapping):
+        # We have at least one top:level:namespaced:key →
+        if any(ismapping(value) for value in mapping.values()):
+            # We have, it would seem, both a namespaced key
+            # and a nested value at top level. What???
+            return False
+        return True
+    # we have no namespaced keys at the top level
+    if any(ismapping(value) for value in mapping.values()):
+        # We have a nested value amongst flat keys
+        return False
+    return True
+
+@export
+def isnestedmap(mapping):
+    """ Boolean predicate for determining if a mapping is nested –
+        that is to say, if contains sub-mappings at the top-level.
+        
+        N.B. We should enhance this to work recursively
+    """
+    if not ismapping(mapping):
+        return False
+    if not mapping:
+        return False
+    if any(consts.NAMESPACE_SEP in nskey for nskey in mapping):
+        # We have at least one top:level:namespaced:key →
+        # if any(ismapping(value) for value in mapping.values()):
+        #     # We have, it would seem, both a namespaced key
+        #     # and a nested value at top level. What???
+        #     return False # WTF HAX
+        return False
+    # we have no namespaced keys at the top level
+    if any(ismapping(value) for value in mapping.values()):
+        # We have a nested value amongst flat keys
+        return True
+    return False
 
 @export
 class FrozenFlat(abc.FrozenKeyMap, clu.abstract.ReprWrapper,
@@ -143,6 +210,40 @@ def mapwalk(mapping, pre=None):
     else:
         yield mapping
 
+frozen_re = re.compile(r"^[Ff]rozen")
+
+@cache
+def thaw_name(name):
+    """ Private function, to cache “thawed” class names """
+    return frozen_re.sub('', name)
+
+@cache
+def freeze_name(name):
+    """ Private function, to cache “frozen” class names """
+    if clsname.startswith("rozen", 1):
+        return name
+    if name.islower():
+        return f"frozen{name}"
+    return f"Frozen{name}"
+
+@cache
+def thaw_class(cls):
+    """ Private function, to “thaw” a possibly frozen –
+        otherwise known as “immutable” – class, based
+        on its name and module.
+    """
+    from clu.naming import dotpath_join, moduleof, qualified_import
+    clsname = cls.__name__
+    if clsname.startswith("rozen", 1):
+        # try to import the non-frozen version:
+        putative = dotpath_join(moduleof(cls), thaw_name(clsname))
+        melted = qualified_import(putative, recurse=True)
+        frozen = cls
+        cls = melted
+    else:
+        frozen = melted = cls
+    return melted
+
 # CONCRETE SUBCLASSES: FrozenNested and Nested
 
 @export
@@ -185,18 +286,38 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         yield from mapwalk(self.tree)
     
     def submap(self, *namespaces, unprefixed=False):
-        """ Return a flattened dict containing only the namespaced items. """
+        """ Return a flattened mapping, if possible a mutable one,
+            containing only items with keys matching the specified
+            namespaces (as namespaced:key:paths).
+        """
+        # We’ll need this later:
+        cls = type(self)
+        
+        # Short-circuit for returning unprefixed top-level items:
         if unprefixed:
-            return { key : value for key, value in self.tree.items() \
-                                  if not ismapping(value) }
+            return cls({ key : value for key, value in self.tree.items() \
+                                                    if not ismapping(value) })
+        
+        # If it’s not unprefixed, and we have no namespaces,
+        # we cough up a new instance with our data:
         if not namespaces:
-            return dict(self)
-        if not ns.concatenate_ns(*namespaces) in self.namespaces():
-            return {}
-        d = self.tree
+            return cls(self)
+        
+        # d = self.tree
+        ours = tuple(self.namespaces())
+        theirs = dict()
+        # out = thaw_class(cls)()
+        
         for namespace in namespaces:
-            d = d[namespace]
-        return { ns.pack_ns(key, *namespaces) : value for key, value in d.items() }
+            if namespace not in ours:
+                continue
+            d = self.tree
+            for fragment in ns.split_ns(namespace):
+                d = d[fragment]
+            theirs.update(d)
+            # { ns.pack_ns(key, *namespaces) : value for key, value in d.items() }
+        
+        return thaw_class(cls)(theirs)
     
     def inner_repr(self):
         return repr(self.tree)
@@ -277,8 +398,8 @@ class KeyedAccessor(metaclass=clu.abstract.Slotted):
     def __init__(self, keymap, namespace=""):
         ourmap = hasattr(keymap, 'nestify') and keymap.nestify() or keymap
         cls = type(keymap)
-        self.namespace = ns.split_ns(namespace)
-        self.keymap = cls(ourmap.submap(*self.namespace, unprefixed=bool(self.namespace)))
+        # self.namespace = ns.split_ns(namespace)
+        self.keymap = cls(ourmap.submap(self.namespace, unprefixed=bool(self.namespace)))
     
     def __getattr__(self, key):
         """ Attribute access repacks the key """
@@ -478,8 +599,8 @@ def test():
         
         assert frozen_nested.submap() == dict(frozen_nested)
         assert nested.submap('body') == frozen_nested.submap('body')
-        assert nested.submap('body', 'declare_i') == frozen_nested.submap('body', 'declare_i')
-        assert nested.submap('WTF', 'HAX') == {}
+        assert nested.submap('body:declare_i') == frozen_nested.submap('body:declare_i')
+        assert nested.submap('WTF:HAX') == {}
         assert nested.submap(unprefixed=True) == { 'type' : 'Program' }
         assert nested.submap() == dict(nested)
     

@@ -79,8 +79,13 @@ def main_module_name(basepath=None):
     """ Get the name of the current __main__ module (which may
         very well just be “__main__”), but still.
     """
-    import __main__
     from clu.predicates import attr
+    
+    # Try importing the module:
+    try:
+        import __main__
+    except ModuleNotFoundError:
+        return ''
     
     # Default:
     if not basepath:

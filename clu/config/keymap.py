@@ -193,13 +193,14 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
     def thaw(self):
         return thaw_class(type(self))(tree=copy.deepcopy(self.tree))
     
-    def submap(self, *namespaces, unprefixed=False):
+    def submap(self, *namespaces, unprefixed=False, cls=False):
         """ Return a flattened mapping, if possible a mutable one,
             containing only items with keys matching the specified
             namespaces (as namespaced:key:paths).
         """
         # We’ll need this later:
-        cls = freeze_class(type(self))
+        if not cls:
+            cls = freeze_class(type(self))
         
         # Short-circuit for returning unprefixed top-level items:
         if unprefixed:
@@ -209,7 +210,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         # If it’s not unprefixed, and we have no namespaces,
         # we cough up a new instance with our data:
         if not namespaces:
-            return type(self)(self.tree)
+            return cls(self.tree)
         
         # Our namespaces, their output data:
         ours = tuple(self.namespaces())

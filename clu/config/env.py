@@ -27,9 +27,9 @@ def envwalk(appname, mapping):
     """
     app_prefix = prefix_env(appname)
     for envkey in (ek for ek in mapping.keys() if ek.startswith(app_prefix)):
-        an, key, namespaces = unpack_env(envkey)
+        an, key, fragments = unpack_env(envkey)
         assert an == appname
-        yield namespaces + [key, mapping[envkey]]
+        yield fragments + [key, mapping[envkey]]
 
 @export
 class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
@@ -203,8 +203,8 @@ def test():
         """ FrozenEnviron and “envwalk(…)” namespaced-key check """
         env = FrozenEnviron()
         
-        for *namespaces, key, value in envwalk('clu', os.environ.copy()):
-            nskey = pack_ns(key, *namespaces)
+        for *fragments, key, value in envwalk('clu', os.environ.copy()):
+            nskey = pack_ns(key, *fragments)
             assert nskey in env
     
     @inline
@@ -213,8 +213,8 @@ def test():
         updates = { 'yo' : 'dogg', 'iheard' : 'you like' }
         env = FrozenEnviron(**updates)
         
-        for *namespaces, key, value in envwalk('clu', os.environ.copy()):
-            nskey = pack_ns(key, *namespaces)
+        for *fragments, key, value in envwalk('clu', os.environ.copy()):
+            nskey = pack_ns(key, *fragments)
             assert nskey in env
         
         # getenv(…) key check:

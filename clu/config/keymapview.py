@@ -9,7 +9,7 @@ import collections.abc
 
 abstract = abc.abstractmethod
 
-from clu.constants.consts import pytuple
+from clu.constants.consts import NAMESPACE_SEP, pytuple
 from clu.config.ns import (concatenate_ns, pack_ns)
 
 from clu.predicates import isnormative, tuplize
@@ -50,7 +50,7 @@ class KeyMapViewBase(collections.abc.Sequence,
         """ Initialize a view on a KeyMap instance, for a given namespace """
         self.mapping = mapping
         self.namespaces = tuplize(namespaces)
-        self.prefixes = tuple(f"{namespace}:" for namespace in self.namespaces)
+        self.prefixes = tuple(f"{namespace}{NAMESPACE_SEP}" for namespace in self.namespaces)
     
     @property
     def _mapping(self): # pragma: no cover

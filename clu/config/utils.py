@@ -66,10 +66,6 @@ def isnestedmap(mapping):
         return False
     if any(consts.NAMESPACE_SEP in nskey for nskey in mapping):
         # We have at least one top:level:namespaced:key →
-        # if any(ismapping(value) for value in mapping.values()):
-        #     # We have, it would seem, both a namespaced key
-        #     # and a nested value at top level. What???
-        #     return False # WTF HAX
         return False
     # we have no namespaced keys at the top level
     if any(ismapping(value) for value in mapping.values()):

@@ -207,15 +207,6 @@ class FrozenKeyMap(FrozenKeyMapBase):
     def _get_namespace_foset(self):
         return FlatOrderedSet(get_ns(nskey) for nskey in sorted(self) if NAMESPACE_SEP in nskey)
     
-    def _namespaces(self): # pragma: no cover
-        """ Iterate over all of the namespaces defined in the mapping.
-            
-            This is the generic implementation. It depends on “__iter__(…)”,
-            as implemented by the concrete descendant.
-        """
-        nss = { get_ns(nskey) for nskey in self if NAMESPACE_SEP in nskey }
-        yield from sorted(nss)
-    
     def namespaces(self):
         yield from self._get_namespace_foset()
     
@@ -266,6 +257,8 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         # get(…) will raise the KeyError if NoDefault was passed
         # (Q.v. “get(¬)” definition supra.)
         value = self.get(key, *fragments, default=default)
+        if value is NoDefault:
+            return None
         if value == default or value is default:
             return value
         self.delete(key, *fragments)
@@ -306,7 +299,8 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
             return None
         if not namespaces:
             return super().clear()
-        for nskey in self.submap(*namespaces).keys():
+        submaps = self.submap(*namespaces)
+        for nskey in submaps.keys():
             del self[nskey]
         return None
     
@@ -355,10 +349,10 @@ class NamespaceWalker(FrozenKeyMap):
             Concrete subclasses must implement “walk(…)” such that it iterates
             over all items in a given instance, yielding them in a form like:
             
-                for *namespaces, key, value in self.walk():
+                for *fragments, key, value in self.walk():
                     # …
             
-            … So an item with no namespaces would yield “['key', 'value']”,
+            … So an item with no namespace prefix would yield “['key', 'value']”,
             but one with three would yield “['do', 're', 'me', 'key', 'value']”.
             
             See the “mapwalk(…)” and “envwalk(…)” function implementations,
@@ -381,14 +375,6 @@ class NamespaceWalker(FrozenKeyMap):
             from clu.config.keymap import FrozenFlat
             cls = FrozenFlat
         return cls({ pack_ns(key, *fragments) : value for *fragments, key, value in self.walk() })
-    
-    def _namespaces(self): # pragma: no cover
-        """ Iterate over all of the namespaces defined in the mapping. """
-        nss = set()
-        for *fragments, key, value in self.walk():
-            if fragments:
-                nss.add(concatenate_ns(*fragments))
-        yield from sorted(nss)
     
     def _get_namespace_foset(self):
         return FlatOrderedSet(concatenate_ns(*fragments) for *fragments, _, _ in self.walk() if fragments)

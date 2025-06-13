@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 
 # What are XDGs?
 
@@ -489,3 +490,25 @@ banners['pypy2.7'] = """
 888       "Y88P"  888       "Y88P"                                            
                                                                               
 """
+
+# Manual all/dir defs:
+
+__all__ = ('arbitrary', 'nested', 'flat',
+           'banners',
+           'XDGS', 'GREEKOUT')
+
+__dir__ = lambda: __all__
+
+def test():
+    from pprint import pprint
+    
+    print()
+    print("ALL TUPLE:")
+    pprint(__all__)
+    
+    print()
+    print("DIR FUNCTION:")
+    pprint(__dir__())
+
+if __name__ == '__main__':
+    sys.exit(test())

@@ -7,11 +7,13 @@ import copy
 import sys, re
 
 from clu.config import abc, ns
+from clu.config.utils import thaw_name, thaw_class, freeze_name, freeze_class
 from clu.constants import consts
+from clu.predicates import tuplize, typeof
 from clu.typology import ismapping
-from clu.exporting import Exporter
+from clu.exporting import Exporter, sysmods, itermodule
 
-cache = lambda function: lru_cache(maxsize=8, typed=False)(function)
+cache = lambda function: lru_cache(maxsize=16, typed=False)(function)
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
@@ -26,8 +28,8 @@ def flatwalk(mapping):
         Based on https://stackoverflow.com/a/12507546/298171
     """
     for nskey in mapping.keys():
-        key, namespaces = ns.unpack_ns(nskey)
-        yield namespaces + [key, mapping[nskey]]
+        key, fragments = ns.unpack_ns(nskey)
+        yield fragments + [key, mapping[nskey]]
 
 @export
 def articulate(mapping, walker=flatwalk):
@@ -36,79 +38,16 @@ def articulate(mapping, walker=flatwalk):
         walking function.
     """
     tree = {}
-    for *namespaces, key, value in walker(mapping):
+    for *fragments, key, value in walker(mapping):
         d = tree
-        for namespace in namespaces:
+        for fragment in fragments:
             try:
-                d = d[namespace]
+                d = d[fragment]
             except KeyError:
-                d[namespace] = {}
-                d = d[namespace]
+                d[fragment] = {}
+                d = d[fragment]
         d[key] = value
     return tree
-
-@export
-def issimplemap(mapping):
-    if not ismapping(mapping):
-        return False
-    if not mapping:
-        return False
-    out = True
-    for nskey, value in mapping.items():
-        out &= (not ismapping(value))
-        out &= (not consts.NAMESPACE_SEP in nskey)
-        if out is False:
-            return out
-    return out
-
-@export
-def isflatmap(mapping):
-    """ Boolean predicate for determining if a mapping is flat –
-        that is to say, if it has no sub-mappings as top-level
-        tree values.
-        
-        N.B. We should enhance this to work recursively
-    """
-    if not ismapping(mapping):
-        return False
-    if not mapping:
-        return False
-    if any(consts.NAMESPACE_SEP in nskey for nskey in mapping):
-        # We have at least one top:level:namespaced:key →
-        if any(ismapping(value) for value in mapping.values()):
-            # We have, it would seem, both a namespaced key
-            # and a nested value at top level. What???
-            return False
-        return True
-    # we have no namespaced keys at the top level
-    if any(ismapping(value) for value in mapping.values()):
-        # We have a nested value amongst flat keys
-        return False
-    return True
-
-@export
-def isnestedmap(mapping):
-    """ Boolean predicate for determining if a mapping is nested –
-        that is to say, if contains sub-mappings at the top-level.
-        
-        N.B. We should enhance this to work recursively
-    """
-    if not ismapping(mapping):
-        return False
-    if not mapping:
-        return False
-    if any(consts.NAMESPACE_SEP in nskey for nskey in mapping):
-        # We have at least one top:level:namespaced:key →
-        # if any(ismapping(value) for value in mapping.values()):
-        #     # We have, it would seem, both a namespaced key
-        #     # and a nested value at top level. What???
-        #     return False # WTF HAX
-        return False
-    # we have no namespaced keys at the top level
-    if any(ismapping(value) for value in mapping.values()):
-        # We have a nested value amongst flat keys
-        return True
-    return False
 
 @export
 class FrozenFlat(abc.FrozenKeyMap, clu.abstract.ReprWrapper,
@@ -136,6 +75,9 @@ class FrozenFlat(abc.FrozenKeyMap, clu.abstract.ReprWrapper,
         self.dictionary = dict(dictionary or {})
         if updates:
             self.dictionary.update(**updates)
+    
+    def thaw(self):
+        return thaw_class(type(self))(dictionary=copy.deepcopy(self.dictionary))
     
     def nestify(self, cls=None, walker=flatwalk):
         """ Articulate a flattened KeyMap instance out into one that is nested. """
@@ -175,7 +117,7 @@ class Flat(FrozenFlat, abc.KeyMap):
     """ A concrete mutable KeyMap class with a flat internal topology. """
     
     def freeze(self):
-        return FrozenFlat(dictionary=copy.deepcopy(self.dictionary))
+        return freeze_class(type(self))(dictionary=copy.deepcopy(self.dictionary))
     
     def __setitem__(self, nskey, value):
         self.dictionary[nskey] = value
@@ -210,40 +152,6 @@ def mapwalk(mapping, pre=None):
     else:
         yield mapping
 
-frozen_re = re.compile(r"^[Ff]rozen")
-
-@cache
-def thaw_name(name):
-    """ Private function, to cache “thawed” class names """
-    return frozen_re.sub('', name)
-
-@cache
-def freeze_name(name):
-    """ Private function, to cache “frozen” class names """
-    if clsname.startswith("rozen", 1):
-        return name
-    if name.islower():
-        return f"frozen{name}"
-    return f"Frozen{name}"
-
-@cache
-def thaw_class(cls):
-    """ Private function, to “thaw” a possibly frozen –
-        otherwise known as “immutable” – class, based
-        on its name and module.
-    """
-    from clu.naming import dotpath_join, moduleof, qualified_import
-    clsname = cls.__name__
-    if clsname.startswith("rozen", 1):
-        # try to import the non-frozen version:
-        putative = dotpath_join(moduleof(cls), thaw_name(clsname))
-        melted = qualified_import(putative, recurse=True)
-        frozen = cls
-        cls = melted
-    else:
-        frozen = melted = cls
-    return melted
-
 # CONCRETE SUBCLASSES: FrozenNested and Nested
 
 @export
@@ -271,19 +179,22 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         self.tree = dictify(dict(tree or {}), cls=dict)
         if updates:
             for nskey, value in updates.items():
-                key, namespaces = ns.unpack_ns(nskey)
+                key, fragments = ns.unpack_ns(nskey)
                 d = self.tree
-                for namespace in namespaces:
+                for fragment in fragments:
                     try:
-                        d = d[namespace]
+                        d = d[fragment]
                     except KeyError:
-                        d[namespace] = {}
-                        d = d[namespace]
+                        d[fragment] = {}
+                        d = d[fragment]
                 d[key] = value
     
     def walk(self):
         """ Iteratively walk the nested KeyMap’s tree of dicts. """
         yield from mapwalk(self.tree)
+    
+    def thaw(self):
+        return thaw_class(type(self))(tree=copy.deepcopy(self.tree))
     
     def submap(self, *namespaces, unprefixed=False):
         """ Return a flattened mapping, if possible a mutable one,
@@ -291,7 +202,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
             namespaces (as namespaced:key:paths).
         """
         # We’ll need this later:
-        cls = type(self)
+        cls = freeze_class(type(self))
         
         # Short-circuit for returning unprefixed top-level items:
         if unprefixed:
@@ -303,21 +214,24 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         if not namespaces:
             return cls(self)
         
-        # d = self.tree
+        # Our namespaces, their output data:
         ours = tuple(self.namespaces())
         theirs = dict()
-        # out = thaw_class(cls)()
         
+        # Go through the namespaces we were given, and copy anything
+        # we have that matches those namespaces into a new output dict,
+        # wholesale and sans any namespaced-key prefixes:
         for namespace in namespaces:
             if namespace not in ours:
                 continue
             d = self.tree
             for fragment in ns.split_ns(namespace):
                 d = d[fragment]
-            theirs.update(d)
-            # { ns.pack_ns(key, *namespaces) : value for key, value in d.items() }
+            theirs.update({ namespace : d })
         
-        return thaw_class(cls)(theirs)
+        # Return a (possibly frozen) instance containing the specified
+        # namespaced data, as a namespaced instance:
+        return cls(**theirs)
     
     def inner_repr(self):
         return repr(self.tree)
@@ -331,26 +245,26 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         return copy.deepcopy(self.tree)
     
     def __contains__(self, nskey):
-        key, namespaces = ns.unpack_ns(nskey)
-        if not namespaces:
+        key, fragments = ns.unpack_ns(nskey)
+        if not fragments:
             # Test for mappings to prevent false positives:
             return not ismapping(self.tree.get(key, {}))
         d = self.tree
-        for namespace in namespaces:
+        for fragment in fragments:
             try:
-                d = d[namespace]
+                d = d[fragment]
             except KeyError:
                 return False
         # Test for mappings to prevent false positives:
         return not ismapping(d.get(key, {}))
     
     def __getitem__(self, nskey):
-        key, namespaces = ns.unpack_ns(nskey)
-        if not namespaces:
+        key, fragments = ns.unpack_ns(nskey)
+        if not fragments:
             return self.tree[key]
         d = self.tree
-        for namespace in namespaces:
-            d = d[namespace]
+        for fragment in fragments:
+            d = d[fragment]
         return d[key]
 
 @export
@@ -361,31 +275,31 @@ class Nested(FrozenNested, abc.KeyMap):
     """
     
     def freeze(self):
-        return FrozenNested(tree=copy.deepcopy(self.tree))
+        return freeze_class(type(self))(tree=copy.deepcopy(self.tree))
     
     def __setitem__(self, nskey, value):
-        key, namespaces = ns.unpack_ns(nskey)
-        if not namespaces:
+        key, fragments = ns.unpack_ns(nskey)
+        if not fragments:
             self.tree[key] = value
         else:
             d = self.tree
-            for namespace in namespaces:
+            for fragment in fragments:
                 try:
-                    d = d[namespace]
+                    d = d[fragment]
                 except KeyError:
-                    d[namespace] = {}
-                    d = d[namespace]
+                    d[fragment] = {}
+                    d = d[fragment]
             d[key] = value
     
     def __delitem__(self, nskey):
         if nskey in self:
-            key, namespaces = ns.unpack_ns(nskey)
-            if not namespaces:
+            key, fragments = ns.unpack_ns(nskey)
+            if not fragments:
                 del self.tree[key]
             else:
                 d = self.tree
-                for namespace in namespaces:
-                    d = d[namespace]
+                for fragment in fragments:
+                    d = d[fragment]
                 del d[key]
         else:
             raise KeyError(nskey)
@@ -398,7 +312,6 @@ class KeyedAccessor(metaclass=clu.abstract.Slotted):
     def __init__(self, keymap, namespace=""):
         ourmap = hasattr(keymap, 'nestify') and keymap.nestify() or keymap
         cls = type(keymap)
-        # self.namespace = ns.split_ns(namespace)
         self.keymap = cls(ourmap.submap(self.namespace, unprefixed=bool(self.namespace)))
     
     def __getattr__(self, key):
@@ -467,6 +380,27 @@ def flatdict():
     return out
 
 @inline.fixture
+def frozenclasses(check=True):
+    """ Scan `sys.modules` for “frozen”-looking types """
+    from clu.naming import qualified_name
+    seen = set()
+    for module in sysmods():
+        for key, value in itermodule(module):
+            if key.startswith("rozen", 1):
+                if key not in seen:
+                    seen.add(key)
+                    modname = qualified_name(module)
+                    if modname == '__main__':
+                        modname = exporter.dotpath
+                    yield (key, value, modname, thaw_name(key))
+
+@inline.fixture
+def frozenclassnames():
+    """ Same as the `frozenclasses()` fixture but with just the names """
+    for quadruple in tuple(frozenclasses(check=True)):
+        yield (quadruple[0], quadruple[2], quadruple[3])
+
+@inline.fixture
 def arbitrary():
     return {
         'yo'     : 'dogg',
@@ -479,8 +413,25 @@ def test():
     
     @inline.precheck
     def show_nestedmaps():
-        print("Nested maps fixture output:")
+        """ Nested maps fixture contents """
         pprint(nestedmaps())
+    
+    @inline.precheck
+    def show_frozenclasses():
+        """ Frozen classes (by name) found in sys.modules """
+        from clu.config.env import FrozenEnviron
+        
+        freezer = tuple(frozenclasses())
+        for popsicle in freezer:
+            pprint(tuplize(popsicle[0], popsicle[1]))
+            # pprint(popsicle)
+
+        print()
+        
+        fridge = tuple(frozenclassnames())
+        # print(f"LEN: {len(fridge)}")
+        for meat in fridge:
+            pprint(meat)
     
     @inline
     def test_mapwalk():
@@ -515,24 +466,14 @@ def test():
         flat = FrozenFlat(flat_dict)
         nested = Nested(flat)
         
-        # print("FLAT:")
-        # pprint(flat)
-        # print()
-        
-        # print("NESTED:")
-        # pprint(nested)
-        # print()
-        
-        # print("NESTED FLATTEN:")
-        # pprint(nested.flatten())
-        # print()
-        
         assert nested.flatten() == flat
         assert nested.flatten().dictionary == flatdict()
-        assert nested == flat
+        assert nested.flatten().thaw() == flat
+        
+        assert len(flat) == len(nested)
     
     @inline
-    def test_flat_frozenflat_nested_eq():
+    def test_flat_nested_eq():
         """ Flat, FrozenFlat and Nested equivalence """
         flat_dict = {}
         
@@ -579,7 +520,7 @@ def test():
         nested = FrozenNested(tree=nestedmaps())
         flat = Flat(nested)
         assert flat.nestify() == nested
-        assert flat == nested
+        assert flat.nestify().thaw() == nested
     
     @inline
     def test_nested_frozennested_eq():
@@ -594,6 +535,7 @@ def test():
     
     @inline
     def test_nested_submaps():
+        """ Check submap(…) equality """
         nested = Nested(tree=nestedmaps())
         frozen_nested = nested.freeze()
         
@@ -601,8 +543,51 @@ def test():
         assert nested.submap('body') == frozen_nested.submap('body')
         assert nested.submap('body:declare_i') == frozen_nested.submap('body:declare_i')
         assert nested.submap('WTF:HAX') == {}
-        assert nested.submap(unprefixed=True) == { 'type' : 'Program' }
+        assert frozen_nested.submap('WTF:HAX') == {}
+        assert nested.submap(unprefixed=True) == FrozenNested({ 'type' : 'Program' })
+        # pprint(nested.submap(unprefixed=True))
         assert nested.submap() == dict(nested)
+    
+    @inline.diagnostic
+    def show_nested_contents():
+        """ Evaluate submap(…) contents """
+        nested = Nested(tree=nestedmaps())
+        frozen_nested = nested.freeze()
+        
+        typ0 = typeof(nested).__name__
+        print(f"NESTED ({typ0}) SUBMAP:")
+        print(nested.submap('body:declare_i'))
+        print()
+        
+        typ1 = typeof(frozen_nested).__name__
+        print(f"FROZEN NESTED ({typ1}) SUBMAP:")
+        print(frozen_nested.submap('body:declare_i'))
+        print()
+        
+        print(f"NESTED ({typ0}) TREE:")
+        pprint(nested.tree)
+        print()
+        
+        print(f"FROZEN NESTED ({typ1}) TREE:")
+        pprint(nested.tree)
+        print()
+    
+    @inline.diagnostic
+    def show_function_cache_stats():
+        """ Show stats for the cached freeze/thaw functions """
+        from clu.naming import nameof
+        
+        # Which functions?
+        cached = (thaw_name, thaw_class,
+                  freeze_name, freeze_class)
+        total = len(cached)
+        
+        # Let’s see them:
+        for idx, function in enumerate(cached):
+            if idx > 0:
+                print()
+            print(f"FUNCTION CACHE INFO: {nameof(function)} ({idx+1} of {total})")
+            print(function.cache_info())
     
     @inline.diagnostic
     def show_fixture_cache_stats():
@@ -611,7 +596,7 @@ def test():
         for idx, name in enumerate(inline.fixtures.keys()):
             if idx > 0:
                 print()
-            print(f"FUNCTION CACHE INFO: {name} ({idx+1} of {total})")
+            print(f"FIXTURE CACHE INFO: {name} ({idx+1} of {total})")
             print(inline.fixtures[name].cache_info())
     
     # Run all inline tests:

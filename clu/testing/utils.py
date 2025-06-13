@@ -462,7 +462,7 @@ class InlineTester(collections.abc.Set,
             if name is None:
                 raise ValueError("couldn’t determine a name for fixture function: {function!r}")
             
-            self.fixtures[name] = wrapper = lru_cache(maxsize=16, typed=False)(function)
+            self.fixtures[name] = wrapper = lru_cache(maxsize=4, typed=False)(function)
             return wrapper
         
         return decoration

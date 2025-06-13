@@ -197,25 +197,27 @@ class TestDicts(object):
             if first is not second:
                 assert first == second
     
-    def test_chainmap_compatibilty_stdlib_collections_chainmap(self, arbitrary):
+    def test_chainmap_compatibilty_stdlib_collections_chainmap(self):
         """ Compatibility checks with “collections.ChainMap” """
         from clu.dicts import ChainMap
         # from clu.dicts import ChainRepr
-        from clu.config.keymap import flatdict, Flat
+        from clu.config.keymap import Flat, Nested
+        from clu.constants.data import arbitrary, nested
         import collections
         
-        chain0 = ChainMap(arbitrary, Flat(flatdict()))
-        chainO = collections.ChainMap(arbitrary, Flat(flatdict()))
+        chain00 = ChainMap(Flat(arbitrary), Nested(nested))
+        chainOO = collections.ChainMap(Flat(arbitrary), Nested(nested))
         
-        assert len(chain0) == len(chainO)
+        assert len(chain00) == len(chainOO)
         
-        for key in chain0.keys():
-            assert chain0[key] == chainO[key]
+        for key in chainOO.keys():
+            assert chain00[key]
+            assert chain00[key] == chainOO[key]
         
-        chainZ = ChainMap(chainO)
+        chainZ = ChainMap(chainOO)
         
-        assert chainZ == chain0
-        assert chainZ == chainO
+        assert chainZ == chain00
+        assert chainZ == chainOO
         
         # repr_instance = ChainRepr()
         # assert repr_instance.repr(chain0) == repr_instance.repr(chainO)

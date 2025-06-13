@@ -15,6 +15,7 @@ from clu.config.ns import unpack_ns, pack_ns, get_ns, compare_ns
 from clu.config.keymapview import KeyMapKeysView, KeyMapItemsView, KeyMapValuesView
 from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsView
 from clu.config.keymapview import NamespaceWalkerValuesView
+from clu.config.utils import freeze_class
 
 from clu.naming import qualified_import, qualified_name, nameof
 from clu.predicates import (typeof,
@@ -163,12 +164,15 @@ class FrozenKeyMap(FrozenKeyMapBase):
     
     def submap(self, *namespaces, unprefixed=False):
         """ Return a flattened dict containing only the namespaced items. """
+        cls = freeze_class(type(self))
         if unprefixed:
-            return { nskey : self[nskey] for nskey in self if NAMESPACE_SEP not in nskey }
+            return cls({ nskey : self[nskey] for nskey in self if NAMESPACE_SEP not in nskey })
         if not namespaces:
-            return dict(self)
-        prefix = prefix_for(*namespaces)
-        return { nskey : self[nskey] for nskey in self if nskey.startswith(prefix) }
+            return cls(self)
+        out = dict()
+        for namespace in namespaces:
+            out.update({ nskey : self[nskey] for nskey in self if nskey.startswith(namespace) })
+        return cls(out)
     
     def keys(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all keys in the mapping,

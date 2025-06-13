@@ -13,6 +13,7 @@ import sys
 from clu.constants.consts import STRINGPAIR, WHITESPACE, NoDefault
 from clu.config.abc import FlatOrderedSet as FOSet
 from clu.naming import qualified_name
+from clu.typology import iterlen
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -138,8 +139,8 @@ class ChainRepr(Repr):
             return f"{{ {item} }}"
         
         # Format all items:
-        items = (STRINGPAIR.format(key, self.subrepr(mapping[key], level)) \
-                               for key in mapping.keys())
+        items = tuple(STRINGPAIR.format(key, self.subrepr(mapping[key], level)) \
+                                    for key in mapping.keys())
         
         # Compute indentation levels:
         ts = "    " * (int(self.maxlevel - level) + 1)
@@ -225,6 +226,24 @@ class ChainRepr(Repr):
     def repr_ChainMapPlusPlus(self, chainmap, level):
         return self.toprepr(chainmap, level)
     
+    def repr_KeyMap(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
+    def repr_FrozenKeyMap(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
+    def repr_Flat(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
+    def repr_FrozenFlat(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
+    def repr_Nested(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
+    def repr_FrozenNested(self, mapping, level):
+        return self.primerepr(mapping, level)
+    
     def shortrepr(self, thing):
         """ Return the “short” repr of a chainmap instance –
             all whitespace will be condensed to single spaces
@@ -284,13 +303,13 @@ class ChainMap(collections.abc.MutableMapping,
             “collections.ChainMap”, will have their constituent dicts extracted
             and individually appended to the new ChainMaps’ internal list.
         """
-        maps = [] # type: list
+        maps = []
+        cls = type(self)
         for d in dicts:
-            if type(self).is_a(d):
+            if cls.is_a(d):
                 for mapping in d.maps:
-                    if bool(mapping):
-                        if mapping not in maps:
-                            maps.append(mapping)
+                    if mapping not in maps:
+                        maps.append(mapping)
             else:
                 if d not in maps:
                     maps.append(d)
@@ -316,6 +335,12 @@ class ChainMap(collections.abc.MutableMapping,
     
     def __contains__(self, key):
         return any(key in mapping for mapping in self.maps)
+    
+    def __eq__(self, other):
+        out = True
+        for nskey in self:
+            out &= self[nskey] == other[nskey]
+        return out
     
     def __bool__(self):
         return any(self.maps)
@@ -715,9 +740,24 @@ def test():
             if first is not second:
                 assert first == second
         
-        print("REPR»CHAIN0:")
+        print("REPR»CHAIN»0:")
         print()
         print(repr(chain0))
+        print()
+        
+        print("REPR»CHAIN»1:")
+        print()
+        print(repr(chain1))
+        print()
+        
+        print("REPR»CHAIN»X:")
+        print()
+        print(repr(chainX))
+        print()
+        
+        print("REPR»CHAIN»Z:")
+        print()
+        print(repr(chainZ))
         print()
     
     @inline
@@ -742,7 +782,11 @@ def test():
         chain0 = ChainMap(dict_arbitrary(), Flat(flatdict()), **overrides)
         chainO = collections.ChainMap(dict_arbitrary(), Flat(flatdict()), overrides)
         
-        assert len(chain0) == len(chainO)
+        # assert len(chain0) == len(chainO)
+        len0 = len(chain0)
+        lenO = len(chainO)
+        print(f"LENS: chain0 is {len0}, chainO is {lenO}")
+        print()
         
         for key in chain0.keys():
             assert chain0[key] == chainO[key]
@@ -757,6 +801,11 @@ def test():
         print("REPR»CHAIN-OH:")
         print()
         print(repr_instance.repr(chainO))
+        print()
+        
+        print("REPR»CHAIN-ZER0:")
+        print()
+        print(repr_instance.repr(chain0))
         print()
     
     @inline

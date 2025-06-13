@@ -336,12 +336,6 @@ class ChainMap(collections.abc.MutableMapping,
     def __contains__(self, key):
         return any(key in mapping for mapping in self.maps)
     
-    def __eq__(self, other):
-        out = True
-        for nskey in self:
-            out &= self[nskey] == other[nskey]
-        return out
-    
     def __bool__(self):
         return any(self.maps)
     

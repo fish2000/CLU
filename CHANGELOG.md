@@ -1,9 +1,108 @@
 # Changelog
 
 
-## 0.12.11:pre6+gf6ef978 [SNAPSHOT]
+## 0.12.12:pre12+gf9e1a9f [SNAPSHOT]
+
+### Add
+
+* Added some useful rando dicts to `clu.constants.data` [Alexander Böhn]
 
 ### Other
+
+* Nixed `clu.dicts.ChainMap.__eq__(…)` for the moment. [Alexander Böhn]
+
+  … because I have reason to believe that, at this time, it may suck.
+
+* Tidying up and removing more dead code. [Alexander Böhn]
+
+* Removed and renamed much in the `clu.keymap`/`clu.dicts` departments. [Alexander Böhn]
+
+* Total overhaul of oh so much stuff in `clu.config` and `clu.dicts` [Alexander Böhn]
+
+  • For the most part, you pass actual namespaces in to a KeyMaps’
+    methods that say “namespaces”.
+    • Like: “flatmap.submap('yo:dogg', 'iheard:youlike')” works
+    • … as does “flatmap.keys('yo:dogg')” or “flatmap.items('yo:dogg')”
+    • … there was some touchy shit with this so watch this space for more
+    • Tests are updated accordingly (both inline and unit tests)
+  • Many changes in “clu.dicts” to afford different classes and speed
+    and things of that nature
+  • Added a new “clu.config.utils” module
+    • This contains ad-hoc name-based functions for “freezing” and
+      “thawing” classes – like you can do:
+
+      >>> from clu.config.utils import freeze_class, thaw_class
+      >>> from clu.config.keymap import Flat, FrozenFlat
+      >>> assert freeze_class(Flat) is FrozenFlat
+      >>> assert thaw_class(FrozenFlat) is Flat
+
+      … which is pretty neat, I think. It’s totally ad-hoc and fragile,
+        tho, so we will see what happens.
+  • Modified “clu.config.abc” to go with all of this
+  • Added some mapping fixture thingees to “clu.constants.data”
+  • Much other miscellany I am sure
+
+  … Yes!
+
+* Rethinking and reworking how `KeyMap.submap(…)` thinks and works. [Alexander Böhn]
+
+* An array of tweaks and optimizations to be found in `clu.dicts` [Alexander Böhn]
+
+  So. We got:
+  • A rewrite of “clu.dicts.merge_as(…)” that doesn’t just hopelessly
+    piggyback on “merge_two(¬)” of the same module, and keeps the dicts
+    in the right order
+  • Some of that “right order” mojo was sprinkled into the constructor
+    for “clu.dicts.ChainMap”
+  • “clu.dicts.ChainRepr” won’t identify builtin types (namely, “dict”)
+    as irritatingly coming from the “builtins” package
+  • Used frozensets in place of sets, wherever speedier
+  • Inline test names in “clu.dicts” make some a lot of sense
+  • Other miscellaneous shit
+
+* Regex flags in `clu.fs.misc` are now handled cheaply and gracefully. [Alexander Böhn]
+
+  … meaning the defaults are computed in the function sigs, which also
+    means they may be modified at the whim of you, the user
+
+* My my, there was much reserved-word-clobbering up in there. [Alexander Böhn]
+
+  … by “there” I mean “clu.dicts”; q.v. previous commit supra.
+
+* No longer clobbering a reserved word (“map”) in `clu.dicts.ChainMap` [Alexander Böhn]
+
+* Just a small addenda to my favorite CLU docstring. [Alexander Böhn]
+
+* A bunch of new namespace tools for use in `clu.config` [Alexander Böhn]
+
+  To wit:
+  • The very deeply abstract base class now has an abstract method
+    definition specifically for the “submap(…)” signature (which this
+    was previously lacking).
+
+  • There’s a new “KeyedAccessor” class in “clu.config.keymap”, allowing
+    for proxied simple access to keymap elements. Like you can be like:
+
+      >>> nested = Nested(nested_data)
+      >>> accessor = KeyedAccessor(nested, "some:namespace:keypath")
+      >>> assert nested['some:namespace:keypath:key'] = accessor['key']
+
+    … at least, that’s the goal with that RN.
+
+  • There is also a “clean_ns(namespaced_string)” function, to be found
+    in “clu.config.ns”, and support regexes and one-liner functions
+    based on those regexes, and an inline test function.
+
+  • Trivial (really) fixes in “clu.exporting” and “clu.predicates” too.
+
+
+## v0.12.12 (2025-06-03)
+
+### Other
+
+* Bumped version: 0.12.11 → 0.12.12. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * Reaffirming the commands’ non-erroneousness AGAIN!! [Alexander Böhn]
 

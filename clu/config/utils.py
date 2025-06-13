@@ -83,7 +83,7 @@ def thaw_name(name):
 @cache
 def freeze_name(name):
     """ Private function, to cache “frozen” class names """
-    if name.startswith("rozen", 1):
+    if name.startswith("rozen", 1) or name.endswith('File'):
         return name
     if name.islower():
         return f"frozen{name}"

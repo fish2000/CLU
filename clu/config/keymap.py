@@ -209,7 +209,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         # If it’s not unprefixed, and we have no namespaces,
         # we cough up a new instance with our data:
         if not namespaces:
-            return cls(self)
+            return type(self)(self.tree)
         
         # Our namespaces, their output data:
         ours = tuple(self.namespaces())

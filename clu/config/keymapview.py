@@ -61,10 +61,10 @@ class KeyMapViewBase(collections.abc.Sequence,
         return len(self.submap)
     
     def __getitem__(self, idx):
-        if isnumber(idx):
-            return tuple(self.submap)[idx]
         if isnormative(idx):
-            return self.submap[idx]
+            return self.mapping[idx]
+        if isnumber(idx):
+            return tuple(self.mapping)[idx]
         tn = typename(idx)
         raise KeyError(f"bad index type: {tn}")
     
@@ -95,12 +95,13 @@ class KeyMapKeysView(KeyMapViewBase,
         return nskey in self.submap
     
     def __iter__(self):
-        if self.namespaces:
-            for nskey in self.mapping:
-                if nskey.startswith(self.namespaces):
-                    yield nskey
-        else:
-            yield from self.mapping
+        yield from self.submap
+        # if self.namespaces:
+        #     for nskey in self.mapping:
+        #         if nskey.startswith(self.namespaces):
+        #             yield nskey
+        # else:
+        #     yield from self.mapping
 
 @export
 @collections.abc.ItemsView.register
@@ -121,12 +122,13 @@ class KeyMapItemsView(KeyMapViewBase,
             return contained is value or contained == value
     
     def __iter__(self):
-        if self.namespaces:
-            for nskey in self.mapping:
-                if nskey.startswith(self.namespaces):
-                    yield (nskey, self.mapping[nskey])
-        else:
-            yield from ((key, self.mapping[key]) for key in self.mapping)
+        yield from ((nskey, self.mapping[nskey]) for nskey in self.submap)
+        # if self.namespaces:
+        #     for nskey in self.mapping:
+        #         if nskey.startswith(self.namespaces):
+        #             yield (nskey, self.mapping[nskey])
+        # else:
+        #     yield from ((key, self.mapping[key]) for key in self.mapping)
 
 @export
 @collections.abc.ValuesView.register
@@ -143,12 +145,13 @@ class KeyMapValuesView(KeyMapViewBase,
         return False
     
     def __iter__(self):
-        if self.namespaces:
-            for nskey in self.mapping:
-                if nskey.startswith(self.namespaces):
-                    yield self.mapping[nskey]
-        else:
-            yield from (self.mapping[key] for key in self.mapping)
+        yield from (self.mapping[nskey] for nskey in self.submap)
+        # if self.namespaces:
+        #     for nskey in self.mapping:
+        #         if nskey.startswith(self.namespaces):
+        #             yield self.mapping[nskey]
+        # else:
+        #     yield from (self.mapping[key] for key in self.mapping)
 
 @export
 class NamespaceWalkerViewBase(KeyMapViewBase):
@@ -181,12 +184,14 @@ class NamespaceWalkerKeysView(NamespaceWalkerViewBase,
         return False
     
     def __iter__(self):
-        if not self.namespaces:
-            yield from (pack_ns(key, *frags) for *frags, key, _ in self.mapping.walk())
-        else:
-            for *fragments, key, value in self.mapping.walk():
-                if concatenate_ns(*fragments) in self.namespaces:
-                    yield pack_ns(key, *fragments)
+        for *fragments, key, value in self.submap.walk():
+            yield pack_ns(key, *fragments)
+        # if not self.namespaces:
+        #     yield from (pack_ns(key, *frags) for *frags, key, _ in self.mapping.walk())
+        # else:
+        #     for *fragments, key, value in self.mapping.walk():
+        #         if concatenate_ns(*fragments) in self.namespaces:
+        #             yield pack_ns(key, *fragments)
 
 @export
 @collections.abc.ItemsView.register
@@ -208,12 +213,14 @@ class NamespaceWalkerItemsView(NamespaceWalkerViewBase,
         return False
     
     def __iter__(self):
-        if not self.namespaces:
-            yield from ((pack_ns(key, *frags), val) for *frags, key, val in self.mapping.walk())
-        else:
-            for *fragments, key, value in self.mapping.walk():
-                if concatenate_ns(*fragments) in self.namespaces:
-                    yield (pack_ns(key, *fragments), value)
+        for *fragments, key, value in self.submap.walk():
+            yield (pack_ns(key, *fragments), value)
+        # if not self.namespaces:
+        #     yield from ((pack_ns(key, *frags), val) for *frags, key, val in self.mapping.walk())
+        # else:
+        #     for *fragments, key, value in self.mapping.walk():
+        #         if concatenate_ns(*fragments) in self.namespaces:
+        #             yield (pack_ns(key, *fragments), value)
 
 @export
 @collections.abc.ValuesView.register
@@ -232,9 +239,10 @@ class NamespaceWalkerValuesView(NamespaceWalkerViewBase,
         return False
     
     def __iter__(self):
-        if not self.namespaces:
-            yield from (value for *_, _, value in self.mapping.walk())
-        else:
-            for *fragments, key, value in self.mapping.walk():
-                if concatenate_ns(*fragments) in self.namespaces:
-                    yield value
+        yield from (self.mapping[nskey] for nskey in self.submap)
+        # if not self.namespaces:
+        #     yield from (value for *_, _, value in self.mapping.walk())
+        # else:
+        #     for *fragments, key, value in self.mapping.walk():
+        #         if concatenate_ns(*fragments) in self.namespaces:
+        #             yield value

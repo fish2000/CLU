@@ -424,12 +424,10 @@ def test():
         freezer = tuple(frozenclasses())
         for popsicle in freezer:
             pprint(tuplize(popsicle[0], popsicle[1]))
-            # pprint(popsicle)
 
         print()
         
         fridge = tuple(frozenclassnames())
-        # print(f"LEN: {len(fridge)}")
         for meat in fridge:
             pprint(meat)
     
@@ -443,9 +441,9 @@ def test():
     def test_mapwalk_content():
         """ Verbose “mapwalk(…)” content check """
         for mappingpath in mapwalk(nestedmaps()):
-            *namespaces, key, value = mappingpath
-            nskey = ns.pack_ns(key, *namespaces)
-            print("NAMESPACES:", ", ".join(namespaces))
+            *fragments, key, value = mappingpath
+            nskey = ns.pack_ns(key, *fragments)
+            print("NAMESPACES:", ", ".join(fragments))
             print("KEY:", key)
             print("NSKEY:", nskey)
             print("VALUE:", value)
@@ -457,8 +455,8 @@ def test():
         flat_dict = {}
         
         for mappingpath in mapwalk(nestedmaps()):
-            *namespaces, key, value = mappingpath
-            nskey = ns.pack_ns(key, *namespaces)
+            *fragments, key, value = mappingpath
+            nskey = ns.pack_ns(key, *fragments)
             flat_dict[nskey] = value
         
         assert flat_dict == flatdict()
@@ -478,8 +476,8 @@ def test():
         flat_dict = {}
         
         for mappingpath in mapwalk(nestedmaps()):
-            *namespaces, key, value = mappingpath
-            nskey = ns.pack_ns(key, *namespaces)
+            *fragments, key, value = mappingpath
+            nskey = ns.pack_ns(key, *fragments)
             flat_dict[nskey] = value
         
         assert flat_dict == flatdict()
@@ -500,8 +498,8 @@ def test():
         nested = FrozenNested(tree=nestedmaps())
         
         for mappingpath in mapwalk(nested.tree):
-            *namespaces, key, value = mappingpath
-            nskey = ns.pack_ns(key, *namespaces)
+            *fragments, key, value = mappingpath
+            nskey = ns.pack_ns(key, *fragments)
             assert nskey in nested
     
     @inline
@@ -510,8 +508,8 @@ def test():
         nested = Nested(tree=nestedmaps(), **arbitrary())
         
         for mappingpath in mapwalk(nested.tree):
-            *namespaces, key, value = mappingpath
-            nskey = ns.pack_ns(key, *namespaces)
+            *fragments, key, value = mappingpath
+            nskey = ns.pack_ns(key, *fragments)
             assert nskey in nested or nskey in arbitrary()
     
     @inline
@@ -545,7 +543,6 @@ def test():
         assert nested.submap('WTF:HAX') == {}
         assert frozen_nested.submap('WTF:HAX') == {}
         assert nested.submap(unprefixed=True) == FrozenNested({ 'type' : 'Program' })
-        # pprint(nested.submap(unprefixed=True))
         assert nested.submap() == dict(nested)
     
     @inline.diagnostic

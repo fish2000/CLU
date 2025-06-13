@@ -59,8 +59,6 @@ class KeyMapViewBase(collections.abc.Sequence,
     
     def __len__(self):
         return len(self.mapping.submap(*self.namespaces))
-        # return iterlen(nskey for nskey in self.mapping \
-        #             if nskey.startswith(self.prefix))
     
     def __getitem__(self, idx):
         if isnumber(idx):
@@ -99,17 +97,6 @@ class KeyMapKeysView(KeyMapViewBase,
                     yield nskey
         else:
             yield from self.mapping
-    
-    # def __iter__(self):
-    #     for nskey in self.mapping:
-    #         if self.namespaces:
-    #             if nskey.startswith(self.namespaces):
-    #                 yield nskey
-    #         else:
-    #             yield nskey
-        # yield from (nskey for nskey in self.mapping \
-        #         if any(nskey.startswith(namespace) \
-        #         for namespace in self.namespaces))
 
 @export
 @collections.abc.ItemsView.register
@@ -136,20 +123,6 @@ class KeyMapItemsView(KeyMapViewBase,
                     yield (nskey, self.mapping[nskey])
         else:
             yield from ((key, self.mapping[key]) for key in self.mapping)
-    
-    # def __iter__(self):
-    #     if self.namespaces:
-    #         for nskey in self.mapping:
-    #             if nskey.startswith(self.namespaces):
-    #                 yield (nskey, self.mapping[nskey])
-    #     else:
-    #         for nskey in self.mapping:
-    #             yield (nskey, self.mapping[nskey])
-        
-    # def __iter__(self):
-    #     yield from ((nskey, self.mapping[nskey]) for nskey in self.mapping \
-    #             if any(nskey.startswith(namespace) \
-    #             for namespace in self.namespaces))
 
 @export
 @collections.abc.ValuesView.register
@@ -173,19 +146,6 @@ class KeyMapValuesView(KeyMapViewBase,
                     yield self.mapping[nskey]
         else:
             yield from (self.mapping[key] for key in self.mapping)
-    
-    # def __iter__(self):
-    #     for nskey in self.mapping:
-    #         if self.namespaces:
-    #             if nskey.startswith(self.namespaces):
-    #                 yield self.mapping[nskey]
-    #         else:
-    #             yield self.mapping[nskey]
-    
-    # def __iter__(self):
-    #     yield from (self.mapping[nskey] for nskey in self.mapping \
-    #             if any(nskey.startswith(namespace) \
-    #             for namespace in self.namespaces))
 
 @export
 class NamespaceWalkerViewBase(KeyMapViewBase):
@@ -199,11 +159,6 @@ class NamespaceWalkerViewBase(KeyMapViewBase):
         if not self.namespaces:
             return iterlen(self.mapping.walk())
         return len(self.mapping.submap(*self.namespaces))
-        # return iterlen(concatenate_ns(*fragments) \
-        #                           for *fragments, _, _ in self.mapping.walk() \
-        #                             if concatenate_ns(*fragments) in self.namespaces)
-        #                            # if any(concatenate_ns(*fragments).startswith(namespace) \
-        #                            #                    for namespace in self.namespaces))
 
 @export
 @collections.abc.KeysView.register
@@ -216,9 +171,10 @@ class NamespaceWalkerKeysView(NamespaceWalkerViewBase,
     
     def __contains__(self, nskey):
         for *fragments, key, value in self.mapping.walk():
+            if not self.namespaces:
+                return nskey == key
             if concatenate_ns(*fragments) in self.namespaces:
-                if nskey == pack_ns(key, *fragments):
-                    return True
+                return nskey == pack_ns(key, *fragments)
         return False
     
     def __iter__(self):
@@ -242,9 +198,10 @@ class NamespaceWalkerItemsView(NamespaceWalkerViewBase,
         nskey, putative = item
         for *fragments, key, value in self.mapping.walk():
             if putative is value or putative == value:
+                if not self.namespaces:
+                    return nskey == key
                 if concatenate_ns(*fragments) in self.namespaces:
-                    if nskey == pack_ns(key, *fragments):
-                        return True
+                    return nskey == pack_ns(key, *fragments)
         return False
     
     def __iter__(self):
@@ -266,6 +223,8 @@ class NamespaceWalkerValuesView(NamespaceWalkerViewBase,
         for *fragments, key, value in self.mapping.walk():
             if putative is value or putative == value:
                 if concatenate_ns(*fragments) in self.namespaces:
+                    return True
+                if not self.namespaces:
                     return True
         return False
     

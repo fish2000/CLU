@@ -115,22 +115,6 @@ class TestDicts(object):
         assert len(beentrying) == len(where)
         assert len(tomeetyou) == len(haveyou)
         
-        '''
-        for orig, clone in ((hey, buthey), (beentrying, where), (tomeetyou, haveyou)):
-            for key in orig.keys():
-                assert key in clone
-                assert key in clone.flatten()
-                # assert orig.get(key) == clone.get(key)
-                assert key in orig
-                assert key in orig.flatten()
-                assert try_items(key, *orig.maps, default=None) is not None
-                assert try_items(key, *clone.maps, default=None) is not None
-                assert try_items(key, *orig.maps, default=None) == try_items(key, *clone.maps, default=None)
-                # FAILS:
-                # assert try_items(key, *orig.maps, default=None) == orig[key]
-                # assert try_items(key, *clone.maps, default=None) == clone[key]
-        '''
-        
         # ONE LAST CHECK. And we’ll call it a day.
         been = ChainMap(arbitrary, fsdata, environment)
         assert frozenset(buthey).issuperset(where)
@@ -200,7 +184,6 @@ class TestDicts(object):
     def test_chainmap_compatibilty_stdlib_collections_chainmap(self):
         """ Compatibility checks with “collections.ChainMap” """
         from clu.dicts import ChainMap
-        # from clu.dicts import ChainRepr
         from clu.config.keymap import Flat, Nested
         from clu.constants.data import arbitrary, nested
         import collections
@@ -218,9 +201,6 @@ class TestDicts(object):
         
         assert chainZ == chain00
         assert chainZ == chainOO
-        
-        # repr_instance = ChainRepr()
-        # assert repr_instance.repr(chain0) == repr_instance.repr(chainO)
     
     def test_ordered_mapping_views(self, dirname, fsdata):
         """ The ordered mapping views are returned from “clu.fs.filesystem.Directory”

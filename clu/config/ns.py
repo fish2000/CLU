@@ -40,16 +40,16 @@ def clean_ns(nskey):
     return out
 
 @export
-def concatenate_ns(*namespaces):
+def concatenate_ns(*fragments):
     """ Return the given namespace(s), concatenated with the
         namespace separator.
     """
-    return NAMESPACE_SEP.join(filter(None, namespaces))
+    return NAMESPACE_SEP.join(filter(None, fragments))
 
 @export
-def prefix_for(*namespaces):
+def prefix_for(*fragments):
     """ Return the prefix string for the given namespace(s) """
-    ns = concatenate_ns(*namespaces)
+    ns = concatenate_ns(*fragments)
     return ns and f"{ns}{NAMESPACE_SEP}" or ''
 
 @export
@@ -76,13 +76,13 @@ def startswith_ns(putative, prefix):
     return putative_ns.startswith(prefix_ns)
 
 @export
-def validate_ns(*namespaces):
+def validate_ns(*fragments):
     """ Raise a ValueError if any of the given namespaces are invalid. """
-    for namespace in namespaces:
-        if NAMESPACE_SEP in namespace:
-            raise ValueError(f"namespace contains separator: “{namespace}”")
-        if not namespace.isidentifier():
-            raise ValueError(f"invalid namespace: “{namespace}”")
+    for fragment in fragments:
+        if NAMESPACE_SEP in fragment:
+            raise ValueError(f"namespace contains separator: “{fragment}”")
+        if not fragment.isidentifier():
+            raise ValueError(f"invalid namespace: “{fragment}”")
     return True
 
 @export
@@ -99,7 +99,7 @@ def unpack_ns(nskey):
     return key, namespaces
 
 @export
-def pack_ns(key, *namespaces):
+def pack_ns(key, *fragments):
     """ Pack a key and a set of (optional) namespaces into a namespaced key.
         
         To wit: if called as “pack_ns('i-heard, 'yo', 'dogg')” the return
@@ -108,9 +108,9 @@ def pack_ns(key, *namespaces):
         If no namespaces are provided (like e.g. “pack_ns('wat')”)
         the return value will be the string "wat".
     """
-    if not namespaces:
+    if not fragments:
         return key
-    return NAMESPACE_SEP.join(chain(namespaces, tuplize(key, expand=False)))
+    return NAMESPACE_SEP.join(chain(fragments, tuplize(key, expand=False)))
 
 @export
 def get_ns(nskey):
@@ -138,12 +138,12 @@ def compare_ns(iterone, itertwo):
 # ENVIRONMENT-VARIABLE MANIPULATION API:
 
 @export
-def concatenate_env(*namespaces):
+def concatenate_env(*fragments):
     """ Concatenate and UPPERCASE namespaces, per environment variables. """
-    return ENVIRONS_SEP.join(namespace.upper() for namespace in namespaces)
+    return ENVIRONS_SEP.join(fragment.upper() for fragment in fragments)
 
 @export
-def prefix_env(appname, *namespaces):
+def prefix_env(appname, *fragments):
     """ Determine the environment-variable prefix based on a given
         set of namespaces and the provided “appname” value. Like e.g.,
         for an appname of “YoDogg” and a namespace value of “iheard”,
@@ -166,16 +166,16 @@ def prefix_env(appname, *namespaces):
         because it translates to the namespaced key “i:heard:you:like”,
         which, you will note, is different.
     """
-    if not appname and not namespaces:
+    if not appname and not fragments:
         return ''
     if not appname:
-        return concatenate_env(*namespaces) + ENVIRONS_SEP
-    if not namespaces:
+        return concatenate_env(*fragments) + ENVIRONS_SEP
+    if not fragments:
         return appname.upper() + ENVIRONS_SEP
-    return appname.upper() + ENVIRONS_SEP + concatenate_env(*namespaces) + ENVIRONS_SEP
+    return appname.upper() + ENVIRONS_SEP + concatenate_env(*fragments) + ENVIRONS_SEP
 
 @export
-def pack_env(appname, key, *namespaces):
+def pack_env(appname, key, *fragments):
     """ Transform a mapping key, along with optional “namespaces”
         values and the provided “appname” value, into an environment-
         variable name. Like e.g., for an appname of “YoDogg” and
@@ -200,7 +200,7 @@ def pack_env(appname, key, *namespaces):
         because it translates to the namespaced key “i:heard:you:like”,
         which, you will note, is different.
     """
-    prefix = prefix_env(appname, *namespaces)
+    prefix = prefix_env(appname, *fragments)
     return f"{prefix}{key.upper()}"
 
 @export
@@ -281,18 +281,18 @@ def test():
         except ValueError as exc:
             assert "namespace contains separator" in str(exc)
     
-    namespaces = ('yo', 'dogg')
+    fragments = ('yo', 'dogg')
     key = 'iheard'
     nskey = "yo:dogg:iheard"
     value = "you like this sort of thing"
     
     @inline
     def test_concatenate_ns():
-        assert concatenate_ns(*namespaces) == "yo:dogg"
+        assert concatenate_ns(*fragments) == "yo:dogg"
     
     @inline
     def test_prefix_for():
-        assert prefix_for(*namespaces) == "yo:dogg:"
+        assert prefix_for(*fragments) == "yo:dogg:"
     
     @inline
     def test_strip_ns():
@@ -305,17 +305,17 @@ def test():
     
     @inline
     def test_startswith_ns():
-        assert startswith_ns(namespaces, ('yo', 'dogg'))
+        assert startswith_ns(fragments, ('yo', 'dogg'))
     
     @inline
     def test_unpack_ns():
-        assert unpack_ns(nskey) == (key, list(namespaces))
+        assert unpack_ns(nskey) == (key, list(fragments))
         assert unpack_ns(nskey) == ('iheard', ['yo', 'dogg'])
     
     @inline
     def test_pack_ns():
-        assert pack_ns(key, *namespaces) == nskey
-        assert pack_ns(key, *namespaces) == "yo:dogg:iheard"
+        assert pack_ns(key, *fragments) == nskey
+        assert pack_ns(key, *fragments) == "yo:dogg:iheard"
     
     @inline
     def test_get_ns():
@@ -327,7 +327,7 @@ def test():
     
     @inline
     def test_compare_ns():
-        assert compare_ns(namespaces, ('yo', 'dogg'))
+        assert compare_ns(fragments, ('yo', 'dogg'))
     
     baseline = 'yo:dogg:iheard:youlike'
     dupes = 'yo:dogg::iheard:youlike'
@@ -346,26 +346,26 @@ def test():
     
     @inline
     def test_concatenate_env():
-        assert concatenate_env(*namespaces) == "YO_DOGG"
-        assert concatenate_env(*chain(tuplize(appname), namespaces)) == "TESTING_YO_DOGG"
-        assert concatenate_env(*chain(tuplize(appname), namespaces, tuplize(key))) == "TESTING_YO_DOGG_IHEARD"
+        assert concatenate_env(*fragments) == "YO_DOGG"
+        assert concatenate_env(*chain(tuplize(appname), fragments)) == "TESTING_YO_DOGG"
+        assert concatenate_env(*chain(tuplize(appname), fragments, tuplize(key))) == "TESTING_YO_DOGG_IHEARD"
     
     @inline
     def test_prefix_env():
-        assert prefix_env(appname, *namespaces) == "TESTING_YO_DOGG_"
+        assert prefix_env(appname, *fragments) == "TESTING_YO_DOGG_"
     
     @inline
     def test_pack_env():
-        assert pack_env(appname, key, *namespaces) == "TESTING_YO_DOGG_IHEARD"
+        assert pack_env(appname, key, *fragments) == "TESTING_YO_DOGG_IHEARD"
     
     @inline
     def test_unpack_env():
-        assert unpack_env(envkey) == (appname, key, list(namespaces))
+        assert unpack_env(envkey) == (appname, key, list(fragments))
         assert unpack_env(envkey) == ('testing', 'iheard', ['yo', 'dogg'])
     
     @inline
     def test_nskey_from_env():
-        assert nskey_from_env(envkey) == (appname, pack_ns(key, *namespaces))
+        assert nskey_from_env(envkey) == (appname, pack_ns(key, *fragments))
         assert nskey_from_env(envkey) == ('testing', "yo:dogg:iheard")
     
     @inline

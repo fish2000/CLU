@@ -149,13 +149,13 @@ class FrozenKeyMap(FrozenKeyMapBase):
         """ Used by `clu.config.codecs` to deserialize keymaps """
         return cls(instance_dict)
     
-    def get(self, key, *namespaces, default=NoDefault):
+    def get(self, key, *fragments, default=NoDefault):
         """ Retrieve a (possibly namespaced) value for a given key.
             
             An optional default value may be specified, to be returned
             if the key in question is not found in the mapping.
         """
-        nskey = pack_ns(key, *namespaces)
+        nskey = pack_ns(key, *fragments)
         if default is NoDefault:
             return self[nskey]
         if nskey in self:
@@ -246,17 +246,17 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         supra. for further deets, my doggie
     """
     
-    def set(self, key, value, *namespaces):
+    def set(self, key, value, *fragments):
         """ Set a (possibly namespaced) value for a given key. """
-        nskey = pack_ns(key, *namespaces)
+        nskey = pack_ns(key, *fragments)
         self[nskey] = value
     
-    def delete(self, key, *namespaces):
+    def delete(self, key, *fragments):
         """ Delete a (possibly namespaced) value from the mapping. """
-        nskey = pack_ns(key, *namespaces)
+        nskey = pack_ns(key, *fragments)
         del self[nskey]
     
-    def pop(self, key, *namespaces, default=NoDefault):
+    def pop(self, key, *fragments, default=NoDefault):
         """ Pop a (possibly namespaced) value off of the mapping
             and return either that value, or a default value
             if it doesn’t exist – raising a KeyError if no
@@ -265,10 +265,10 @@ class KeyMap(KeyMapBase, FrozenKeyMap):
         # NoDefault never escapes to userland – the call to
         # get(…) will raise the KeyError if NoDefault was passed
         # (Q.v. “get(¬)” definition supra.)
-        value = self.get(key, *namespaces, default=default)
+        value = self.get(key, *fragments, default=default)
         if value == default or value is default:
             return value
-        self.delete(key, *namespaces)
+        self.delete(key, *fragments)
         return value
     
     def popitem(self):
@@ -380,18 +380,18 @@ class NamespaceWalker(FrozenKeyMap):
         if cls is None:
             from clu.config.keymap import FrozenFlat
             cls = FrozenFlat
-        return cls({ pack_ns(key, *namespaces) : value for *namespaces, key, value in self.walk() })
+        return cls({ pack_ns(key, *fragments) : value for *fragments, key, value in self.walk() })
     
     def _namespaces(self): # pragma: no cover
         """ Iterate over all of the namespaces defined in the mapping. """
         nss = set()
-        for *namespaces, key, value in self.walk():
-            if namespaces:
-                nss.add(concatenate_ns(*namespaces))
+        for *fragments, key, value in self.walk():
+            if fragments:
+                nss.add(concatenate_ns(*fragments))
         yield from sorted(nss)
     
     def _get_namespace_foset(self):
-        return FlatOrderedSet(concatenate_ns(*ns) for *ns, _, _ in self.walk() if ns)
+        return FlatOrderedSet(concatenate_ns(*fragments) for *fragments, _, _ in self.walk() if fragments)
     
     def keys(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all keys in the mapping,
@@ -421,25 +421,25 @@ class NamespaceWalker(FrozenKeyMap):
         return NamespaceWalkerValuesView(self, *namespaces)
     
     def __iter__(self):
-        for *namespaces, key, value in self.walk():
-            yield pack_ns(key, *namespaces)
+        for *fragments, key, value in self.walk():
+            yield pack_ns(key, *fragments)
     
     def __len__(self):
         return iterlen(self.walk())
     
     def __contains__(self, nskey):
-        key, namespaces = unpack_ns(nskey)
+        key, fragments = unpack_ns(nskey)
         for *ns, k, value in self.walk():
             if k == key:
-                if compare_ns(ns, namespaces):
+                if compare_ns(ns, fragments):
                     return True
         return False
     
     def __getitem__(self, nskey):
-        key, namespaces = unpack_ns(nskey)
+        key, fragments = unpack_ns(nskey)
         for *ns, k, value in self.walk():
             if k == key:
-                if compare_ns(ns, namespaces):
+                if compare_ns(ns, fragments):
                     return value
         raise KeyError(nskey)
 

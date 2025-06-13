@@ -44,13 +44,13 @@ class KeyMapViewBase(collections.abc.Sequence,
     """
     
     __slots__ = pytuple('weakref') \
-              + tuplize('mapping', 'namespaces', 'prefixes')
+              + tuplize('mapping', 'namespaces', 'submap')
     
     def __init__(self, mapping, *namespaces):
         """ Initialize a view on a KeyMap instance, for a given namespace """
         self.mapping = mapping
         self.namespaces = tuplize(namespaces)
-        self.prefixes = tuple(f"{namespace}{NAMESPACE_SEP}" for namespace in self.namespaces)
+        self.submap = self.mapping.submap(*self.namespaces)
     
     @property
     def _mapping(self): # pragma: no cover
@@ -58,11 +58,15 @@ class KeyMapViewBase(collections.abc.Sequence,
         return self.mapping
     
     def __len__(self):
-        return len(self.mapping.submap(*self.namespaces))
+        return len(self.submap)
     
     def __getitem__(self, idx):
         if isnumber(idx):
-            return tuple(self)[idx]
+            return tuple(self.submap)[idx]
+        if isnormative(idx):
+            return self.submap[idx]
+        tn = typename(idx)
+        raise KeyError(f"bad index type: {tn}")
     
     @abstract
     def __contains__(self, nskey):
@@ -88,7 +92,7 @@ class KeyMapKeysView(KeyMapViewBase,
     _from_iterable = classmethod(set_returner)
     
     def __contains__(self, nskey):
-        return nskey in self.mapping.submap(*self.namespaces)
+        return nskey in self.submap
     
     def __iter__(self):
         if self.namespaces:
@@ -110,7 +114,7 @@ class KeyMapItemsView(KeyMapViewBase,
     def __contains__(self, item):
         nskey, value = item
         try:
-            contained = self.mapping.submap(*self.namespaces)[nskey]
+            contained = self.submap[nskey]
         except KeyError:
             return False
         else:
@@ -132,9 +136,8 @@ class KeyMapValuesView(KeyMapViewBase,
     """ A KeyMap values view. """
     
     def __contains__(self, value):
-        submap = self.mapping.submap(*self.namespaces)
-        for nskey in submap:
-            contained = submap[nskey]
+        for nskey in self.submap:
+            contained = self.submap[nskey]
             if contained is value or contained == value:
                 return True
         return False
@@ -158,7 +161,7 @@ class NamespaceWalkerViewBase(KeyMapViewBase):
     def __len__(self):
         if not self.namespaces:
             return iterlen(self.mapping.walk())
-        return len(self.mapping.submap(*self.namespaces))
+        return len(self.submap)
 
 @export
 @collections.abc.KeysView.register

@@ -131,15 +131,15 @@ class NodeBase(collections.abc.Hashable,
         if self.is_rootnode():
             return self.node_name
         parent = self
-        namespaces = []
+        fragments = []
         while True:
             parent = parent.node_parent
             if parent.is_rootnode():
                 break
-            namespaces.append(parent.node_name)
-        if not namespaces:
+            fragments.append(parent.node_name)
+        if not fragments:
             return self.node_name
-        return pack_ns(self.node_name, *reversed(namespaces))
+        return pack_ns(self.node_name, *reversed(fragments))
     
     @property
     def value(self):
@@ -182,18 +182,18 @@ class NodeBase(collections.abc.Hashable,
         """ Return True if a child exists for a (possibly namespaced) name,
             otherwise False.
         """
-        key, namespaces = unpack_ns(nskey)
+        key, fragments = unpack_ns(nskey)
         node = self
-        for namespace in namespaces:
-            node = node.namespace(namespace)
+        for fragment in fragments:
+            node = node.namespace(fragment)
         return key in node.child_nodes
     
     def get_child(self, nskey):
         """ Retrieve a child node of a (possibly namespaced) given name. """
-        key, namespaces = unpack_ns(nskey)
+        key, fragments = unpack_ns(nskey)
         node = self
-        for namespace in namespaces:
-            node = node.namespace(namespace)
+        for fragment in fragments:
+            node = node.namespace(fragment)
         return node.child_nodes[key]
     
     def assemble_subcommand(self, recursive=False):
@@ -468,11 +468,11 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
         # the new instance as needed:
         for namespace in interim.namespaces():
             node = instance.tree
-            for nsfragment in split_ns(namespace):
+            for fragment in split_ns(namespace):
                 try:
-                    node = node.namespace(nsfragment)
+                    node = node.namespace(fragment)
                 except KeyError:
-                    node = node.add_child(nsfragment)
+                    node = node.add_child(fragment)
         
         # With namespaces in place, go through the items,
         # using the newly created namespaces to anchor
@@ -505,11 +505,11 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
             for nskey, value in updates.items():
                 key, namespace = unpack_ns(nskey)
                 node = self.tree
-                for nsfragment in namespace:
+                for fragment in namespace:
                     try:
-                        node = node.namespace(nsfragment)
+                        node = node.namespace(fragment)
                     except KeyError:
-                        node = node.add_child(nsfragment)
+                        node = node.add_child(fragment)
                 node.add_child(key, value)
     
     def walk(self):
@@ -832,12 +832,6 @@ def test():
         
         instance_dict = ntm.to_dict()
         instance = NodeTreeMap.from_dict(instance_dict)
-        
-        # pprint(ntm.flatten().submap())
-        # pprint(instance.flatten().submap())
-        
-        # pprint(tuple(ntm.namespaces()))
-        # pprint(tuple(instance.namespaces()))
         
         assert ntm == instance
         assert instance_dict == instance.to_dict()

@@ -375,7 +375,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     primitives amongst other things. The (skeletal) [`git_version`][clu.version.git_version] subpackage has a
     couple of [Git-related][git-link] functions, but what you really want is in [`read_version`][clu.version.read_version]
     – therein you’ll find a `read_version_file(…)` function that uses the `ast` module to read one of those
-    `__version__.py` files I know you have lying around. Yes![<sup>†</sup>](#dagger)
+    `__version__.py` files I know you have lying around. Yes[<sup>†</sup>](#dagger)!
 
 * [The `pytest` testsuite][clu-testsuite]: CLU has a full set of [`pytest`][pytest-link]-compatible unit tests.
     In addition to copious module-specific [CLU inline tests][clu.testing], you can run this test suite using

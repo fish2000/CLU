@@ -82,7 +82,8 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     
     … and there are plenty of tools for rolling your own `KeyMap`s in [`clu.config`][clu.config]: the
     [`proxy`][clu.config.proxy] subpackage has a `KeyMap` proxy class, [`ns`][clu.config.ns] has utility functions
-    for manipulating namespace strings, [`keymapview`][clu.config.keymapview] has a class tower for
+    for manipulating namespace strings, [`utils`][clu.config.utils] has more general utility functions (right now
+    the `freeze`/`thaw` functions live there), [`keymapview`][clu.config.keymapview] has a class tower for
     [`KeyMap`][clu.config.keymap] key/value/item views, and [`abc`][clu.config.abc] has, as you’d expect, all
     the abstract base classes upon which our [`KeyMap`s][clu.config.keymap] are built, for your perusal and
     eventual enjoyment.
@@ -428,6 +429,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 [clu.config.keymapview]: https://github.com/fish2000/CLU/tree/master/clu/config/keymapview.py
 [clu.config.ns]: https://github.com/fish2000/CLU/tree/master/clu/config/ns.py
 [clu.config.proxy]: https://github.com/fish2000/CLU/tree/master/clu/config/proxy.py
+[clu.config.utils]: https://github.com/fish2000/CLU/tree/master/clu/config/utils.py
 
 [clu.constants]: https://github.com/fish2000/CLU/tree/master/clu/constants
 [clu.constants.consts]: https://github.com/fish2000/CLU/tree/master/clu/constants/consts.py

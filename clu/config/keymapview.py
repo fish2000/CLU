@@ -20,7 +20,7 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 typename = lambda thing: type(thing).__name__
-set_returner = lambda self, iterable: set(iterable)
+set_returner = lambda cls, iterable: set(iterable)
 
 @export
 class KeyMapViewBase(collections.abc.Sequence,

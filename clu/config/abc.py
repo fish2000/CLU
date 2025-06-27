@@ -15,7 +15,7 @@ from clu.config.ns import unpack_ns, pack_ns, get_ns, compare_ns
 from clu.config.keymapview import KeyMapKeysView, KeyMapItemsView, KeyMapValuesView
 from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsView
 from clu.config.keymapview import NamespaceWalkerValuesView
-from clu.config.utils import freeze_class
+from clu.config.keymaputils import freeze_class
 
 from clu.naming import qualified_import, qualified_name, nameof
 from clu.predicates import (typeof,

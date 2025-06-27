@@ -27,11 +27,11 @@
     • Tests are updated accordingly (both inline and unit tests)
   • Many changes in “clu.dicts” to afford different classes and speed
     and things of that nature
-  • Added a new “clu.config.utils” module
+  • Added a new “clu.config.keymaputils” module
     • This contains ad-hoc name-based functions for “freezing” and
       “thawing” classes – like you can do:
 
-      >>> from clu.config.utils import freeze_class, thaw_class
+      >>> from clu.config.keymaputils import freeze_class, thaw_class
       >>> from clu.config.keymap import Flat, FrozenFlat
       >>> assert freeze_class(Flat) is FrozenFlat
       >>> assert thaw_class(FrozenFlat) is Flat

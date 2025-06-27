@@ -6,7 +6,7 @@ import copy
 import sys, re
 
 from clu.config import abc, ns
-from clu.config.utils import thaw_name, thaw_class, freeze_name, freeze_class
+from clu.config.keymaputils import thaw_name, thaw_class, freeze_name, freeze_class
 from clu.constants import consts
 from clu.predicates import tuplize, typeof
 from clu.typology import ismapping

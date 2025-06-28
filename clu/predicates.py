@@ -21,7 +21,7 @@ assigned = pytuple('doc', 'annotations')
 wrap = lambda function: wraps(function, assigned=assigned)
 
 negate = lambda function: wrap(function)(lambda *args, **kwargs: not function(*args, **kwargs))
-reverse = lambda function: wrap(function)(lambda *args, **kwargs: reversed(function(*args, **kwargs)))
+reverse = lambda function: wrap(function)(lambda *args, **kwargs: tuple(reversed(function(*args, **kwargs))))
 
 negate_doc = """
 ### … You use `negate(function)` thusly:
@@ -214,48 +214,48 @@ isorigin        = lambda cls, originator=object: isancestor(origin(cls), ancesto
 ismarkedprivate = lambda string: string.startswith('_')
 ispublic        = lambda string: not ispyname(string) and not ismifflin(string)
 
-@export
-class Base(object):
-    """ Base type for programmatically created new types.
-        
-        Can be accessed as an attribute of “newtype(…)”, e.g. “newtype.Base”;
-        q.v. the “newtype(…)” function sub.
-    """
-    pass
-
-@cache
-def newtype(name, *bases, metaclass=None, attributes=None, **keywords):
-    """ newtype(name, *bases, metaclass=None, attributes=None, **keywords)
-        → Shortcut for “type(name, tuple(bases) or (newtype.Base,), dict(attributes))”
-        
-        q.v. https://docs.python.org/3/library/types.html#dynamic-type-creation supra.
-    """
-    from clu.dicts import asdict
-    from clu.typespace import types
-    
-    # Default arguments:
-    if not bases:
-        bases = (newtype.Base,)
-    if attributes is None:
-        attributes = {}
-    if ismetaclass(metaclass):
-        keywords['metaclass'] = metaclass
-    
-    # Resolve bases and prepare class namespace:
-    resolved_bases = types.resolve_bases(bases)
-    meta, namespace, kwds = types.prepare_class(name, bases=resolved_bases,
-                                                      kwds=keywords)
-    
-    # Update the namespace with class attributes:
-    namespace.update(asdict(attributes))
-    namespace['__metaclass__'] = meta # old-skool
-    
-    # Create and return the new class:
-    return meta(name, resolved_bases, namespace, **kwds)
-
-# Hang the base type off of the “newtype(…)” function,
-# for E-Z access:
-newtype.Base = Base
+# @export
+# class Base(object):
+#     """ Base type for programmatically created new types.
+#
+#         Can be accessed as an attribute of “newtype(…)”, e.g. “newtype.Base”;
+#         q.v. the “newtype(…)” function sub.
+#     """
+#     pass
+#
+# @cache
+# def newtype(name, *bases, metaclass=None, attributes=None, **keywords):
+#     """ newtype(name, *bases, metaclass=None, attributes=None, **keywords)
+#         → Shortcut for “type(name, tuple(bases) or (newtype.Base,), dict(attributes))”
+#
+#         q.v. https://docs.python.org/3/library/types.html#dynamic-type-creation supra.
+#     """
+#     from clu.dicts import asdict
+#     from clu.typespace import types
+#
+#     # Default arguments:
+#     if not bases:
+#         bases = (newtype.Base,)
+#     if attributes is None:
+#         attributes = {}
+#     if ismetaclass(metaclass):
+#         keywords['metaclass'] = metaclass
+#
+#     # Resolve bases and prepare class namespace:
+#     resolved_bases = types.resolve_bases(bases)
+#     meta, namespace, kwds = types.prepare_class(name, bases=resolved_bases,
+#                                                       kwds=keywords)
+#
+#     # Update the namespace with class attributes:
+#     namespace.update(asdict(attributes))
+#     namespace['__metaclass__'] = meta # old-skool
+#
+#     # Create and return the new class:
+#     return meta(name, resolved_bases, namespace, **kwds)
+#
+# # Hang the base type off of the “newtype(…)” function,
+# # for E-Z access:
+# newtype.Base = Base
 
 # ENUM PREDICATES: `isenum(…)` predicate; `enumchoices(…)` to return a tuple
 # of strings naming an enum’s choices (like duh)

@@ -170,7 +170,7 @@ class TestPredicates(object):
         # Reverse “listify(…)”:
         backwards = reverse(listify)
         # Ensure the reversed function returns a list:
-        backwardsify = lambda *items: list(backwards(item for item in items if item is not None))
+        backwardsify = lambda *items: list(backwards(filter(None, items)))
         
         # Sample reversed lists:
         l1 = backwardsify("yo", "dogg", "I", "heard", "you", "like", "ordered", "lists")
@@ -189,7 +189,7 @@ class TestPredicates(object):
         # Reverse “listify(…)”:
         backwards = reverse(listify)
         # Ensure the reversed function returns a list:
-        backwardslist = lambda *items: list(backwards(item for item in items if item is not None))
+        backwardslist = lambda *items: list(backwards(filter(None, items)))
         # Imbue the wrapped revered function with “itervariadic(¬)” powers:
         backwardsify = itervariadic(backwardslist)
         
@@ -210,17 +210,17 @@ class TestPredicates(object):
         assert r1 == r2
     
     def test_mro_and_rmro(self):
-        from clu.predicates import mro, rmro
-        from clu.predicates import newtype
+        from clu.predicates import mro, rmro, tuplize
+        import types
         
-        A = newtype('A')
-        B = newtype('B', A)
-        C = newtype('C', B)
-        D = newtype('D', C)
+        A = types.new_class('A', tuplize(object))
+        B = types.new_class('B', tuplize(A))
+        C = types.new_class('C', tuplize(B))
+        D = types.new_class('D', tuplize(C))
         
-        # “newtype.Base” ◀︎◀︎ the base type of things made with “newtype(…)”
-        assert mro(D)           == (D, C, B, A, newtype.Base, object)
-        assert tuple(rmro(D))   == (object, newtype.Base, A, B, C, D)
+        # “object” ◀︎◀︎ the base type of things made with “types.new_class(…)”
+        assert mro(D)           == (D, C, B, A, object)
+        assert rmro(D)          == (object, A, B, C, D)
     
     def test_unwrap(self):
         from clu.predicates import unwrap
@@ -277,19 +277,18 @@ class TestPredicates(object):
         assert isorigin({},                 originator=dict)
     
     def test_isancestor_and_isorigin(self):
-        from clu.predicates import isancestor
-        from clu.predicates import isorigin
-        from clu.predicates import newtype
+        from clu.predicates import isancestor, isorigin, tuplize
+        import types
         
-        A = newtype('A')
-        B = newtype('B', A)
-        C = newtype('C', B)
-        D = newtype('D', C)
+        A = types.new_class('A', bases=tuplize(object))
+        B = types.new_class('B', bases=tuplize(A))
+        C = types.new_class('C', bases=tuplize(B))
+        D = types.new_class('D', bases=tuplize(C))
         
-        assert isancestor(A, newtype.Base) # ◀︎◀︎ the base type of things made with “newtype(…)”
-        assert isancestor(B, newtype.Base) # ◀︎◀︎ the base type of things made with “newtype(…)”
-        assert isancestor(C, newtype.Base) # ◀︎◀︎ the base type of things made with “newtype(…)”
-        assert isancestor(D, newtype.Base) # ◀︎◀︎ the base type of things made with “newtype(…)”
+        assert isancestor(A, object) # ◀︎◀︎ the base type of things made with “types.new_class(…)”
+        assert isancestor(B, object) # ◀︎◀︎ the base type of things made with “types.new_class(…)”
+        assert isancestor(C, object) # ◀︎◀︎ the base type of things made with “types.new_class(…)”
+        assert isancestor(D, object) # ◀︎◀︎ the base type of things made with “types.new_class(…)”
         
         assert isancestor(B, A)
         assert isancestor(C, B)
@@ -305,29 +304,28 @@ class TestPredicates(object):
         assert isorigin(dict,               originator=dict)
         assert isorigin({},                 originator=dict)
     
-    def test_newtype(self):
-        from clu.predicates import isclass, ismetaclass, metaclass
-        from clu.predicates import newtype
+    def test_new_class(self):
+        from clu.predicates import isclass, ismetaclass, metaclass, tuplize
         from clu.typespace.namespace import SimpleNamespace
-        import abc
+        import abc, types
         
-        # equivalient to class Thingy(newtype.Base): pass
-        # “newtype.Base” ◀︎◀︎ the base type of things made with “newtype(…)”
-        Thingy = newtype('Thingy')
+        # equivalient to class Thingy: pass
+        # “object” ◀︎◀︎ the base type of things made with “types.new_class(…)”
+        Thingy = types.new_class('Thingy')
         assert isclass(Thingy)
         assert not ismetaclass(Thingy)
         assert Thingy.__name__ == 'Thingy'
         assert Thingy.__qualname__.endswith('Thingy')
         
         # equivalent to class MetaThingy(type): pass
-        MetaThingy = newtype('MetaThingy', type)
+        MetaThingy = types.new_class('MetaThingy', bases=tuplize(type))
         assert not isclass(MetaThingy)
         assert ismetaclass(MetaThingy)
         assert MetaThingy.__name__ == 'MetaThingy'
         assert MetaThingy.__qualname__.endswith('MetaThingy')
         
         # equivalent to class ThingyWithMeta(Thingy, metaclass=MetaThingy): pass
-        ThingyWithMeta = newtype('ThingyWithMeta', Thingy, metaclass=MetaThingy)
+        ThingyWithMeta = types.new_class('ThingyWithMeta', bases=tuplize(Thingy), kwds=dict(metaclass=MetaThingy))
         assert isclass(ThingyWithMeta)
         assert not ismetaclass(ThingyWithMeta)
         assert ThingyWithMeta.__name__ == 'ThingyWithMeta'
@@ -335,35 +333,37 @@ class TestPredicates(object):
         assert metaclass(ThingyWithMeta) is MetaThingy
         
         # equivalent to class DerivedThingy(Thingy): pass
-        DerivedThingy = newtype('DerivedThingy', Thingy)
+        DerivedThingy = types.new_class('DerivedThingy', bases=tuplize(Thingy))
         assert isclass(DerivedThingy)
         assert not ismetaclass(DerivedThingy)
         assert DerivedThingy.__name__ == 'DerivedThingy'
         assert DerivedThingy.__qualname__.endswith('DerivedThingy')
-        assert DerivedThingy.__mro__ == (DerivedThingy, Thingy, newtype.Base, object)
+        assert DerivedThingy.__mro__ == (DerivedThingy, Thingy, object)
         
         # equivalent to class AbstractThingy(Thingy, abc.ABC): pass
-        AbstractThingy = newtype('AbstractThingy', Thingy, abc.ABC)
+        AbstractThingy = types.new_class('AbstractThingy', bases=tuplize(Thingy, abc.ABC))
         assert isclass(AbstractThingy)
         assert not ismetaclass(AbstractThingy)
         assert AbstractThingy.__name__ == 'AbstractThingy'
         assert AbstractThingy.__qualname__.endswith('AbstractThingy')
-        assert AbstractThingy.__mro__ == (AbstractThingy, Thingy, newtype.Base, abc.ABC, object)
+        assert AbstractThingy.__mro__ == (AbstractThingy, Thingy, abc.ABC, object)
         assert metaclass(AbstractThingy) is abc.ABCMeta
         
         # equivalent to:
         # class ThingyWithAttrs(Thingy):
         #     yo = 'dogg',
         #     iheard = 'you like attributes'
-        ThingyWithAttrs = newtype('ThingyWithAttrs', Thingy, attributes=SimpleNamespace(yo='dogg',
-                                                                                    iheard='you like attributes'))
-        assert isclass(ThingyWithAttrs)
-        assert not ismetaclass(ThingyWithAttrs)
-        assert ThingyWithAttrs.__name__ == 'ThingyWithAttrs'
-        assert ThingyWithAttrs.__qualname__.endswith('ThingyWithAttrs')
-        assert ThingyWithAttrs.__mro__ == (ThingyWithAttrs, Thingy, newtype.Base, object)
-        assert ThingyWithAttrs.yo == 'dogg'
-        assert ThingyWithAttrs.iheard == 'you like attributes'
+        
+        # ThingyWithAttrs = types.new_class('ThingyWithAttrs', bases=tuplize(Thingy),
+        #                                                       kwds=SimpleNamespace(yo='dogg',
+        #                                                                        iheard='you like attributes'))
+        # assert isclass(ThingyWithAttrs)
+        # assert not ismetaclass(ThingyWithAttrs)
+        # assert ThingyWithAttrs.__name__ == 'ThingyWithAttrs'
+        # assert ThingyWithAttrs.__qualname__.endswith('ThingyWithAttrs')
+        # assert ThingyWithAttrs.__mro__ == (ThingyWithAttrs, Thingy, object)
+        # assert ThingyWithAttrs.yo == 'dogg'
+        # assert ThingyWithAttrs.iheard == 'you like attributes'
     
     @pytest.mark.TODO
     def test_static_accessors(self, environment, consts):

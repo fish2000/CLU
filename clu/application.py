@@ -3,7 +3,7 @@ from __future__ import print_function
 
 import sys
 
-from clu.predicates import newtype, mro, allattrs, attr_search
+from clu.predicates import mro, allattrs, attr_search, tuplize
 from clu.typespace import types
 from clu.importing import (ModuleBase,
                            MetaModule,
@@ -65,8 +65,8 @@ class AppBase(ModuleBase, metaclass=AppMeta):
         if allattrs(cls, 'finder', 'loader'):
             return cls.finder, cls.loader
         
-        LoaderCls = newtype('Loader', LoaderBase, appname=cls.appname)
-        FinderCls = newtype('Finder', FinderBase, appname=cls.appname)
+        LoaderCls = types.new_class('Loader', bases=tuplize(LoaderBase), kwds=dict(appname=cls.appname))
+        FinderCls = types.new_class('Finder', bases=tuplize(FinderBase), kwds=dict(appname=cls.appname))
         return FinderCls, LoaderCls
     
     @classmethod
@@ -76,8 +76,9 @@ class AppBase(ModuleBase, metaclass=AppMeta):
         try:
             return cls.exportercls
         except TypeError:
-            ExporterCls = newtype('Exporter', ExporterBase, appname=cls.appname,
-                                                            basepath=cls.basepath)
+            ExporterCls = types.new_class('Exporter', bases=tuplize(ExporterBase),
+                                                       kwds=dict(appname=cls.appname,
+                                                                basepath=cls.basepath))
             return ExporterCls
     
     @classmethod

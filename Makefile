@@ -88,7 +88,7 @@ remove-changelog:
 changelog: remove-changelog
 	gitchangelog > CHANGELOG.md
 	git addremove .
-	git commit -m "[make] New changelog added"
+	git commit -m "[make] Changelog updated @ $(shell git rev-parse --short HEAD)"
 
 repl:
 	python -m bpython --config=$(PROJECT_ROOT)/.config/bpython/config.py3 -i $(CLU_REPL_SCRIPT)

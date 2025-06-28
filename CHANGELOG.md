@@ -1,7 +1,55 @@
 # Changelog
 
 
-## 0.12.13:pre32+g85452ed [SNAPSHOT]
+## 0.12.14:pre1+g1aba217 [SNAPSHOT]
+
+### New
+
+* New function grabs the top commit ID; tweaked changelog generation. [Alexander Böhn]
+
+
+## v0.12.14 (2025-06-28)
+
+### New
+
+* New `clu.typology` functions for checking an iterable’s contents. [Alexander Böhn]
+
+  … like: “allthesame(iterable)” works with hashable OR non-hashable
+    contents!! HOW DID HE DO THAT??? you ask. Check the code, it was
+    a good time!
+  … similarly “allsimilar(iterable[, xform=casefold]) will basically
+    do when ‘allthesame(…)’ does but after applying some convenience
+    item-transformer function
+  … Both of these use @itervariadic, are documented, and export all
+    their (equally well-documented) constituent lambdas
+
+  Indeed yes!
+
+### Tweaks
+
+* Tweaks in the clu.config.abc.FlatOrderedSet initialization. [Alexander Böhn]
+
+  … basically I love using “filter(¬)” whenever possible
+
+### Fix
+
+* Fixed wrong-function call in `allsimilar(…)`’s unhashable-input branch. [Alexander Böhn]
+
+  … N.B. need to ensure tests cover all lambdas, and both code branches
+    for these; also ensure @itervariadic’s niceties are assuaged
+
+* Fixed a few uncaught errors there in `clu.trie.Trie` [Alexander Böhn]
+
+  … time for inline tests here in this new module, ay wot, wot, wot?
+
+* Fixed a few dangling references to `config.utils` [Alexander Böhn]
+
+  Q.v. commit supra.
+
+* Fixed another `README.md` glitch. [Alexander Böhn]
+
+  … there was a problematic set of superscript HTML tags that were
+    being literally rendered.
 
 ### Add
 
@@ -22,6 +70,10 @@
   … I mean, the tests run OK………………… butttt………………
 
 ### Other
+
+* Bumped version: 0.12.13 → 0.12.14. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * Ensure the valorous `clu.constants.consts.NoDefault` class looks good. [Alexander Böhn]
 
@@ -44,24 +96,6 @@
     a very inexplicable but nonetheless quite strong mental link in
     my mind, between passing kwargs in @itervariadic and the death
     that we all face. Maybe (I have no aunts tho) but something.
-
-* Fixed wrong-function call in `allsimilar(…)`’s unhashable-input branch. [Alexander Böhn]
-
-  … N.B. need to ensure tests cover all lambdas, and both code branches
-    for these; also ensure @itervariadic’s niceties are assuaged
-
-* New `clu.typology` functions for checking an iterable’s contents. [Alexander Böhn]
-
-  … like: “allthesame(iterable)” works with hashable OR non-hashable
-    contents!! HOW DID HE DO THAT??? you ask. Check the code, it was
-    a good time!
-  … similarly “allsimilar(iterable[, xform=casefold]) will basically
-    do when ‘allthesame(…)’ does but after applying some convenience
-    item-transformer function
-  … Both of these use @itervariadic, are documented, and export all
-    their (equally well-documented) constituent lambdas
-
-  Indeed yes!
 
 * Providing a slightly more invariant `__hash__` for frozen keymaps. [Alexander Böhn]
 
@@ -104,10 +138,6 @@
   … I love that class, I’ll have you know – warts and all, I do love
     that motherfucking thing
 
-* Tweaks in the clu.config.abc.FlatOrderedSet initialization. [Alexander Böhn]
-
-  … basically I love using “filter(¬)” whenever possible
-
 * Such a minor optimization it may just be premature. [Alexander Böhn]
 
 * Minor changes to `clu.config.keymap.FrozenNested::submap(…)` [Alexander Böhn]
@@ -119,19 +149,11 @@
   … it’s something, OK? Gimme like five minutes, unless your kids are
     on fire or something of similar urgency. THANK YOU.
 
-* Fixed a few uncaught errors there in `clu.trie.Trie` [Alexander Böhn]
-
-  … time for inline tests here in this new module, ay wot, wot, wot?
-
 * Split the gratuitous `clu.trie.Trie` methods off from the essentials. [Alexander Böhn]
 
   … maybe this makes things go faster, even with slots, when memory
     is the thing at issue? I know not. But I am not above doing this,
     clearly as we can see
-
-* Fixed a few dangling references to `config.utils` [Alexander Böhn]
-
-  Q.v. commit supra.
 
 * An extremely minor clarification. [Alexander Böhn]
 
@@ -144,11 +166,6 @@
 
   … There are waaaaaaaaay too many “utils.py” modules out there in
     the world, if you asked me. I’m doing *my* part.
-
-* Fixed another `README.md` glitch. [Alexander Böhn]
-
-  … there was a problematic set of superscript HTML tags that were
-    being literally rendered.
 
 * Dealt with the download link in `README.md` [Alexander Böhn]
 
@@ -187,6 +204,10 @@
 
 * Added some useful rando dicts to `clu.constants.data` [Alexander Böhn]
 
+### Remove
+
+* Removed and renamed much in the `clu.keymap`/`clu.dicts` departments. [Alexander Böhn]
+
 ### Other
 
 * Bumped version: 0.12.12 → 0.12.13. [Alexander Böhn]
@@ -198,8 +219,6 @@
   … because I have reason to believe that, at this time, it may suck.
 
 * Tidying up and removing more dead code. [Alexander Böhn]
-
-* Removed and renamed much in the `clu.keymap`/`clu.dicts` departments. [Alexander Böhn]
 
 * Total overhaul of oh so much stuff in `clu.config` and `clu.dicts` [Alexander Böhn]
 
@@ -319,17 +338,19 @@
 
 ## v0.12.10 (2025-05-25)
 
-### Other
-
-* Bumped version: 0.12.9 → 0.12.10. [Alexander Böhn]
-
-* [make] New changelog added. [Alexander Böhn]
+### Fix
 
 * Fixed `clu.naming.qualified_name_tuple(…)` to work for module objects. [Alexander Böhn]
 
   … this involved special-casing the whole thing, but it was worth it,
     as it just wasn’t fucking working for this entire case this whole
     time, which is fucking embarrasing. Yes!
+
+### Other
+
+* Bumped version: 0.12.9 → 0.12.10. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * More requirement/REPL-import adjustments. [Alexander Böhn]
 
@@ -352,13 +373,15 @@
     privliges the “__qualname__” with what it returns for whatever
     argument thing it is passed. Have fun you guys
 
+### Remove
+
+* Removed (fortunately vestigial) Click package dependency. [Alexander Böhn]
+
 ### Other
 
 * Bumped version: 0.12.8 → 0.12.9. [Alexander Böhn]
 
 * [make] New changelog added. [Alexander Böhn]
-
-* Removed (fortunately vestigial) Click package dependency. [Alexander Böhn]
 
 * Expanded “getdoc” codepath in `clu.repl.ansi.signature(…)` [Alexander Böhn]
 
@@ -386,11 +409,7 @@
 
 ## v0.12.8 (2025-05-24)
 
-### Other
-
-* Bumped version: 0.12.7 → 0.12.8. [Alexander Böhn]
-
-* [make] New changelog added. [Alexander Böhn]
+### Fix
 
 * Fixes in `clu.naming.{qualified_import,main_module_mame}(…)` [Alexander Böhn]
 
@@ -400,6 +419,12 @@
     is raised during an internal import call – this should mean its
     own error-handling should keep runtime import errors from reaching
     a user when it’s being called correctly (!)
+
+### Other
+
+* Bumped version: 0.12.7 → 0.12.8. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * Very slight, and likely premature, optimization. [Alexander Böhn]
 
@@ -448,6 +473,12 @@
 ### Add
 
 * Adding TOML module discussion screenshot. [Alexander Böhn]
+
+### Remove
+
+* Removed `setup.cfg` entry from `MANIFEST.in` [Alexander Böhn]
+
+* Removed the old `setup.cfg` file. [Alexander Böhn]
 
 ### Other
 
@@ -498,8 +529,6 @@
 
 * Sometimes, I prefer to ask permission first. [Alexander Böhn]
 
-* Removed `setup.cfg` entry from `MANIFEST.in` [Alexander Böhn]
-
 * Minor `README.md` tweak. [Alexander Böhn]
 
 * Updated `README.md` with information on `clu.enums` and `clu.all` [Alexander Böhn]
@@ -512,16 +541,30 @@
 
 * A few more addenda in `pyproject.toml` [Alexander Böhn]
 
-* Removed the old `setup.cfg` file. [Alexander Böhn]
-
 
 ## v0.12.4 (2025-05-19)
+
+### Fix
+
+* Fixed a few `pyproject.toml` build-related things. [Alexander Böhn]
+
+* Fixed the display of a code block in `README.md` [Alexander Böhn]
+
+* Fixed embarrasing `README.md` mistake. [Alexander Böhn]
+
+  … it said “man” instead of “many”. HURR DURR
 
 ### Add
 
 * Added a symbolic link to the old treatment file name. [Alexander Böhn]
 
   … because sometimes, I am lame
+
+### Remove
+
+* Removed the CLU Treatment.md symlink. [Alexander Böhn]
+
+  … ooooooooof.
 
 ### Other
 
@@ -530,12 +573,6 @@
 * [make] New changelog added. [Alexander Böhn]
 
 * More refinements to the whole `pyproject.toml` deal. [Alexander Böhn]
-
-* Fixed a few `pyproject.toml` build-related things. [Alexander Böhn]
-
-* Removed the CLU Treatment.md symlink. [Alexander Böhn]
-
-  … ooooooooof.
 
 * Seriously fleshing out `pyproject.toml` stuff. [Alexander Böhn]
 
@@ -548,12 +585,6 @@
   … after installing CLU, use “clu-version --version-only” or
     “clu-version -V” to just print the version number string,
     sans copyright attributions and appelations
-
-* Fixed the display of a code block in `README.md` [Alexander Böhn]
-
-* Fixed embarrasing `README.md` mistake. [Alexander Böhn]
-
-  … it said “man” instead of “many”. HURR DURR
 
 * Minor `README.md` styling issue fix. [Alexander Böhn]
 
@@ -571,23 +602,27 @@
 
 ## v0.12.3 (2025-05-19)
 
-### Add
-
-* Added a `__dir__()` function to `repl.py` [Alexander Böhn]
-
-### Other
-
-* Bumped version: 0.12.2 → 0.12.3. [Alexander Böhn]
+### Fix
 
 * Fixing inclusion of `CLU_Treatment.md` [Alexander Böhn]
 
   … this required modifying the filename and “MANIFEST.in”, again
 
+### Add
+
+* Added a `__dir__()` function to `repl.py` [Alexander Böhn]
+
+### Remove
+
 * Removed old `COPYING.md` reference from `MANIFEST.in` [Alexander Böhn]
 
-* Cleaned up some requirements and REPL imports. [Alexander Böhn]
-
 * Removed old-and-outdated COPYING.md. [Alexander Böhn]
+
+### Other
+
+* Bumped version: 0.12.2 → 0.12.3. [Alexander Böhn]
+
+* Cleaned up some requirements and REPL imports. [Alexander Böhn]
 
 
 ## v0.12.2 (2025-05-19)
@@ -618,6 +653,10 @@
 
 * Added a “treadment” document describing CLU. [Alexander Böhn]
 
+### Remove
+
+* Removed unnecessary check in `clu.repl.ansi` [Alexander Böhn]
+
 ### Other
 
 * Bumped version: 0.11.6 → 0.12.0. [Alexander Böhn]
@@ -634,8 +673,6 @@
 
 * Cleaned up some `super(…)` calls in `clu.repl.ansi` [Alexander Böhn]
 
-* Removed unnecessary check in `clu.repl.ansi` [Alexander Böhn]
-
 * Notes for `clu.abstract.Serializable` [Alexander Böhn]
 
 * `ANSIFormat` is also a `clu.abstract.Serializable` [Alexander Böhn]
@@ -649,20 +686,24 @@
 
 ## v0.11.6 (2025-05-07)
 
+### Fix
+
+* Fixed an old docstring typo, again. [Alexander Böhn]
+
+* Fixed an old docstring typo. [Alexander Böhn]
+
+### Remove
+
+* Removed licensing classifier. [Alexander Böhn]
+
 ### Other
 
 * Bumped version: 0.11.5 → 0.11.6. [Alexander Böhn]
-
-* Removed licensing classifier. [Alexander Böhn]
 
 * Keep `clu.exporting.ExporterBase` subclasses *sans* appname from registering. [Alexander Böhn]
 
   … this keeps the “clu.exporting.appnames” set from being polluted
     with e.g. technical classes like ExporterBase itself and whatnot
-
-* Fixed an old docstring typo, again. [Alexander Böhn]
-
-* Fixed an old docstring typo. [Alexander Böhn]
 
 * Minor `super(…)` cleanup in `clu.exporting` [Alexander Böhn]
 
@@ -678,6 +719,13 @@
 
 
 ## v0.11.5 (2025-05-06)
+
+### Fix
+
+* Fixed up `clu.repl.modules` indexing and related tests. [Alexander Böhn]
+
+  … also corrected a big ol’ WHOOPSIE MOTHERFUCKING DAISY in that
+    recently-committed “clu.predicates.ismarkedprivate(…)” function
 
 ### Add
 
@@ -731,11 +779,6 @@
   … like as in, calling “modulemap.reload()” will actually reload the
     thing using “importlib.reload(…)” which, I think, is cool.
 
-* Fixed up `clu.repl.modules` indexing and related tests. [Alexander Böhn]
-
-  … also corrected a big ol’ WHOOPSIE MOTHERFUCKING DAISY in that
-    recently-committed “clu.predicates.ismarkedprivate(…)” function
-
 * Moved PIL.Image import into `try/except` block in “clu/scripts/repl.py” [Alexander Böhn]
 
 * Using `clu.predicates.ismarkedprivate(…)` in “clu/scripts/repl.py” [Alexander Böhn]
@@ -748,6 +791,10 @@
 
 
 ## v0.11.4 (2025-05-03)
+
+### Tweaks
+
+* Tweaked that last adjustment, again. [Alexander Böhn]
 
 ### Add
 
@@ -763,8 +810,6 @@
     be, after all, the “Pi-thon” release, hardy har
 
 * Aesthetic improvements to the code in `clu/scripts/repl.py` [Alexander Böhn]
-
-* Tweaked that last adjustment, again. [Alexander Böhn]
 
 * More REPL fixes (specifically `__all__` now works right) [Alexander Böhn]
 
@@ -789,13 +834,15 @@
 
 ## v0.11.2 (2025-05-03)
 
-### Other
-
-* Bumped version: 0.11.1 → 0.11.2. [Alexander Böhn]
+### Fix
 
 * Fixed a subtle but show-stopping bug in `clu.scripts.treeline` [Alexander Böhn]
 
   … used “self” in a `__new__(…)` function definition, blech!
+
+### Other
+
+* Bumped version: 0.11.1 → 0.11.2. [Alexander Böhn]
 
 * Cleaned up `super(…)` calls in `clu.abstract` [Alexander Böhn]
 
@@ -825,6 +872,10 @@
 
 ## v0.11.0 (2025-05-02)
 
+### Fix
+
+* Fixed faulty operator in `noxfile.py` [Alexander Böhn]
+
 ### Add
 
 * Added a `clu.abstract.Serializable` abstract base class. [Alexander Böhn]
@@ -840,8 +891,6 @@
 * Bumped version: 0.10.1 → 0.11.0. [Alexander Böhn]
 
 * Subtle fix in `clu.fs.pypath` add-path logic. [Alexander Böhn]
-
-* Fixed faulty operator in `noxfile.py` [Alexander Böhn]
 
 * Such minutiae. [Alexander Böhn]
 
@@ -859,11 +908,19 @@
 
 ## v0.10.0 (2025-04-24)
 
+### Fix
+
+* Fix for the lack of params in the new ‘zict’ [Alexander Böhn]
+
 ### Add
 
 * Added tests in `clu.config.ns` for the environment-variable API. [Alexander Böhn]
 
 * Added a “clu.scripts.treeline.node_print(…)” function; updated inline tests accordingly. [Alexander Böhn]
+
+### Remove
+
+* Removed yet another legacy import from the “clu.extending” testsuite. [Alexander Böhn]
 
 ### Other
 
@@ -895,8 +952,6 @@
 
 * Using `pyattr(…)` in place of one of the `attr(…)` calls … in `clu.extending` [Alexander Böhn]
 
-* Removed yet another legacy import from the “clu.extending” testsuite. [Alexander Böhn]
-
 * Legacy gunk removed. [Alexander Böhn]
 
 * Better reprs for better living. [Alexander Böhn]
@@ -921,8 +976,6 @@
 
 * Some returns in “keyvalue.py” are now yield-froms. [Alexander Böhn]
 
-* Fix for the lack of params in the new ‘zict’ [Alexander Böhn]
-
 * Use `contextlib.closing(…)` whilst yielding database. [Alexander Böhn]
 
   … like just in case
@@ -935,6 +988,10 @@
 ### Add
 
 * Added on-the-fly filepath-based hashing to `clu.exporting.Exporter` [Alexander Böhn]
+
+### Remove
+
+* Removed inline test stubs from `clu.scripts.dictroast` … as they were causing the module to get picked up by Nox as one   with actual tests present; running the module with no arguments   produces a non-zero error code (by design) and that was screwing   things up a bit. [Alexander Böhn]
 
 ### Other
 
@@ -991,8 +1048,6 @@
 
 * Non-spammy and accurate command line history in `dictroast.py` … as in: we only print the last ten commands, and the logic that   does that printing reports stuff about how many lines there were,   and correctly numbers those lines. [Alexander Böhn]
 
-* Removed inline test stubs from `clu.scripts.dictroast` … as they were causing the module to get picked up by Nox as one   with actual tests present; running the module with no arguments   produces a non-zero error code (by design) and that was screwing   things up a bit. [Alexander Böhn]
-
 * Allow an arbitrary dict class in `clu.config.keymap.dictify(…)` … also stop star-importing everything in “clu.version”, because   that module contains one-off functions that have to run without   the rest of CLU, and are not fit for general human consumption,   generally speaking. [Alexander Böhn]
 
 * WHOOOOOOPS … I’m 44 years old, you’d think I’d know how to correctly call a   fucking function by now. [Alexander Böhn]
@@ -1029,6 +1084,12 @@
 
 ## v0.8.4 (2022-10-02)
 
+### Fix
+
+* Fixing bump2version configuration. [Alexander Böhn]
+
+* Fixed wonky `clu.exporting.Registry` class-registration logic. [Alexander Böhn]
+
 ### Add
 
 * Adding the built docs HTML file. [Alexander Böhn]
@@ -1050,8 +1111,6 @@
 ### Other
 
 * Bump version: 0.8.3 → 0.8.4. [Alexander Böhn]
-
-* Fixing bump2version configuration. [Alexander Böhn]
 
 * Taking a stab at moving away from `setup.py` [Alexander Böhn]
 
@@ -1157,8 +1216,6 @@
 
 * Fleshing out some of the `clu.exporting` inline tests. [Alexander Böhn]
 
-* Fixed wonky `clu.exporting.Registry` class-registration logic. [Alexander Böhn]
-
 * Programmer-note minutiae. [Alexander Böhn]
 
 * The export mechanism updates `__code__.co_name` for callables … The `clu.exporting.determine_name(…)` function inspects this   attribute, and it was lopsided that we weren’t updating it with   our new names accordingly. [Alexander Böhn]
@@ -1176,18 +1233,24 @@
 
 ## v0.8.3 (2022-09-10)
 
+### Fix
+
+* Fixed docstring on `clu.config.env.FrozenEnviron` … it was giving the wrong instructions for using a KeyMap key to   access a namespaced environment variable. [Alexander Böhn]
+
 ### Other
 
 * Bump version: 0.8.2 → 0.8.3. [Alexander Böhn]
 
 * Updated Makefile. [Alexander Böhn]
 
-* Fixed docstring on `clu.config.env.FrozenEnviron` … it was giving the wrong instructions for using a KeyMap key to   access a namespaced environment variable. [Alexander Böhn]
-
 * Whitespace. [Alexander Böhn]
 
 
 ## v0.8.2 (2022-09-10)
+
+### Fix
+
+* Fixed the `clu.constants.consts.BPYTHON` REPL detection. [Alexander Böhn]
 
 ### Add
 
@@ -1218,8 +1281,6 @@
 * Fleshed out a docstring in `clu.config.env.FrozenEnviron` [Alexander Böhn]
 
 * Minor cleanup. [Alexander Böhn]
-
-* Fixed the `clu.constants.consts.BPYTHON` REPL detection. [Alexander Böhn]
 
 * Whitespace. [Alexander Böhn]
 
@@ -1252,6 +1313,176 @@
 
 
 ## v0.8.0 (2022-08-30)
+
+### New
+
+* New `Directory.walkback(…)` function was terminating early … So I fixed that. [Alexander Böhn]
+
+* New accessors in “clu.predicates” using “inspect.getattr_static(…)” ... Which that function, “getattr_static(…)” retrieves attributes     from things without setting off any of the “__getattr__(…)” or     “__getattribute__(…)” logic insanity; this means that calling     it (or any of my new and improved accessors based on it!!) will     get you, like, e.g. a descriptor instance instead of to whatever     the call to that instances’ “__get__(…)” method would’ve lead. ... So the new predicate attribute getter function things are all     named “stattr(…)”, “stattrs(…)” – just like the versions sans     the “st” prefixes (which it’s “st” for “static”, get it??) only     the underlying calls use “getattr_static(…)” instead of calling     “resolve(…)”… which calls “or_none(…)” which calls “getattr(…)”     which calls a bajillion descriptor/class-dict/instance-dict/mro     thingamabobs about whose inner workings I am always a bit hazy. ... SO YEAH ENJOY. Also I wrote tests for these, plus I simplified     “getitem(…)” and also gave “clu.exporting.ValueDescriptor” a     real “__repr__(…)” function for some reason. Yup. [Alexander Böhn]
+
+### Changes
+
+* Changed zero to False in “itermodule(…)” getattr() call default. [Alexander Böhn]
+
+* Changelog requirements include install requirements. [Alexander Böhn]
+
+* Changed the internal weakref field name from “keymap” to “referent” ... which the former was both weirdly syntactically repetetive and     amiguously confusing; the latter says what it actually is and     isn’t the name of any other things already in use in general. [Alexander Böhn]
+
+* Changelog and git-ignore tweaks. [Alexander Böhn]
+
+* Changing all references to “Slotted” and the like to “clu.abstract” ... the “Slotted” metaclass and the “ValueDescriptor” read-only     property class have been relocated to “clu.abstract”; ... The export machinery was removed from “clu.abstract” – enabling     the types from that module to be used by “clu.exporting” itself ... “doctrim(…)” was also removed from “clu.exporting” – we are now     using ‘importlib.cleandoc(…)’ generally in its stead ... other assorted updates to grease the wheels of this particular     iota of progress were in fact made to shit in general, doggie. [Alexander Böhn]
+
+* Changes “clu.predicates.pyname(…)” to match “determine_name(…)” ... q.v. the previous commit note supra. w/r/t the “__qualname__”     and “__name__” attributes. [Alexander Böhn]
+
+* Changing the PyYAML requirememt to tox-only ... also got rid of some unnecessary DepreciationWarning supressors. [Alexander Böhn]
+
+* Changed “followlinks=True” in “Directory.walk(…)” arguments ... plus some random updates and minutiae in “clu.fs.filesystem”     and “clu.testing.utils” [Alexander Böhn]
+
+* Changed all my “graceful_issubclass(…)” refs to `subclasscheck(…)` ... it’s better-looking, less confusing, terse-er and an all-around     improvement. Don’t you think? [Alexander Böhn]
+
+### Tweaks
+
+* Tweak to “clu.version.git_version” speeds things up ... and should nudge coverage to 100% [Alexander Böhn]
+
+* Tweak to “clu.naming.duplicate(…)” [Alexander Böhn]
+
+* Tweak to “clu.exporting.ExporterBase.inner_repr()” ... trims repr strings down by shortening “path” using “basepath”     and “os.path.relpath(…)” [Alexander Böhn]
+
+* Tweaked CLU import in noxfile.py. [Alexander Böhn]
+
+* Tweaking “norecursedirs” pytest INI-option. [Alexander Böhn]
+
+* Tweaked a method name in “clu.dicts.ChainMap” ... specifically it is now “mapcontaining” instead of “mapcontains” [Alexander Böhn]
+
+* Tweaking shutdown logic. [Alexander Böhn]
+
+* Tweaked “suffix_searcher(…)” test to explicitly check None operands. [Alexander Böhn]
+
+* Tweaked conditional-deepcopy logic ... now it uses “getattr(…)” which readers of the CLU source – if     any exist besides myself – will note that I love that shit. [Alexander Böhn]
+
+* Tweaks to the new display capacities of the “show-modules.py” script. [Alexander Böhn]
+
+* Tweaked and wrote tests for “clu.predicates.slots_for(…)” [Alexander Böhn]
+
+* Tweaked custom-subclass Exporter test. [Alexander Böhn]
+
+* Tweaking the REPL boostrap script. [Alexander Böhn]
+
+* Tweaked ever-so-slightly the print_all() thing in consts.py. [Alexander Böhn]
+
+* Tweak fix to Makefile. [Alexander Böhn]
+
+* Tweaked project name. [Alexander Böhn]
+
+* Tweak to .gitignore. [Alexander Böhn]
+
+* Tweaks in the ansi and typespace modules. [Alexander Böhn]
+
+* Tweaked Makefile and rebased the travis config. [Alexander Böhn]
+
+### Fix
+
+* Fixed a long-standing problem with `clu.predicates.slots_for(¬)` … the issue was that if a class at some point defined a single slot   with the (completely valid) syntax `__slots__ = 'string_name'`,   the output from `slots_for(¬)` would have iterated that string   resulting in something like `('yo', 'd', 'o', 'g', 'g')` instead   of the expected `('yo', 'dogg')`. … we deal with this by introducing a `clu.predicates.normalize(…)`   function that uses `clu.predicates.isnormative(…)` to selectively   tuplize strings while passing other iterables through without   fucking with them. [Alexander Böhn]
+
+* Fixed that bug in Python there. [Alexander Böhn]
+
+* Fixed `clu.typespace` compatibility and added `@inline.runif(…)` … to wit: *) The `clu.typespace.types` pseudo-module is now an instance of    `clu.typespace.namespace.Typespace` which is a descendent of    `clu.typespace.namespace.Namespace` and has typespace-specific    stuff in it.    +) MEANING: if you do `types.ModuleType` (which is something       present in Python’s `types` module) it looks up the right       thing, as does `types.Module` – which was the point of CLU’s       `types` in the first place    +) The on-the-fly sub-namespace stuff is cleaner, I believe    +) The inline tests in `clu.typespace` have been fixed up *) Speaking of tests: when decorating inline test functions you    can now conditionally run things, by using `@inline.runif(…)`    with a boolean value. Examples and inline documentation of this    are included *) Fuck yes! [Alexander Böhn]
+
+* Fixed flaw in comparing IDs. [Alexander Böhn]
+
+* Fixed ambiguously failing git-tags test. [Alexander Böhn]
+
+* Fix for the “dict resized during iteration” occasional puke ... which that’s a problem whilst importing some other people’s     package modules, occasionally – NOT a CLU issue, mind you –     that OK yeah, for more complainey exposition regarding this     crapola, see the inline programmer notes in “clu/exporting.py” [Alexander Böhn]
+
+* Fixed resize-during-iteration heisenbug in “Loader.__repr__(…)” [Alexander Böhn]
+
+* Fixing “arrowheads” in extracted signatures with a regex ... which is surprisingly effective and not thing of now having     two problems, actually, evidently, yeah. [Alexander Böhn]
+
+* Fixed columnar justification in CLU module display. [Alexander Böhn]
+
+* Fix the import of “clu.typespace.types” in “clu.scripts.repl” [Alexander Böhn]
+
+* Fixed file perms. [Alexander Böhn]
+
+* Fixed file perms. [Alexander Böhn]
+
+* Fixed a few random bugs in “clu.config.proxy” ... argument-passing and naming consistency issues, mostly. [Alexander Böhn]
+
+* Fixed phantom-environment-variable bug in “clu.dicts.ChainMap” [Alexander Böhn]
+
+* Fixed SimpleNamespace.__dir__(…)” and “SimpleNamespace.__repr__(…)” ... wbich were apparently broken?… WHOOOOOPS. [Alexander Böhn]
+
+* Fixing the report-format sizing… YET ONCE AGAIN. [Alexander Böhn]
+
+* Fixed generated docstrings on returned test functions ... FYI, docstrings with format components are, like, undefined     behavior it looks like…?! [Alexander Böhn]
+
+* Fixed a few assertions. [Alexander Böhn]
+
+* Fixed a regression with hacky “isnamespace(…)” from “clu.predicates” [Alexander Böhn]
+
+* Fixed it! [Alexander Böhn]
+
+* Fixed time reporting for one-off execution of @inline tests. [Alexander Böhn]
+
+* Fixed possible race condition in “ProxyModule.__getattr__(…)” ... “ProxyModule._executed” could be True for like one or maybe two     frames of interpreter execution during which the initialization     mapping list “ProxyModule.target_dicts” still existed, which     could short-circuit attribute-access for like half a frame more     after calling for the deletion of the list – this is probably     minute enough to qualify this diff as “premature optimization”     – or “obsessive-compulsive flow control”, either-or – but I do     not care as it is far more satisfying to have unfucked it than     it’d be to leave it sitting there all fucked and such. [Alexander Böhn]
+
+* Fixed docstring *again* pt. II. [Alexander Böhn]
+
+* Fixed docstring *again* [Alexander Böhn]
+
+* Fixed Redis class-module inline test. [Alexander Böhn]
+
+* Fixed “RedRun.__repr__(…)” when the configuration is inactive. [Alexander Böhn]
+
+* Fixed variable-shadow name bug in “clu.fs.misc” [Alexander Böhn]
+
+* Fixed bug when calling “clu.fs.misc.re_excluder(…)” with no args. [Alexander Böhn]
+
+* Fixed that irritating off-by-one bug in “print_ansi_centered(…)” [Alexander Böhn]
+
+* Fixed “clu.config.filebase.FileBase” so file paths override searches ... previously, even specifying an explicit file path would not end     up overriding the file path search, had the file path search     found anything. [Alexander Böhn]
+
+* Fixed “len(Directory(…))” which had been infinitely recursing ... also added some useful items/keys/values-views implementations     in “clu.dicts” [Alexander Böhn]
+
+* Fixed a docstring copypasta typo. [Alexander Böhn]
+
+* Fixing “clu.config.fieldtypes.TupleField” [Alexander Böhn]
+
+* Fixed container field types ... it wasn’t a pretty fix – it involves manually calling a field’s     “__set_name__(…)” method – but it works. Blech! [Alexander Böhn]
+
+* Fixed unlabeled keyword arg “default” in “slots_for(…)” internals. [Alexander Böhn]
+
+* Fixed prefix in “yodogg” embedded test package. [Alexander Böhn]
+
+* Fixed a bug in “clu.fs.pypath.remove_paths(…)” and added some stuff ... namely “clu.fs.pypath.remove_invalid_paths(…)”, which removes     anything in “sys.path” that doesn’t point anywhere; ... also added a module-private function “mutate_syspath(…)” used     in both “remove_paths(…)” and “remove_invalid_paths(…)” to     change the “sys.path” list in-place without randomly reordering     it at the time. ... the new function is imported into the REPL environment and also     called before the interactive interpreter starts, ensuring that     the REPL environments’ “sys.path” is not bullshit in any way. [Alexander Böhn]
+
+* Fixed typo in requirements/dev.txt. [Alexander Böhn]
+
+* Fixed test function name, which was wrong, and needed fixing. [Alexander Böhn]
+
+* Fixed a docstring that was showing the wrong arity. [Alexander Böhn]
+
+* Fixed SUNDER and DUNDER in clu.enums. [Alexander Böhn]
+
+  Whoooooooooops
+
+* Fixed the unnamed-lambda test in `test_exporting.py` ... in a hacky way I confess – I had to move the lambda definitions     out of the test-case method and up to the module-level for the     “thingname_search(…)” function to work on them. [Alexander Böhn]
+
+* Fixed a bug in clu.fs.filesystem.Directory.zip_archive(…) ... the bug was actually in clu.fs.filesystem.TemporaryName.copy(…)     which I had blindly refactored at some point in the somewhat     recent past; anyway, I’m going to add a proper test which is     why this commit also includes a gratuitous bunch of JPG and PNG     binaries as “test data”, erm. [Alexander Böhn]
+
+* Fixed a whoooooole lot of unreasonable docstrings in clu.predicates. [Alexander Böhn]
+
+* Fixed and added tests for clu.fs.script_path(…) [Alexander Böhn]
+
+* Fixed unmarked raw string in regex. [Alexander Böhn]
+
+* Fixed some corner-cases in typology ... thanks, nacent test suite!! [Alexander Böhn]
+
+* Fixed enum aliases. [Alexander Böhn]
+
+* Fixed CSDIL enum’s __index__(…) method. [Alexander Böhn]
+
+* Fixes for clu.version.VersionInfo. [Alexander Böhn]
 
 ### Add
 
@@ -1648,6 +1879,98 @@
 
 * Added a bunch of basic project stuff ... .gitignore, .bumpversion.cfg; ... ABOUT.md, README.md, CODE_OF_CONDUCT.md ... __init__.py files in clu/ and test/ ... __version__.py and semantic-versioning code in version.py ... basic setup.py boilerplate. [Alexander Böhn]
 
+### Remove
+
+* Removed gratuitous “tuplize(…)” calls … these were found in “__slots__” assignments in assorted class   definitions. Removing these calls allowed trimming of imports   from “clu.predicates”. … there are also a few changes to the nox/pytest configurations,   allowing for tests to run instead of collapsing into a heap of   inscrutable error messages. [Alexander Böhn]
+
+* Removed “nondeterministic” test function annotation. [Alexander Böhn]
+
+* Removed no-op script from post-push hook actions. [Alexander Böhn]
+
+* Removed hardcoded absolute paths from “test_repr.py” ... using “consts.BASEPATH” instead – easy-peasy, lemon-squeezy. [Alexander Böhn]
+
+* Removing some non-ANSI-specific testing code. [Alexander Böhn]
+
+* Removed the “appdirs” dev requirement. [Alexander Böhn]
+
+* Removed confusing “+” signs from formatting regexes. [Alexander Böhn]
+
+* Removed TypeLocker remnants from “clu.fs.filesystem” [Alexander Böhn]
+
+* Removed redundant PyYAML requirement. [Alexander Böhn]
+
+* Removing assorted unnecessary stuff from the keymap implementations. [Alexander Böhn]
+
+* Removed gratuitous “tuple()” calls in “test_keyvalue.py” [Alexander Böhn]
+
+* Removed empty inline tests from “clu.testing.utils” [Alexander Böhn]
+
+* Removed dead (but not forgotten) code. [Alexander Böhn]
+
+* Removed unused “iterchain(…)” from “clu.repr” [Alexander Böhn]
+
+* Removed intermediate package imports from “clu.compilation” [Alexander Böhn]
+
+* Removing gratuitous exec-perm bits. [Alexander Böhn]
+
+* Removed “chain/iterchain” references from “clu.config.keymap{view}” [Alexander Böhn]
+
+* Removed unused “collections.abc” reference from “clu.config.keymap” [Alexander Böhn]
+
+* Removed unused “@abstractmethod” reference from “clu.config.keymap” [Alexander Böhn]
+
+* Removed pointless “sorted(…)” call in “clu.exporting.itermodule(…)” [Alexander Böhn]
+
+* Removed sequence literals from nested sample data. [Alexander Böhn]
+
+* Remove insecure Django requirement. [Alexander Böhn]
+
+* Removed old “Python 3”-specific REPL module. [Alexander Böhn]
+
+* Removed old Bash REPL stub. [Alexander Böhn]
+
+* Removing old “clu.constants.terminalsize” hacks. [Alexander Böhn]
+
+* Removed unnecessary callable check in “clu.exporting.determine_name(…)” [Alexander Böhn]
+
+* Removed unused class-keyword argument check. [Alexander Böhn]
+
+* Removed read/write access code in “clu.importing.Registry” [Alexander Böhn]
+
+* Removed wack function “predicates_for_types(…)” ... so uncivilized. [Alexander Böhn]
+
+* Removed empty test. [Alexander Böhn]
+
+* Removed “__call__(…)” stub from “clu.fs.filesystem.Directory” [Alexander Böhn]
+
+* Removed “default” params from NamespacedFieldManager methods. [Alexander Böhn]
+
+* Removed unused import. [Alexander Böhn]
+
+* Removed irritating Makefile rule to clean up after pytest ... having already dealt with this with fixtures. [Alexander Böhn]
+
+* Removed “Nondeterminism(…)” exception toss in naming test. [Alexander Böhn]
+
+* Removing the last vestiges of the old xfail constants naming test. [Alexander Böhn]
+
+* Removed dangling import. [Alexander Böhn]
+
+* Removed unnecessary call to “maketypelist(…)” in “subclasscheck(…)” ... that would be in clu.typology – in the function definition that     is arguably the backbone of that whole module, actually. [Alexander Böhn]
+
+* Removed some redundant `stringify(…)` calls in clu.fs.filesystem. [Alexander Böhn]
+
+* Removed “defaults” kwarg from ANSIFormatBase NamedTuple declaration ... this greased the wheels for PyPy compatibility, and it turns     out to be totally unnecessary anyway, because the defaulting is     taken care of in the subclass. [Alexander Böhn]
+
+* Removed “defaults” kwarg from ANSIFormatBase NamedTuple declaration ... this greased the wheels for PyPy compatibility, and it turns     out to be totally unnecessary anyway, because the defaulting is     taken care of in the subclass. [Alexander Böhn]
+
+* Removed clu.fs.appdirectories inline test from clu.keyvalue. [Alexander Böhn]
+
+* Removed gratuitous module-level imports in predicate tests. [Alexander Böhn]
+
+* Removed old project egg-info directory name. [Alexander Böhn]
+
+* Remove gratuitous OS check in clu.fs.NamedTemporaryFile. [Alexander Böhn]
+
 ### Minutiae
 
 * Minutiae. [Alexander Böhn]
@@ -1706,8 +2029,6 @@
 
 * Avoiding a gratuitous list comprehension in `clu.config.keymapview` … which was used in the default `__len__(…)` implementation in the   base abstract class. Now we use `clu.typology.iterlen(…)` on a   generator expression which we all know is way betterer. [Alexander Böhn]
 
-* Fixed a long-standing problem with `clu.predicates.slots_for(¬)` … the issue was that if a class at some point defined a single slot   with the (completely valid) syntax `__slots__ = 'string_name'`,   the output from `slots_for(¬)` would have iterated that string   resulting in something like `('yo', 'd', 'o', 'g', 'g')` instead   of the expected `('yo', 'dogg')`. … we deal with this by introducing a `clu.predicates.normalize(…)`   function that uses `clu.predicates.isnormative(…)` to selectively   tuplize strings while passing other iterables through without   fucking with them. [Alexander Böhn]
-
 * Construct `clu.config.keymap.Nested` instances from iterables is GO … just needed a single additional `dict(…)` call in the constructor … so, like, you can create instances of all KeyMap types found in   `clu.config.keymap` concrete definition package the same way you   can create ordinary dicts – iterables yielding `key, value` pairs   will do the trick. [Alexander Böhn]
 
 * No longer are defaultdicts necessary in `clu.config.keymap.Nested` … the source of the bug was one line of code in which I had tried   to be clever – frequently the downfall of many a programmer – and   the fix was to just expand it into two freaking lines already,   which made it more legible. … This allowed for the removal of the “DefaultTree(…)” function,   which I disliked. This should speed things up, too. Yes! [Alexander Böhn]
@@ -1720,13 +2041,9 @@
 
 * Spelling totally counts. [Alexander Böhn]
 
-* Fixed that bug in Python there. [Alexander Böhn]
-
 * Re-enabled long-dormant inline `clu.importing.base` tests. [Alexander Böhn]
 
 * Updated `clu.typology` with the new `Typespace` type. [Alexander Böhn]
-
-* Fixed `clu.typespace` compatibility and added `@inline.runif(…)` … to wit: *) The `clu.typespace.types` pseudo-module is now an instance of    `clu.typespace.namespace.Typespace` which is a descendent of    `clu.typespace.namespace.Namespace` and has typespace-specific    stuff in it.    +) MEANING: if you do `types.ModuleType` (which is something       present in Python’s `types` module) it looks up the right       thing, as does `types.Module` – which was the point of CLU’s       `types` in the first place    +) The on-the-fly sub-namespace stuff is cleaner, I believe    +) The inline tests in `clu.typespace` have been fixed up *) Speaking of tests: when decorating inline test functions you    can now conditionally run things, by using `@inline.runif(…)`    with a boolean value. Examples and inline documentation of this    are included *) Fuck yes! [Alexander Böhn]
 
 * The new `Directory.subdirectories(¬)` method uses a regex filter … previously it had used a suffix-specific filter, which employed   `clu.fs.misc.suffix_searcher(…)` which made kind of very little   sense as directories rarely have file-suffix-y suffixes by which   one might wish to filter them. [Alexander Böhn]
 
@@ -1740,8 +2057,6 @@
 
 * Whitespace. [Alexander Böhn]
 
-* Fixed flaw in comparing IDs. [Alexander Böhn]
-
 * Clu.fs.filesystem.Directory.walkback() yields lists of strings … whereas originally it was handing back lists of directory entry   objects, which I don’t think can just be used in a string context   without e.g. “os.fspath(…)”-ing them first, erm. [Alexander Böhn]
 
 * Few things are as satisfying as swapping `return` with `yield from` [Alexander Böhn]
@@ -1750,15 +2065,11 @@
 
 * Rewrote `Directory.walkback(…)` to use itertools.groupby(…) … The other version was using an `if`/`else` branch inside a `for`   loop inside a `while True` loop, which that just rubbed me the   wrong way, basically. This is less irritating, personally. [Alexander Böhn]
 
-* New `Directory.walkback(…)` function was terminating early … So I fixed that. [Alexander Böhn]
-
 * Including the banner figlet command, for reference. [Alexander Böhn]
 
 * Future-resistance for the repl banners … not quite future-proofing. SHAMELESS PLUG: I figlet-ed banners   up to Python 3.11 because that’s the version that will contain   my patch!! Yaaayyyyyy!!!! [Alexander Böhn]
 
 * CONSISTENCY!!! [Alexander Böhn]
-
-* Removed gratuitous “tuplize(…)” calls … these were found in “__slots__” assignments in assorted class   definitions. Removing these calls allowed trimming of imports   from “clu.predicates”. … there are also a few changes to the nox/pytest configurations,   allowing for tests to run instead of collapsing into a heap of   inscrutable error messages. [Alexander Böhn]
 
 * PyYAJL bindings appear unwilling to build. [Alexander Böhn]
 
@@ -1775,8 +2086,6 @@
     have to tell me not to do a thing once, dogg
 
 * Forgot to remove distutils-related import. WHOOPS. [Alexander Böhn]
-
-* Changed zero to False in “itermodule(…)” getattr() call default. [Alexander Böhn]
 
 * Rewrote clu.fs.filesystem.which(…) and fixed other peoples’ bugs. [Alexander Böhn]
 
@@ -1801,8 +2110,6 @@
 
 * This requirements file just makes Dependabot lose its mind. [Alexander Böhn]
 
-* Fixed ambiguously failing git-tags test. [Alexander Böhn]
-
 * Dependabot update. [Alexander Böhn]
 
 * Bump version: 0.7.1 → 0.7.2. [Alexander Böhn]
@@ -1816,8 +2123,6 @@
 * Not-quite-redundant env-value defaulting in “clu.repl.columnize” [Alexander Böhn]
 
 * Bump version: 0.7.0 → 0.7.1. [Alexander Böhn]
-
-* Fix for the “dict resized during iteration” occasional puke ... which that’s a problem whilst importing some other people’s     package modules, occasionally – NOT a CLU issue, mind you –     that OK yeah, for more complainey exposition regarding this     crapola, see the inline programmer notes in “clu/exporting.py” [Alexander Böhn]
 
 * EVEN MORE coverage nitpicks for “clu.dispatch” ... 100% coverage or bust. [Alexander Böhn]
 
@@ -1849,8 +2154,6 @@
 
 * Pragma-no-cover-ing the “pytest_sessionfinish(…)” exithandle-assigner. [Alexander Böhn]
 
-* Removed “nondeterministic” test function annotation. [Alexander Böhn]
-
 * Sorted out inline-tests-versus-__main__ controversy ... specifically, “clu.typespace” and “clu.api” are packages whose     “__init__.py” files define inline tests – that is all well and     good, those tests run as normative during iterative testing     while coding (like e.g. ⌘-R in TextMate et al.) but then for     nox and codecov runs, they need a stub ”__main__.py” file to     import and run the inline test function. AND THAT’S ALL these     “__main__.py” files should aspire to ever do, okay? Tough break     kid, better luck next time ... also: coverage fixes (because it is always fucking wonky and     counterintuitive, behaviorwise, phhheh) ... and: the ‘Click’ package has been bumped up to the big time:     it is now a bona-fide install requirement. Huzzah! [Alexander Böhn]
 
 * Actual inline tests running in “clu.api” skeleton. [Alexander Böhn]
@@ -1866,8 +2169,6 @@
 * Full coverage for “clu.constants.consts” (albiet with pragmas) [Alexander Böhn]
 
 * Full coverage for “clu.predicates” in the pytest suite. [Alexander Böhn]
-
-* Tweak to “clu.version.git_version” speeds things up ... and should nudge coverage to 100% [Alexander Böhn]
 
 * Near-100% test-coverage for “clu.repl.modules” [Alexander Böhn]
 
@@ -1895,8 +2196,6 @@
 
 * Only calculating the branch in “git-pushex” if necessary. [Alexander Böhn]
 
-* Removed no-op script from post-push hook actions. [Alexander Böhn]
-
 * Trimmed dead code and installed coverage post-push hook. [Alexander Böhn]
 
 * Basic pre- and post-push Git hook-script infrastructure in place. [Alexander Böhn]
@@ -1914,8 +2213,6 @@
 * Bump version: 0.6.8 → 0.6.9. [Alexander Böhn]
 
 * Trimmed dead code. [Alexander Böhn]
-
-* Removed hardcoded absolute paths from “test_repr.py” ... using “consts.BASEPATH” instead – easy-peasy, lemon-squeezy. [Alexander Böhn]
 
 * Switching “clu.repl.ansi.ansidoc(…)” to use the new DocFormat class ... which this brilliant new hotness type is both composed from and     descended from various “clu.abstract.Formatter” types, defined     for the most part in “clu.repl.ansi” (a module that oooooof, if     ever any module needed to get split up into smaller, and more     bite-sized chunks, this one is it) ... using the “clu.repl.ansi.DocFormat” type to furnish “ansidoc(…)”     will be faster, more expandable, more controllable, sexier,     smarter, better-looking, and generally a better all-around deal     than the one-off corner-case-ridden function it replaces. [Alexander Böhn]
 
@@ -1940,8 +2237,6 @@
 * Notes and docstrings for the new stuff in “clu.importing” ... as in: the new “__init_subclass__(…)” methods of “FinderBase”     and “LoaderBase”; the equivalent logic in “ModuleBase”; many     other miscellaneous related assorted sundries as well ... also the “clu.importing.ModuleAlias” class has been kitted out     similar to “clu.importing.ArgumentSink”, like with a bunch of     ABC ancestors, hashability, in/eqality operators, and other     fancy stuff. [Alexander Böhn]
 
 * All crucial subclass logic transplanted from “initialize_types(…)” ... so: “clu.importing.FinderBase” and “clu.importing.LoaderBase”     have “__init_subclass__(…)” methods that take care of assigning     e.g. loader class and instance references to subclasses that     require them – which frankly this should have been where this     stuff was done from day one, but ah oh well ... “clu.importing.LoaderBase” has a subclass cache (in “linkages”)     and a per-subclass instance cache, modeled after the mechanism     used by “clu.exporting.ExporterBase”; all those aforementioned     “__init_subclass__(…)” methods lean on this new registry setup     in some way; ... this assignment logic was also added/moved into ModuleBase’s     existing “__init_subclass__(…)” method ... all the “dynamic subtype” interstitial class declarations in     the “initialize_types(…)” and related/subordinate functions     are just ‘pass’ statements     • related logic in the “dynamic” subtype creation stuff one       currently finds in “clu.application” was also axed ... all this shit was double-checked six ways from Sunday – all the     tests run OK; a new inline diagnostic added to “clu.importing”     dumps the contents of the new loader caches; etc etc ad nauseum ... oh yeah one more thing, “clu.abstract.AppName” searches the MRO     for an appname if its subtype is initialized without specifying     one (or if it’s None) in the same manner of fashion employed by     “clu.importing.ModuleBase” in its “__init_subclass__(…)” method. [Alexander Böhn]
-
-* Fixed resize-during-iteration heisenbug in “Loader.__repr__(…)” [Alexander Böhn]
 
 * Marking the “PYTHON_BIN” const as a path. [Alexander Böhn]
 
@@ -2003,8 +2298,6 @@
 * “clu.fs.abc.BaseFSName” is no longer an AbstractContextManager ... it turns out that this one abstract ancestor did not really     much matter – we just made “clu.fs.filesystem.Directory” and     “clu.fs.filesystem.TemporaryName” inherit individually from     the AbstractContextManager ABC; we only had to add a one-line     “__enter__(…)” method to TemporaryName and that was that ... thus opening the door to mixing BaseFSName in with classes that     descend from working context-manager types; see the immediately     preceding commit regarding a TemporaryFileWrapper subclass that     mixes in BaseFSName – implementations of BaseFSName mixin types     can be pleasantly minimal, needing only “__init__(…)”, their     “name(…)” properties, and “to_string(…)” in many cases (and we     can maybe get rid of the requirement for the latter, methinks) [Alexander Böhn]
 
 * Experimental “fs.abc.TemporaryFileWrapper” / “BaseFSName” subclass ... only exists for now in an inline test function, which runs OK ... the trick was making the “name” ABC property writeable in the     implementation, incidentally ... need to unclobber __enter__ and __exit__ though, most likely ... to set this up we moved “clu.fs.filesystem.temporary(…)” over     to “clu.fs.misc”; one unit test was likewise moved as well. [Alexander Böhn]
-
-* Fixing “arrowheads” in extracted signatures with a regex ... which is surprisingly effective and not thing of now having     two problems, actually, evidently, yeah. [Alexander Böhn]
 
 * Had to name something “inline” inside “clu.typespace.test()” ... as that’s how the nox inline-test collector spots such modules. [Alexander Böhn]
 
@@ -2111,8 +2404,6 @@
 
 * Abstracted the common textwrap.TextWrapper args in “clu.repl.ansi” [Alexander Böhn]
 
-* Removing some non-ANSI-specific testing code. [Alexander Böhn]
-
 * Test data fixture-ization. [Alexander Böhn]
 
 * Got rid of superfluous one-off const import in “clu.abstract” [Alexander Böhn]
@@ -2131,8 +2422,6 @@
 
 * Redid all the ANSI and terminal formatting stuff with OOP ... so don’t NO ONE accuse me of not being object-oriented enough     for anything, ever. [Alexander Böhn]
 
-* Fixed columnar justification in CLU module display. [Alexander Böhn]
-
 * Tons of revisions to “clu.repl.columnize” ... including! • things in “clu.abstract” supporting new formatters     	       … with unit tests!     	       • streamlined and non-nonsensical width-estimation 	       • elimination of some inappropriate lambdas 	       • new, improved, generally sexier docstrings 	       • the more tangled-up and illegible bits of internal 	         code have been untangled and, at least, legiblized     	       • a general revision of all of the keyword-argument- 	         related crapola that had been previously occupying 		 “clu.repl.columnize” up until now, including total 		 normalization of all of the naming 	       • a better inline “demo(…)” function that will, if 	         given a chance, respect the width of the terminal ... on the whole, it’s something I am relatively unashamed to have     as a part of CLU right now, rather than a hastily-retrofitted     copypasta hackjob, ported from something penned originally by     an obvious Python-hating Rubyist (clearly evidenced by their     anti-significant-whitespace fantods manifested as a plague of     “pass” statements demarking each block-dedent, excuse me?…)     and adapted without style, elegance, or forward-thinkingness     by me when I did not feel like writing such a function, dogg. [Alexander Böhn]
 
 * Moved “modeflags(…)” to “clu.fs.misc” ... plus of course the requisite adjustments to tests and etcetera. [Alexander Böhn]
@@ -2147,8 +2436,6 @@
 
 * An LRU cache seriously speeds up repeat calls in “clu.repl.modules” ... the inline-test running time went from a couple of seconds down     to like 1/100th of that – I try not to gratuitously cache or     otherwise memoize functions but sometimes it’s just idiotic not     to do so, doggie ... this commit also has the remains of an attempt to twaddle with     what turned out to be one of the overly-sensitive codepaths in     “clu.importing” which this, the twaddling, did not work in the     end. The embellishment of a few lines of inline-test code in     “clu.application” was from sorting out the non-working-osity     of same. Yep. [Alexander Böhn]
 
-* Removed the “appdirs” dev requirement. [Alexander Böhn]
-
 * Made “Pillow” an explicit dev requirement. [Alexander Böhn]
 
 * Made “python-dateutil” an explicit dev requirement. [Alexander Böhn]
@@ -2162,8 +2449,6 @@
 * Only retarget bound methods for renaming just the once. [Alexander Böhn]
 
 * Another day, another Unicode codepoint with which to amuse myself. [Alexander Böhn]
-
-* Removed confusing “+” signs from formatting regexes. [Alexander Böhn]
 
 * OCD-ish update/tweak to “clu.predicates.wrap_value(…).__doc__” [Alexander Böhn]
 
@@ -2194,10 +2479,6 @@
 * All types of lovely and fantastic miscellany ... “clu.constants.polyfills” no longer depends on anything from     “clu.constants.consts” (in fact the latter will now attempt a     guarded import from the former, because we can) ... The new boolean constant “clu.constants.consts.NUMPY” is True     if you can import numpy from within the Python environment in     which CLU is operating ... “clu.mathematics” doesn’t export anything when it has to mock     the numpy module (which it will do if that aforementioned const     value is False) ... New “noxfile.py” logic attempts to install numpy when it looks     like it’ll need to test code that conditionally leverages it ... Running Nox using Make rules will generate a JSON report of how     everything worked out, by default ... “clu.repl.ansi.ANSIFormat” now employs a pretty conservative     instance-caching scheme – hard references, keyed on hashed enum     values, queries follow the same exhaustive normalization we’ve     been using all along before calling up to “super().__new__(…)”     – that seems to work all nice and transparent like ... Other assorted frippery, devil-may-care flim-flam, and sundry     jocund elements of imaginative fancy. [Alexander Böhn]
 
 * The “Format” class is now “clu.abstract.Format” ... right now it just has the one “render(…)” abstract method, but     the journey of 1,000 premature optimizations starts with but a     single such method, no? [Alexander Böhn]
-
-* Tweak to “clu.naming.duplicate(…)” [Alexander Böhn]
-
-* Tweak to “clu.exporting.ExporterBase.inner_repr()” ... trims repr strings down by shortening “path” using “basepath”     and “os.path.relpath(…)” [Alexander Böhn]
 
 * Using interim variable instead of global lookup. [Alexander Böhn]
 
@@ -2241,8 +2522,6 @@
 
 * Ensure class-modules aren’t created in circumstances when unwarranted. [Alexander Böhn]
 
-* Fix the import of “clu.typespace.types” in “clu.scripts.repl” [Alexander Böhn]
-
 * Automatic width adjust in module-export display script. [Alexander Böhn]
 
 * Festooned the license text with all the latest Unicodery and doodadishness. [Alexander Böhn]
@@ -2252,8 +2531,6 @@
 * Excised all traces of “TemporaryFileWrapper” from “clu.fs.filesystem” ... as it seems to be getting on splendidly over in “clu.fs.abc” [Alexander Böhn]
 
 * Relocated our “TemporaryFileWrapper” to the “clu.fs.abc” module. [Alexander Böhn]
-
-* Removed TypeLocker remnants from “clu.fs.filesystem” [Alexander Böhn]
 
 * Starting a “clu.fs.abc” module, for filesystem-centric base classes ... the TypeLocker metaclass has already been relocated therein. [Alexander Böhn]
 
@@ -2311,8 +2588,6 @@
 
 * Planting a seedling into which “clu.application” can maybe grow. [Alexander Böhn]
 
-* Tweaked CLU import in noxfile.py. [Alexander Böhn]
-
 * Shortened inline-test-gathering function name. [Alexander Böhn]
 
 * Allow arbitrary test-function names in “clu.all.clu_inline_tests(…)” [Alexander Böhn]
@@ -2348,13 +2623,9 @@
 
 * Bumped testing numpy minimum version. [Alexander Böhn]
 
-* Removed redundant PyYAML requirement. [Alexander Böhn]
-
 * Touched up “requirements/dev.txt” as well. [Alexander Böhn]
 
 * Bumped up a bunch of minimum versions for the install requirements. [Alexander Böhn]
-
-* Removing assorted unnecessary stuff from the keymap implementations. [Alexander Böhn]
 
 * The big s/PROJECT_NAME/APPNAME/g changeover. [Alexander Böhn]
 
@@ -2367,8 +2638,6 @@
 * Short-circuit return for file-list calls on nonexistant directories. [Alexander Böhn]
 
 * Using the “consts” fixture in leu of manual import in “test_repr.py” [Alexander Böhn]
-
-* Removed gratuitous “tuple()” calls in “test_keyvalue.py” [Alexander Böhn]
 
 * Converted the “Directory.ls(…)” function to use a “re_matcher()” ... whereas before a one-off regex was in play. [Alexander Böhn]
 
@@ -2404,13 +2673,9 @@
 
 * Swapped the return values from “clu.naming.qualified_name_tuple(…)” ... thus matching the order of those returned by “dotpath_split(…)”     in the same module. [Alexander Böhn]
 
-* Removed empty inline tests from “clu.testing.utils” [Alexander Böhn]
-
 * Got rid of the async coroutine inline-test code in “clu.dispatch” ... as much as I loved it. [Alexander Böhn]
 
 * Nixed unnecessary shebang. [Alexander Böhn]
-
-* Fixed file perms. [Alexander Böhn]
 
 * No longer using “collections.OrderedDict” in “clu.version” [Alexander Böhn]
 
@@ -2419,8 +2684,6 @@
 * Trying to fix an off-by-one error in one of the inline diagnostics. [Alexander Böhn]
 
 * Using EXPORTER_NAME throughout “clu.importing” [Alexander Böhn]
-
-* Fixed file perms. [Alexander Böhn]
 
 * CLU-module exporter detection is now less hardcoded and janky. [Alexander Böhn]
 
@@ -2438,8 +2701,6 @@
 
 * Another “clu.config.proxy” nitpick bugfix. [Alexander Böhn]
 
-* Fixed a few random bugs in “clu.config.proxy” ... argument-passing and naming consistency issues, mostly. [Alexander Böhn]
-
 * Disabling unused code in some paramatrized “appdirectories” tests. [Alexander Böhn]
 
 * Myriad updates to the enums used by “clu.fs.appdirectories” [Alexander Böhn]
@@ -2451,8 +2712,6 @@
 * Whitespace. [Alexander Böhn]
 
 * Whitespace. [Alexander Böhn]
-
-* Tweaking “norecursedirs” pytest INI-option. [Alexander Böhn]
 
 * Explicitly setting some environment variables in “noxfile.py” [Alexander Böhn]
 
@@ -2510,8 +2769,6 @@
 
 * Import order matters. [Alexander Böhn]
 
-* Removed dead (but not forgotten) code. [Alexander Böhn]
-
 * OK so there was a “string.center(…)” method THIS WHOLE TIME!!! Wow. [Alexander Böhn]
 
 * Make my file. [Alexander Böhn]
@@ -2523,8 +2780,6 @@
 * Bump version: 0.5.15 → 0.6.0. [Alexander Böhn]
 
 * Ah yes, what it once was. [Alexander Böhn]
-
-* Fixed phantom-environment-variable bug in “clu.dicts.ChainMap” [Alexander Böhn]
 
 * Made the inline-test Nox run command slightly more legible. [Alexander Böhn]
 
@@ -2572,15 +2827,11 @@
 
 * Simplifying “super(…)” calls in “clu.config” [Alexander Böhn]
 
-* Removed unused “iterchain(…)” from “clu.repr” [Alexander Böhn]
-
 * Minor tweaks to “clu.dicts.ChainMap.from{keys,items}(…)” [Alexander Böhn]
 
 * Caching the return from “clu.predicates.newtype(…)” ... this isn’t perfect, as it pretty much necessitates that any     attributes – as in, any values for the class-body namespace –     be passed as “clu.typespace.SimpleNamespace” dictionaries, or     something else hashable (that happens to be, like, the only     convenient hashable “frozen dictionary” type lying around my     heirarchy RN)… I don’t hate this, as using a “Namespace”-y type     kind of works for this purpose, despite the supurfluousness…     in any case we’ll see. ... like, I may move “newtype(…)” out of “clu.predicates” entirely     as it is outgrowing its original one-liner convenience lambda,     for seriously. [Alexander Böhn]
 
 * “clu.predicates.newtype(…)” uses a bespoke default base “ObjectType” ... this distinguishes types that are created with this function ... “clu.predicates.ObjectType” inherits from ‘object’ and adds     nothing except one more bump in its inheritance-chain road; ... again, a few minimal additions to the predicates testsuite were     necessary – but thankfully not a biggie. [Alexander Böhn]
-
-* Removed intermediate package imports from “clu.compilation” [Alexander Böhn]
 
 * Completely and punctilliously rewrote “clu.predicates.newtype(…)” ... to be, like, a real thing ... updated the relevant test (which didn’t need much reworking) [Alexander Böhn]
 
@@ -2606,8 +2857,6 @@
 
 * Maintaining legacy make targets for the consts and modules scripts. [Alexander Böhn]
 
-* Removing gratuitous exec-perm bits. [Alexander Böhn]
-
 * Symlinked the old script locations to their new module-main source. [Alexander Böhn]
 
 * Now the “show-modules.py” script is the clu.__main__ module code ... and OK in that last commit, pretend I typed “show-consts.py”,     OK?? Same diff. ... OK so yeah you can execute the show-modules brouhahah by doing: [Alexander Böhn]
@@ -2632,13 +2881,7 @@
 
 * Setting up Sphinx documentation. [Alexander Böhn]
 
-* Removed “chain/iterchain” references from “clu.config.keymap{view}” [Alexander Böhn]
-
-* Removed unused “collections.abc” reference from “clu.config.keymap” [Alexander Böhn]
-
 * Consolidated imports. [Alexander Böhn]
-
-* Removed unused “@abstractmethod” reference from “clu.config.keymap” [Alexander Böhn]
 
 * And just for good measure: s/nsutils/ns/g. [Alexander Böhn]
 
@@ -2682,8 +2925,6 @@
 * Made “clu.exporting.ExporterBase.modulenames()” into a generator. [Alexander Böhn]
 
 * Made “clu.exporting.itermodule{ids}(…)” into generator functions. [Alexander Böhn]
-
-* Removed pointless “sorted(…)” call in “clu.exporting.itermodule(…)” [Alexander Böhn]
 
 * Made “clu.predicates.uniquify(…)” into a generator ... rather than something that just happens to return a tuple. [Alexander Böhn]
 
@@ -2733,17 +2974,11 @@
 
 * Dropped gratuitous “list(…)” from “Directory.importables(…)” innards. [Alexander Böhn]
 
-* Changelog requirements include install requirements. [Alexander Böhn]
-
 * Whitespace. [Alexander Böhn]
-
-* Fixed SimpleNamespace.__dir__(…)” and “SimpleNamespace.__repr__(…)” ... wbich were apparently broken?… WHOOOOOPS. [Alexander Böhn]
 
 * Clarified the in-use syntax of our intermediate dataclass decorator. [Alexander Böhn]
 
 * ModuleSpec instances are no longer considered packages by default. [Alexander Böhn]
-
-* Fixing the report-format sizing… YET ONCE AGAIN. [Alexander Böhn]
 
 * Gratuitous further simplification. [Alexander Böhn]
 
@@ -2751,11 +2986,7 @@
 
 * Slight performance gain made via pass-through-ing of some methods ... specifically the “keys(…)”, “items(…)” and “values(…)” methods;     this is likely due to those having fallen back to the default     implementations prior to the explicit pass-through, which meant     that “clu.config.defg.Nested” proxies were using the classes     for key/items/values views that did not take advantage of any     of the “NamespaceWalker” machinery. [Alexander Böhn]
 
-* Changed the internal weakref field name from “keymap” to “referent” ... which the former was both weirdly syntactically repetetive and     amiguously confusing; the latter says what it actually is and     isn’t the name of any other things already in use in general. [Alexander Böhn]
-
 * Got rid of reasonable-looking but completely stupid clone() impl ... which would have created a weakref to a temporary, essentially ... UGH. [Alexander Böhn]
-
-* Fixed generated docstrings on returned test functions ... FYI, docstrings with format components are, like, undefined     behavior it looks like…?! [Alexander Böhn]
 
 * Docstrings ‘n’ notes for the proxy-related inline metafunctions. [Alexander Böhn]
 
@@ -2791,8 +3022,6 @@
 
 * Updated the “clu.testing.utils.InlineTester” docstring ... now the code sample illustrates returning POSIX status values. [Alexander Böhn]
 
-* Changelog and git-ignore tweaks. [Alexander Böhn]
-
 * Bump version: 0.5.4 → 0.5.5. [Alexander Böhn]
 
 * Integrating “gitchangelog” and taking it for a trial run. [Alexander Böhn]
@@ -2816,8 +3045,6 @@
 * Fold my case. [Alexander Böhn]
 
 * Using str.casefold() instead of str.lower() for comparison. [Alexander Böhn]
-
-* Fixed a few assertions. [Alexander Böhn]
 
 * Cleaned up the “clu.importing” inline testsuite a bit. [Alexander Böhn]
 
@@ -2852,8 +3079,6 @@
 * Using the “flatdict()” fixture-ish function in KeyMap inline tests ... also killed some dead code in “clu.testing.utils” [Alexander Böhn]
 
 * WTF HAX. [Alexander Böhn]
-
-* Fixed a regression with hacky “isnamespace(…)” from “clu.predicates” [Alexander Böhn]
 
 * Explicit > Implicit. [Alexander Böhn]
 
@@ -2898,8 +3123,6 @@
 * Shortcutting the @dataclass decorator in the name of legibility. [Alexander Böhn]
 
 * Deduplicated the efforts between “initialize_{new_types,module}(…)” [Alexander Böhn]
-
-* Fixed it! [Alexander Böhn]
 
 * Go by the name you’ve been given, not just the one you’re called. [Alexander Böhn]
 
@@ -3003,8 +3226,6 @@
 
 * Developer-facing comments about what the fuck is going on. [Alexander Böhn]
 
-* Fixed time reporting for one-off execution of @inline tests. [Alexander Böhn]
-
 * Killed a lot of dead code. [Alexander Böhn]
 
 * Integrated ‘dbx-stopwatch’ with the inline test framework ... including a custom report-formatting function, as theirs is     awful (and not like this one is much better but the need is     there, and it’s something, OK?) ... inline tests auto-collect and run via local-variable mapping     hook ”inline.test(«vars», [runcount])” ... a number of inline test suites were converted over to the new     auto-collection API ... tweaked the requirements accordingly (N.B. this still needs     some winnowing) [Alexander Böhn]
@@ -3081,8 +3302,6 @@
 
 * Testing roundtrip flatten-to-nestify and nestify-to-flatten. [Alexander Böhn]
 
-* Removed sequence literals from nested sample data. [Alexander Böhn]
-
 * The “mapwalk(…)” function includes sequence indexes. [Alexander Böhn]
 
 * Compatibility stuff across the board for the new KeyMap API. [Alexander Böhn]
@@ -3123,13 +3342,9 @@
 
 * The “qualified_name(…)” and “qualified_import(…)” fns are quieter ... they were, like, unnecessarily chatty there for a long while. [Alexander Böhn]
 
-* Remove insecure Django requirement. [Alexander Böhn]
-
 * Further fleshing out REPL script. [Alexander Böhn]
 
 * Getting started on new REPL environment script. [Alexander Böhn]
-
-* Tweaked a method name in “clu.dicts.ChainMap” ... specifically it is now “mapcontaining” instead of “mapcontains” [Alexander Böhn]
 
 * Whitespace. [Alexander Böhn]
 
@@ -3158,8 +3373,6 @@
 * Storing “__dir__(…)” results for ProxyModule’s “__dir__(…)” impl ... Also, I like ‘delattr(…)’ more than ‘del «thing»’ – the latter     of which looks way too nondeterministic by association and also     more problematically loosey-goosey like in general. [Alexander Böhn]
 
 * Explicit, I am told, brings more general joy than (say) implicit ... I dunno whether premature optimization is better or more joyful     or nicer or what-have-you than other kinds of optimization but     you are getting those in this diff too whether you like it     or not, doggie, OK? OK. [Alexander Böhn]
-
-* Fixed possible race condition in “ProxyModule.__getattr__(…)” ... “ProxyModule._executed” could be True for like one or maybe two     frames of interpreter execution during which the initialization     mapping list “ProxyModule.target_dicts” still existed, which     could short-circuit attribute-access for like half a frame more     after calling for the deletion of the list – this is probably     minute enough to qualify this diff as “premature optimization”     – or “obsessive-compulsive flow control”, either-or – but I do     not care as it is far more satisfying to have unfucked it than     it’d be to leave it sitting there all fucked and such. [Alexander Böhn]
 
 * Culling ‘sys.modules’ on “clu.importing.Registry.unregister(…)” ... fucking finally. [Alexander Böhn]
 
@@ -3249,14 +3462,6 @@
 
       … now works, and makes a certain amount of sense
 
-* Removed old “Python 3”-specific REPL module. [Alexander Böhn]
-
-* Removed old Bash REPL stub. [Alexander Böhn]
-
-* Fixed docstring *again* pt. II. [Alexander Böhn]
-
-* Fixed docstring *again* [Alexander Böhn]
-
 * Use current if “importables(…)” called with Falsy subdirectory. [Alexander Böhn]
 
 * Docstring minutiae. [Alexander Böhn]
@@ -3276,8 +3481,6 @@
 * Logging format config manscaping. [Alexander Böhn]
 
 * Trimmed dead code. [Alexander Böhn]
-
-* Tweaking shutdown logic. [Alexander Böhn]
 
 * Minor tweak to zipfile artifact save logic. [Alexander Böhn]
 
@@ -3305,8 +3508,6 @@
 
 * CLU-project module tests properly consider class-based modules. [Alexander Böhn]
 
-* Fixed Redis class-module inline test. [Alexander Böhn]
-
 * Managing Redis subprocess with a class-based module. [Alexander Böhn]
 
 * More Redis-handle decoupling. [Alexander Böhn]
@@ -3321,13 +3522,7 @@
 
 * Bump version: 0.4.3 → 0.4.4. [Alexander Böhn]
 
-* Fixed “RedRun.__repr__(…)” when the configuration is inactive. [Alexander Böhn]
-
 * Escaping a raw regex string. [Alexander Böhn]
-
-* Fixed variable-shadow name bug in “clu.fs.misc” [Alexander Böhn]
-
-* Fixed bug when calling “clu.fs.misc.re_excluder(…)” with no args. [Alexander Böhn]
 
 * Getting rid of polyfill “walk(…)” and “scandir(…)” [Alexander Böhn]
 
@@ -3355,8 +3550,6 @@
 
 * Trimming “clu.constants.polyfills” [Alexander Böhn]
 
-* Removing old “clu.constants.terminalsize” hacks. [Alexander Böhn]
-
 * Docstring tweak. [Alexander Böhn]
 
 * Some import/export touchups ... the master exporter class-registry dictionary now uses weakrefs ... the filesystem root is now programmatically determined ... gratuitous super-call in “FinderBase.invalidate_caches()” has     been removed. [Alexander Böhn]
@@ -3373,8 +3566,6 @@
 
 * Importing “clu.abstract” wholesale rather than piecemeal ... in both “clu.exporting” and “clu.importing” [Alexander Böhn]
 
-* Removed unnecessary callable check in “clu.exporting.determine_name(…)” [Alexander Böhn]
-
 * Getting “lru_cache” in “clu.exporting” directly from ‘functools’ [Alexander Böhn]
 
 * One-character typo fix. [Alexander Böhn]
@@ -3386,8 +3577,6 @@
 * Fleshing out “clu.repr” tests and details. [Alexander Böhn]
 
 * Simplified decorator usage in “clu.fs.misc” [Alexander Böhn]
-
-* Tweaked “suffix_searcher(…)” test to explicitly check None operands. [Alexander Böhn]
 
 * Another premature optimization in the testsuite. [Alexander Böhn]
 
@@ -3440,8 +3629,6 @@
 * Simplified that “clu.fs.filesystem.TemporaryName.write(…)” call ... using a call to “TemporaryName.parent()” ... also added None checks to “Directory.{copy_all,flatten}(…)” [Alexander Böhn]
 
 * Swapped a manual read of a “__doc__” attr for “inspect.getdoc(…)” ... also removed a call to “ensure_path_is_valid(…)” within the     “clu.fs.filesystem” module, in favor of custom logic allowing     for idempotency (as as it was, the existing logic would fail     to write if a file existed, which why?) [Alexander Böhn]
-
-* Changing all references to “Slotted” and the like to “clu.abstract” ... the “Slotted” metaclass and the “ValueDescriptor” read-only     property class have been relocated to “clu.abstract”; ... The export machinery was removed from “clu.abstract” – enabling     the types from that module to be used by “clu.exporting” itself ... “doctrim(…)” was also removed from “clu.exporting” – we are now     using ‘importlib.cleandoc(…)’ generally in its stead ... other assorted updates to grease the wheels of this particular     iota of progress were in fact made to shit in general, doggie. [Alexander Böhn]
 
 * Lambda-ifying the “@cache” decorator in “clu.exporting” [Alexander Böhn]
 
@@ -3525,11 +3712,7 @@
 
 * Only split spec.name if it’s registered. [Alexander Böhn]
 
-* Removed unused class-keyword argument check. [Alexander Böhn]
-
 * Sorting registered appnames in “clu.importing” [Alexander Böhn]
-
-* Removed read/write access code in “clu.importing.Registry” [Alexander Böhn]
 
 * Disabled read/write access to the “clu.importing.Registry” data ... commented out, for now. [Alexander Böhn]
 
@@ -3585,8 +3768,6 @@
 
 * OMEGA MARKS THE END (by which I mean, the “pair(…)” tests run OK!!! [Alexander Böhn]
 
-* Changes “clu.predicates.pyname(…)” to match “determine_name(…)” ... q.v. the previous commit note supra. w/r/t the “__qualname__”     and “__name__” attributes. [Alexander Böhn]
-
 * Exporter instances and subclasses can now be unregistered ... with tests for both that, and the new “__wrapped__”-function     awareness logic ... in doing this we had to subtlely but fundamentally alter the     logic within the verenable “clu.exporting.determine_name(…)”     function – it now privileges “__name__” over “__qualname__”     while going about its business. Tests seem to suggest this     hasn’t perturbed anything, but that function is at the heart     of the export system and so I wanted to make a note of the     change here. [Alexander Böhn]
 
 * A list comprehension should be faster than a “list(genexp)” ... right?… [Alexander Böhn]
@@ -3629,8 +3810,6 @@
 
 * Bump version: 0.3.5 → 0.3.6. [Alexander Böhn]
 
-* Tweaked conditional-deepcopy logic ... now it uses “getattr(…)” which readers of the CLU source – if     any exist besides myself – will note that I love that shit. [Alexander Böhn]
-
 * Conditional deep-copying in “FlatOrderedSet”’s “clone(…)” logic. [Alexander Böhn]
 
 * Whitespace. [Alexander Böhn]
@@ -3671,11 +3850,7 @@
 
 * EVERYBODY CHILL. [Alexander Böhn]
 
-* Fixed that irritating off-by-one bug in “print_ansi_centered(…)” [Alexander Böhn]
-
 * Easing iteration in “clu.exporting” ... using “yield from”, and ... removing gratuitous tuple-conversions. [Alexander Böhn]
-
-* Removed wack function “predicates_for_types(…)” ... so uncivilized. [Alexander Böhn]
 
 * Using “yield from” in “clu.exporting.ExporterBase” [Alexander Böhn]
 
@@ -3684,10 +3859,6 @@
 * Package-scoping the “clumods” fixture. [Alexander Böhn]
 
 * Restoring entire `os.environ` mapping in “environment” test fixture. [Alexander Böhn]
-
-* Removed empty test. [Alexander Böhn]
-
-* Fixed “clu.config.filebase.FileBase” so file paths override searches ... previously, even specifying an explicit file path would not end     up overriding the file path search, had the file path search     found anything. [Alexander Böhn]
 
 * “clu.fs.filesystem.Directory” is now reverse-iterable. [Alexander Böhn]
 
@@ -3703,13 +3874,9 @@
 
 * The OrderedMappingViews in “clu.dicts” implement “collections.abc.Sequence” ... and they are now well-tested. [Alexander Böhn]
 
-* Removed “__call__(…)” stub from “clu.fs.filesystem.Directory” [Alexander Böhn]
-
 * Trimmed dead code in “clu.fs.filesystem” [Alexander Böhn]
 
 * Renaming the “clu.dicts” testsuite module. [Alexander Böhn]
-
-* Fixed “len(Directory(…))” which had been infinitely recursing ... also added some useful items/keys/values-views implementations     in “clu.dicts” [Alexander Böhn]
 
 * Starting on “clu.fs.sourcetree” module ... q.v. *.srctree files from the Cython test suite. [Alexander Böhn]
 
@@ -3721,15 +3888,11 @@
 
 * Halfway to namespaced field access as dotted attributes. [Alexander Böhn]
 
-* Fixed a docstring copypasta typo. [Alexander Böhn]
-
 * Getting rid of CLU-specific inline-test-ish code in “clu.config.filebase” [Alexander Böhn]
 
 * Ensure sys.path entries pointing to files aren’t made into Directories. [Alexander Böhn]
 
 * Clarified the parent module of “remove_invalid_paths(…)” [Alexander Böhn]
-
-* Changing the PyYAML requirememt to tox-only ... also got rid of some unnecessary DepreciationWarning supressors. [Alexander Böhn]
 
 * Bump version: 0.3.3 → 0.3.4. [Alexander Böhn]
 
@@ -3747,13 +3910,7 @@
 
 * WHOOOOPS. [Alexander Böhn]
 
-* Fixing “clu.config.fieldtypes.TupleField” [Alexander Böhn]
-
-* Removed “default” params from NamespacedFieldManager methods. [Alexander Böhn]
-
 * Trimmed a whoooooole lot of dead code. [Alexander Böhn]
-
-* Fixed container field types ... it wasn’t a pretty fix – it involves manually calling a field’s     “__set_name__(…)” method – but it works. Blech! [Alexander Böhn]
 
 * Moved file-format-related config stuff into “clu.config.formats” [Alexander Böhn]
 
@@ -3796,10 +3953,6 @@
 * Raising when calling “flatten(…)” on a nonexistant Directory. [Alexander Böhn]
 
 * Confirming the new script directory location in the testsuite. [Alexander Böhn]
-
-* Tweaks to the new display capacities of the “show-modules.py” script. [Alexander Böhn]
-
-* Removed unused import. [Alexander Böhn]
 
 * The “show-modules.py” script actually shows all the modules. [Alexander Böhn]
 
@@ -3889,8 +4042,6 @@
 
 * Exporter checks in “clu.testing.pytest.clumods” and “show-modules.py” ... beforehand, there was a hardcoded list of “CLU modules” in a     static tuple in “clu.constants.data” which really was a list     of modules in CLU that used the “clu.exporting.Exporter” class     to export their shit. ... now there still is; the difference is that that tuple can now     contain any valid module in CLU and the two places where the     tuple gets iterated also check to see if the module they’re     exporting contains an exporter – if it doesn’t, whatever that     bit of code returns won’t contain said module ... clearly this is a janky system but we currently need it to     test that the Exporter registration system works in the first     place; it could get pared down to like only being used in one     or two instances, I feel like. [Alexander Böhn]
 
-* Changed “followlinks=True” in “Directory.walk(…)” arguments ... plus some random updates and minutiae in “clu.fs.filesystem”     and “clu.testing.utils” [Alexander Böhn]
-
 * Confirming the counts of the flattened directory contents ... using a “countfiles(…)” function, which in itself isn’t really     any type of anything – but its existence did necessitate the     creation of a new “clu.testing.utils” module. [Alexander Böhn]
 
 * Bump version: 0.2.6 → 0.2.7. [Alexander Böhn]
@@ -3923,12 +4074,6 @@
 
 * Bump version: 0.2.1 → 0.2.2. [Alexander Böhn]
 
-* Fixed unlabeled keyword arg “default” in “slots_for(…)” internals. [Alexander Böhn]
-
-* Tweaked and wrote tests for “clu.predicates.slots_for(…)” [Alexander Böhn]
-
-* New accessors in “clu.predicates” using “inspect.getattr_static(…)” ... Which that function, “getattr_static(…)” retrieves attributes     from things without setting off any of the “__getattr__(…)” or     “__getattribute__(…)” logic insanity; this means that calling     it (or any of my new and improved accessors based on it!!) will     get you, like, e.g. a descriptor instance instead of to whatever     the call to that instances’ “__get__(…)” method would’ve lead. ... So the new predicate attribute getter function things are all     named “stattr(…)”, “stattrs(…)” – just like the versions sans     the “st” prefixes (which it’s “st” for “static”, get it??) only     the underlying calls use “getattr_static(…)” instead of calling     “resolve(…)”… which calls “or_none(…)” which calls “getattr(…)”     which calls a bajillion descriptor/class-dict/instance-dict/mro     thingamabobs about whose inner workings I am always a bit hazy. ... SO YEAH ENJOY. Also I wrote tests for these, plus I simplified     “getitem(…)” and also gave “clu.exporting.ValueDescriptor” a     real “__repr__(…)” function for some reason. Yup. [Alexander Böhn]
-
 * Bump version: 0.2.0 → 0.2.1. [Alexander Böhn]
 
 * Made the “clu.typespace.namespace.SimpleNamespace” type “hashable” [Alexander Böhn]
@@ -3951,8 +4096,6 @@
 
 * Loading the “{attr,pyattr,item}_across(…)” predicates in the REPL. [Alexander Böhn]
 
-* Fixed prefix in “yodogg” embedded test package. [Alexander Böhn]
-
 * Filtering out class-registry function names in “ExporterBase.__dir__(…)” [Alexander Böhn]
 
 * A little DRY in “clu.exporting” [Alexander Böhn]
@@ -3963,15 +4106,11 @@
 
 * Made “path” a first-class keyword arg of “clu.exporting.ExportBase” [Alexander Böhn]
 
-* Fixed a bug in “clu.fs.pypath.remove_paths(…)” and added some stuff ... namely “clu.fs.pypath.remove_invalid_paths(…)”, which removes     anything in “sys.path” that doesn’t point anywhere; ... also added a module-private function “mutate_syspath(…)” used     in both “remove_paths(…)” and “remove_invalid_paths(…)” to     change the “sys.path” list in-place without randomly reordering     it at the time. ... the new function is imported into the REPL environment and also     called before the interactive interpreter starts, ensuring that     the REPL environments’ “sys.path” is not bullshit in any way. [Alexander Böhn]
-
 * Using “clu.naming.nameof(…)” instead of “clu.exporting.determine_name(…)” ... in “clu.typespace.namespace” [Alexander Böhn]
 
 * One more assert in the ExporterBase subclass test. [Alexander Böhn]
 
 * Extraordinarily minor tweak to docstring. [Alexander Böhn]
-
-* Tweaked custom-subclass Exporter test. [Alexander Böhn]
 
 * Simplified class-keyword logic in “ExporterBase” metaclasses. [Alexander Böhn]
 
@@ -4008,11 +4147,7 @@
 
 * Relative-izing “path_to_dotpath(…)” to keep it non-CLU-specific. [Alexander Böhn]
 
-* Fixed typo in requirements/dev.txt. [Alexander Böhn]
-
 * Fleshed out the “dev” requirements. [Alexander Böhn]
-
-* Removed irritating Makefile rule to clean up after pytest ... having already dealt with this with fixtures. [Alexander Böhn]
 
 * Cleaned up tox.ini. [Alexander Böhn]
 
@@ -4024,17 +4159,11 @@
 
 * I HATE VIRTUALENVS. [Alexander Böhn]
 
-* Tweaking the REPL boostrap script. [Alexander Böhn]
-
 * Shuffled imports in module naming test. [Alexander Böhn]
 
 * Resolved double-export situation with SimpleNamespace and Namespace. [Alexander Böhn]
 
 * Laid down a few pytest markers. [Alexander Böhn]
-
-* Removed “Nondeterminism(…)” exception toss in naming test. [Alexander Böhn]
-
-* Removing the last vestiges of the old xfail constants naming test. [Alexander Böhn]
 
 * EXECUTIVE CALL: you have to import from “clu.constants” subpackages ... MEANING: you can’t do this shit anymore: [Alexander Böhn]
 
@@ -4118,13 +4247,9 @@
 
 * Updated “clu.typology” testsuite function name. [Alexander Böhn]
 
-* Fixed test function name, which was wrong, and needed fixing. [Alexander Böhn]
-
 * Updated some filesystem tests to use the “temporarydir” fixture. [Alexander Böhn]
 
 * Moved the huge greek-text dict to new module “clu.constants.data” ... Which OK yeah I know “data” is a lame-ass name for a module or     anything like that – technically they *all* contain data so it     is not that descriptive – but I wanted a catch-all junk-drawer     module, and so. Yes! [Alexander Böhn]
-
-* Removed dangling import. [Alexander Böhn]
 
 * Trying package scope for the “dirname” fixture ... the latest pytest docs call package-scope “experimental” – so     that’s what this is: like that time you drunkenly made out with     your sophomore-year roommate and then never really talked about     it afterward for like twenty years, I am “experimenting”. [Alexander Böhn]
 
@@ -4190,15 +4315,11 @@
 
 * Formatting and whitespace. [Alexander Böhn]
 
-* Removed unnecessary call to “maketypelist(…)” in “subclasscheck(…)” ... that would be in clu.typology – in the function definition that     is arguably the backbone of that whole module, actually. [Alexander Böhn]
-
 * Finally, started a testcase suite for clu.typology. [Alexander Böhn]
 
 * Trepidaciously starting to use “functools.wraps(…)” in “negate(…)” ... I can’t seem to get it to NOT update the function signature,     as is displayed in e.g. bpython above the display of inline     __doc__ strings …!? [Alexander Böhn]
 
 * Expanded classtype predicates test to cover “metaclass(…)” [Alexander Böhn]
-
-* Fixed a docstring that was showing the wrong arity. [Alexander Böhn]
 
 * Made “isfunction(…)” – née “ΛΛ(…)” – not use “callable(…)” [Alexander Böhn]
 
@@ -4209,10 +4330,6 @@
 * Using new collation accessor to build typelists in clu.typology. [Alexander Böhn]
 
 * Whitespace. [Alexander Böhn]
-
-* Fixed SUNDER and DUNDER in clu.enums. [Alexander Böhn]
-
-  Whoooooooooops
 
 * Updated an old source notation in clu.typology. [Alexander Böhn]
 
@@ -4252,8 +4369,6 @@
 
 * Reverted `__bytes__(…)` method changes in clu.fs.filesystem ... using “self.to_string()” would have had those methods return     bytes-ified object repr strings, which we don’t actually want     that, we want the fucking filesystem path in bytes-ized form. [Alexander Böhn]
 
-* Removed some redundant `stringify(…)` calls in clu.fs.filesystem. [Alexander Böhn]
-
 * Tidied up the imports in clu.repl.ansi. [Alexander Böhn]
 
 * Check for “source” keyword in class kwargs before deleting it. [Alexander Böhn]
@@ -4284,8 +4399,6 @@
 
 * Renamed the module-level unnamed lambdas in the exporter test ... so as not to shadow or overwrite or otherwise fuck with things     that had the same names, but had been defined local to their     respective test methods in other places. [Alexander Böhn]
 
-* Fixed the unnamed-lambda test in `test_exporting.py` ... in a hacky way I confess – I had to move the lambda definitions     out of the test-case method and up to the module-level for the     “thingname_search(…)” function to work on them. [Alexander Böhn]
-
 * Travis tweak. [Alexander Böhn]
 
 * MTV’s Make My File. [Alexander Böhn]
@@ -4300,13 +4413,9 @@
 
 * Bump version: 0.1.4 → 0.1.5. [Alexander Böhn]
 
-* Fixed a bug in clu.fs.filesystem.Directory.zip_archive(…) ... the bug was actually in clu.fs.filesystem.TemporaryName.copy(…)     which I had blindly refactored at some point in the somewhat     recent past; anyway, I’m going to add a proper test which is     why this commit also includes a gratuitous bunch of JPG and PNG     binaries as “test data”, erm. [Alexander Böhn]
-
 * We no longer have to delete things from modules ... lest anyone forget, that’s why we wrote all that exporter stuff. [Alexander Böhn]
 
 * Moved “scandir” and “walk” imports to clu.constants.polyfills. [Alexander Böhn]
-
-* Changed all my “graceful_issubclass(…)” refs to `subclasscheck(…)` ... it’s better-looking, less confusing, terse-er and an all-around     improvement. Don’t you think? [Alexander Böhn]
 
 * Using the clu.exporter machinery in clu.fs.{filesystem,misc} [Alexander Böhn]
 
@@ -4353,8 +4462,6 @@
 
 * Spiffed up the `negate(…)` docstring ... since yeah OK I confess, this function is basically like my     new kitten right now, in terms of my feelings. [Alexander Böhn]
 
-* Fixed a whoooooole lot of unreasonable docstrings in clu.predicates. [Alexander Böhn]
-
 * Truly gratuitous callability checks in `attr(…)` accessor test. [Alexander Böhn]
 
 * Bringing the negated `hasattr(…)` shortcuts into the testsuite. [Alexander Böhn]
@@ -4383,17 +4490,11 @@
 
 * Warnings are fired off when setting up AppDirs with certain values ... to wit: “appauthor”, “roaming” and “multipath” are Windows-only     options; we now warn if one tries to make use of them while on     a non-Windows platform ... also refactored some of the AppDirs-based key-value ancestor     type stuff. [Alexander Böhn]
 
-* Fixed and added tests for clu.fs.script_path(…) [Alexander Böhn]
-
 * Got rid of legacy Cython helpers in setup.py. [Alexander Böhn]
 
 * Rehashing the keyvalue module. [Alexander Böhn]
 
-* Removed “defaults” kwarg from ANSIFormatBase NamedTuple declaration ... this greased the wheels for PyPy compatibility, and it turns     out to be totally unnecessary anyway, because the defaulting is     taken care of in the subclass. [Alexander Böhn]
-
 * N.B. “psutil” IS NOT OF OR IN THE STANDARD LIBRARY, DOGG. [Alexander Böhn]
-
-* Removed “defaults” kwarg from ANSIFormatBase NamedTuple declaration ... this greased the wheels for PyPy compatibility, and it turns     out to be totally unnecessary anyway, because the defaulting is     taken care of in the subclass. [Alexander Böhn]
 
 * MANIFEST.in includes only .py files from the tests/ directory. [Alexander Böhn]
 
@@ -4430,8 +4531,6 @@
 * Tests (and tweaks) for clu.fs.filesystem.temporary(…) [Alexander Böhn]
 
 * Pruned unused SYSTEM import from test_fs_appdirectories.py. [Alexander Böhn]
-
-* Removed clu.fs.appdirectories inline test from clu.keyvalue. [Alexander Böhn]
 
 * Put in stubbed Win32 clu.fs.appdirectories tests ... each of which ensures it gets skipped by immediately making a     call to “pytest.importorskip(…)” with some win32 interop module     as the operand. [Alexander Böhn]
 
@@ -4515,10 +4614,6 @@
 
 * The `path_to_dotpath(…)` function was exported from the wrong place ... now it’s not, because I fixed it. [Alexander Böhn]
 
-* Tweaked ever-so-slightly the print_all() thing in consts.py. [Alexander Böhn]
-
-* Removed gratuitous module-level imports in predicate tests. [Alexander Böhn]
-
 * Bringing back λ the ultimate. [Alexander Böhn]
 
 * Nixed unnecessary “os.path.basename()” in clu.naming. [Alexander Böhn]
@@ -4529,17 +4624,7 @@
 
 * Marked string as raw in clu/version/read_version.py. [Alexander Böhn]
 
-* Removed old project egg-info directory name. [Alexander Böhn]
-
-* Tweak fix to Makefile. [Alexander Böhn]
-
 * Uncrustified and updated setup.py. [Alexander Böhn]
-
-* Tweaked project name. [Alexander Böhn]
-
-* Fixed unmarked raw string in regex. [Alexander Böhn]
-
-* Tweak to .gitignore. [Alexander Böhn]
 
 * Bump version: 0.1.0 → 0.1.1. [Alexander Böhn]
 
@@ -4557,8 +4642,6 @@
 
 * Using pytest.xfail() where nondeterminism might happen. [Alexander Böhn]
 
-* Fixed some corner-cases in typology ... thanks, nacent test suite!! [Alexander Böhn]
-
 * Migrated clu.naming tests from replutilities. [Alexander Böhn]
 
 * Migrated dict/namespace merge tests from replutilities. [Alexander Böhn]
@@ -4573,15 +4656,11 @@
 
 * Finished writing that docstring. [Alexander Böhn]
 
-* Fixed enum aliases. [Alexander Böhn]
-
 * Typelist function tune-up ... and and overdue __all__/__dir__ set for the clu.typology module. [Alexander Böhn]
 
 * Moved the enums from clu.fs.appdirectories to clu.constants.enums. [Alexander Böhn]
 
 * Moved aliasing enum stuff from clu.constants to clu.repl. [Alexander Böhn]
-
-* Remove gratuitous OS check in clu.fs.NamedTemporaryFile. [Alexander Böhn]
 
 * It’s probably overkill to fork() before umask()-ing ... but frankly the race condition inherent in trying to get the     process’ current umask without perturbing the value is fucking     stupid, it is exactly dumb shit like that that inflames my OCD     and keeps me from telling everyone I know about how great the     fucking POSIX API is (which really that is not a joke, I really     actually generally like it except for warts like this one). [Alexander Böhn]
 
@@ -4593,13 +4672,9 @@
 
 * ANSI text printing works on the command line. [Alexander Böhn]
 
-* Fixed CSDIL enum’s __index__(…) method. [Alexander Böhn]
-
 * ANSI metaclass name-lookup method now considers aliases. [Alexander Böhn]
 
 * ZERO-COST ENUM MEMBER ALIASING, MOTHERFUCKERS. [Alexander Böhn]
-
-* Tweaks in the ansi and typespace modules. [Alexander Böhn]
 
 * Further OCD-ish CSDIL cleanup. [Alexander Böhn]
 
@@ -4632,8 +4707,6 @@
       serendipitous occasions somewhere betwen those two time-suck
       categories of what it is, doggie.
 
-* Tweaked Makefile and rebased the travis config. [Alexander Böhn]
-
 * A few tweaks to clu.fs.filesystem. [Alexander Böhn]
 
 * Minor tweak to short project description. [Alexander Böhn]
@@ -4641,7 +4714,5 @@
 * Fleshed out ABOUT.md and README.md. [Alexander Böhn]
 
 * Snipped a dead code line. [Alexander Böhn]
-
-* Fixes for clu.version.VersionInfo. [Alexander Böhn]
 
 

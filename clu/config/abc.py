@@ -202,7 +202,7 @@ class FrozenKeyMap(FrozenKeyMapBase):
         return KeyMapValuesView(self, *namespaces)
     
     def __hash__(self):
-        return hash(tuple(self.values()))
+        return hash(tuple(self.keys())) ^ len(self)
     
     def _get_namespace_foset(self):
         return FlatOrderedSet(get_ns(nskey) for nskey in sorted(self) if NAMESPACE_SEP in nskey)

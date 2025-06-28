@@ -213,11 +213,11 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
             return cls(self.tree)
         
         # Our namespaces, their output data:
-        ours = tuple(self.namespaces())
-        theirs = dict()
+        ours = set(self.namespaces())
+        theirs = {}
         
-        # Go through the namespaces we were given, and copy anything
-        # we have that matches those namespaces into a new output dict,
+        # Go through the namespaces we were passed, and copy anything
+        # we have that matches those namespaces into a new output dict –
         # wholesale and sans any namespaced-key prefixes:
         for namespace in namespaces:
             if namespace not in ours:
@@ -225,11 +225,11 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
             d = self.tree
             for fragment in ns.split_ns(namespace):
                 d = d[fragment]
-            theirs.update({ namespace : d })
+            theirs[namespace] = d
         
         # Return a (possibly frozen) instance containing the specified
         # namespaced data, as a namespaced instance:
-        return cls(**theirs)
+        return cls(theirs)
     
     def inner_repr(self):
         return repr(self.tree)

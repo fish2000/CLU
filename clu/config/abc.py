@@ -481,9 +481,44 @@ class FlatOrderedSet(collections.abc.Set,
     
     @classmethod
     def is_a(cls, instance):
+        """ Check to see if a thing – an instance, whatever – is, like,
+            close enough to what “this class” is to be a viable enough
+            thing that way. Erm. Like it can be a FlatOrderedSet or whatever
+            for our purposes (which is, while initialization, just something
+            that is ordered and may or may not have other FlatOrderedSets
+            all up inside it). That probably doesn’t help. I’ll rewrite
+            this docstring and rename the function later, yes.
+        """
         return isinstance(instance, (cls, FlatOrderedSet)) or \
                isinstance(getattr(instance, 'things', None),
                                   collections.abc.Iterable)
+    
+    @classmethod
+    def expand(cls, *things, seen=None, predicate=always):
+        """ Go through a list-like containerful of things, and if any of
+            those is a container just like we are, expand it in place –
+            recursively, of course, so everything can be nested as fuck
+            for all we care (q.v. “FlatOrderedSet::is_a(…)” doc supra).
+            
+        """
+        # Set up a set of everything “seen”, which we pass forward
+        # into recursive calls:
+        thingseen = seen or set()
+        
+        # Step through the non-None things we were given, preserving
+        # their order:
+        for thing in filter(None, things):
+            if cls.is_a(thing):
+                # Are they “us”? If so, recursively expand them:
+                yield from cls.expand(*thing, seen=thingseen, predicate=predicate)
+            
+            elif predicate(thing):
+                # If they are not us, does our predicate test OK
+                # against, ah, “them”? If it does, add them to the
+                # seen-set and yield them out:
+                if thing not in thingseen:
+                    thingseen.add(thing)
+                    yield thing
     
     def __init__(self, *things, predicate=always):
         """ Initialize a new FlatOrderedSet instance with zero or more things.
@@ -491,24 +526,19 @@ class FlatOrderedSet(collections.abc.Set,
             Optionally, a unary boolean function “predicate” may be specified
             to filter the list of things.
         """
+        # Make sure the predicate is not garbage:
         if uncallable(predicate):
             raise ValueError("FlatOrderedSet requires a callable predicate")
-        cls = type(self)
-        thinglist = []
+        
+        # Budget knock-off of the logic from “clu.predicates.itervariadic”:
         if len(things) == 1:
             if isexpandable(things[0]):
                 things = things[0]
             elif iscontainer(things[0]) and not ismapping(things[0]):
                 things = tuple(things[0])
-        for thing in filter(None, things):
-            if cls.is_a(thing):
-                for other in filter(predicate, thing):
-                    if other not in thinglist:
-                        thinglist.append(other)
-            elif predicate(thing):
-                if thing not in thinglist:
-                    thinglist.append(thing)
-        self.things = tuple(thinglist)
+        
+        # Install a flat, uniquified version of what we were passed
+        self.things = tuple(self.expand(*things, predicate=predicate))
         self.predicate = predicate
     
     def __iter__(self):

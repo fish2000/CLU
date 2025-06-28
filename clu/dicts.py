@@ -462,20 +462,55 @@ class ChainMap(collections.abc.MutableMapping,
 
 class ChainMapPlusPlus(ChainMap):
     
-    def __init__(self, *dicts, **overrides):
+    """ ChainMapPlusPlus – experimental extensions to the CLU ChainMap
         
-        maps = []
+        Note the “expand(…)” classmethod and its similarity to one of the
+        same name, found in “clu.config.abc” in the `__init__(…)` method
+        for our ever-popular and family-fun class “FlatOrderedSet”. Yes!
         
-        for d in dicts:
-            if type(self).is_a(d):
-                maps.append(FOSet(*d.maps, predicate=bool))
+        In this case “experimental” is no joke. This is never guaranteed
+        to do anything expectedly or in anyway normal, anywhere, anytime,
+        for any of you. It’s not even @exported, see? If it works for you
+        I would looooooooove to know all about how, where, when – most of
+        all *why* – and I’ll buy you a pizza, if you do alert me to all
+        or at least some of these.
+    """
+    
+    @classmethod
+    def expand(cls, *dicts, seen=None):
+        """ Iterate over some mappings, yielding them out uniquely
+            and recursively descending into any other similarly-typed
+            ChainMap-y instances in-place and in-order.
+            
+            Q.v. “clu.config.abc.FlatOrderedSet.__init__(…)” and friends,
+                  clu/config/abc.py supra.
+        """
+        dictseen = seen or list()
+        for mapping in filter(None, dicts):
+            if cls.is_a(mapping):
+                yield from cls.expand(**mapping.maps, seen=dictseen)
             else:
-                maps.append(d)
+                if mapping not in dictseen:
+                    dictseen.append(mapping)
+                    yield mapping
+    
+    def __init__(self, *dicts, **overrides):
+        """ Initialize a new ChainMapPlusPlus instance.
+            
+            This is HIGHLY EXPERIMENTAL, okay?? Don’t blame
+            me if it erases your hard drive and tells AI to
+            write your estranged children hatemail. Later
+            on, this shit will rule, I solemnly swear. Yes!
+        """
+        # Operate directly on the instance member:
+        self.maps = []
         
-        if bool(overrides):
-            maps.append(FOSet(dict(**overrides)))
+        # Just deal with the overrides:
+        if overrides:
+            self.maps.insert(0, dict(overrides))
         
-        self.maps = FOSet(*maps)
+        # The action (recursive, I might add) is all right here:
+        self.maps.extend(self.expand(*dicts))
 
 @export
 def ischainmap(thing):

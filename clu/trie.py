@@ -3,6 +3,7 @@ from __future__ import print_function
 
 from collections import defaultdict as DefaultDict
 from functools import lru_cache
+from copy import copy
 
 import collections.abc
 import clu.abstract
@@ -38,7 +39,7 @@ class BaseTrie(clu.abstract.Unhashable, metaclass=clu.abstract.Slotted):
         trie = self
         for character in string:
             child = trie.children[character]
-            child.identity = character
+            child.identity = copy(character)
             child.parent = trie
             trie = child
         trie.is_final = True
@@ -92,7 +93,7 @@ class Trie(BaseTrie, collections.abc.MutableMapping):
         yield from self.children
     
     def __str__(self):
-        return self.identity
+        return str(self.identity)
     
     def is_rootnode(self):
         return self.parent is None

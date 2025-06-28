@@ -183,9 +183,9 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     [`types.ModuleType`][types.ModuleType] is to be found in `typespace.types.Module`, [`types.FunctionType`][types.FunctionType]
     is `typespace.types.Function`, et cetera, ad nauseum, so you can just do `from clu.typespace import types`
     to lose the redundant “Type” naming suffix – which I don’t know about you but that annoys me, I mean we all know
-    that these things are types because they are in the fucking [`types`][types] module and don’t need those overly verbose extra four characters
-    there at the end. ALSO, there are additional useful types, from Python’s standard library and common packages,
-    in the [`types` namespace][clu.typespace.namespace]. YOU’RE WELCOME!!
+    that these things are types because they are in the fucking [`types`][types] module and don’t need those overly
+    verbose extra four characters there at the end. ALSO, there are additional useful types, from Python’s standard
+    library and common packages, in the [`types` namespace][clu.typespace.namespace]. YOU’RE WELCOME!!
 
 * [`enums`][clu.enums]: Furnishes  `alias(…)` – which, spoiler alert, let you create aliases within your enums!
     Oh yes. Like so:
@@ -365,6 +365,13 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 * [`sanitizer`][clu.sanitizer]: functions for cleaning up unicode. Right now there is just a list-based `sanitize(…)`
     function that tones down anything with high-value code points to the point where it can be safely `ascii`-ified. 
 
+* [`trie`][clu.trie]: A relative newcomer, [`clu.trie`][clu.trie] is a toolkit for building trie-search type custom
+    systems for parsing specific things, i.e. error strings, program output… [`clu.config.keymap`][KeyMap keys] maybe,
+    who knows. It’s all shiny and new (meaning: the current contents will fail to blow your mind); if tries and/or other
+    similar tree-search dark arts are, like, your thing: do hit me up with suggestions or samples, or PULL REQUESTS!!
+    How do I love pull requests. I’ll toast your name for life, if you were to send me one good PR. On this or anything
+    else (you’re heartily invited to nitpick my abundantly horrid spelling errors too if you are into that). Yes!
+  
 * [`typology`][clu.typology]: This is like [`clu.predicates`][clu.predicates] but with more predicates, many of which are
     based on typelists. The module is full of typelists and it uses them extensively in its predicates, via `isinstance(…)`,
     `issubclass(…)` and a custom version of same called `subclasscheck(…)` which tries very hard to work with
@@ -490,6 +497,7 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 [clu.repr]: https://github.com/fish2000/CLU/tree/master/clu/repr.py
 [clu.sanitizer]: https://github.com/fish2000/CLU/tree/master/clu/sanitizer.py
 [clu.stdio]: https://github.com/fish2000/CLU/tree/master/clu/stdio.py
+[clu.trie]: https://github.com/fish2000/CLU/tree/master/clu/trie.py
 [clu.typology]: https://github.com/fish2000/CLU/tree/master/clu/typology.py
 
 [instakit]: https://github.com/fish2000/instakit

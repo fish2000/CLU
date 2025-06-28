@@ -213,6 +213,9 @@ class MetaNoDefault(type):
     """ A metaclasss to make a type Falsey. """
     def __bool__(cls):
         return False
+    
+    def __repr__(cls):
+        return 'NoDefault'
 
 class NoDefault(metaclass=MetaNoDefault):
     """ A singleton object to signify a lack of an argument. """
@@ -223,6 +226,9 @@ class NoDefault(metaclass=MetaNoDefault):
     
     def __bool__(self):
         return False
+    
+    def __repr__(self):
+        return 'NoDefault'
 
 # Manually rename `pytuple(…)` per mechanism of “clu.exporting.Exporter”:
 pytuple.__lambda_name__ = λ # type: ignore

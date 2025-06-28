@@ -415,17 +415,17 @@ class NamespaceWalker(FrozenKeyMap):
     
     def __contains__(self, nskey):
         key, fragments = unpack_ns(nskey)
-        for *ns, k, value in self.walk():
+        for *frags, k, value in self.walk():
             if k == key:
-                if compare_ns(ns, fragments):
+                if compare_ns(frags, fragments):
                     return True
         return False
     
     def __getitem__(self, nskey):
         key, fragments = unpack_ns(nskey)
-        for *ns, k, value in self.walk():
+        for *frags, k, value in self.walk():
             if k == key:
-                if compare_ns(ns, fragments):
+                if compare_ns(frags, fragments):
                     return value
         raise KeyError(nskey)
 
@@ -493,22 +493,21 @@ class FlatOrderedSet(collections.abc.Set,
         """
         if uncallable(predicate):
             raise ValueError("FlatOrderedSet requires a callable predicate")
+        cls = type(self)
         thinglist = []
         if len(things) == 1:
             if isexpandable(things[0]):
                 things = things[0]
             elif iscontainer(things[0]) and not ismapping(things[0]):
                 things = tuple(things[0])
-        for thing in things:
-            if thing is not None:
-                if type(self).is_a(thing):
-                    for other in thing.things:
-                        if predicate(other):
-                            if other not in thinglist:
-                                thinglist.append(other)
-                elif predicate(thing):
-                    if thing not in thinglist:
-                        thinglist.append(thing)
+        for thing in filter(None, things):
+            if cls.is_a(thing):
+                for other in filter(predicate, thing):
+                    if other not in thinglist:
+                        thinglist.append(other)
+            elif predicate(thing):
+                if thing not in thinglist:
+                    thinglist.append(thing)
         self.things = tuple(thinglist)
         self.predicate = predicate
     
@@ -594,7 +593,7 @@ class FlatOrderedSet(collections.abc.Set,
     
     def to_dict(self):
         """ Used by `clu.config.codecs` to serialize FlatOrderedSets """
-        return { 'things'    : self.things,
+        return { 'things'    : copy.copy(self.things),
                  'predicate' : qualified_name(self.predicate) }
     
 

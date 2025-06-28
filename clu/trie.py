@@ -9,7 +9,8 @@ import clu.abstract
 import clu.enums
 import sys
 
-from clu.predicates import moduleof, tuplize
+from clu.naming import moduleof
+from clu.predicates import tuplize
 from clu.typology import isstring, isstringlist, subclasscheck
 from clu.exporting import Exporter
 
@@ -29,7 +30,7 @@ class BaseTrie(clu.abstract.Unhashable, metaclass=clu.abstract.Slotted):
         self.is_final = False
         self.identity = None
         self.parent = None # root nodes have no parents
-        self.children = DefaultDict(Trie)
+        self.children = DefaultDict(type(self))
     
     def add(self, string):
         if not string:
@@ -59,7 +60,7 @@ class BaseTrie(clu.abstract.Unhashable, metaclass=clu.abstract.Slotted):
         return any(self.find(string, pos) for pos in range(len(string)))
 
 @export
-class Trie(BaseTrie, collections.abc.Sized, collections.abc.Mapping, ):
+class Trie(BaseTrie, collections.abc.MutableMapping):
     
     def __bool__(self):
         return bool(self.children)

@@ -63,7 +63,7 @@ def test():
     def test_git_last_commit():
         """ Try to grab the last commit ID """
         commitID = git_last_commit()
-        # print(len(commitID))
+        
         if commitID:
             assert len(commitID) == 7
         

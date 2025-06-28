@@ -1,13 +1,197 @@
 # Changelog
 
 
-## 0.12.12:pre12+gf9e1a9f [SNAPSHOT]
+## 0.12.13:pre32+g85452ed [SNAPSHOT]
+
+### Add
+
+* Added stub description of `clu.trie` to `README.md` [Alexander Böhn]
+
+  Just leaving this right here, like for later
+
+* Adding the beginnings of a new `clu.trie` basic library. [Alexander Böhn]
+
+  … seeing where this goes. This is in aid of parsing keymap namespaced
+    keys faster or more betterer, depending, so we will see where this
+    goes. AS ALWAYS, PULLS ARE WELCOME!!!!! 🥰
+
+* Added a link in `README.md` to the new `clu.config.utils` module. [Alexander Böhn]
+
+* Addressing some unexpected issues with KeyMap views and config files. [Alexander Böhn]
+
+  … I mean, the tests run OK………………… butttt………………
+
+### Other
+
+* Ensure the valorous `clu.constants.consts.NoDefault` class looks good. [Alexander Böhn]
+
+  … meaning its class-based and instance-based repr methods return
+    nothing but “NoDefault”, now and forever. There is only a single
+    NoDefault class ever, out there; its only instance is itself.
+
+    *** NoDefault Stands Alone ***
+
+  … Erm, yes. Yes!
+
+* Better living through your functional friends: `filter`, `map`, and `reduce` [Alexander Böhn]
+
+* At long last, `clu.predicates.@itervariadic(…)` passes keyword args. [Alexander Böhn]
+
+  … fucking FINALLY. It did not do this for like ever and, I’ll just
+    tell you, I was totally scared to fuck with it; like maybe I had
+    tried to get it to do kwargs at some point and AT THAT VERY EXACT
+    MOMENT my aunt’s ferret died, which scarred me for life and forged
+    a very inexplicable but nonetheless quite strong mental link in
+    my mind, between passing kwargs in @itervariadic and the death
+    that we all face. Maybe (I have no aunts tho) but something.
+
+* Fixed wrong-function call in `allsimilar(…)`’s unhashable-input branch. [Alexander Böhn]
+
+  … N.B. need to ensure tests cover all lambdas, and both code branches
+    for these; also ensure @itervariadic’s niceties are assuaged
+
+* New `clu.typology` functions for checking an iterable’s contents. [Alexander Böhn]
+
+  … like: “allthesame(iterable)” works with hashable OR non-hashable
+    contents!! HOW DID HE DO THAT??? you ask. Check the code, it was
+    a good time!
+  … similarly “allsimilar(iterable[, xform=casefold]) will basically
+    do when ‘allthesame(…)’ does but after applying some convenience
+    item-transformer function
+  … Both of these use @itervariadic, are documented, and export all
+    their (equally well-documented) constituent lambdas
+
+  Indeed yes!
+
+* Providing a slightly more invariant `__hash__` for frozen keymaps. [Alexander Böhn]
+
+* All-new, all-singing all-dancing recursive ordered expansion!!! [Alexander Böhn]
+
+  … Specifically:
+    • Our verenable and yet lovely “clu.config.abc.FlatOrderedSet”
+      alongside our exotic, experimental “clu.dicts.ChainMapPlusPlus”
+      now have recursive expansion iterator initialization functions!!
+    • WHAT DOES THAT MEAN?!? you ask (nay, demand) to know? Well. Both
+      of those classes each can accept an arbitrary bunch of *things*
+      when initializing their respective instances. Idiomatically, that
+      arbitrary bunch can contain instances of the very class being
+      initialized!
+    • Up until like just now, pretty much, both of those classes would
+      expand such instances in-place and in-order when they came across
+      them during initialization. Sorta. I mean, they kind-of clumsily
+      did like some if/thens and would expand instances, but only one
+      level deep for sure. It was unreliable fragile shit even when it
+      did work – but I loved both these true-CLU containers when they
+      were functional!
+    • But now they are, like totally – they are quickly and recursively
+      each using an “expand(…)” method to both expand and uniquify all
+      things in the list they end up containing. You should read this
+      code because I am proud of it and it is cool. It’s documented,
+      too, so yeah you’re welcome!!
+
+  … of course some other ancillary things were tweaked for this; as of
+    this time, all tests have gone green. So in conclusion: fuck yes.
+
+* Scrapped a few *really* old `clu.config` tests whose meaning is lost. [Alexander Böhn]
+
+  … like they were only testing inoperative legacy shit – the likes
+    of which, while aspirational in its day, is all something I’d
+    enjoy completely forgetting about as soon as is biologically
+    advisable. In essence. Yes!
+
+* Trying to squeeze more speed out of `clu.config.abc.FlatOrderedSet` [Alexander Böhn]
+
+  … I love that class, I’ll have you know – warts and all, I do love
+    that motherfucking thing
+
+* Tweaks in the clu.config.abc.FlatOrderedSet initialization. [Alexander Böhn]
+
+  … basically I love using “filter(¬)” whenever possible
+
+* Such a minor optimization it may just be premature. [Alexander Böhn]
+
+* Minor changes to `clu.config.keymap.FrozenNested::submap(…)` [Alexander Böhn]
+
+  … AGAIN. I know. These are minor, yes, but they clarify things too
+
+* An inline test and a fixture for `clu.tree` [Alexander Böhn]
+
+  … it’s something, OK? Gimme like five minutes, unless your kids are
+    on fire or something of similar urgency. THANK YOU.
+
+* Fixed a few uncaught errors there in `clu.trie.Trie` [Alexander Böhn]
+
+  … time for inline tests here in this new module, ay wot, wot, wot?
+
+* Split the gratuitous `clu.trie.Trie` methods off from the essentials. [Alexander Böhn]
+
+  … maybe this makes things go faster, even with slots, when memory
+    is the thing at issue? I know not. But I am not above doing this,
+    clearly as we can see
+
+* Fixed a few dangling references to `config.utils` [Alexander Böhn]
+
+  Q.v. commit supra.
+
+* An extremely minor clarification. [Alexander Böhn]
+
+  … namely, the first arg for that lambda is always a class instance,
+    not a regular-instance instance, erm. So instead it says “cls”,
+    now, and not “self”, and I consider myself at least clarified
+    (if not edified).
+
+* Renaming `clu.config.utils` to `clu.config.keymaputils` [Alexander Böhn]
+
+  … There are waaaaaaaaay too many “utils.py” modules out there in
+    the world, if you asked me. I’m doing *my* part.
+
+* Fixed another `README.md` glitch. [Alexander Böhn]
+
+  … there was a problematic set of superscript HTML tags that were
+    being literally rendered.
+
+* Dealt with the download link in `README.md` [Alexander Böhn]
+
+  … as in, it will (or at least, *should*) always be current now
+
+* Various and sundry semantic renamings. [Alexander Böhn]
+
+* OK SO. I had to revert some things. [Alexander Böhn]
+
+  … namely I got reaaeeaaaalllll clever with those namespaced-walker
+    keymap view “__iter__(…)” methods – as it turns out, because of
+    all that reeeaaaaaalllll clever shiit I pulled with the submaps
+    being all properly of the right class, oh ho ho, yadda yadda,
+    but that did NOT WORK. Namely iterating a keymap submap can trigger
+    some crazy recursive shit in some cases, e.g. with the “Environ”
+    maps and other such things.
+
+  … soooooo. Until I unfuck this, the rule is “do not iterate submaps
+    within NamespacedWalker views’ ‘__iter__(…)’ methods – in fact,
+    probably don’t fucking iterate them at all in this context, OK?”
+
+  … yeah. OK yeah.
+
+* Simplify, and Exclude. [Alexander Böhn]
+
+* More `clu.config.keymap` nitpicks like simians endlessly grooming. [Alexander Böhn]
+
+* Ooooo I hate turning generators back into stupid returns. [Alexander Böhn]
+
+* Some (no doubt premature) optimizations in `clu.config.keymapview` [Alexander Böhn]
+
+
+## v0.12.13 (2025-06-13)
 
 ### Add
 
 * Added some useful rando dicts to `clu.constants.data` [Alexander Böhn]
 
 ### Other
+
+* Bumped version: 0.12.12 → 0.12.13. [Alexander Böhn]
+
+* [make] New changelog added. [Alexander Böhn]
 
 * Nixed `clu.dicts.ChainMap.__eq__(…)` for the moment. [Alexander Böhn]
 
@@ -27,11 +211,11 @@
     • Tests are updated accordingly (both inline and unit tests)
   • Many changes in “clu.dicts” to afford different classes and speed
     and things of that nature
-  • Added a new “clu.config.keymaputils” module
+  • Added a new “clu.config.utils” module
     • This contains ad-hoc name-based functions for “freezing” and
       “thawing” classes – like you can do:
 
-      >>> from clu.config.keymaputils import freeze_class, thaw_class
+      >>> from clu.config.utils import freeze_class, thaw_class
       >>> from clu.config.keymap import Flat, FrozenFlat
       >>> assert freeze_class(Flat) is FrozenFlat
       >>> assert thaw_class(FrozenFlat) is Flat

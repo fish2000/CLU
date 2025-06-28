@@ -210,6 +210,32 @@ def test():
     from clu.testing.utils import inline
     from pprint import pprint
     
+    @inline.fixture
+    def yodogg_needles():
+        return tuplize('yo', 'dogg', 'yo dogg', 'yo yo', 'dogg yo')
+    
+    @inline
+    def test_BaseTrie_basics():
+        """ Try the most basic trie functionality """
+        bt = BaseTrie()
+        
+        for needle in yodogg_needles():
+            bt.add(needle)
+        
+        assert bt.search('yo')
+        assert not bt.search('no')
+        assert bt.search('yo dogg')
+        assert bt.search('yo doggggggggg')
+        assert bt.search('yyyyyyyoooooyoyyyyo dogg')
+        assert not bt.search('yes')
+        assert not bt.search('yes dog')
+        assert bt.search('yes dogg') # !!!
+        
+        assert type(bt.children) == DefaultDict
+        assert type(bt.children['y']) == BaseTrie
+        assert len(bt.children) == 2
+        assert len(bt.children['y'].children) == 1
+    
     # …
     
     return inline.test(100)

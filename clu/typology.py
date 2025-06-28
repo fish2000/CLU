@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-from itertools import count
+from functools import reduce
+from itertools import count, product
 
 import abc
 import argparse
@@ -25,7 +26,7 @@ from clu.predicates import (negate,
                             allpyattrs, haspyattr, nopyattr,
                             isiterable, haslength, typeof,
                             getpyattr, or_none, isenum,
-                            pyattr, attrs,
+                            pyattr, attrs, itervariadic,
                             tuplize, uniquify,
                             apply_to, predicate_any,
                                       predicate_all)
@@ -60,6 +61,29 @@ def iterlen(iterable):
 samelength = lambda a, b: operator.eq(iterlen(a), iterlen(b))
 differentlength = lambda a, b: operator.ne(iterlen(a), iterlen(b))
 isunique = lambda thing: isiterable(thing) and haslength(thing) and samelength(tuple(thing), frozenset(thing))
+
+casefold = lambda string: string.casefold()
+multiply = lambda iterable: product(iterable, reversed(iterable))
+comparer = lambda boolean, tup: boolean & (tup[0] == tup[1])
+
+checkall = lambda iterable:        reduce(comparer, multiply(tuplize(iterable)),           True)
+maybeall = lambda iterable, xform: reduce(comparer, multiply(tuple(map(xform, iterable))), True)
+
+@export
+@itervariadic
+def allthesame(*things):
+    """ allthesame(*things) → Return True if all the things passed in are the same. """
+    if ishashablelist(things):
+        return len(set(things)) == 1
+    return checkall(things)
+
+@export
+@itervariadic
+def allsimilar(*things, xform=casefold):
+    """ allsimilar(*things) → Return True if all the things passed in are similar. """
+    if ishashablelist(things):
+        return len(set(xform(thing) for thing in things)) == 1
+    return checkall(things, xform=xform)
 
 # TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)` –
 # can be formulated and tested by these lambdas and functions
@@ -236,7 +260,16 @@ issingletonlist = predicate_all(issingleton)
 export(samelength,      name='samelength',  doc="samelength(a, b) → boolean predicate, True if both `len(a)` and `len(b)` are defined and equal to each other")
 export(differentlength, name='differentlength', doc="differentlength(a, b) → boolean predicate, True if both `len(a)` and `len(b)` are defined, but are unequal")
 export(isunique,        name='isunique',    doc="isunique(thing) → boolean predicate, True if `thing` is an iterable with unique contents")
+
+export(casefold,        name='isunique',    doc="casefold(string) → string transformer, lowercases `string`")
+export(multiply,        name='multiply',    doc="multiply(*things) → iterable transformer, makes `things` into `product(things, reverse(things))`")
+export(comparer,        name='comparer',    doc="comparer(boolean, tup) → boolean `reduce(…)` predicate, returns `boolean & (tup[0] == tup[1])`")
+export(checkall,        name='checkall',    doc="checkall(*things) → list predicate, True if `things` all compare equal")
+export(maybeall,        name='maybeall',    doc="maybeall(*things, xform) → list predicate, True if `xform(thing) for thing in things` all compare equal")
+
+
 export(istypelist,      name='istypelist',  doc="istypelist(thing) → boolean predicate, True if `thing` is a “typelist” – a list consisting only of class types")
+
 export(ismetatypelist,  name='ismetatypelist',
                          doc="ismetatypelist(thing) → boolean predicate, True if `thing` is a “metatypelist” – a list consisting only of metaclass types")
 export(maketypelist,    name='maketypelist',

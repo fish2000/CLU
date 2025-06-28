@@ -109,6 +109,7 @@ mods = ('clu',
         'clu.scripts.ansicolors',
         'clu.scripts.treeline',
         'clu.stdio',
+        'clu.trie',
         'clu.typespace.types', # not technically a module!
         'clu.version', 'clu.version.git_version',
         'sys', 'os', 'io', 're', 'abc',

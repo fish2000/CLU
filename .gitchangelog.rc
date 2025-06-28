@@ -1,6 +1,5 @@
 # -*- coding: utf-8; mode: python -*-
-import os
-import sys
+import sys, os
 
 print("*********************************", file=sys.stderr)
 print(os.getcwd(), file=sys.stderr)
@@ -72,7 +71,6 @@ from clu.repl.cli.print_version import version_string
 ## will be ignored and won't be reported in the changelog.
 ##
 ignore_regexps = [
-    r'@minor', r'!minor',
     r'@cosmetic', r'!cosmetic',
     r'@refactor', r'!refactor',
     r'@wip', r'!wip',
@@ -94,25 +92,20 @@ ignore_regexps = [
 ## ``subject_process`` (or ``body_process``) to do some changes to the subject,
 ## whenever you are tweaking this variable.
 ##
-section_regexps = [
-    ('New', [
-        r'^[nN]ew\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
-     ]),
-    ('Changes', [
-        r'^[cC]hg\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
-     ]),
-    ('Fix', [
-        r'^[fF]ix\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
-     ]),
-    ('Add', [
-        r'^[aA]dd\s*',
-     ]),
-    ('Minutiae', [
-        r'^[mM]inutiae\s*',
-     ]),
-    ('Other', None ## Match all lines
-     ),
 
+# r'^[nN]ew\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
+# r'^[cC]hang\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
+# r'^[fF]ix\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
+
+section_regexps =       [
+        ('New',         [r'^[nN]ew\s*']),
+        ('Changes',     [r'^[cC]hang\s*']),
+        ('Tweaks',      [r'^[tT]weak\s*']),
+        ('Fix',         [r'^[fF]ix\s*']),
+        ('Add',         [r'^[aA]dd\s*']),
+        ('Remove',      [r'^[rR]emov\s*']),
+        ('Minutiae',    [r'^[mM]inutiae\s*']),
+        ('Other',       None), # Match all lines
 ]
 
 

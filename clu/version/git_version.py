@@ -12,6 +12,7 @@ export = exporter.decorator()
 git = which('git')
 
 GIT_STATUS = f'{git} status'
+GIT_LAST = f'{git} rev-parse --short HEAD'
 GIT_TAGS = f'{git} describe --tags'
 
 @export
@@ -24,6 +25,15 @@ def are_we_gitted(directory=None):
             return False
         else:
             return True
+
+@export
+def git_last_commit(directory=None):
+    """ Get the (shortened) last commit ID """
+    with Directory(pth=directory):
+        try:
+            return back_tick(GIT_LAST).strip()
+        except ExecutionError:
+            return None
 
 @export
 def git_version_tags(directory=None):
@@ -44,13 +54,24 @@ def test():
     from clu.version import version_info
     
     @inline
-    def test_one():
+    def test_are_we_gitted():
         """ Check if we’re in a Git repo """
         assert are_we_gitted()
         assert not are_we_gitted(directory=td())
     
     @inline
-    def test_two():
+    def test_git_last_commit():
+        """ Try to grab the last commit ID """
+        commitID = git_last_commit()
+        # print(len(commitID))
+        if commitID:
+            assert len(commitID) == 7
+        
+        nonID = git_last_commit(directory=td())
+        assert nonID is None
+    
+    @inline
+    def test_git_version_tags():
         """ Get the Git version tags """
         version = version_info.to_string()
         

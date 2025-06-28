@@ -35,6 +35,10 @@ sdist/
 .noxresults.json
 .tm_properties
 
+!.editorconfig
+!.gitignore
+!.gitchangelog
+
 tmtags
 tmtagsHistory
 

@@ -83,7 +83,7 @@ def allsimilar(*things, xform=casefold):
     """ allsimilar(*things) → Return True if all the things passed in are similar. """
     if ishashablelist(things):
         return len(set(xform(thing) for thing in things)) == 1
-    return checkall(things, xform=xform)
+    return maybeall(things, xform=xform)
 
 # TYPELISTS: lists containing only types -- according to `clu.predicates.isclasstype(…)` –
 # can be formulated and tested by these lambdas and functions

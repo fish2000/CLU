@@ -429,7 +429,7 @@ def itervariadic(function):
 @itervariadic
 def tuplize(*items):
     """ tuplize(*items) → Return a new tuple containing all non-`None` arguments """
-    return tuple(item for item in items if item is not None)
+    return tuple(filter(None, items))
 
 @export
 @itervariadic
@@ -445,13 +445,13 @@ def uniquify(*items):
 @itervariadic
 def listify(*items):
     """ listify(*items) → Return a new list containing all non-`None` arguments """
-    return [item for item in items if item is not None]
+    return list(filter(None, items))
 
 @export
 @itervariadic
 def union(*items):
     """ union(*items) → Return the set-union of the contents of all non-`None` arguments """
-    return set().union(item for item in items if item is not None)
+    return set().union(filter(None, items))
 
 # UTILITY ANCESTOR PREDICATES: search through attributes across the MRO of a given type –
 # q.v. “resolve” meta-predicate supra.:
@@ -465,19 +465,19 @@ ancestral_union = lambda atx, cls, default=tuple(): tuple(uniquify(iterchain(anc
 @itervariadic
 def allof(*items):
     """ allof(*items) → Return the result of “all(…)” on all non-`None` arguments """
-    return all(item for item in items if item is not None)
+    return all(filter(None, items))
 
 @export
 @itervariadic
 def anyof(*items):
     """ anyof(*items) → Return the result of “any(…)” on all non-`None` arguments """
-    return any(item for item in items if item is not None)
+    return any(filter(None, items))
 
 @export
 @itervariadic
 def noneof(*items):
     """ noneof(*items) → Return the result of “not any(…)” on all non-`None` arguments """
-    return negate(any)(item for item in items if item is not None)
+    return negate(any)(filter(None, items))
 
 # This allows “slots_for(…)”, below, to deal with slots defined with one string, á la:
 # >>> __slots__ = 'string'

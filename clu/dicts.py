@@ -328,10 +328,10 @@ class ChainMap(collections.abc.MutableMapping,
             return self.__missing__(key)
     
     def __len__(self):
-        return len(frozenset(iterchain(mapping.keys() for mapping in self.maps)))
+        return sum(len(mapping) for mapping in self.maps)
     
     def __iter__(self):
-        yield from frozenset(iterchain(mapping.keys() for mapping in self.maps))
+        yield from iterchain(mapping.keys() for mapping in self.maps)
     
     def __contains__(self, key):
         return any(key in mapping for mapping in self.maps)
@@ -488,7 +488,7 @@ class ChainMapPlusPlus(ChainMap):
         dictseen = seen or list()
         for mapping in filter(None, dicts):
             if cls.is_a(mapping):
-                yield from cls.expand(**mapping.maps, seen=dictseen)
+                yield from cls.expand(*mapping.maps, seen=dictseen)
             else:
                 if mapping not in dictseen:
                     dictseen.append(mapping)

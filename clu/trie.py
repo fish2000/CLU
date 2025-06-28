@@ -4,12 +4,13 @@ from __future__ import print_function
 from collections import defaultdict as DefaultDict
 from functools import lru_cache
 
+import collections.abc
 import clu.abstract
 import clu.enums
 import sys
 
-from clu.predicates import tuplize
-from clu.typology import isstring, isstringlist
+from clu.predicates import moduleof, tuplize
+from clu.typology import isstring, isstringlist, subclasscheck
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -18,15 +19,17 @@ export = exporter.decorator()
 cache = lambda function: lru_cache(maxsize=128, typed=False)(function)
 
 @export
-class Trie(metaclass=clu.abstract.Slotted):
+class BaseTrie(clu.abstract.Unhashable, metaclass=clu.abstract.Slotted):
     
-    __slots__ = ('is_final', 'children', 'parent')
+    __slots__ = ('is_final',
+                 'identity', 'parent',
+                 'children')
     
     def __init__(self):
         self.is_final = False
+        self.identity = None
+        self.parent = None # root nodes have no parents
         self.children = DefaultDict(Trie)
-        # Root nodes have no parents:
-        self.parent = None
     
     def add(self, string):
         if not string:
@@ -34,6 +37,7 @@ class Trie(metaclass=clu.abstract.Slotted):
         trie = self
         for character in string:
             child = trie.children[character]
+            child.identity = character
             child.parent = trie
             trie = child
         trie.is_final = True
@@ -42,16 +46,20 @@ class Trie(metaclass=clu.abstract.Slotted):
         if not string:
             return False
         trie = self
-        # for idx in range(pos, len(string)):
-        for idx, character in enumerate(string[pos:]):
+        for character in string[pos:]:
             if trie.is_final:
                 return True
-            # character = string[idx]
             if character in trie.children:
                 trie = trie.children[character]
             else:
                 return False
         return trie.is_final
+    
+    def search(self, string):
+        return any(self.find(string, pos) for pos in range(len(string)))
+
+@export
+class Trie(BaseTrie, collections.abc.Sized, collections.abc.Mapping, ):
     
     def __bool__(self):
         return bool(self.children)
@@ -67,16 +75,45 @@ class Trie(metaclass=clu.abstract.Slotted):
             raise ValueError(f"can’t index a trie with falsey value: {character}")
         return self.children[character]
     
+    def __setitem__(self, character, newvalue):
+        if not character:
+            raise ValueError(f"can’t index a trie with falsey value: {character}")
+        if not subclasscheck(BaseTrie, typeof(newvalue)):
+            raise ValueError(f"what the fuck is this? --> {newvalue}")
+        self.children[character] = newvalue
+    
+    def __delitem__(self, character):
+        if not character:
+            raise ValueError(f"can’t index a trie with falsey value: {character}")
+        del self.children[character]
+    
+    def __iter__(self):
+        yield from self.children
+    
+    def __str__(self):
+        return self.identity
+    
+    def is_rootnode(self):
+        return self.parent is None
+    
+    def is_leafnode(self):
+        return not self
+    
+    def whoami(self):
+        out = []
+        trie = self
+        while not trie.is_rootnode():
+            out.insert(0, str(trie))
+            trie = trie.parent
+        return ''.join(out)
+    
     def debug_search(self, string):
         print()
         for pos in range(len(string)):
             result = self.find(string, pos)
             print(f"+++++ self.find('{string}', {pos:02}) == {result}")
         print()
-        return self.search(string)
-    
-    def search(self, string):
-        return any(self.find(string, pos) for pos in range(len(string)))
+        return super().search(string)
 
 @export
 class Status(clu.enums.AliasingEnum):
@@ -147,7 +184,7 @@ class TrieSearcher(clu.abstract.ReprWrapper, metaclass=clu.abstract.Slotted):
     def _do_search(self, infodict):
         infodict['status'] = Status.RUNNING
         terms = infodict['terms']
-        out = tuple(term for term in terms if self.root_node.debug_search(term))
+        out = tuple(term for term in terms if self.root_node.search(term))
         infodict['results'] = out
         infodict['status'] = Status.COMPLETE
         return out

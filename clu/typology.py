@@ -25,11 +25,11 @@ from clu.predicates import (negate,
                             ismetaclass, isclasstype, metaclass,
                             allpyattrs, haspyattr, nopyattr,
                             isiterable, haslength, typeof,
-                            getpyattr, or_none, isenum,
+                            getpyattr, or_none, no_op,
                             pyattr, attrs, itervariadic,
                             tuplize, uniquify,
                             apply_to, predicate_any,
-                                      predicate_all)
+                                      predicate_all, isenum)
 
 from clu.typespace import types
 
@@ -79,7 +79,7 @@ def allthesame(*things):
 
 @export
 @itervariadic
-def allsimilar(*things, xform=casefold):
+def allsimilar(*things, xform=no_op):
     """ allsimilar(*things) → Return True if all the things passed in are similar. """
     if ishashablelist(things):
         return len(set(xform(thing) for thing in things)) == 1

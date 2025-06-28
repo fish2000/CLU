@@ -416,13 +416,13 @@ def itervariadic(function):
         iterating or expanding them.
     """
     @wraps(function)
-    def wrapper(*args, expand=True):
+    def wrapper(*args, expand=True, **kwargs):
         if len(args) == 1 and expand:
             if isexpandable(args[0]):
-                return function(*args[0])
+                return function(*args[0], **kwargs)
             if iscontainer(args[0]):
-                return function(*tuple(args[0]))
-        return function(*args)
+                return function(*tuple(args[0]), **kwargs)
+        return function(*args, **kwargs)
     return wrapper
 
 @export

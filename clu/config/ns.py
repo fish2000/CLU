@@ -49,8 +49,10 @@ def concatenate_ns(*fragments):
 @export
 def prefix_for(*fragments):
     """ Return the prefix string for the given namespace(s) """
+    if not fragments:
+        return ''
     ns = concatenate_ns(*fragments)
-    return ns and f"{ns}{NAMESPACE_SEP}" or ''
+    return f"{ns}{NAMESPACE_SEP}"
 
 @export
 def strip_ns(nskey):

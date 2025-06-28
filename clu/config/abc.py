@@ -534,6 +534,9 @@ class FlatOrderedSet(collections.abc.Set,
     def __bool__(self):
         return len(self.things) > 0
     
+    def _hash(self):
+        return hash(self.things)
+    
     def __hash__(self):
         return self._hash()
     

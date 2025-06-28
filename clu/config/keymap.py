@@ -213,7 +213,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
             return cls(self.tree)
         
         # Our namespaces, their output data:
-        ours = set(self.namespaces())
+        ours = frozenset(self._get_namespace_foset().things)
         theirs = {}
         
         # Go through the namespaces we were passed, and copy anything

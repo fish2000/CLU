@@ -460,6 +460,8 @@ class ChainMap(collections.abc.MutableMapping,
         return cls(deepcopy(self.top),
                  *(deepcopy(mapping) for mapping in self.rest))
 
+# “';p[[[[[-0” – Moira Rose
+
 class ChainMapPlusPlus(ChainMap):
     
     """ ChainMapPlusPlus – experimental extensions to the CLU ChainMap

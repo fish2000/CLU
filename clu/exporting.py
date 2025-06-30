@@ -113,11 +113,6 @@ def search_by_id(thingID):
         
         Caching courtesy the `functools.lru_cache(…)` decorator.
     """
-    # Would you believe that the uniquify(…) call is absolutely
-    # fucking necessary to use on `sys.modules`?! I checked and
-    # on my system, like on all my REPLs, uniquifying the modules
-    # winnowed the module list (and therefore, this functions’
-    # search space) by around 100 fucking modules (!) every time!!
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         for module in sysmods():

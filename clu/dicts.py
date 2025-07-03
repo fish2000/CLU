@@ -465,7 +465,7 @@ class ChainMap(collections.abc.MutableMapping,
 # “';p[[[[[-0” – Moira Rose
 
 @export
-@multidict.MultiMapping.register # Must be a virtual ABC, bases don’t align
+@multidict.MutableMultiMapping.register # Must be a virtual ABC, bases don’t align
 class ChainMapPlusPlus(ChainMap):
     
     """ ChainMapPlusPlus – experimental extensions to the CLU ChainMap
@@ -528,6 +528,21 @@ class ChainMapPlusPlus(ChainMap):
         if default is NoDefault:
             return item_across(key, *self.dicts) or self.__missing__(key)
         return item_across(key, *self.dicts, default=default)
+    
+    def add(self, key, value):
+        pass
+    
+    def extend(self, iter):
+        pass
+    
+    def update(self, dicty, *updates):
+        pass
+    
+    def popone(self, key, default=NoDefault):
+        pass
+    
+    def popall(self, key, default=tuple()):
+        pass
 
 @export
 def ischainmap(thing):

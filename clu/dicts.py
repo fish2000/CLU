@@ -509,7 +509,7 @@ class ChainMapPlusPlus(ChainMap):
         
         # Just deal with the overrides:
         if overrides:
-            self.maps.insert(0, dict(overrides))
+            dicts.insert(0, dict(overrides))
         
         # The action (recursive, I might add) is all right here:
         self.maps.extend(self.expand(*dicts))

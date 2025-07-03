@@ -471,7 +471,7 @@ class ChainMapPlusPlus(ChainMap):
         for our ever-popular and family-fun class “FlatOrderedSet”. Yes!
         
         In this case “experimental” is no joke. This is never guaranteed
-        to do anything expectedly or in anyway normal, anywhere, anytime,
+        to do anything expectedly or in any way normal, anywhere, anytime,
         for any of you. It’s not even @exported, see? If it works for you
         I would looooooooove to know all about how, where, when – most of
         all *why* – and I’ll buy you a pizza, if you do alert me to all

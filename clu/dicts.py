@@ -465,7 +465,7 @@ class ChainMap(collections.abc.MutableMapping,
 # “';p[[[[[-0” – Moira Rose
 
 @export
-@multidict.MultiMapping.register
+@multidict.MultiMapping.register # Must be a virtual ABC, bases don’t align
 class ChainMapPlusPlus(ChainMap):
     
     """ ChainMapPlusPlus – experimental extensions to the CLU ChainMap

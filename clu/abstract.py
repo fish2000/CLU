@@ -96,6 +96,8 @@ class UnhashableMeta(Slotted):
 
 class Unhashable(abc.ABC, metaclass=UnhashableMeta):
     
+    __slots__ = tuple()
+    
     @classmethod
     def __subclasshook__(cls, subcls):
         if cls is Unhashable:

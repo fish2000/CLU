@@ -535,7 +535,7 @@ class ChainMapPlusPlus(ChainMap):
     def extend(self, iter):
         pass
     
-    def update(self, dicty, *updates):
+    def update(self, dictish=NoDefault, **updates):
         pass
     
     def popone(self, key, default=NoDefault):

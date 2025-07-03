@@ -8,6 +8,7 @@ iterchain = chain.from_iterable
 import clu.abstract
 import collections
 import collections.abc
+import multidict
 import sys
 
 from clu.constants.consts import STRINGPAIR, WHITESPACE, NoDefault
@@ -259,6 +260,7 @@ cmshortrepr = reprizer.shortrepr
 
 @export
 class ChainMap(collections.abc.MutableMapping,
+               clu.abstract.Appreciative,
                clu.abstract.Cloneable,
                metaclass=clu.abstract.Slotted):
     
@@ -281,7 +283,7 @@ class ChainMap(collections.abc.MutableMapping,
         return cls((dict(iterable) for iterable in iterables), **overrides)
     
     @classmethod
-    def is_a(cls, instance):
+    def appreciates(cls, instance):
         """ Check if an instance is a ChainMap of any sort – this covers:
             
             • this class (whichever it may be, derived or otherwise)
@@ -306,7 +308,7 @@ class ChainMap(collections.abc.MutableMapping,
         maps = []
         cls = type(self)
         for d in dicts:
-            if cls.is_a(d):
+            if cls.appreciates(d):
                 for mapping in d.maps:
                     if mapping not in maps:
                         maps.append(mapping)
@@ -462,6 +464,8 @@ class ChainMap(collections.abc.MutableMapping,
 
 # “';p[[[[[-0” – Moira Rose
 
+@export
+@multidict.MultiMapping.register
 class ChainMapPlusPlus(ChainMap):
     
     """ ChainMapPlusPlus – experimental extensions to the CLU ChainMap
@@ -489,7 +493,7 @@ class ChainMapPlusPlus(ChainMap):
         """
         dictseen = seen or list()
         for mapping in filter(None, dicts):
-            if cls.is_a(mapping):
+            if cls.appreciates(mapping):
                 yield from cls.expand(*mapping.maps, seen=dictseen)
             else:
                 if mapping not in dictseen:
@@ -513,6 +517,16 @@ class ChainMapPlusPlus(ChainMap):
         
         # The action (recursive, I might add) is all right here:
         self.maps.extend(self.expand(*dicts))
+    
+    def getone(self, key, default=NoDefault):
+        """ Return the first value for a key. """
+        return self.get(key, default)
+    
+    def getall(self, key, default=NoDefault):
+        from clu.predicates import item_across
+        if default is NoDefault:
+            return item_across(key, *self.dicts) or self.__missing__(key)
+        return item_across(key, *self.dicts, default=default)
 
 @export
 def ischainmap(thing):

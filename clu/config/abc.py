@@ -435,7 +435,8 @@ class NamespaceWalker(FrozenKeyMap):
 class FlatOrderedSet(collections.abc.Set,
                      collections.abc.Sequence,
                      collections.abc.Reversible,
-                     collections.abc.Hashable, clu.abstract.Cloneable,
+                     collections.abc.Hashable, clu.abstract.Appreciative,
+                                               clu.abstract.Cloneable,
                                                clu.abstract.ReprWrapper,
                                                clu.abstract.Serializable,
                                                metaclass=clu.abstract.Slotted):
@@ -480,7 +481,7 @@ class FlatOrderedSet(collections.abc.Set,
                     predicate=qualified_import(instance_dict['predicate']))
     
     @classmethod
-    def is_a(cls, instance):
+    def appreciates(cls, instance):
         """ Check to see if a thing – an instance, whatever – is, like,
             close enough to what “this class” is to be a viable enough
             thing that way. Erm. Like it can be a FlatOrderedSet or whatever
@@ -498,7 +499,7 @@ class FlatOrderedSet(collections.abc.Set,
         """ Go through a list-like containerful of things, and if any of
             those is a container just like we are, expand it in place –
             recursively, of course, so everything can be nested as fuck
-            for all we care (q.v. “FlatOrderedSet::is_a(…)” doc supra).
+            for all we care (q.v. “FlatOrderedSet::appreciates(…)” doc supra).
             
         """
         # Set up a set of everything “seen”, which we pass forward
@@ -508,7 +509,7 @@ class FlatOrderedSet(collections.abc.Set,
         # Step through the non-None things we were given, preserving
         # their order:
         for thing in filter(None, things):
-            if cls.is_a(thing):
+            if cls.appreciates(thing):
                 # Are they “us”? If so, recursively expand them:
                 yield from cls.expand(*thing, seen=thingseen, predicate=predicate)
             
@@ -571,28 +572,28 @@ class FlatOrderedSet(collections.abc.Set,
         return self._hash()
     
     def __eq__(self, other):
-        if type(self).is_a(other):
+        if type(self).appreciates(other):
             return self.things == other.things
         elif isinstance(other, collections.abc.Sequence):
             return self.things == tuple(other)
         return NotImplemented
     
     def __ne__(self, other):
-        if type(self).is_a(other):
+        if type(self).appreciates(other):
             return self.things != other.things
         elif isinstance(other, collections.abc.Sequence):
             return self.things != tuple(other)
         return NotImplemented
     
     def __add__(self, operand):
-        if type(self).is_a(operand):
+        if type(self).appreciates(operand):
             return type(self)(*self.things, *operand.things, predicate=self.predicate)
         elif isinstance(operand, collections.abc.Sequence):
             return type(self)(*self.things, *tuple(operand), predicate=self.predicate)
         return NotImplemented
     
     def __radd__(self, operand):
-        if type(self).is_a(operand):
+        if type(self).appreciates(operand):
             return type(self)(*operand.things, *self.things, predicate=self.predicate)
         elif isinstance(operand, collections.abc.Sequence):
             return type(self)(*tuple(operand), *self.things, predicate=self.predicate)

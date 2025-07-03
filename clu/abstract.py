@@ -102,6 +102,29 @@ class Unhashable(abc.ABC, metaclass=UnhashableMeta):
             return getattr(subcls, '__hash__', None) is None
         return NotImplemented
 
+class Appreciative(abc.ABC):
+    
+    """ An abstract class representing a type that “appreciates”
+        an instance. But what?? you may ask. What is this – WHAT
+        DOES IT MEAN?!? It means that the class has a class method
+        called “appreciates.” This takes an instance of… something,
+        and returns a boolean.
+        
+        A class usually “appreciates” an instance if that instance
+        is of that class, or one like it. It can be for any reason,
+        but any ABCs or other CLU stuff based on the `Appreciative`
+        class will assume that classes will appreciate… something
+        like that. OK? OK.
+    """
+    
+    __slots__ = tuple()
+    
+    @classmethod
+    @abstract
+    def appreciates(cls, instance):
+        """ Boolean, tests if the class “appreciates” an instance """
+        ...
+
 class Format(collections.abc.Callable, metaclass=Slotted):
     
     """ An abstract class representing something that formats something
@@ -419,6 +442,7 @@ class ManagedContext(contextlib.AbstractContextManager):
 
 __all__ = ('Slotted', 'SlotMatch', 'NonSlotted',
            'UnhashableMeta', 'Unhashable',
+           'Appreciative',
            'Format', 'NonFormat', 'SlottedFormat', 'Sanitizer',
            'Serializable', 'Cloneable',
            'ReprWrapper', 'SlottedRepr', 'MappingViewRepr',

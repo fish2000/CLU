@@ -523,6 +523,7 @@ class ChainMapPlusPlus(ChainMap):
         return self.get(key, default)
     
     def getall(self, key, default=NoDefault):
+        """ Return all values for a key. """
         from clu.predicates import item_across
         if default is NoDefault:
             return item_across(key, *self.dicts) or self.__missing__(key)

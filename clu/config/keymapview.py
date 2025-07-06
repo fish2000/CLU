@@ -58,16 +58,16 @@ class KeyMapViewBase(collections.abc.Sequence,
     @property
     def _mapping(self): # pragma: no cover
         """ For compatibility with “collections.abc” stuff """
-        return self.mapping
+        return self.submap
     
     def __len__(self):
         return len(self.submap)
     
     def __getitem__(self, idx):
         if isnormative(idx):
-            return self.mapping[idx]
+            return self.submap[idx]
         if isnumber(idx):
-            return tuple(self.mapping)[idx]
+            return tuple(self.submap)[idx]
         tn = typename(idx)
         raise KeyError(f"bad index type: {tn}")
     

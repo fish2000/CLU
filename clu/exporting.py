@@ -434,10 +434,9 @@ class ExporterBase(collections.abc.MutableMapping,
             if putative in cls.instances:
                 return cls.instances[putative]
         
-        try:
-            instance = super().__new__(cls, *args, **kwargs) # type: ignore
-        except TypeError:
-            instance = super().__new__(cls)
+        # Call super:
+        # instance = super().__new__(cls, *args, **kwargs) # type: ignore
+        instance = super().__new__(cls) # type: ignore
         
         instance.__exports__ = {}
         instance.path = path

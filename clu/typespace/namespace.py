@@ -31,10 +31,8 @@ class NamespaceRepr(Repr):
         """ Initialize a NamespaceRepr, with default params
             for ‘maxlevel’, ‘maxstring’, and ‘maxother’.
         """
-        try:
-            super().__init__(*args, **kwargs)
-        except TypeError:
-            super().__init__()
+        # Call super:
+        super().__init__(*args, **kwargs)
         self.maxlevel = maxlevel
         self.maxstring = maxstring
         self.maxother = maxother

@@ -332,41 +332,6 @@ class Nested(FrozenNested, abc.KeyMap):
         del d[key]
         self.nskeys.remove(nskey)
 
-@export
-class KeyedAccessor(metaclass=clu.abstract.Slotted):
-    
-    __slots__ = ('keymap', 'namespace')
-    
-    def __init__(self, keymap, namespace=""):
-        ourmap = hasattr(keymap, 'nestify') and keymap.nestify() or keymap
-        cls = type(keymap)
-        self.keymap = cls(ourmap.submap(self.namespace, unprefixed=bool(self.namespace)))
-    
-    def __getattr__(self, key):
-        """ Attribute access repacks the key """
-        nskey = ns.pack_ns(key, *self.namespace)
-        if nskey in self.keymap:
-            return self[nskey]
-        raise AttributeError(f"namespaced key {nskey} not present in keymap")
-    
-    def accessor(self, *addenda):
-        namespace = ns.concatenate_ns(*self.namespace, *addenda)
-        realigned = type(self)(keymap=self.keymap,
-                               namespaces=ns.concatenate_ns(*namespace))
-        return realigned
-    
-    def __contains__(self, nskey):
-        return nskey in self.keymap
-    
-    def __getitem__(self, nskey):
-        """ Unpack and return """
-        *addenda, key = ns.split_ns(nskey)
-        accessor = self.accessor(*addenda)
-        if nskey in accessor.keymap:
-            return accessor.keymap[nskey]
-        if ns.concatenate_ns(*addenda) in set(self.keymap.namespaces()):
-            return accessor
-
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
 

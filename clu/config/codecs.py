@@ -134,12 +134,6 @@ def test():
         assert allitems(anndict_nested, *pytuple('qualname', 'dict'))
         assert allitems(anndict_foset, *pytuple('qualname', 'dict'))
         
-        # print("flat qualname:", qualified_name(Flat))
-        # print("anndict_nested['__dict__']:")
-        # pprint(anndict_nested['__dict__'])
-        # print("nestedmaps():")
-        # pprint(nestedmaps())
-        
         assert anndict_flat['__qualname__'] == qualified_name(Flat)
         assert anndict_nested['__qualname__'] == qualified_name(Nested)
         assert anndict_foset['__qualname__'] == qualified_name(FlatOrderedSet)
@@ -177,11 +171,6 @@ def test():
         assert instance_nested.tree == nestedmaps()
         assert instance_foset.things == flat_ordered_set().things
         assert instance_foset == flat_ordered_set()
-        
-        # print("instance_nested.tree:")
-        # pprint(instance_nested.tree)
-        # print("nestedmaps():")
-        # pprint(nestedmaps())
     
     @inline
     def test_json_encode_decode():
@@ -193,14 +182,6 @@ def test():
         flat_json = json_encode(flat)
         nested_json = json_encode(nested)
         foset_json = json_encode(foset)
-        
-        # print("flat_json:")
-        # print(flat_json)
-        # print()
-        
-        # print("nested_json:")
-        # print(nested_json)
-        # print()
         
         print("foset_json:")
         print(foset_json)

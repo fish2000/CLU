@@ -275,10 +275,7 @@ class Partial(partial):
     def __init__(self, *args, **kwargs):
         """ Initialize a new Partial object, with a predicate and a function """
         # N.B. The real action seems to happen in partial.__new__(…)
-        try:
-            super().__init__(*args, **kwargs)
-        except:
-            super().__init__() # type: ignore
+        super().__init__()
         
         # Name the Partial instance, as if it’s a phi-type:
         self.__name__ = self.__qualname__ = φ

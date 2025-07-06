@@ -379,14 +379,6 @@ else:
     __all__ += ('numpy',)
 
 try:
-    import more_itertools
-except (ImportError, SyntaxError):
-    pass
-else:
-    # Extend `__all__`:
-    __all__ += ('more_itertools',)
-
-try:
     import colorama
     import termcolor
 except (ImportError, SyntaxError):

@@ -118,7 +118,6 @@ class Appreciative(abc.ABC):
         class will assume that classes will appreciate… something
         like that. OK? OK.
     """
-    
     __slots__ = tuple()
     
     @classmethod
@@ -184,6 +183,7 @@ class Serializable(abc.ABC):
         class. This dict is based on the class, and contains whatever the
        “from_dict(…)” method expects.
     """
+    __slots__ = tuple()
     
     @classmethod
     def from_dict(cls, instance_dict):
@@ -267,6 +267,7 @@ class SlottedRepr(ReprWrapper, metaclass=Slotted):
         inheritance chain’s value for “__slots__” to build the repr
         string for its instances
     """
+    __slots__ = tuple()
     
     def inner_repr(self):
         """ Use the union of __slots__, defined across this classes’
@@ -283,6 +284,7 @@ class MappingViewRepr(ReprWrapper):
     """ A ReprWrapper class that simply returns the repr for a
         “self._mapping” value – of which most MappingView types make use.
     """
+    __slots__ = tuple()
     
     def inner_repr(self): # pragma: no cover
         """ Return the repr string for “self._mapping” """
@@ -369,6 +371,7 @@ class ValueDescriptor(Descriptor):
     """ A descriptor whose repr-string tries to be a literal reflection
         of its wrapped value
     """
+    __slots__ = tuple()
     
     def __repr__(self):
         """ A custom repr for the ValueDescriptor’s literal value """

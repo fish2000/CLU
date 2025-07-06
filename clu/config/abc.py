@@ -179,7 +179,7 @@ class FrozenKeyMap(FrozenKeyMapBase):
         
         # Iterate namespaces, taking those matching our namespaces
         # for a new instance:
-        out = dict()
+        out = {}
         for namespace in namespaces:
             out.update({ nskey : self[nskey] \
                      for nskey in self \

@@ -281,8 +281,6 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
     
     def __getitem__(self, nskey):
         key, fragments = ns.unpack_ns(nskey)
-        if not fragments:
-            return self.tree[key]
         d = self.tree
         for fragment in fragments:
             d = d[fragment]
@@ -314,30 +312,24 @@ class Nested(FrozenNested, abc.KeyMap):
     
     def __setitem__(self, nskey, value):
         key, fragments = ns.unpack_ns(nskey)
-        if not fragments:
-            self.tree[nskey] = value
-        else:
-            d = self.tree
-            for fragment in fragments:
-                try:
-                    d = d[fragment]
-                except KeyError:
-                    d[fragment] = {}
-                    d = d[fragment]
-            d[key] = value
+        d = self.tree
+        for fragment in fragments:
+            try:
+                d = d[fragment]
+            except KeyError:
+                d[fragment] = {}
+                d = d[fragment]
+        d[key] = value
         self.nskeys.add(nskey)
     
     def __delitem__(self, nskey):
         if nskey not in self:
             raise KeyError(nskey)
         key, fragments = ns.unpack_ns(nskey)
-        if not fragments:
-            del self.tree[key]
-        else:
-            d = self.tree
-            for fragment in fragments:
-                d = d[fragment]
-            del d[key]
+        d = self.tree
+        for fragment in fragments:
+            d = d[fragment]
+        del d[key]
         self.nskeys.remove(nskey)
 
 @export

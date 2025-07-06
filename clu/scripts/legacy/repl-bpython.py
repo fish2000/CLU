@@ -164,7 +164,6 @@ import math
 import operator
 import pickle
 import shutil
-import six
 import sysconfig
 import weakref
 
@@ -231,7 +230,6 @@ __all__ = ('Image',
            'pickle',
            'reduce',
            'shutil',
-           'six',
            'sysconfig',
            'types',
            'weakref',

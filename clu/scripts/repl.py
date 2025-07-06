@@ -116,7 +116,7 @@ mods = ('clu',
         'argparse', 'collections', 'contextlib', 'copy',
         'datetime', 'functools', 'importlib', 'inspect',
         'itertools', 'math', 'operator', 'pathlib',
-        'pickle', 'six', 'shutil', 'sysconfig', 'weakref',
+        'pickle', 'shutil', 'sysconfig', 'weakref',
         'numpy', 'colorama',
         'xerox', 'zict')
 

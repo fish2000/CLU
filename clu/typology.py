@@ -135,11 +135,7 @@ array_types += attrs(numpy, 'ndarray',
 scalar_types = frozenset(getattr(numpy, 'ScalarType',
                      set(numeric_types) - { decimal.Decimal }))
 
-try:
-    from six import string_types
-except (ImportError, SyntaxError): # pragma: no cover
-    string_types = tuple(uniquify(str, unicode))
-
+string_types = tuple(uniquify(str, unicode))
 bytes_types = (bytes, bytearray)
 path_classes = tuplize(argparse.FileType, or_none(os, 'PathLike'), Path) # Path may be “None” in disguise
 path_types = string_types + bytes_types + path_classes # type: ignore

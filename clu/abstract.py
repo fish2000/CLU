@@ -128,8 +128,10 @@ class Appreciative(abc.ABC):
     
     @classmethod
     def __subclasshook__(cls, subcls):
-        appreciates = getattr(subcls, 'appreciates', None)
-        return callable(appreciates)
+        if cls is Appreciative:
+            appreciates = getattr(subcls, 'appreciates', None)
+            return callable(appreciates)
+        return NotImplemented
 
 class Format(collections.abc.Callable, metaclass=Slotted):
     

@@ -1,11 +1,159 @@
 # Changelog
 
 
-## 0.12.14:pre1+g1aba217 [SNAPSHOT]
+## 0.12.14:pre29+g3c4002c [SNAPSHOT]
 
 ### New
 
 * New function grabs the top commit ID; tweaked changelog generation. [Alexander Böhn]
+
+### Tweaks
+
+* Tweaked manifest file because PNGs weren’t OK (?!) [Alexander Böhn]
+
+### Fix
+
+* Fixed two mistaken uses of the new nskeyset stuff. [Alexander Böhn]
+
+  … Q.v. the last commit; I was passing the internal nskeyset around
+    when it needed to be regenerated for new instances. WHOOOOOPS.
+
+### Add
+
+* Added commentary from Moira Rose in `clu.dicts` programmer notes. [Alexander Böhn]
+
+  … verbatim, directly from her expert paws, in fact. For those who
+    don’t know her name, Dr. Rose has always freely offered her keen
+    programming insight throughout many of my projects. Here’s her
+    reclining after a recent local symposium:
+
+  https://raw.githubusercontent.com/fish2000/CLU/master/scratch/images/moira.png
+
+### Remove
+
+* Removed the superfluous, unnecessary `clu.config.keymap.KeyedAccessor` [Alexander Böhn]
+
+  … it wasn’t working out. It never appeared in any working code –
+    no tests were ever written for the thing – and the more I think
+    about it, the bigger a waste of time it seems to be, indeeeeeed
+
+* Removed more old/dead code. [Alexander Böhn]
+
+  … This time from “clu.config.codecs”, where the tests had built
+    up some nasty cruft.
+
+### Minutiae
+
+* Minutiae. [Alexander Böhn]
+
+### Other
+
+* That inline test was better as a precheck function. [Alexander Böhn]
+
+* Got `clu.config.codecs` working with annotated dicts. [Alexander Böhn]
+
+  … q.v. the module, supra. This stuff now works as advertized (or,
+    at least, slightely moreso as advertized, erm). Yes!
+
+* Nixed a gnarly bug in two `clu.config.keymapview.KeyMapViewBase` methods. [Alexander Böhn]
+
+  … they were inspecting the primary mapping and not the submap.
+
+* More `clu.config.abc.NamespaceWalker` keymap view optimizations. [Alexander Böhn]
+
+  … specifically the “__contains__(…)” methods, when possible, do
+    not walk the keymap themselves; rather, they try to delegate
+    to the keymaps’ “__contains__(…)” implementation (which as
+    recently noted has been awesomely accelerated in the “Nested” and
+    and “FrozenNested” implementations. Yesssssssir!
+
+* Trimmed dead code. [Alexander Böhn]
+
+  … specifically the old “__contains__(¬)” implementation from the
+    “clu.config.keymap.FrozenNested” and “clu.config.keymap.Nested”
+    classes has been obliterated here.
+
+* Overhaul of `__contains__(¬)` in the `Nested` and `FrozenNested` keymaps. [Alexander Böhn]
+
+  … In a circuitous move, the “__contains__(…)” method for the two
+    nested forms for keymap now use an internal set of namespaced
+    keys to track and check items contained by the dictionary. So
+    far this is already a big-ass optimization just for calls that
+    use that method (`thing in keymap`, `keymap == otherkeymap` etc)
+    and I have not even seen where the internal set can be leveraged
+    now that it exists (I feel like the NamespacedWalker view classes
+    could fucking have a go at things there). Yes!
+
+* `clu.config.abc.FlatOrderedSet` now actually checks all its arguments. [Alexander Böhn]
+
+  … for hashability. Better this than a random error from somewhere
+    in the bowels of the init code, really
+
+* Better signature for `clu.dicts.ChainMapPlusPlus::update(…)` [Alexander Böhn]
+
+* Edited a doctoring that was now a total lie. [Alexander Böhn]
+
+  … in that the function in question *is* exported now. Ah.
+
+* Stubbed out methods to satisfy the `multidict.MutableMultiMapping` ABC. [Alexander Böhn]
+
+* The `clu.abstract.Unhashable` type has a `__slots__` param now. [Alexander Böhn]
+
+  … whereas before it did not; this will keep it from accidentally
+    introducing a “__dict__” into a class tower.
+
+* Programmer note. [Alexander Böhn]
+
+* Docstring. [Alexander Böhn]
+
+* Halfway to making `clu.dicts.ChainMapPlusPlus` a working `MultiDict` [Alexander Böhn]
+
+  … as in, filled in methods, and made it an (albeit virtual) sublass
+    of the “multidict.MultiMapping” ABC
+  … also added my own ABC for classes with an “appreciates(…)” method,
+    which is to what I renamed all the “is_a(…)” class methods. I mean
+    “is_a(…)” looks more pat, and “programmer-y”, but really it didn’t
+    actually make any sense.
+
+  Yes!
+
+* Grammar. [Alexander Böhn]
+
+* Let’s not neglect expanding THISgit diff. [Alexander Böhn]
+
+* This programmer note was waaaaaay overdue to be fried. [Alexander Böhn]
+
+  … Look, the whole thing was concernting some kind of “uniquify(…)”
+    op that I apparently had been using in some very early-on iteration
+    of that function, and has loooooooong ceased to exist! I vaguely
+    recall all of that – at the time I think whatever my “uniquify(…)”
+    implementation stood at, was super fucking primitive and is also
+    thankfully long dead. So here you go – another rather inflated
+    commit note, at least in terms of bytes, at least in terms of the
+    actual size of the actual commit. Actually. Yes!
+
+* Code cleanup: the actual deletion. [Alexander Böhn]
+
+* Finally getting rid of the useless `clu.predicates.newtype(…)` stuff. [Alexander Böhn]
+
+  … for the curious: this was a limp clone of “types.new_class(…)” and
+    its various friends – my clone-y limpness was somehow syntactically
+    weird and also simultaneously semantically confused about what it
+    sought to do. Anyway it’s mercifully gone now – it was suprisingly
+    used more frequently around the CLUniverse than I had assumed. All
+    the stuff (tests, etc) have been toyed with as needed.
+
+  … some minor tuneups to other “clu.predicates” faves have also made
+    it in, most noteworthily the “reverse(…)” combinator (see it’s a
+    combinator now!! I’m fancy) returns a tuple, which is something
+    you can generally work with, versus a “reversed object instance”,
+    which is something you can iterate but that’s it. It was annoying.
+
+  … Yes!
+
+* Ensuring a lack of “dangling references” in `clu.trie.Trie` [Alexander Böhn]
+
+* [make] Changelog updated @ 1aba217. [Alexander Böhn]
 
 
 ## v0.12.14 (2025-06-28)
@@ -2388,7 +2536,7 @@
 
 * Un-redundified the “clu.config.abc.FlatOrderedSet” repr output. [Alexander Böhn]
 
-* Updates to “clu.abstract.ReprWrapper”, “clu.dicts.ChainMap” etc etc ... “clu.abstract.ReprWrapper” correctly uses stuff from “clu.repr”     which up until now it had been duplicating some logic here and     there ... “clu.config.abc.FlatOrderedSet” and “clu.dicts.ChainMap” both     now implement an “appreciates(…)” class method, for doing internal-use     instance checking properly in subclasses and structurally-alike     similar types ... other misc. simplification and tweaks to “clu.dicts.ChainMap” ... programmer notes added to “clu.dicts.ChainRepr” ... fix for a bug when repr-izing a “clu.exporting.ExporterBase”     subclass instance created without a “path” attribute (which is     rarely used but in fact a legal use of the things) ... some minor updates to the “clu.dicts” testsuite. [Alexander Böhn]
+* Updates to “clu.abstract.ReprWrapper”, “clu.dicts.ChainMap” etc etc ... “clu.abstract.ReprWrapper” correctly uses stuff from “clu.repr”     which up until now it had been duplicating some logic here and     there ... “clu.config.abc.FlatOrderedSet” and “clu.dicts.ChainMap” both     now implement an “is_a(…)” class method, for doing internal-use     instance checking properly in subclasses and structurally-alike     similar types ... other misc. simplification and tweaks to “clu.dicts.ChainMap” ... programmer notes added to “clu.dicts.ChainRepr” ... fix for a bug when repr-izing a “clu.exporting.ExporterBase”     subclass instance created without a “path” attribute (which is     rarely used but in fact a legal use of the things) ... some minor updates to the “clu.dicts” testsuite. [Alexander Böhn]
 
 * You say tomato, I say to-MAAAAH-to, like real snooty. [Alexander Böhn]
 

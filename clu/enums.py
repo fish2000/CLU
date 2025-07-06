@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import abc
 import clu.abstract
+import collections.abc
 
 from clu.constants.polyfills import Enum, EnumMeta # type: ignore
 from clu.exporting import Exporter
@@ -101,7 +103,7 @@ class alias(clu.abstract.BaseDescriptor, metaclass=clu.abstract.Slotted):
             cls.__aliases__[self.name] = self.member_for_value(cls, self.aliased)
 
 @export
-class AliasingEnumMeta(EnumMeta):
+class AliasingEnumMeta(EnumMeta, abc.ABCMeta):
     
     def __new__(metacls, name, bases, attributes, **kwargs):
         """ Ensure `__aliases__` is a dictionary attribute on the new class.

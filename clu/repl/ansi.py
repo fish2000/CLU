@@ -18,7 +18,7 @@ from clu.predicates import mro, or_none
 from clu.typology import dict_types, isstring, isbytes
 from clu.fs.misc import re_matcher
 from clu.naming import nameof, qualified_name, isinspectable
-from clu.enums import alias, AliasingEnumMeta
+from clu.enums import alias, AliasingEnum, AliasingEnumMeta
 from clu.stdio import std, linebreak, flush_all
 from clu.exporting import Exporter
 
@@ -28,12 +28,14 @@ export = exporter.decorator()
 print_separator = lambda filler='-': print(filler * SEPARATOR_WIDTH)
 
 @export
-class ANSIBase(Enum):
+class ANSIBase(clu.abstract.Appreciative, AliasingEnum):
     
     """ Root ancestor class for all ANSI-code enums """
     
     @classmethod
-    def is_ansi(cls, instance):
+    def appreciates(cls, instance):
+        """ Boolean, tests if the class “appreciates” an instance """
+        # N.B. This is far too ripe for false positives
         return cls in mro(instance)
 
 @export
@@ -133,7 +135,7 @@ class ANSI(AliasingEnumMeta):
         """ Convert a specifier of unknown type to an enum or alias member """
         if specifier is None:
             return cls.NOTHING
-        elif cls.is_ansi(specifier):
+        elif cls.appreciates(specifier):
             return specifier                        # Already an ANSI type, return it
         if isstring(specifier):
             return cls.for_name(specifier)          # Match by name, decoding if necessary
@@ -325,7 +327,7 @@ class ANSIFormat(clu.abstract.Format,
                 text = from_value
             elif isbytes(from_value):
                 text = str(from_value, encoding=ENCODING)
-            elif ANSIBase.is_ansi(from_value):
+            elif ANSIBase.appreciates(from_value):
                 text = from_value
         instance = cls.get_or_create(Text.convert(text),
                                Background.convert(background),

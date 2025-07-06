@@ -126,6 +126,11 @@ class Appreciative(abc.ABC):
     def appreciates(cls, instance):
         """ Boolean, tests if the class “appreciates” an instance """
         ...
+    
+    @classmethod
+    def __subclasshook__(cls, subcls):
+        appreciates = getattr(subcls, 'appreciates', None)
+        return callable(appreciates)
 
 class Format(collections.abc.Callable, metaclass=Slotted):
     

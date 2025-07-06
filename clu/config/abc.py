@@ -164,14 +164,26 @@ class FrozenKeyMap(FrozenKeyMapBase):
     
     def submap(self, *namespaces, unprefixed=False):
         """ Return a flattened dict containing only the namespaced items. """
+        # Get the frozen version of this class:
         cls = freeze_class(type(self))
+        
+        # Shortcut for unprefixed keys:
         if unprefixed:
-            return cls({ nskey : self[nskey] for nskey in self if NAMESPACE_SEP not in nskey })
+            return cls({ nskey : self[nskey] \
+                     for nskey in self \
+                      if NAMESPACE_SEP not in nskey })
+        
+        # Shortcut for a lack of namespaces:
         if not namespaces:
             return cls(self)
+        
+        # Iterate namespaces, taking those matching our namespaces
+        # for a new instance:
         out = dict()
         for namespace in namespaces:
-            out.update({ nskey : self[nskey] for nskey in self if nskey.startswith(namespace) })
+            out.update({ nskey : self[nskey] \
+                     for nskey in self \
+                      if nskey.startswith(namespace) })
         return cls(out)
     
     def keys(self, *namespaces, unprefixed=False):
@@ -205,7 +217,9 @@ class FrozenKeyMap(FrozenKeyMapBase):
         return hash(tuple(self.keys())) ^ len(self)
     
     def _get_namespace_foset(self):
-        return FlatOrderedSet(get_ns(nskey) for nskey in sorted(self) if NAMESPACE_SEP in nskey)
+        return FlatOrderedSet(get_ns(nskey) \
+            for nskey in self \
+             if NAMESPACE_SEP in nskey)
     
     def namespaces(self):
         yield from self._get_namespace_foset()
@@ -374,10 +388,12 @@ class NamespaceWalker(FrozenKeyMap):
         if cls is None:
             from clu.config.keymap import FrozenFlat
             cls = FrozenFlat
-        return cls({ pack_ns(key, *fragments) : value for *fragments, key, value in self.walk() })
+        return cls({ pack_ns(key, *fragments) : value \
+            for *fragments, key, value in self.walk() })
     
     def _get_namespace_foset(self):
-        return FlatOrderedSet(concatenate_ns(*fragments) for *fragments, _, _ in self.walk() if fragments)
+        return FlatOrderedSet(concatenate_ns(*fragments) \
+            for *fragments, _, _ in self.walk() if fragments)
     
     def keys(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all keys in the mapping,
@@ -479,9 +495,8 @@ class FlatOrderedSet(collections.abc.Set,
         """ Used by `clu.config.codecs` to deserialize FlatOrderedSets """
         out = cls()
         out.things = tuple(instance_dict['things'])
+        out.predicate = qualified_import(instance_dict['predicate'])
         return out
-        # return cls(*instance_dict['things'],
-        #             predicate=qualified_import(instance_dict['predicate']))
     
     @classmethod
     def appreciates(cls, instance):
@@ -618,7 +633,8 @@ class FlatOrderedSet(collections.abc.Set,
     def clone(self, deep=False, memo=None):
         copier = getattr(copy, deep and 'deepcopy' or 'copy')
         out = type(self)()
-        out.things = tuple(map(copier, self.things))
+        out.things = copier(self.things)
+        out.predicate = self.predicate
         return out
     
     def inner_repr(self):

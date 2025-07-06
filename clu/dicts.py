@@ -108,10 +108,7 @@ class ChainRepr(Repr):
         """ Initialize a ChainRepr, with default params
             for ‘maxlevel’, ‘maxstring’, and ‘maxother’.
         """
-        try:
-            super().__init__(*args, **kwargs)
-        except TypeError:
-            super().__init__()
+        super().__init__(*args, **kwargs)
         self.maxlevel = maxlevel
         self.maxstring = maxstring
         self.maxother = maxother

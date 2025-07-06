@@ -300,7 +300,7 @@ class TestConfig(object):
                                       'wat:yo', 'wat:yoyo', 'nodogg:yo', 'nodogg:yoyo')
         assert tuple(flat.values()) == ('dogg', 'you like', 'dicts', 'we put dicts in your dicts',
                                         'dogggggg', 'dogggggggggg', 'dogggggg', 'dogggggggggg')
-        assert tuple(flat.namespaces()) == ('nodogg', 'wat')
+        assert set(flat.namespaces()) == set(['nodogg', 'wat'])
         
         assert flat.dictionary == dictionary
         

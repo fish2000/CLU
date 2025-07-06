@@ -72,10 +72,7 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
         """ Initialize a FrozenKeyMap instance wrapping an environment-variable
             dictionary from a target dictionary, with a supplied appname.
         """
-        try:
-            super().__init__(**updates)
-        except TypeError:
-            super().__init__()
+        super().__init__()
         self.appname = appname or APPNAME
         self.environment = environment is None \
                        and os.environ.copy() \
@@ -142,13 +139,10 @@ class Environ(FrozenEnviron, KeyMap, contextlib.AbstractContextManager):
         """
         if environment is None:
             environment = os.environ
-        try:
-            super().__init__(environment=environment,
-                                 appname=appname,
-                                       **updates)
-        except TypeError:
-            super().__init__(environment=environment,
-                                 appname=appname)
+        
+        super().__init__(environment=environment,
+                             appname=appname,
+                                   **updates)
         self.stash = None
     
     def freeze(self):

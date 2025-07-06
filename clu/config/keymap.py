@@ -170,9 +170,8 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
     @classmethod
     def from_dict(cls, instance_dict):
         """ Used by `clu.config.codecs` to deserialize keymaps """
-        out = cls()
+        out = cls(nskeyset=instance_dict.get('nskeyset', None))
         out.tree = instance_dict['tree']
-        out.nskeys = instance_dict['nskeyset']
         return out
     
     def __init__(self, tree=None, *, nskeyset=None, **updates):
@@ -180,10 +179,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
             target nested dictionary (or a “tree” of dicts).
         """
         # Call up:
-        try:
-            super().__init__(**updates)
-        except TypeError:
-            super().__init__()
+        super().__init__()
         
         # Sort out the nature of the input:
         if hasattr(tree, 'tree'):
@@ -192,7 +188,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
             tree = getattr(tree.nestify(), 'tree')
         
         # Assign, and deal with updates:
-        self.tree = dictify(tree or {}, cls=dict)
+        self.tree = dictify(tree or {})
         if updates:
             for nskey, value in updates.items():
                 key, fragments = ns.unpack_ns(nskey)
@@ -206,7 +202,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
                 d[key] = value
         
         # Keep the keyset we got:
-        self.nskeys = nskeyset
+        self.nskeys = nskeyset and frozenset(nskeyset) or None
     
     def walk(self):
         """ Iteratively walk the nested KeyMap’s tree of dicts. """
@@ -222,7 +218,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         return thaw_class(type(self))(tree=copy.copy(self.tree),
                                   nskeyset=copy.copy(self.nskeys))
     
-    def submap(self, *namespaces, unprefixed=False, cls=False):
+    def submap(self, *namespaces, unprefixed=False, cls=None):
         """ Return a flattened mapping, if possible a mutable one,
             containing only items with keys matching the specified
             namespaces (as namespaced:key:paths).
@@ -233,7 +229,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         
         # Short-circuit for returning unprefixed top-level items:
         if unprefixed:
-            return cls({ key : value \
+            return cls({ key: value \
                      for key, value in self.tree.items() \
                          if not ismapping(value) })
         
@@ -298,10 +294,7 @@ class Nested(FrozenNested, abc.KeyMap):
             target nested dictionary (or a “tree” of dicts).
         """
         # Call up, without passing nskeyset:
-        try:
-            super().__init__(tree=tree, nskeyset=None, **updates)
-        except TypeError:
-            super().__init__()
+        super().__init__(tree=tree, nskeyset=None, **updates)
         
         # Mutable-ize the keyset:
         self.nskeys = nskeyset and set(nskeyset) or set(self.nskeyset())

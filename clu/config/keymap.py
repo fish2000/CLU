@@ -238,8 +238,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         if unprefixed:
             return cls({ key : value \
                      for key, value in self.tree.items() \
-                         if not ismapping(value) },
-                         nskeyset=self.nskeys)
+                         if not ismapping(value) })
         
         # If it’s not unprefixed, and we have no namespaces,
         # we cough up a new instance with our data:
@@ -263,7 +262,7 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         
         # Return a (possibly frozen) instance containing the specified
         # namespaced data, as a namespaced instance:
-        return cls(theirs, nskeyset=self.nskeys)
+        return cls(theirs)
     
     def inner_repr(self):
         return repr(self.tree)

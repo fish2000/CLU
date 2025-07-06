@@ -428,14 +428,8 @@ def test():
         for meat in fridge:
             pprint(meat)
     
-    @inline
-    def test_mapwalk():
-        """ Simple “mapwalk(…)” content """
-        dictderive = tuple(mapwalk(nestedmaps()))
-        return dictderive
-    
-    @inline
-    def test_mapwalk_content():
+    @inline.precheck
+    def show_mapwalk_content():
         """ Verbose “mapwalk(…)” content check """
         for mappingpath in mapwalk(nestedmaps()):
             *fragments, key, value = mappingpath
@@ -445,6 +439,12 @@ def test():
             print("NSKEY:", nskey)
             print("VALUE:", value)
             print()
+    
+    @inline
+    def test_mapwalk():
+        """ Simple “mapwalk(…)” content """
+        dictderive = tuple(mapwalk(nestedmaps()))
+        return dictderive
     
     @inline
     def test_frozenflat_nested_eq():

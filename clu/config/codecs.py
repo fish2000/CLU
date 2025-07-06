@@ -88,7 +88,7 @@ decoder = Decoder()
 
 @export
 def json_encode(things):
-    return encoder.encode(things)
+    return encoder.encode(annotated_dict_for(things))
 
 @export
 def json_decode(string):
@@ -99,11 +99,11 @@ def json_decode(string):
 
 @export
 def pickle_encode(things):
-    return pickle.dumps(things)
+    return pickle.dumps(annotated_dict_for(things))
 
 @export
 def pickle_decode(string):
-    return pickle.loads(string)
+    return instance_for(pickle.loads(string))
 
 # Assign the modules’ `__all__` and `__dir__` using the exporter:
 __all__, __dir__ = exporter.all_and_dir()
@@ -183,15 +183,23 @@ def test():
         nested_json = json_encode(nested)
         foset_json = json_encode(foset)
         
-        print("foset_json:")
-        print(foset_json)
-        print()
+        # print("flat_json:")
+        # print(flat_json)
+        # print()
+        
+        # print("nested_json:")
+        # print(nested_json)
+        # print()
+        
+        # print("foset_json:")
+        # print(foset_json)
+        # print()
         
         reconstituted_flat = json_decode(flat_json)
         reconstituted_nested = json_decode(nested_json)
         reconstituted_foset = json_decode(foset_json)
         
-        # assert reconstituted_flat == reconstituted_nested
+        assert reconstituted_flat == reconstituted_nested
         assert reconstituted_flat == flat
         assert reconstituted_nested == nested
         assert reconstituted_foset == foset
@@ -231,25 +239,25 @@ def test():
         reconstituted_nested = pickle_decode(nested_pickle)
         reconstituted_foset = pickle_decode(foset_pickle)
         
-        print("FLAT:")
-        print(flat)
-        print()
+        # print("FLAT:")
+        # print(flat)
+        # print()
         
-        print("NESTED:")
-        print(nested)
-        print()
+        # print("NESTED:")
+        # print(nested)
+        # print()
         
-        print("RECONSTITUTED FLAT:")
-        print(reconstituted_flat)
-        print()
+        # print("RECONSTITUTED FLAT:")
+        # print(reconstituted_flat)
+        # print()
         
-        print("RECONSTITUTED NESTED:")
-        print(reconstituted_nested)
-        print()
+        # print("RECONSTITUTED NESTED:")
+        # print(reconstituted_nested)
+        # print()
         
-        # assert reconstituted_flat == reconstituted_nested
+        assert reconstituted_flat == reconstituted_nested
         assert reconstituted_flat == flat
-        # assert reconstituted_nested == nested
+        assert reconstituted_nested == nested
         assert reconstituted_foset == foset
     
     # Run all inline tests:

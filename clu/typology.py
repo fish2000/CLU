@@ -158,6 +158,10 @@ mapping_types   = { collections.abc.Mapping,
                     collections.abc.MutableMapping,
                     types.MappingProxy }
 
+set_types       = { collections.abc.Set,
+                    collections.abc.MutableSet,
+                    frozenset, set }
+
 mapping_classes = dict_types | namespace_types | mapping_types
 
 function_types = Λ = (types.Function,
@@ -216,6 +220,7 @@ iscomplex = lambda thing: subclasscheck(thing, complex)
 ismapping = lambda thing: subclasscheck(thing, mapping_classes)
 isarray = lambda thing: subclasscheck(thing, array_types)
 isscalar = lambda thing: subclasscheck(thing, scalar_types)
+isset = lambda thing: subclasscheck(thing, set_types)
 isstring = lambda thing: subclasscheck(thing, string_types)
 isbytes = lambda thing: subclasscheck(thing, bytes_types)
 ismodule = lambda thing: subclasscheck(thing, types.Module)
@@ -245,6 +250,7 @@ iscomplexlist = predicate_all(iscomplex)
 ismappinglist = predicate_all(ismapping)
 isarraylist = predicate_all(isarray)
 isscalarlist = predicate_all(isscalar)
+issetlist = predicate_all(isset)
 isstringlist = predicate_all(isstring)
 isbyteslist = predicate_all(isbytes)
 ismodulelist = predicate_all(ismodule)
@@ -291,6 +297,7 @@ export(graceful_issubclass,
 export(numeric_types,   name='numeric_types')
 export(array_types,     name='array_types')
 export(scalar_types,    name='scalar_types')
+export(set_types,       name='set_types')
 export(string_types,    name='string_types')
 export(bytes_types,     name='bytes_types')
 export(path_classes,    name='path_classes')
@@ -334,6 +341,7 @@ export(iscomplex,       name='iscomplex',   doc="iscomplex(thing) → boolean pr
 export(ismapping,       name='ismapping',   doc="ismapping(thing) → boolean predicate, True if `thing` is a mapping (dict-ish) type or an instance of same")
 export(isarray,         name='isarray',     doc="isarray(thing) → boolean predicate, True if `thing` is an array type or an instance of same")
 export(isscalar,        name='isscalar',    doc="isscalar(thing) → boolean predicate, True if `thing` is a numpy scalar numeric type or an instance of same")
+export(isset,           name='isset',       doc="isset(thing) → boolean predicate, True if `thing` is a set-like type or an instance of same")
 export(isstring,        name='isstring',    doc="isstring(thing) → boolean predicate, True if `thing` is a string type or an instance of same")
 export(isbytes,         name='isbytes',     doc="isbytes(thing) → boolean predicate, True if `thing` is a bytes-like type or an instance of same")
 export(ismodule,        name='ismodule',    doc="ismodule(thing) → boolean predicate, True if `thing` is a module type or an instance of same")
@@ -364,6 +372,7 @@ export(iscomplexlist,   name='iscomplexlist',   doc="iscomplexlist(thinglist) �
 export(ismappinglist,   name='ismappinglist',   doc="ismappinglist(thinglist) → boolean predicate, True if `thinglist` is a sequence of mapping (dict-ish) types")
 export(isarraylist,     name='isarraylist',     doc="isarraylist(thinglist) → boolean predicate, True if `thinglist` is a sequence of array types")
 export(isscalarlist,    name='isscalarlist',    doc="isscalarlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of numpy scalar numeric types")
+export(issetlist,       name='issetlist',       doc="issetlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of set-like types")
 export(isstringlist,    name='isstringlist',    doc="isstringlist(thinglist) → boolean predicate, True if `thinglist` is a sequence of string types")
 export(isbyteslist,     name='isbyteslist',     doc="isbyteslist(thinglist) → boolean predicate, True if `thinglist` is a sequence of bytes-like types")
 export(ismodulelist,    name='ismodulelist',    doc="ismodulelist(thinglist) → boolean predicate, True if `thinglist` is a sequence of module types")

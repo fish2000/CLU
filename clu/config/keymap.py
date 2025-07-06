@@ -9,7 +9,7 @@ from clu.config import abc, ns
 from clu.config.keymaputils import thaw_name, thaw_class, freeze_name, freeze_class
 from clu.constants import consts
 from clu.predicates import tuplize, typeof
-from clu.typology import ismapping
+from clu.typology import ismapping, isset
 from clu.exporting import Exporter, sysmods, itermodule
 
 exporter = Exporter(path=__file__)
@@ -61,26 +61,32 @@ class FrozenFlat(abc.FrozenKeyMap, clu.abstract.ReprWrapper,
             keys are strings; namespaces can be specified per-key as per the
             output of ‘pack_ns(…)’ (q.v. function definition supra.)
         """
+        # Call up:
         try:
             super().__init__(**updates)
         except TypeError:
             super().__init__()
+        
+        # Sort out our passed-in dictionary:
         if hasattr(dictionary, 'dictionary'):
             dictionary = getattr(dictionary, 'dictionary')
         elif hasattr(dictionary, 'flatten'):
             dictionary = getattr(dictionary.flatten(), 'dictionary')
+        
+        # Assign things:
         self.dictionary = dict(dictionary or {})
         if updates:
             self.dictionary.update(**updates)
     
     def thaw(self):
-        return thaw_class(type(self))(dictionary=copy.deepcopy(self.dictionary))
+        return thaw_class(type(self))(dictionary=copy.copy(self.dictionary))
     
     def nestify(self, cls=None, walker=flatwalk):
         """ Articulate a flattened KeyMap instance out into one that is nested. """
         if cls is None:
             cls = FrozenNested
-        return cls(tree=articulate(self.dictionary, walker=walker))
+        return cls(tree=articulate(self.dictionary, walker=walker),
+                nskeyset=frozenset(self.keys()))
     
     def __iter__(self):
         yield from self.dictionary
@@ -106,7 +112,7 @@ class FrozenFlat(abc.FrozenKeyMap, clu.abstract.ReprWrapper,
     
     def to_dict(self):
         """ Used by `clu.config.codecs` to serialize the keymap """
-        return copy.deepcopy(self.dictionary)
+        return copy.copy(self.dictionary)
 
 @export
 class Flat(FrozenFlat, abc.KeyMap):
@@ -114,7 +120,7 @@ class Flat(FrozenFlat, abc.KeyMap):
     """ A concrete mutable KeyMap class with a flat internal topology. """
     
     def freeze(self):
-        return freeze_class(type(self))(dictionary=copy.deepcopy(self.dictionary))
+        return freeze_class(type(self))(dictionary=copy.copy(self.dictionary))
     
     def __setitem__(self, nskey, value):
         self.dictionary[nskey] = value
@@ -159,21 +165,37 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         or, if you will, a nested – internal topology.
     """
     
-    __slots__ = 'tree'
+    __slots__ = ('tree', 'nskeys')
     
-    def __init__(self, tree=None, **updates):
+    @classmethod
+    def from_dict(cls, instance_dict):
+        """ Used by `clu.config.codecs` to deserialize keymaps """
+        out = cls()
+        from pprint import pprint
+        print(f"{cls.__name__}.from_dict():")
+        pprint(instance_dict)
+        out.tree = instance_dict['tree']
+        out.nskeys = instance_dict['nskeyset']
+        return out
+    
+    def __init__(self, tree=None, *, nskeyset=None, **updates):
         """ Initialize an articulated (née “nested”) KeyMap instance from a
             target nested dictionary (or a “tree” of dicts).
         """
+        # Call up:
         try:
             super().__init__(**updates)
         except TypeError:
             super().__init__()
+        
+        # Sort out the nature of the input:
         if hasattr(tree, 'tree'):
             tree = getattr(tree, 'tree')
         elif hasattr(tree, 'nestify'):
             tree = getattr(tree.nestify(), 'tree')
-        self.tree = dictify(dict(tree or {}), cls=dict)
+        
+        # Assign, and deal with updates:
+        self.tree = dictify(tree or {}, cls=dict)
         if updates:
             for nskey, value in updates.items():
                 key, fragments = ns.unpack_ns(nskey)
@@ -185,13 +207,23 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
                         d[fragment] = {}
                         d = d[fragment]
                 d[key] = value
+        
+        # Keep the keyset we got:
+        self.nskeys = nskeyset
     
     def walk(self):
         """ Iteratively walk the nested KeyMap’s tree of dicts. """
         yield from mapwalk(self.tree)
     
+    def nskeyset(self):
+        """ Walk the tree, and assemble a set of the namespaced keys """
+        yield from (ns.pack_ns(key, *fragments) \
+               for *fragments, key, value in self.walk() \
+                   if not ismapping(value))
+    
     def thaw(self):
-        return thaw_class(type(self))(tree=copy.deepcopy(self.tree))
+        return thaw_class(type(self))(tree=copy.copy(self.tree),
+                                  nskeyset=copy.copy(self.nskeys))
     
     def submap(self, *namespaces, unprefixed=False, cls=False):
         """ Return a flattened mapping, if possible a mutable one,
@@ -204,13 +236,15 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         
         # Short-circuit for returning unprefixed top-level items:
         if unprefixed:
-            return cls({ key : value for key, value in self.tree.items() \
-                                                    if not ismapping(value) })
+            return cls({ key : value \
+                     for key, value in self.tree.items() \
+                         if not ismapping(value) },
+                         nskeyset=self.nskeys)
         
         # If it’s not unprefixed, and we have no namespaces,
         # we cough up a new instance with our data:
         if not namespaces:
-            return cls(self.tree)
+            return cls(self.tree, nskeyset=self.nskeys)
         
         # Our namespaces, their output data:
         ours = frozenset(self._get_namespace_foset().things)
@@ -229,32 +263,38 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
         
         # Return a (possibly frozen) instance containing the specified
         # namespaced data, as a namespaced instance:
-        return cls(theirs)
+        return cls(theirs, nskeyset=self.nskeys)
     
     def inner_repr(self):
         return repr(self.tree)
     
     def clone(self, deep=False, memo=None):
         copier = deep and copy.deepcopy or copy.copy
-        return type(self)(tree=copier(self.tree))
+        return type(self)(tree=copier(self.tree),
+                      nskeyset=copier(self.nskeys))
     
     def to_dict(self):
         """ Used by `clu.config.codecs` to serialize the keymap """
-        return copy.deepcopy(self.tree)
+        return { 'tree'     : copy.copy(self.tree),
+                 'nskeyset' : None }
     
     def __contains__(self, nskey):
-        key, fragments = ns.unpack_ns(nskey)
-        if not fragments:
-            # Test for mappings to prevent false positives:
-            return not ismapping(self.tree.get(key, {}))
-        d = self.tree
-        for fragment in fragments:
-            try:
-                d = d[fragment]
-            except KeyError:
-                return False
-        # Test for mappings to prevent false positives:
-        return not ismapping(d.get(key, {}))
+        # if self.nskeys is None:
+        if not isset(self.nskeys):
+            self.nskeys = frozenset(self.nskeyset())
+        return nskey in self.nskeys
+        # key, fragments = ns.unpack_ns(nskey)
+        # if not fragments:
+        #     # Test for mappings to prevent false positives:
+        #     return not ismapping(self.tree.get(key, {}))
+        # d = self.tree
+        # for fragment in fragments:
+        #     try:
+        #         d = d[fragment]
+        #     except KeyError:
+        #         return False
+        # # Test for mappings to prevent false positives:
+        # return not ismapping(d.get(key, {}))
     
     def __getitem__(self, nskey):
         key, fragments = ns.unpack_ns(nskey)
@@ -272,13 +312,27 @@ class Nested(FrozenNested, abc.KeyMap):
         internal topology.
     """
     
+    def __init__(self, tree=None, *, nskeyset=None, **updates):
+        """ Initialize an articulated (née “nested”) KeyMap instance from a
+            target nested dictionary (or a “tree” of dicts).
+        """
+        # Call up, without passing nskeyset:
+        try:
+            super().__init__(tree=tree, nskeyset=None, **updates)
+        except TypeError:
+            super().__init__()
+        
+        # Mutable-ize the keyset:
+        self.nskeys = nskeyset and set(nskeyset) or set(self.nskeyset())
+    
     def freeze(self):
-        return freeze_class(type(self))(tree=copy.deepcopy(self.tree))
+        return freeze_class(type(self))(tree=copy.copy(self.tree),
+                                    nskeyset=frozenset(self.nskeys))
     
     def __setitem__(self, nskey, value):
         key, fragments = ns.unpack_ns(nskey)
         if not fragments:
-            self.tree[key] = value
+            self.tree[nskey] = value
         else:
             d = self.tree
             for fragment in fragments:
@@ -288,19 +342,20 @@ class Nested(FrozenNested, abc.KeyMap):
                     d[fragment] = {}
                     d = d[fragment]
             d[key] = value
+        self.nskeys.add(nskey)
     
     def __delitem__(self, nskey):
-        if nskey in self:
-            key, fragments = ns.unpack_ns(nskey)
-            if not fragments:
-                del self.tree[key]
-            else:
-                d = self.tree
-                for fragment in fragments:
-                    d = d[fragment]
-                del d[key]
-        else:
+        if nskey not in self:
             raise KeyError(nskey)
+        key, fragments = ns.unpack_ns(nskey)
+        if not fragments:
+            del self.tree[key]
+        else:
+            d = self.tree
+            for fragment in fragments:
+                d = d[fragment]
+            del d[key]
+        self.nskeys.remove(nskey)
 
 @export
 class KeyedAccessor(metaclass=clu.abstract.Slotted):
@@ -465,10 +520,11 @@ def test():
         
         flat = FrozenFlat(flat_dict)
         nested = Nested(flat)
+        flattened = nested.flatten()
         
-        assert nested.flatten() == flat
-        assert nested.flatten().dictionary == flatdict()
-        assert nested.flatten().thaw() == flat
+        assert flattened == flat
+        assert flattened.dictionary == flatdict()
+        assert flattened.thaw() == flat
         
         assert len(flat) == len(nested)
     
@@ -512,15 +568,16 @@ def test():
         for mappingpath in mapwalk(nested.tree):
             *fragments, key, value = mappingpath
             nskey = ns.pack_ns(key, *fragments)
-            assert nskey in nested or nskey in arbitrary()
+            assert nskey in nested
     
     @inline
     def test_frozennested_flat_eq():
         """ FrozenNested and Flat roundtrip commutativity """
         nested = FrozenNested(tree=nestedmaps())
         flat = Flat(nested)
-        assert flat.nestify() == nested
-        assert flat.nestify().thaw() == nested
+        renested = flat.nestify()
+        assert renested == nested
+        assert renested.thaw() == nested
     
     @inline
     def test_nested_frozennested_eq():

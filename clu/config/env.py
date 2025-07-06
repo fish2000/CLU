@@ -116,8 +116,8 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
     def inner_repr(self): # pragma: no cover
         """ Return some readable meta-information about this instance """
         prefix = prefix_env(self.appname)
-        nscount = iterlen(self.namespaces())
-        keycount = len(self.keys())
+        nscount = len(self._get_namespace_foset().things)
+        keycount = iterlen(self.walk())
         return f"[prefix=“{prefix}*”, namespaces={nscount}, keys={keycount}]"
     
     def clone(self, deep=False, memo=None):
@@ -128,7 +128,7 @@ class FrozenEnviron(NamespaceWalker, clu.abstract.ReprWrapper,
     
     def to_dict(self):
         """ Used by `clu.config.codecs` to serialize the keymap """
-        return { 'environment'  : copy.deepcopy(self.environment),
+        return { 'environment'  : copy.copy(self.environment),
                  'appname'      : self.appname }
 
 @export

@@ -477,8 +477,11 @@ class FlatOrderedSet(collections.abc.Set,
     @classmethod
     def from_dict(cls, instance_dict):
         """ Used by `clu.config.codecs` to deserialize FlatOrderedSets """
-        return cls(*instance_dict['things'],
-                    predicate=qualified_import(instance_dict['predicate']))
+        out = cls()
+        out.things = tuple(instance_dict['things'])
+        return out
+        # return cls(*instance_dict['things'],
+        #             predicate=qualified_import(instance_dict['predicate']))
     
     @classmethod
     def appreciates(cls, instance):
@@ -613,14 +616,9 @@ class FlatOrderedSet(collections.abc.Set,
                                  predicate=self.predicate)
     
     def clone(self, deep=False, memo=None):
-        # Q.v. https://stackoverflow.com/a/48550898/298171
-        cls = type(self)
-        out = cls.__new__(cls)
-        things = list()
         copier = getattr(copy, deep and 'deepcopy' or 'copy')
-        for thing in self.things:
-            things.append(copier(thing))
-        super(cls, out).__init__(*things, predicate=self.predicate)
+        out = type(self)()
+        out.things = tuple(map(copier, self.things))
         return out
     
     def inner_repr(self):

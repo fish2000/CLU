@@ -8,6 +8,7 @@ iterchain = chain.from_iterable
 import clu.abstract
 import collections
 import collections.abc
+import copy
 import multidict
 import sys
 
@@ -454,13 +455,8 @@ class ChainMap(collections.abc.MutableMapping,
     
     def clone(self, deep=False, memo=None):
         """ Return a cloned copy of the ChainMap instance """
-        from copy import copy, deepcopy
-        cls = type(self)
-        if not deep:
-            return cls(copy(self.top),
-                           *self.rest)
-        return cls(deepcopy(self.top),
-                 *(deepcopy(mapping) for mapping in self.rest))
+        copier = deep and copy.deepcopy or copy.copy
+        return type(self)(*map(copier, self.maps))
 
 # “';p[[[[[-0” – Moira Rose
 

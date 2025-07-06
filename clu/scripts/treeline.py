@@ -461,7 +461,7 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
         # node tree – and an interim FrozenNested instance
         # using the instance dict data:
         instance = cls(tree=RootNode())
-        interim = FrozenNested.from_dict(instance_dict)
+        interim = FrozenNested.from_dict(dict(tree=instance_dict, nskeyset=None))
         
         # instance.update(interim)
         # Go through the namespaces, creating them within

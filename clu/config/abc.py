@@ -22,7 +22,7 @@ from clu.predicates import (typeof,
                             isexpandable, iscontainer, isnotnone,
                             always, uncallable)
 
-from clu.typology import iterlen, ismapping
+from clu.typology import iterlen, ishashablelist, ismapping
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -537,6 +537,10 @@ class FlatOrderedSet(collections.abc.Set,
                 things = things[0]
             elif iscontainer(things[0]) and not ismapping(things[0]):
                 things = tuple(things[0])
+        
+        # Make sure the things passed in can be worked with:
+        if not ishashablelist(things):
+            raise ValueError("FlatOrderedSet requires hashable members")
         
         # Install a flat, uniquified version of what we were passed
         self.things = tuple(self.expand(*things, predicate=predicate))

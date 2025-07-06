@@ -171,9 +171,6 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
     def from_dict(cls, instance_dict):
         """ Used by `clu.config.codecs` to deserialize keymaps """
         out = cls()
-        from pprint import pprint
-        print(f"{cls.__name__}.from_dict():")
-        pprint(instance_dict)
         out.tree = instance_dict['tree']
         out.nskeys = instance_dict['nskeyset']
         return out
@@ -278,22 +275,9 @@ class FrozenNested(abc.NamespaceWalker, clu.abstract.ReprWrapper,
                  'nskeyset' : None }
     
     def __contains__(self, nskey):
-        # if self.nskeys is None:
         if not isset(self.nskeys):
             self.nskeys = frozenset(self.nskeyset())
         return nskey in self.nskeys
-        # key, fragments = ns.unpack_ns(nskey)
-        # if not fragments:
-        #     # Test for mappings to prevent false positives:
-        #     return not ismapping(self.tree.get(key, {}))
-        # d = self.tree
-        # for fragment in fragments:
-        #     try:
-        #         d = d[fragment]
-        #     except KeyError:
-        #         return False
-        # # Test for mappings to prevent false positives:
-        # return not ismapping(d.get(key, {}))
     
     def __getitem__(self, nskey):
         key, fragments = ns.unpack_ns(nskey)

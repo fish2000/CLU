@@ -177,10 +177,8 @@ class FileBase(Nested, FileName): # type: ignore
         extra_user_dirs = kwargs.pop('extra_user_dirs', None)
         search_sys_path = kwargs.pop('search_sys_path', False)
         
-        try:
-            super(FileBase, self).__init__(*args, **kwargs)
-        except TypeError:
-            super(FileBase, self).__init__()
+        # Call super:
+        super(FileBase, self).__init__(*args, **kwargs)
         
         if isvalidpath(filepath):
             self.filepath = filepath

@@ -100,13 +100,8 @@ class NodeBase(collections.abc.Hashable,
     
     def __new__(cls, parent, name, *children, value=None):
         
-        try:
-            instance = super().__new__(cls, parent,
-                                            name,
-                                           *children,
-                                            value=value) # type: ignore
-        except TypeError:
-            instance = super().__new__(cls)
+        # Call super:
+        instance = super().__new__(cls) # type: ignore
         
         instance.node_name = str(name)
         instance.node_value = value
@@ -489,17 +484,19 @@ class NodeTreeMap(NamespaceWalker, clu.abstract.ReprWrapper,
     
     def __init__(self, tree=None, **updates):
         """ Initialize a NodeTreeMap, hosting a given node tree """
-        try:
-            super().__init__(**updates)
-        except TypeError:
-            super().__init__()
+        # Call super:
+        super().__init__(**updates)
         tree = getattr(tree, 'tree', tree)
+        
         # “mnq gvfc” – Nellie
         if tree is not None:
             if type(tree) not in acceptable_types:
                 badtype = nameof(typeof(tree))
                 raise TypeError(f"NodeTreeMap requires a Node instance, not type {badtype}")
+        
+        # Assign tree:
         self.tree = tree
+        
         # N.B. – assume updates is a basic KeyMap:
         if updates:
             for nskey, value in updates.items():

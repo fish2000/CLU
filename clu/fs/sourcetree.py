@@ -23,10 +23,8 @@ class SourceTree(abc.ABC, metaclass=Slotted):
     __slots__ = ('directory', 'header_lines', 'filepath')
     
     def __init__(self, filepath, path=None, **kwargs):
-        try:
-            super(SourceTree, self).__init__(**kwargs)
-        except TypeError:
-            super(SourceTree, self).__init__()
+        # Call super:
+        super(SourceTree, self).__init__(**kwargs)
         
         # Check the “srctree” file:
         if not os.path.isfile(filepath):

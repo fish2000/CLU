@@ -374,10 +374,7 @@ class LoaderBase(clu.abstract.AppName,
         # Create and register a new loader, as per the
         # arguments with which to initialize this new
         # loader instance:
-        try:
-            cls.instances[key] = instance = super().__new__(cls, *args, **kwargs)
-        except TypeError:
-            cls.instances[key] = instance = super().__new__(cls)
+        cls.instances[key] = instance = super().__new__(cls, *args, **kwargs)
         
         # Return the newly created instance:
         return instance

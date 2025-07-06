@@ -435,7 +435,6 @@ class ExporterBase(collections.abc.MutableMapping,
                 return cls.instances[putative]
         
         # Call super:
-        # instance = super().__new__(cls, *args, **kwargs) # type: ignore
         instance = super().__new__(cls) # type: ignore
         
         instance.__exports__ = {}

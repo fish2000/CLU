@@ -62,10 +62,7 @@ class FrozenFlat(abc.FrozenKeyMap, clu.abstract.ReprWrapper,
             output of ‘pack_ns(…)’ (q.v. function definition supra.)
         """
         # Call up:
-        try:
-            super().__init__(**updates)
-        except TypeError:
-            super().__init__()
+        super().__init__(**updates)
         
         # Sort out our passed-in dictionary:
         if hasattr(dictionary, 'dictionary'):

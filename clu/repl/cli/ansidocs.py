@@ -14,7 +14,6 @@ def actually_print_ansidocs(dotpath):
         formatting accordingly (as in, no ANSI if we can’t ANSI)
     """
     from clu.naming import qualified_import
-    from importlib import import_module
     
     # Attempt to import it:
     try:

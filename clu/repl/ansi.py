@@ -585,8 +585,8 @@ wrapper_kws = lambda **kwargs: { **BASE_KWARGS, **kwargs }
 @export
 class HighlighterWrapper(TextWrapper):
     
-    def __init__(self):
-        super().__init__(**wrapper_kws())
+    def __init__(self, **kwargs):
+        super().__init__(**wrapper_kws(**kwargs))
 
 @export
 class DualOptionWrapper(clu.abstract.Format):

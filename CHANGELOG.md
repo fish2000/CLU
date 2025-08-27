@@ -1,7 +1,65 @@
 # Changelog
 
 
-## 0.12.14:pre29+g3c4002c [SNAPSHOT]
+## 0.12.15:pre12+g3ba5ee3 [SNAPSHOT]
+
+### Tweaks
+
+* Tweaked many things, in the name of speeeeeed. [Alexander Böhn]
+
+### Add
+
+* Added a missing __slots__ attribute to some abstract classes. [Alexander Böhn]
+
+  … dunno if that was possibly causing issues, but you never know
+
+### Remove
+
+* Removed several more gratuitous error-checks on initialization. [Alexander Böhn]
+
+  … these are all those that look for TypeErrors in  “__init__(…)” or
+    “__new__(…)” methods. Best to do without, so far, yes.
+
+* Removed the vestigial “more-itertools” package requirement. [Alexander Böhn]
+
+* Removed the “six” package requirement. [Alexander Böhn]
+
+  … yaaaaaay!
+
+### Other
+
+* Miscellany. [Alexander Böhn]
+
+  … some kwarg-passing here, some import-trimming there. NBD.
+
+* This should be the last of the problematic initializer error-checks. [Alexander Böhn]
+
+* Killed dead code. [Alexander Böhn]
+
+* Simplified more initializers. [Alexander Böhn]
+
+* Simplified `clu.config.keymap.FrozenFlat.__init__(…)`’s `super()` call. [Alexander Böhn]
+
+  … I have this weird habit of catchint TypeErrors whenever I do a
+    “super().__init__(…)” call, because I originally wanted to work
+    around some fucked-up PyPy3 bug that necessitated doing that,
+    basically. But it’s dumb and probably hiding real problems, so
+    let’s no longer do that. Yes.
+
+* Updated the `clu.repl.ansi` enums to use `clu.abstract.Appreciative` [Alexander Böhn]
+
+  … The base type was using a really clumsy “is_ansi(…)” class method
+    to do this – that exact same clumsy function is now an offical
+    “appreciates(…)” method (see the ABC in question!) and the call
+    sites have been updated accordingly too. Now all that needs to
+    happen is the method itself has to get totally rewritten. Yes!
+
+* A very small update. [Alexander Böhn]
+
+  … allegedly, “{}” creates an empty dict faster than “dict()” does
+
+
+## v0.12.15 (2025-07-06)
 
 ### New
 
@@ -47,6 +105,10 @@
 * Minutiae. [Alexander Böhn]
 
 ### Other
+
+* Bumped version: 0.12.14 → 0.12.15. [Alexander Böhn]
+
+* [make] Changelog updated @ 3c4002c. [Alexander Böhn]
 
 * That inline test was better as a precheck function. [Alexander Böhn]
 

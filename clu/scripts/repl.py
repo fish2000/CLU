@@ -224,7 +224,6 @@ if 'user:script' in cluenv:
 
 # Adjust __all__ again:
 __all__ += ['_explain', 'explain', 'cluenv']
-# __all__ = tuple(__all__)
 __dir__ = lambda: __all__
 
 # Remove duplicate and invalid sys.paths:

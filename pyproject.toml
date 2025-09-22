@@ -37,6 +37,8 @@ Source = "https://github.com/fish2000/CLU"
 Tracker = "https://github.com/fish2000/CLU/issues"
 Changelog = "https://github.com/fish2000/CLU/blob/master/CHANGELOG.md"
 Download = "https://pypi.org/project/python-clu/"
+License = "https://github.com/fish2000/CLU/blob/master/LICENSE.txt"
+# License = "https://raw.githubusercontent.com/fish2000/CLU/refs/heads/master/LICENSE.txt"
 
 [tool.setuptools.dynamic]
 classifiers = { file = "CLASSIFIERS.txt" }

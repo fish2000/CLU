@@ -30,13 +30,13 @@ clu-boilercopy = 'clu.repl.cli.boilerplate:boilerplate_copy_command'
 clu-testing = 'clu.testing.pytest'
 
 [project.urls]
-homepage = "https://github.com/fish2000/CLU"
-repository = "https://github.com/fish2000/CLU"
-documentation = "https://github.com/fish2000/CLU/blob/master/README.md"
-source = "https://github.com/fish2000/CLU"
-tracker = "https://github.com/fish2000/CLU/issues"
-changelog = "https://github.com/fish2000/CLU/blob/master/CHANGELOG.md"
-download = "https://pypi.org/project/python-clu/"
+Homepage = "https://github.com/fish2000/CLU"
+Repository = "https://github.com/fish2000/CLU"
+Documentation = "https://github.com/fish2000/CLU/blob/master/README.md"
+Source = "https://github.com/fish2000/CLU"
+Tracker = "https://github.com/fish2000/CLU/issues"
+Changelog = "https://github.com/fish2000/CLU/blob/master/CHANGELOG.md"
+Download = "https://pypi.org/project/python-clu/"
 
 [tool.setuptools.dynamic]
 classifiers = { file = "CLASSIFIERS.txt" }

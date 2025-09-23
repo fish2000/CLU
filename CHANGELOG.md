@@ -1,7 +1,7 @@
 # Changelog
 
 
-## 0.12.16:pre10+gf42970e [SNAPSHOT]
+## v0.12.17 (2025-09-23)
 
 ### Fix
 
@@ -12,6 +12,10 @@
 * Added a license URL to `pyproject.toml` [Alexander Böhn]
 
 ### Other
+
+* Bumped version: 0.12.16 → 0.12.17. [Alexander Böhn]
+
+* [make] Changelog updated @ f42970e. [Alexander Böhn]
 
 * Moving around the “xerox” dependency. [Alexander Böhn]
 

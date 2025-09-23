@@ -48,7 +48,7 @@ version = { attr = "clu.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["*.jpg", "*.jpeg", "*.txt", "*.conf", "*.md", "*.rst", "Makefile"]
+include = ["clu*", "*.jpg", "*.jpeg", "*.txt", "*.conf", "*.md", "*.rst", "Makefile"]
 
 [tool.pytest.ini_options]
 delete_temps = true

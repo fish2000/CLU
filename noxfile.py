@@ -11,12 +11,9 @@ nox.options.stop_on_first_error = True
 nox.options.keywords = tuple()
 
 # Skip manifest check if we’re not running in a Git repo:
-from clu.predicates import tuplize
 from clu.version.git_version import are_we_gitted
-if not are_we_gitted():
-    nox.options.keywords += tuplize("not checkmanifest")
 
-@nox.session
+@nox.session(default=are_we_gitted())
 def checkmanifest(session):
     """ Check CLU’s MANIFEST.in against the Git HEAD """
     session.install("-r", "requirements/nox/manifest.txt")

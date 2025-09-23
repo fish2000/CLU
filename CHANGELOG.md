@@ -1,6 +1,22 @@
 # Changelog
 
 
+## 0.12.18:pre1+g88cee62 [SNAPSHOT]
+
+### Other
+
+* I have had the wrong path in that endpoint this whole time. [Alexander Böhn]
+
+
+## v0.12.18 (2025-09-23)
+
+### Other
+
+* Bumped version: 0.12.17 → 0.12.18. [Alexander Böhn]
+
+* [make] Changelog updated @ caf4d82. [Alexander Böhn]
+
+
 ## v0.12.17 (2025-09-23)
 
 ### Fix

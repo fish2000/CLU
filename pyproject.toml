@@ -43,7 +43,7 @@ License = "https://github.com/fish2000/CLU/blob/master/LICENSE.txt"
 [tool.setuptools.dynamic]
 classifiers = { file = "CLASSIFIERS.txt" }
 dependencies = { file = "requirements/install.txt" }
-optional-dependencies = { all = { file = "requirements/nox/repl.txt" } }
+optional-dependencies = { all = { file = "requirements/nox/tests.txt" } }
 version = { attr = "clu.__version__" }
 
 [tool.setuptools.packages.find]

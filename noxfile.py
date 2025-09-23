@@ -65,6 +65,8 @@ def inline(session, module):
     session.install("-r", "requirements/install.txt")
     if str(module).endswith('mathematics'):
         session.install("-r", "requirements/nox/tests.txt")
+    elif str(module).endswith('repl.modules'):
+        session.install("-r", "requirements/nox/tests.txt")
     session.run('python', '-m', module)
 
 @nox.session(default=False)

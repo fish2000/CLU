@@ -316,9 +316,12 @@ class Registry(abc.ABC, metaclass=clu.abstract.Slotted):
             appname = determine_name(cls)
         else:
             if appname in classes:
-                raise TypeError(f"appname already registered: {appname}")
-            appnames.add(appname)
-            classes[appname] = cls
+                # raise TypeError(f"appname already registered: {appname}")
+                warnings.warn(f"appname already registered: “{appname}”",
+                                ExportWarning, stacklevel=2)
+            else:
+                appnames.add(appname)
+                classes[appname] = cls
         super().__init_subclass__(**kwargs) # type: ignore
         cls.instances = weakref.WeakValueDictionary()
         cls.appname = clu.abstract.ValueDescriptor(appname)

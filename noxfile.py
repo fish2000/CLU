@@ -6,14 +6,15 @@ import sys, os
 sys.path.append(os.path.dirname(__file__))
 
 # Recycle, reduce, reuse:
-# nox.options.keywords = "not coverage"
 nox.options.reuse_existing_virtualenvs = True
 nox.options.stop_on_first_error = True
+nox.options.keywords = tuple()
 
 # Skip manifest check if we’re not running in a Git repo:
+from clu.predicates import tuplize
 from clu.version.git_version import are_we_gitted
 if not are_we_gitted():
-    nox.options.keywords = "not checkmanifest"
+    nox.options.keywords += tuplize("not checkmanifest")
 
 @nox.session
 def checkmanifest(session):
@@ -66,7 +67,7 @@ def inline(session, module):
         session.install("-r", "requirements/nox/tests.txt")
     session.run('python', '-m', module)
 
-@nox.session
+@nox.session(default=False)
 def coverage(session):
     """ Run `codecov`, updating CLU’s statistics on codecov.io """
     import clu.all

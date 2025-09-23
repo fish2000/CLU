@@ -1,7 +1,43 @@
 # Changelog
 
 
-## 0.12.15:pre12+g3ba5ee3 [SNAPSHOT]
+## 0.12.16:pre10+gf42970e [SNAPSHOT]
+
+### Fix
+
+* Fixed “include” segment in `pyproject.toml` [Alexander Böhn]
+
+### Add
+
+* Added a license URL to `pyproject.toml` [Alexander Böhn]
+
+### Other
+
+* Moving around the “xerox” dependency. [Alexander Böhn]
+
+* Trying not to have to build anything upon install. [Alexander Böhn]
+
+* Brushing up some command-endpoint-related stuff. [Alexander Böhn]
+
+* Making the `pyproject.toml` validator moew OCD-ish. [Alexander Böhn]
+
+  … we install an external bundle of other schemas people have made
+    for this validator (which thank fuck someone else did this, it
+    has to be the boringest thing in the world to write these things
+    in, like, my opinion – more power to those who feel otherwise).
+
+* Finally got the `nox` behavior for which I was looking. [Alexander Böhn]
+
+  … just didn’t want to run `coverage` by default, is all, ah.
+
+* Capitalized key names in `project.urls`, within `pyproject.toml` [Alexander Böhn]
+
+* Didn’t need •that• anymore. [Alexander Böhn]
+
+  … a minor dead-code cleanup.
+
+
+## v0.12.16 (2025-08-27)
 
 ### Tweaks
 
@@ -27,6 +63,10 @@
   … yaaaaaay!
 
 ### Other
+
+* Bumped version: 0.12.15 → 0.12.16. [Alexander Böhn]
+
+* [make] Changelog updated @ 3ba5ee3. [Alexander Böhn]
 
 * Miscellany. [Alexander Böhn]
 

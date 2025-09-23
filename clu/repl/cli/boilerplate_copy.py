@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-import sys, os
-
-from clu.repl.cli.boilerplate import boilerplate_command
+import sys, os, xerox
 
 def boilerplate_copy_command(): # pragma: no cover
-    import xerox
-    return boilerplate_command(function=xerox.copy)
+    from clu.repl.cli import boilerplate
+    return boilerplate.boilerplate_command(function=xerox.copy)
 
 if __name__ == '__main__':
     print("Copying boilerplate to clipboard…")

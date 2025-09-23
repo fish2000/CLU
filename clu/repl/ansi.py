@@ -701,10 +701,13 @@ class DocFormat(clu.abstract.Format):
             self.putpara(paragraph)
         
         self.putln(count=2)
+        return thing
     
     def __call__(self, *things):
+        out = None
         for thing in things:
-            self.render(thing)
+            out = self.render(thing)
+        return out
 
 def old_ansidoc(*things):
     """ old_ansidoc(*things) → Print the docstring value for each thing, in ANSI color """
@@ -751,6 +754,9 @@ def old_ansidoc(*things):
         linebreak()
         print()
         flush_all()
+    
+    # Return thing(s)
+    return len(things) == 1 and things[0] or things
 
 ansidoc = DocFormat()
 

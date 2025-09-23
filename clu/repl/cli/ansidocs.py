@@ -26,8 +26,7 @@ def actually_print_ansidocs(dotpath):
         sys.exit(os.EX_CONFIG)
     
     # This goes directly to stdout:
-    ansidocs(thing)
-    return thing
+    return ansidocs.render(thing)
 
 def ansidocs_command():
     """ Print out the ANSI-ified docstring for the given thing(s) """

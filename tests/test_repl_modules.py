@@ -41,14 +41,16 @@ class TestReplModules(object):
         assert all(type(record) is Result for record in results.result_records)
         assert all(type(record) is Mismatch for record in mismatches.mismatch_records)
     
+    # @pytest.mark.parametrize('modulename', mods)
     def test_compare_module_lookups_for_all_things_variadic_args(self):
         from clu.repl.modules import compare_module_lookups_for_all_things
         from clu.repl.modules import Results, Mismatches
         from clu.repl.modules import Result, Mismatch
         
-        modules = ('predicates', 'typology', 'mathematics', 'naming')
+        modules = ('predicates', 'typology', 'mathematics', 'naming', 'trie')
         prefixd = tuple(f"clu.{nm}" for nm in modules)
         results, mismatches = compare_module_lookups_for_all_things(*prefixd)
+        # results, mismatches = compare_module_lookups_for_all_things(*mods)
         
         assert type(results) is Results
         assert type(mismatches) is Mismatches

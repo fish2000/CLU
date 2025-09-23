@@ -618,7 +618,7 @@ def stdpout():
     from clu.stdio import std
     
     # If we’ve been here before we don’t need to bother:
-    if not getattr(pout, '__WTF_HAX__', False):
+    if not hasattr(pout.stream, '__WTF_HAX__'):
         
         try:
             # Step one: pop off the old stderr-bound handler:
@@ -647,7 +647,7 @@ def stdpout():
             pass
         
         # Step five: doctor the “pout” module reflecting our change:
-        pout.__WTF_HAX__ = True
+        pout.stream.__WTF_HAX__ = True
     
     # Step six: return the “pout” module object:
     return pout

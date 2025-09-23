@@ -3,6 +3,10 @@
 from __future__ import print_function
 import sys, os
 
+from clu.repl.ansi import DocFormat, PygmentsHighlighter
+ansidocs = DocFormat()
+pygmentizer = PygmentsHighlighter()
+
 boilerplate = '''
 # -*- coding: utf-8 -*-
 from __future__ import print_function
@@ -40,7 +44,10 @@ if __name__ == '__main__':
     sys.exit(test())
 '''.lstrip()
 
-def boilerplate_command(function=print):
+pygment_printer = lambda text: print(pygmentizer.render(text))
+default_function = ansidocs.isatty and pygment_printer or print
+
+def boilerplate_command(function=default_function):
     """ Write out the boilerplate code for a CLU python module file """
     function(boilerplate)
     return os.EX_OK

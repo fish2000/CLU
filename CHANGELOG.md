@@ -1,9 +1,35 @@
 # Changelog
 
 
-## 0.12.18:pre1+g88cee62 [SNAPSHOT]
+## 0.12.19:pre3+ge5c369b [SNAPSHOT]
 
 ### Other
+
+* The “boilerplate_copy” CLI command errors gratefully without `xerox` [Alexander Böhn]
+
+  … to wit: it was importing “xerox” (which it uses to do the actual
+    copying of the boilerplate to the system clipboard) recklessly,
+    without checking for installation – since “xerox” is an optional
+    depenedency, this was stupid. It is now less stupid. Ta-daaaaa!
+
+* Getting `clu-boilerplate` to prettyprint code in ANSI when apropos. [Alexander Böhn]
+
+  … there needs to be a better way to unit-test these fucking endpoint
+    commands and whatnot
+
+* Not modifying the `nox` keywords list anymore. [Alexander Böhn]
+
+  … instead we can toggle Nox sessions’ default runability (so to
+    speak) directly as boolean values, indeed!
+
+
+## v0.12.19 (2025-09-23)
+
+### Other
+
+* Bumped version: 0.12.18 → 0.12.19. [Alexander Böhn]
+
+* [make] Changelog updated @ 88cee62. [Alexander Böhn]
 
 * I have had the wrong path in that endpoint this whole time. [Alexander Böhn]
 

@@ -7,7 +7,7 @@ def boilerplate_copy_command(): # pragma: no cover
     try:
         import xerox
     except (ImportError, ModuleNotFoundError) as exc:
-        print("ERROR: This module requires the “xerox” module.")
+        print("ERROR: This command requires the “xerox” module.")
         print("ERROR: Install “xerox” into your Python enviroment to use it!")
         sys.exit(os.EX_CONFIG)
     

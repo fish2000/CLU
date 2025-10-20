@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-import sys, os, xerox
+import sys, os
 
 def boilerplate_copy_command(): # pragma: no cover
+    """ Actually execute the copy-to-clipboard operation """
+    try:
+        import xerox
+    except (ImportError, ModuleNotFoundError) as exc:
+        print("ERROR: This module requires the “xerox” module.")
+        print("ERROR: Install “xerox” into your Python enviroment to use it!")
+        sys.exit(os.EX_CONFIG)
+    
     from clu.repl.cli import boilerplate
     return boilerplate.boilerplate_command(function=xerox.copy)
 

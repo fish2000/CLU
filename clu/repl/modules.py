@@ -17,7 +17,7 @@ from clu.predicates import (ispyname,
                             negate,
                             lowers)
 
-from clu.exporting import Exporter
+from clu.exporting import ExporterBase, Exporter
 
 exporter = Exporter(path=__file__)
 export = exporter.decorator()

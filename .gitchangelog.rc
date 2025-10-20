@@ -98,6 +98,7 @@ ignore_regexps = [
 # r'^[fF]ix\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
 
 section_regexps =       [
+        ('Bump',        [r'^[bB]ump\s*']),
         ('New',         [r'^[nN]ew\s*']),
         ('Changes',     [r'^[cC]hang\s*']),
         ('Tweaks',      [r'^[tT]weak\s*']),

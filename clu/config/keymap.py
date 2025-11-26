@@ -124,16 +124,36 @@ class Flat(FrozenFlat, abc.KeyMap):
     
     def __delitem__(self, nskey):
         del self.dictionary[nskey]
-
+    
     def keys(self, *namespaces, unprefixed=False):
+        """ Return a namespaced view over either all keys in the mapping,
+            or over only those keys in the mapping which match the specified
+            namespace values.
+        """
         if unprefixed:
             return super().keys(unprefixed=True)
         if not namespaces:
             return super().keys()
         return (key for key in self.dictionary.keys() \
                 if any(ns.namespace_matches(key, namespace) for namespace in namespaces))
-
+    
+    def items(self, *namespaces, unprefixed=False):
+        """ Return a namespaced view over either all key/value pairs in the
+            mapping, or over only those key/value pairs in the mapping whose
+            keys match the specified namespace values.
+        """
+        if unprefixed:
+            return super().items(unprefixed=True)
+        if not namespaces:
+            return super().items()
+        return ((key, value) for key, value in self.dictionary.items() \
+                if any(ns.namespace_matches(key, namespace) for namespace in namespaces))
+    
     def values(self, *namespaces, unprefixed=False):
+        """ Return a namespaced view over either all values in the mapping,
+            or over only those values in the mapping whose keys match the
+            specified namespace values.
+        """
         if unprefixed:
             return super().values(unprefixed=True)
         if not namespaces:

@@ -1,9 +1,83 @@
 # Changelog
 
 
-## 0.12.19:pre3+ge5c369b [SNAPSHOT]
+## 0.12.20 [release]
+
+### New
+
+* New Changelog section callout for version bumps. [Alexander Böhn]
+
+### Fix
+
+* Refactor ROOT_PATH for cross-platform compatibility. [2400031832]
+
+  Replace the makeshift try-except approach for ROOT_PATH determination with a robust cross-platform implementation using os.name and os.path.splitdrive.
+
+  - On POSIX (Linux, macOS): Returns '/'
+  - On Windows: Returns drive root (e.g., 'C:\')
+
+  Includes proper documentation with rationale and Python docs reference.
+
+  Closes #17
+
+* Remove unused FilesystemError import in datafile() [AkhilChowdary2222]
+
+  The `FilesystemError` exception was imported from `clu.constants.exceptions` on line 538 but was never used in the `datafile()` method. This commit removes the unused import to clean up the code.
+
+  Fixes #16
+
+* Fixed name on a lambda `export(…)` call. [Alexander Böhn]
+
+  Fixes issue #15 !
+
+* Fixed a typo in the xerox import error messaging. [Alexander Böhn]
+
+  … see also: https://github.com/fish2000/CLU/commit/e5c369b72544aaaec8566a059a06ab590a9a24d2
+  … irritatingly, the incorrect version just went out in a release;
+    if the survival of this misnomer makes it into anyone’s production
+    enviroment and it pisses you off personally, let me know. I will
+    be viscerally shocked and amazed that anyone notices and I will
+    buy you several drinks, all of your choosing, for your troubles.
+  … AND THATS THE ALEXANDER BÖHN GUARANTEE RIGHT THERE PEOPLE. Yes.
+
+### Add
+
+* Added docstrings and `items(…)` to the `clu.config.keymap.Flat` class … these things augment new code pertaining to “namespace_matches(…)”   and bring things back up to original status quo. [Alexander Böhn]
 
 ### Other
+
+* Working around enhanced rigorousness (?!) in `pickle.whichmodule(…)` [Alexander Böhn]
+
+  … like WTF, so forever you would call this random module function –
+    always passing None for the “name” parameter – and you’d get a
+    result. A different, and often shittier result than my own module-
+    determining functions would get you. That was the point of using
+    it in these cases: it was a baaseline against which my own shit
+    could be checked. Anyway they recently rewrote it – now you *have*
+    to put in the name value AND IT CANT BE NONE – plus it throws
+    PicklingErrors (or whatever) when this function specifically does
+    *not* seek to fucking pickle anything. Anyway, we’re trying to
+    generally remove or mitigate calls to “pickle.whichmodue(…)” now,
+    so watch out. Yep.
+
+* Renamed and lightly edited new tests for “namespace_matches(…)” [Alexander Böhn]
+
+* Restore upstream docstrings and convert test suite to pytest style. [pjcodes404]
+
+* Refactor namespace matching logic across config subsystem. [pjcodes404]
+
+* Tribble notes in “clu/all.py” [Alexander Böhn]
+
+
+## v0.12.20 (2025-10-20)
+
+### Bump
+
+* Bumped version: 0.12.19 → 0.12.20. [Alexander Böhn]
+
+### Other
+
+* [make] Changelog updated @ e5c369b. [Alexander Böhn]
 
 * The “boilerplate_copy” CLI command errors gratefully without `xerox` [Alexander Böhn]
 
@@ -25,9 +99,11 @@
 
 ## v0.12.19 (2025-09-23)
 
-### Other
+### Bump
 
 * Bumped version: 0.12.18 → 0.12.19. [Alexander Böhn]
+
+### Other
 
 * [make] Changelog updated @ 88cee62. [Alexander Böhn]
 
@@ -36,14 +112,20 @@
 
 ## v0.12.18 (2025-09-23)
 
-### Other
+### Bump
 
 * Bumped version: 0.12.17 → 0.12.18. [Alexander Böhn]
+
+### Other
 
 * [make] Changelog updated @ caf4d82. [Alexander Böhn]
 
 
 ## v0.12.17 (2025-09-23)
+
+### Bump
+
+* Bumped version: 0.12.16 → 0.12.17. [Alexander Böhn]
 
 ### Fix
 
@@ -54,8 +136,6 @@
 * Added a license URL to `pyproject.toml` [Alexander Böhn]
 
 ### Other
-
-* Bumped version: 0.12.16 → 0.12.17. [Alexander Böhn]
 
 * [make] Changelog updated @ f42970e. [Alexander Böhn]
 
@@ -85,6 +165,10 @@
 
 ## v0.12.16 (2025-08-27)
 
+### Bump
+
+* Bumped version: 0.12.15 → 0.12.16. [Alexander Böhn]
+
 ### Tweaks
 
 * Tweaked many things, in the name of speeeeeed. [Alexander Böhn]
@@ -109,8 +193,6 @@
   … yaaaaaay!
 
 ### Other
-
-* Bumped version: 0.12.15 → 0.12.16. [Alexander Böhn]
 
 * [make] Changelog updated @ 3ba5ee3. [Alexander Böhn]
 
@@ -146,6 +228,10 @@
 
 
 ## v0.12.15 (2025-07-06)
+
+### Bump
+
+* Bumped version: 0.12.14 → 0.12.15. [Alexander Böhn]
 
 ### New
 
@@ -191,8 +277,6 @@
 * Minutiae. [Alexander Böhn]
 
 ### Other
-
-* Bumped version: 0.12.14 → 0.12.15. [Alexander Böhn]
 
 * [make] Changelog updated @ 3c4002c. [Alexander Böhn]
 
@@ -306,6 +390,10 @@
 
 ## v0.12.14 (2025-06-28)
 
+### Bump
+
+* Bumped version: 0.12.13 → 0.12.14. [Alexander Böhn]
+
 ### New
 
 * New `clu.typology` functions for checking an iterable’s contents. [Alexander Böhn]
@@ -366,8 +454,6 @@
   … I mean, the tests run OK………………… butttt………………
 
 ### Other
-
-* Bumped version: 0.12.13 → 0.12.14. [Alexander Böhn]
 
 * [make] New changelog added. [Alexander Böhn]
 
@@ -496,6 +582,10 @@
 
 ## v0.12.13 (2025-06-13)
 
+### Bump
+
+* Bumped version: 0.12.12 → 0.12.13. [Alexander Böhn]
+
 ### Add
 
 * Added some useful rando dicts to `clu.constants.data` [Alexander Böhn]
@@ -505,8 +595,6 @@
 * Removed and renamed much in the `clu.keymap`/`clu.dicts` departments. [Alexander Böhn]
 
 ### Other
-
-* Bumped version: 0.12.12 → 0.12.13. [Alexander Böhn]
 
 * [make] New changelog added. [Alexander Böhn]
 
@@ -597,9 +685,11 @@
 
 ## v0.12.12 (2025-06-03)
 
-### Other
+### Bump
 
 * Bumped version: 0.12.11 → 0.12.12. [Alexander Böhn]
+
+### Other
 
 * [make] New changelog added. [Alexander Böhn]
 
@@ -623,9 +713,11 @@
 
 ## v0.12.11 (2025-05-25)
 
-### Other
+### Bump
 
 * Bumped version: 0.12.10 → 0.12.11. [Alexander Böhn]
+
+### Other
 
 * [make] New changelog added. [Alexander Böhn]
 
@@ -633,6 +725,10 @@
 
 
 ## v0.12.10 (2025-05-25)
+
+### Bump
+
+* Bumped version: 0.12.9 → 0.12.10. [Alexander Böhn]
 
 ### Fix
 
@@ -643,8 +739,6 @@
     time, which is fucking embarrasing. Yes!
 
 ### Other
-
-* Bumped version: 0.12.9 → 0.12.10. [Alexander Böhn]
 
 * [make] New changelog added. [Alexander Böhn]
 
@@ -661,6 +755,10 @@
 
 ## v0.12.9 (2025-05-24)
 
+### Bump
+
+* Bumped version: 0.12.8 → 0.12.9. [Alexander Böhn]
+
 ### Add
 
 * Added a `clu.predicates.pyqualname(…)` function. [Alexander Böhn]
@@ -674,8 +772,6 @@
 * Removed (fortunately vestigial) Click package dependency. [Alexander Böhn]
 
 ### Other
-
-* Bumped version: 0.12.8 → 0.12.9. [Alexander Böhn]
 
 * [make] New changelog added. [Alexander Böhn]
 
@@ -705,6 +801,10 @@
 
 ## v0.12.8 (2025-05-24)
 
+### Bump
+
+* Bumped version: 0.12.7 → 0.12.8. [Alexander Böhn]
+
 ### Fix
 
 * Fixes in `clu.naming.{qualified_import,main_module_mame}(…)` [Alexander Böhn]
@@ -717,8 +817,6 @@
     a user when it’s being called correctly (!)
 
 ### Other
-
-* Bumped version: 0.12.7 → 0.12.8. [Alexander Böhn]
 
 * [make] New changelog added. [Alexander Böhn]
 
@@ -733,18 +831,22 @@
 
 ## v0.12.7 (2025-05-19)
 
-### Other
+### Bump
 
 * Bumped version: 0.12.6 → 0.12.7. [Alexander Böhn]
+
+### Other
 
 * [make] New changelog added. [Alexander Böhn]
 
 
 ## v0.12.6 (2025-05-19)
 
-### Other
+### Bump
 
 * Bumped version: 0.12.5 → 0.12.6. [Alexander Böhn]
+
+### Other
 
 * [make] New changelog added. [Alexander Böhn]
 
@@ -766,6 +868,10 @@
 
 ## v0.12.5 (2025-05-19)
 
+### Bump
+
+* Bumped version: 0.12.4 → 0.12.5. [Alexander Böhn]
+
 ### Add
 
 * Adding TOML module discussion screenshot. [Alexander Böhn]
@@ -777,8 +883,6 @@
 * Removed the old `setup.cfg` file. [Alexander Böhn]
 
 ### Other
-
-* Bumped version: 0.12.4 → 0.12.5. [Alexander Böhn]
 
 * [make] New changelog added. [Alexander Böhn]
 
@@ -840,6 +944,10 @@
 
 ## v0.12.4 (2025-05-19)
 
+### Bump
+
+* Bumped version: 0.12.3 → 0.12.4. [Alexander Böhn]
+
 ### Fix
 
 * Fixed a few `pyproject.toml` build-related things. [Alexander Böhn]
@@ -863,8 +971,6 @@
   … ooooooooof.
 
 ### Other
-
-* Bumped version: 0.12.3 → 0.12.4. [Alexander Böhn]
 
 * [make] New changelog added. [Alexander Böhn]
 
@@ -898,6 +1004,10 @@
 
 ## v0.12.3 (2025-05-19)
 
+### Bump
+
+* Bumped version: 0.12.2 → 0.12.3. [Alexander Böhn]
+
 ### Fix
 
 * Fixing inclusion of `CLU_Treatment.md` [Alexander Böhn]
@@ -916,27 +1026,27 @@
 
 ### Other
 
-* Bumped version: 0.12.2 → 0.12.3. [Alexander Böhn]
-
 * Cleaned up some requirements and REPL imports. [Alexander Böhn]
 
 
 ## v0.12.2 (2025-05-19)
 
+### Bump
+
+* Bumped version: 0.12.1 → 0.12.2. [Alexander Böhn]
+
 ### Add
 
 * Added the image files in the scratch/ directory. [Alexander Böhn]
 
-### Other
-
-* Bumped version: 0.12.1 → 0.12.2. [Alexander Böhn]
-
 
 ## v0.12.1 (2025-05-19)
 
-### Other
+### Bump
 
 * Bumped version: 0.12.0 → 0.12.1. [Alexander Böhn]
+
+### Other
 
 * Another README.md clarifying edit. [Alexander Böhn]
 
@@ -944,6 +1054,10 @@
 
 
 ## v0.12.0 (2025-05-19)
+
+### Bump
+
+* Bumped version: 0.11.6 → 0.12.0. [Alexander Böhn]
 
 ### Add
 
@@ -954,8 +1068,6 @@
 * Removed unnecessary check in `clu.repl.ansi` [Alexander Böhn]
 
 ### Other
-
-* Bumped version: 0.11.6 → 0.12.0. [Alexander Böhn]
 
 * Updated the “dagger” anchor links in README.md. [Alexander Böhn]
 
@@ -982,6 +1094,10 @@
 
 ## v0.11.6 (2025-05-07)
 
+### Bump
+
+* Bumped version: 0.11.5 → 0.11.6. [Alexander Böhn]
+
 ### Fix
 
 * Fixed an old docstring typo, again. [Alexander Böhn]
@@ -993,8 +1109,6 @@
 * Removed licensing classifier. [Alexander Böhn]
 
 ### Other
-
-* Bumped version: 0.11.5 → 0.11.6. [Alexander Böhn]
 
 * Keep `clu.exporting.ExporterBase` subclasses *sans* appname from registering. [Alexander Böhn]
 
@@ -1015,6 +1129,10 @@
 
 
 ## v0.11.5 (2025-05-06)
+
+### Bump
+
+* Bumped version: 0.11.4 → 0.11.5. [Alexander Böhn]
 
 ### Fix
 
@@ -1037,8 +1155,6 @@
   … this simply checks a string to see if it starts with an underscore
 
 ### Other
-
-* Bumped version: 0.11.4 → 0.11.5. [Alexander Böhn]
 
 * Updated the (rare) manually-updated __all__ tuple for `clu.abstract` [Alexander Böhn]
 
@@ -1088,6 +1204,10 @@
 
 ## v0.11.4 (2025-05-03)
 
+### Bump
+
+* Bumped version: 0.11.3 → 0.11.4. [Alexander Böhn]
+
 ### Tweaks
 
 * Tweaked that last adjustment, again. [Alexander Böhn]
@@ -1097,8 +1217,6 @@
 * Added a few missing elements to REPL `__all__` list. [Alexander Böhn]
 
 ### Other
-
-* Bumped version: 0.11.3 → 0.11.4. [Alexander Böhn]
 
 * Updated the Python version banners accordingly. [Alexander Böhn]
 
@@ -1114,6 +1232,10 @@
 
 ## v0.11.3 (2025-05-03)
 
+### Bump
+
+* Bumped version: 0.11.2 → 0.11.3. [Alexander Böhn]
+
 ### Add
 
 * Added a hook in the repl script to additionally run a user-specified script. [Alexander Böhn]
@@ -1123,12 +1245,12 @@
 
 * Added the “pip install” command to `README.md` [Alexander Böhn]
 
-### Other
-
-* Bumped version: 0.11.2 → 0.11.3. [Alexander Böhn]
-
 
 ## v0.11.2 (2025-05-03)
+
+### Bump
+
+* Bumped version: 0.11.1 → 0.11.2. [Alexander Böhn]
 
 ### Fix
 
@@ -1137,8 +1259,6 @@
   … used “self” in a `__new__(…)` function definition, blech!
 
 ### Other
-
-* Bumped version: 0.11.1 → 0.11.2. [Alexander Böhn]
 
 * Cleaned up `super(…)` calls in `clu.abstract` [Alexander Böhn]
 
@@ -1161,12 +1281,16 @@
 
 ## v0.11.1 (2025-05-02)
 
-### Other
+### Bump
 
 * Bumped version: 0.11.0 → 0.11.1. [Alexander Böhn]
 
 
 ## v0.11.0 (2025-05-02)
+
+### Bump
+
+* Bumped version: 0.10.1 → 0.11.0. [Alexander Böhn]
 
 ### Fix
 
@@ -1184,8 +1308,6 @@
 
 ### Other
 
-* Bumped version: 0.10.1 → 0.11.0. [Alexander Böhn]
-
 * Subtle fix in `clu.fs.pypath` add-path logic. [Alexander Böhn]
 
 * Such minutiae. [Alexander Böhn]
@@ -1193,9 +1315,11 @@
 
 ## v0.10.1 (2025-04-28)
 
-### Other
+### Bump
 
 * Bumped version: 0.10.0 → 0.10.1. [Alexander Böhn]
+
+### Other
 
 * Adjusted `MANIFEST.in` for `bump-my-version` [Alexander Böhn]
 
@@ -1203,6 +1327,12 @@
 
 
 ## v0.10.0 (2025-04-24)
+
+### Bump
+
+* Bumped version: 0.9.0 → 0.10.0. [Alexander Böhn]
+
+* Bumped version: 0.8.5 → 0.9.0. [Alexander Böhn]
 
 ### Fix
 
@@ -1219,10 +1349,6 @@
 * Removed yet another legacy import from the “clu.extending” testsuite. [Alexander Böhn]
 
 ### Other
-
-* Bumped version: 0.9.0 → 0.10.0. [Alexander Böhn]
-
-* Bumped version: 0.8.5 → 0.9.0. [Alexander Böhn]
 
 * Amended and tweaked the new `bump-my-version` config file. [Alexander Böhn]
 
@@ -1281,6 +1407,10 @@
 
 ## v0.8.5 (2022-12-19)
 
+### Bump
+
+* Bump version: 0.8.4 → 0.8.5. [Alexander Böhn]
+
 ### Add
 
 * Added on-the-fly filepath-based hashing to `clu.exporting.Exporter` [Alexander Böhn]
@@ -1290,8 +1420,6 @@
 * Removed inline test stubs from `clu.scripts.dictroast` … as they were causing the module to get picked up by Nox as one   with actual tests present; running the module with no arguments   produces a non-zero error code (by design) and that was screwing   things up a bit. [Alexander Böhn]
 
 ### Other
-
-* Bump version: 0.8.4 → 0.8.5. [Alexander Böhn]
 
 * Switched the PYTHON_VERSION constant to a `VersionInfo` instance … it had previously been a float value composed of just the running   Python major and minor version numbers – which oh yes that was   very clever, right up until Python 3.10 became 3.1… woooooof. … With the tweaks to `VersionInfo` allowing string comparisons,   this meant that the few places that looked at the PYTHON_VERSION   value could merely be switched to string comparisons, which that   was easy, and it all seems to work. … It was kind of nerve-wracking to mess around with any of the   `VersionInfo` innards, as that was the first part of CLU that I   properly wrote, before porting the stuff from my old REPL env   scripts†, and as such 1) it was written to have zero other CLU   dependencies, and 2) a lot of weird random low-level forgotton   shit depends upon it in turn. I think everything works but   we shall see… ergh. Yes! [Alexander Böhn]
 
@@ -1380,6 +1508,10 @@
 
 ## v0.8.4 (2022-10-02)
 
+### Bump
+
+* Bump version: 0.8.3 → 0.8.4. [Alexander Böhn]
+
 ### Fix
 
 * Fixing bump2version configuration. [Alexander Böhn]
@@ -1405,8 +1537,6 @@
 * Added checks for the exporter’s `__code__` attribute reassignment. [Alexander Böhn]
 
 ### Other
-
-* Bump version: 0.8.3 → 0.8.4. [Alexander Böhn]
 
 * Taking a stab at moving away from `setup.py` [Alexander Böhn]
 
@@ -1529,13 +1659,15 @@
 
 ## v0.8.3 (2022-09-10)
 
+### Bump
+
+* Bump version: 0.8.2 → 0.8.3. [Alexander Böhn]
+
 ### Fix
 
 * Fixed docstring on `clu.config.env.FrozenEnviron` … it was giving the wrong instructions for using a KeyMap key to   access a namespaced environment variable. [Alexander Böhn]
 
 ### Other
-
-* Bump version: 0.8.2 → 0.8.3. [Alexander Böhn]
 
 * Updated Makefile. [Alexander Böhn]
 
@@ -1543,6 +1675,10 @@
 
 
 ## v0.8.2 (2022-09-10)
+
+### Bump
+
+* Bump version: 0.8.1 → 0.8.2. [Alexander Böhn]
 
 ### Fix
 
@@ -1565,8 +1701,6 @@
 * Added basic inline tests and harness to `clu.config.codecs` [Alexander Böhn]
 
 ### Other
-
-* Bump version: 0.8.1 → 0.8.2. [Alexander Böhn]
 
 * Spelling! [Alexander Böhn]
 
@@ -1599,16 +1733,164 @@
 
 ## v0.8.1 (2022-08-30)
 
+### Bump
+
+* Bump version: 0.8.0 → 0.8.1. [Alexander Böhn]
+
 ### Add
 
 * Added `clu.config.codecs` … for the purpose of housing customized subclasses of e.g. json   encoding plumbing, and the like. [Alexander Böhn]
 
-### Other
-
-* Bump version: 0.8.0 → 0.8.1. [Alexander Böhn]
-
 
 ## v0.8.0 (2022-08-30)
+
+### Bump
+
+* Bump version: 0.7.2 → 0.8.0. [Alexander Böhn]
+
+* Bump version: 0.7.1 → 0.7.2. [Alexander Böhn]
+
+* Bump version: 0.7.0 → 0.7.1. [Alexander Böhn]
+
+* Bump version: 0.6.9 → 0.7.0. [Alexander Böhn]
+
+* Bump version: 0.6.8 → 0.6.9. [Alexander Böhn]
+
+* Bump version: 0.6.7 → 0.6.8. [Alexander Böhn]
+
+* Bump version: 0.6.6 → 0.6.7. [Alexander Böhn]
+
+* Bump version: 0.6.5 → 0.6.6. [Alexander Böhn]
+
+* Bump version: 0.6.4 → 0.6.5. [Alexander Böhn]
+
+* Bump version: 0.6.3 → 0.6.4. [Alexander Böhn]
+
+* Bump version: 0.6.2 → 0.6.3. [Alexander Böhn]
+
+* Bumped testing numpy minimum version. [Alexander Böhn]
+
+* Bumped up a bunch of minimum versions for the install requirements. [Alexander Böhn]
+
+* Bump version: 0.6.1 → 0.6.2. [Alexander Böhn]
+
+* Bump version: 0.6.0 → 0.6.1. [Alexander Böhn]
+
+* Bump version: 0.5.15 → 0.6.0. [Alexander Böhn]
+
+* Bump version: 0.5.14 → 0.5.15. [Alexander Böhn]
+
+* Bump version: 0.5.13 → 0.5.14. [Alexander Böhn]
+
+* Bump version: 0.5.12 → 0.5.13. [Alexander Böhn]
+
+* Bump version: 0.5.11 → 0.5.12. [Alexander Böhn]
+
+* Bump version: 0.5.10 → 0.5.11. [Alexander Böhn]
+
+* Bump version: 0.5.9 → 0.5.10. [Alexander Böhn]
+
+* Bump version: 0.5.8 → 0.5.9. [Alexander Böhn]
+
+* Bump version: 0.5.7 → 0.5.8. [Alexander Böhn]
+
+* Bump version: 0.5.6 → 0.5.7. [Alexander Böhn]
+
+* Bump version: 0.5.5 → 0.5.6. [Alexander Böhn]
+
+* Bump version: 0.5.4 → 0.5.5. [Alexander Böhn]
+
+* Bump version: 0.5.3 → 0.5.4. [Alexander Böhn]
+
+* Bump version: 0.5.2 → 0.5.3. [Alexander Böhn]
+
+* Bump version: 0.5.1 → 0.5.2. [Alexander Böhn]
+
+* Bump version: 0.5.0 → 0.5.1. [Alexander Böhn]
+
+* Bump version: 0.4.10 → 0.5.0. [Alexander Böhn]
+
+* Bump version: 0.4.9 → 0.4.10. [Alexander Böhn]
+
+* Bump version: 0.4.8 → 0.4.9. [Alexander Böhn]
+
+* Bump version: 0.4.7 → 0.4.8. [Alexander Böhn]
+
+* Bump version: 0.4.6 → 0.4.7. [Alexander Böhn]
+
+* Bump version: 0.4.5 → 0.4.6. [Alexander Böhn]
+
+* Bump version: 0.4.4 → 0.4.5. [Alexander Böhn]
+
+* Bump version: 0.4.3 → 0.4.4. [Alexander Böhn]
+
+* Bump version: 0.4.2 → 0.4.3. [Alexander Böhn]
+
+* Bump version: 0.4.1 → 0.4.2. [Alexander Böhn]
+
+* Bump version: 0.4.0 → 0.4.1. [Alexander Böhn]
+
+* Bump version: 0.3.9 → 0.4.0. [Alexander Böhn]
+
+* Bump version: 0.3.8 → 0.3.9. [Alexander Böhn]
+
+* Bump version: 0.3.7 → 0.3.8. [Alexander Böhn]
+
+* Bump version: 0.3.6 → 0.3.7. [Alexander Böhn]
+
+* Bump version: 0.3.5 → 0.3.6. [Alexander Böhn]
+
+* Bump version: 0.3.4 → 0.3.5. [Alexander Böhn]
+
+* Bump version: 0.3.3 → 0.3.4. [Alexander Böhn]
+
+* Bump version: 0.3.2 → 0.3.3. [Alexander Böhn]
+
+* Bump version: 0.3.1 → 0.3.2. [Alexander Böhn]
+
+* Bump version: 0.3.0 → 0.3.1. [Alexander Böhn]
+
+* Bump version: 0.2.10 → 0.3.0. [Alexander Böhn]
+
+* Bump version: 0.2.9 → 0.2.10. [Alexander Böhn]
+
+* Bump version: 0.2.8 → 0.2.9. [Alexander Böhn]
+
+* Bump version: 0.2.7 → 0.2.8. [Alexander Böhn]
+
+* Bump version: 0.2.6 → 0.2.7. [Alexander Böhn]
+
+* Bump version: 0.2.5 → 0.2.6. [Alexander Böhn]
+
+* Bump version: 0.2.4 → 0.2.5. [Alexander Böhn]
+
+* Bump version: 0.2.3 → 0.2.4. [Alexander Böhn]
+
+* Bump version: 0.2.2 → 0.2.3. [Alexander Böhn]
+
+* Bump version: 0.2.1 → 0.2.2. [Alexander Böhn]
+
+* Bump version: 0.2.0 → 0.2.1. [Alexander Böhn]
+
+* Bump version: 0.1.9 → 0.2.0. [Alexander Böhn]
+
+* Bump version: 0.1.8 → 0.1.9. [Alexander Böhn]
+
+* Bump version: 0.1.7 → 0.1.8. [Alexander Böhn]
+
+* Bump version: 0.1.6 → 0.1.7. [Alexander Böhn]
+
+* Bump version: 0.1.5 → 0.1.6. [Alexander Böhn]
+
+* Bump version: 0.1.4 → 0.1.5. [Alexander Böhn]
+
+* Bump version: 0.1.3 → 0.1.4. [Alexander Böhn]
+
+* Bump version: 0.1.2 → 0.1.3. [Alexander Böhn]
+
+* Bump version: 0.1.1 → 0.1.2. [Alexander Böhn]
+
+* Bump version: 0.1.0 → 0.1.1. [Alexander Böhn]
 
 ### New
 
@@ -2307,8 +2589,6 @@
 
 ### Other
 
-* Bump version: 0.7.2 → 0.8.0. [Alexander Böhn]
-
 * Clarified the  docstrings. [Alexander Böhn]
 
 * Further KeyMap optimizations, this time in `FrozenNested.submap(…)` … which that implementation had always bugged me as it was pretty   pathological – no longer to we have to iterate the whole KeyMap   instance to slice out a submap. … the tradeoff is, we do iterate the whole KeyMap in order to test   via short-circuit whether or not the namespace(s) provided to   `FrozenNested.submap(…)` are valid, and return an empty dict if   they are not; fortunately tho now since the various `flatten()`   and `nestify()` implementations default to returning immutable   (“frozen”) instances, `namespace()` calls are cached by default. … So yeah I am pretty happy with that. [Alexander Böhn]
@@ -2408,8 +2688,6 @@
 
 * Dependabot update. [Alexander Böhn]
 
-* Bump version: 0.7.1 → 0.7.2. [Alexander Böhn]
-
 * Switching over to bump2version ... as it appears the original “bumpversion” has committed infocide. [Alexander Böhn]
 
 * Including “clu.importing” top-level module in coverage report. [Alexander Böhn]
@@ -2417,8 +2695,6 @@
 * Restructured “clu.importing” into a subpackage ... as that module was getting a bit ungainly. Thus far, we have     split off the ProxyModule stuff, and juggled the inline tests     accordingly; most notably, the “initialize_types(…)” call for     CLU’s “Module” type is in “clu/importing/__init__.py”. After     sorting out all the imports, this proved to not fuck things     up – SO FAR. We shall see. [Alexander Böhn]
 
 * Not-quite-redundant env-value defaulting in “clu.repl.columnize” [Alexander Böhn]
-
-* Bump version: 0.7.0 → 0.7.1. [Alexander Böhn]
 
 * EVEN MORE coverage nitpicks for “clu.dispatch” ... 100% coverage or bust. [Alexander Böhn]
 
@@ -2457,8 +2733,6 @@
 * Skeleton of Click-based “clu.api” nested-command-module scheme. [Alexander Böhn]
 
 * Inline tests for “clu.csv”; plus some spring cleaning ... as in, got rid of Makefile rules and scripts that weren’t doing     me any favors ... all marginally-useful old scripts live in “clu/scripts/legacy”     which is wildcard-excluded from coverage. [Alexander Böhn]
-
-* Bump version: 0.6.9 → 0.7.0. [Alexander Böhn]
 
 * Testing and CI config updates. [Alexander Böhn]
 
@@ -2506,8 +2780,6 @@
 
 * Inline test for legacy “clu.repl.ansi.ansidoc(…)” function ... née “old_ansidoc(…)” [Alexander Böhn]
 
-* Bump version: 0.6.8 → 0.6.9. [Alexander Böhn]
-
 * Trimmed dead code. [Alexander Böhn]
 
 * Switching “clu.repl.ansi.ansidoc(…)” to use the new DocFormat class ... which this brilliant new hotness type is both composed from and     descended from various “clu.abstract.Formatter” types, defined     for the most part in “clu.repl.ansi” (a module that oooooof, if     ever any module needed to get split up into smaller, and more     bite-sized chunks, this one is it) ... using the “clu.repl.ansi.DocFormat” type to furnish “ansidoc(…)”     will be faster, more expandable, more controllable, sexier,     smarter, better-looking, and generally a better all-around deal     than the one-off corner-case-ridden function it replaces. [Alexander Böhn]
@@ -2551,8 +2823,6 @@
 * Programmer note about the super/subclass attribute-delete thing. [Alexander Böhn]
 
 * Ignore errors when attempting to delete a subclass attribute ... this bug caught courtesy of the TMI project, ha. [Alexander Böhn]
-
-* Bump version: 0.6.7 → 0.6.8. [Alexander Böhn]
 
 * “clu.importing.ProxyModule” is now a “generic template type” ... to wit, you don’t simply inherit from ProxyModule – you do it     like this: [Alexander Böhn]
 
@@ -2664,8 +2934,6 @@
 
 * Whitespace and thing-names. [Alexander Böhn]
 
-* Bump version: 0.6.6 → 0.6.7. [Alexander Böhn]
-
 * Paths in “consts” are now instances of “pathlib.Path” ... instead of interned strings ... it took surprisingly little effort – almost none, actually – to     support this change throughout the rest of CLU… I am kind of     waiting for the other-shoe untested-codepath giant error-message     supernova to occur right in my face, as a result of this; let     that be known, and but so, I go forth! [Alexander Böhn]
 
 * The const-module ANSI display now uses “clu.repl.modules.ModuleMap” ... and myrdiad other formatting strategem. [Alexander Böhn]
@@ -2748,15 +3016,11 @@
 
 * OCD-ish update/tweak to “clu.predicates.wrap_value(…).__doc__” [Alexander Böhn]
 
-* Bump version: 0.6.5 → 0.6.6. [Alexander Böhn]
-
 * The “humanize” package no longer exposes “timedelta” [Alexander Böhn]
 
 * Dead code harvest pt. II. [Alexander Böhn]
 
 * Dead code harvest. [Alexander Böhn]
-
-* Bump version: 0.6.4 → 0.6.5. [Alexander Böhn]
 
 * Links in the “boilerplate.py” README.md. [Alexander Böhn]
 
@@ -2846,8 +3110,6 @@
 
 * Whitespace. [Alexander Böhn]
 
-* Bump version: 0.6.3 → 0.6.4. [Alexander Böhn]
-
 * Trimmed dead code. [Alexander Böhn]
 
 * Storing PyPI classifiers in an external file. [Alexander Böhn]
@@ -2915,13 +3177,7 @@
 
 * Apparently you have to check “co_cellvars” sometimes too. [Alexander Böhn]
 
-* Bump version: 0.6.2 → 0.6.3. [Alexander Böhn]
-
-* Bumped testing numpy minimum version. [Alexander Böhn]
-
 * Touched up “requirements/dev.txt” as well. [Alexander Böhn]
-
-* Bumped up a bunch of minimum versions for the install requirements. [Alexander Böhn]
 
 * The big s/PROJECT_NAME/APPNAME/g changeover. [Alexander Böhn]
 
@@ -3031,15 +3287,11 @@
 
 * Setting the CLU-specific pytest options in “conftest.py” ... using “Config.addinivalue_line(…)” in the “pytest_configure”     hook function. [Alexander Böhn]
 
-* Bump version: 0.6.1 → 0.6.2. [Alexander Böhn]
-
 * Moved pytest-specific settings to a “pytest.ini” file. [Alexander Böhn]
 
 * Stopping on first Nox error. [Alexander Böhn]
 
 * Using nox in “test-all” Makefile rule. [Alexander Böhn]
-
-* Bump version: 0.6.0 → 0.6.1. [Alexander Böhn]
 
 * Accelerated “clu.fs.filesystem.Directory.suffix_histogram(…)” ... by using “collections.Counter.update(…)” in the “os.walk(…)”     generator loop – instead of manually incrementing per-suffix     counter values. [Alexander Böhn]
 
@@ -3073,8 +3325,6 @@
 
 * Less ponderous KeyError message from “clu.predicates.try_items(…)” [Alexander Böhn]
 
-* Bump version: 0.5.15 → 0.6.0. [Alexander Böhn]
-
 * Ah yes, what it once was. [Alexander Böhn]
 
 * Made the inline-test Nox run command slightly more legible. [Alexander Böhn]
@@ -3101,25 +3351,13 @@
 
 * We really don’t support Python 3.5 or 3.6. [Alexander Böhn]
 
-* Bump version: 0.5.14 → 0.5.15. [Alexander Böhn]
-
 * Don’t declare known dunder names as slots under PyPy. [Alexander Böhn]
-
-* Bump version: 0.5.13 → 0.5.14. [Alexander Böhn]
 
 * Sorted out directory-excludes for documentation. [Alexander Böhn]
 
-* Bump version: 0.5.12 → 0.5.13. [Alexander Böhn]
-
-* Bump version: 0.5.11 → 0.5.12. [Alexander Böhn]
-
 * Requiring a minimal “pout” [Alexander Böhn]
 
-* Bump version: 0.5.10 → 0.5.11. [Alexander Böhn]
-
 * Updating, slash juggling, requirements. [Alexander Böhn]
-
-* Bump version: 0.5.9 → 0.5.10. [Alexander Böhn]
 
 * Simplifying “super(…)” calls in “clu.config” [Alexander Böhn]
 
@@ -3148,8 +3386,6 @@
 * Toggle test function verbosity based on output mode. [Alexander Böhn]
 
 * The beginnings of JSON reporting output for the inline tester. [Alexander Böhn]
-
-* Bump version: 0.5.8 → 0.5.9. [Alexander Böhn]
 
 * Maintaining legacy make targets for the consts and modules scripts. [Alexander Böhn]
 
@@ -3188,8 +3424,6 @@
 * Whitespace. [Alexander Böhn]
 
 * Relocated the old “clu.config” env API to “clu.config.base” ... this is, like, a temporary situation – so everything from the     original “NamespacedMutableMapping”-related “clu.config” fiasco     can more or less live in this “base” module – keeping the tests     working, and the few annyoingly dependent other parts of the     system from having a flying shit attack ... and then so right now “clu.config.env” is actually empty, but     *now* we can start to migrate everything to the all-new and     improved “KeyMap”-based shit, which until recently was entirely     confined in “clu.config.defg” but now includes:     * clu.config.abc     * clu.config.defg     * clu.config.env COMING SOON!!     * clu.config.keymapview     * clu.config.nsutils     * clu.config.proxy ... yeah! Fuck yeah my doggie, indeed. [Alexander Böhn]
-
-* Bump version: 0.5.7 → 0.5.8. [Alexander Böhn]
 
 * Continuing the Great DEFG Split-Up… ... successfully moved FrozenKeyMap, KeyMap, NamespaceWalker, and     related base classes to “clu.config.abc” ... global-find-and-replace updated all the references to same ... tossed the NamespacedMutableMapping ABC into “clu.config.base”     for the time being, and global-find-and-replaced its references ... juggled and re-juggled all the relevant imports ... updated the ‘repl-bpython.py’ script ... other related nonsense. [Alexander Böhn]
 
@@ -3242,8 +3476,6 @@
 
 * TURN THAT SHIT OFF. [Alexander Böhn]
 
-* Bump version: 0.5.6 → 0.5.7. [Alexander Böhn]
-
 * CHANGES DEEMED TO HAVE BEEN LOGGED. [Alexander Böhn]
 
 * Parity-check ‘twixt “clu.dicts.ChainMap” and “collections.ChainMap” ... surprisingly, without any extracurricular coaxing on my part,     “__eq__(…)” works butter-smooth between both types, as does     constructing a CLU ChainMap from a standard-library instance     (although the opposite path remains unhiked for now, gah) [Alexander Böhn]
@@ -3259,8 +3491,6 @@
 * Tried a different “__len__()” implementation: it’s exactly the same ... speedwise at least. It’s more explicit, but also uglier (if you     were to ask me, which you most certainly did not, but hey –     c’est la guerre, no?) [Alexander Böhn]
 
 * Made the inline testsuite for “clu.dicts” into a real actual thing ... and the verdict is, “clu.dicts.ChainMap.flatten()” is horribly     inefficient but everything else is totally rad doggie. [Alexander Böhn]
-
-* Bump version: 0.5.5 → 0.5.6. [Alexander Böhn]
 
 * Spicing up the bpython REPL with more datastructure samples ... pre-made and ready-to-eat!! [Alexander Böhn]
 
@@ -3318,8 +3548,6 @@
 
 * Updated the “clu.testing.utils.InlineTester” docstring ... now the code sample illustrates returning POSIX status values. [Alexander Böhn]
 
-* Bump version: 0.5.4 → 0.5.5. [Alexander Böhn]
-
 * Integrating “gitchangelog” and taking it for a trial run. [Alexander Böhn]
 
 * A fine Commit #1,000 as any: preservation of namespace insert-order ... happy order-of-magnitude-aversary, my dear CLU, and salud! [Alexander Böhn]
@@ -3329,8 +3557,6 @@
 * First draft of “KeyMapView” and “KeyMapProxy” ... which those are ‘FrozenKeyMap’ and ‘KeyMap’ types, respectively,     that wrap weakrefs to actual KeyMap instances and forward method     calls to those instances down from the public API. ... includes a decorator “@selfcheck” that tests the Truthiness of     the ‘self’ instance before the actual method invocation and     raises a ‘ValueError’ for any and all unworthy instance values. ... tests and all that other hoohah to follow, after I veg out     with the cats and some kombucha and watch me some YouTube. [Alexander Böhn]
 
 * Generators beat constructed lists. [Alexander Böhn]
-
-* Bump version: 0.5.3 → 0.5.4. [Alexander Böhn]
 
 * How many commits are just, however circuitously, pushing whitespace? [Alexander Böhn]
 
@@ -3401,8 +3627,6 @@
 * Docstring updates for “ProxyModule” and “ChainModuleMap” ... the callable/‘__missing__(…)’ stuff has had the shit documented     out of it. [Alexander Böhn]
 
 * “clu.importing.ProxyModule” knows about module ‘__getattr__(…)’ ... and “MappingType.__missing__(…)” too, and callables in general. [Alexander Böhn]
-
-* Bump version: 0.5.2 → 0.5.3. [Alexander Böhn]
 
 * Ensuring no duplication occurs when initializing ProxyModules ... also, it seems I misunderstood the use of the “module” param     accepted by “collections.namedtuple”… erm. [Alexander Böhn]
 
@@ -3480,8 +3704,6 @@
 
 * Ensure that “git_version_tags(…)” uses the project base directory. [Alexander Böhn]
 
-* Bump version: 0.5.1 → 0.5.2. [Alexander Böhn]
-
 * Updated “clu-version” to output a Git version tag, if present. [Alexander Böhn]
 
 * Propagated the docstrings. [Alexander Böhn]
@@ -3511,8 +3733,6 @@
 * Updating the primary “@inline” docstring. [Alexander Böhn]
 
 * Revised the @inline test decorator mechanism ... to wit: it is now implemented as a class that is instanced     automatically via module ‘__getattr__(…)’ each time it is     requested for import ... this makes managing the stopwatch instances and the decorated     functions, as instance attributes, way way easier ... plus it eliminates the need for the clunky “vars()” argument     to all the “inline.test()” calls ... a few other revisions were made during these changes (most     notably the elimination of the “collection phase” in the main     stopwatch report – but that was kind of stupid anyway) [Alexander Böhn]
-
-* Bump version: 0.5.0 → 0.5.1. [Alexander Böhn]
 
 * Actual inline tests for @inline and friends. [Alexander Böhn]
 
@@ -3676,8 +3896,6 @@
 
 * Module-importing “clu.constants.consts” instead of cherry-picking. [Alexander Böhn]
 
-* Bump version: 0.4.10 → 0.5.0. [Alexander Böhn]
-
 * Made “clu.importint.ProxyModule” a real thing ... with tests (both inline and unitary), docstrings and notes,     differentiated support functions and classes… YOU NAME IT ... !!!!!!!!!!!!!!!!!! FUCK YES !!!!!!!!!!!!!!!!!!! [Alexander Böhn]
 
 * Further notations, errata, and error-message minutiae. [Alexander Böhn]
@@ -3722,8 +3940,6 @@
 
 * Noting possible one-liner for “installed_appnames()” impl. [Alexander Böhn]
 
-* Bump version: 0.4.9 → 0.4.10. [Alexander Böhn]
-
 * Updated/refactored some of “clu.fs.pypath” ... “pypath.append_path(…)” has been renamed “pypath.add_path(…)”,     and it now accepts a keyword-only argument ‘prepend=True’ to,     y’know, prepend its payload to ‘sys.path’ instead of appending. ... “pypath.remove_invalid_paths()” calls ‘site.removeduppaths()’     before doing anything to ‘sys.path’ ... There’s a new convenience function “pypath.enhance(…)” which     is basically sugar for calling “remove_invalid_paths()” ahead     of calling “add_path(…)” – which as already noted now also     includes a call to ‘site.removeduppaths()’ ... the REPL script imports “clu.fs.pypath” as a module, instead     of picking through its exported functions ... many tests make use of new “clu.fs.pypath.enhance(…)” function. [Alexander Böhn]
 
 * Moved the “pytester” requirement into the CLU pytest plugin proper. [Alexander Böhn]
@@ -3735,8 +3951,6 @@
 * Moved “clu.shelving.dispatch” down to “clu.dispatch” ... as it is clearly bigger than just the nascent ‘shelving’ module. [Alexander Böhn]
 
 * Made “clu.fs.filesystem.TemporaryFileWrapper” an explicit Iterable ... as in, it inherits from ‘collections.abc.Iterable’ ... also added 'pytester' to the test plugins loaded in conftest.py. [Alexander Böhn]
-
-* Bump version: 0.4.8 → 0.4.9. [Alexander Böhn]
 
 * Split off async parts of “clu.abstract.ManagedContext” ... into “clu.abstract.AsyncManagedContext” [duh] ... also added tests for the former. [Alexander Böhn]
 
@@ -3764,13 +3978,7 @@
 
 * REPL script updates. [Alexander Böhn]
 
-* Bump version: 0.4.7 → 0.4.8. [Alexander Böhn]
-
 * Typographic eratta en extremis. [Alexander Böhn]
-
-* Bump version: 0.4.6 → 0.4.7. [Alexander Böhn]
-
-* Bump version: 0.4.5 → 0.4.6. [Alexander Böhn]
 
 * SIG-WINCH!!!!! [Alexander Böhn]
 
@@ -3785,8 +3993,6 @@
 * Exit handle functions execute properly from signal handlers. [Alexander Böhn]
 
 * More tweaks to async signal-handler demo code. [Alexander Böhn]
-
-* Bump version: 0.4.4 → 0.4.5. [Alexander Böhn]
 
 * Some minutiae in “clu.shelving.dispatch.test(…)” [Alexander Böhn]
 
@@ -3816,8 +4022,6 @@
 
 * Clarified a few things in “clu.config.filebase” [Alexander Böhn]
 
-* Bump version: 0.4.3 → 0.4.4. [Alexander Böhn]
-
 * Escaping a raw regex string. [Alexander Böhn]
 
 * Getting rid of polyfill “walk(…)” and “scandir(…)” [Alexander Böhn]
@@ -3833,8 +4037,6 @@
 * Abstracted the “exclude” bit from two “clu.fs.filesystem” methods ... namely: “clu.fs.filesystem.Directory.importables(…)” and its     cousin, “clu.fs.filesystem.Directory.suffix_histogram(…)”, and     stowed the logic of said bit in a function in “clu.fs.misc”. [Alexander Böhn]
 
 * Git-ignoring Redis artifacts. [Alexander Böhn]
-
-* Bump version: 0.4.2 → 0.4.3. [Alexander Böhn]
 
 * I keep thinking I fixed “clu.repl.ansi.print_ansi_centered(¬)…” ... and then it turns out there is yet another corner-case causing     it to be off by one or two filler characters in some situation     or another – likely one brought about by the last “fix” – but     I really do think I’ve nailed it this time, famous last words,     OK we shall see now won’t we doggie yeah. [Alexander Böhn]
 
@@ -3854,8 +4056,6 @@
 
 * Finally we can eschew “clu.constants.data.MODNAMES”!… ... in favor of an actual programmatically-generated list of the     project’s importable file-based submodules ... the current method “clu.fs.filesystem.Directory.importables(…)”     is pretty comprehensive, for something hacked together quickly     and out of frustration ... TODOs of course are: *) split that lambda off into some kind of     reusable exclude-list shit in “clu.fs.misc”, and add some tests     and sensible defaults and yadda-yadda; *) check to see if this     has any value outside of this particular application; and other     such shit ... YES!!! YES DOGG THIS WAS ON MY PERSONAL SHIT-LIST FOR A WHILE     NOW SO I CAN START THE DAY HAPPY OKAY?? [Alexander Böhn]
 
-* Bump version: 0.4.1 → 0.4.2. [Alexander Böhn]
-
 * Properly set “_executed” flag on modules lacking an “__execute__()” [Alexander Böhn]
 
 * Whitespace. [Alexander Böhn]
@@ -3865,8 +4065,6 @@
 * Getting “lru_cache” in “clu.exporting” directly from ‘functools’ [Alexander Böhn]
 
 * One-character typo fix. [Alexander Böhn]
-
-* Bump version: 0.4.0 → 0.4.1. [Alexander Böhn]
 
 * Less precision is OK with me in this case. [Alexander Böhn]
 
@@ -3970,8 +4168,6 @@
 
 * Minor docstring manscaping. [Alexander Böhn]
 
-* Bump version: 0.3.9 → 0.4.0. [Alexander Böhn]
-
 * Clarified “appname” parameters ... and, may I just say: I am really, really happy with the whole     class-based module implementation that’s in “clu.importing”.     If I can just say. Yes! [Alexander Böhn]
 
 * Docstrings, tests, nitpicks, consolidations, and such. [Alexander Böhn]
@@ -3997,8 +4193,6 @@
   ... still – awesome, tho, yes? I think yes.
 
 * Directly using “collections.abc” in “clu.typespace.namespace” [Alexander Böhn]
-
-* Bump version: 0.3.8 → 0.3.9. [Alexander Böhn]
 
 * Caching module specs in “clu.importing” ... this works across all “clu.importing.FinderBase” subclasses –     meaning for all defined appnames – short-circuting spec lookups     within “sys.meta_path” to the first “FinderBase” subclass when     the spec in question is in the cache. TAKE THAT, LATENCY. [Alexander Böhn]
 
@@ -4096,15 +4290,9 @@
 
 * Well pypy3 is •trying• to run the testsuite in tox. [Alexander Böhn]
 
-* Bump version: 0.3.7 → 0.3.8. [Alexander Böhn]
-
 * Manual version adjust. [Alexander Böhn]
 
 * Manual version adjust. [Alexander Böhn]
-
-* Bump version: 0.3.6 → 0.3.7. [Alexander Böhn]
-
-* Bump version: 0.3.5 → 0.3.6. [Alexander Böhn]
 
 * Conditional deep-copying in “FlatOrderedSet”’s “clone(…)” logic. [Alexander Böhn]
 
@@ -4137,8 +4325,6 @@
 * Rewrote and sort-of optimized “clu.fs.misc.stringify(…)” ... also did some more nitpickery with the “clu.config” ABCs and     added more miscellany in general within “clu.fs.misc” as does     befit its name. [Alexander Böhn]
 
 * The tox settings had somehow become awry, so I un-awrized them. [Alexander Böhn]
-
-* Bump version: 0.3.4 → 0.3.5. [Alexander Böhn]
 
 * Moved config’s abstract bases into a new “clu.config.abc” module ... and all the myriad changes that go along with such. [Alexander Böhn]
 
@@ -4190,15 +4376,9 @@
 
 * Clarified the parent module of “remove_invalid_paths(…)” [Alexander Böhn]
 
-* Bump version: 0.3.3 → 0.3.4. [Alexander Böhn]
-
 * Requiring PyYAML. [Alexander Böhn]
 
-* Bump version: 0.3.2 → 0.3.3. [Alexander Böhn]
-
 * Including TOML files in MANIFEST.in. [Alexander Böhn]
-
-* Bump version: 0.3.1 → 0.3.2. [Alexander Böhn]
 
 * Bugfixes in “clu.config” – ... better None-checks in “clu.config.env” ... force-stringify arg in “clu.confiig.settings.Schema.nestify(…)” ... check type before length in “clu.config.fieldtypes.StringField” ... many updates and tweaks to the “clu.fs.appdirectories” module ... testing package EnvBase subclasses and custom schema classes     in “test_config.py” ... miscellaneous changes to support all of the above shit. [Alexander Böhn]
 
@@ -4242,8 +4422,6 @@
 
 * Trying to get the PyPy testenv to actually use PyPy, like it used to. [Alexander Böhn]
 
-* Bump version: 0.3.0 → 0.3.1. [Alexander Böhn]
-
 * Some tox.ini adjustments. [Alexander Böhn]
 
 * Raising when calling “flatten(…)” on a nonexistant Directory. [Alexander Böhn]
@@ -4256,17 +4434,11 @@
 
 * Updating the hardcoded module list. [Alexander Böhn]
 
-* Bump version: 0.2.10 → 0.3.0. [Alexander Böhn]
-
 * Test for “clu.fs.filesystem.script_path(…)” no longer xfails. [Alexander Böhn]
-
-* Bump version: 0.2.9 → 0.2.10. [Alexander Böhn]
 
 * Moved “scripts” directory into the CLU module base proper. [Alexander Böhn]
 
 * F-strings in “clu/__init__.py. [Alexander Böhn]
-
-* Bump version: 0.2.8 → 0.2.9. [Alexander Böhn]
 
 * Stubbing out migration methods in “clu.keyvalue.CLUInterface” [Alexander Böhn]
 
@@ -4330,8 +4502,6 @@
 
 * Prevent leakage from the “clu.fs.filesystem.TypeLocker” metalclass ... specifically, all classes for which TypeLocker was their meta     – we still need a good word for that – would receive a “types”     attribute that was a reference to an OrderedDict full of all     of those classes, as kept internally by TypeLocker for its own     housekeeping purposes. That was a downside of its use, as this     attribute was kind of hanging out in the open, using a fairly     common name with no underscore-prefixing (something I kind of     loathe, personally, but that’s me) or other indication of what     it was or what it was for or how shit could break if it were     to be improperly fucked with. ... This solves the problem by overshadowing the “types” attribute     with a read-only “clu.exporting.ValueDescriptor” instance on     all generated classes. [Alexander Böhn]
 
-* Bump version: 0.2.7 → 0.2.8. [Alexander Böhn]
-
 * Rewrote “ls(…)” and “ls_la(…)” from “clu.fs.filesystem.Directory” ... to use the new less-cumbersomely-verbose modes of dealing with     “clu.fs.misc.suffix_searcher(…)” [Alexander Böhn]
 
 * Rewrote a lot of “clu.fs.filesystem.Directory.flatten(…)” ... as well as rewrites in “clu.fs.misc.suffix_searcher(…)” and     “clu.testing.utils.countfiles(…)” – the latter of which now     also takes a “suffix” argument to only count files matching     a specific suffix, like duh ... expanded the “flatten(…)” method tests to cover all the new     combos of using the suffix-related arguments and double-checked     the output of everything and whatnot ... ALSO FIXED MANY BUUUUUUUGGS. [Alexander Böhn]
@@ -4340,11 +4510,7 @@
 
 * Confirming the counts of the flattened directory contents ... using a “countfiles(…)” function, which in itself isn’t really     any type of anything – but its existence did necessitate the     creation of a new “clu.testing.utils” module. [Alexander Böhn]
 
-* Bump version: 0.2.6 → 0.2.7. [Alexander Böhn]
-
 * I think it’s irritating how .jpg and .jpeg are valid JPEG suffixes. [Alexander Böhn]
-
-* Bump version: 0.2.5 → 0.2.6. [Alexander Böhn]
 
 * We now have a “Directory.flatten(…)” instance method ... plus a working test stub, plus helper methods (one of which let     us rewrite some of “Directory.zip_archive(…)” to omit inlining     the “relparent(…)” lambda). I wrote all of this up at the bar     while standing up and drinking whiskey talking intermittently     to other patrons so I am calling this effort NOT BAD AT ALL. [Alexander Böhn]
 
@@ -4352,29 +4518,17 @@
 
 * The “clu.fs.filesystem.script_path()” function is poorly behaved ... particularly in normal sdist installs. Its test code has been     branded with the shameful and dreaded X-FAIL for the moment. [Alexander Böhn]
 
-* Bump version: 0.2.4 → 0.2.5. [Alexander Böhn]
-
 * Getting rid of root-level conftest.py, in favor of “clu.testing” [Alexander Böhn]
 
 * A docstring! A docstring for this function straight away!!! ... if you say it in like a King Arthur voice it’s kinda funny. [Alexander Böhn]
 
 * This is evidently how console-script endpoints should work. [Alexander Böhn]
 
-* Bump version: 0.2.3 → 0.2.4. [Alexander Böhn]
-
 * Made the stupid little version-string script a setuptools entrypoint. [Alexander Böhn]
-
-* Bump version: 0.2.2 → 0.2.3. [Alexander Böhn]
 
 * Moving the pytest fixtures that use CLU formally into the project. [Alexander Böhn]
 
-* Bump version: 0.2.1 → 0.2.2. [Alexander Böhn]
-
-* Bump version: 0.2.0 → 0.2.1. [Alexander Böhn]
-
 * Made the “clu.typespace.namespace.SimpleNamespace” type “hashable” [Alexander Böhn]
-
-* Bump version: 0.1.9 → 0.2.0. [Alexander Böhn]
 
 * Clarified the “clu.naming.moduleof(…)” docstring. [Alexander Böhn]
 
@@ -4383,8 +4537,6 @@
 * Clarified the “clu.naming.nameof(…)” docstring. [Alexander Böhn]
 
 * Whitespace. [Alexander Böhn]
-
-* Bump version: 0.1.8 → 0.1.9. [Alexander Böhn]
 
 * Whitespace. [Alexander Böhn]
 
@@ -4447,8 +4599,6 @@
 
 * Cleaned up tox.ini. [Alexander Böhn]
 
-* Bump version: 0.1.7 → 0.1.8. [Alexander Böhn]
-
 * Split off testing requirements into tox.txt. [Alexander Böhn]
 
 * Requiring docopt in requirements/install.txt. [Alexander Böhn]
@@ -4495,8 +4645,6 @@
 * Converted an outlying ‘%’-style format string to an f-string. [Alexander Böhn]
 
 * Exporting “clu.repl.ansi.evict_announcer(…)” in all the right places. [Alexander Böhn]
-
-* Bump version: 0.1.6 → 0.1.7. [Alexander Böhn]
 
 * Tests for “clu.exporting.Exporter” instance registry. [Alexander Böhn]
 
@@ -4635,8 +4783,6 @@
 
   ... YEAH!!!
 
-* Bump version: 0.1.5 → 0.1.6. [Alexander Böhn]
-
 * All sorts of new numpy-related shizziach. [Alexander Böhn]
 
 * Clu.repl.ansi.ansidoc(…) is now variadic ... call it with all the things, feel free ... or just use it with `pythonpy`: [Alexander Böhn]
@@ -4707,8 +4853,6 @@
 
 * Finally, a clu.fs.filesystem test for Zipfile archiving. [Alexander Böhn]
 
-* Bump version: 0.1.4 → 0.1.5. [Alexander Böhn]
-
 * We no longer have to delete things from modules ... lest anyone forget, that’s why we wrote all that exporter stuff. [Alexander Böhn]
 
 * Moved “scandir” and “walk” imports to clu.constants.polyfills. [Alexander Böhn]
@@ -4724,8 +4868,6 @@
 * Made the Makefile look slightly less like drunken spider footprints ... there is actually a “make test” target after all these years;     there are separate rules to purge build and test artifacts (the     latter of which have been piling up it would seem); some things     make sense now to do before other things, blah blah ITS ANOTHER     MAKEFILE COMMIT OKAY? You know EXACTLY what it is and YOU DON’T     GIVE A FUUUUUUCK. Who can blame you? I’ll let you know when the     diff is something of consequence in a language you like, okay     my doggie? Fuck yes. [Alexander Böhn]
 
 * Keeping Makefile tasks from wreaking mayhem with native extensions ... one rule, written for a Cython-based project, was going through     and unceremoniously purging everything that had an *.so suffix,     which in this case was not so much Cython artifacts as it was     all the helpfully compiled bits of installed modules like oh     you know NUMPY and all its friends dogg what the fuck! OK so     fixed. Whooooooops. [Alexander Böhn]
-
-* Bump version: 0.1.3 → 0.1.4. [Alexander Böhn]
 
 * The clu.compilation.macros module had lost its ever-crucial TOKEN! ... It also had docstrings on one class but not the other, for some     stupid reason – I evened that shit up and fixed it. [Alexander Böhn]
 
@@ -4747,8 +4889,6 @@
 * Moving development-environment REPL scriptlets into the codebase… [Alexander Böhn]
 
 * Fleshed out clu.repl.ansi.ANSIFormat a bit ... meaning I stole a few of the best bits from VersionInfo (which     is also a NamedTuple ancestor) and adapted them, particularly     for construction ... tried to figure out WTF is with bpython and printing ANSI and     got rather much nowhere ... All of the ANSI-enmeta’d enums – or OK pal what is •your• cool     word for “classes that employt the indicated classtype as their     metaclass” – now cache their “Type.for_name('string')” lookups,     which were potentially doing linear scans of both internal dict     sets (`__members__` *and* `__aliases__` motherfucker) and while     I personally never experienced slow performance or behavior on     this operation, the fact that it could have concievably been     pathologically there sometime in the far-off future led me to     choose this issue as my PREMATURE OPTIMIZATION OF THE WEEK!!!! [Alexander Böhn]
-
-* Bump version: 0.1.2 → 0.1.3. [Alexander Böhn]
 
 * Only using Python versions currently available locally in tox.ini. [Alexander Böhn]
 
@@ -4797,8 +4937,6 @@
 * Noodled around with the project Makefile, pt. II. [Alexander Böhn]
 
 * Noodled around with the project Makefile. [Alexander Böhn]
-
-* Bump version: 0.1.1 → 0.1.2. [Alexander Böhn]
 
 * Amended clu.predicates accessor lambdas with call signatures. [Alexander Böhn]
 
@@ -4921,8 +5059,6 @@
 * Marked string as raw in clu/version/read_version.py. [Alexander Böhn]
 
 * Uncrustified and updated setup.py. [Alexander Böhn]
-
-* Bump version: 0.1.0 → 0.1.1. [Alexander Böhn]
 
 * Updated .bumpversion.cfg ... thanks to read_version.py I no longer have to update a bajillion     backup __version__ strings, and so. [Alexander Böhn]
 

@@ -11,6 +11,7 @@ include appveyor.yml
 include codecov.yml
 
 include ABOUT.md
+include CITATION.cff
 include CHANGELOG.md
 include CLASSIFIERS.txt
 include CLU_Treatment.md

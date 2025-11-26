@@ -14,8 +14,18 @@ import sys
 
 from clu.constants.consts import STRINGPAIR, WHITESPACE, NoDefault
 from clu.config.abc import FlatOrderedSet as FOSet
-from clu.naming import qualified_name
-from clu.typology import iterlen
+from clu.naming import isbuiltin, nameof, qualified_name
+from clu.typespace.namespace import isnamespace
+
+from clu.predicates import (haspyattr, or_none,
+                            getitem, finditem, try_items,
+                            item_search, item_across,
+                            tuplize, typeof)
+
+from clu.typology import (iterlen, subclasscheck,
+                          ismapping, isstring,
+                          isset, issequence)
+
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)
@@ -115,11 +125,13 @@ class ChainRepr(Repr):
     
     def subrepr(self, thing, level):
         """ An internal “core” repr helper method. """
-        from clu.typology import ismapping
-        
         # For mappings, go down another level:
         if ischainmap(thing) or ismapping(thing):
             return self.repr1(thing, level - 1)
+        
+        # for sequences, use “seqrepr(…)”:
+        if isset(thing) or issequence(thing):
+            return self.repr1(tuplize(thing), level - 1)
         
         # For everything else, defer to the type:
         return repr(thing)
@@ -137,17 +149,29 @@ class ChainRepr(Repr):
             item = STRINGPAIR.format(key, self.subrepr(mapping[key], level))
             return f"{{ {item} }}"
         
-        # Format all items:
+        # Pair all key-values off into individual items:
         items = tuple(STRINGPAIR.format(key, self.subrepr(mapping[key], level)) \
                                     for key in mapping.keys())
+        
+        # Format the item list as a sequence
+        return self.seqrepr(items, level)
+    
+    def seqrepr(self, sequence, level):
+        """ The internal method for “core” repr production of
+            any and all sequence data
+        """
+        if len(sequence) == 0:
+            return "[]"
+        elif len(sequence) == 1:
+            return f"'{sequence[0]}'"
         
         # Compute indentation levels:
         ts = "    " * (int(self.maxlevel - level) + 1)
         ls = "    " * (int(self.maxlevel - level) + 0)
-        total = (f",\n{ts}").join(items)
+        total = (f",\n{ts}").join(sequence)
         
         # Return the formatted map contents:
-        return f"{{ \n{ts}{total}\n{ls}}}"
+        return f"[[ \n{ts}{total}\n{ls}]]"
     
     def toprepr(self, chainmap, level):
         """ The “top-level” ChainMap-specific repr method –
@@ -155,7 +179,6 @@ class ChainRepr(Repr):
             that comprise the ChainMap instance, and dispatch
             sub-repr method calls accordingly.
         """
-        from clu.naming import isbuiltin, nameof
         from clu.testing.utils import multiple
         
         # Typename and map item counts:
@@ -243,6 +266,24 @@ class ChainRepr(Repr):
     def repr_FrozenNested(self, mapping, level):
         return self.primerepr(mapping, level)
     
+    def repr_set(self, sequence, level):
+        return self.seqrepr(tuplize(sequence), level)
+    
+    def repr_frozenset(self, sequence, level):
+        return self.seqrepr(tuplize(sequence), level)
+    
+    def repr_list(self, sequence, level):
+        return self.seqrepr(sequence, level)
+    
+    def repr_tuple(self, sequence, level):
+        return self.seqrepr(sequence, level)
+    
+    def repr_generator(self, sequence, level):
+        return self.seqrepr(tuplize(sequence), level)
+    
+    def repr_FlatOrderedSet(self, sequence, level):
+        return self.seqrepr(tuplize(sequence.things), level)
+    
     def shortrepr(self, thing):
         """ Return the “short” repr of a chainmap instance –
             all whitespace will be condensed to single spaces
@@ -321,7 +362,6 @@ class ChainMap(collections.abc.MutableMapping,
         raise KeyError(key)
     
     def __getitem__(self, key):
-        from clu.predicates import try_items
         try:
             return try_items(key, *self.maps)
         except KeyError:
@@ -354,7 +394,6 @@ class ChainMap(collections.abc.MutableMapping,
         """
         if default is NoDefault:
             return self[key]
-        from clu.predicates import getitem
         return getitem(self, key, default=default)
     
     def mapchain(self):
@@ -439,7 +478,6 @@ class ChainMap(collections.abc.MutableMapping,
             containing an item by the specified name, may optionally
             be passsed in as well.
         """
-        from clu.predicates import finditem
         if default is NoDefault:
             return finditem(itx, *self.maps) or { itx : self.__missing__(itx) }
         return finditem(itx, *self.maps, default=default)
@@ -517,7 +555,6 @@ class ChainMapPlusPlus(ChainMap):
     
     def getall(self, key, default=NoDefault):
         """ Return all values for a key. """
-        from clu.predicates import item_across
         if default is NoDefault:
             return item_across(key, *self.dicts) or self.__missing__(key)
         return item_across(key, *self.dicts, default=default)
@@ -550,7 +587,6 @@ def ischainmap(thing):
         focus on. I didn’t want to disappoint. Now I miss everybody,
         is it still light outside?
     """
-    from clu.typology import subclasscheck
     return subclasscheck(thing, (ChainMap, collections.ChainMap))
 
 # DICT FUNCTIONS: dictionary-merging
@@ -623,7 +659,6 @@ def merge_two(one, two, *, cls=dict, **overrides):
         
         Based on this docopt example source: https://git.io/fjCZ6
     """
-    from clu.predicates import typeof, item_search
     cls = typeof(cls or one)
     zero = dict(overrides)
     keys = tuple(frozenset(zero.keys()) | frozenset(one.keys()) | frozenset(two.keys()))
@@ -635,7 +670,6 @@ def merge_as(*dicts, cls=dict, **overrides):
     """ Merge all dictionary arguments into a new instance of the specified class,
         passing all additional keyword arguments to the class constructor as overrides
     """
-    from clu.predicates import typeof, item_search
     cls = typeof(cls or (dicts and dicts[0] or dict))
     dicts = [dict(overrides), *dicts]
     keyset = set()
@@ -658,9 +692,6 @@ def merge(*dicts, **overrides):
 @export
 def asdict(thing): # pragma: no cover
     """ asdict(thing) → returns either thing, thing.__dict__, or dict(thing) as necessary """
-    from clu.predicates import haspyattr, or_none, typeof
-    from clu.typology import ismapping
-    from clu.typespace.namespace import isnamespace
     if typeof(thing) is thing:
         return thing
     if isnamespace(thing):
@@ -697,7 +728,6 @@ def test():
     from clu.constants.consts import TEST_PATH
     from clu.constants.data import XDGS
     from clu.fs.filesystem import Directory
-    from clu.predicates import try_items
     from clu.testing.utils import inline
     import os
     

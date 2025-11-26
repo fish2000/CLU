@@ -30,3 +30,8 @@ replace = """__version__ = '{new_version}'"""
 filename = "clu/__version__.py"
 search = """__version__ = '{current_version}'"""
 replace = """__version__ = '{new_version}'"""
+
+[[tool.bumpversion.files]]
+filename = "CITATION.cff"
+search = """version: {current_version}"""
+replace = """version: {new_version}"""

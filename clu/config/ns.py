@@ -40,6 +40,24 @@ def clean_ns(nskey):
     return out
 
 @export
+def get_ns_and_key(nskey):
+    """ Get the namespace and key portion of a namespaced key, as a packed
+        string and a bare key, respectively.
+    """
+    rpartition = clean_ns(nskey).rpartition(NAMESPACE_SEP)
+    return rpartition[0], rpartition[-1]
+
+@export
+def compare_ns(iterone, itertwo):
+    """ Boolean predicate to compare a pair of namespace iterables, value-by-value """
+    for one, two in zip_longest(iterone,
+                                itertwo,
+                                fillvalue=NoDefault):
+        if one != two:
+            return False
+    return True
+
+@export
 def concatenate_ns(*fragments):
     """ Return the given namespace(s), concatenated with the
         namespace separator.
@@ -65,6 +83,17 @@ def split_ns(namespaced):
     return clean_ns(namespaced).split(NAMESPACE_SEP)
 
 @export
+def namespace_matches(namespace, prefix):
+    """ Return True if the given namespace matches the given prefix.
+        
+        A match occurs if the namespace is exactly equal to the prefix,
+        or if the namespace starts with the prefix followed by a separator.
+    """
+    if namespace == prefix:
+        return True
+    return namespace.startswith(f"{prefix}{NAMESPACE_SEP}")
+
+@export
 def startswith_ns(putative, prefix):
     """ Boolean predicate to compare a pair of namespace iterables,
         returning True if the first starts with the second.
@@ -75,7 +104,7 @@ def startswith_ns(putative, prefix):
     """
     putative_ns = concatenate_ns(*putative)
     prefix_ns = concatenate_ns(*prefix)
-    return putative_ns.startswith(prefix_ns)
+    return namespace_matches(putative_ns, prefix_ns)
 
 @export
 def validate_ns(*fragments):
@@ -118,24 +147,6 @@ def pack_ns(key, *fragments):
 def get_ns(nskey):
     """ Get the namespace portion of a namespaced key as a packed string. """
     return clean_ns(nskey).rpartition(NAMESPACE_SEP)[0]
-
-@export
-def get_ns_and_key(nskey):
-    """ Get the namespace and key portion of a namespaced key, as a packed
-        string and a bare key, respectively.
-    """
-    rpartition = clean_ns(nskey).rpartition(NAMESPACE_SEP)
-    return rpartition[0], rpartition[-1]
-
-@export
-def compare_ns(iterone, itertwo):
-    """ Boolean predicate to compare a pair of namespace iterables, value-by-value """
-    for one, two in zip_longest(iterone,
-                                itertwo,
-                                fillvalue=NoDefault):
-        if one != two:
-            return False
-    return True
 
 # ENVIRONMENT-VARIABLE MANIPULATION API:
 

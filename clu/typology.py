@@ -263,7 +263,7 @@ export(samelength,      name='samelength',  doc="samelength(a, b) → boolean pr
 export(differentlength, name='differentlength', doc="differentlength(a, b) → boolean predicate, True if both `len(a)` and `len(b)` are defined, but are unequal")
 export(isunique,        name='isunique',    doc="isunique(thing) → boolean predicate, True if `thing` is an iterable with unique contents")
 
-export(casefold,        name='isunique',    doc="casefold(string) → string transformer, lowercases `string`")
+export(casefold,        name='casefold',    doc="casefold(string) → string transformer, lowercases `string`")
 export(multiply,        name='multiply',    doc="multiply(*things) → iterable transformer, makes `things` into `product(things, reverse(things))`")
 export(comparer,        name='comparer',    doc="comparer(boolean, tup) → boolean `reduce(…)` predicate, returns `boolean & (tup[0] == tup[1])`")
 export(checkall,        name='checkall',    doc="checkall(*things) → list predicate, True if `things` all compare equal")

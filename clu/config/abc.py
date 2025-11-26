@@ -234,20 +234,20 @@ class FrozenKeyMap(FrozenKeyMapBase):
 @export
 class KeyMap(KeyMapBase, FrozenKeyMap):
     
-    """ The abstract base class for mutable namespaced mappings (nee "KeyMaps").
+    """ The abstract base class for mutable namespaced mappings (née “KeyMaps”).
         
         Subclasses must implement all the requisite Python dunder methods required by
-        the ancestor "FrozenKeyMap", like e.g. '__iter__', '__len__' &c, plus also a
-        "namespaces()" method which takes no arguments and iterates in order over all
-        namespaces contained in the KeyMaps keys.
+        the ancestor “FrozenKeyMap”, like e.g. ‘__iter__’, ‘__len__’ &c, plus also a
+        “namespaces()” method which takes no arguments and iterates in order over all
+        namespaces contained in the KeyMap’s keys.
         
-        OK AND FURTHERMORE for mutability, you also need to do your own '__setattr__'
-        and '__delattr__' (which maybe we'll make that last one optional as delete
-        methods in Python are totally gauche and a sign of a sort of naive vulgar
+        OK AND FURTHERMORE for mutability, you also need to do your own ‘__setattr__’
+        and ‘__delattr__’ (which maybe we’ll make that last one optional as delete
+        methods in Python are totally gauche and a sign of a sort of naïve vulgar
         un-Pythonicism, I feel like).
         
-        Optionally one may override '__missing__', which can be kind of interesting,
-        and '__bool__' which generally is less so. Q.v. the "FrozenKeyMapBase" source
+        Optionally one may override ‘__missing__’, which can be kind of interesting,
+        and ‘__bool__’ which generally is less so. Q.v. the “FrozenKeyMapBase” source
         supra. for further deets, my doggie
     """
     

@@ -15,6 +15,7 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, PROJECT_NAME, NoDefault
 from clu.constants.consts import ENVIRONS_SEP, NAMESPACE_SEP
+from clu.config.ns import namespace_matches
 from clu.predicates import isiterable
 from clu.typology import iterlen, ismapping
 from clu.exporting import Exporter
@@ -196,13 +197,13 @@ class Flat(NamespacedMutableMapping,
         if namespace is None:
             return self.dictionary.keys()
         return (key for key in self.dictionary.keys() \
-                     if key.startswith(namespace + NAMESPACE_SEP))
+                     if namespace_matches(key, namespace))
     
     def values(self, namespace=None):
         if namespace is None:
             return self.dictionary.values()
         return (value for key, value in self.dictionary.items() \
-                       if key.startswith(namespace + NAMESPACE_SEP))
+                       if namespace_matches(key, namespace))
     
     def nestify(self, cls=None):
         if cls is None:

@@ -125,6 +125,22 @@ class Flat(FrozenFlat, abc.KeyMap):
     def __delitem__(self, nskey):
         del self.dictionary[nskey]
 
+    def keys(self, *namespaces, unprefixed=False):
+        if unprefixed:
+            return super().keys(unprefixed=True)
+        if not namespaces:
+            return super().keys()
+        return (key for key in self.dictionary.keys() \
+                if any(ns.namespace_matches(key, namespace) for namespace in namespaces))
+
+    def values(self, *namespaces, unprefixed=False):
+        if unprefixed:
+            return super().values(unprefixed=True)
+        if not namespaces:
+            return super().values()
+        return (value for key, value in self.dictionary.items() \
+                if any(ns.namespace_matches(key, namespace) for namespace in namespaces))
+
 @export
 def dictify(treeish, cls=dict):
     """ Recursively convert a possibly nested mapping to dicts.

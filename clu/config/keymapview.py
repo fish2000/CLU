@@ -10,7 +10,7 @@ import collections.abc
 abstract = abc.abstractmethod
 
 from clu.constants.consts import NAMESPACE_SEP, pytuple
-from clu.config.ns import concatenate_ns, pack_ns, unpack_ns, get_ns_and_key
+from clu.config.ns import concatenate_ns, pack_ns, unpack_ns, get_ns_and_key, namespace_matches
 
 from clu.predicates import isnormative, tuplize
 from clu.typology import isnumber, iterlen
@@ -164,7 +164,7 @@ class NamespaceWalkerKeysView(NamespaceWalkerViewBase,
         namespace, key = get_ns_and_key(nskey)
         if not self.namespaces:
             return nskey in self.mapping
-        if namespace in self.namespaces:
+        if any(namespace_matches(namespace, ns) for ns in self.namespaces):
             return nskey in self.submap
         return False
     
@@ -173,7 +173,8 @@ class NamespaceWalkerKeysView(NamespaceWalkerViewBase,
             yield from (pack_ns(key, *frags) for *frags, key, _ in self.mapping.walk())
         else:
             for *fragments, key, value in self.mapping.walk():
-                if concatenate_ns(*fragments) in self.namespaces:
+                ns = concatenate_ns(*fragments)
+                if any(namespace_matches(ns, prefix) for prefix in self.namespaces):
                     yield pack_ns(key, *fragments)
 
 @export
@@ -191,7 +192,8 @@ class NamespaceWalkerItemsView(NamespaceWalkerViewBase,
         thing = ...
         if not self.namespaces:
             thing = self.mapping.get(key, *fragments, default=None)
-        if concatenate_ns(*fragments) in self.namespaces:
+        ns = concatenate_ns(*fragments)
+        if any(namespace_matches(ns, prefix) for prefix in self.namespaces):
             thing = self.submap.get(key, *fragments, default=None)
         return thing == putative
     
@@ -200,7 +202,8 @@ class NamespaceWalkerItemsView(NamespaceWalkerViewBase,
             yield from ((pack_ns(key, *frags), val) for *frags, key, val in self.mapping.walk())
         else:
             for *fragments, key, value in self.mapping.walk():
-                if concatenate_ns(*fragments) in self.namespaces:
+                ns = concatenate_ns(*fragments)
+                if any(namespace_matches(ns, prefix) for prefix in self.namespaces):
                     yield (pack_ns(key, *fragments), value)
 
 @export
@@ -213,7 +216,8 @@ class NamespaceWalkerValuesView(NamespaceWalkerViewBase,
     def __contains__(self, putative):
         for *fragments, _, value in self.mapping.walk():
             if putative is value or putative == value:
-                if concatenate_ns(*fragments) in self.namespaces:
+                ns = concatenate_ns(*fragments)
+                if any(namespace_matches(ns, prefix) for prefix in self.namespaces):
                     return True
                 if not self.namespaces:
                     return True
@@ -224,5 +228,6 @@ class NamespaceWalkerValuesView(NamespaceWalkerViewBase,
             yield from (value for *_, _, value in self.mapping.walk())
         else:
             for *fragments, _, value in self.mapping.walk():
-                if concatenate_ns(*fragments) in self.namespaces:
+                ns = concatenate_ns(*fragments)
+                if any(namespace_matches(ns, prefix) for prefix in self.namespaces):
                     yield value

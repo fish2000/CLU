@@ -11,7 +11,7 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, NAMESPACE_SEP, NoDefault, pytuple
 from clu.config.ns import concatenate_ns, prefix_for
-from clu.config.ns import unpack_ns, pack_ns, get_ns, compare_ns
+from clu.config.ns import unpack_ns, pack_ns, get_ns, compare_ns, namespace_matches
 from clu.config.keymapview import KeyMapKeysView, KeyMapItemsView, KeyMapValuesView
 from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsView
 from clu.config.keymapview import NamespaceWalkerValuesView
@@ -183,12 +183,12 @@ class FrozenKeyMap(FrozenKeyMapBase):
         for namespace in namespaces:
             out.update({ nskey : self[nskey] \
                      for nskey in self \
-                      if nskey.startswith(namespace) })
+                      if namespace_matches(nskey, namespace) })
         return cls(out)
-    
+
     def keys(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all keys in the mapping,
-            or over only those keys in the mapping matching the specified
+            or over only those keys in the mapping which match the specified
             namespace values.
         """
         if unprefixed:

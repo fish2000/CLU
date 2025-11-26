@@ -730,7 +730,7 @@ def test():
     def stash_environment():
         """ Stash environment state before testing """
         test.stash = os.environ.copy()
-        print(f"Environment stashed in {qualified_name(test.stash)}")
+        print("Environment stashed in `test.stash`")
     
     @inline
     def test_chainmap_deep_cloning():

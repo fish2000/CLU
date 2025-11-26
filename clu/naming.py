@@ -9,7 +9,7 @@ import inspect
 
 from clu.constants.consts import λ, φ
 from clu.constants.consts import BASEPATH, QUALIFIER, NoDefault
-
+from clu.predicates import pyqualname
 from clu.exporting import (path_to_dotpath, determine_name,
                                             search_for_name,
                                             search_for_module)
@@ -20,16 +20,20 @@ exporter = Exporter(path=__file__)
 export = exporter.decorator()
 
 @export
-def determine_module(thing, name=None):
+def determine_module(thing):
     """ Private module function to find the module of a thing,
         using “pickle.whichmodule(…)”
     """
-    if name is not None:
-        return name
+    import pickle
+    
     if thing is None:
         return None
     
-    import pickle
+    name = pyqualname(thing) \
+        or search_for_name(thing) \
+        or determine_name(thing)
+    
+    # print(f"THINGNAME: {name} ({thing!s})")
     return pickle.whichmodule(thing, name) # type: ignore
 
 __doc__ = """

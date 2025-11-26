@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(__file__))
 # Recycle, reduce, reuse:
 nox.options.reuse_existing_virtualenvs = True
 nox.options.stop_on_first_error = True
-nox.options.keywords = tuple()
+# nox.options.keywords = tuple()
 
 # Skip manifest check if we’re not running in a Git repo:
 from clu.version.git_version import are_we_gitted

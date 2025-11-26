@@ -12,8 +12,9 @@ import pickle
 import sys
 
 from clu.constants import consts
+from clu.naming import nameof, moduleof
 from clu.typespace import types
-from clu.predicates import (ispyname,
+from clu.predicates import (ispyname, pyqualname,
                             negate,
                             lowers)
 
@@ -121,6 +122,7 @@ class ModuleMap(collections.abc.Mapping,
         return repr(dict(self))
 
 clu_importall = clu.all.import_all_modules
+whichmod = lambda thing: pickle.whichmodule(thing, pyqualname(thing) or nameof(thing))
 
 @cache
 def compare_module_lookups_for_all_things(*modules,
@@ -166,12 +168,12 @@ def compare_module_lookups_for_all_things(*modules,
                         module_idx))
         
         for name, thing in exports.items():
-            whichmodule = pickle.whichmodule(thing, None)
+            # whichmodule = whichmod(thing)
             determination = moduleof(thing)
             try:
-                assert determination == whichmodule
+                assert determination == modulename
             except AssertionError:
-                mismatches.append(Mismatch(whichmodule,
+                mismatches.append(Mismatch(modulename,
                                            determination,
                                            modulename,
                                            nameof(thing),

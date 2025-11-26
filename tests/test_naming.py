@@ -320,10 +320,10 @@ class TestNaming(object):
             exports = Exporter[modulename].exports()
             total += len(exports)
             for name, thing in exports.items():
-                whichmodule = pickle.whichmodule(thing, None)
+                # whichmodule = pickle.whichmodule(thing, None)
                 determination = moduleof(thing)
                 try:
-                    assert determination == whichmodule
+                    assert determination == modulename
                 except AssertionError:
                     mismatches += 1
         

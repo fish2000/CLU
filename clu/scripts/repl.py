@@ -64,6 +64,8 @@ def module_export(modulename, namespace, all=__all__):
     except ValueError:
         module = importlib.import_module(modulename)
     name = nameof(module)
+    # if name != modulename:
+    #     print(f"YO DOGG: {name} ≠ {modulename}")
     namespace[modulename] = namespace[name] = module
     all += listify(name)
 

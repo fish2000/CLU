@@ -70,10 +70,10 @@ class TestScriptsREPL(object):
     def test_repl_module_export(self, consts, modulename):
         from clu.scripts.repl import module_export
         
-        module_export(modulename, namespace=locals())
+        module_export(modulename, namespace=globals())
         
-        assert modulename in locals()
-        assert modulename.split(consts.QUALIFIER)[-1] in locals()
+        assert modulename in globals()
+        assert modulename.split(consts.QUALIFIER)[-1] in globals()
     
     @pytest.mark.parametrize('modulename', mods)
     def test_repl_star_export(self, modulename):
@@ -82,8 +82,8 @@ class TestScriptsREPL(object):
         from clu.scripts.repl import star_export
         
         module = qualified_import(modulename)
-        star_export(modulename, namespace=locals())
+        star_export(modulename, namespace=globals())
         
         for thingname in dir(module):
             if ispublic(thingname):
-                assert thingname in locals()
+                assert thingname in globals()

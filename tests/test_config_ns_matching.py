@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-import sys
-import signal
+import sys, signal
+
+# test_namespace_matching.py
+# originally added by pjcodes404 - https://github.com/pjcodes404
+
 if not hasattr(signal, 'SIGHUP'):
     signal.SIGHUP = 1
 if not hasattr(signal, 'SIGQUIT'):
     signal.SIGQUIT = 3
 if not hasattr(signal, 'SIGSTOP'):
     signal.SIGSTOP = 19
+
 from unittest.mock import MagicMock
 
 # Mock zict if not present

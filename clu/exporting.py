@@ -534,9 +534,7 @@ class ExporterBase(collections.abc.MutableMapping,
     
     def datafile(self):
         """ Return a unique filename for this instance """
-        from clu.fs.appdirectories import AppDirs
-        from clu.constants.exceptions import FilesystemError
-        
+        from clu.fs.appdirectories import AppDirs        
         # Initialize an AppDirs instance:
         appdirs = AppDirs(appname=type(self).appname)
         

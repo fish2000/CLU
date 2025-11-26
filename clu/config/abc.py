@@ -11,7 +11,7 @@ abstract = abc.abstractmethod
 
 from clu.constants.consts import DEBUG, NAMESPACE_SEP, NoDefault, pytuple
 from clu.config.ns import concatenate_ns, prefix_for
-from clu.config.ns import unpack_ns, pack_ns, get_ns, compare_ns
+from clu.config.ns import unpack_ns, pack_ns, get_ns, compare_ns, namespace_matches
 from clu.config.keymapview import KeyMapKeysView, KeyMapItemsView, KeyMapValuesView
 from clu.config.keymapview import NamespaceWalkerKeysView, NamespaceWalkerItemsView
 from clu.config.keymapview import NamespaceWalkerValuesView
@@ -183,12 +183,12 @@ class FrozenKeyMap(FrozenKeyMapBase):
         for namespace in namespaces:
             out.update({ nskey : self[nskey] \
                      for nskey in self \
-                      if nskey.startswith(namespace) })
+                      if namespace_matches(nskey, namespace) })
         return cls(out)
-    
+
     def keys(self, *namespaces, unprefixed=False):
         """ Return a namespaced view over either all keys in the mapping,
-            or over only those keys in the mapping matching the specified
+            or over only those keys in the mapping which match the specified
             namespace values.
         """
         if unprefixed:
@@ -234,20 +234,20 @@ class FrozenKeyMap(FrozenKeyMapBase):
 @export
 class KeyMap(KeyMapBase, FrozenKeyMap):
     
-    """ The abstract base class for mutable namespaced mappings (née “KeyMaps”).
+    """ The abstract base class for mutable namespaced mappings (nee "KeyMaps").
         
         Subclasses must implement all the requisite Python dunder methods required by
-        the ancestor “FrozenKeyMap”, like e.g. ‘__iter__’, ‘__len__’ &c, plus also a
-        “namespaces()” method which takes no arguments and iterates in order over all
-        namespaces contained in the KeyMap’s keys.
+        the ancestor "FrozenKeyMap", like e.g. '__iter__', '__len__' &c, plus also a
+        "namespaces()" method which takes no arguments and iterates in order over all
+        namespaces contained in the KeyMaps keys.
         
-        OK AND FURTHERMORE for mutability, you also need to do your own ‘__setattr__’
-        and ‘__delattr__’ (which maybe we’ll make that last one optional as delete
-        methods in Python are totally gauche and a sign of a sort of naïve vulgar
+        OK AND FURTHERMORE for mutability, you also need to do your own '__setattr__'
+        and '__delattr__' (which maybe we'll make that last one optional as delete
+        methods in Python are totally gauche and a sign of a sort of naive vulgar
         un-Pythonicism, I feel like).
         
-        Optionally one may override ‘__missing__’, which can be kind of interesting,
-        and ‘__bool__’ which generally is less so. Q.v. the “FrozenKeyMapBase” source
+        Optionally one may override '__missing__', which can be kind of interesting,
+        and '__bool__' which generally is less so. Q.v. the "FrozenKeyMapBase" source
         supra. for further deets, my doggie
     """
     

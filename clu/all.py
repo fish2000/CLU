@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# “fdres`” – spontaneous rebuke from Tribble, 20 Oct 2025 10pm-ish
 from __future__ import print_function
 from clu.exporting import Exporter
 

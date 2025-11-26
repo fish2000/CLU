@@ -145,12 +145,17 @@ QUALIFIER = sys.intern(os.extsep)
 # Delimiter for repr-strings indicating instance IDs:
 REPR_DELIMITER = sys.intern('@')
 
-try:
-    # Determine the root path for the current filesystem:
-    ROOT_PATH = sys.intern(path(BASEPATH).absolute().root)
-except (AttributeError, SyntaxError): # pragma: no cover
-    # Fall back to the Unix default
-    ROOT_PATH = sys.intern('/')
+# Determine the root path for the current filesystem.
+# Uses os.path.abspath combined with os.sep for cross-platform compatibility.
+# On POSIX systems (Linux, macOS), this returns '/'.
+# On Windows, this returns the drive root (e.g., 'C:\').
+# Reference: https://docs.python.org/3/library/os.path.html
+if os.name == 'nt':  # Windows
+    # Get the drive letter from BASEPATH and append the separator
+    _drive = os.path.splitdrive(os.path.abspath(BASEPATH))[0]
+    ROOT_PATH = sys.intern(_drive + os.sep if _drive else os.sep)
+else:  # POSIX (Unix, Linux, macOS)
+    ROOT_PATH = sys.intern(os.sep)
 
 # List of Python’s built-in singleton types:
 NoneType = type(None)

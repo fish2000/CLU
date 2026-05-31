@@ -142,10 +142,8 @@ class Flat(FrozenFlat, abc.KeyMap):
             mapping, or over only those key/value pairs in the mapping whose
             keys match the specified namespace values.
         """
-        if unprefixed:
-            return super().items(unprefixed=True)
-        if not namespaces:
-            return super().items()
+        if unprefixed or not namespaces:
+            return super().items(unprefixed=unprefixed)
         return ((key, value) for key, value in self.dictionary.items() \
                 if any(ns.namespace_matches(key, namespace) for namespace in namespaces))
     

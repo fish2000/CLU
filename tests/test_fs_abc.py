@@ -25,7 +25,7 @@ class TestFsMisc(object):
         assert Directory in TypeLocker.types.values()
         assert TemporaryFileWrapper in TypeLocker.types.values()
     
-    @pytest.mark.parametrize('tmp', filter(os.path.exists, tmps))
+    @pytest.mark.parametrize('tmp', tuple(filter(os.path.exists, tmps)))
     def test_BaseFSName_concrete_subclass(self, consts,
                                                 temporarydir,
                                                 tmp):

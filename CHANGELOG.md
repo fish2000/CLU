@@ -1,7 +1,7 @@
 # Changelog
 
 
-## 0.12.23:pre5+g1d52c39 [SNAPSHOT]
+## 0.12.23:pre6+g583bcc6 [SNAPSHOT]
 
 ### Add
 
@@ -10,6 +10,8 @@
 * Added `uv.lock` file … OK, let’s see how this goes. [Alexander Böhn]
 
 ### Other
+
+* [make] Changelog updated @ 1d52c39. [Alexander Böhn]
 
 * Got the date format backwards in `CITATION.cff` [Alexander Böhn]
 

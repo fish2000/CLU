@@ -1,7 +1,11 @@
 # Changelog
 
 
-## 0.12.20 [release]
+## v0.12.22 (2026-08-18)
+
+### Bump
+
+* Bumped version: 0.12.21 → 0.12.22. [Alexander Böhn]
 
 ### Add
 
@@ -23,6 +27,8 @@
 * Removed py.test legacy config file … this ensures it uses the config stuff in “pyproject.toml” [Alexander Böhn]
 
 ### Other
+
+* [make] Changelog updated @ 02e3900. [Alexander Böhn]
 
 * Assuaging the whinging by the latest py.test version. [Alexander Böhn]
 

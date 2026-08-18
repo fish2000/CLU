@@ -5,7 +5,7 @@ authors:
   given-names: "Alexander"
   orcid: "https://orcid.org/0009-0007-9645-1744"
 title: "Python-CLU"
-version: 0.12.23
-date-released: "2026-01-01"
+version: 0.12.24
+date-released: "2026-08-18"
 url: "https://github.com/fish2000/CLU"
 repository-code: "https://github.com/fish2000/CLU"

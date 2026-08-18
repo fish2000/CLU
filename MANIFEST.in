@@ -40,6 +40,7 @@ exclude .coverage
 exclude .envrc
 exclude .noxresults.json
 exclude coverage.xml
+exclude uv.lock
 
 recursive-exclude clu *.pyc *~ *.so .DS_Store
 recursive-exclude docs *.pyc *~ *.so .DS_Store

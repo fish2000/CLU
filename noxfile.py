@@ -8,7 +8,6 @@ sys.path.append(os.path.dirname(__file__))
 # Recycle, reduce, reuse:
 nox.options.reuse_existing_virtualenvs = True
 nox.options.stop_on_first_error = True
-# nox.options.keywords = tuple()
 
 # Skip manifest check if we’re not running in a Git repo:
 from clu.version.git_version import are_we_gitted
@@ -20,10 +19,13 @@ def checkmanifest(session):
     session.run('python', '-m', 'check_manifest', '-v')
 
 @nox.session
-def checkpyproject(session):
+@nox.parametrize('tomls', (
+    nox.param('.bumpversion.toml',  id='bumpversion'),
+    nox.param('pyproject.toml',     id='pyproject')))
+def checkpyproject(session, tomls):
     """ Validate CLU’s pyproject.toml """
     session.install("-r", "requirements/nox/pyproject.txt")
-    session.run('validate-pyproject', '--verbose', 'pyproject.toml')
+    session.run('validate-pyproject', '--verbose', tomls)
 
 @nox.session
 @nox.parametrize('module', (

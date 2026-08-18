@@ -1,6 +1,34 @@
 # Changelog
 
 
+## 0.12.23:pre5+g1d52c39 [SNAPSHOT]
+
+### Add
+
+* Adding `pip` as an explict `pyproject.toml` requirement. [Alexander Böhn]
+
+* Added `uv.lock` file … OK, let’s see how this goes. [Alexander Böhn]
+
+### Other
+
+* Got the date format backwards in `CITATION.cff` [Alexander Böhn]
+
+* Keeping `uv.lock` out of packages and wheels. [Alexander Böhn]
+
+* Further expanded `CITATION.cff` and related `.bumpversion.toml` settings … dates are now proper precise dates, and additional settings have   been added. Yes! [Alexander Böhn]
+
+
+## v0.12.23 (2026-08-18)
+
+### Bump
+
+* Bumped version: 0.12.22 → 0.12.23. [Alexander Böhn]
+
+### Other
+
+* [make] Changelog updated @ 49698e8. [Alexander Böhn]
+
+
 ## v0.12.22 (2026-08-18)
 
 ### Bump

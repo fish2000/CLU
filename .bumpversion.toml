@@ -35,3 +35,9 @@ replace = """__version__ = '{new_version}'"""
 filename = "CITATION.cff"
 search = """version: {current_version}"""
 replace = """version: {new_version}"""
+
+[[tool.bumpversion.files]]
+filename = "CITATION.cff"
+search = """date-released: \\d{{4}}"""
+replace = """date-released: {now:%Y}"""
+regex = true

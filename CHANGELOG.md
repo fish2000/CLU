@@ -3,6 +3,38 @@
 
 ## 0.12.20 [release]
 
+### Add
+
+* Added additional TOML file validation to `noxfile` … right now we’re just running “.bumpversion.toml” through it all,   but it’s nice to have. You know, for the future. Yes! [Alexander Böhn]
+
+* Added a `CITATION.cff` file, and rearranged imports in `clu.dicts` [Alexander Böhn]
+
+  … the “CITATION.cff” file goes with “orcid.org”; see also:
+    - https://orcid.org/0009-0007-9645-1744
+
+  … and the “clu.dicts” reshuffle was because I was for some reason
+    at one point paranoid about needing, for some reason, to be able
+    to import “clu.dicts” within “clu.predicates” or “clu.typology”.
+    That isn’t necessary, and it’s time to stop writing “defensive code”
+    around this for no reason, yeah? Yeah!
+
+### Remove
+
+* Removed py.test legacy config file … this ensures it uses the config stuff in “pyproject.toml” [Alexander Böhn]
+
+### Other
+
+* Assuaging the whinging by the latest py.test version. [Alexander Böhn]
+
+* Cleaner logic for short-circuting in `clu.config.keymap.Flat` … Kind of a nothingburger, but I’ll likely spread this notion   around, because it assuages my OCD. [Alexander Böhn]
+
+
+## v0.12.21 (2025-11-26)
+
+### Bump
+
+* Bumped version: 0.12.20 → 0.12.21. [Alexander Böhn]
+
 ### New
 
 * New Changelog section callout for version bumps. [Alexander Böhn]
@@ -45,6 +77,8 @@
 * Added docstrings and `items(…)` to the `clu.config.keymap.Flat` class … these things augment new code pertaining to “namespace_matches(…)”   and bring things back up to original status quo. [Alexander Böhn]
 
 ### Other
+
+* [make] Changelog updated @ 46e4b9a. [Alexander Böhn]
 
 * Working around enhanced rigorousness (?!) in `pickle.whichmodule(…)` [Alexander Böhn]
 

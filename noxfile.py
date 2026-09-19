@@ -23,7 +23,7 @@ def checkmanifest(session):
     nox.param('.bumpversion.toml',  id='bumpversion'),
     nox.param('pyproject.toml',     id='pyproject')))
 def checkpyproject(session, tomls):
-    """ Validate CLU’s pyproject.toml """
+    """ Validate CLU’s attendant toml files """
     session.install("-r", "requirements/nox/pyproject.txt")
     session.run('validate-pyproject', '--verbose', tomls)
 

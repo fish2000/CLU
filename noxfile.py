@@ -49,7 +49,7 @@ def pytest(session):
     # session.env['PYTEST_DISABLE_PLUGIN_AUTOLOAD'] = '1'
     session.install("-r", "requirements/install.txt")
     session.install("-r", "requirements/nox/repl.txt")
-    session.run('pytest', '--no-delete-temps')
+    session.run('pytest', '--delete-temps')
 
 def parametrized_inline_tests():
     import clu.all

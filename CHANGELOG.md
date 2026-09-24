@@ -1,9 +1,26 @@
 # Changelog
 
 
-## 0.12.24:pre2+g0e186a1 [SNAPSHOT]
+## 0.12.25:pre3+gc18e3a2 [SNAPSHOT]
+
+### Bump
+
+* Bumped version: 0.12.24 → 0.12.25. [Alexander Böhn]
 
 ### Other
+
+* Loosening Redis requirement. [Alexander Böhn]
+
+
+## v0.12.25 (2026-09-24)
+
+### Bump
+
+* Bumped version: 0.12.24 → 0.12.25. [Alexander Böhn]
+
+### Other
+
+* [make] Changelog updated @ 0e186a1. [Alexander Böhn]
 
 * Re-enabling temp-file cleanup after running pytest. [Alexander Böhn]
 

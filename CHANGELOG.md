@@ -1,13 +1,17 @@
 # Changelog
 
 
-## 0.12.25:pre3+gc18e3a2 [SNAPSHOT]
+## v0.12.26 (2026-09-24)
 
 ### Bump
+
+* Bumped version: 0.12.25 → 0.12.26. [Alexander Böhn]
 
 * Bumped version: 0.12.24 → 0.12.25. [Alexander Böhn]
 
 ### Other
+
+* [make] Changelog updated @ c18e3a2. [Alexander Böhn]
 
 * Loosening Redis requirement. [Alexander Böhn]
 

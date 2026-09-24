@@ -1,7 +1,20 @@
 # Changelog
 
 
-## 0.12.23:pre6+g583bcc6 [SNAPSHOT]
+## 0.12.24:pre2+g0e186a1 [SNAPSHOT]
+
+### Other
+
+* Re-enabling temp-file cleanup after running pytest. [Alexander Böhn]
+
+* Noxfile label update … a trifiling matter but it assuages my OCD, and so. [Alexander Böhn]
+
+
+## v0.12.24 (2026-08-18)
+
+### Bump
+
+* Bumped version: 0.12.23 → 0.12.24. [Alexander Böhn]
 
 ### Add
 
@@ -10,6 +23,8 @@
 * Added `uv.lock` file … OK, let’s see how this goes. [Alexander Böhn]
 
 ### Other
+
+* [make] Changelog updated @ 583bcc6. [Alexander Böhn]
 
 * [make] Changelog updated @ 1d52c39. [Alexander Böhn]
 

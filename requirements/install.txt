@@ -11,7 +11,6 @@ packaging
 pout>=0.8.13
 pygments>=2.0.0
 PyYAML>=5.3.0
-redis>=3.4.0
 setuptools>=30.0.0
 toml>=0.10.0
 tomli>=2.2.0

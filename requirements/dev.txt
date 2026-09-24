@@ -21,6 +21,7 @@ ptpython>=3.0.0
 python-dateutil>=2.8.0
 pythonpy-fork>=0.5.0
 pytz>=2019.3
+redis>=3.4.0
 requests>=2.20.0
 requests-toolbelt>=0.9.0
 setproctitle>=1.1.0

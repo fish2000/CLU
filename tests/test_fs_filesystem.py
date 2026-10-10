@@ -308,7 +308,7 @@ class TestFsFilesystem(object):
         
         BINARIES = ('ls', 'cat', 'df',
                     'python',
-                    'python-config')
+                    'pip')
         
         for binary in BINARIES:
             assert which(binary) == back_tick(f"which {binary}")

@@ -95,6 +95,11 @@ class BaseFSName(collections.abc.Hashable,
     
     fields = ('name', 'exists')
     
+    @classmethod
+    def all_fields(cls):
+        """ Return a tuple containing all the field names for this class. """
+        return ancestral_union('fields', cls)
+    
     @property
     @abstract
     def name(self):
@@ -181,9 +186,7 @@ class BaseFSName(collections.abc.Hashable,
         return True
     
     def to_string(self):
-        return strfields(self,
-               ancestral_union('fields', type(self)),
-                         try_callables=False)
+        return strfields(self, self.all_fields(), try_callables=False)
     
     def inner_repr(self):
         return self.to_string()

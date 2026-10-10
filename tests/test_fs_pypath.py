@@ -4,7 +4,6 @@ from __future__ import print_function
 import pytest
 import sys, os
 
-from clu.typology import isvalidpathlist
 from clu.fs.misc import temporary
 from clu.fs import pypath
 

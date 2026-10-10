@@ -26,19 +26,16 @@ def add_paths(*putatives, prepend=False):
     paths = frozenset(sys.path)
     add_paths.oldpaths.append(tuple(sys.path))
     for pth in (os.fspath(putative) for putative in putatives):
-        # if pth in paths:
-        #     out[pth] = False
-        #     continue
-        for p in paths:
-            if not os.path.exists(p):
-                out[pth] = False
-                continue
-            if os.path.samefile(p, pth):
-                out[pth] = False
-                continue
         if not os.path.exists(pth):
             out[pth] = False
             continue
+        if pth in paths:
+            out[pth] = False
+            continue
+        for p in paths:
+            if os.path.samefile(p, pth):
+                out[pth] = False
+                continue
         if prepend:
             sys.path.insert(0, pth)
         else:
@@ -73,13 +70,17 @@ def remove_paths(*putatives):
     removals = set()
     paths = set(sys.path)
     for pth in (os.fspath(putative) for putative in putatives):
-        for p in paths:
-            if os.path.samefile(p, pth):
-                out[pth] = True
-                removals |= { p }
-                continue
-        out[pth] = False
-        continue
+        if not os.path.exists(pth):
+            out[pth] = False
+            continue
+        if pth in paths:
+            for p in paths:
+                if os.path.samefile(p, pth):
+                    out[pth] = True
+                    removals |= { p }
+                    continue
+        else:
+            out[pth] = False
     paths -= removals
     remove_paths.oldpaths.append(tuple(sys.path))
     mutate_syspath(paths)

@@ -6,7 +6,6 @@ import pytest
 mods = ('clu.all',
         'clu.abstract',
         'clu.constants.consts',
-        'clu.constants.polyfills',
         'clu.config.keymap',
         'clu.config.ns',
         'clu.csv',

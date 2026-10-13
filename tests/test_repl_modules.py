@@ -6,7 +6,6 @@ import pytest
 mods = ('clu.all',
         'clu.abstract',
         'clu.constants.consts',
-        'clu.constants.polyfills',
         'clu.config.ns',
         'clu.csv',
         'clu.fs.appdirectories',

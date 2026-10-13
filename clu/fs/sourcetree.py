@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from pathlib import Path
 
 import abc
 import os
 import sys
 
 from clu.constants.exceptions import ExecutionError
-from clu.constants.polyfills import Path
 from clu.abstract import Slotted
 from clu.fs.filesystem import back_tick, Intermediate
 from clu.exporting import Exporter

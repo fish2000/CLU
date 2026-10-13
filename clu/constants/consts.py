@@ -1,23 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from pathlib import Path as path
 
 import getpass
 import platform
 import sysconfig
 import sys, os, re
 
-# Choose a “path” interim operator for path-type consts –
-# trying “pathlib.Path”, “pathlib2.Path”, and falling
-# back to string-interning with “sys.intern”:
-try:
-    from clu.constants.polyfills import Path as path
-except (ImportError, SyntaxError): # pragma: no cover
-    path = sys.intern
-else:
-    if not callable(path):  # pragma: no cover
-        path = sys.intern
-
-# Get VersionInfo from clu.version:
 from clu.version import VersionInfo
 
 # Define the “pytuple” shortcut lambda:
@@ -107,7 +96,7 @@ NAMESPACE_SEP = sys.intern(os.pathsep)
 
 # A boolean value for “numpy” availability – False if it’s not present:
 try:
-    from clu.constants.polyfills import numpy
+    import numpy
 except (ImportError, SyntaxError): # pragma: no cover
     NUMPY = False
 else:

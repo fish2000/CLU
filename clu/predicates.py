@@ -217,7 +217,7 @@ ispublic        = lambda string: not ispyname(string) and not ismifflin(string)
 @export
 def isenum(cls):
     """ isenum(cls) → boolean predicate, True if cls descends from `Enum`. """
-    from clu.constants.polyfills import Enum # type: ignore
+    from enum import Enum # type: ignore
     if nopyattr(cls, 'mro'):
         return False
     return Enum in cls.__mro__

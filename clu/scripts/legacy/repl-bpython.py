@@ -17,10 +17,6 @@ from clu.constants.exceptions import (BadDotpathWarning,
                                       ExportError, ExportWarning,
                                       KeyValueError)
 
-from clu.constants.polyfills import (Enum, EnumMeta, unique,
-                                     AutoType, auto,
-                                     Path, reduce)
-
 from clu.compilation.macros import Macro, Macros
 from clu.compilation.compiledb import CDBSubBase, CDBBase, CDBJsonFile
 
@@ -214,7 +210,6 @@ __all__ = ('Image',
            'sys', 'os', 're',
            'appdirectories',
            'argparse',
-           # 'clu.abstract',
            'collections',
            'contextlib',
            'copy',

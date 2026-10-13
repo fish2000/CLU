@@ -20,7 +20,7 @@ typed = re.compile(r"^(?P<typename>\w+)(?:Type)$")
 
 def prepare_types_ns(path, basepath):
     """ Prepare and return the “types” alias namespace """
-    from clu.constants.polyfills import cache_from_source
+    from importlib.util import cache_from_source
     from clu.typespace.namespace import SimpleNamespace, Namespace, Typespace
     from clu.predicates import pyattr
     

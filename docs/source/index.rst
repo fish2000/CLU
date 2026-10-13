@@ -85,9 +85,6 @@ clu.constants
 .. automodule:: clu.constants.exceptions
    :members:
 
-.. automodule:: clu.constants.polyfills
-   :members:
-
 clu.dicts
 =========
 

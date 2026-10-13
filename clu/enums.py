@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from enum import Enum, EnumMeta
 
 import abc
 import clu.abstract
 import collections.abc
 
-from clu.constants.polyfills import Enum, EnumMeta # type: ignore
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

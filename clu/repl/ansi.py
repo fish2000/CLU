@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import namedtuple as NamedTuple
+from enum import Enum, unique, auto
 
 import abc
 import colorama
@@ -13,7 +14,6 @@ import sys, re
 abstract = abc.abstractmethod
 
 from clu.constants.consts import ENCODING, SEPARATOR_WIDTH
-from clu.constants.polyfills import Enum, unique, auto
 from clu.predicates import mro, or_none
 from clu.typology import dict_types, isstring, isbytes
 from clu.fs.misc import re_matcher

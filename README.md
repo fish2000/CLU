@@ -88,9 +88,8 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     the abstract base classes upon which our [`KeyMap`s][clu.config.keymap] are built, for your perusal and
     eventual enjoyment.
 
-* [`constants`][clu.constants]: Definitions of [useful constants][clu.constants.consts], as well as
-    [polyfills][clu.constants.polyfills] to allow certain dependencies from the Python standard library to work even
-    when some of their moving parts are missing (i.e. Ye Olde Pythone 2.7, various PyPy implementations, etc).
+* [`constants`][clu.constants]: Definitions of [useful constants][clu.constants.consts], basically. You’ll love ‘em,
+    because you don’t have to define ‘em. Yes!
 
 * [`all`][clu.all]: Herein you will find some verrrrry interesting “meta” functions for CLU. You have the `import_all_modules(…)`
     function, which when provided your projects’ base path and appname, will return all the package names therein,
@@ -440,7 +439,6 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 
 [clu.constants]: https://github.com/fish2000/CLU/tree/master/clu/constants
 [clu.constants.consts]: https://github.com/fish2000/CLU/tree/master/clu/constants/consts.py
-[clu.constants.polyfills]: https://github.com/fish2000/CLU/tree/master/clu/constants/polyfills.py
 
 [clu.fs]: https://github.com/fish2000/CLU/tree/master/clu/fs
 [clu.fs.abc]: https://github.com/fish2000/CLU/tree/master/clu/fs/abc.py

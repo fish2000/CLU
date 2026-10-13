@@ -7,7 +7,7 @@ import pytest
 @pytest.fixture
 def shared_datadir(request, tmpdir):
     """ Vendored version of “shared_datadir(…)” from the pytest-datadir package """
-    from clu.constants.polyfills import Path
+    from pathlib import Path
     from clu.fs.misc import win32_longpath
     
     # Get the shared data path:
@@ -26,7 +26,7 @@ def shared_datadir(request, tmpdir):
 @pytest.fixture
 def original_datadir(request):
     """ Vendored version of “original_datadir(…)” from the pytest-datadir package """
-    from clu.constants.polyfills import Path
+    from pathlib import Path
     
     # Split the “.py” from the requesting modules’ file path,
     # and return a path instance based on that filesystem path prefix:
@@ -35,7 +35,7 @@ def original_datadir(request):
 @pytest.fixture
 def copied_datadir(original_datadir, tmpdir):
     """ Vendored version of “datadir(…)” from the pytest-datadir package """
-    from clu.constants.polyfills import Path
+    from pathlib import Path
     from clu.fs.misc import win32_longpath
     
     # Prepare a temporary path for return:

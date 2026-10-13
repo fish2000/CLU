@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from enum import Enum, unique
 from functools import lru_cache
 
-import platform, sys
+import platform
+import sys
 
 from clu.constants.consts import ENCODING
-from clu.constants.polyfills import Enum, unique
 
 onecache = lambda function: lru_cache(maxsize=1, typed=True)(function)
 

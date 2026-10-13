@@ -2,6 +2,7 @@
 from __future__ import print_function
 from functools import reduce
 from itertools import count, product
+from pathlib import Path
 
 import abc
 import argparse
@@ -13,9 +14,12 @@ import io
 import operator
 import os
 
+try:
+    import numpy
+except (ImportError, ModuleNotFoundError):
+    numpy = None
+
 from clu.constants.consts import λ, φ, SINGLETON_TYPES # type: ignore
-from clu.constants.polyfills import long, unicode, numpy
-from clu.constants.polyfills import Path # type: ignore
 from clu.abstract import Slotted
 from clu.enums import alias
 from clu.extending import Extensible
@@ -124,18 +128,21 @@ graceful_issubclass = subclasscheck
 # TYPELISTS: manual assemblages of types, used for predicate testing
 # and other similar stuff.
 
-numeric_types = tuple(uniquify(bool, int, long, float, complex, decimal.Decimal))
+numeric_types = tuple(uniquify(bool, int, float, complex, decimal.Decimal))
 array_types = (types.Array, bytearray, memoryview) # type: tuple
-array_types += attrs(numpy, 'ndarray',
-                            'matrix',
-                            'ma.core.MaskedArray')
+
+if numpy:
+    array_types += attrs(numpy, 'ndarray',
+                                'matrix',
+                                'ma.core.MaskedArray')
 
 # N.B. this numpy typelist does *not* include `decimal.Decimal` –
 # and it *does* include `memoryview`:
-scalar_types = frozenset(getattr(numpy, 'ScalarType',
-                     set(numeric_types) - { decimal.Decimal }))
+# scalar_types = frozenset(getattr(numpy, 'ScalarType',
+#                      set(numeric_types) - { decimal.Decimal }))
+scalar_types = set(numeric_types) - { decimal.Decimal }
 
-string_types = tuple(uniquify(str, unicode))
+string_types = (str,)
 bytes_types = (bytes, bytearray)
 path_classes = tuplize(argparse.FileType, or_none(os, 'PathLike'), Path) # Path may be “None” in disguise
 path_types = string_types + bytes_types + path_classes # type: ignore

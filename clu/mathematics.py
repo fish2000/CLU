@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from functools import reduce
 
 from clu.constants import consts
-from clu.constants.polyfills import numpy, reduce # type: ignore
 from clu.naming import moduleof
 from clu.predicates import isclasstype
 from clu.typology import isxlist
 from clu.exporting import Exporter
 
+try:
+    import numpy
+except (ImportError, ModuleNotFoundError):
+    import mock
+    numpy = mock.Mock()
+
 exporter = Exporter(path=__file__)
 export = exporter.decorator()
-
-if numpy is None:
-    from mock import Mock
-    numpy = Mock()
 
 # JUST LIKE THE GREEKS
 σ = sum

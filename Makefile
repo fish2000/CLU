@@ -8,10 +8,13 @@ distclean: clean-cython clean-test-artifacts clean-build-artifacts
 
 rebuild: clean-build-artifacts cython
 
-upload: clean-build-artifacts changelog bump twine-upload
+update-lockfile:
+	uv lock
+
+upload: clean-build-artifacts changelog bump update-lockfile twine-upload
 	git push
 
-bigupload: clean-build-artifacts changelog bigbump twine-upload
+bigupload: clean-build-artifacts changelog bigbump update-lockfile twine-upload
 	git push
 
 clean-pyc:

@@ -10,7 +10,10 @@ rebuild: clean-build-artifacts cython
 
 update-lockfile:
 	uv lock
-	git commit -m "[make] \`uv\` lockfile updated @ $(shell git rev-parse --short HEAD)"
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		git add uv.lock; \
+		git commit -m "[make] \`uv\` lockfile updated @ $(shell git rev-parse --short HEAD)"; \
+	fi
 
 upload: clean-build-artifacts changelog update-lockfile bump twine-upload
 	git push

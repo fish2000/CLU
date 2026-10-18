@@ -1,6 +1,17 @@
 # Changelog
 
 
+## 0.12.28:pre3+g7dae7a9 [SNAPSHOT]
+
+### Other
+
+* [make] `uv` lockfile updated @ b462bcd. [Alexander Böhn]
+
+* Made those `uv` lockfile rules actually work PART II. [Alexander Böhn]
+
+* [make] Changelog updated @ 4899a83. [Alexander Böhn]
+
+
 ## v0.12.28 (2026-10-18)
 
 ### Bump

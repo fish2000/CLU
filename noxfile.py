@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import nox
 import sys, os
+
 sys.path.append(os.path.dirname(__file__))
 
 # Recycle, reduce, reuse:
@@ -18,10 +19,13 @@ def checkmanifest(session):
     session.install("-r", "requirements/nox/manifest.txt")
     session.run('python', '-m', 'check_manifest', '-v')
 
+def find_tomls():
+    with os.scandir('.') as iterscan:
+        yield from filter(lambda name: name.endswith('.toml'),
+                         (direntry.name for direntry in iterscan))
+
 @nox.session
-@nox.parametrize('tomls', (
-    nox.param('.bumpversion.toml',  id='bumpversion'),
-    nox.param('pyproject.toml',     id='pyproject')))
+@nox.parametrize('tomls', tuple(find_tomls()))
 def checkpyproject(session, tomls):
     """ Validate CLU’s attendant toml files """
     session.install("-r", "requirements/nox/pyproject.txt")

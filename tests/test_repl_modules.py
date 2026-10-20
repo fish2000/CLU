@@ -46,7 +46,7 @@ class TestReplModules(object):
         from clu.repl.modules import Results, Mismatches
         from clu.repl.modules import Result, Mismatch
         
-        modules = ('predicates', 'typology', 'mathematics', 'naming', 'trie')
+        modules = ('predicates', 'typology', 'exporting', 'naming', 'trie')
         prefixd = tuple(f"clu.{nm}" for nm in modules)
         results, mismatches = compare_module_lookups_for_all_things(*prefixd)
         # results, mismatches = compare_module_lookups_for_all_things(*mods)

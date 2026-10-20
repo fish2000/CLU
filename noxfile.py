@@ -28,7 +28,7 @@ def find_tomls():
 @nox.parametrize('tomls', tuple(find_tomls()))
 def checktomlfiles(session, tomls):
     """ Validate CLU’s attendant toml files """
-    session.install("-r", "requirements/nox/pyproject.txt")
+    session.install("-r", "requirements/nox/tomlcheck.txt")
     session.run('validate-pyproject', '--verbose', tomls)
 
 @nox.session

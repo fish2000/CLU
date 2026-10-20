@@ -1,6 +1,55 @@
 # Changelog
 
 
+## 0.12.28:pre3+g7dae7a9 [SNAPSHOT]
+
+### Other
+
+* [make] `uv` lockfile updated @ b462bcd. [Alexander Böhn]
+
+* Made those `uv` lockfile rules actually work PART II. [Alexander Böhn]
+
+* [make] Changelog updated @ 4899a83. [Alexander Böhn]
+
+
+## v0.12.28 (2026-10-18)
+
+### Bump
+
+* Bumped version: 0.12.27 → 0.12.28. [Alexander Böhn]
+
+### Add
+
+* Added a pytest suite for the `clu.fs.pypath` functions … one such suite did not exist, and that wasn’t right at all –   so this update corrects that horrendous iniquity. Yes. [Alexander Böhn]
+
+### Remove
+
+* Removed the `clu.constants.polyfills` module. [Alexander Böhn]
+
+* Removed `clu.constants.polyfills`, and all references to same within CLU … really that thing was an albatross. This radically and awesomely   simplifies a bunch of older, clumsier imports, as well as a bunch   of pointless conditional logic – or hey I mean hey, if you’re   still on Python 2.7 or you like the way “six” works or any of   that, you can email me or even call me at home, and we’ll talk   about catering to your stogily hilarious whim. Yes! [Alexander Böhn]
+
+* Removed unused import from the `clu.fs.pypath` tests. [Alexander Böhn]
+
+### Other
+
+* Made those `uv`lockfile rules actually work. [Alexander Böhn]
+
+* Updated `uv.lock` and added `Makefile` rules for doing same on bump … gotta keep ‘em separated. HEYY. Yeah you talking back to me? [Alexander Böhn]
+
+* Broke out the `ancestral_union(…)` call in `clu.fs.abc.BaseFSName` … it deserves its own “classmethod”, rite? Gets rid of an unsightly “type(self)” call, which I consider a code wart. Yes. [Alexander Böhn]
+
+
+## v0.12.27 (2026-09-24)
+
+### Bump
+
+* Bumped version: 0.12.26 → 0.12.27. [Alexander Böhn]
+
+### Other
+
+* [make] Changelog updated @ a33479e. [Alexander Böhn]
+
+
 ## v0.12.26 (2026-09-24)
 
 ### Bump

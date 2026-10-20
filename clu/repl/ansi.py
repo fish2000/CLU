@@ -35,8 +35,7 @@ class ANSIBase(clu.abstract.Appreciative, AliasingEnum):
     @classmethod
     def appreciates(cls, instance):
         """ Boolean, tests if the class “appreciates” an instance """
-        # N.B. This is far too ripe for false positives
-        return cls in mro(instance)
+        return isinstance(instance, cls)
 
 @export
 class ANSI(AliasingEnumMeta):

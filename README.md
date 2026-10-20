@@ -325,9 +325,6 @@ So do have a look around. Here’s an abridged breakdown of some things within:
     also a [`clu.testing.pytest`][clu.testing.pytest] submodule, with some currently-under-development
     [`pytest`][pytest-link] plugins.
 
-* [`mathematics`][clu.mathematics]: the future home for math-related stuff. All there is right now is a `clamp(…)` function that works with
-    [`numpy`][numpy-link] [dtypes][numpy-dtype-link].
-
 * [`naming`][clu.naming]: functions for determining the names of things (even module constants and other random things
     that generally lack things like `__name__` attributes) and for the importing and exporting of things by
     “qualified names” – for instance, you can use `naming.qualified_import(…)` to import a class [`CurveSet`][instakit.processors.curves.CurveSet]
@@ -489,7 +486,6 @@ So do have a look around. Here’s an abridged breakdown of some things within:
 [clu.exporting]: https://github.com/fish2000/CLU/tree/master/clu/exporting.py
 [clu.extending]: https://github.com/fish2000/CLU/tree/master/clu/extending.py
 [clu.keyvalue]: https://github.com/fish2000/CLU/tree/master/clu/keyvalue.py
-[clu.mathematics]: https://github.com/fish2000/CLU/tree/master/clu/mathematics.py
 [clu.naming]: https://github.com/fish2000/CLU/tree/master/clu/naming.py
 [clu.predicates]: https://github.com/fish2000/CLU/tree/master/clu/predicates.py
 [clu.repr]: https://github.com/fish2000/CLU/tree/master/clu/repr.py

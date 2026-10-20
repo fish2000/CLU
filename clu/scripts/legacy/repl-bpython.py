@@ -163,13 +163,6 @@ import shutil
 import sysconfig
 import weakref
 
-from clu.mathematics import (σ, Σ,
-                             isdtype, isnumpything,
-                                      isnumpytype,
-                                      isnumpythinglist,
-                                      isnumpytypelist,
-                             Clamper, clamp)
-
 from clu import keyvalue, all
 from clu.enums import (DUNDER, SUNDER,
                        alias, AliasingEnumMeta, AliasingEnum)

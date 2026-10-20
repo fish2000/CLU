@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from functools import reduce as Σ
 
 import sys
 
-from clu.mathematics import Σ
 from clu.exporting import Exporter
 
 exporter = Exporter(path=__file__)

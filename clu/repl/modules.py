@@ -207,7 +207,7 @@ def test():
     
     @inline.fixture
     def predicate_modules():
-        modules = ('predicates', 'typology', 'mathematics', 'naming',
+        modules = ('predicates', 'typology', 'naming',
                    'exporting', 'extending', 'all', 'enums')
         prefixd = tuple(f"clu.{nm}" for nm in modules)
         return prefixd

@@ -151,12 +151,6 @@ clu.keyvalue
 .. automodule:: clu.keyvalue
    :members:
 
-clu.mathematics
-===============
-
-.. automodule:: clu.mathematics
-   :members:
-
 clu.naming
 ==========
 

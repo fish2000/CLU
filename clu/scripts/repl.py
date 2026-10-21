@@ -64,8 +64,6 @@ def module_export(modulename, namespace, all=__all__):
     except ValueError:
         module = importlib.import_module(modulename)
     name = nameof(module)
-    # if name != modulename:
-    #     print(f"YO DOGG: {name} ≠ {modulename}")
     namespace[modulename] = namespace[name] = module
     all += listify(name)
 
@@ -116,9 +114,7 @@ mods = ('clu',
         'argparse', 'collections', 'contextlib', 'copy',
         'datetime', 'functools', 'importlib', 'inspect',
         'itertools', 'math', 'operator', 'pathlib',
-        'pickle', 'shutil', 'sysconfig', 'weakref',
-        'numpy', 'colorama',
-        'xerox', 'zict')
+        'pickle', 'shutil', 'sysconfig', 'weakref')
 
 # “Star-import” all starmods – this is equivalent to doing:
 # 
@@ -189,21 +185,6 @@ def explain(thing, width=None):
     print(columnize(subthings,
           display_width=display_width,
                   ljust=True))
-
-try:
-    from PIL import Image
-    from instakit.utils.static import asset
-except (ImportError, SyntaxError, TypeError): # pragma: no cover
-    pass
-else:
-    # Extend `__all__`:
-    __all__ += ['asset', 'image_paths', 'catimage']
-    # Prepare a list of readily open-able image file paths:
-    image_paths = list(map(
-        lambda image_file: asset.path('img', image_file),
-            asset.listfiles('img')))
-    # I do this practically every time, so I might as well do it here:
-    catimage = Image.open(image_paths[0])
 
 # Access CLU app environment variables:
 cluenv = Environ(appname=consts.APPNAME)

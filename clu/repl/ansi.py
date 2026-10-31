@@ -14,7 +14,7 @@ import sys, re
 abstract = abc.abstractmethod
 
 from clu.constants.consts import ENCODING, SEPARATOR_WIDTH
-from clu.predicates import mro, or_none
+from clu.predicates import attr, item, mro, or_none
 from clu.typology import dict_types, isstring, isbytes
 from clu.fs.misc import re_matcher
 from clu.naming import nameof, qualified_name, isinspectable
@@ -643,69 +643,78 @@ class DocFormat(clu.abstract.Format):
     
     __slots__ = ('iohandle', '__doc__')
     
-    def __init__(self, iohandle=std.OUT):
-        self.iohandle = iohandle
+    def __init__(self, **kwargs):
+        # Original param was named ”iohandle“ but it‘s ”file“ everywhere
+        # else; let’s try both, and default to the previous named default:
+        self.iohandle = item(kwargs, 'iohandle', 'file', default=std.OUT)
     
     @property
     def isatty(self):
         return bool(self.iohandle.isatty())
     
-    def get(self, atx):
+    def get(self, *attributes):
         cls = type(self)
         if not self.isatty:
             return cls.null
-        return getattr(cls, atx)
+        return attr(cls, *attributes)
     
-    def put(self, string):
-        return print(string, file=self.iohandle)
+    def put(self, string, **kwargs):
+        file = kwargs.pop('file', self.iohandle)
+        return print(string, file=file)
     
     def putcenter(self, text=None, filler='•', width=None, color=None, **kwargs):
-        file = kwargs.get('file', self.iohandle)
+        file = kwargs.pop('file', self.iohandle)
         return print_ansi_centered(text=text, filler=filler,
                                                width=width,
                                                color=color,
                                                 file=file,
                                                    **kwargs)
     
-    def putln(self, count=1):
+    def putln(self, count=1, **kwargs):
+        file = kwargs.pop('file', self.iohandle)
         for idx in range(count):
-            print(file=self.iohandle)
+            print(file=file)
     
-    def putcode(self, codestring):
+    def putcode(self, codestring, **kwargs):
+        file = kwargs.pop('file', self.iohandle)
         return self.put(
-               self.get('code').render(codestring))
+               self.get('code').render(codestring), file=file)
     
-    def putpara(self, paragraph):
+    def putpara(self, paragraph, **kwargs):
+        file = kwargs.pop('file', self.iohandle)
         if paragraph:
             return self.put(
-                   self.get('para').render(paragraph))
-        return self.putln()
+                   self.get('para').render(paragraph), file=file)
+        return self.putln(file=file)
     
-    def render(self, thing):
-        head = f"__doc__ for “{qualified_name(thing)}”"
+    def render(self, thing, **kwargs):
+        qname = qualified_name(thing)
+        head = f"__doc__ for “{qname}”"
+        file = kwargs.pop('file', self.iohandle)
         doc = inspect.getdoc(thing) or "«¡no docstring found!»"
         sig = signature(thing)
         start = int(not isinspectable(thing)) * 2
         paragraphs = paragraphize(doc)[start:]
         
-        self.putln()
-        self.putcenter(head, color=self.get('head'))
-        self.putln()
+        self.putln(file=file)
+        self.putcenter(text=head, color=self.get('head'), file=file)
+        self.putln(file=file)
         
         if sig:
-            self.putcode(sig)
-            self.putln(count=int(not self.isatty))
+            self.putcode(sig, file=file)
+            self.putln(count=int(not self.isatty), file=file)
         
         for paragraph in paragraphs:
-            self.putpara(paragraph)
+            self.putpara(paragraph, file=file)
         
-        self.putln(count=2)
+        self.putln(count=2, file=file)
         return thing
     
-    def __call__(self, *things):
+    def __call__(self, *things, **kwargs):
+        file = kwargs.pop('file', self.iohandle)
         out = None
         for thing in things:
-            out = self.render(thing)
+            out = self.render(thing, file=file)
         return out
 
 def old_ansidoc(*things):
@@ -798,13 +807,40 @@ def test():
         """ Test the current (class-based) ANSIDoc function """
         ansidoc(Exporter)
         ansidoc(product)
+
+    @inline.runif(std.ERR.isatty())
+    def test_ansidoc_redirect():
+        """ Test the ANSIDoc function with redirected output """
+        ansidoc(Exporter, file=std.ERR)
+        ansidoc(product, file=std.ERR)
     
     @inline
-    def test_three():
+    def test_docformat_class():
         """ Manual test of the DocFormat class """
         fmt = DocFormat()
         fmt(Exporter)
         fmt(product)
+
+    @inline.runif(std.ERR.isatty())
+    def test_docformat_alternate_io():
+        """ Test the DocFormat class with alternate iohandle """
+        fmt = DocFormat(iohandle=std.ERR)
+        fmt(Exporter)
+        fmt(product)
+
+    @inline.runif(std.ERR.isatty())
+    def test_docformat_alternate_file():
+        """ Test the DocFormat class with alternate file """
+        fmt = DocFormat(file=std.ERR)
+        fmt(Exporter)
+        fmt(product)
+
+    @inline.runif(std.ERR.isatty())
+    def test_docformat_redirect():
+        """ Test the DocFormat class with redirected output """
+        fmt = DocFormat()
+        fmt(Exporter, file=std.ERR)
+        fmt(product, file=std.ERR)
     
     return inline.test(10)
 

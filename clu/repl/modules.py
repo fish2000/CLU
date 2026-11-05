@@ -222,7 +222,7 @@ def module_export(modulename, namespace, all=None):
 
 export(notpyname,                   name='notpyname',           doc="notpyname(string) → boolean predicate, returns True unless string is a __dunder__ name, when it returns False")
 export(isplural,                    name='isplural',            doc="isplural(integer) → returns an 's' unless the integer argument is 1, in which case it returns an empty string")
-export(ok_for_star_import,          name='ok_for_star_import',  doc="ok_for_star_import(name) → boolean predicate, returns True if a function name is not marked private (by name")
+export(ok_for_star_import,          name='ok_for_star_import',  doc="ok_for_star_import(name) → boolean predicate, returns True if a function name is not marked private (by name)")
 
 export(Mismatch,                    name='Mismatch')
 export(Mismatches,                  name='Mismatches')

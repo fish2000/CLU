@@ -34,9 +34,8 @@ import warnings
 from clu.all import import_clu_modules
 from clu.config.env import Environ
 from clu.constants import consts
-from clu.naming import nameof, qualified_import
-from clu.predicates import ispublic, ismarkedprivate, listify
-from clu.repl import columnize
+from clu.naming import nameof
+from clu.repl.columnize import columnize
 from clu.repl.modules import star_export, module_export, ok_for_star_import
 
 # Set up the __all__ list:

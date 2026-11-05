@@ -12,11 +12,11 @@ import pickle
 import sys
 
 from clu.constants import consts
-from clu.naming import nameof, moduleof
 from clu.typespace import types
+from clu.naming import nameof, moduleof, qualified_import
 from clu.predicates import (ispyname, pyqualname,
-                            negate,
-                            lowers)
+                            negate, ispublic, ismarkedprivate,
+                            listify, lowers)
 
 from clu.exporting import ExporterBase, Exporter
 
@@ -190,8 +190,39 @@ def compare_module_lookups_for_all_things(*modules,
            Mismatches(mismatch_idx,        tuple(mismatches),
                                                  failure_rate)
 
-export(notpyname,                   name='notpyname',       doc="notpyname(string) → boolean predicate, returns True unless string is a __dunder__ name, when it returns False")
-export(isplural,                    name='isplural',        doc="isplural(integer) → returns an 's' unless the integer argument is 1, in which case it returns an empty string")
+# predicate for star-importing:
+ok_for_star_import = lambda name: ispublic(name) and not ismarkedprivate(name)
+
+# MODULE EXPORT FUNCTIONS: given a module name, export
+# either the module or its contents into a given namespace:
+@export
+def star_export(modulename, namespace, all=None):
+    """ Safely bind everything a module exports to a namespace. """
+    try:
+        module = qualified_import(modulename)
+    except ValueError:
+        module = importlib.import_module(modulename)
+    for name in dir(module):
+        if ok_for_star_import(name):
+            namespace[name] = getattr(module, name)
+            if all is not None:
+                all += listify(name)
+
+@export
+def module_export(modulename, namespace, all=None):
+    """ Safely bind a module to a namespace. """
+    try:
+        module = qualified_import(modulename)
+    except ValueError:
+        module = importlib.import_module(modulename)
+    name = nameof(module)
+    namespace[modulename] = namespace[name] = module
+    if all is not None:
+        all += listify(name)
+
+export(notpyname,                   name='notpyname',           doc="notpyname(string) → boolean predicate, returns True unless string is a __dunder__ name, when it returns False")
+export(isplural,                    name='isplural',            doc="isplural(integer) → returns an 's' unless the integer argument is 1, in which case it returns an empty string")
+export(ok_for_star_import,          name='ok_for_star_import',  doc="ok_for_star_import(name) → boolean predicate, returns True if a function name is not marked private (by name")
 
 export(Mismatch,                    name='Mismatch')
 export(Mismatches,                  name='Mismatches')
